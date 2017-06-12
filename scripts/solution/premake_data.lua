@@ -165,7 +165,10 @@ make.create_solution(solution_data, project_defaults, projects)
             -- But still want to bring in header files etc.
 
             link = true;
-            if other_proj.no_link == true then link = false end
+            if other_proj.no_link == true then link = false end -- deprecated
+            if other_proj.lang_settings then
+              if other_proj.lang_settings.no_link == true then link = false end
+            end
 
             if link then
 
@@ -249,6 +252,25 @@ make.create_solution(solution_data, project_defaults, projects)
     flags({"Symbols", "Unicode"})
     flags(project_defaults.flags)
 
+    local rtti = false
+    if proj.lang_settings then
+      if proj.lang_settings.rtti then rtti = true end
+    end
+
+    if rtti ~= true then
+      flags("NoRTTI"); -- deprecated premake5
+    end
+
+    local exceptions = false
+    if proj.lang_settings then
+      if proj.lang_settings.exceptions then exceptions = true end
+    end
+    if exceptions ~= true then
+      flags("NoExceptions") -- deprecated premake5
+    end
+
+    -- Release
+
     configuration({"Release"})
     defines({"NDEBUG", "NIMGUI"})
 
@@ -264,6 +286,24 @@ make.create_solution(solution_data, project_defaults, projects)
 
     flags { "Optimize", "Unicode" }
     flags(project_defaults.flags)
+
+    local rtti = false
+    if proj.lang_settings then
+      if proj.lang_settings.rtti then rtti = true end
+    end
+
+    if rtti ~= true then
+      flags("NoRTTI"); -- deprecated premake5
+    end
+
+    local exceptions = false
+    if proj.lang_settings then
+      if proj.lang_settings.exceptions then exceptions = true end
+    end
+    if exceptions ~= true then
+      flags("NoExceptions") -- deprecated premake5
+    end
+
   end
 
 end

@@ -11,7 +11,10 @@ table.insert(
     kind     = "StaticLib",
     language = "C++",
     location = make.get_proj_root(),
-    no_link  = true,
+
+    lang_settings = {
+      no_link = true
+    },
 
     src_files = {
       make.add_headers(make.get_proj_root()),

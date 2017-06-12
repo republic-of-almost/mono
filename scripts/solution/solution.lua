@@ -28,8 +28,8 @@ project_defaults = {
     "EnableSSE2",
     "ExtraWarnings",
     "FloatFast",
-    "NoExceptions", -- deprecated premake5
-    "NoRTTI", -- deprecated premake5
+    -- "NoExceptions", -- deprecated premake5
+    -- "NoRTTI", -- deprecated premake5
   },
 
   defines = {
@@ -41,8 +41,8 @@ project_defaults = {
     "_CRT_NO_WARNINGS",
   },
 
-  exceptions = false,
-  rtti = false,
+--   exceptions = false,
+--   rtti = false,
 }
 
 -- This is used by the individual projects, but it needs to be defined first.
