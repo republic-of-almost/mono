@@ -71,6 +71,19 @@ load_assets()
 
     Nil::Data::set(asset, mesh);
   }
+  
+  // Load asset
+  {
+    Nil::Node asset;
+    asset.set_parent(assets);
+    asset.set_name("Bridge");
+    
+    Nil::Data::Mesh_resource mesh{};
+    
+    mesh.id = (uint32_t)Game_asset::BRIDGE;
+    
+    Nil::Data::set(asset, mesh);
+  }
 }
 
 

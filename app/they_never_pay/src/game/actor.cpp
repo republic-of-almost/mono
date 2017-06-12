@@ -162,8 +162,9 @@ think(Nil::Node node, uintptr_t user_data)
       math::vec3 scale = math::vec3_scale(math::ray_direction(ray), distance);
       math::vec3 hit = math::vec3_add(ray.start, scale);
     
-      const math::vec3 height = math::vec3_init(0, actor->height, 0);
-      const math::vec3 pos    = math::vec3_add(hit, height);
+//      const math::vec3 height = math::vec3_init(0, actor->height, 0);
+//      const math::vec3 pos    = math::vec3_add(hit, height);
+      const math::vec3 pos = hit;
       
       memcpy(trans.position, pos.data, sizeof(trans.position));
       Nil::Data::set(node, trans);
@@ -205,8 +206,9 @@ think(Nil::Node node, uintptr_t user_data)
         const math::vec3 ray_dir = math::ray_direction(side_step_ray);
         const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
         const math::vec3 hit     = math::vec3_add(side_step_ray.start, scale);
-        const math::vec3 height  = math::vec3_init(0, actor->height, 0);
-        const math::vec3 pos     = math::vec3_add(hit, height);
+//        const math::vec3 height  = math::vec3_init(0, actor->height, 0);
+//        const math::vec3 pos     = math::vec3_add(hit, height);
+        const math::vec3 pos = hit;
         
         memcpy(trans.position, pos.data, sizeof(trans.position));
         Nil::Data::set(node, trans);
@@ -269,58 +271,58 @@ setup(Actor *actor)
   
   // Nav Mesh
   {
-    auto add_quad = [](float *v, const float origin_x, const float origin_y, const float scale_x, const float scale_y)
-    {
-      v[0] = origin_x +scale_x;
-      v[1] = 0.f;
-      v[2] = origin_y -scale_y;
-      v[3] = origin_x -scale_x;
-      v[4] = 0.f;
-      v[5] = origin_y +scale_y;
-      v[6] = origin_x +scale_x;
-      v[7] = 0.f;
-      v[8] = origin_y +scale_y;
-
-      v[9] = origin_x -scale_x;
-      v[10] = 0.f;
-      v[11] = origin_y +scale_y;
-      v[12] = origin_x +scale_x;
-      v[13] = 0.f;
-      v[14] = origin_y -scale_y;
-      v[15] = origin_x -scale_x;
-      v[16] = 0.f;
-      v[17] = origin_y -scale_y;
-    };
-
-    float mesh[18 * 16]{};
-    
-    // Rooms //
-    
-    constexpr float x_room_scale = 15.f;
-    constexpr float y_room_scale = 11.f;
-    
-    add_quad(&mesh[18 * 0], -x_room_scale * 1.f + 0.f, +y_room_scale * -3.f + 0.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 1], +x_room_scale * 1.f + 1.f, +y_room_scale * -3.f + 0.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 2], -x_room_scale * 1.f + 0.f, +y_room_scale * -1.f + 1.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 3], +x_room_scale * 1.f + 1.f, +y_room_scale * -1.f + 1.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 4], -x_room_scale * 1.f + 0.f, +y_room_scale * +1.f + 2.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 5], +x_room_scale * 1.f + 1.f, +y_room_scale * +1.f + 2.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 6], -x_room_scale * 1.f + 0.f, +y_room_scale * +3.f + 3.f, x_room_scale, y_room_scale);
-    add_quad(&mesh[18 * 7], +x_room_scale * 1.f + 1.f, +y_room_scale * +3.f + 3.f, x_room_scale, y_room_scale);
-    
-    // Doors //
-    
-    constexpr float x_door_scale = 3.f;
-    constexpr float y_door_scale = 3.f;
-
-    add_quad(&mesh[18 * 8], 0.f, +y_door_scale * -10.f + 0.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 9], 12.f, -20.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 10], 0.f, +y_door_scale * -4.f + 1.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 11], 12.f, -0.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 12], 0.f, +y_door_scale * +4.f + 2.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 13], 12.f, +20.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 14], 0.f, +y_door_scale * +10.f + 3.f, x_door_scale, y_door_scale);
-    add_quad(&mesh[18 * 15], 12.f, +25.f, x_door_scale, y_door_scale);
+//    auto add_quad = [](float *v, const float origin_x, const float origin_y, const float scale_x, const float scale_y)
+//    {
+//      v[0] = origin_x +scale_x;
+//      v[1] = 0.f;
+//      v[2] = origin_y -scale_y;
+//      v[3] = origin_x -scale_x;
+//      v[4] = 0.f;
+//      v[5] = origin_y +scale_y;
+//      v[6] = origin_x +scale_x;
+//      v[7] = 0.f;
+//      v[8] = origin_y +scale_y;
+//
+//      v[9] = origin_x -scale_x;
+//      v[10] = 0.f;
+//      v[11] = origin_y +scale_y;
+//      v[12] = origin_x +scale_x;
+//      v[13] = 0.f;
+//      v[14] = origin_y -scale_y;
+//      v[15] = origin_x -scale_x;
+//      v[16] = 0.f;
+//      v[17] = origin_y -scale_y;
+//    };
+//
+//    float mesh[18 * 16]{};
+//    
+//    // Rooms //
+//    
+//    constexpr float x_room_scale = 15.f;
+//    constexpr float y_room_scale = 11.f;
+//    
+//    add_quad(&mesh[18 * 0], -x_room_scale * 1.f + 0.f, +y_room_scale * -3.f + 0.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 1], +x_room_scale * 1.f + 1.f, +y_room_scale * -3.f + 0.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 2], -x_room_scale * 1.f + 0.f, +y_room_scale * -1.f + 1.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 3], +x_room_scale * 1.f + 1.f, +y_room_scale * -1.f + 1.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 4], -x_room_scale * 1.f + 0.f, +y_room_scale * +1.f + 2.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 5], +x_room_scale * 1.f + 1.f, +y_room_scale * +1.f + 2.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 6], -x_room_scale * 1.f + 0.f, +y_room_scale * +3.f + 3.f, x_room_scale, y_room_scale);
+//    add_quad(&mesh[18 * 7], +x_room_scale * 1.f + 1.f, +y_room_scale * +3.f + 3.f, x_room_scale, y_room_scale);
+//    
+//    // Doors //
+//    
+//    constexpr float x_door_scale = 3.f;
+//    constexpr float y_door_scale = 3.f;
+//
+//    add_quad(&mesh[18 * 8], 0.f, +y_door_scale * -10.f + 0.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 9], 12.f, -20.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 10], 0.f, +y_door_scale * -4.f + 1.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 11], 12.f, -0.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 12], 0.f, +y_door_scale * +4.f + 2.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 13], 12.f, +20.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 14], 0.f, +y_door_scale * +10.f + 3.f, x_door_scale, y_door_scale);
+//    add_quad(&mesh[18 * 15], 12.f, +25.f, x_door_scale, y_door_scale);
 
     
 //    constexpr float mesh[] = {
@@ -343,7 +345,90 @@ setup(Actor *actor)
 //      -x_scale, 0.f, -y_scale,
 //    };
     
-    memcpy(actor->nav_mesh, mesh, sizeof(actor->nav_mesh));
+//    memcpy(actor->nav_mesh, mesh, sizeof(actor->nav_mesh));
+
+    const float nav_mesh[] = {
+      1.000000f, 0.000000f, 1.000000f, 
+  1.000000f, 0.000000f, -1.000000f, 
+  -1.000000f, 0.000000f, -1.000000f, 
+  1.000000f, 0.000000f, -1.000000f, 
+  1.000000f, 0.000000f, -2.105740f, 
+  -1.000000f, 0.000000f, -2.105740f, 
+  1.000000f, 0.000000f, -2.105740f, 
+  1.000000f, 0.000000f, -3.377539f, 
+  -1.000000f, 0.000000f, -3.377539f, 
+  1.000000f, 0.000000f, -3.377539f, 
+  1.000000f, 0.000000f, -4.721119f, 
+  -1.000000f, 0.000000f, -4.721119f, 
+  -1.000000f, 0.000000f, 1.000000f, 
+  -1.000000f, 0.000000f, 1.313838f, 
+  1.000000f, 0.000000f, 1.313838f, 
+  -1.000000f, 0.000000f, 1.313838f, 
+  -1.000000f, 0.000000f, 1.746101f, 
+  1.000000f, 0.000000f, 1.746101f, 
+  -1.000000f, 0.000000f, 1.746101f, 
+  -1.000000f, 0.000000f, 2.446092f, 
+  1.000000f, 0.000000f, 2.446092f, 
+  -1.000000f, 0.000000f, 2.446092f, 
+  -1.000000f, 0.000000f, 3.859232f, 
+  1.000000f, 0.000000f, 3.859232f, 
+  -1.000000f, 0.000000f, 3.859232f, 
+  -1.000000f, 0.000000f, 3.996049f, 
+  1.000000f, 0.000000f, 3.996049f, 
+  -1.000000f, 0.000000f, 3.996049f, 
+  -1.000000f, 0.000000f, 4.112285f, 
+  1.000000f, 0.000000f, 4.112285f, 
+  -1.000000f, 0.000000f, 4.112285f, 
+  -1.000000f, 0.000000f, 4.299206f, 
+  1.000000f, 0.000000f, 4.299206f, 
+  -1.000000f, 0.000000f, 4.299206f, 
+  -1.000000f, 0.000000f, 4.464451f, 
+  1.000000f, 0.000000f, 4.464451f, 
+  -1.000000f, 0.000000f, 4.464451f, 
+  -1.000000f, 0.000000f, 4.940219f, 
+  1.000000f, 0.000000f, 4.940219f, 
+  -1.000000f, 0.000000f, 1.000000f, 
+  1.000000f, 0.000000f, 1.000000f, 
+  -1.000000f, 0.000000f, -1.000000f, 
+  -1.000000f, 0.000000f, -1.000000f, 
+  1.000000f, 0.000000f, -1.000000f, 
+  -1.000000f, 0.000000f, -2.105740f, 
+  -1.000000f, 0.000000f, -2.105740f, 
+  1.000000f, 0.000000f, -2.105740f, 
+  -1.000000f, 0.000000f, -3.377539f, 
+  -1.000000f, 0.000000f, -3.377539f, 
+  1.000000f, 0.000000f, -3.377539f, 
+  -1.000000f, 0.000000f, -4.721119f, 
+  1.000000f, 0.000000f, 1.000000f, 
+  -1.000000f, 0.000000f, 1.000000f, 
+  1.000000f, 0.000000f, 1.313838f, 
+  1.000000f, 0.000000f, 1.313838f, 
+  -1.000000f, 0.000000f, 1.313838f, 
+  1.000000f, 0.000000f, 1.746101f, 
+  1.000000f, 0.000000f, 1.746101f, 
+  -1.000000f, 0.000000f, 1.746101f, 
+  1.000000f, 0.000000f, 2.446092f, 
+  1.000000f, 0.000000f, 2.446092f, 
+  -1.000000f, 0.000000f, 2.446092f, 
+  1.000000f, 0.000000f, 3.859232f, 
+  1.000000f, 0.000000f, 3.859232f, 
+  -1.000000f, 0.000000f, 3.859232f, 
+  1.000000f, 0.000000f, 3.996049f, 
+  1.000000f, 0.000000f, 3.996049f, 
+  -1.000000f, 0.000000f, 3.996049f, 
+  1.000000f, 0.000000f, 4.112285f, 
+  1.000000f, 0.000000f, 4.112285f, 
+  -1.000000f, 0.000000f, 4.112285f, 
+  1.000000f, 0.000000f, 4.299206f, 
+  1.000000f, 0.000000f, 4.299206f, 
+  -1.000000f, 0.000000f, 4.299206f, 
+  1.000000f, 0.000000f, 4.464451f, 
+  1.000000f, 0.000000f, 4.464451f, 
+  -1.000000f, 0.000000f, 4.464451f, 
+  1.000000f, 0.000000f, 4.940219f,
+    };
+    
+    memcpy(actor->nav_mesh, nav_mesh, sizeof(actor->nav_mesh));
   }
   
   // Main Entity

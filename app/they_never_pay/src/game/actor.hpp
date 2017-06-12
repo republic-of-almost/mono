@@ -16,7 +16,7 @@ struct Actor
   float accum_pitch;
   float accum_yaw;
   float height;
-  float nav_mesh[18 * 16];
+  float nav_mesh[78 * 3];
 };
 
 
