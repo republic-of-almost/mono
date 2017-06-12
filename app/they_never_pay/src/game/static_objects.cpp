@@ -1,10 +1,12 @@
 #include <game/static_objects.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/data/material.hpp>
+#include <nil/data/mesh.hpp>
 #include <nil/data/mesh_resource.hpp>
 #include <lib/logging.hpp>
 #include <math/general/general.hpp>
 #include <assets/cube_mesh.hpp>
+#include <data/data.hpp>
 #include <stdlib.h>
 
 
@@ -48,24 +50,13 @@ setup(Static_objects *obj)
     Nil::Data::set(obj->object, material);
   }
   
-  // Mesh Resource
+  // Mesh Instance
   {
-    Nil::Data::Mesh_resource mesh{};
-
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
-
+    Nil::Data::Mesh mesh{};
+    mesh.mesh_id = (uint32_t)Game_asset::CUBE;
+    
     Nil::Data::set(obj->object, mesh);
   }
-
 }
 
 

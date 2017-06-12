@@ -6,7 +6,19 @@
 #include <math/vec/vec_fwd.hpp>
 
 
+enum class Game_asset {
+
+  CUBE = 1,
+  CUBE_BEV,
+
+}; // enum
+
+
 namespace Game_data {
+
+
+void
+load_assets();
 
 
 void
@@ -39,6 +51,10 @@ get_keyboard();
 
 Nil::Node
 get_debug_lines();
+
+
+Nil::Node
+get_assets();
 
 
 void

@@ -6,6 +6,9 @@
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
+#include <nil/data/mesh_resource.hpp>
+#include <assets/cube_mesh.hpp>
+
 
 namespace Game_data {
 
@@ -13,6 +16,61 @@ namespace Game_data {
 namespace
 {
   lib::array<float> line_info;
+}
+
+
+void
+load_assets()
+{
+  Nil::Node assets = get_assets();
+
+  // Load assets
+  {
+    Nil::Node asset;
+    asset.set_parent(assets);
+    asset.set_name("Cube Bev");
+    
+    Nil::Data::Mesh_resource mesh{};
+
+    mesh.id = (uint32_t)Game_asset::CUBE_BEV;
+
+    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
+    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
+
+    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
+    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
+
+    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
+    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
+
+    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
+
+    Nil::Data::set(asset, mesh);
+  }
+  
+  // Load assets
+  {
+    Nil::Node asset;
+    asset.set_parent(assets);
+    asset.set_name("Cube");
+    
+    Nil::Data::Mesh_resource mesh{};
+
+    mesh.id = (uint32_t)Game_asset::CUBE;
+
+    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_positions));
+    memcpy(mesh.position_vec3, Nil_ext::Mesh::cube_positions, sizeof(Nil_ext::Mesh::cube_positions));
+
+    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_normals));
+    memcpy(mesh.normal_vec3, Nil_ext::Mesh::cube_normals, sizeof(Nil_ext::Mesh::cube_normals));
+
+    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_texture_coords));
+    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::cube_texture_coords, sizeof(Nil_ext::Mesh::cube_texture_coords));
+
+    mesh.count = Nil_ext::Mesh::cube_mesh_vert_count;
+
+    Nil::Data::set(asset, mesh);
+  }
 }
 
 
@@ -66,6 +124,12 @@ setup()
     
     Nil::Data::set(node, kb);
   }
+  
+  // Assets
+  {
+    Nil::Node node = get_assets();
+    node.set_name("Assets");
+  }
 }
 
 
@@ -116,6 +180,14 @@ get_keyboard()
 
 Nil::Node
 get_debug_lines()
+{
+  static Nil::Node node;
+  return node;
+}
+
+
+Nil::Node
+get_assets()
 {
   static Nil::Node node;
   return node;
