@@ -1099,7 +1099,7 @@ rov_execute()
       glUseProgram(rov_line_shaders[0].program);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-            
+      
       // -- Draw the Batches Of Lines -- //
       const size_t batches = (rp.line_draw_calls.size() / 32) + 1;
 

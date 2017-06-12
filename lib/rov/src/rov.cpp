@@ -1,6 +1,5 @@
 #include <lib/platform.hpp>
 
-
 #ifdef LIB_PLATFORM_WEB
 #include <GLES2/gl2.h>
 #define ROV_GLES2
