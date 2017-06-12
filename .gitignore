@@ -1,3 +1,5 @@
+output/
+
 
 # -- General C++ --#
 # https://github.com/github/gitignore
@@ -58,3 +60,4 @@ xcuserdata/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
+.*.xcworkspace
