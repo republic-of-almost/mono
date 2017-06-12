@@ -8,6 +8,8 @@
 #include <lib/array.hpp>
 #include <lib/assert.hpp>
 
+#include <remotery/Remotery.h>
+
 
 namespace Nil {
 
@@ -24,6 +26,9 @@ struct Engine::Impl
 Engine::Engine()
 : m_impl(new Impl)
 {
+  static Remotery* rmt;
+  rmt_CreateGlobalInstance(&rmt);
+
   LIB_ASSERT(m_impl);
   
   if(!m_impl)
@@ -83,6 +88,8 @@ Engine::run()
 {
   LIB_ASSERT(m_impl);
   
+  rmt_ScopedCPUSample(Tick, 0);
+  
   if(!m_impl)
   {
     LOG_ERROR_ONCE("Engine is in corrupted state.");
@@ -93,6 +100,8 @@ Engine::run()
     Create list of events
   */
   {
+    rmt_ScopedCPUSample(CreEventList, 0);
+  
     m_impl->pending_events.clear();
     
     Graph::Data *graph = Data::get_graph_data();
@@ -112,6 +121,8 @@ Engine::run()
   // Distro Events
   if(!m_impl->settings.pause_node_events)
   {
+    rmt_ScopedCPUSample(DistroEvents, 0);
+    
     std::vector<Event_data> nodes;
   
     for(Aspect &asp : m_impl->aspects)
@@ -143,8 +154,13 @@ Engine::run()
   
   // Thinking
   {
+    rmt_ScopedCPUSample(Thinking, 0);
+    
+  
     for(Aspect &asp : m_impl->aspects)
     {
+      rmt_ScopedCPUSample(AspectEarlyThink, 0);
+    
       if(asp.early_think_fn)
       {
         asp.early_think_fn(*this, asp);
@@ -154,6 +170,8 @@ Engine::run()
     // Think
     for(Aspect &asp : m_impl->aspects)
     {
+      rmt_ScopedCPUSample(AspectThink, 0);
+    
       if(asp.think_fn)
       {
         asp.think_fn(*this, asp);
@@ -163,6 +181,8 @@ Engine::run()
     // Late Think
     for(Aspect &asp : m_impl->aspects)
     {
+      rmt_ScopedCPUSample(AspectLateThink, 0);
+    
       if(asp.late_think_fn)
       {
         asp.late_think_fn(*this, asp);

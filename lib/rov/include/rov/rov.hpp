@@ -325,6 +325,8 @@ rov_submitMeshTransform(const float world[16])
 #define ROV_IMPL_INCLUDED
 
 
+#include <remotery/Remotery.h>
+
 
 #ifdef ROV_GL3
 #define GL_HAS_VAO
@@ -562,6 +564,8 @@ namespace
 void
 rov_initialize()
 {
+  rmt_BindOpenGL();
+
   #ifdef GL_HAS_VAO
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -985,6 +989,8 @@ rov_execute()
       For each material in the pass.
     */
     size_t dc_index = 0;
+    
+    rmt_BeginOpenGLSample(MeshRender);
 
     for(auto &mat : rp.materials)
     {
@@ -1092,10 +1098,14 @@ rov_execute()
         glDrawArrays(GL_TRIANGLES, 0, vbo.vertex_count);
       }
     } // For amts
+    
+    rmt_EndOpenGLSample();
 
     // Line Renderer
     #ifdef GL_HAS_GEO_SHD
     {
+      rmt_ScopedOpenGLSample(DebugLineRender);
+    
       glUseProgram(rov_line_shaders[0].program);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

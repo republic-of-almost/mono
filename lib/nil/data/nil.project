@@ -39,6 +39,7 @@ table.insert(
     project_dependencies = {
       "Lib",
       "Math",
+      "Remotery",
     },
 
    link_dependencies_macosx = {

@@ -20,6 +20,9 @@
 #endif
 
 
+#include <remotery/Remotery.h>
+
+
 namespace {
 
 constexpr char err_msg_context_setup_fail[] = "SDL Context Failed to initialize";
@@ -278,6 +281,8 @@ sdl_aspect_debug_window(uintptr_t user_data)
 void
 early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
+  rmt_ScopedCPUSample(SDLEarlyThink, 0);
+
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 
@@ -596,6 +601,8 @@ sdl_key_to_nil(const size_t sdl_key)
 void
 late_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
+  rmt_ScopedCPUSample(SDLLateThink, 0);
+
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 

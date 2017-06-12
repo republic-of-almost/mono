@@ -43,7 +43,7 @@ main()
   
   Game::Static_objects objs;
   Game::setup(&objs);
-
+  
   /*
     Run Game
   */
