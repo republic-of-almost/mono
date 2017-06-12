@@ -34,6 +34,7 @@ set(Node &node, const Mesh_resource &in)
   
   Mesh_resource cpy_in{};
   cpy_in.count = in.count;
+  cpy_in.id    = in.id;
   
   if(in.status > 0)
   {

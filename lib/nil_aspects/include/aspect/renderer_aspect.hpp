@@ -32,8 +32,7 @@ struct Data
 
   // Meshes //
 
-  std::vector<uint32_t> external_mesh_ids;
-  std::vector<uint32_t> internal_mesh_ids;
+  std::vector<uint32_t> mesh_ids;
   std::vector<Nil::Node> pending_mesh_load;
   
   

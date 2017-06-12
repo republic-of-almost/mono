@@ -885,7 +885,18 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       if(ImGui::CollapsingHeader("Mesh"))
       {
-        ImGui::Text("No UI Impl");
+        Nil::Data::Mesh mesh{};
+        Nil::Data::get(self->inspector_node, mesh);
+        
+        bool update_mesh = false;
+        
+        if(ImGui::InputInt("Mesh ID", (int*)&mesh.mesh_id))   { update_mesh = true; }
+        if(ImGui::InputInt("Index ID", (int*)&mesh.index_id)) { update_mesh = true; }
+        
+        if(update_mesh)
+        {
+          Nil::Data::set(self->inspector_node, mesh);
+        }
       }
     }
 
@@ -899,13 +910,17 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         Nil::Data::Mesh_resource mesh_resource{};
         Nil::Data::get(self->inspector_node, mesh_resource);
+      
+        bool update_resource = false;
+        
+        if(ImGui::InputInt("Mesh_id", (int*)&mesh_resource.id)) { update_resource = true; }
+        
 
         float columns = 3; // put position as default.
 
-        if(mesh_resource.normal_vec3) { columns += 3.f; }
+        if(mesh_resource.normal_vec3)         { columns += 3.f; }
         if(mesh_resource.texture_coords_vec2) { columns += 2.f; }
-        if(mesh_resource.color_vec4) { columns += 4.f; }
-
+        if(mesh_resource.color_vec4)          { columns += 4.f; }
 
         float col_ratio = (1.f / columns) * 0.9f;
 
@@ -989,6 +1004,11 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
           ImGui::EndGroup();
           ImGui::EndChild();
           ImGui::EndGroup();
+        }
+        
+        if(update_resource)
+        {
+          Nil::Data::set(self->inspector_node, mesh_resource);
         }
       }
     }
