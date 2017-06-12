@@ -1015,9 +1015,22 @@ rov_execute()
       {
         auto &dc = rp.draw_calls[dc_index++];
 
-        const rov_gl_mesh vbo = rov_meshes[dc.mesh];
-        glBindBuffer(GL_ARRAY_BUFFER, vbo.gl_id);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        rov_gl_mesh vbo;
+
+        if(dc.mesh > 0)
+        {
+          vbo = rov_meshes[dc.mesh - 1];
+          glBindBuffer(GL_ARRAY_BUFFER, vbo.gl_id);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+        else
+        {
+          vbo = rov_gl_mesh{};
+          glBindBuffer(GL_ARRAY_BUFFER, 0);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+          
+          continue;
+        }
 
         // Vertex
         {
@@ -1084,7 +1097,9 @@ rov_execute()
     #ifdef GL_HAS_GEO_SHD
     {
       glUseProgram(rov_line_shaders[0].program);
-
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            
       // -- Draw the Batches Of Lines -- //
       const size_t batches = (rp.line_draw_calls.size() / 32) + 1;
 
