@@ -990,7 +990,7 @@ rov_execute()
     */
     size_t dc_index = 0;
     
-    rmt_BeginOpenGLSample(MeshRender);
+//    rmt_BeginOpenGLSample(MeshRender);
 
     for(auto &mat : rp.materials)
     {
@@ -1099,7 +1099,7 @@ rov_execute()
       }
     } // For amts
     
-    rmt_EndOpenGLSample();
+//    rmt_EndOpenGLSample();
 
     // Line Renderer
     #ifdef GL_HAS_GEO_SHD
