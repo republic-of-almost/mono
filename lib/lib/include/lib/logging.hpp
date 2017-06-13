@@ -128,6 +128,10 @@ log(const char *prefix,
 #ifdef LIB_LOGGING_IMPL
 
 
+#ifndef LIB_IMPL_INCLUDED_2B1B9F18_0082_4CA6_8411_01B99B7A6959
+#define LIB_IMPL_INCLUDED_2B1B9F18_0082_4CA6_8411_01B99B7A6959
+
+
 #include "directory.hpp"
 #include "platform.hpp"
 #include "file.hpp"
@@ -255,3 +259,4 @@ log(const char *prefix,
 
 
 #endif // impl guard
+#endif // impl inc
