@@ -1,4 +1,4 @@
-#include <data/data.hpp>
+    #include <data/data.hpp>
 #include <nil/data/window.hpp>
 #include <nil/data/developer.hpp>
 #include <nil/data/mouse.hpp>
@@ -9,7 +9,7 @@
 #include <nil/data/mesh_resource.hpp>
 #include <assets/cube_mesh.hpp>
 
-#include <lib/obj_model_loader.hpp>
+#include <lib/model.hpp>
 
 
 namespace Game_data {
@@ -24,6 +24,8 @@ namespace
 void
 load_assets()
 {
+
+  
   Nil::Node assets = get_assets();
 
   // Load assets
@@ -76,6 +78,11 @@ load_assets()
   
   // Load asset
   {
+  /*
+    OBJ Test
+  */
+  lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/bridge.obj");  
+  
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Bridge");
@@ -83,6 +90,12 @@ load_assets()
     Nil::Data::Mesh_resource mesh{};
     
     mesh.id = (uint32_t)Game_asset::BRIDGE;
+    
+    mesh.position_vec3 = model.verts[0];
+    mesh.normal_vec3 = model.normals[0];
+    mesh.texture_coords_vec2 = model.uvs[0];
+    
+    mesh.count = model.element_count[0] * 3;
     
     Nil::Data::set(asset, mesh);
   }
