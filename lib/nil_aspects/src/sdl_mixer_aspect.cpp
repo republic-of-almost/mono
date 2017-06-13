@@ -16,6 +16,10 @@
 
 #include <stdint.h>
 
+#ifndef NBENCHMARK
+#include <remotery/Remotery.h>
+#endif
+
 
 namespace {
 
@@ -216,6 +220,8 @@ late_think(
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
+  
+  rmt_ScopedCPUSample(SDLMixer_LateThink, 0);
   
   /*
     Load any samples

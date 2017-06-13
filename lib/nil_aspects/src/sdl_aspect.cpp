@@ -19,8 +19,9 @@
 //#include <imguizmo/ImGuizmo.h>
 #endif
 
-
+#ifndef NBENCHMARK
 #include <remotery/Remotery.h>
+#endif
 
 
 namespace {
@@ -281,7 +282,7 @@ sdl_aspect_debug_window(uintptr_t user_data)
 void
 early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-  rmt_ScopedCPUSample(SDLEarlyThink, 0);
+  rmt_ScopedCPUSample(SDL_EarlyThink, 0);
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -601,7 +602,7 @@ sdl_key_to_nil(const size_t sdl_key)
 void
 late_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-  rmt_ScopedCPUSample(SDLLateThink, 0);
+  rmt_ScopedCPUSample(SDL_LateThink, 0);
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -808,7 +809,7 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
     
-    
+    rmt_ScopedCPUSample(SDL_SwapBuffer, 0);
     SDL_GL_SwapWindow(self->sdl_window);
   }
 }

@@ -12,6 +12,11 @@
 #include <lib/utilities.hpp>
 
 
+#ifndef NBENCHMARK
+#include <remotery/Remotery.h>
+#endif
+
+
 namespace Nil_ext {
 namespace ImGui_Aspect {
 
@@ -156,6 +161,8 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
+  
+  rmt_ScopedCPUSample(Logic_Think, 0);
 
   Nil::Node root = Nil::Node(0, false);
 

@@ -5,6 +5,11 @@
 #include <nil/node_event.hpp>
 
 
+#ifndef NBENCHMARK
+#include <remotery/Remotery.h>
+#endif
+
+
 #ifdef IMGUI_DEVELOPER_SUPPORT
 
 
@@ -140,6 +145,8 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
+  
+  rmt_ScopedCPUSample(Logic_EarktThink, 0);
 
   for(size_t i = 0; i < self->logic_nodes.size(); ++i)
   {
@@ -156,6 +163,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
 //  Data *self = reinterpret_cast<Data*>(aspect.user_data);
 //  LIB_ASSERT(self);
+// rmt_ScopedCPUSample(Logic_Think, 0);
 //
 //  for(auto &log : self->logic)
 //  {
