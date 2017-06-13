@@ -9,6 +9,8 @@
 #include <nil/data/mesh_resource.hpp>
 #include <assets/cube_mesh.hpp>
 
+#include <lib/obj_model_loader.hpp>
+
 
 namespace Game_data {
 
