@@ -74,225 +74,260 @@ load_obj_from_file(
   const char *filename,
   const size_t size_hint)
 {
+  LIB_NS_NAME::model return_model{};
+
   // Load file
   FILE *file = fopen(filename, "r");
   
-  float *pos_list = (float*)MODEL_ALLOC(sizeof(float) * size_hint);
-  size_t pos_count = 0;
-  
-  float *normal_list = (float*)MODEL_ALLOC(sizeof(float) * size_hint);
-  size_t normal_count = 0;
-  
-  float *uv_list = (float*)MODEL_ALLOC(sizeof(float) * size_hint);
-  size_t uv_count = 0;
-  
-  size_t capacity     = size_hint;
-  size_t mesh_count   = 0;
-  
-  size_t vertex_capcity = 0;
-  size_t vertex_count = 0;
-  
-  LIB_NS_NAME::model return_model{};
-  
   if(file)
   {
+    /*
+      Parse the file to find out how may meshes and vertexes there are.
+      This ables us to reduce the number of allocations we have to make.
+    */
+    uint32_t mesh_count = 0;
+    lib::array<uint32_t, 32> triangle_count;
+    
     while(true)
     {
       char line[128]{};
       
       const int result = fscanf(file, "%s", line);
       
+      /*
+        All done.
+      */
       if(result == EOF)
       {
         break;
       }
       
       /*
-        Object Name - This is the mesh name
-        This needs to come before all the vertex information.
+       
       */
       if(strcmp("o", line) == 0)
       {
         // This might be a new mesh so zero the counters.
-        vertex_count = 0;
-        normal_count = 0;
-        uv_count     = 0;
-        
-        vertex_count = 0;
-        vertex_capcity = 0;
-        
         mesh_count += 1;
       }
       
-      /*
-        Vertex Position
-      */
-      else if(strcmp("v", line) == 0)
+      if(strcmp("f", line) == 0)
       {
-        fscanf(
-          file,
-          "%f %f %f\n",
-          &pos_list[pos_count + 0],
-          &pos_list[pos_count + 1],
-          &pos_list[pos_count + 2]
-        );
-        
-        vertex_count += 3;
+        LIB_ASSERT(mesh_count > 0);
+        triangle_count[mesh_count - 1] += 1;
+      }
+    }
+    
+    // Setup return model
+    {
+      return_model.mesh_count = mesh_count;
+    
+      return_model.verts = (float**)MODEL_ALLOC(sizeof(float*) * mesh_count);
+      for(uint32_t i = 0; i < mesh_count; ++i)
+      {
+        return_model.verts[i] = (float*)MODEL_ALLOC(sizeof(float) * triangle_count[i] * 9);
       }
       
-      /*
-        Texture Position
-      */
-      else if(strcmp("vt", line) == 0)
+      return_model.normals = (float**)MODEL_ALLOC(sizeof(float*) * mesh_count);
+      for(uint32_t i = 0; i < mesh_count; ++i)
       {
-        fscanf(
-          file,
-          "%f %f %f\n",
-          &uv_list[uv_count + 0],
-          &uv_list[uv_count + 1],
-          &uv_list[uv_count + 2]
-        );
-        
-        uv_count += 3;
+        return_model.normals[i] = (float*)MODEL_ALLOC(sizeof(float) * triangle_count[i] * 9);
       }
       
-      /*
-        Normal
-      */
-      else if(strcmp("vn", line) == 0)
+      return_model.uvs = (float**)MODEL_ALLOC(sizeof(float*) * mesh_count);
+      for(uint32_t i = 0; i < mesh_count; ++i)
       {
-        fscanf(
-          file,
-          "%f %f %f\n",
-          &normal_list[normal_count + 0],
-          &normal_list[normal_count + 1],
-          &normal_list[normal_count + 2]
-        );
-        
-        normal_count += 3;
+        return_model.uvs[i] = (float*)MODEL_ALLOC(sizeof(float) * triangle_count[i] * 6);
       }
       
-      /*
-        Face - This is the index that makes up the triangle
-        This section in the object file needs to come *after* all the meshes
-        vertices etc have been parsed.
-      */
-      else if(strcmp("f", line) == 0)
       {
-        /*
-          If this is a new mesh create space for it.
-        */
-        if(return_model.mesh_count < mesh_count)
+        return_model.element_count = (uint32_t*)MODEL_ALLOC(sizeof(uint32_t) * mesh_count);
+        
+        for(uint32_t i = 0; i < mesh_count; ++i)
         {
-          const size_t this_mesh = mesh_count - 1;
-        
-          // Resize the
-          {
-            float **vert_ptrs     = (float**)MODEL_ALLOC(sizeof(float**) * mesh_count);
-            float **old_vert_ptrs = return_model.verts;
-            return_model.verts    = vert_ptrs;
-            memcpy(return_model.verts, old_vert_ptrs, sizeof(float**) * this_mesh);
-            MODEL_FREE(old_vert_ptrs);
-          }
-          
-          {
-            float **norm_ptrs     = (float**)MODEL_ALLOC(sizeof(float**) * mesh_count);
-            float **old_norm_ptrs = return_model.normals;
-            return_model.normals  = norm_ptrs;
-            memcpy(return_model.normals, old_norm_ptrs, sizeof(float**) * this_mesh);
-            MODEL_FREE(old_norm_ptrs);
-          }
-          
-          {
-            float **uv_ptrs     = (float**)MODEL_ALLOC(sizeof(float**) * mesh_count);
-            float **old_uv_ptrs = return_model.uvs;
-            return_model.uvs    = uv_ptrs;
-            memcpy(return_model.uvs, old_uv_ptrs, sizeof(float**) * this_mesh);
-            MODEL_FREE(old_uv_ptrs);
-          }
-          
-          {
-            uint32_t *element_count    = (uint32_t*)MODEL_ALLOC(sizeof(uint32_t*) * mesh_count);
-            uint32_t *old_elements     = return_model.element_count;
-            return_model.element_count = element_count;
-            memcpy(return_model.uvs, old_elements, sizeof(uint32_t*) * this_mesh);
-            MODEL_FREE(old_elements);
-          }
-          
-          // Allocate hint size space.
-          {
-            return_model.verts[this_mesh]   = (float*)MODEL_ALLOC(sizeof(float) * 3 * size_hint);
-            return_model.normals[this_mesh] = (float*)MODEL_ALLOC(sizeof(float) * 3 * size_hint);
-            return_model.uvs[this_mesh]     = (float*)MODEL_ALLOC(sizeof(float) * 2 * size_hint);
-            
-            vertex_capcity = size_hint;
-          }
-          
-          return_model.mesh_count += 1;
+          return_model.element_count[i] = triangle_count[i];
         }
-      
-        uint32_t index_list[9];
-      
-        const int matched = fscanf(
-          file,
-          "%d/%d/%d %d/%d/%d %d/%d/%d\n",
-          &index_list[0],
-          &index_list[1],
-          &index_list[2],
-          &index_list[3],
-          &index_list[4],
-          &index_list[5],
-          &index_list[6],
-          &index_list[7],
-          &index_list[8]
-        );
+      }
+    }
+    
+    // Fill the mesh buffers
+    {
+      fseek(file, 0, SEEK_SET);
+    
+      lib::array<float, 128 * 3> positions;
+      lib::array<float, 128 * 3> normals;
+      lib::array<float, 128 * 2> uvs;
+    
+      uint32_t this_mesh = 0;
+      uint32_t curr_tri = 0;
+    
+      while(true)
+      {
+        char line[128]{};
         
-        if(matched != 9)
+        const int result = fscanf(file, "%s", line);
+        
+        /*
+          All done.
+        */
+        if(result == EOF)
         {
-          LOG_ERROR("Importer error, need positions, normals, and tex coords defined, and triangulated");
           break;
         }
         
-        const uint32_t curr_mesh = return_model.mesh_count - 1;
+        /*
+          Object Name - This is the mesh name
+          This needs to come before all the vertex information.
+        */
+        if(strcmp("o", line) == 0)
+        {
+          // This might be a new mesh so zero the counters.
+          
+          positions.clear();
+          normals.clear();
+          uvs.clear();
+          
+          curr_tri = 0;
+          this_mesh += 1;
+          
+          // Dummy elemenets as objs index from 1 not 0
+          positions.resize(3);
+          normals.resize(3);
+          uvs.resize(2);
+        }
         
-        // Vert
+        /*
+          Vertex Position
+        */
+        else if(strcmp("v", line) == 0)
+        {
+          const size_t curr_size = positions.size();
         
-        return_model.verts[curr_mesh][vertex_count * 3 + 0] = pos_list[index_list[0] * 3 + 0];
-        return_model.verts[curr_mesh][vertex_count * 3 + 1] = pos_list[index_list[0] * 3 + 1];
-        return_model.verts[curr_mesh][vertex_count * 3 + 2] = pos_list[index_list[0] * 3 + 2];
+          positions.emplace_back(0.f);
+          positions.emplace_back(0.f);
+          positions.emplace_back(0.f);
+        
+          fscanf(
+            file,
+            "%f %f %f\n",
+            &positions[curr_size + 0],
+            &positions[curr_size + 1],
+            &positions[curr_size + 2]
+          );
+        }
+        
+        /*
+          Texture Position
+        */
+        else if(strcmp("vt", line) == 0)
+        {
+          const size_t curr_size = uvs.size();
+          
+          uvs.emplace_back(0.f);
+          uvs.emplace_back(0.f);
+        
+          fscanf(
+            file,
+            "%f %f\n",
+            &uvs[curr_size + 0],
+            &uvs[curr_size + 1]
+          );
+        }
+        
+        /*
+          Normal
+        */
+        else if(strcmp("vn", line) == 0)
+        {
+          const size_t curr_size = normals.size();
+        
+          normals.emplace_back(0.f);
+          normals.emplace_back(0.f);
+          normals.emplace_back(0.f);
+        
+          fscanf(
+            file,
+            "%f %f %f\n",
+            &normals[curr_size + 0],
+            &normals[curr_size + 1],
+            &normals[curr_size + 2]
+          );
+        }
+        
+        /*
+          Face - This is the index that makes up the triangle
+          This section in the object file needs to come *after* all the meshes
+          vertices etc have been parsed.
+        */
+        else if(strcmp("f", line) == 0)
+        {
+          uint32_t index_list[9];
+        
+          // Vertex / texture / normal
+        
+          const int matched = fscanf(
+            file,
+            "%d/%d/%d %d/%d/%d %d/%d/%d\n",
+            &index_list[0],
+            &index_list[1],
+            &index_list[2],
+            
+            &index_list[3],
+            &index_list[4],
+            &index_list[5],
+            
+            &index_list[6],
+            &index_list[7],
+            &index_list[8]
+          );
+          
+          if(matched != 9)
+          {
+            LOG_ERROR("Importer error, need positions, normals, and tex coords defined, and triangulated");
+            break;
+          }
+          
+          const size_t curr_mesh = this_mesh - 1;
+          
+          return_model.verts[curr_mesh][(curr_tri * 9) + 0] = positions[(index_list[0] * 3) + 0];
+          return_model.verts[this_mesh][(curr_tri * 9) + 1] = positions[(index_list[0] * 3) + 1];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 2] = positions[(index_list[0] * 3) + 2];
+          
+          return_model.uvs[curr_mesh][(curr_tri * 6) + 0] = uvs[(index_list[1] * 2) + 0];
+          return_model.uvs[curr_mesh][(curr_tri * 6) + 1] = uvs[(index_list[1] * 2) + 1];
+          
+          return_model.normals[curr_mesh][(curr_tri * 9) + 0] = normals[(index_list[2] * 3) + 0];
+          return_model.normals[curr_mesh][(curr_tri * 9) + 1] = normals[(index_list[2] * 3) + 1];
+          return_model.normals[curr_mesh][(curr_tri * 9) + 2] = normals[(index_list[2] * 3) + 2];
+          
+          // --
 
-        return_model.normals[curr_mesh][vertex_count * 3 + 0] = normal_list[index_list[1] * 3 + 0];
-        return_model.normals[curr_mesh][vertex_count * 3 + 1] = normal_list[index_list[1] * 3 + 1];
-        return_model.normals[curr_mesh][vertex_count * 3 + 2] = normal_list[index_list[1] * 3 + 2];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 3] = positions[(index_list[3] * 3) + 0];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 4] = positions[(index_list[3] * 3) + 1];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 5] = positions[(index_list[3] * 3) + 2];
+          
+          return_model.uvs[curr_mesh][(curr_tri * 6) + 2] = uvs[(index_list[4] * 2) + 0];
+          return_model.uvs[curr_mesh][(curr_tri * 6) + 3] = uvs[(index_list[4] * 2) + 1];
+          
+          return_model.normals[curr_mesh][(curr_tri * 9) + 3] = normals[(index_list[5] * 3) + 0];
+          return_model.normals[curr_mesh][(curr_tri * 9) + 4] = normals[(index_list[5] * 3) + 1];
+          return_model.normals[curr_mesh][(curr_tri * 9) + 5] = normals[(index_list[5] * 3) + 2];
+          
+          // --
+          
+          return_model.verts[curr_mesh][(curr_tri * 9) + 6] = positions[(index_list[6] * 3) + 0];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 7] = positions[(index_list[6] * 3) + 1];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 8] = positions[(index_list[6] * 3) + 2];
+          
+          return_model.uvs[curr_mesh][(curr_tri * 6) + 4] = uvs[(index_list[7] * 2) + 0];
+          return_model.uvs[curr_mesh][(curr_tri * 6) + 5] = uvs[(index_list[7] * 2) + 1];
+          
+          return_model.normals[curr_mesh][(curr_tri * 9) + 6] = normals[(index_list[8] * 3) + 0];
+          return_model.normals[curr_mesh][(curr_tri * 9) + 7] = normals[(index_list[8] * 3) + 1];
+          return_model.normals[curr_mesh][(curr_tri * 9) + 8] = normals[(index_list[8] * 3) + 2];
         
-        return_model.uvs[curr_mesh][vertex_count * 2 + 0] = uv_list[index_list[2] * 2 + 0];
-        return_model.uvs[curr_mesh][vertex_count * 2 + 1] = uv_list[index_list[2] * 2 + 1];
-        
-        // Vert
-        
-        return_model.verts[curr_mesh][vertex_count * 3 + 0] = pos_list[index_list[3] * 3 + 0];
-        return_model.verts[curr_mesh][vertex_count * 3 + 1] = pos_list[index_list[3] * 3 + 1];
-        return_model.verts[curr_mesh][vertex_count * 3 + 2] = pos_list[index_list[3] * 3 + 2];
-
-        return_model.normals[curr_mesh][vertex_count * 3 + 0] = normal_list[index_list[4] * 3 + 0];
-        return_model.normals[curr_mesh][vertex_count * 3 + 1] = normal_list[index_list[4] * 3 + 1];
-        return_model.normals[curr_mesh][vertex_count * 3 + 2] = normal_list[index_list[4] * 3 + 2];
-        
-        return_model.uvs[curr_mesh][vertex_count * 2 + 0] = uv_list[index_list[5] * 2 + 0];
-        return_model.uvs[curr_mesh][vertex_count * 2 + 1] = uv_list[index_list[5] * 2 + 1];
-        
-        // Vert
-        
-        return_model.verts[curr_mesh][vertex_count * 3 + 0] = pos_list[index_list[6] * 3 + 0];
-        return_model.verts[curr_mesh][vertex_count * 3 + 1] = pos_list[index_list[6] * 3 + 1];
-        return_model.verts[curr_mesh][vertex_count * 3 + 2] = pos_list[index_list[6] * 3 + 2];
-
-        return_model.normals[curr_mesh][vertex_count * 3 + 0] = normal_list[index_list[7] * 3 + 0];
-        return_model.normals[curr_mesh][vertex_count * 3 + 1] = normal_list[index_list[7] * 3 + 1];
-        return_model.normals[curr_mesh][vertex_count * 3 + 2] = normal_list[index_list[7] * 3 + 2];
-        
-        return_model.uvs[curr_mesh][vertex_count * 2 + 0] = uv_list[index_list[8] * 2 + 0];
-        return_model.uvs[curr_mesh][vertex_count * 2 + 1] = uv_list[index_list[8] * 2 + 1];
+          curr_tri += 1;
+        }
       }
     }
   }
