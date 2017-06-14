@@ -207,6 +207,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Material{});
   aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Mesh{});
   aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Texture{});
+  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Texture_resource{});
   aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Resource{});
   aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Graphics{});
   aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Mesh_resource{});
@@ -275,6 +276,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
     if(Nil::Data::has_mesh_resource(node))
     {
       self->pending_mesh_load.emplace_back(node);
+    }
+    
+    if(Nil::Data::has_texture_resource(node))
+    {
+      self->pending_texture_load.emplace_back(node);
     }
 
     if(Nil::Data::has_developer(node))
@@ -363,6 +369,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
         (uint8_t)mat.shader,
         math::mat4_from_nil_transform(trans),
         mesh.mesh_id,
+        mat.texture_01,
       };
 
       memcpy(rov_render.color, mat.color, sizeof(Nil::Data::Material::color));
@@ -459,6 +466,27 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
         Nil::Data::set(node, mesh_resource);
       }
     }
+    
+    for(auto &node : self->pending_texture_load)
+    {
+      Nil::Data::Texture_resource texture_resource{};
+      Nil::Data::get(node, texture_resource);
+      
+      if(texture_resource.status == 0)
+      {
+        const uint32_t texture = rov_createTexture(texture_resource.data, texture_resource.width, texture_resource.height, texture_resource.sizeof_data, texture_resource.compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8);
+        
+        if((texture_resource.id + 1) > self->texture_ids.size())
+        {
+          self->texture_ids.resize(1 << (texture_resource.id + 1));
+        }
+        
+        self->texture_ids[texture_resource.id] = texture;
+      }
+      
+      texture_resource.status = 1;
+      Nil::Data::set(node, texture_resource);
+    }
   }
 }
 
@@ -508,7 +536,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
           rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
           rov_setShader(render.shader_type);
           rov_setMesh(self->mesh_ids[render.mesh_id]);
-
+          rov_setTexture(self->texture_ids[render.texture_01_id], 0);
           rov_submitMeshTransform(math::mat4_get_data(render.world));
         }
       }

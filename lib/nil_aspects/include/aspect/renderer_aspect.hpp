@@ -35,6 +35,9 @@ struct Data
   std::vector<uint32_t> mesh_ids;
   std::vector<Nil::Node> pending_mesh_load;
   
+  std::vector<uint32_t> texture_ids;
+  std::vector<Nil::Node> pending_texture_load;
+  
   
   Nil::Node debug_lines = Nil::Node(nullptr);
   
@@ -58,6 +61,7 @@ struct Data
     uint8_t shader_type;
     math::mat4 world;
     uint32_t mesh_id;
+    uint32_t texture_01_id;
     
     float color[4];
   };

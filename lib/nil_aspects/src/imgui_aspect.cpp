@@ -1090,6 +1090,37 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         ImGui::Text("No UI Impl");
       }
     }
+    
+    
+    /*
+      Texture Resource
+    */
+    if(Nil::Data::has_texture_resource(self->inspector_node))
+    {
+      if(ImGui::CollapsingHeader("Texture Resource"))
+      {
+        Nil::Data::Texture_resource tex_resource{};
+        Nil::Data::get(self->inspector_node, tex_resource);
+        
+        const int flags = ImGuiInputTextFlags_ReadOnly;
+        
+        bool update_resource = false;
+        
+        if(ImGui::InputInt("ID##TexR", (int*)&tex_resource.id)) { update_resource = true; }
+        ImGui::InputInt("Components*##TexR", (int*)&tex_resource.compoents, flags);
+        ImGui::InputInt("Width*##TexR", (int*)&tex_resource.width, flags);
+        ImGui::InputInt("Height*##TexR", (int*)&tex_resource.height, flags);
+        ImGui::InputInt("Depth*##TexR", (int*)&tex_resource.depth, flags);
+        ImGui::InputInt("Dimentions*##TexR", (int*)&tex_resource.dimentions, flags);
+        
+        ImGui::Text("* Readonly");
+        
+        if(update_resource)
+        {
+          Nil::Data::set(self->inspector_node, tex_resource);
+        }
+      }
+    }
 
 
     /*
