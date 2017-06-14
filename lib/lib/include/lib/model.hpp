@@ -25,13 +25,24 @@
 namespace LIB_NS_NAME {
 
 
+struct material
+{
+  const char *name;
+  const char *texture_01_path;
+};
+
+
 struct model
 {
+  char **name;
   float     **verts;
   float     **normals;
   float     **uvs;
-  uint32_t   *element_count;
+  uint32_t   *vertex_count;
+  uint32_t   *triangle_count;
   uint32_t    mesh_count;
+  
+  material  **mesh_material;
 };
 
 
@@ -87,6 +98,7 @@ load_obj_from_file(
     */
     uint32_t mesh_count = 0;
     lib::array<uint32_t, 32> triangle_count;
+    lib::array<uint32_t, 32> name_size;
     
     while(true)
     {
@@ -107,6 +119,17 @@ load_obj_from_file(
       */
       if(strcmp("o", line) == 0)
       {
+        char name[128]{};
+      
+        fscanf(
+          file,
+          "%s\n",
+          name
+        );
+        
+        const uint32_t str_size = strlen(name);
+        name_size.emplace_back(str_size);
+      
         // This might be a new mesh so zero the counters.
         mesh_count += 1;
       }
@@ -121,6 +144,12 @@ load_obj_from_file(
     // Setup return model
     {
       return_model.mesh_count = mesh_count;
+      
+      return_model.name = (char**)MODEL_ALLOC(sizeof(char*) * mesh_count);
+      for(uint32_t i = 0; i < mesh_count; ++i)
+      {
+        return_model.name[i] = (char*)MODEL_ALLOC(sizeof(char) * name_size[i]);
+      }
     
       return_model.verts = (float**)MODEL_ALLOC(sizeof(float*) * mesh_count);
       for(uint32_t i = 0; i < mesh_count; ++i)
@@ -140,12 +169,23 @@ load_obj_from_file(
         return_model.uvs[i] = (float*)MODEL_ALLOC(sizeof(float) * triangle_count[i] * 6);
       }
       
+      // Tri count
       {
-        return_model.element_count = (uint32_t*)MODEL_ALLOC(sizeof(uint32_t) * mesh_count);
+        return_model.triangle_count = (uint32_t*)MODEL_ALLOC(sizeof(uint32_t) * mesh_count);
         
         for(uint32_t i = 0; i < mesh_count; ++i)
         {
-          return_model.element_count[i] = triangle_count[i];
+          return_model.triangle_count[i] = triangle_count[i];
+        }
+      }
+      
+      // Vert count
+      {
+        return_model.vertex_count = (uint32_t*)MODEL_ALLOC(sizeof(uint32_t) * mesh_count);
+        
+        for(uint32_t i = 0; i < mesh_count; ++i)
+        {
+          return_model.vertex_count[i] = triangle_count[i] * 3;
         }
       }
     }
@@ -155,8 +195,13 @@ load_obj_from_file(
       fseek(file, 0, SEEK_SET);
     
       lib::array<float, 128 * 3> positions;
+      positions.resize(3);
+      
       lib::array<float, 128 * 3> normals;
+      normals.resize(3);
+      
       lib::array<float, 128 * 2> uvs;
+      uvs.resize(2);
     
       uint32_t this_mesh = 0;
       uint32_t curr_tri = 0;
@@ -181,19 +226,19 @@ load_obj_from_file(
         */
         if(strcmp("o", line) == 0)
         {
-          // This might be a new mesh so zero the counters.
+          char name[128]{};
+      
+          fscanf(
+            file,
+            "%s\n",
+            name
+          );
           
-          positions.clear();
-          normals.clear();
-          uvs.clear();
-          
+//          memcpy(return_model.name[this_mesh], name, sizeof(char) * strlen(name));
+          strcat(return_model.name[this_mesh], name);
+        
           curr_tri = 0;
           this_mesh += 1;
-          
-          // Dummy elemenets as objs index from 1 not 0
-          positions.resize(3);
-          normals.resize(3);
-          uvs.resize(2);
         }
         
         /*
@@ -290,7 +335,7 @@ load_obj_from_file(
           const size_t curr_mesh = this_mesh - 1;
           
           return_model.verts[curr_mesh][(curr_tri * 9) + 0] = positions[(index_list[0] * 3) + 0];
-          return_model.verts[this_mesh][(curr_tri * 9) + 1] = positions[(index_list[0] * 3) + 1];
+          return_model.verts[curr_mesh][(curr_tri * 9) + 1] = positions[(index_list[0] * 3) + 1];
           return_model.verts[curr_mesh][(curr_tri * 9) + 2] = positions[(index_list[0] * 3) + 2];
           
           return_model.uvs[curr_mesh][(curr_tri * 6) + 0] = uvs[(index_list[1] * 2) + 0];
