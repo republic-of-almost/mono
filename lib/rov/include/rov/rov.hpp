@@ -35,7 +35,7 @@ void        rov_execute();
 // ------------------------------------------------------------ [ Resources ] --
 
 
-uint32_t    rov_createTexture(const uint8_t *data, size_t size, uint32_t format);
+uint32_t    rov_createTexture(const uint8_t *data, uint32_t width, uint32_t height, size_t size, uint32_t format);
 uint32_t    rov_createMesh(const float *pos, const float *normals, const float *tex_coords, size_t count);
 
 
@@ -346,9 +346,104 @@ namespace {
 // ------------------------------------------------------------ [ Resources ] --
 
 
-uint32_t
-rov_createTexture(const uint8_t *data, size_t size, uint32_t format)
+namespace
 {
+  struct rov_gl_texture
+  {
+    GLint gl_id;
+    uint32_t width;
+    uint32_t height;
+  };
+  
+  std::vector<rov_gl_texture> rov_textures;
+  
+  GLint
+  format_to_gl_internal(uint32_t format)
+  {
+    switch(format)
+    {
+      case(rovPixel_R8): return GL_R8;
+      case(rovPixel_RG8): return GL_RG8;
+      case(rovPixel_RGB8): return GL_RGB8;
+      case(rovPixel_RGBA8): return GL_RGBA8;
+      
+      default:
+        return GL_RGB8;
+    }
+  }
+  
+  GLenum
+  format_to_gl_format(uint32_t format)
+  {
+    switch(format)
+    {
+      case(rovPixel_R8): return GL_RED;
+      case(rovPixel_RG8): return GL_RG;
+      case(rovPixel_RGB8): return GL_RGB;
+      case(rovPixel_RGBA8): return GL_RGBA;
+      
+      default:
+        return GL_RGB;
+    }
+  }
+  
+  GLenum
+  format_to_gl_type(uint32_t format)
+  {
+    switch(format)
+    {
+      case(rovPixel_R8):
+      case(rovPixel_RG8):
+      case(rovPixel_RGB8):
+      case(rovPixel_RGBA8):
+        return GL_UNSIGNED_BYTE;
+      
+      default:
+        return GL_UNSIGNED_BYTE;
+    }
+  }
+}
+
+
+uint32_t
+rov_createTexture(const uint8_t *data, uint32_t width, uint32_t height, size_t size, uint32_t format)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(vao);
+  #endif
+  
+  GLuint texture;
+  glGenTextures(1, &texture);
+  
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     format_to_gl_internal(format),
+                     width,
+                     height,
+                     0,
+                     format_to_gl_format(format),
+                     format_to_gl_type(format),
+                     data);
+  
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  
+  
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(0);
+  #endif
+  
+  rov_gl_texture tex;
+  tex.gl_id = texture;
+  tex.width = width;
+  tex.height = height;
+  
+  rov_textures.emplace_back(tex);
+  
+  return rov_textures.size();
 }
 
 
@@ -774,8 +869,8 @@ highp mat4 inverse(mat4 m) {
         highp vec4 spec = vec4(0.0);
         highp vec3 view_dir = normalize(uni_eye - ps_in_fragpos);
         highp vec3 l_dir = normalize(vec3(-0.35,1.0,-1.25));
-//        vec4 diffuse = texture(uni_map_01, texture_coord);
-        highp vec4 diffuse = vec4(uni_color);//
+        highp vec4 diffuse = texture2D(uni_texture_0, ps_in_texture_coords);
+//        highp vec4 diffuse = vec4(uni_color);//
         highp vec4 ambient = vec4(0.1, 0.1, 0.1, 1);
         highp vec4 specular = vec4(0.1, 0.1, 0.1, 1);
         highp float shininess = 32.0;
@@ -1007,12 +1102,22 @@ rov_execute()
       const uint32_t details = lib::bits::lower32(mat.material);
 
       const uint8_t shader = lib::bits::first8(details);
-//      const uint8_t texture_01 = lib::bits::second8(details);
+      const uint8_t texture_01 = lib::bits::second8(details);
 //      const uint8_t texture_02 = lib::bits::third8(details);
 //      const uint8_t texture_03 = lib::bits::forth8(details);
 
 
       glUseProgram(rov_mesh_shaders[shader].program);
+      
+      if(texture_01)
+      {
+        rov_gl_texture tex = rov_textures[texture_01 - 1];
+        
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, tex.gl_id);
+
+//        glUniform1i(desc->count, desc->index);
+      }
 
       /*
         For each draw call in the material.
@@ -1037,7 +1142,7 @@ rov_execute()
           
           continue;
         }
-
+        
         // Vertex
         {
           size_t pointer = 0;
