@@ -10,7 +10,8 @@ enum class Game_asset {
 
   CUBE = 1,
   CUBE_BEV,
-  BRIDGE,
+
+  STATIC // must be last entry.
 
 }; // enum
 

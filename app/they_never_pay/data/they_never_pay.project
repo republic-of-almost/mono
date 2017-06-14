@@ -37,7 +37,11 @@ table.insert(
       "Math",
       "AspectsControllers",
       "Assets",
+
+      -- Thirdparty
+
       "Remotery",
+      "STB",
     },
 
     inc_dirs = {

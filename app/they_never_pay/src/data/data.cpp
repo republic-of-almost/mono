@@ -1,4 +1,4 @@
-    #include <data/data.hpp>
+#include <data/data.hpp>
 #include <nil/data/window.hpp>
 #include <nil/data/developer.hpp>
 #include <nil/data/mouse.hpp>
@@ -6,10 +6,16 @@
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
+
+#include <nil/data/texture.hpp>
+#include <nil/data/texture_resource.hpp>
 #include <nil/data/mesh_resource.hpp>
+#include <nil/data/mesh.hpp>
+#include <nil/data/material.hpp>
 #include <assets/cube_mesh.hpp>
 
 #include <lib/model.hpp>
+#include <stb/stb_image.h>
 
 
 namespace Game_data {
@@ -77,27 +83,65 @@ load_assets()
   }
   
   // Load asset
-  {
-  /*
-    OBJ Test
-  */
-  lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/bridge.obj");  
+
+  uint32_t counter = (uint32_t)Game_asset::STATIC;
   
+  lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
+  
+  // Load any texture
+  {
+    int x = 0;
+    int y = 0;
+    int c = 0;
+    stbi_uc *img_data = nullptr;
+    img_data = stbi_load("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/texture/Bridge.png", &x, &y, &c, 0);
+    
+    Nil::Data::Texture_resource tex_data{};
+    tex_data.data = img_data;
+    tex_data.id = 1;
+    tex_data.dimentions = 2;
+    tex_data.compoents = c;
+    tex_data.width = x;
+    tex_data.height = y;
+    
+    Nil::Data::set(assets, tex_data);
+    
+    
     Nil::Node asset;
     asset.set_parent(assets);
-    asset.set_name("Bridge");
+    asset.set_name("Static");
     
-    Nil::Data::Mesh_resource mesh{};
+    for(uint32_t i = 0; i < model.mesh_count; ++i)
+    {
+      Nil::Node child;
+      child.set_parent(asset);
+      child.set_name(model.name[i]);
     
-    mesh.id = (uint32_t)Game_asset::BRIDGE;
-    
-    mesh.position_vec3 = model.verts[0];
-    mesh.normal_vec3 = model.normals[0];
-    mesh.texture_coords_vec2 = model.uvs[0];
-    
-    mesh.count = model.element_count[0] * 3;
-    
-    Nil::Data::set(asset, mesh);
+      Nil::Data::Mesh_resource mesh{};
+      
+      mesh.id = ++counter;
+      
+      mesh.position_vec3       = model.verts[i];
+      mesh.normal_vec3         = model.normals[i];
+      mesh.texture_coords_vec2 = model.uvs[i];
+      mesh.count               = model.vertex_count[i];
+      
+      Nil::Data::set(child, mesh);
+      
+      Nil::Data::Mesh mesh_instance{};
+      mesh_instance.mesh_id = mesh.id;
+      
+      Nil::Data::set(child, mesh_instance);
+      
+      Nil::Data::Material mat{};
+      mat.shader = Nil::Data::Material::DIR_LIGHT;
+      mat.color[0] = 0.6f;
+      mat.color[1] = 0.1f;
+      mat.color[2] = 0.2f;
+      mat.color[3] = 1.f;
+      mat.texture_01 = tex_data.id;
+      Nil::Data::set(child, mat);
+    }
   }
 }
 
@@ -228,34 +272,37 @@ debug_line(const math::vec3 start, const math::vec3 end, const math::vec3 col)
   // Line data //
   Nil::Node node = get_debug_lines();
   
-  Nil::Data::Developer line_data;
-  Nil::Data::get(node, line_data);
-  
-  const size_t count = (size_t)line_data.aux_02;
-  
-  if(count >= line_info.size())
+  if(node.is_valid() && Nil::Data::has_developer(node))
   {
-    line_info.resize(count + 9);
+    Nil::Data::Developer line_data;
+    Nil::Data::get(node, line_data);
+    
+    const size_t count = (size_t)line_data.aux_02;
+    
+    if(count >= line_info.size())
+    {
+      line_info.resize(count + 9);
+    }
+
+    
+    line_info[count + 0] = (math::get_x(start));
+    line_info[count + 1] = (math::get_y(start));
+    line_info[count + 2] = (math::get_z(start));
+
+    line_info[count + 3] = (math::get_x(end));
+    line_info[count + 4] = (math::get_y(end));
+    line_info[count + 5] = (math::get_z(end));
+    
+    line_info[count + 6] = (math::get_x(col));
+    line_info[count + 7] = (math::get_y(col));
+    line_info[count + 8] = (math::get_z(col));
+    
+    
+    line_data.aux_01 = (uintptr_t)line_info.data();
+    line_data.aux_02 += 9;
+    
+    Nil::Data::set(node, line_data);
   }
-
-  
-  line_info[count + 0] = (math::get_x(start));
-  line_info[count + 1] = (math::get_y(start));
-  line_info[count + 2] = (math::get_z(start));
-
-  line_info[count + 3] = (math::get_x(end));
-  line_info[count + 4] = (math::get_y(end));
-  line_info[count + 5] = (math::get_z(end));
-  
-  line_info[count + 6] = (math::get_x(col));
-  line_info[count + 7] = (math::get_y(col));
-  line_info[count + 8] = (math::get_z(col));
-  
-  
-  line_data.aux_01 = (uintptr_t)line_info.data();
-  line_data.aux_02 += 9;
-  
-  Nil::Data::set(node, line_data);
 }
 
 
