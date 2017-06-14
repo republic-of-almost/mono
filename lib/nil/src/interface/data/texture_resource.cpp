@@ -32,12 +32,20 @@ set(Node &node, const Texture_resource &in)
 {
   NIL_DATA_GETTER_SETTER_HAS_SETUP
 
+  Texture_resource cpy = in;
+  
+  // Copy The data
+  uint8_t *cpy_data = (uint8_t*)malloc(in.sizeof_data);
+  memcpy(cpy_data, in.data, in.sizeof_data);
+  
+  cpy.data = cpy_data;
+
   if(!setter_helper(
     node,
     graph->component_data.texture_resource_node_id,
     graph->component_data.texture_resource_data,
     in,
-    get_type_id(in)))
+    get_type_id(cpy)))
   {
     NIL_DATA_SETTER_ERROR(Texture_resource)
   }
