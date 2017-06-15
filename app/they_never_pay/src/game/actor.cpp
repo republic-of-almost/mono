@@ -121,7 +121,8 @@ think(Nil::Node node, uintptr_t user_data)
     Nil::Data::Transform trans{};
     Nil::Data::get(node, trans);
     
-    math::vec3 next_step = math::vec3_init_with_array(trans.position);
+    const math::vec3 curr_step = math::vec3_init_with_array(trans.position);
+    math::vec3 next_step = curr_step;
     math::vec3 move_dir  = math::vec3_zero();
 
     const math::vec3 local_movement = math::vec3_init(x_move, 0.f, z_move);
@@ -176,21 +177,20 @@ think(Nil::Node node, uintptr_t user_data)
     */
     else if(math::vec3_length(move_dir) > math::epsilon())
     {
-      math::vec3 start;
-      math::vec3 end;
+      math::vec3 curr_step_edge[2];
       
       math::ray_test_closest_edge(
         actor->nav_mesh,
         actor->nav_mesh_count,
-        next_step,
-        start,
-        end
+        curr_step,
+        curr_step_edge[0],
+        curr_step_edge[1]
       );
       
-      Game_data::debug_line(start, end, math::vec3_init(1,1,0));
+      Game_data::debug_line(curr_step_edge[0], curr_step_edge[1], math::vec3_init(1,1,0));
       
       const math::vec3 norm_edge = math::vec3_normalize(
-        math::vec3_subtract(end, start)
+        math::vec3_subtract(curr_step_edge[0], curr_step_edge[1])
       );
       
       const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
@@ -213,6 +213,47 @@ think(Nil::Node node, uintptr_t user_data)
         
         memcpy(trans.position, pos.data, sizeof(trans.position));
         Nil::Data::set(node, trans);
+      }
+      else
+      {
+        math::vec3 next_step_edge[2];
+      
+        math::ray_test_closest_edge(
+        actor->nav_mesh,
+        actor->nav_mesh_count,
+        next_step,
+        next_step_edge[0],
+        next_step_edge[1]
+      );
+      
+      Game_data::debug_line(next_step_edge[0], next_step_edge[1], math::vec3_init(1,1,0));
+      
+      const math::vec3 norm_edge = math::vec3_normalize(
+        math::vec3_subtract(next_step_edge[0], next_step_edge[1])
+      );
+      
+      const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
+      
+      const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
+      
+      const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
+      const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
+      const math::ray side_step_ray      = math::ray_init(side_step, side_step_ray_end);
+      
+      distance = 0.f;
+      if(math::ray_test_triangles(side_step_ray, actor->nav_mesh, actor->nav_mesh_count, &distance))
+      {
+        const math::vec3 ray_dir = math::ray_direction(side_step_ray);
+        const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
+        const math::vec3 hit     = math::vec3_add(side_step_ray.start, scale);
+//        const math::vec3 height  = math::vec3_init(0, actor->height, 0);
+//        const math::vec3 pos     = math::vec3_add(hit, height);
+        const math::vec3 pos = hit;
+        
+        memcpy(trans.position, pos.data, sizeof(trans.position));
+        Nil::Data::set(node, trans);
+      }
+
       }
     }
   }
