@@ -27,8 +27,10 @@ namespace LIB_NS_NAME {
 
 struct material
 {
-  const char *name;
-  const char *texture_01_path;
+  char *name;
+  char *texture_01_path;
+  char *texture_02_path;
+  char *texture_03_path;
 };
 
 
@@ -40,9 +42,11 @@ struct model
   float     **uvs;
   uint32_t   *vertex_count;
   uint32_t   *triangle_count;
+  int32_t    *material_id;
   uint32_t    mesh_count;
   
-  material  **mesh_material;
+  material   *mesh_material;
+  uint32_t    material_count;
 };
 
 
@@ -71,6 +75,7 @@ load_obj_from_file(
 #include <stdlib.h>
 #include <stdio.h>
 #include "logging.hpp"
+#include "string.hpp"
 
 
 // ----------------------------------------------------------- [ Model Impl ] --
@@ -89,6 +94,7 @@ load_obj_from_file(
 
   // Load file
   FILE *file = fopen(filename, "r");
+  FILE *mat_file = nullptr;
   
   if(file)
   {
@@ -112,6 +118,121 @@ load_obj_from_file(
       if(result == EOF)
       {
         break;
+      }
+      
+      /*
+        Material
+        --
+        If there is a material file listed go get its details.
+      */
+      if(strcmp("mtllib", line) == 0)
+      {
+        char name[128]{};
+        
+        fscanf(
+          file,
+          "%s\n",
+          name
+        );
+      
+        std::string path = LIB_NS_NAME::string::get_dir_from_filepath(filename) + std::string(name);
+        
+        mat_file = fopen(path.c_str(), "r");
+        
+        if(mat_file)
+        {
+          uint32_t number_of_mats = 0;
+          lib::array<uint32_t, 32> mat_name_size;
+          
+          /*
+            Scan through the
+          */
+          while(true)
+          {
+            char mat_line[128]{};
+          
+            const int result = fscanf(mat_file, "%s", mat_line);
+            
+            if(result == EOF)
+            {
+              break;
+            }
+            
+            if(strcmp("newmtl", mat_line) == 0)
+            {
+              number_of_mats += 1;
+              
+              char mat_name[128]{};
+              
+              fscanf(
+                mat_file,
+                "%s",
+                mat_name
+              );
+              
+              mat_name_size.emplace_back((uint32_t)strlen(mat_name));
+            }
+          }
+          
+          /*
+            Allocate the materials.
+          */
+          
+          {
+            return_model.mesh_material = (material*)MODEL_ALLOC(sizeof(material) * number_of_mats);
+            for(uint32_t i = 0; i < number_of_mats; ++i)
+            {
+              return_model.mesh_material[i].name = (char*)MODEL_ALLOC(sizeof(char) * mat_name_size[i]);
+            }
+            return_model.material_count = number_of_mats;
+          }
+          
+          number_of_mats = 0;
+          fseek(mat_file, 0, SEEK_SET);
+          
+          while(true)
+          {
+            char mat_line[128]{};
+          
+            const int result = fscanf(mat_file, "%s", mat_line);
+            
+            if(result == EOF)
+            {
+              break;
+            }
+            
+            if(strcmp("newmtl", mat_line) == 0)
+            {
+              
+              char mat_name[128]{};
+              
+              fscanf(
+                mat_file,
+                "%s",
+                mat_name
+              );
+              
+              strcat(return_model.mesh_material[number_of_mats].name, mat_name);
+              
+              number_of_mats += 1;
+            }
+            
+            if(strcmp("map_Kd", mat_line) == 0)
+            {
+              char path[1024]{};
+              
+              fscanf(
+                mat_file,
+                "%s",
+                path
+              );
+              
+              return_model.mesh_material[number_of_mats - 1].texture_01_path = (char*)MODEL_ALLOC(strlen(path) * sizeof(char));
+              memset(return_model.mesh_material[number_of_mats - 1].texture_01_path, 0, sizeof(char) * strlen(path));
+              strcat(return_model.mesh_material[number_of_mats - 1].texture_01_path, path);
+            }
+          }
+        }
       }
       
       /*
@@ -186,6 +307,17 @@ load_obj_from_file(
         for(uint32_t i = 0; i < mesh_count; ++i)
         {
           return_model.vertex_count[i] = triangle_count[i] * 3;
+        }
+      }
+      
+      // Material ID
+      {
+        return_model.material_id = (int32_t*)MODEL_ALLOC(sizeof(int32_t) * mesh_count);
+        
+        // Memset
+        for(uint32_t i = 0; i < mesh_count; ++i)
+        {
+          return_model.material_id[i] = -1;
         }
       }
     }
@@ -297,6 +429,27 @@ load_obj_from_file(
             &normals[curr_size + 1],
             &normals[curr_size + 2]
           );
+        }
+        
+        else if(strcmp("usemtl", line) == 0)
+        {
+          char mat_name[128];
+        
+          fscanf(
+            file,
+            "%s\n",
+            mat_name
+          );
+          
+          // Search mats for this
+          for(uint32_t i = 0; i < return_model.material_count; ++i)
+          {
+            if(strcmp(return_model.mesh_material[i].name, mat_name) == 0)
+            {
+              return_model.material_id[this_mesh - 1] = i;
+              break;
+            }
+          }
         }
         
         /*
