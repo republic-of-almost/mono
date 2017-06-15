@@ -106,6 +106,7 @@ load_assets()
       stbi_uc *img_data = nullptr;
       const char *path = model.mesh_material[model.material_id[i]].texture_01_path;
       
+      stbi_set_flip_vertically_on_load(true);
       img_data = stbi_load(path, &x, &y, &c, 0);
       
       Nil::Data::Texture_resource tex_data{};
