@@ -223,7 +223,6 @@ setup(Actor *actor)
   LIB_ASSERT(actor);
   
   actor->height = 2.f;
-  
   actor->entity.set_name("Actor");
   
   // Mouse Capture
@@ -261,7 +260,7 @@ setup(Actor *actor)
     float pos[] = {0.f, 0.f, 0.f};
     memcpy(trans.position, pos, sizeof(trans.position));
     
-    float scale[] = {0.5f, 0.5f, 0.5f};
+    float scale[] = {1.f, 1.f, 1.f};
     memcpy(trans.scale, scale, sizeof(trans.scale));
     
     float rot[] = {0.f, 0.f, 0.f, 1.f};
@@ -285,7 +284,7 @@ setup(Actor *actor)
       float pos[] = {0.f, 1 + math::g_ratio(), 0.f};
       memcpy(trans.position, pos, sizeof(trans.position));
       
-      float scale[] = {0.5f, 0.5f, 0.5f};
+      float scale[] = {1.f, 1.f, 1.f};
       memcpy(trans.scale, scale, sizeof(trans.scale));
       
       float rot[] = {0.f, 0.f, 0.f, 1.f};
