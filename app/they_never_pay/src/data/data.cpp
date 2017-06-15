@@ -88,25 +88,8 @@ load_assets()
   
   lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
   
-  // Load any texture
   {
-    int x = 0;
-    int y = 0;
-    int c = 0;
-    stbi_uc *img_data = nullptr;
-    img_data = stbi_load("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/texture/Bridge.png", &x, &y, &c, 0);
-    
-    Nil::Data::Texture_resource tex_data{};
-    tex_data.data = img_data;
-    tex_data.id = 1;
-    tex_data.dimentions = 2;
-    tex_data.compoents = c;
-    tex_data.width = x;
-    tex_data.height = y;
-    
-    Nil::Data::set(assets, tex_data);
-    
-    
+  
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Static");
@@ -116,6 +99,24 @@ load_assets()
       Nil::Node child;
       child.set_parent(asset);
       child.set_name(model.name[i]);
+      
+      int x = 0;
+      int y = 0;
+      int c = 0;
+      stbi_uc *img_data = nullptr;
+      const char *path = model.mesh_material[model.material_id[i]].texture_01_path;
+      
+      img_data = stbi_load(path, &x, &y, &c, 0);
+      
+      Nil::Data::Texture_resource tex_data{};
+      tex_data.data       = img_data;
+      tex_data.id         = i + 1;
+      tex_data.dimentions = 2;
+      tex_data.compoents  = c;
+      tex_data.width      = x;
+      tex_data.height     = y;
+      
+      Nil::Data::set(child, tex_data);
     
       Nil::Data::Mesh_resource mesh{};
       
