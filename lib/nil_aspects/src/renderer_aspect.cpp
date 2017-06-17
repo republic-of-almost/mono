@@ -536,7 +536,12 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
           rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
           rov_setShader(render.shader_type);
           rov_setMesh(self->mesh_ids[render.mesh_id]);
-          rov_setTexture(self->texture_ids[render.texture_01_id], 0);
+          
+          if(render.texture_01_id)
+          {
+            rov_setTexture(self->texture_ids[render.texture_01_id], 0);
+          }
+          
           rov_submitMeshTransform(math::mat4_get_data(render.world));
         }
       }
