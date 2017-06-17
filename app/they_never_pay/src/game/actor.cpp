@@ -207,9 +207,7 @@ think(Nil::Node node, uintptr_t user_data)
         const math::vec3 ray_dir = math::ray_direction(side_step_ray);
         const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
         const math::vec3 hit     = math::vec3_add(side_step_ray.start, scale);
-//        const math::vec3 height  = math::vec3_init(0, actor->height, 0);
-//        const math::vec3 pos     = math::vec3_add(hit, height);
-        const math::vec3 pos = hit;
+        const math::vec3 pos     = hit;
         
         memcpy(trans.position, pos.data, sizeof(trans.position));
         Nil::Data::set(node, trans);
@@ -246,9 +244,7 @@ think(Nil::Node node, uintptr_t user_data)
         const math::vec3 ray_dir = math::ray_direction(side_step_ray);
         const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
         const math::vec3 hit     = math::vec3_add(side_step_ray.start, scale);
-//        const math::vec3 height  = math::vec3_init(0, actor->height, 0);
-//        const math::vec3 pos     = math::vec3_add(hit, height);
-        const math::vec3 pos = hit;
+        const math::vec3 pos     = hit;
         
         memcpy(trans.position, pos.data, sizeof(trans.position));
         Nil::Data::set(node, trans);
