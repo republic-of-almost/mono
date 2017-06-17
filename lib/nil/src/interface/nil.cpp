@@ -254,7 +254,7 @@ Engine::get_state(Engine_state &out)
   out.texture_count           = data->texture_node_id.size();
   out.texture_resource_count  = data->texture_resource_node_id.size();
   out.transform_count         = out.node_count;
-  out.window_count            = data->window_node_id.size();
+//  out.window_count            = data->window_node_id.size();
 }
 
 

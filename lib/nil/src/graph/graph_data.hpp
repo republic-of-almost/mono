@@ -3,6 +3,7 @@
 
 
 #include <lib/utilities.hpp>
+#include "graph_fwd.hpp"
 #include <math/math.hpp>
 #include <stdint.h>
 
@@ -103,8 +104,8 @@ struct Component_data
   lib::array<uint32_t>                    texture_resource_node_id;
   lib::array<Nil::Data::Texture_resource> texture_resource_data;
   
-  lib::array<uint32_t>                    window_node_id;
-  lib::array<Nil::Data::Window>           window_data;
+//  lib::array<uint32_t>                    window_node_id;
+//  lib::array<Nil::Data::Window>           window_data;
 };
 
 
@@ -134,6 +135,23 @@ struct Data
   // -- Other -- //
   uint64_t                    graph_tick;
   uint32_t                    instance_counter;
+  
+  // -- Callbacks -- //
+  
+  struct graph_tick_cb {
+    graph_tick_fn fn;
+    uintptr_t user_data;
+  };
+  graph_tick_cb               frame_tick_callbacks[16];
+  
+  // -- //
+  
+  struct node_delete_cb {
+    node_delete_fn fn;
+    uintptr_t user_data;
+  };
+  node_delete_cb              node_delete_callbacks[16];
+  
 };
 
 

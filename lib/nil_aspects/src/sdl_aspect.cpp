@@ -78,7 +78,20 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
   LIB_ASSERT(self);
 
   Nil::Event_data evt;
+  
+  
+  size_t added_windows = 0;
+  Nil::Data::Window *windows = nullptr;
+  Nil::Node *nodes = nullptr;
 
+  Nil::Data::events(Nil::Data::Event::ADDED, &added_windows, &windows, &nodes);
+  
+  if(nodes && !self->window_node)
+  {
+    self->window_node = nodes[0];
+  }
+  
+  
   while(event_list.get(evt))
   {
     Nil::Node node = Nil::Event::node(evt);
@@ -286,6 +299,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
+
 
   if(self->window_node.is_valid())
   {
@@ -642,6 +656,7 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
     #endif
 
     SDL_Event evt;
+    
     
     while (SDL_PollEvent(&evt))
     {

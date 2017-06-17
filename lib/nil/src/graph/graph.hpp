@@ -92,6 +92,17 @@ bool
 node_modified(Data *data, const uint32_t node_id);
 
 
+// ------------------------------------------------------------ [ Callbacks ] --
+
+
+bool
+callbaack_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data);
+
+
+bool
+callback_node_delete(Data *data, const node_delete_fn &cb, uintptr_t user_data);
+
+
 // ----------------------------------------------------------- [ Attributes ] --
 
 

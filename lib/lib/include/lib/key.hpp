@@ -13,20 +13,20 @@
 #include <stdint.h>
 
 
-// ---------------------------------------------------------- [ Key Config ] --
+// ----------------------------------------------------------- [ Key Config ] --
 
 
 // Not impl yet.
-#define LIB_KEY_CPP 0;
-#define LIB_KEY_SIMD 0;
-#define LIB_KEY_ASM 0;
+#define LIB_KEY_CPP 0
+#define LIB_KEY_SIMD 0
+#define LIB_KEY_ASM 0
 
 #ifndef LIB_NS_NAME
 #define LIB_NS_NAME lib
 #endif
 
 
-// ------------------------------------------------------- [ Key Interface ] --
+// -------------------------------------------------------- [ Key Interface ] --
 
 
 namespace LIB_NS_NAME {
@@ -82,7 +82,7 @@ upper_bounds(
 #endif // inc guard
 
 
-// ------------------------------------------------------------ [ Key Impl ] --
+// ------------------------------------------------------------- [ Key Impl ] --
 
 
 #ifdef LIB_KEY_IMPL
@@ -91,7 +91,7 @@ upper_bounds(
 #include "bits.hpp"
 
 
-// ----------------------------------------------------------- [ U32 to Ptr] --
+// ------------------------------------------------------------ [ U32 to Ptr] --
 
 
 namespace LIB_NS_NAME {
@@ -122,7 +122,7 @@ id_from_ptr(const void *ptr)
 } // ns
 
 
-// ------------------------------------------------------- [ Linear Search ] --
+// -------------------------------------------------------- [ Linear Search ] --
 
 
 namespace LIB_NS_NAME {
@@ -204,7 +204,7 @@ linear_search_upper32(
 } // ns
 
 
-// ------------------------------------------------------- [ Bounds Search ] --
+// -------------------------------------------------------- [ Bounds Search ] --
 
 
 namespace LIB_NS_NAME {

@@ -4,10 +4,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Window
@@ -21,6 +25,9 @@ struct Window
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Window &out);
 
@@ -29,12 +36,30 @@ void
 set(Node &node, const Window &in);
 
 
+void
+remove_window(Node &node, const Window &in);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_window(const Node &node);
 
 
 uint64_t
 get_type_id(const Window &in);
+
+
+size_t
+window_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Window **out_win, Node **out_node);
 
 
 } // ns

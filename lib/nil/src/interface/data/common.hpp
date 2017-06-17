@@ -95,6 +95,199 @@ has(const uint32_t id, const S &id_arr)
 }
 
 
+/*!
+  Generic_data
+  --
+  Yes yes templates bad!
+  The hope is I could do a generic data managment then things that require
+  specific needs can be custom.
+*/
+template<typename T>
+struct Generic_data
+{
+  lib::array<uint32_t>  keys;
+  lib::array<T>         data;
+  lib::array<uint32_t>  actions;
+  
+  // --
+  
+  std::vector<Nil::Node>  added_nodes;
+  lib::array<T>           added_data;
+  
+  std::vector<Nil::Node>  updated_nodes;
+  lib::array<T>           updated_data;
+  
+  std::vector<Nil::Node>  removed_nodes;
+  lib::array<T>           removed_data;
+  
+  // --
+  
+  explicit
+  Generic_data()
+  {
+    Nil::Graph::callback_node_delete(
+      Nil::Data::get_graph_data(),
+      [](const uint32_t id, uintptr_t user_data)
+      {
+        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
+        LIB_ASSERT(data);
+        
+        data->remove_data(Nil::Node(id));
+      },
+      (uintptr_t)this
+    );
+    
+    
+    Nil::Graph::callbaack_graph_tick(
+      Nil::Data::get_graph_data(),
+      [](uintptr_t user_data)
+      {
+        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
+        LIB_ASSERT(data);
+        
+        data->added_nodes.clear();
+        data->added_data.clear();
+        data->updated_data.clear();
+        data->updated_nodes.clear();
+        data->removed_nodes.clear();
+        data->removed_data.clear();
+      },
+      (uintptr_t)this
+    );
+  }
+  
+  
+  void
+  process_event_lists()
+  {
+    const size_t count = keys.size();
+  
+    for(size_t i = 0; i < count; ++i)
+    {
+      const uint32_t action = actions[i];
+    
+      if(action & Nil::Data::Event::ADDED)
+      {
+        added_nodes.emplace_back(keys[i]);
+        added_data.emplace_back(data[i]);
+      }
+        
+      else if(action & Nil::Data::Event::UPDATED)
+      {
+        updated_nodes.emplace_back(keys[i]);
+        updated_data.emplace_back(data[i]);
+      }
+      
+      else if(action & Nil::Data::Event::REMOVED)
+      {
+        removed_nodes.emplace_back(keys[i]);
+        removed_data.emplace_back(data[i]);
+      }
+    }
+  }
+  
+  
+  void
+  get_data(const Nil::Node &node, T &out)
+  {
+    size_t out_index = 0;
+
+    const bool found = find(node, &out_index);
+
+    if(likely(found))
+    {
+      out = data[out_index];
+    }
+    else
+    {
+      NIL_DATA_GETTER_ERROR(Window)
+    }
+
+  }
+  
+  void
+  set_data(Nil::Node &node, const T &in)
+  {
+    size_t out_index = 0;
+
+    const bool found = find(node, &out_index);
+
+    if(found)
+    {
+      data[out_index] = in;
+      actions[out_index] |= Nil::Data::Event::UPDATED;
+    }
+    else
+    {
+      uint64_t node_types = node.get_data_type_id();
+      node.set_data_type_id(node_types | get_type_id(in));
+      
+      keys.emplace_back(node.get_id());
+      data.emplace_back(in);
+      actions.emplace_back(Nil::Data::Event::ADDED);
+    }
+  }
+  
+  void
+  remove_data(const Nil::Node &node)
+  {
+    size_t out_index = 0;
+
+    const bool found = find(node, &out_index);
+
+    if(found)
+    {
+      actions[out_index] |= Nil::Data::Event::REMOVED;
+    }
+  }
+  
+  bool
+  find(const Nil::Node &node, size_t *index = nullptr)
+  {
+    const uint32_t id   = node.get_id();
+    const uint32_t *ids = keys.data();
+    const size_t count  = keys.size();
+    
+    const bool found = lib::key::linear_search(
+      id,
+      ids,
+      count,
+      index
+    );
+    
+    return found;
+  }
+  
+  void
+  events(const uint32_t event, size_t *count, T **out_data, Nil::Node **out_node)
+  {
+    process_event_lists();
+  
+    switch(event)
+    {
+    case(Nil::Data::Event::ADDED):
+      *count = added_data.size();
+      *out_data = added_data.data();
+      *out_node = added_nodes.data();
+      break;
+
+    case(Nil::Data::Event::UPDATED):
+      *count = updated_data.size();
+      *out_data = updated_data.data();
+      *out_node = updated_nodes.data();
+      break;
+      
+    case(Nil::Data::Event::REMOVED):
+      *count = removed_data.size();
+      *out_data = removed_data.data();
+      *out_node = removed_nodes.data();
+      break;
+    }
+  }
+  
+};
+
+
 } // ns
 } // ns
 

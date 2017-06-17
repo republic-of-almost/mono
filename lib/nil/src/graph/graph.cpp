@@ -799,19 +799,24 @@ namespace
         }
       }
       
-      // Window Data
-      {
-        size_t index = 0;
-        
-        if(lib::key::linear_search(
-          node_id,
-          data.window_node_id.data(),
-          data.window_node_id.size(), &index))
-        {
-          data.window_node_id.erase(index);
-          data.window_data.erase(index);
-        }
-      }
+//      // Window Data
+//      {
+//        size_t index = 0;
+//        
+//        if(lib::key::linear_search(
+//          node_id,
+//          data.window_node_id.data(),
+//          data.window_node_id.size(), &index))
+//        {
+//          data.window_node_id.erase(index);
+//          data.window_data.erase(index);
+//        }
+//      }
+      graph->node_delete_callbacks[0].fn(
+        node_id,
+        graph->node_delete_callbacks[0].user_data
+      );
+  
     }
   }
   
@@ -1199,6 +1204,29 @@ node_modified(Data *data, const uint32_t node_id)
 //  data->node_events.emplace_back(evt);
   
   return true; // ?
+}
+
+
+// ------------------------------------------------------------ [ Callbacks ] --
+
+
+bool
+callbaack_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data)
+{
+  data->frame_tick_callbacks[0] = {
+    cb,
+    user_data
+  };
+}
+
+
+bool
+callback_node_delete(Data *data, const node_delete_fn &cb, uintptr_t user_data)
+{
+  data->node_delete_callbacks[0] = {
+    cb,
+    user_data
+  };
 }
 
 

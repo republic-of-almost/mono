@@ -42,6 +42,26 @@ struct Transform;
 struct Window;
 
 
+namespace Event {
+enum ENUM {
+
+  ADDED   = 1 << 0,
+  UPDATED = 1 << 1,
+  REMOVED = 1 << 2,
+};
+}
+
+namespace Status {
+enum ENUM {
+  PENDING     = 1 << 0,
+  ERROR       = 1 << 1,
+  OK          = 1 << 2,
+  UNKNOWN     = 1 << 3,
+  NOT_FOUND   = 1 << 4,
+};
+}
+
+
 } // ns
 } // ns
 
