@@ -18,8 +18,8 @@ namespace {
 Nil::Data::Generic_data<Nil::Data::Window>&
 get_win_data()
 {
-  static Nil::Data::Generic_data<Nil::Data::Window> win;
-  return win;
+  static Nil::Data::Generic_data<Nil::Data::Window> data;
+  return data;
 }
 
 
@@ -82,9 +82,9 @@ window_count()
 
 
 void
-events(const uint32_t event, size_t *count, Window **out_win, Node **out_node)
+events(const uint32_t event, size_t *count, Window **out_data = nullptr, Node **out_node = nullptr)
 {
-  return get_win_data().events(event, count, out_win, out_node);
+  return get_win_data().events(event, count, out_data, out_node);
 }
 
 

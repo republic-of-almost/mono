@@ -96,7 +96,7 @@ node_modified(Data *data, const uint32_t node_id);
 
 
 bool
-callbaack_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data);
+callback_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data);
 
 
 bool

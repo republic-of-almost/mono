@@ -645,19 +645,19 @@ namespace
         }
       }
       
-      // Keyboard Data
-      {
-        size_t index = 0;
-        
-        if(lib::key::linear_search(
-          node_id,
-          data.keyboard_node_id.data(),
-          data.keyboard_node_id.size(), &index))
-        {
-          data.keyboard_node_id.erase(index);
-          data.keyboard_data.erase(index);
-        }
-      }
+//      // Keyboard Data
+//      {
+//        size_t index = 0;
+//        
+//        if(lib::key::linear_search(
+//          node_id,
+//          data.keyboard_node_id.data(),
+//          data.keyboard_node_id.size(), &index))
+//        {
+//          data.keyboard_node_id.erase(index);
+//          data.keyboard_data.erase(index);
+//        }
+//      }
       
       // Light Data
       {
@@ -730,19 +730,19 @@ namespace
       }
       
       // Mouse Data
-      {
-        size_t index = 0;
-        
-        if(lib::key::linear_search(
-          node_id,
-          data.mouse_node_id.data(),
-          data.mouse_node_id.size(), &index))
-        {
-          data.mouse_node_id.erase(index);
-          data.mouse_data.erase(index);
-        }
-      }
-      
+//      {
+//        size_t index = 0;
+//        
+//        if(lib::key::linear_search(
+//          node_id,
+//          data.mouse_node_id.data(),
+//          data.mouse_node_id.size(), &index))
+//        {
+//          data.mouse_node_id.erase(index);
+//          data.mouse_data.erase(index);
+//        }
+//      }
+//      
       // Resource Data
       {
         size_t index = 0;
@@ -812,11 +812,14 @@ namespace
 //          data.window_data.erase(index);
 //        }
 //      }
-      graph->node_delete_callbacks[0].fn(
-        node_id,
-        graph->node_delete_callbacks[0].user_data
-      );
-  
+
+      for(auto &cb : graph->node_delete_callbacks)
+      {
+        if(cb.fn)
+        {
+          cb.fn(node_id, cb.user_data);
+        }
+      }
     }
   }
   
@@ -895,6 +898,14 @@ think(Data *graph)
   
   // Temp
   graph->node_events.clear();
+  
+  for(auto &cb : graph->frame_tick_callbacks)
+  {
+    if(cb.fn)
+    {
+      cb.fn(cb.user_data);
+    }
+  }
 }
 
 
@@ -1211,22 +1222,22 @@ node_modified(Data *data, const uint32_t node_id)
 
 
 bool
-callbaack_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data)
+callback_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data)
 {
-  data->frame_tick_callbacks[0] = {
+  data->frame_tick_callbacks.emplace_back(
     cb,
     user_data
-  };
+  );
 }
 
 
 bool
 callback_node_delete(Data *data, const node_delete_fn &cb, uintptr_t user_data)
 {
-  data->node_delete_callbacks[0] = {
+  data->node_delete_callbacks.emplace_back(
     cb,
     user_data
-  };
+  );
 }
 
 

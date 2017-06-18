@@ -101,15 +101,25 @@ has(const uint32_t id, const S &id_arr)
   Yes yes templates bad!
   The hope is I could do a generic data managment then things that require
   specific needs can be custom.
+  
+  TODO
+  --
+  - Sort by id so can bin search
+  - process_event_lists() should happen via callback after api has had its turn.
+  - Mask events, such as ADDED | UPDATED some people just want to read not write.
+    - eg camera on window changes.
+    - Need better memory mgr for this stuff.
 */
 template<typename T>
 struct Generic_data
 {
+  // -- Data -- //
+
   lib::array<uint32_t>  keys;
   lib::array<T>         data;
   lib::array<uint32_t>  actions;
   
-  // --
+  // -- Cached Event Data -- //
   
   std::vector<Nil::Node>  added_nodes;
   lib::array<T>           added_data;
@@ -125,7 +135,8 @@ struct Generic_data
   explicit
   Generic_data()
   {
-    Nil::Graph::callback_node_delete(
+    Nil::Graph::callback_node_delete
+    (
       Nil::Data::get_graph_data(),
       [](const uint32_t id, uintptr_t user_data)
       {
@@ -138,12 +149,23 @@ struct Generic_data
     );
     
     
-    Nil::Graph::callbaack_graph_tick(
+    Nil::Graph::callback_graph_tick
+    (
       Nil::Data::get_graph_data(),
       [](uintptr_t user_data)
       {
         Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
         LIB_ASSERT(data);
+        
+        // -- Clear Actions -- //
+        
+        memset(
+          data->actions.data(),
+          0,
+          sizeof(decltype(data->actions[0])) * data->actions.size()
+        );
+        
+        // -- Clear Event Caches -- //
         
         data->added_nodes.clear();
         data->added_data.clear();
@@ -202,8 +224,8 @@ struct Generic_data
     {
       NIL_DATA_GETTER_ERROR(Window)
     }
-
   }
+  
   
   void
   set_data(Nil::Node &node, const T &in)
@@ -219,14 +241,28 @@ struct Generic_data
     }
     else
     {
-      uint64_t node_types = node.get_data_type_id();
-      node.set_data_type_id(node_types | get_type_id(in));
+      uint64_t type_ids = 0;
+      
+      Graph::node_get_data_type_id(
+        Nil::Data::get_graph_data(),
+        node.get_id(),
+        &type_ids
+      );
+      
+      type_ids |= get_type_id(in);
+      
+      Graph::node_set_data_type_id(
+        Nil::Data::get_graph_data(),
+        node.get_id(),
+        &type_ids
+      );
       
       keys.emplace_back(node.get_id());
       data.emplace_back(in);
       actions.emplace_back(Nil::Data::Event::ADDED);
     }
   }
+  
   
   void
   remove_data(const Nil::Node &node)
@@ -237,9 +273,28 @@ struct Generic_data
 
     if(found)
     {
+      uint64_t type_ids = 0;
+      
+      Graph::node_get_data_type_id(
+        Nil::Data::get_graph_data(),
+        node.get_id(),
+        &type_ids
+      );
+      
+      T dummy_data;
+      
+      type_ids &= ~get_type_id(dummy_data);
+      
+      Graph::node_set_data_type_id(
+        Nil::Data::get_graph_data(),
+        node.get_id(),
+        &type_ids
+      );
+      
       actions[out_index] |= Nil::Data::Event::REMOVED;
     }
   }
+  
   
   bool
   find(const Nil::Node &node, size_t *index = nullptr)
@@ -258,6 +313,7 @@ struct Generic_data
     return found;
   }
   
+  
   void
   events(const uint32_t event, size_t *count, T **out_data, Nil::Node **out_node)
   {
@@ -267,20 +323,20 @@ struct Generic_data
     {
     case(Nil::Data::Event::ADDED):
       *count = added_data.size();
-      *out_data = added_data.data();
-      *out_node = added_nodes.data();
+      if(out_data) { *out_data = added_data.data();  }
+      if(out_node) { *out_node = added_nodes.data(); }
       break;
 
     case(Nil::Data::Event::UPDATED):
       *count = updated_data.size();
-      *out_data = updated_data.data();
-      *out_node = updated_nodes.data();
+      if(out_data) { *out_data = updated_data.data();  }
+      if(out_node) { *out_node = updated_nodes.data(); }
       break;
       
     case(Nil::Data::Event::REMOVED):
       *count = removed_data.size();
-      *out_data = removed_data.data();
-      *out_node = removed_nodes.data();
+      if(out_data) { *out_data = removed_data.data();  }
+      if(out_node) { *out_node = removed_nodes.data(); }
       break;
     }
   }

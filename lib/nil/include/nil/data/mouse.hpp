@@ -4,10 +4,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Mouse
@@ -22,12 +26,22 @@ struct Mouse
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Mouse &out);
 
 
 void
 set(Node &node, const Mouse &in);
+
+
+void
+remove_mouse(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
@@ -37,6 +51,16 @@ has_mouse(const Node &node);
 uint64_t
 get_type_id(const Mouse &in);
 
+
+size_t
+mouse_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Mouse **out_data, Node **out_node);
 
 
 } // ns

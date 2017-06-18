@@ -37,7 +37,7 @@ set(Node &node, const Window &in);
 
 
 void
-remove_window(Node &node, const Window &in);
+remove_window(Node &node);
 
 
 // ----------------------------------------------------------------- [ Info ] --
@@ -59,7 +59,7 @@ window_count();
 
 
 void
-events(const uint32_t data, size_t *count, Window **out_win, Node **out_node);
+events(const uint32_t data, size_t *count, Window **out_data, Node **out_node);
 
 
 } // ns

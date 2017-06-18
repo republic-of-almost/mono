@@ -71,8 +71,8 @@ struct Component_data
   lib::array<uint32_t>                    graphics_node_id;
   lib::array<Nil::Data::Graphics>         graphics_data;
   
-  lib::array<uint32_t>                    keyboard_node_id;
-  lib::array<Nil::Data::Keyboard>         keyboard_data;
+//  lib::array<uint32_t>                    keyboard_node_id;
+//  lib::array<Nil::Data::Keyboard>         keyboard_data;
 
   lib::array<uint32_t>                    light_node_id;
   lib::array<Nil::Data::Light>            light_data;
@@ -89,8 +89,8 @@ struct Component_data
   lib::array<uint32_t>                    mesh_resource_node_id;
   lib::array<Nil::Data::Mesh_resource>    mesh_resource_data;
 
-  lib::array<uint32_t>                    mouse_node_id;
-  lib::array<Nil::Data::Mouse>            mouse_data;
+//  lib::array<uint32_t>                    mouse_node_id;
+//  lib::array<Nil::Data::Mouse>            mouse_data;
  
   lib::array<uint32_t>                    resource_node_id;
   lib::array<Nil::Data::Resource>         resource_data;
@@ -142,7 +142,7 @@ struct Data
     graph_tick_fn fn;
     uintptr_t user_data;
   };
-  graph_tick_cb               frame_tick_callbacks[16];
+  lib::array<graph_tick_cb>               frame_tick_callbacks;
   
   // -- //
   
@@ -150,7 +150,7 @@ struct Data
     node_delete_fn fn;
     uintptr_t user_data;
   };
-  node_delete_cb              node_delete_callbacks[16];
+  lib::array<node_delete_cb>              node_delete_callbacks;
   
 };
 

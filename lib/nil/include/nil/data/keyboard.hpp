@@ -22,6 +22,9 @@ namespace Nil {
 namespace Data {
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 namespace KeyState {
 enum ENUM {
 
@@ -161,6 +164,9 @@ struct Keyboard
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Keyboard &out);
 
@@ -169,12 +175,31 @@ void
 set(Node &node, const Keyboard &in);
 
 
+void
+remove_keyboard(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_keyboard(const Node &node);
 
 
 uint64_t
 get_type_id(const Keyboard &in);
+
+
+size_t
+keyboard_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Keyboard **out_data, Node **out_node);
+
 
 
 } // n
