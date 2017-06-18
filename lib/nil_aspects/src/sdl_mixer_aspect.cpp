@@ -164,14 +164,15 @@ events(
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
   
-  Nil::Event_data evt;
-  
-  while(event_list.get(evt))
+  // SDL has been initialized
   {
-    Nil::Node node = Nil::Event::node(evt);
-  
-    // Initialize the hardware
-    if(Nil::Data::has_graphics(node))
+    size_t               count    = 0;
+    Nil::Data::Graphics *graphics = nullptr;
+    Nil::Node           *node     = nullptr;
+    
+    Nil::Data::events(Nil::Data::Event::ADDED, &count, &graphics, &node);
+    
+    if(count)
     {
       self->initialized = true;
       
@@ -201,16 +202,16 @@ events(
       
       Mix_ChannelFinished(finished_chans);
       
-//      // Debugging
+      // Debugging //
       Mix_Chunk *sample = Mix_LoadWAV("/Users/PhilCK/Desktop/Lua/audio/walk.wav");
       self->samples.emplace_back(sample);
       self->sample_keys.emplace_back(uint32_t{0});
     }
+  }
+  
     
-    
-    self->sample_nodes.process(event_list);
-    self->sample_player_nodes.process(event_list);
-  } // while event list
+  self->sample_nodes.process(event_list);
+  self->sample_player_nodes.process(event_list);
 }
 
 void
