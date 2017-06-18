@@ -4,6 +4,8 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
+
 
 
 namespace Nil {
@@ -12,6 +14,8 @@ using generic_callback_fn = void(*)(Nil::Node node, uintptr_t user_data);
 
 namespace Data {
 
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Logic
@@ -30,6 +34,9 @@ struct Logic
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Logic &out);
 
@@ -38,12 +45,30 @@ void
 set(Node &node, const Logic &in);
 
 
+void
+remove_logic(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_logic(const Node &node);
 
 
 uint64_t
 get_type_id(const Logic &in);
+
+
+size_t
+logic_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Logic **out_data, Node **out_node);
 
 
 } // ns

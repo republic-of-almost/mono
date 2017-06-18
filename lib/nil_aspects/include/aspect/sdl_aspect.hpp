@@ -33,16 +33,16 @@ struct Data
 {
   // Window / GL State //
 
-  SDL_Window *sdl_window;
-  SDL_GLContext sdl_gl_context;
+  SDL_Window      *sdl_window;
+  SDL_GLContext   sdl_gl_context;
   
-  Nil::Node window_node;
+  Nil::Node       window_node;
   
   // Input State //
   
   int32_t mouse_delta[2];
   int32_t mouse[2];
-  bool mouse_captured = false;
+  bool    mouse_captured = false;
   
   std::vector<Nil::Node> mouse_input_nodes;
   

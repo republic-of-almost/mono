@@ -11,10 +11,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Gamepad
@@ -29,6 +33,9 @@ struct Gamepad
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Gamepad &out);
 
@@ -37,12 +44,31 @@ void
 set(Node &node, const Gamepad &in);
 
 
+void
+remove_gamepad(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_gamepad(const Node &node);
 
 
 uint64_t
 get_type_id(const Gamepad &in);
+
+
+size_t
+gamepad_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Gamepad **out_data, Node **out_node);
+
 
 
 } // ns

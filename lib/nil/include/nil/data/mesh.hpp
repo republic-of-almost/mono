@@ -4,10 +4,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Mesh
@@ -20,6 +24,9 @@ struct Mesh
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Mesh &out);
 
@@ -28,12 +35,30 @@ void
 set(Node &node, const Mesh &in);
 
 
+void
+remove_window(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_mesh(const Node &node);
 
 
 uint64_t
 get_type_id(const Mesh &in);
+
+
+size_t
+mesh_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Mesh **out_data, Node **out_node);
 
 
 } // ns

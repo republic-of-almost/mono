@@ -21,10 +21,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 namespace Collider_type {
@@ -52,6 +56,8 @@ struct Collider
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
 
 void
 get(const Node &node, Collider &out);
@@ -61,12 +67,31 @@ void
 set(Node &node, const Collider &in);
 
 
+void
+remove_collider(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_collider(const Node &node);
 
 
 uint64_t
 get_type_id(const Collider &in);
+
+
+size_t
+collider_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Collider **out_data, Node **out_node);
+
 
 
 

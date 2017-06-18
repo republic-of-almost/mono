@@ -6,24 +6,35 @@
 #include <lib/utilities.hpp>
 #include "common.hpp"
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
+namespace {
+
+
+// -- Lazy Getter -- //
+Nil::Data::Generic_data<Nil::Data::Mesh_resource>&
+get_mesh_rsrc_data()
+{
+  static Nil::Data::Generic_data<Nil::Data::Mesh_resource> data;
+  return data;
+}
+
+
+} // ns
+
 
 namespace Nil {
 namespace Data {
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Mesh_resource &out)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!getter_helper(
-        node.get_id(),
-        graph->component_data.mesh_resource_node_id,
-        graph->component_data.mesh_resource_data,
-        out))
-  {
-    NIL_DATA_GETTER_ERROR(Mesh_resource)
-  }
+  get_mesh_rsrc_data().get_data(node, out);
 }
 
 
@@ -86,24 +97,24 @@ set(Node &node, const Mesh_resource &in)
     cpy_in.texture_coords_vec2 = in.texture_coords_vec2;
   }
 
-  if(!setter_helper(
-    node,
-    graph->component_data.mesh_resource_node_id,
-    graph->component_data.mesh_resource_data,
-    cpy_in,
-    get_type_id(cpy_in)))
-  {
-    NIL_DATA_SETTER_ERROR(Mesh_resource)
-  }
+  get_mesh_rsrc_data().set_data(node, cpy_in);
 }
+
+
+void
+remove_mesh_resource(Node &node)
+{
+  get_mesh_rsrc_data().remove_data(node);
+}
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
 has_mesh_resource(const Node &node)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-  
-  return has(node.get_id(), graph->component_data.mesh_resource_node_id);
+  return get_mesh_rsrc_data().find(node);
 }
 
 
@@ -111,6 +122,23 @@ uint64_t
 get_type_id(const Mesh_resource &)
 {
   NIL_DATA_TYPE_ID_REG
+}
+
+
+size_t
+mesh_resource_count()
+{
+  return get_mesh_rsrc_data().keys.size();
+}
+
+
+// --------------------------------------------------------------- [ Events ] --
+
+
+void
+events(const uint32_t event, size_t *count, Mesh_resource **out_data, Node **out_node)
+{
+  return get_mesh_rsrc_data().events(event, count, out_data, out_node);
 }
 
 

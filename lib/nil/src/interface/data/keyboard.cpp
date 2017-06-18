@@ -7,12 +7,13 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 namespace {
 
 
 // -- Lazy Getter -- //
-
-
 Nil::Data::Generic_data<Nil::Data::Keyboard>&
 get_kb_data()
 {
@@ -80,7 +81,7 @@ keyboard_count()
 
 
 void
-events(const uint32_t event, size_t *count, Keyboard **out_data = nullptr, Node **out_node = nullptr)
+events(const uint32_t event, size_t *count, Keyboard **out_data, Node **out_node)
 {
   return get_kb_data().events(event, count, out_data, out_node);
 }

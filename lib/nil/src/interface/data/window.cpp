@@ -9,12 +9,13 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 namespace {
 
 
 // -- Lazy Getter -- //
-
-
 Nil::Data::Generic_data<Nil::Data::Window>&
 get_win_data()
 {
@@ -82,7 +83,7 @@ window_count()
 
 
 void
-events(const uint32_t event, size_t *count, Window **out_data = nullptr, Node **out_node = nullptr)
+events(const uint32_t event, size_t *count, Window **out_data, Node **out_node)
 {
   return get_win_data().events(event, count, out_data, out_node);
 }

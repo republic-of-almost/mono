@@ -7,49 +7,59 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
+namespace {
+
+
+// -- Lazy Getter -- //
+Nil::Data::Generic_data<Nil::Data::Mesh>&
+get_mesh_data()
+{
+  static Nil::Data::Generic_data<Nil::Data::Mesh> data;
+  return data;
+}
+
+
+} // ns
+
+
 namespace Nil {
 namespace Data {
+
+
+// -------------------------------------------------------------- [ Get/Set ] --
 
 
 void
 get(const Node &node, Mesh &out)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!getter_helper(
-        node.get_id(),
-        graph->component_data.mesh_node_id,
-        graph->component_data.mesh_data,
-        out))
-  {
-    NIL_DATA_GETTER_ERROR(Mesh)
-  }
+  get_mesh_data().get_data(node, out);
 }
 
 
 void
 set(Node &node, const Mesh &in)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!setter_helper(
-    node,
-    graph->component_data.mesh_node_id,
-    graph->component_data.mesh_data,
-    in,
-    get_type_id(in)))
-  {
-    NIL_DATA_SETTER_ERROR(Mesh)
-  }
+  get_mesh_data().set_data(node, in);
 }
+
+
+void
+remove_mesh(Node &node)
+{
+  get_mesh_data().remove_data(node);
+}
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
 has_mesh(const Node &node)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-  
-  return has(node.get_id(), graph->component_data.mesh_node_id);
+  return get_mesh_data().find(node);
 }
 
 
@@ -57,6 +67,23 @@ uint64_t
 get_type_id(const Mesh &)
 {
   NIL_DATA_TYPE_ID_REG
+}
+
+
+size_t
+mesh_count()
+{
+  return get_mesh_data().keys.size();
+}
+
+
+// --------------------------------------------------------------- [ Events ] --
+
+
+void
+events(const uint32_t event, size_t *count, Mesh **out_data, Node **out_node)
+{
+  return get_mesh_data().events(event, count, out_data, out_node);
 }
 
 

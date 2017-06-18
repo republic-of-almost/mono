@@ -11,6 +11,9 @@ namespace Nil {
 namespace Data {
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 struct Texture_resource
 {
   uint32_t id;
@@ -26,6 +29,9 @@ struct Texture_resource
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Texture_resource &out);
 
@@ -34,12 +40,30 @@ void
 set(Node &node, const Texture_resource &in);
 
 
+void
+remove_texture_resource(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_texture_resource(const Node &node);
 
 
 uint64_t
 get_type_id(const Texture_resource &in);
+
+
+size_t
+texture_resource_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Texture_resource **out_data, Node **out_node);
 
 
 } // ns

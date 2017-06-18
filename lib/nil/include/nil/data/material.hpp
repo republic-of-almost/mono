@@ -4,10 +4,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Material
@@ -24,6 +28,9 @@ struct Material
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Material &out);
 
@@ -32,12 +39,30 @@ void
 set(Node &node, const Material &in);
 
 
+void
+remove_window(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_material(const Node &node);
 
 
 uint64_t
 get_type_id(const Material &in);
+
+
+size_t
+material_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Material **out_data, Node **out_node);
 
 
 } // ns

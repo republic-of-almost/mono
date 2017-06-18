@@ -7,12 +7,13 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 namespace {
 
 
 // -- Lazy Getter -- //
-
-
 Nil::Data::Generic_data<Nil::Data::Mouse>&
 get_ms_data()
 {
@@ -76,11 +77,11 @@ mouse_count()
 }
 
 
-// ------------------------------------------------------- [ Updated Events ] --
+// --------------------------------------------------------------- [ Events ] --
 
 
 void
-events(const uint32_t event, size_t *count, Mouse **out_data = nullptr, Node **out_node = nullptr)
+events(const uint32_t event, size_t *count, Mouse **out_data, Node **out_node)
 {
   return get_ms_data().events(event, count, out_data, out_node);
 }

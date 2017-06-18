@@ -7,49 +7,56 @@
 #include "common.hpp"
 
 
+namespace {
+
+
+// -- Lazy Getter -- //
+Nil::Data::Generic_data<Nil::Data::Audio_resource>&
+get_audio_rsrc_data()
+{
+  static Nil::Data::Generic_data<Nil::Data::Audio_resource> data;
+  return data;
+}
+
+
+} // ns
+
+
 namespace Nil {
 namespace Data {
+
+
+// -------------------------------------------------------------- [ Get/Set ] --
 
 
 void
 get(const Node &node, Audio_resource &out)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!getter_helper(
-        node.get_id(),
-        graph->component_data.audio_resource_node_id,
-        graph->component_data.audio_resource_data,
-        out))
-  {
-    NIL_DATA_GETTER_ERROR(Audio_resource)
-  }
+  get_audio_rsrc_data().get_data(node, out);
 }
 
 
 void
 set(Node &node, const Audio_resource &in)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!setter_helper(
-    node,
-    graph->component_data.audio_resource_node_id,
-    graph->component_data.audio_resource_data,
-    in,
-    get_type_id(in)))
-  {
-    NIL_DATA_SETTER_ERROR(Audio_resource)
-  }
+  get_audio_rsrc_data().set_data(node, in);
 }
+
+
+void
+remove_audio_resource(Node &node)
+{
+  get_audio_rsrc_data().remove_data(node);
+}
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
 has_audio_resource(const Node &node)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-  
-  return has(node.get_id(), graph->component_data.audio_resource_node_id);
+  return get_audio_rsrc_data().find(node);
 }
 
 
@@ -58,6 +65,24 @@ get_type_id(const Audio_resource &)
 {
   NIL_DATA_TYPE_ID_REG
 }
+
+
+size_t
+audio_resource_count()
+{
+  return get_audio_rsrc_data().keys.size();
+}
+
+
+// --------------------------------------------------------------- [ Events ] --
+
+
+void
+events(const uint32_t event, size_t *count, Audio_resource **out_data, Node **out_node)
+{
+  return get_audio_rsrc_data().events(event, count, out_data, out_node);
+}
+
 
 
 } // ns

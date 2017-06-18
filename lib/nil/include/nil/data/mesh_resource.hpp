@@ -16,6 +16,9 @@ namespace Nil {
 namespace Data {
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 struct Mesh_resource
 {
   uint32_t id;
@@ -30,6 +33,9 @@ struct Mesh_resource
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Mesh_resource &mesh);
 
@@ -38,12 +44,31 @@ void
 set(Node &node, const Mesh_resource &mesh);
 
 
+void
+remove_mesh_resource(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
+
 bool
 has_mesh_resource(const Node &node);
 
 
 uint64_t
 get_type_id(const Mesh_resource &mesh);
+
+
+size_t
+mesh_resource_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Mesh_resource **out_data, Node **out_node);
 
 
 } // ns

@@ -11,6 +11,9 @@ namespace Nil {
 namespace Data {
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 namespace Texture_filtering {
 enum ENUM {
 
@@ -33,6 +36,9 @@ struct Texture
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Texture &out);
 
@@ -41,12 +47,30 @@ void
 set(Node &node, const Texture &in);
 
 
+void
+remove_texture(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_texture(const Node &node);
 
 
 uint64_t
 get_type_id(const Texture &in);
+
+
+size_t
+texture_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Texture **out_data, Node **out_node);
 
 
 } // ns

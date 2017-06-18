@@ -4,10 +4,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Camera
@@ -28,6 +32,9 @@ struct Camera
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Camera &out);
 
@@ -36,12 +43,30 @@ void
 set(Node &node, const Camera &in);
 
 
+void
+remove_camera(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_camera(const Node &node);
 
 
 uint64_t
 get_type_id(const Camera &in);
+
+
+size_t
+camera_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Camera **out_data, Node **out_node);
 
 
 } // ns

@@ -10,10 +10,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Developer
@@ -26,6 +30,9 @@ struct Developer
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Developer &out);
 
@@ -34,12 +41,30 @@ void
 set(Node &node, const Developer &in);
 
 
+void
+remove_developer(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_developer(const Node &node);
 
 
 uint64_t
 get_type_id(const Developer &in);
+
+
+size_t
+developer_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Developer **out_data, Node **out_node);
 
 
 } // ns

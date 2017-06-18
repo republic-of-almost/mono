@@ -15,10 +15,14 @@
 
 #include <nil/fwd.hpp>
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
 namespace Data {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Graphics
@@ -30,6 +34,9 @@ struct Graphics
 };
 
 
+// -------------------------------------------------------------- [ Get/Set ] --
+
+
 void
 get(const Node &node, Graphics &out);
 
@@ -38,12 +45,30 @@ void
 set(Node &node, const Graphics &in);
 
 
+void
+remove_graphics(Node &node);
+
+
+// ----------------------------------------------------------------- [ Info ] --
+
+
 bool
 has_graphics(const Node &node);
 
 
 uint64_t
 get_type_id(const Graphics &in);
+
+
+size_t
+graphics_count();
+
+
+// ---------------------------------------------------------- [ Data Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Graphics **out_data, Node **out_node);
 
 
 } // ns

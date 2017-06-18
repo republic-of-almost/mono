@@ -43,72 +43,6 @@ struct Event
 };
 
 
-/*
-  TODO:
-  Break this up, have data register with the graph.
-  This means we could expose it to add any type of data.
-*/
-struct Component_data
-{
-  lib::array<uint32_t>                    audio_node_id;
-  lib::array<Nil::Data::Audio>            audio_data;
-  
-  lib::array<uint32_t>                    audio_resource_node_id;
-  lib::array<Nil::Data::Audio_resource>   audio_resource_data;
-
-  lib::array<uint32_t>                    camera_node_id;
-  lib::array<Nil::Data::Camera>           camera_data;
-  
-  lib::array<uint32_t>                    collider_node_id;
-  lib::array<Nil::Data::Collider>         collider_data;
-
-  lib::array<uint32_t>                    developer_node_id;
-  lib::array<Nil::Data::Developer>        developer_data;
-
-  lib::array<uint32_t>                    gamepad_node_id;
-  lib::array<Nil::Data::Gamepad>          gamepad_data;
-
-  lib::array<uint32_t>                    graphics_node_id;
-  lib::array<Nil::Data::Graphics>         graphics_data;
-  
-//  lib::array<uint32_t>                    keyboard_node_id;
-//  lib::array<Nil::Data::Keyboard>         keyboard_data;
-
-  lib::array<uint32_t>                    light_node_id;
-  lib::array<Nil::Data::Light>            light_data;
-
-  lib::array<uint32_t>                    logic_node_id;
-  lib::array<Nil::Data::Logic>            logic_data;
-
-  lib::array<uint32_t>                    material_node_id;
-  lib::array<Nil::Data::Material>         material_data;
-  
-  lib::array<uint32_t>                    mesh_node_id;
-  lib::array<Nil::Data::Mesh>             mesh_data;
-
-  lib::array<uint32_t>                    mesh_resource_node_id;
-  lib::array<Nil::Data::Mesh_resource>    mesh_resource_data;
-
-//  lib::array<uint32_t>                    mouse_node_id;
-//  lib::array<Nil::Data::Mouse>            mouse_data;
- 
-  lib::array<uint32_t>                    resource_node_id;
-  lib::array<Nil::Data::Resource>         resource_data;
-
-  lib::array<uint32_t>                    rigidbody_node_id;
-  lib::array<Nil::Data::Rigidbody>        rigidbody_data;
-  
-  lib::array<uint32_t>                    texture_node_id;
-  lib::array<Nil::Data::Texture>          texture_data;
-
-  lib::array<uint32_t>                    texture_resource_node_id;
-  lib::array<Nil::Data::Texture_resource> texture_resource_data;
-  
-//  lib::array<uint32_t>                    window_node_id;
-//  lib::array<Nil::Data::Window>           window_data;
-};
-
-
 struct Data
 {
   // -- Graph -- //
@@ -128,9 +62,6 @@ struct Data
   
   // -- Events -- //
   lib::array<Event>           node_events;        // When changes happen.
-
-  // -- Data -- //
-  Component_data              component_data;
 
   // -- Other -- //
   uint64_t                    graph_tick;

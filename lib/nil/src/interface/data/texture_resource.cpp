@@ -7,57 +7,59 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
+namespace {
+
+
+// -- Lazy Getter -- //
+Nil::Data::Generic_data<Nil::Data::Texture_resource>&
+get_texture_rsrc_data()
+{
+  static Nil::Data::Generic_data<Nil::Data::Texture_resource> data;
+  return data;
+}
+
+
+} // ns
+
+
 namespace Nil {
 namespace Data {
+
+
+// -------------------------------------------------------------- [ Get/Set ] --
 
 
 void
 get(const Node &node, Texture_resource &out)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!getter_helper(
-        node.get_id(),
-        graph->component_data.texture_resource_node_id,
-        graph->component_data.texture_resource_data,
-        out))
-  {
-    NIL_DATA_GETTER_ERROR(Texture_resource)
-  }
+  get_texture_rsrc_data().get_data(node, out);
 }
 
 
 void
 set(Node &node, const Texture_resource &in)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  Texture_resource cpy = in;
-  
-  // Copy The data
-  uint8_t *cpy_data = (uint8_t*)malloc(in.sizeof_data);
-  memcpy(cpy_data, in.data, in.sizeof_data);
-  
-  cpy.data = cpy_data;
-
-  if(!setter_helper(
-    node,
-    graph->component_data.texture_resource_node_id,
-    graph->component_data.texture_resource_data,
-    in,
-    get_type_id(cpy)))
-  {
-    NIL_DATA_SETTER_ERROR(Texture_resource)
-  }
+  get_texture_rsrc_data().set_data(node, in);
 }
+
+
+void
+remove_texture_resource(Node &node)
+{
+  get_texture_rsrc_data().remove_data(node);
+}
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
 has_texture_resource(const Node &node)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-  
-  return has(node.get_id(), graph->component_data.texture_resource_node_id);
+  return get_texture_rsrc_data().find(node);
 }
 
 
@@ -65,6 +67,23 @@ uint64_t
 get_type_id(const Texture_resource &)
 {
   NIL_DATA_TYPE_ID_REG
+}
+
+
+size_t
+texture_resource_count()
+{
+  return get_texture_rsrc_data().keys.size();
+}
+
+
+// --------------------------------------------------------------- [ Events ] --
+
+
+void
+events(const uint32_t event, size_t *count, Texture_resource **out_data, Node **out_node)
+{
+  return get_texture_rsrc_data().events(event, count, out_data, out_node);
 }
 
 

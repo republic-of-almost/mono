@@ -7,49 +7,59 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
+namespace {
+
+
+// -- Lazy Getter -- //
+Nil::Data::Generic_data<Nil::Data::Developer>&
+get_developer_data()
+{
+  static Nil::Data::Generic_data<Nil::Data::Developer> data;
+  return data;
+}
+
+
+} // ns
+
+
 namespace Nil {
 namespace Data {
+
+
+// -------------------------------------------------------------- [ Get/Set ] --
 
 
 void
 get(const Node &node, Developer &out)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!getter_helper(
-        node.get_id(),
-        graph->component_data.developer_node_id,
-        graph->component_data.developer_data,
-        out))
-  {
-    NIL_DATA_GETTER_ERROR(Developer)
-  }
+  get_developer_data().get_data(node, out);
 }
 
 
 void
 set(Node &node, const Developer &in)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-
-  if(!setter_helper(
-    node,
-    graph->component_data.developer_node_id,
-    graph->component_data.developer_data,
-    in,
-    get_type_id(in)))
-  {
-    NIL_DATA_SETTER_ERROR(Developer)
-  }
+  get_developer_data().set_data(node, in);
 }
+
+
+void
+remove_developer(Node &node)
+{
+  get_developer_data().remove_data(node);
+}
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
 has_developer(const Node &node)
 {
-  NIL_DATA_GETTER_SETTER_HAS_SETUP
-  
-  return has(node.get_id(), graph->component_data.developer_node_id);
+  return get_developer_data().find(node);
 }
 
 
@@ -57,6 +67,23 @@ uint64_t
 get_type_id(const Developer &)
 {
   NIL_DATA_TYPE_ID_REG
+}
+
+
+size_t
+developer_count()
+{
+  return get_developer_data().keys.size();
+}
+
+
+// --------------------------------------------------------------- [ Events ] --
+
+
+void
+events(const uint32_t event, size_t *count, Developer **out_data, Node **out_node)
+{
+  return get_developer_data().events(event, count, out_data, out_node);
 }
 
 

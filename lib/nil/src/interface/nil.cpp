@@ -224,7 +224,6 @@ void
 Engine::get_state(Engine_state &out)
 {
   const Graph::Data *graph = Data::get_graph_data();
-  const Graph::Component_data *data = &graph->component_data;
   
   /*
     Events
@@ -237,24 +236,6 @@ Engine::get_state(Engine_state &out)
   */
   out.node_count              = Graph::node_descendants_count(graph, 0);
   out.bounding_box_count      = out.node_count;
-  out.camera_count            = data->camera_node_id.size();
-  out.collider_count          = data->collider_node_id.size();
-  out.developer_count         = data->developer_node_id.size();
-  out.gamepad_count           = data->gamepad_node_id.size();
-  out.graphics_count          = data->graphics_node_id.size();
-//  out.keyboard_count          = data->keyboard_node_id.size();
-  out.light_count             = data->light_node_id.size();
-  out.logic_count             = data->logic_node_id.size();
-  out.material_count          = data->material_node_id.size();
-  out.mesh_count              = data->mesh_node_id.size();
-  out.mesh_resource_count     = data->mesh_resource_node_id.size();
-//  out.mouse_count             = data->mouse_node_id.size();
-  out.resouce_count           = data->resource_node_id.size();
-  out.rigidbody_count         = data->rigidbody_node_id.size();
-  out.texture_count           = data->texture_node_id.size();
-  out.texture_resource_count  = data->texture_resource_node_id.size();
-  out.transform_count         = out.node_count;
-//  out.window_count            = data->window_node_id.size();
 }
 
 
