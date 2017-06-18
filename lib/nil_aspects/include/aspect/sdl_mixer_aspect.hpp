@@ -9,7 +9,6 @@
 #endif
 
 #include <lib/array.hpp>
-#include <nil/node_controller.hpp>
 #include <nil/node.hpp>
 #include <vector>
 
@@ -26,10 +25,7 @@ struct Data
   lib::array<uint32_t> sample_keys;
   lib::array<Mix_Chunk*, 64>  samples;
   lib::array<uint32_t>    channels;
-  
-  Nil::Node_controller sample_nodes;
-  Nil::Node_controller sample_player_nodes;
-  
+    
   bool initialized = false;
   
   // Debug UI //

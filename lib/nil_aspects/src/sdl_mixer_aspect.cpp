@@ -119,25 +119,6 @@ start_up(
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-
-  // Register for data types.
-  {
-    aspect.data_types = 0;
-    aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Audio{});
-    aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Audio_resource{});
-    
-    // only used to idicate HW is ready.
-    aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Graphics{});
-  }
-  
-  // Create Node Controllers
-  {
-    Nil::Node_controller players(Nil::Data::get_type_id(Nil::Data::Audio{}));
-    self->sample_player_nodes = static_cast<Nil::Node_controller&&>(players);
-    
-    Nil::Node_controller samples(Nil::Data::get_type_id(Nil::Data::Audio_resource{}));
-    self->sample_nodes = static_cast<Nil::Node_controller&&>(samples);
-  }
   
   #ifndef NIMGUI
   {
@@ -208,10 +189,6 @@ events(
       self->sample_keys.emplace_back(uint32_t{0});
     }
   }
-  
-    
-  self->sample_nodes.process(event_list);
-  self->sample_player_nodes.process(event_list);
 }
 
 void
@@ -221,151 +198,8 @@ late_think(
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
+
   
-  rmt_ScopedCPUSample(SDLMixer_LateThink, 0);
-  
-  /*
-    Load any samples
-  */
-  for(auto &samp : self->sample_nodes.added())
-  {
-    {
-      Nil::Node node = Nil::Node(samp.get_id());
-    
-      Nil::Data::Audio_resource data{};
-      
-      Nil::Data::get(node, data);
-    
-      Mix_Chunk *chunk = Mix_LoadWAV(data.filename);
-      
-      if(!chunk)
-      {
-        LOG_ERROR("Failed to load audio file");
-        break;
-      }
-    
-      self->samples.emplace_back(chunk);
-      self->sample_keys.emplace_back(samp.get_id());
-      
-      data.id = samp.get_id();
-      Nil::Data::set(node, data);
-    }
-  }
-  
-  /*
-    Any channels that have finished playing we can clear
-  */
-  for(auto &chan : channels_finished)
-  {
-    const uint32_t chan_details = self->channels[chan];
-    self->channels[chan] = 0;
-    
-    Nil::Node node(lib::entity::instance(chan_details));
-    Nil::Data::Audio data{};
-    Nil::Data::get(node, data);
-    
-    data.channel_id = 0;
-    data.current_state = Nil::Data::Audio::STOPPED;
-    Nil::Data::set(node, data);
-  }
-  
-  channels_finished.clear();
-  
-  /*
-    Remove data
-  */
-  {
-    Nil::Node_list remove_players = self->sample_player_nodes.removed();
-  }
-  
-  /*
-    Update or insert new data
-  */
-  {
-    Nil::Node_list players = self->sample_player_nodes.updated_and_added();
-    
-    for(auto &node : players)
-    {
-      LIB_ASSERT(Nil::Data::has_audio(node));
-    
-      Nil::Data::Audio audio{};
-      Nil::Data::get(node, audio);
-      
-      const uint32_t curr_state = audio.current_state;
-      const uint32_t req_state  = audio.request_state;
-      
-      if(req_state  == Nil::Data::Audio::PLAY &&
-         curr_state != Nil::Data::Audio::PLAYING)
-      {
-        /*
-          Search for an available channel
-        */
-        for(uint32_t i = 0; i < self->channels.size(); ++i)
-        {
-          if(self->channels[i] == 0)
-          {
-            // -- Find Sample -- //
-            size_t sample = 0;
-            {
-              const uint32_t sample_key = audio.audio_id;
-              
-              if(!lib::key::linear_search(
-                sample_key,
-                self->sample_keys.data(),
-                self->sample_keys.size(),
-                &sample))
-              {
-                LOG_WARNING("Failed to find audio");
-              }
-            }
-          
-            // -- Volume -- //
-            {
-              const float volume = (float)MIX_MAX_VOLUME * audio.volume;
-              Mix_Volume(i, (int)volume);
-            }
-            
-            // -- Play Channel -- //
-            {
-              const int loop = audio.loop ? -1 : 0;
-            
-              Mix_Chunk *chunk = self->samples[sample];
-              Mix_PlayChannel(i, chunk, loop);
-              
-              audio.channel_id = i + 1;
-            }
-            
-            // Set the channel data.
-            self->channels[i] = lib::entity::create(1, node.get_id());
-            audio.current_state = Nil::Data::Audio::PLAYING;
-            
-            break;
-          }
-        }
-        
-        audio.request_state = Nil::Data::Audio::NO_REQ_STATE;
-        Nil::Data::set(node, audio);
-      }
-      else if(audio.channel_id)
-      {
-        const float volume = (float)MIX_MAX_VOLUME * audio.volume;
-        Mix_Volume(audio.channel_id - 1, volume);
-      }
-    }
-  }
-  
-  /*
-    Update or insert new data
-  */
-  {
-    Nil::Node_list audio = self->sample_nodes.updated_and_added();
-    
-    for(auto &node : audio)
-    {
-      LIB_ASSERT(Nil::Data::has_audio_resource(node));
-    
-    }
-  }
 }
 
 

@@ -54,6 +54,10 @@ uint64_t
 get_type_id(const Audio &in);
 
 
+size_t
+audio_count();
+
+
 // ---------------------------------------------------------- [ Data Events ] --
 
 

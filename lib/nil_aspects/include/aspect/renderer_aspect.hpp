@@ -4,7 +4,6 @@
 
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
-#include <nil/node_controller.hpp>
 #include <math/math.hpp>
 #include <lib/utilities.hpp>
 #include <vector>
@@ -25,9 +24,6 @@ namespace ROV_Aspect {
 
 struct Data
 {
-  Nil::Node_controller        renderable_nodes;
-  Nil::Node_controller        camera_nodes;
-
   uint32_t current_viewport[2];
 
   // Meshes //

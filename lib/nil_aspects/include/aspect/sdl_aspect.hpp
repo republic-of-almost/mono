@@ -9,7 +9,6 @@
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
-#include <nil/node_controller.hpp>
 #include <SDL2/SDL.h>
 #include <vector>
 
