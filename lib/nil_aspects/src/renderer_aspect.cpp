@@ -249,6 +249,24 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
   Nil::Event_data evt;
 
   event_list.reset();
+  
+  
+  /*
+    Updated Window
+  */
+  {
+    size_t count = 0;
+    Nil::Data::Window *win;
+    
+    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &win, nullptr);
+    
+    if(count)
+    {
+      /* We operate on 1 window idea so grab the first */
+      self->current_viewport[0] = win[0].width;
+      self->current_viewport[1] = win[1].height;
+    }
+  }
 
   while(event_list.get(evt))
   {

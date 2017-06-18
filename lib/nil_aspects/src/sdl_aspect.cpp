@@ -50,23 +50,14 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 
-  Nil::Node_controller mouse_input(Nil::Data::get_type_id(Nil::Data::Mouse{}));
-  self->mouse_input_nodes = static_cast<Nil::Node_controller&&>(mouse_input);
-
-  self->sdl_window = nullptr;
-  self->sdl_gl_context = nullptr;
-  self->window_node = Nil::Node(nullptr);
-
-  aspect.data_types = 0;
-  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Window{});
-  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Mouse{});
-  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Keyboard{});
-  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Gamepad{});
+  self->sdl_window      = nullptr;
+  self->sdl_gl_context  = nullptr;
+  self->window_node     = Nil::Node(nullptr);
 
   #ifdef IMGUI_DEVELOPER_SUPPORT
-  self->sdl_show_info = false;
-  self->sdl_show_settings = false;
-  self->sdl_show_raw_input = false;
+  self->sdl_show_info       = false;
+  self->sdl_show_settings   = false;
+  self->sdl_show_raw_input  = false;
   #endif
 }
 
@@ -76,67 +67,99 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-
-  Nil::Event_data evt;
   
-  
-  size_t added_windows = 0;
-  Nil::Data::Window *windows = nullptr;
-  Nil::Node *nodes = nullptr;
-
-  Nil::Data::events(Nil::Data::Event::ADDED, &added_windows, &windows, &nodes);
-  
-  if(nodes && !self->window_node)
+  // Added Windows
   {
-    self->window_node = nodes[0];
-  }
-  
-  
-  while(event_list.get(evt))
-  {
-    Nil::Node node = Nil::Event::node(evt);
-
-    if(Nil::Data::has_window(node))
+    if(!self->window_node)
     {
-      const bool valid_window_node = self->window_node;
-      const bool updating_current  = self->window_node == node;
-
-      if(!valid_window_node || updating_current)
+      size_t count = 0;
+      Nil::Data::Window *data = nullptr;
+      Nil::Node *nodes;
+      
+      Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &nodes);
+      
+      if(nodes)
       {
-        self->window_node = node;
-      }
-      else
-      {
-        LOG_ERROR("SDL Aspect only supports one node with a window.")
-      }
-    }
-
-    if(Nil::Data::has_keyboard(node))
-    {
-      Nil::Data::Keyboard kb_data{};
-      Nil::Data::get(node, kb_data);
-
-      kb_data.key_state = self->keys;
-      kb_data.key_count = Nil::Data::KeyCode::COUNT;
-
-      Nil::Data::set(node, kb_data);
-    }
-
-    if(Nil::Data::has_mouse(node))
-    {
-      Nil::Data::Mouse mouse{};
-      Nil::Data::get(node, mouse);
-
-      if(self->mouse_captured != mouse.capture)
-      {
-        self->mouse_captured = mouse.capture;
-
-        SDL_SetRelativeMouseMode(mouse.capture ? SDL_TRUE : SDL_FALSE);
+        self->window_node = nodes[0];
       }
     }
   }
+  
+  // Modified Windows
+  {
+    if(self->window_node)
+    {
+      size_t count = 0;
+      Nil::Data::Window *data = nullptr;
+      Nil::Node *nodes;
+      
+      Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &nodes);
+      
+      if(nodes)
+      {
+        SDL_SetWindowTitle(self->sdl_window, data[0].title);
+        SDL_SetWindowSize(self->sdl_window, data[0].width, data[0].height);
+        SDL_SetWindowFullscreen(self->sdl_window, data[0].fullscreen ? fullscreen_mode : 0);
+        
+      }
+    }
+  }
+  
+  // Added Keyboards
+  {
+    size_t count = 0;
+    Nil::Data::Keyboard *data = nullptr;
+    Nil::Node *nodes;
+    
+    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &nodes);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      data[i].key_state = self->keys;
+      data[i].key_count = Nil::Data::KeyCode::COUNT;
+      
+      Nil::Data::set(nodes[i], data[i]);
+    }
+  }
+  
+  // Added Mice
+  {
+    size_t count = 0;
+    Nil::Data::Mouse *data = nullptr;
+    Nil::Node *nodes;
+    
+    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &nodes);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      if(self->mouse_captured != data[i].capture)
+      {
+        self->mouse_captured = data[i].capture;
+        self->mouse_input_nodes.emplace_back(nodes[i]);
 
-  self->mouse_input_nodes.process(event_list);
+        SDL_SetRelativeMouseMode(data[i].capture ? SDL_TRUE : SDL_FALSE);
+      }
+    }
+  }
+  
+  // Modified Mice
+  {
+    size_t count = 0;
+    Nil::Data::Mouse *data = nullptr;
+    Nil::Node *nodes;
+    
+    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &nodes);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      if(self->mouse_captured != data[i].capture)
+      {
+        self->mouse_captured = data[i].capture;
+
+        SDL_SetRelativeMouseMode(data[i].capture ? SDL_TRUE : SDL_FALSE);
+      }
+    }
+  }
 }
 
 
@@ -300,7 +323,6 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 
-
   if(self->window_node.is_valid())
   {
     Nil::Data::Window window_data;
@@ -328,8 +350,8 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         #ifdef __EMSCRIPTEN__
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         #endif
@@ -475,14 +497,6 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       SDL_Event evt;
       while (SDL_PollEvent(&evt)) {}
     }
-
-    // Else resize
-    else
-    {
-      SDL_SetWindowTitle(self->sdl_window, window_data.title);
-      SDL_SetWindowSize(self->sdl_window, window_data.width, window_data.height);
-      SDL_SetWindowFullscreen(self->sdl_window, window_data.fullscreen ? fullscreen_mode : 0);
-    }
   }
 
   // Update nodes
@@ -493,9 +507,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   {
     LOG_TODO_ONCE("Data last set thing");
 
-    Nil::Node_list input_nodes = self->mouse_input_nodes.all();
-
-    for(Nil::Node &node : input_nodes)
+    for(Nil::Node &node : self->mouse_input_nodes)
     {
       if(Nil::Data::has_mouse(node))
       {

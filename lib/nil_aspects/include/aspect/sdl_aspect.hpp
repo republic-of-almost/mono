@@ -44,9 +44,7 @@ struct Data
   int32_t mouse[2];
   bool mouse_captured = false;
   
-  std::vector<Nil::Node> keyboard_input_nodes;
-  
-  Nil::Node_controller mouse_input_nodes;
+  std::vector<Nil::Node> mouse_input_nodes;
   
   uint32_t keys[Nil::Data::KeyCode::COUNT];
   
