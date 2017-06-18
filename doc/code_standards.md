@@ -14,7 +14,7 @@ The rule of thumb is use what you _need_.
   - Data over Code.
   - Stack allocations.
   - Clear ownership semantics.
-  - Defined ctors/dtors even if empty.
+  - Defined ctors/dtors even if empty for classes.
 
 ### Discouraged
 
