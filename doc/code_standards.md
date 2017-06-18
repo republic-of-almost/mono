@@ -1,7 +1,7 @@
 # Code Standards
 
-Each project defines its standards based on its own constraints. These are only
-rules of thumbs.
+Each project defines its standards based on its own constraints. These are
+solution wide rules of thumbs.
 
 ## Rule of Thumbs
 
@@ -15,6 +15,9 @@ The rule of thumb is use what you _need_.
   - Stack allocations.
   - Clear ownership semantics.
   - Defined ctors/dtors even if empty for classes.
+  - 80 Character width.
+  - tabs set to spaces, and tab length set to 2.
+  - Pass of allocations to calling code.
 
 ### Discouraged
 
