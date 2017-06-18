@@ -18,9 +18,10 @@ table.insert(
     },
 
     src_files = {
-      make.add_headers(make.get_proj_root()),
-      make.add_src(make.get_proj_root()),
-      make.add_doc(make.get_proj_root()),
+      make.add_headers(make.get_proj_root() .. "../test/"),
+      make.add_headers(make.get_proj_root() .. "../test/"),
+      --
+      make.add_doc(make.get_proj_root() .. "../test/"),
     },
 
     inc_dirs = {

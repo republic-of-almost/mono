@@ -13,9 +13,6 @@ namespace Nil_ext {
 namespace Logic_aspect {
 
 
-
-
-
 // ---------------------------------------------------- [ Logic Aspect Data ] --
 
 

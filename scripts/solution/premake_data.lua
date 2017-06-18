@@ -18,11 +18,11 @@ end
 function
 make.add_src(dir)
   return {
-    dir .. "../**.cpp",
-    dir .. "../**.cc",
-    dir .. "../**.mm",
-    dir .. "../**.c",
-    dir .. "../**.m",
+    dir .. "**.cpp",
+    dir .. "**.cc",
+    dir .. "**.mm",
+    dir .. "**.c",
+    dir .. "**.m",
   }
 end
 
@@ -31,9 +31,9 @@ end
 function
 make.add_headers(dir)
   return {
-    dir .. "../**.hpp",
-    dir .. "../**.hh",
-    dir .. "../**.h",
+    dir .. "**.hpp",
+    dir .. "**.hh",
+    dir .. "**.h",
   }
 end
 
@@ -42,8 +42,8 @@ end
 function
 make.add_doc(dir)
   return {
-    dir .. "../**.txt",
-    dir .. "../**.md",
+    dir .. "**.txt",
+    dir .. "**.md",
   }
 end
 
