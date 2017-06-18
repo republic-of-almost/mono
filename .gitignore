@@ -1,5 +1,6 @@
 output/
-
+assets/
+media_masters/
 
 # -- General C++ --#
 # https://github.com/github/gitignore
