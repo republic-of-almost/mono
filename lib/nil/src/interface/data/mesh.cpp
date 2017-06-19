@@ -66,7 +66,7 @@ has_mesh(const Node &node)
 uint64_t
 get_type_id(const Mesh &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_mesh_data().type_id;
 }
 
 

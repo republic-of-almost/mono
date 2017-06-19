@@ -66,7 +66,7 @@ has_audio(const Node &node)
 uint64_t
 get_type_id(const Audio &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_audio_data().type_id;
 }
 
 

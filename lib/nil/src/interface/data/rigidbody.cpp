@@ -66,7 +66,7 @@ has_rigidbody(const Node &node)
 uint64_t
 get_type_id(const Rigidbody &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_rb_data().type_id;
 }
 
 

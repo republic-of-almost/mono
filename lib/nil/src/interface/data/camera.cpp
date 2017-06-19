@@ -66,7 +66,7 @@ has_camera(const Node &node)
 uint64_t
 get_type_id(const Camera &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_camera_data().type_id;
 }
 
 

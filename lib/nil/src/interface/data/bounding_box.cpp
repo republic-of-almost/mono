@@ -68,6 +68,7 @@ has_bounding_box(const Node &)
 uint64_t
 get_type_id(const Bounding_box &)
 {
+  LIB_ASSERT(false); // this type id is wrong see transform what todo.
   NIL_DATA_TYPE_ID_REG
 }
 

@@ -64,7 +64,7 @@ has_collider(const Node &node)
 uint64_t
 get_type_id(const Collider &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_collider_data().type_id;
 }
 
 

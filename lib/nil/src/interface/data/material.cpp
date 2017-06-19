@@ -69,7 +69,7 @@ has_material(const Node &node)
 uint64_t
 get_type_id(const Material &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_mat_data().type_id;
 }
 
 
