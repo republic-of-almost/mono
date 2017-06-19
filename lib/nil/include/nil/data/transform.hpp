@@ -33,6 +33,10 @@ void
 set(Node &node, const Transform &in);
 
 
+// You cannot remove a transform
+// Hense why no function.
+
+
 // ----------------------------------------------------------------- [ Info ] --
 
 
@@ -52,7 +56,7 @@ transform_count();
 
 
 void
-events(const uint32_t data, size_t *count, Transform **out_data = nullptr, Node **out_node = nullptr);
+events(const uint32_t data, size_t *count, Transform **out_data, Node **out_node);
 
 
 } // ns

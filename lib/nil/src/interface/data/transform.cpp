@@ -21,7 +21,6 @@ struct Transform_data
       nullptr,
       nullptr,
       nullptr,
-      
       (uintptr_t)this,
       0
     );
@@ -125,6 +124,7 @@ get_type_id(const Transform &)
 void
 events(const uint32_t data, size_t *count, Transform **out_data, Node **out_node)
 {
+  LIB_ASSERT(false); // Not impl'd unsure if needed right now!
 }
 
 

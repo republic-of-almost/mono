@@ -693,6 +693,12 @@ data_register_type(
 void
 data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendents)
 {
+  /*
+    Further Work.
+    Instead of spamming all the callbacks we should check here if a node has the
+    type id and selectivly call the callbacks.
+  */
+
   // -- Param Check -- //
   LIB_ASSERT(graph);
   
@@ -715,7 +721,11 @@ data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, 
     }
   }
   
-  
+  /*
+    Call update on the children
+    This is only really needed for inherited things like transforms
+    and bounding boxes. Perhaps colliders as well.
+  */
   if(decendents)
   {
     const size_t decendents_count = Graph::node_descendants_count(graph, node_id);
