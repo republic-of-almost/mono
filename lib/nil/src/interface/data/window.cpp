@@ -68,7 +68,7 @@ has_window(const Node &node)
 uint64_t
 get_type_id(const Window &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_win_data().type_id;
 }
 
 

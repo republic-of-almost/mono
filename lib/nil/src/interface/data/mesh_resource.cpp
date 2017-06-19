@@ -121,7 +121,7 @@ has_mesh_resource(const Node &node)
 uint64_t
 get_type_id(const Mesh_resource &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_mesh_rsrc_data().type_id;
 }
 
 

@@ -12,11 +12,6 @@
   Graph::Data *graph = get_graph_data();  \
   LIB_ASSERT(graph);                      \
   LIB_ASSERT(node.is_valid());
-  
-#define NIL_DATA_TYPE_ID_REG                                \
-  const static uint64_t type_id = Data::register_type_id(); \
-  LIB_ASSERT(type_id);                                      \
-  return type_id;
 
 #define NIL_DATA_GETTER_ERROR(NAME) \
   LOG_ERROR("Node does not contain " #NAME " data");
@@ -27,56 +22,6 @@
 
 namespace Nil {
 namespace Data {
-
-
-
-template<typename S, typename T, typename U>
-bool
-getter_helper(const uint32_t id, const S &id_arr, const T &data_arr, U &out)
-{
-  size_t index = 0;
-  
-  if(lib::key::linear_search(id, id_arr.data(), id_arr.size(), &index))
-  {
-    out = data_arr[index];
-    return true;
-  }
-
-  return false;
-}
-
-
-template<typename S, typename T, typename U>
-bool
-setter_helper(Node node, S &id_arr, T &data_arr, const U &in, const uint64_t data_type_id)
-{
-  size_t index = 0;
-  
-  if(lib::key::linear_search(node.get_id(), id_arr.data(), id_arr.size(), &index))
-  {
-    data_arr[index] = in;
-  }
-  else
-  {
-    id_arr.emplace_back(node.get_id());
-    data_arr.emplace_back(in);
-    
-    const uint64_t id = node.get_data_type_id();
-    node.set_data_type_id(id | data_type_id);
-  }
-  
-  LIB_ASSERT(id_arr.size() == data_arr.size());
-  
-  /*
-    Add Event
-  */
-  Graph::Data *graph = Data::get_graph_data();
-  LIB_ASSERT(graph);
-  
-  Graph::node_modified(graph, node.get_id());
-  
-  return true;
-}
 
 
 template<typename S>
@@ -119,6 +64,8 @@ struct Generic_data
   lib::array<T>         data;
   lib::array<uint32_t>  actions;
   
+  uint64_t              type_id;
+  
   // -- Cached Event Data -- //
   
   std::vector<Nil::Node>  added_nodes;
@@ -133,25 +80,12 @@ struct Generic_data
   // --
   
   explicit
-  Generic_data()
+  Generic_data(const uint64_t dependent_types = 0)
   {
-    Nil::Graph::callback_node_delete
-    (
+    type_id = Nil::Graph::data_register_type(
       Nil::Data::get_graph_data(),
-      [](const uint32_t id, uintptr_t user_data)
-      {
-        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
-        LIB_ASSERT(data);
-        
-        data->remove_data(Nil::Node(id));
-      },
-      (uintptr_t)this
-    );
-    
-    
-    Nil::Graph::callback_graph_tick
-    (
-      Nil::Data::get_graph_data(),
+      
+      // Tick Callback
       [](uintptr_t user_data)
       {
         Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
@@ -174,7 +108,41 @@ struct Generic_data
         data->removed_nodes.clear();
         data->removed_data.clear();
       },
-      (uintptr_t)this
+      
+      // Node deleted callback
+      [](const uint32_t id, uintptr_t user_data)
+      {
+        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
+        LIB_ASSERT(data);
+        
+        data->remove_data(Nil::Node(id));
+      },
+      
+      // Dependency callback
+      [](const uint32_t id, uintptr_t user_data)
+      {
+        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
+        LIB_ASSERT(data);
+      
+        size_t index = 0;
+        const uint32_t *ids = data->keys.data();
+        const size_t id_count = data->keys.size();
+        
+        const bool found = lib::key::linear_search(
+          id,
+          ids,
+          id_count,
+          &index
+        );
+        
+        if(found)
+        {
+          data->actions[index] |= Nil::Data::Event::UPDATED;
+        }
+      },
+      
+      (uintptr_t)this,
+      dependent_types
     );
   }
   
@@ -261,6 +229,8 @@ struct Generic_data
       data.emplace_back(in);
       actions.emplace_back(Nil::Data::Event::ADDED);
     }
+    
+    Graph::data_updated(Nil::Data::get_graph_data(), node.get_id(), type_id);
   }
   
   

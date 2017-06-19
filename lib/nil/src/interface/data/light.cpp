@@ -66,7 +66,7 @@ has_light(const Node &node)
 uint64_t
 get_type_id(const Light &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_light_data().type_id;
 }
 
 

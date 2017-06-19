@@ -544,11 +544,14 @@ namespace
     }
     
     // -- Remove The Data -- //
-    for(auto &cb : graph->node_delete_callbacks)
+    for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
     {
-      if(cb.fn)
+      if(graph->graph_type_data[i].delete_cb)
       {
-        cb.fn(node_id, cb.user_data);
+        graph->graph_type_data[i].delete_cb(
+          node_id,
+          graph->graph_type_data[i].user_data
+        );
       }
     }
   }
@@ -629,11 +632,17 @@ think(Data *graph)
   // Temp
   graph->node_events.clear();
   
-  for(auto &cb : graph->frame_tick_callbacks)
+  const size_t count = graph->graph_type_data.size();
+  
+  for(size_t i = 0; i < count; ++i)
   {
-    if(cb.fn)
+    graph_tick_fn tick_fn = graph->graph_type_data[i].tick_cb;
+  
+    if(tick_fn)
     {
-      cb.fn(cb.user_data);
+      uintptr_t user_data = graph->graph_type_data[i].user_data;
+    
+      tick_fn(user_data);
     }
   }
 }
@@ -649,6 +658,89 @@ uint64_t
 last_tick(Data *graph)
 {
   return graph->graph_tick;
+}
+
+
+// ----------------------------------------------------------- [ Graph Data ] --
+
+
+uint64_t
+data_register_type(
+  Data *graph,
+  const graph_tick_fn &tick_cb,
+  const node_delete_fn &delete_cb,
+  const data_dependecy_alert_fn &dependency_cb,
+  uintptr_t user_data,
+  uint64_t dependency_id
+)
+{
+  // -- Param Check -- //
+  LIB_ASSERT(graph);
+  
+  graph->graph_type_data.emplace_back(
+    tick_cb,
+    delete_cb,
+    dependency_cb,
+    user_data,
+    uint64_t{1} << graph->graph_type_data.size(),
+    dependency_id
+  );
+  
+  return graph->graph_type_data.back().type_id;
+}
+
+
+void
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendents)
+{
+  /*
+    Further Work.
+    Instead of spamming all the callbacks we should check here if a node has the
+    type id and selectivly call the callbacks.
+  */
+
+  // -- Param Check -- //
+  LIB_ASSERT(graph);
+  
+  const size_t type_count = graph->graph_type_data.size();
+  
+  for(size_t i = 0; i < type_count; ++i)
+  {
+    const uint64_t dependencies = graph->graph_type_data[i].dependency;
+  
+    if(dependencies & type_id)
+    {
+      data_dependecy_alert_fn alert_fn = graph->graph_type_data[i].dependency_cb;
+    
+      if(alert_fn)
+      {
+        uintptr_t user_data = graph->graph_type_data[i].user_data;
+      
+        alert_fn(node_id, user_data);
+      }
+    }
+  }
+  
+  /*
+    Call update on the children
+    This is only really needed for inherited things like transforms
+    and bounding boxes. Perhaps colliders as well.
+  */
+  if(decendents)
+  {
+    const size_t decendents_count = Graph::node_descendants_count(graph, node_id);
+    
+    size_t index = 0;
+    
+    lib::key::linear_search(node_id, graph->node_id.data(), graph->node_id.size(), &index);
+    
+    for(uint32_t i = 0; i < decendents_count; ++i)
+    {
+      const uint32_t child_id = graph->node_id[index + i + 1];
+      data_updated(graph, child_id, type_id, false);
+    }
+  }
+
 }
 
 

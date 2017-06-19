@@ -66,7 +66,7 @@ has_developer(const Node &node)
 uint64_t
 get_type_id(const Developer &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_developer_data().type_id;
 }
 
 

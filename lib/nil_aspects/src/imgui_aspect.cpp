@@ -51,60 +51,92 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-
-  Nil::Event_data evt{};
-
-  while(event_list.get(evt))
+  
+  // Developer Data Removed
   {
-    const Nil::Node evt_node(evt.node_id);
-
-    if(!Nil::Event::node_removed(evt))
+    size_t count;
+    Nil::Data::Developer *data;
+    Nil::Node *node;
+    
+    Nil::Data::events(Nil::Data::Event::REMOVED, &count, &data, &node);
+    
+    for(size_t i = 0; i < count; ++i)
     {
-      if(Nil::Data::has_developer(evt_node))
+      size_t j = 0;
+    
+      while(j < self->dev_nodes.size())
       {
-        Nil::Data::Developer data{};
-        Nil::Data::get(evt_node, data);
-
-        if(data.type_id == 1)
+        if(self->dev_nodes[j] == node[i])
         {
-          bool exists = false;
-
-          for(size_t i = 0; i < self->dev_nodes.size(); ++i)
-          {
-            const Nil::Node &node = self->dev_nodes[i];
-
-            if(node.get_id() == evt.node_id)
-            {
-              exists = true;
-              self->dev_data[i] = data;
-            }
-          }
-
-          if(!exists)
-          {
-            self->dev_nodes.emplace_back(evt_node);
-            self->dev_data.emplace_back(data);
-
-            LIB_ASSERT(self->dev_nodes.size() == self->dev_data.size());
-          }
+          self->dev_data.erase(self->dev_data.begin() + j);
+          self->dev_nodes.erase(self->dev_nodes.begin() + j);
+          break;
+        }
+        else
+        {
+          ++j;
         }
       }
-    } // if add / update
+    }
+  } // removed dev data
 
-    else
+  // Developer Data Added
+  {
+    size_t count;
+    Nil::Data::Developer *data;
+    Nil::Node *node;
+    
+    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
+    
+    for(size_t i = 0; i < count; ++i)
     {
-      for(size_t i = 0; i < self->dev_nodes.size(); ++i)
+      if(data[i].type_id == 1)
       {
-        const Nil::Node &node = self->dev_nodes[i];
-
-        if(node == evt_node)
+        bool duplicate = false;
+      
+        for(Nil::Node &n : self->dev_nodes)
         {
-          self->dev_data.erase(std::begin(self->dev_data) + i);
-          self->dev_nodes.erase(std::begin(self->dev_nodes) + i);
+          if(n == node[i])
+          {
+            duplicate = true;
+            break;
+          }
+        }
+      
+        if(!duplicate)
+        {
+          self->dev_data.emplace_back(data[i]);
+          self->dev_nodes.emplace_back(node[i]);
         }
       }
-    } // else remove
-  } // while events
+    }
+  } // new dev data
+  
+  // Developer Data Modified
+  {
+    size_t count;
+    Nil::Data::Developer *data;
+    Nil::Node *node;
+    
+    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &node);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      size_t j = 0;
+    
+      while(j < self->dev_nodes.size())
+      {
+        if(self->dev_nodes[j] == node[i])
+        {
+          self->dev_data[j] = data[i];
+        }
+        else
+        {
+          ++j;
+        }
+      }
+    }
+  } // Mod dev data
 }
 
 

@@ -390,8 +390,8 @@ setup(Actor *actor)
         
         cam_data.width              = 1.f;
         cam_data.height             = 1.f;
-        cam_data.fov                = math::tau() * 0.2f;
-        cam_data.near_plane         = 1.f;
+        cam_data.fov                = math::tau() * 0.12f;
+        cam_data.near_plane         = 0.1f;
         cam_data.far_plane          = 100.f;
         cam_data.clear_color_buffer = true;
         cam_data.clear_depth_buffer = true;

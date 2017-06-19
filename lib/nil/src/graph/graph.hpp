@@ -32,6 +32,24 @@ uint64_t
 last_tick(Data *data);
 
 
+// ----------------------------------------------------------- [ Graph Data ] --
+
+
+uint64_t
+data_register_type(
+  Data *data,
+  const graph_tick_fn &tick_cb,
+  const node_delete_fn &delete_cb,
+  const data_dependecy_alert_fn &dependency_cb,
+  uintptr_t user_data,
+  uint64_t dependency_id
+);
+
+
+void
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendent = false);
+
+
 // ---------------------------------------------------------------- [ Nodes ] --
 
 

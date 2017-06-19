@@ -24,25 +24,5 @@ get_root_node()
 }
 
 
-uint64_t
-register_type_id()
-{
-  static int i = 0;
-  
-  if(i >= 64)
-  {
-    LIB_ASSERT(false);
-    LOG_FATAL("Run out of data type identifiers, the max is 64");
-    return 0;
-  }
-  
-  uint64_t new_id = BIT(i);
-  
-  ++i;
-  
-  return new_id;
-}
-
-
 } // ns
 } // ns

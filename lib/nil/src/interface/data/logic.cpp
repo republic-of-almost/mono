@@ -67,7 +67,7 @@ has_logic(const Node &node)
 uint64_t
 get_type_id(const Logic &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_logic_data().type_id;
 }
 
 

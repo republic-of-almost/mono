@@ -66,7 +66,7 @@ has_keyboard(const Node &node)
 uint64_t
 get_type_id(const Keyboard &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_kb_data().type_id;
 }
 
 

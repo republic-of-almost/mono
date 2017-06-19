@@ -11,6 +11,7 @@ namespace Nil {
 class Node; // fwd for callback prototype.
 using graph_tick_fn = void(*)(uintptr_t user_data);
 using node_delete_fn = void(*)(const uint32_t node, uintptr_t user_data);
+using data_dependecy_alert_fn = void(*)(const uint32_t node, uintptr_t user_data);
 
 
 namespace Graph {

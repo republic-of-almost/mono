@@ -19,10 +19,6 @@ Node&
 get_root_node();
 
 
-uint64_t
-register_type_id();
-
-
 } // ns
 } // ns
 
