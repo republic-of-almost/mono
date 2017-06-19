@@ -137,7 +137,7 @@ struct Generic_data
   explicit
   Generic_data(const uint64_t dependent_types = 0)
   {
-    Nil::Graph::data_register_type(
+    type_id = Nil::Graph::data_register_type(
       Nil::Data::get_graph_data(),
       
       // Tick Callback
@@ -176,10 +176,28 @@ struct Generic_data
       // Dependency callback
       [](const uint32_t id, uintptr_t user_data)
       {
+        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
+        LIB_ASSERT(data);
+      
+        size_t index = 0;
+        const uint32_t *ids = data->keys.data();
+        const size_t id_count = data->keys.size();
+        
+        const bool found = lib::key::linear_search(
+          id,
+          ids,
+          id_count,
+          &index
+        );
+        
+        if(found)
+        {
+          data->actions[index] |= Nil::Data::Event::UPDATED;
+        }
       },
       
       (uintptr_t)this,
-      0
+      dependent_types
     );
   }
   
@@ -266,6 +284,8 @@ struct Generic_data
       data.emplace_back(in);
       actions.emplace_back(Nil::Data::Event::ADDED);
     }
+    
+    Graph::data_updated(Nil::Data::get_graph_data(), node.get_id(), type_id);
   }
   
   

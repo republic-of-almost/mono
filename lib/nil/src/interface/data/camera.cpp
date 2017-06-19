@@ -1,4 +1,5 @@
 #include <nil/data/camera.hpp>
+#include <nil/data/transform.hpp>
 #include <nil/node.hpp>
 #include <data/data.hpp>
 #include <graph/graph_data.hpp>
@@ -14,7 +15,9 @@ namespace {
 Nil::Data::Generic_data<Nil::Data::Camera>&
 get_camera_data()
 {
-  static Nil::Data::Generic_data<Nil::Data::Camera> data;
+  static Nil::Data::Generic_data<Nil::Data::Camera> data(
+    Nil::Data::get_type_id(Nil::Data::Transform{})
+  );
   return data;
 }
 

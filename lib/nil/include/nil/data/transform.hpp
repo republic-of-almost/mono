@@ -48,12 +48,11 @@ size_t
 transform_count();
 
 
-// ---------------------------------------------------------- [ Data Events ] --
+// --------------------------------------------------------------- [ Events ] --
 
 
 void
-events(const uint32_t data, size_t *count, Transform **out_data, Node **out_node);
-
+events(const uint32_t data, size_t *count, Transform **out_data = nullptr, Node **out_node = nullptr);
 
 
 } // ns

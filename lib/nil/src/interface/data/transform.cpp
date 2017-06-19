@@ -6,8 +6,48 @@
 #include "common.hpp"
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
+namespace {
+
+
+struct Transform_data
+{
+  explicit Transform_data()
+  {
+    type_id = Nil::Graph::data_register_type(
+      Nil::Data::get_graph_data(),
+      nullptr,
+      nullptr,
+      nullptr,
+      
+      (uintptr_t)this,
+      0
+    );
+  }
+  
+  uint64_t type_id;
+};
+
+
+// -- Lazy Getter -- //
+Transform_data
+get_trans_data()
+{
+  static Transform_data data;
+  return data;
+}
+
+
+} // ns
+
+
 namespace Nil {
 namespace Data {
+
+
+// -------------------------------------------------------------- [ Get/Set ] --
 
 
 void
@@ -57,7 +97,12 @@ set(Node &node, const Transform &in)
     LIB_ASSERT(false);
     LOG_ERROR("Invalid Node");
   }
+  
+  Graph::data_updated(Data::get_graph_data(), node.get_id(), get_trans_data().type_id, true);
 }
+
+
+// ----------------------------------------------------------------- [ Info ] --
 
 
 bool
@@ -70,7 +115,16 @@ has_transform(const Node &)
 uint64_t
 get_type_id(const Transform &)
 {
-  NIL_DATA_TYPE_ID_REG
+  return get_trans_data().type_id;
+}
+
+
+// --------------------------------------------------------------- [ Events ] --
+
+
+void
+events(const uint32_t data, size_t *count, Transform **out_data, Node **out_node)
+{
 }
 
 

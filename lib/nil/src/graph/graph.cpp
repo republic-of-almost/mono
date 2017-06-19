@@ -632,13 +632,17 @@ think(Data *graph)
   // Temp
   graph->node_events.clear();
   
-  for(size_t i = 0; graph->graph_type_data.size(); ++i)
+  const size_t count = graph->graph_type_data.size();
+  
+  for(size_t i = 0; i < count; ++i)
   {
-    if(graph->graph_type_data[i].tick_cb)
+    graph_tick_fn tick_fn = graph->graph_type_data[i].tick_cb;
+  
+    if(tick_fn)
     {
-      graph->graph_type_data[i].tick_cb(
-        graph->graph_type_data[i].user_data
-      );
+      uintptr_t user_data = graph->graph_type_data[i].user_data;
+    
+      tick_fn(user_data);
     }
   }
 }
@@ -687,22 +691,43 @@ data_register_type(
 
 
 void
-data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id)
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendents)
 {
   // -- Param Check -- //
   LIB_ASSERT(graph);
   
-  for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
+  const size_t type_count = graph->graph_type_data.size();
+  
+  for(size_t i = 0; i < type_count; ++i)
   {
-    if(graph->graph_type_data[i].dependency & type_id)
+    const uint64_t dependencies = graph->graph_type_data[i].dependency;
+  
+    if(dependencies & type_id)
     {
-      if(graph->graph_type_data[i].dependency_cb)
+      data_dependecy_alert_fn alert_fn = graph->graph_type_data[i].dependency_cb;
+    
+      if(alert_fn)
       {
-        graph->graph_type_data[i].dependency_cb(
-          node_id,
-          graph->graph_type_data[i].user_data
-        );
+        uintptr_t user_data = graph->graph_type_data[i].user_data;
+      
+        alert_fn(node_id, user_data);
       }
+    }
+  }
+  
+  
+  if(decendents)
+  {
+    const size_t decendents_count = Graph::node_descendants_count(graph, node_id);
+    
+    size_t index = 0;
+    
+    lib::key::linear_search(node_id, graph->node_id.data(), graph->node_id.size(), &index);
+    
+    for(uint32_t i = 0; i < decendents_count; ++i)
+    {
+      const uint32_t child_id = graph->node_id[index + i + 1];
+      data_updated(graph, child_id, type_id, false);
     }
   }
 
