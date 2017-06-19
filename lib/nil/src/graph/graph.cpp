@@ -544,11 +544,14 @@ namespace
     }
     
     // -- Remove The Data -- //
-    for(auto &cb : graph->node_delete_callbacks)
+    for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
     {
-      if(cb.fn)
+      if(graph->graph_type_data[i].delete_cb)
       {
-        cb.fn(node_id, cb.user_data);
+        graph->graph_type_data[i].delete_cb(
+          node_id,
+          graph->graph_type_data[i].user_data
+        );
       }
     }
   }
@@ -629,11 +632,13 @@ think(Data *graph)
   // Temp
   graph->node_events.clear();
   
-  for(auto &cb : graph->frame_tick_callbacks)
+  for(size_t i = 0; graph->graph_type_data.size(); ++i)
   {
-    if(cb.fn)
+    if(graph->graph_type_data[i].tick_cb)
     {
-      cb.fn(cb.user_data);
+      graph->graph_type_data[i].tick_cb(
+        graph->graph_type_data[i].user_data
+      );
     }
   }
 }
@@ -649,6 +654,58 @@ uint64_t
 last_tick(Data *graph)
 {
   return graph->graph_tick;
+}
+
+
+// ----------------------------------------------------------- [ Graph Data ] --
+
+
+uint64_t
+data_register_type(
+  Data *graph,
+  const graph_tick_fn &tick_cb,
+  const node_delete_fn &delete_cb,
+  const data_dependecy_alert_fn &dependency_cb,
+  uintptr_t user_data,
+  uint64_t dependency_id
+)
+{
+  // -- Param Check -- //
+  LIB_ASSERT(graph);
+  
+  graph->graph_type_data.emplace_back(
+    tick_cb,
+    delete_cb,
+    dependency_cb,
+    user_data,
+    uint64_t{1} << graph->graph_type_data.size(),
+    dependency_id
+  );
+  
+  return graph->graph_type_data.back().type_id;
+}
+
+
+void
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id)
+{
+  // -- Param Check -- //
+  LIB_ASSERT(graph);
+  
+  for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
+  {
+    if(graph->graph_type_data[i].dependency & type_id)
+    {
+      if(graph->graph_type_data[i].dependency_cb)
+      {
+        graph->graph_type_data[i].dependency_cb(
+          node_id,
+          graph->graph_type_data[i].user_data
+        );
+      }
+    }
+  }
+
 }
 
 

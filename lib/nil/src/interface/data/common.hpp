@@ -119,6 +119,8 @@ struct Generic_data
   lib::array<T>         data;
   lib::array<uint32_t>  actions;
   
+  uint64_t              type_id;
+  
   // -- Cached Event Data -- //
   
   std::vector<Nil::Node>  added_nodes;
@@ -133,25 +135,12 @@ struct Generic_data
   // --
   
   explicit
-  Generic_data()
+  Generic_data(const uint64_t dependent_types = 0)
   {
-    Nil::Graph::callback_node_delete
-    (
+    Nil::Graph::data_register_type(
       Nil::Data::get_graph_data(),
-      [](const uint32_t id, uintptr_t user_data)
-      {
-        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
-        LIB_ASSERT(data);
-        
-        data->remove_data(Nil::Node(id));
-      },
-      (uintptr_t)this
-    );
-    
-    
-    Nil::Graph::callback_graph_tick
-    (
-      Nil::Data::get_graph_data(),
+      
+      // Tick Callback
       [](uintptr_t user_data)
       {
         Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
@@ -174,7 +163,23 @@ struct Generic_data
         data->removed_nodes.clear();
         data->removed_data.clear();
       },
-      (uintptr_t)this
+      
+      // Node deleted callback
+      [](const uint32_t id, uintptr_t user_data)
+      {
+        Generic_data<T> *data = reinterpret_cast<Generic_data<T>*>(user_data);
+        LIB_ASSERT(data);
+        
+        data->remove_data(Nil::Node(id));
+      },
+      
+      // Dependency callback
+      [](const uint32_t id, uintptr_t user_data)
+      {
+      },
+      
+      (uintptr_t)this,
+      0
     );
   }
   

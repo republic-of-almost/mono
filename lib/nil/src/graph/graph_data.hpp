@@ -43,6 +43,9 @@ struct Event
 };
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 struct Data
 {
   // -- Graph -- //
@@ -62,6 +65,18 @@ struct Data
   
   // -- Events -- //
   lib::array<Event>           node_events;        // When changes happen.
+  
+  struct graph_type
+  {
+    graph_tick_fn           tick_cb;
+    node_delete_fn          delete_cb;
+    data_dependecy_alert_fn dependency_cb;
+    uintptr_t               user_data;
+    uint64_t                type_id;
+    uint64_t                dependency;
+  };
+  
+  lib::array<graph_type>    graph_type_data;
 
   // -- Other -- //
   uint64_t                    graph_tick;
