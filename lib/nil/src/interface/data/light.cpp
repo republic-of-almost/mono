@@ -17,7 +17,9 @@ namespace {
 Nil::Data::Generic_data<Nil::Data::Light>&
 get_light_data()
 {
-  static Nil::Data::Generic_data<Nil::Data::Light> data;
+  static Nil::Data::Generic_data<Nil::Data::Light> data(
+    Nil::Data::get_type_id(Nil::Data::Transform{})
+  );
   return data;
 }
 

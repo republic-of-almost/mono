@@ -1,4 +1,4 @@
-#include <nil/data/material.hpp>
+#include <nil/data/renderable.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/node.hpp>
 #include <data/data.hpp>
@@ -15,10 +15,10 @@ namespace {
 
 
 // -- Lazy Getter -- //
-Nil::Data::Generic_data<Nil::Data::Material>&
+Nil::Data::Generic_data<Nil::Data::Renderable>&
 get_mat_data()
 {
-  static Nil::Data::Generic_data<Nil::Data::Material> data(
+  static Nil::Data::Generic_data<Nil::Data::Renderable> data(
     Nil::Data::get_type_id(Nil::Data::Transform{})
   );
   return data;
@@ -36,21 +36,21 @@ namespace Data {
 
 
 void
-get(const Node &node, Material &out)
+get(const Node &node, Renderable &out)
 {
   get_mat_data().get_data(node, out);
 }
 
 
 void
-set(Node &node, const Material &in)
+set(Node &node, const Renderable &in)
 {
   get_mat_data().set_data(node, in);
 }
 
 
 void
-remove_material(Node &node)
+remove_renderable(Node &node)
 {
   get_mat_data().remove_data(node);
 }
@@ -60,21 +60,21 @@ remove_material(Node &node)
 
 
 bool
-has_material(const Node &node)
+has_renderable(const Node &node)
 {
   return get_mat_data().find(node);
 }
 
 
 uint64_t
-get_type_id(const Material &)
+get_type_id(const Renderable &)
 {
   return get_mat_data().type_id;
 }
 
 
 size_t
-material_count()
+renderable_count()
 {
   return get_mat_data().keys.size();
 }
@@ -84,7 +84,7 @@ material_count()
 
 
 void
-events(const uint32_t event, size_t *count, Material **out_data, Node **out_node)
+events(const uint32_t event, size_t *count, Renderable **out_data, Node **out_node)
 {
   return get_mat_data().events(event, count, out_data, out_node);
 }

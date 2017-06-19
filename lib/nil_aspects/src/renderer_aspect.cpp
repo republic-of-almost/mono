@@ -290,7 +290,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
   // Added Material
   {
     size_t                count = 0;
-    Nil::Data::Material   *data = nullptr;
+    Nil::Data::Renderable   *data = nullptr;
     Nil::Node             *node = nullptr;
     
     Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
@@ -323,7 +323,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
   */
   {
     size_t                count = 0;
-    Nil::Data::Material   *data = nullptr;
+    Nil::Data::Renderable   *data = nullptr;
     Nil::Node             *node = nullptr;
     
     Nil::Data::events(Nil::Data::Event::REMOVED, &count, &data, &node);
@@ -375,7 +375,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         Nil::Data::Transform trans{};
         Nil::Data::get(node[i], trans, true);
 
-        Nil::Data::Material mat{};
+        Nil::Data::Renderable mat{};
         Nil::Data::get(node[i], mat);
 
         Nil::Data::Mesh mesh{};
@@ -393,7 +393,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
           mat.texture_01,
         };
 
-        memcpy(rov_render.color, mat.color, sizeof(Nil::Data::Material::color));
+        memcpy(rov_render.color, mat.color, sizeof(Nil::Data::Renderable::color));
         /*
           Check to see if we have it already.
         */
@@ -418,7 +418,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
     };
   
     size_t                count = 0;
-    Nil::Data::Material   *data = nullptr;
+    Nil::Data::Renderable   *data = nullptr;
     Nil::Node             *node = nullptr;
     
     Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);

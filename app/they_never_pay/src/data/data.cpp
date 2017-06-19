@@ -11,7 +11,7 @@
 #include <nil/data/texture_resource.hpp>
 #include <nil/data/mesh_resource.hpp>
 #include <nil/data/mesh.hpp>
-#include <nil/data/material.hpp>
+#include <nil/data/renderable.hpp>
 #include <assets/cube_mesh.hpp>
 
 #include <lib/model.hpp>
@@ -135,8 +135,8 @@ load_assets()
       
       Nil::Data::set(child, mesh_instance);
       
-      Nil::Data::Material mat{};
-      mat.shader = Nil::Data::Material::DIR_LIGHT;
+      Nil::Data::Renderable mat{};
+      mat.shader = Nil::Data::Renderable::DIR_LIGHT;
       mat.color[0] = 0.6f;
       mat.color[1] = 0.1f;
       mat.color[2] = 0.2f;

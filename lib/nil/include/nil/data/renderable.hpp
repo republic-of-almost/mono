@@ -1,5 +1,5 @@
-#ifndef MATERIAL_INCLUDED_75C9D93A_7575_4AE3_A4F5_91D82D1C1DD9
-#define MATERIAL_INCLUDED_75C9D93A_7575_4AE3_A4F5_91D82D1C1DD9
+#ifndef RENDERABLE_INCLUDED_75C9D93A_7575_4AE3_A4F5_91D82D1C1DD9
+#define RENDERABLE_INCLUDED_75C9D93A_7575_4AE3_A4F5_91D82D1C1DD9
 
 
 #include <nil/fwd.hpp>
@@ -14,7 +14,7 @@ namespace Data {
 // ----------------------------------------------------------------- [ Data ] --
 
 
-struct Material
+struct Renderable
 {
   enum { FULLBRIGHT, LIT, DIR_LIGHT }  shader;
   float     color[4];
@@ -25,6 +25,10 @@ struct Material
   
   float     scale[2];
   float     offset[2];
+  
+  // -- Output -- //
+  
+  float     world_mat[16];
 };
 
 
@@ -32,37 +36,41 @@ struct Material
 
 
 void
-get(const Node &node, Material &out);
+get(const Node &node, Renderable &out);
 
 
 void
-set(Node &node, const Material &in);
+set(Node &node, const Renderable &in);
 
 
 void
-remove_window(Node &node);
+get(Renderable *renderables);
+
+
+void
+remove_renderable(Node &node);
 
 
 // ----------------------------------------------------------------- [ Info ] --
 
 
 bool
-has_material(const Node &node);
+has_renderable(const Node &node);
 
 
 uint64_t
-get_type_id(const Material &in);
+get_type_id(const Renderable &in);
 
 
 size_t
-material_count();
+renderable_count();
 
 
 // ---------------------------------------------------------- [ Data Events ] --
 
 
 void
-events(const uint32_t data, size_t *count, Material **out_data, Node **out_node);
+events(const uint32_t data, size_t *count, Renderable **out_data, Node **out_node);
 
 
 } // ns

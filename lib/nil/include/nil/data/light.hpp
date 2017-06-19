@@ -32,6 +32,10 @@ struct Light
   uint32_t type;
   uint8_t color[3];
   float attenuation;
+  
+  // -- Output -- //
+  
+  float out_position[3];
 };
 
 

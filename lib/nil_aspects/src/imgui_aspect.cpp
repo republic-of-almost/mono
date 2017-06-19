@@ -885,11 +885,11 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     /*
       Material
     */
-    if(Nil::Data::has_material(self->inspector_node))
+    if(Nil::Data::has_renderable(self->inspector_node))
     {
-      if(ImGui::CollapsingHeader("Material"))
+      if(ImGui::CollapsingHeader("Renderable"))
       {
-        Nil::Data::Material mat{};
+        Nil::Data::Renderable mat{};
         Nil::Data::get(self->inspector_node, mat);
 
         bool update_mat = false;
@@ -1305,9 +1305,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         }
         case(11):
         {
-          if(!Nil::Data::has_material(self->inspector_node))
+          if(!Nil::Data::has_renderable(self->inspector_node))
           {
-            Nil::Data::Material data{};
+            Nil::Data::Renderable data{};
             Nil::Data::set(self->inspector_node, data);
           }
           break;

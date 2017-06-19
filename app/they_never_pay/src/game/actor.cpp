@@ -4,7 +4,7 @@
 #include <nil/data/camera.hpp>
 #include <nil/data/mouse.hpp>
 #include <nil/data/keyboard.hpp>
-#include <nil/data/material.hpp>
+#include <nil/data/renderable.hpp>
 #include <nil/data/transform.hpp>
 #include <math/geometry/ray.hpp>
 #include <math/general/general.hpp>
@@ -358,12 +358,12 @@ setup(Actor *actor)
     
     // Head Material
     {
-      Nil::Data::Material mat{};
+      Nil::Data::Renderable mat{};
       
       float color[] = {1.f, 1.f, 0.f, 1.f};
       memcpy(mat.color, color, sizeof(mat.color));
       
-      mat.shader = Nil::Data::Material::FULLBRIGHT;
+      mat.shader = Nil::Data::Renderable::FULLBRIGHT;
       
       Nil::Data::set(head, mat);
     }
