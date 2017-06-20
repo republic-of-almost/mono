@@ -1,0 +1,34 @@
+#!lua
+
+--[[
+  ImGUI Project Description
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "ImGuizmo",
+    kind     = "StaticLib",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      --
+      make.add_src(make.get_proj_root() .. "../src/"),
+      --
+      make.add_doc(make.get_proj_root() .. "../include/"),
+      make.add_doc(make.get_proj_root() .. "../src/"),
+    },
+
+    inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+    project_dependencies = {
+      "ImGUI",
+      "STB",
+    },
+  }
+)
