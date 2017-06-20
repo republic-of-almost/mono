@@ -26,6 +26,10 @@ table.insert(
       make.get_proj_root() .. "../include/",
     },
 
+    defines = {
+      "ROV_GL4",
+    },
+
     project_dependencies = {
       "External",
       "Lib",
