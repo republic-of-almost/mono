@@ -23,26 +23,12 @@ namespace {
 inline void
 logic_aspect_debug_menu(uintptr_t user_data)
 {
-  Nil_ext::ROV_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
-  );
-
-  if(ImGui::BeginMenu("Logic"))
-  {
-    ImGui::EndMenu();
-  }
-
-  LIB_ASSERT(self);
 }
 
 
 inline void
 logic_aspect_debug_window(uintptr_t user_data)
 {
-  Nil_ext::ROV_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
-  );
-  LIB_ASSERT(self);
 }
 #endif
 

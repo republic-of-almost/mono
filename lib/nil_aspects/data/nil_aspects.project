@@ -27,8 +27,9 @@ table.insert(
       make.get_proj_root() .. "../src/",
     },
 
-    preprocessor = {
+    defines = {
       "IMGUI_DEVELOPER_SUPPORT",
+      "IMGIZMO_DEVELOPER_SUPPORT",
     },
 
     project_dependencies = {
@@ -41,6 +42,7 @@ table.insert(
       -- Thrid Party --
 
       "ImGUI",
+      "ImGuizmo",
       "OpenGL",
       "Remotery",
     },

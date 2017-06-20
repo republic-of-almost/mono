@@ -1,9 +1,5 @@
 #include <aspect/aspects.hpp>
 
-
-#define IMGUI_DEVELOPER_SUPPORT
-//#define IMGIZMO_DEVELOPER_SUPPORT
-
 #include <nil/aspect.hpp>
 #include <nil/nil.hpp>
 
