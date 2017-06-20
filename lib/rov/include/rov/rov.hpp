@@ -1209,7 +1209,7 @@ rov_execute()
     // Line Renderer
     #ifdef GL_HAS_GEO_SHD
     {
-      rmt_ScopedOpenGLSample(DebugLineRender);
+//      rmt_ScopedOpenGLSample(DebugLineRender);
     
       glUseProgram(rov_line_shaders[0].program);
       glBindBuffer(GL_ARRAY_BUFFER, 0);

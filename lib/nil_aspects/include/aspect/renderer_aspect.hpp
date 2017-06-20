@@ -50,22 +50,6 @@ struct Data
   std::vector<uint32_t> camera_node_ids;
   std::vector<ROV_Camera> rov_camera;
   
-  // Draw Calls //
-  
-  struct ROV_Renderable
-  {
-    uint8_t shader_type;
-    math::mat4 world;
-    uint32_t mesh_id;
-    uint32_t texture_01_id;
-    
-    float color[4];
-  };
-
-  
-  std::vector<uint32_t> renderable_node_ids;
-  std::vector<ROV_Renderable> renderables;
-  
   bool has_initialized = false;
   bool process_pending = true;
 

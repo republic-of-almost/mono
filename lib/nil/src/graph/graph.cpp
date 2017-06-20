@@ -1177,6 +1177,8 @@ node_set_transform(
     return true;
   }
   
+  Graph::think(data);
+  
   return false;
 }
 

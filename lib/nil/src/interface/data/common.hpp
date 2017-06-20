@@ -3,6 +3,7 @@
 
 
 #include <nil/node.hpp>
+#include <nil/data/transform.hpp>
 #include <graph/graph_data.hpp>
 #include <data/data.hpp>
 #include <stddef.h>
@@ -22,6 +23,9 @@
 
 namespace Nil {
 namespace Data {
+
+
+using test_cb = void(*)(uint32_t id, uintptr_t user_data, size_t index);
 
 
 template<typename S>
@@ -79,9 +83,16 @@ struct Generic_data
   
   // --
   
+  test_cb cb = nullptr;
+  
   explicit
-  Generic_data(const uint64_t dependent_types = 0)
+  Generic_data(
+    const uint64_t dependent_types = 0,
+    const test_cb &set_cb = nullptr
+  )
   {
+    cb = set_cb;
+  
     type_id = Nil::Graph::data_register_type(
       Nil::Data::get_graph_data(),
       
@@ -138,6 +149,11 @@ struct Generic_data
         if(found)
         {
           data->actions[index] |= Nil::Data::Event::UPDATED;
+          
+          if(data->cb)
+          {
+            data->cb(id, user_data, index);
+          }
         }
       },
       

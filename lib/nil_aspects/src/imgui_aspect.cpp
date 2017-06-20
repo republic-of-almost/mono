@@ -908,6 +908,12 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         if(ImGui::InputInt("Texture 03", (int*)&mat.texture_03)) { update_mat = true; }
         if(ImGui::DragFloat2("UV Scale", mat.scale))             { update_mat = true; }
         if(ImGui::DragFloat2("UV Offset", mat.offset))           { update_mat = true; }
+        
+        // Outputs //
+        ImGui::InputFloat4("MatRow0", (float*)&mat.world_mat[0]);
+        ImGui::InputFloat4("MatRow1", (float*)&mat.world_mat[4]);
+        ImGui::InputFloat4("MatRow2", (float*)&mat.world_mat[8]);
+        ImGui::InputFloat4("MatRow3", (float*)&mat.world_mat[12]);
 
         if(update_mat)
         {

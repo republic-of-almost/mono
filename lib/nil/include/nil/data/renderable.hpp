@@ -26,6 +26,8 @@ struct Renderable
   float     scale[2];
   float     offset[2];
   
+  uint32_t  mesh_id;
+  
   // -- Output -- //
   
   float     world_mat[16];
@@ -36,15 +38,15 @@ struct Renderable
 
 
 void
+get(size_t *count, Renderable **renderables);
+
+
+void
 get(const Node &node, Renderable &out);
 
 
 void
 set(Node &node, const Renderable &in);
-
-
-void
-get(Renderable *renderables);
 
 
 void

@@ -356,18 +356,6 @@ setup(Actor *actor)
       Nil::Data::set(head, trans);
     }
     
-    // Head Material
-    {
-      Nil::Data::Renderable mat{};
-      
-      float color[] = {1.f, 1.f, 0.f, 1.f};
-      memcpy(mat.color, color, sizeof(mat.color));
-      
-      mat.shader = Nil::Data::Renderable::FULLBRIGHT;
-      
-      Nil::Data::set(head, mat);
-    }
-    
     // Camera
     {
       Nil::Node camera;

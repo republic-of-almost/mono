@@ -16,8 +16,33 @@ Nil::Data::Generic_data<Nil::Data::Camera>&
 get_camera_data()
 {
   static Nil::Data::Generic_data<Nil::Data::Camera> data(
-    Nil::Data::get_type_id(Nil::Data::Transform{})
+    Nil::Data::get_type_id(Nil::Data::Transform{}),
+    [](uint32_t id, uintptr_t user_data, size_t index)
+    {
+      Nil::Data::Generic_data<Nil::Data::Camera> *data = reinterpret_cast<Nil::Data::Generic_data<Nil::Data::Camera>*>(user_data);
+      LIB_ASSERT(data);
+      
+      Nil::Node node(id);
+      
+      Nil::Data::Transform trans;
+      Nil::Data::get(node, trans, true);
+
+      math::transform internal_trans = math::transform_init(
+      math::vec3_init_with_array(trans.position),
+      math::vec3_init_with_array(trans.scale),
+      math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
+      );
+
+      math::mat4 view = transform_get_lookat_matrix(internal_trans, math::vec3_init(0,0,1), math::vec3_init(0,1,0));
+
+      memcpy(
+        data->data[index].view_mat,
+        math::mat4_get_data(view),
+        sizeof(data->data[index].view_mat)
+      );
+    }
   );
+  
   return data;
 }
 
@@ -33,6 +58,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Camera **cameras)
+{
+  *cameras = get_camera_data().data.begin();
+  *count   = get_camera_data().data.size();
+}
+
+
+void
 get(const Node &node, Camera &out)
 {
   get_camera_data().get_data(node, out);
@@ -42,7 +75,26 @@ get(const Node &node, Camera &out)
 void
 set(Node &node, const Camera &in)
 {
-  get_camera_data().set_data(node, in);
+  Camera cpy = in;
+
+  Nil::Data::Transform trans;
+  Nil::Data::get(node, trans, true);
+
+  math::transform internal_trans = math::transform_init(
+  math::vec3_init_with_array(trans.position),
+  math::vec3_init_with_array(trans.scale),
+  math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
+  );
+
+  math::mat4 view = transform_get_lookat_matrix(internal_trans, math::vec3_init(1,0,0), math::vec3_init(0,1,0));
+
+  memcpy(
+    cpy.view_mat,
+    math::mat4_get_data(view),
+    sizeof(cpy.view_mat)
+  );
+
+  get_camera_data().set_data(node, cpy);
 }
 
 

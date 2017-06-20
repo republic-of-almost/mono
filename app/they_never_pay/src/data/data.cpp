@@ -111,7 +111,7 @@ load_assets()
       
       Nil::Data::Texture_resource tex_data{};
       tex_data.data       = img_data;
-      tex_data.id         = i + 1;
+      tex_data.id         = ++counter;
       tex_data.dimentions = 2;
       tex_data.compoents  = c;
       tex_data.width      = x;
@@ -142,6 +142,7 @@ load_assets()
       mat.color[2] = 0.2f;
       mat.color[3] = 1.f;
       mat.texture_01 = tex_data.id;
+      mat.mesh_id = mesh.id;
       Nil::Data::set(child, mat);
     }
   }

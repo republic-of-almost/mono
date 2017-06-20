@@ -23,6 +23,8 @@
 #ifdef IMGUI_DEVELOPER_SUPPORT
 #include <imgui/imgui.h>
 
+#include <OpenGL/gl3.h>
+
 
 // ------------------------------------------------ [ Renderer Aspect IMGUI ] --
 
@@ -287,20 +289,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
     }
   }
   
-  // Added Material
-  {
-    size_t                count = 0;
-    Nil::Data::Renderable   *data = nullptr;
-    Nil::Node             *node = nullptr;
-    
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      
-    }
-  }
-  
   // Developer Thingy
   {
     size_t                count = 0;
@@ -317,173 +305,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       }
     }
   }
-  
-  /*
-    Remove data first
-  */
-  {
-    size_t                count = 0;
-    Nil::Data::Renderable   *data = nullptr;
-    Nil::Node             *node = nullptr;
-    
-    Nil::Data::events(Nil::Data::Event::REMOVED, &count, &data, &node);
-  
-    for(size_t i = 0; i < count; ++i)
-    {
-      for(size_t i = 0; i < self->renderable_node_ids.size(); ++i)
-      {
-        if(node[i].get_id() == self->renderable_node_ids[i])
-        {
-          self->renderable_node_ids.erase(self->renderable_node_ids.begin() + i);
-          self->renderables.erase(self->renderables.begin() + i);
-          break;
-        }
-      }
-    }
-  }
-  
-  // Remove camera
-  {
-    size_t            count = 0;
-    Nil::Data::Camera *data = nullptr;
-    Nil::Node         *node = nullptr;
-    
-    Nil::Data::events(Nil::Data::Event::REMOVED, &count, &data, &node);
-  
-    for(size_t i = 0; i < count; ++i)
-
-    {
-      for(size_t i = 0; i < self->camera_node_ids.size(); ++i)
-      {
-        if(node[i].get_id() == self->camera_node_ids[i])
-        {
-          self->camera_node_ids.erase(self->camera_node_ids.begin() + i);
-          self->rov_camera.erase(self->rov_camera.begin() + i);
-        }
-      }
-    }
-  }
-
-  /*
-    Update or insert new data
-  */
-  {
-    auto add_or_insert = [](Data* self, const Nil::Node *node, size_t count)
-    {
-      for(size_t i = 0; i < count; ++i)
-      {
-        Nil::Data::Transform trans{};
-        Nil::Data::get(node[i], trans, true);
-
-        Nil::Data::Renderable mat{};
-        Nil::Data::get(node[i], mat);
-
-        Nil::Data::Mesh mesh{};
-
-        if(Nil::Data::has_mesh(node[i]))
-        {
-          Nil::Data::get(node[i], mesh);
-        }
-
-        Data::ROV_Renderable rov_render
-        {
-          (uint8_t)mat.shader,
-          math::mat4_from_nil_transform(trans),
-          mesh.mesh_id,
-          mat.texture_01,
-        };
-
-        memcpy(rov_render.color, mat.color, sizeof(Nil::Data::Renderable::color));
-        /*
-          Check to see if we have it already.
-        */
-        bool insert_new_data = true;
-
-        for(size_t j = 0; j < self->renderable_node_ids.size(); ++j)
-        {
-          if(self->renderable_node_ids[j] == node[i].get_id())
-          {
-            self->renderables[j] = rov_render;
-            insert_new_data = false;
-            break;
-          }
-        }
-
-        if(insert_new_data)
-        {
-          self->renderable_node_ids.emplace_back(node[i].get_id());
-          self->renderables.emplace_back(rov_render);
-        }
-      }
-    };
-  
-    size_t                count = 0;
-    Nil::Data::Renderable   *data = nullptr;
-    Nil::Node             *node = nullptr;
-    
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
-    add_or_insert(self, node, count);
-    
-    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &node);
-    add_or_insert(self, node, count);
-  }
-
-  // Camera
-  {
-    auto add_or_insert = [](Data* self, const Nil::Node *node, size_t count)
-    {
-      for(size_t i = 0; i < count; ++i)
-      {
-        Nil::Data::Transform trans{};
-        Nil::Data::get(node[i], trans, true);
-
-        Nil::Data::Camera cam_data{};
-        Nil::Data::get(node[i], cam_data);
-
-        uint32_t clear_flags = 0;
-        if(cam_data.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
-        if(cam_data.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
-
-        const Data::ROV_Camera rov_camera
-        {
-          math::mat4_lookat_from_nil_transform(trans),
-          math::mat4_projection_from_nil_camera(cam_data, self->current_viewport),
-          clear_flags
-        };
-
-        /*
-          Check to see if we have it already.
-        */
-        bool insert_new_data = true;
-
-        for(size_t j = 0; j < self->camera_node_ids.size(); ++j)
-        {
-          if(self->camera_node_ids[j] == node[i].get_id())
-          {
-            self->rov_camera[j] = rov_camera;
-            insert_new_data = false;
-            break;
-          }
-        }
-
-        if(insert_new_data)
-        {
-          self->camera_node_ids.emplace_back(node[i].get_id());
-          self->rov_camera.emplace_back(rov_camera);
-        }
-      }
-    };
-  
-    size_t                count = 0;
-    Nil::Data::Camera     *data = nullptr;
-    Nil::Node             *node = nullptr;
-    
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
-    add_or_insert(self, node, count);
-    
-    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &node);
-    add_or_insert(self, node, count);
-  }
 }
 
 
@@ -497,7 +318,6 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   LIB_ASSERT(self);
 
   rmt_ScopedCPUSample(ROV_EarlyThink, 0);
-
 
   /*
     Resources
@@ -572,8 +392,15 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   if(self->has_initialized)
   {
-    for(auto &cam : self->rov_camera)
+    size_t cam_count = 0;
+    Nil::Data::Camera *cameras;
+    
+    Nil::Data::get(&cam_count, &cameras);
+    
+    for(uint32_t j = 0; j < cam_count; ++j)
     {
+      Nil::Data::Camera cam = cameras[j];
+      
       #ifdef IMGIZMO_DEVELOPER_SUPPORT
       float world_mat[16];
       math::mat4_to_array(self->renderables.front().world, world_mat);
@@ -588,32 +415,49 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         world_mat
       );
       #endif
+      
+      uint32_t clear_flags = 0;
+      if(cam.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
+      if(cam.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
 
       const uint32_t viewport[4] {0,0,self->current_viewport[0], self->current_viewport[1]};
+      
+      const math::mat4 proj = math::mat4_projection(cam.width * self->current_viewport[0], cam.height * self->current_viewport[1], cam.near_plane, cam.far_plane, cam.fov);
+      
 
       rov_startRenderPass(
-        math::mat4_get_data(cam.view),
-        math::mat4_get_data(cam.proj),
+        cam.view_mat,
+        math::mat4_get_data(proj),
         viewport,
-        cam.clear_flags);
+        clear_flags
+      );
 
-      for(auto &render : self->renderables)
+      size_t renderable_count = 0;
+      Nil::Data::Renderable *renderables;
+      
+      Nil::Data::get(&renderable_count, &renderables);
+    
+
+      for(size_t i = 0; i < renderable_count; ++i)
       {
+        Nil::Data::Renderable render = renderables[i];
+      
         if(self->mesh_ids.size() > render.mesh_id)
         {
           rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
-          rov_setShader(render.shader_type);
+          rov_setShader(rovShader_Lit);
+          
           rov_setMesh(self->mesh_ids[render.mesh_id]);
           
-          if(render.texture_01_id)
+          if(render.texture_01)
           {
-            rov_setTexture(self->texture_ids[render.texture_01_id], 0);
+            rov_setTexture(self->texture_ids[render.texture_01], 0);
           }
           
-          rov_submitMeshTransform(math::mat4_get_data(render.world));
+          rov_submitMeshTransform(render.world_mat);
         }
       }
-
+      
       // debug_lines
       if(self->debug_lines)
       {
