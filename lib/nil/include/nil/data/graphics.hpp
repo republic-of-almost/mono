@@ -38,6 +38,10 @@ struct Graphics
 
 
 void
+get(size_t *count, Graphics **data);
+
+
+void
 get(const Node &node, Graphics &out);
 
 

@@ -32,6 +32,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Rigidbody **data)
+{
+  *count = get_rb_data().data.size();
+  *data = get_rb_data().data.data();
+}
+
+
+void
 get(const Node &node, Rigidbody &out)
 {
   get_rb_data().get_data(node, out);

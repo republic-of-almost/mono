@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Keyboard **data)
+{
+  *count = get_kb_data().data.size();
+  *data = get_kb_data().data.data();
+}
+
+
+void
 get(const Node &node, Keyboard &out)
 {
   get_kb_data().get_data(node, out);

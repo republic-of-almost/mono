@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Gamepad **data)
+{
+  *count = get_gamepad_data().data.size();
+  *data = get_gamepad_data().data.data();
+}
+
+
+void
 get(const Node &node, Gamepad &out)
 {
   get_gamepad_data().get_data(node, out);

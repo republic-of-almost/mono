@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Resource **data)
+{
+  *count = get_rsrc_data().data.size();
+  *data = get_rsrc_data().data.data();
+}
+
+
+void
 get(const Node &node, Resource &out)
 {
   get_rsrc_data().get_data(node, out);

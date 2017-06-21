@@ -24,6 +24,10 @@ struct Rigidbody
 
 
 void
+get(size_t *count, Rigidbody **data);
+
+
+void
 get(const Node &node, Rigidbody &out);
 
 

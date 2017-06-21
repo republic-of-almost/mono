@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Mouse **data)
+{
+  *count = get_ms_data().data.size();
+  *data = get_ms_data().data.data();
+}
+
+
+void
 get(const Node &node, Mouse &out)
 {
   get_ms_data().get_data(node, out);

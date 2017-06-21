@@ -30,6 +30,10 @@ struct Mouse
 
 
 void
+get(size_t *count, Mouse **data);
+
+
+void
 get(const Node &node, Mouse &out);
 
 

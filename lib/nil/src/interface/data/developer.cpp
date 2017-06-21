@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Developer **data)
+{
+  *count = get_developer_data().data.size();
+  *data = get_developer_data().data.data();
+}
+
+
+void
 get(const Node &node, Developer &out)
 {
   get_developer_data().get_data(node, out);

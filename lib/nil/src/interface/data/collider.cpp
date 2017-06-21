@@ -31,6 +31,15 @@ namespace Data {
 
 
 void
+get(size_t *count, Collider **data)
+{
+  *count = get_collider_data().data.size();
+  *data = get_collider_data().data.data();
+}
+
+
+
+void
 get(const Node &node, Collider &out)
 {
   get_collider_data().get_data(node, out);

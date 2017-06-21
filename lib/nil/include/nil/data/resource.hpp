@@ -39,6 +39,10 @@ struct Resource
 
 
 void
+get(size_t *count, Resource **data);
+
+
+void
 get(const Node &node, Resource &out);
 
 

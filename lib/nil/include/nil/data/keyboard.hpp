@@ -168,6 +168,10 @@ struct Keyboard
 
 
 void
+get(size_t *count, Keyboard **data);
+
+
+void
 get(const Node &node, Keyboard &out);
 
 

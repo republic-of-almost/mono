@@ -28,6 +28,10 @@ struct Mesh
 
 
 void
+get(size_t *count, Mesh **data);
+
+
+void
 get(const Node &node, Mesh &out);
 
 

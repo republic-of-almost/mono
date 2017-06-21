@@ -34,6 +34,10 @@ struct Developer
 
 
 void
+get(size_t *count, Developer **data);
+
+
+void
 get(const Node &node, Developer &out);
 
 

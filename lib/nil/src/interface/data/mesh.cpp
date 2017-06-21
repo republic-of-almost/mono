@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Mesh **data)
+{
+  *count = get_mesh_data().data.size();
+  *data = get_mesh_data().data.data();
+}
+
+
+void
 get(const Node &node, Mesh &out)
 {
   get_mesh_data().get_data(node, out);
