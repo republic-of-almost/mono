@@ -2,7 +2,9 @@
 #include <nil/data/window.hpp>
 #include <nil/data/developer.hpp>
 #include <nil/data/mouse.hpp>
+#include <nil/data/light.hpp>
 #include <nil/data/keyboard.hpp>
+#include <nil/data/transform.hpp>
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
@@ -16,6 +18,7 @@
 
 #include <lib/model.hpp>
 #include <stb/stb_image.h>
+#include <math/geometry/misc.hpp>
 
 
 namespace Game_data {
@@ -146,6 +149,31 @@ load_assets()
       Nil::Data::set(child, mat);
     }
   }
+  
+  lib::model lights = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/lights.obj");
+  {
+    Nil::Node asset;
+    asset.set_parent(assets);
+    asset.set_name("Lights");
+    
+    for(uint32_t i = 0; i < lights.mesh_count; ++i)
+    {
+      Nil::Node child;
+      child.set_parent(asset);
+      child.set_name(lights.name[i]);
+      
+      const math::vec3 origin = math::get_vec3_origin(lights.verts[i], lights.triangle_count[i]);
+      
+      Nil::Data::Transform trans;
+      memcpy(trans.position, origin.data, sizeof(trans.position));
+      
+      Nil::Data::set(child, trans);
+      
+      Nil::Data::Light light;
+      Nil::Data::set(child, light);
+    }
+  }
+  
 }
 
 
