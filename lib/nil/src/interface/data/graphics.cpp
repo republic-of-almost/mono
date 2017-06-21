@@ -56,6 +56,14 @@ remove_graphics(Node &node)
 // ----------------------------------------------------------------- [ Info ] --
 
 
+void
+get(size_t *count, Graphics **data)
+{
+  *count = get_graphics_data().data.size();
+  *data = get_graphics_data().data.data();
+}
+
+
 bool
 has_graphics(const Node &node)
 {

@@ -60,6 +60,10 @@ struct Collider
 
 
 void
+get(size_t *count, Collider **data);
+
+
+void
 get(const Node &node, Collider &out);
 
 

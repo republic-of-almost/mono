@@ -32,6 +32,10 @@ struct Audio
 
 
 void
+get(size_t *count, Audio **data);
+
+
+void
 get(const Node &node, Audio &out);
 
 

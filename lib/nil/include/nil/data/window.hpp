@@ -29,6 +29,10 @@ struct Window
 
 
 void
+get(size_t *out_count, Window **out_resource);
+
+
+void
 get(const Node &node, Window &out);
 
 

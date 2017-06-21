@@ -35,6 +35,14 @@ namespace Data {
 
 
 void
+get(size_t *out_count, Window **out_resource)
+{
+  *out_count    = get_win_data().data.size();
+  *out_resource = get_win_data().data.data();
+}
+
+
+void
 get(const Node &node, Window &out)
 {
   get_win_data().get_data(node, out);

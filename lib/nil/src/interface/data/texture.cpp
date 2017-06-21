@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Texture **data)
+{
+  *count = get_texture_data().data.size();
+  *data = get_texture_data().data.data();
+}
+
+
+void
 get(const Node &node, Texture &out)
 {
   get_texture_data().get_data(node, out);

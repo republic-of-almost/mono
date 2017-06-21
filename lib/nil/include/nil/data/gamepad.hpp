@@ -37,6 +37,10 @@ struct Gamepad
 
 
 void
+get(size_t *count, Gamepad **data);
+
+
+void
 get(const Node &node, Gamepad &out);
 
 

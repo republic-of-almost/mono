@@ -40,6 +40,10 @@ struct Texture
 
 
 void
+get(size_t *count, Texture **data);
+
+
+void
 get(const Node &node, Texture &out);
 
 

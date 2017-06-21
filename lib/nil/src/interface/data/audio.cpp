@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Audio **data)
+{
+  *count = get_audio_data().data.size();
+  *data = get_audio_data().data.data();
+}
+
+
+void
 get(const Node &node, Audio &out)
 {
   get_audio_data().get_data(node, out);

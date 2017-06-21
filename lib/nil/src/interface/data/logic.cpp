@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Logic **data)
+{
+  *count = get_logic_data().data.size();
+  *data = get_logic_data().data.data();
+}
+
+
+void
 get(const Node &node, Logic &out)
 {
   get_logic_data().get_data(node, out);

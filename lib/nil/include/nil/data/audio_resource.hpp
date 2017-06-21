@@ -27,6 +27,10 @@ struct Audio_resource
 
 
 void
+get(size_t *count, Audio_resource **data);
+
+
+void
 get(const Node &node, Audio_resource &data);
 
 

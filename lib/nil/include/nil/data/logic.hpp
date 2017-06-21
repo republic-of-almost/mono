@@ -38,6 +38,10 @@ struct Logic
 
 
 void
+get(size_t *count, Logic **data);
+
+
+void
 get(const Node &node, Logic &out);
 
 
