@@ -9,6 +9,11 @@
 // -------------------------------------------------------- [ Types and ID's] --
 
 
+using rovMat4     = float[16];
+using rovVec3     = float[3];
+using rovViewport = uint32_t[4];
+using rovColor    = float[4];
+
 constexpr uint32_t rovPixel_R8        = 1;
 constexpr uint32_t rovPixel_RG8       = 2;
 constexpr uint32_t rovPixel_RGB8      = 3;
@@ -19,9 +24,40 @@ constexpr uint32_t rovClearFlag_Depth = 2;
 
 constexpr uint32_t rovInputFormat_PNT = 1;
 
-constexpr uint32_t rovShader_Fullbright = 1;
-constexpr uint32_t rovShader_Lit        = 2;
-constexpr uint32_t rovShader_DirLight   = 3;
+constexpr uint32_t rovShader_Fullbright = 0;
+constexpr uint32_t rovShader_Lit        = 1;
+constexpr uint32_t rovShader_DirLight   = 2;
+constexpr uint32_t rovShader_Count      = 3;
+
+
+struct rovLight
+{
+  rovColor color;
+  
+  float amb_amount;
+  float diff_amount;
+  
+  enum TYPE { DIR, POINT } type;
+  
+  union {
+    struct
+    {
+      rovVec3 position;
+      
+      float constant_atten;
+      float linear_atten;
+      float exp_atten;
+      
+    } point;
+    
+    struct
+    {
+      rovVec3 direction;
+    
+    } dir;
+  };
+  
+};
 
 
 // ------------------------------------------------------------- [ Lifetime ] --
@@ -48,14 +84,18 @@ uint32_t    rov_createMesh(
               const float *tex_coords,
               size_t count);
 
+uint32_t    rov_createLights(
+              rovLight *lights,
+              size_t count);
+
 
 // ----------------------------------------------------------- [ Renderpass ] --
 
 
 void        rov_startRenderPass(
-              const float view[16],
-              const float proj[16],
-              const uint32_t viewport[4],
+              const rovMat4 view,
+              const rovMat4 proj,
+              const rovViewport viewport,
               uint32_t clear_flags);
 
 
@@ -67,6 +107,7 @@ void        rov_setCamera(const float view[16], const float proj[16]);
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);
 void        rov_setShader(uint32_t shader_id);
+void        rov_setLights(const rovLight *lights, size_t light_count);
 
 
 // ---------------------------------------------------- [ Dbg Line Renderer ] --

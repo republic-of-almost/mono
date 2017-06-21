@@ -7,9 +7,6 @@
 
 namespace ROV_Internal
 {
-  using rovMat4 = float[16];
-  using rovVec3 = float[3];
-
   struct Camera
   {
     rovMat4 view;
@@ -39,8 +36,7 @@ namespace ROV_Internal
   {
     rovMat4 view;
     rovMat4 proj;
-
-    uint32_t viewport[4];
+    rovViewport viewport;
 
     uint32_t clear_flags;
 

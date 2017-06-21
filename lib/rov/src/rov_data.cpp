@@ -4,13 +4,8 @@
 */
 
 #include <rov/rov.hpp>
-#include <remotery/Remotery.h>
 #include <vector>
-#include <string>
-#include <stdio.h>
 #include <lib/utilities.hpp>
-#include <math/math.hpp>
-#include <GL/gl3w.h>
 #include "rov_platform_exec.hpp"
 
 namespace
@@ -70,21 +65,22 @@ namespace
 
 
 void
-rov_startRenderPass(const float view[16], const float proj[16], const uint32_t viewport[4], uint32_t clear_flags)
+rov_startRenderPass(
+  const rovMat4 view,
+  const rovMat4 proj,
+  const rovViewport viewport,
+  uint32_t clear_flags)
 {
   rov_render_passes.emplace_back();
+  ROV_Internal::rovRenderPass *rp = &rov_render_passes.back();
 
-  memcpy(rov_render_passes.back().view, view, sizeof(float) * 16);
-  memcpy(rov_render_passes.back().proj, proj, sizeof(float) * 16);
+  memcpy(rp->view, view, sizeof(rovMat4));
+  memcpy(rp->proj, proj, sizeof(rovMat4));
+  memcpy(rp->viewport, viewport, sizeof(rovViewport));
 
-  memcpy(rov_render_passes.back().viewport, viewport, sizeof(ROV_Internal::rovRenderPass::viewport));
+  rp->clear_flags = clear_flags;
 
-  rov_render_passes.back().clear_flags = clear_flags;
-
-  ROV_Internal::rovMaterial mat{};
-  mat.material = rov_curr_material();
-
-  rov_render_passes.back().materials.push_back(mat);
+  rp->materials.emplace_back(rov_curr_material(), size_t{0});
 }
 
 
@@ -121,7 +117,26 @@ rov_setMesh(uint32_t mesh_id)
 void
 rov_setShader(uint32_t shader_type)
 {
+  // -- Param Check -- //
+  LIB_ASSERT(shader_type < rovShader_Count);
+
   curr_rov_mesh_shader = shader_type;
+}
+
+
+namespace
+{
+  const size_t max_lights = 5;
+  size_t curr_light_count = 0;
+  rovLight curr_lights[max_lights];
+} // anon ns
+
+
+void
+rov_setLights(const rovLight *lights, size_t light_count)
+{
+  curr_light_count = max_lights < light_count ? max_lights : light_count;
+  memcpy(curr_lights, lights, curr_light_count);
 }
 
 
@@ -132,11 +147,11 @@ void
 rov_submitLine(const float start[3], const float end[3])
 {
   ROV_Internal::rovLineDrawCall dc;
-  memcpy(dc.start, start, sizeof(ROV_Internal::rovVec3));
-  memcpy(dc.end, end, sizeof(ROV_Internal::rovVec3));
-  memcpy(dc.color, curr_rov_clear_color, sizeof(ROV_Internal::rovVec3));
+  memcpy(dc.start, start, sizeof(rovVec3));
+  memcpy(dc.end, end, sizeof(rovVec3));
+  memcpy(dc.color, curr_rov_clear_color, sizeof(rovVec3));
 
-  rov_render_passes.back().line_draw_calls.push_back(dc);
+  rov_render_passes.back().line_draw_calls.emplace_back(dc);
 }
 
 
