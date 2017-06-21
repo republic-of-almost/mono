@@ -139,7 +139,7 @@ load_assets()
       Nil::Data::set(child, mesh_instance);
       
       Nil::Data::Renderable mat{};
-      mat.shader = Nil::Data::Renderable::DIR_LIGHT;
+      mat.shader = Nil::Data::Renderable::LIT;
       mat.color[0] = 0.6f;
       mat.color[1] = 0.1f;
       mat.color[2] = 0.2f;
