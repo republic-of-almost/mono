@@ -360,6 +360,7 @@ namespace
 namespace
 {
   GLuint dummy_tex = 0; // dummy buffer for
+  size_t dummy_count = 0;
 }
 
 
@@ -551,12 +552,11 @@ rov_initialize()
   }
   #endif
 
+  // DUMMY LIGHT
 
-  // DUMMY
-  
-  #ifdef GL_HAS_VAO
-  glBindVertexArray(vao);
-  #endif
+  rovLight light_data[] = {
+    { {0.f,5.f,0.f}, {1,1,0}, 0.f, 4.f, 4.f, 0.01f, 0.14f, 0.07f },
+  };
   
   GLuint dummy_buffer;
   glGenTextures(1, &dummy_buffer);
@@ -564,12 +564,12 @@ rov_initialize()
   glBindTexture(GL_TEXTURE_1D, dummy_buffer);
   glTexImage1D(GL_TEXTURE_1D,
                      0,
-                     GL_RGB,
-                     10,
+                     GL_RGBA32F,
+                     512,
                      0,
-                     GL_RGB,
-                     GL_UNSIGNED_BYTE,
-                     nullptr);
+                     GL_RGBA,
+                     GL_FLOAT,
+                     light_data);
   
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -587,6 +587,24 @@ rov_destroy()
 
 
 namespace ROV_Internal {
+
+
+uint32_t
+api_light_buffer(const rovLight lights[], const size_t count)
+{
+  dummy_count = count;
+  
+  glBindTexture(GL_TEXTURE_1D, dummy_tex);
+  glTexSubImage1D(GL_TEXTURE_1D,
+                0,
+                0,
+                count * 4,
+                GL_RGBA,
+                GL_FLOAT,
+                lights);
+  
+  return 1;
+}
 
 
 void
@@ -699,7 +717,7 @@ api_execute(const rovRenderPass passes[], const size_t pass_count)
         */
         if(shd.uni_buffer_01 != -1)
         {
-          glUniform1i(shd.uni_light_count, 0);
+          glUniform1i(shd.uni_light_count, dummy_count);
         
           glActiveTexture(GL_TEXTURE0 + texture_slots);
           glBindTexture(GL_TEXTURE_1D, dummy_tex);

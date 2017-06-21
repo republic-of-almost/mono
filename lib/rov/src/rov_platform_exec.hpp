@@ -55,6 +55,9 @@ void
 api_execute(const rovRenderPass passes[], const size_t pass_count);
 
 
+uint32_t
+api_light_buffer(const rovLight lights[], const size_t light_count);
+
 }
 
 

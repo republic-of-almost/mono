@@ -126,17 +126,16 @@ rov_setShader(uint32_t shader_type)
 
 namespace
 {
-  const size_t max_lights = 5;
-  size_t curr_light_count = 0;
-  rovLight curr_lights[max_lights];
+  uint32_t curr_light_buffer = 0;
+  
+  
 } // anon ns
 
 
 void
 rov_setLights(const rovLight *lights, size_t light_count)
 {
-  curr_light_count = max_lights < light_count ? max_lights : light_count;
-  memcpy(curr_lights, lights, curr_light_count);
+  curr_light_buffer = ROV_Internal::api_light_buffer(lights, light_count);
 }
 
 

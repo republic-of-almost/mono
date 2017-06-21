@@ -32,31 +32,16 @@ constexpr uint32_t rovShader_Count      = 3;
 
 struct rovLight
 {
-  rovColor color;
-  
-  float amb_amount;
-  float diff_amount;
-  
-  enum TYPE { DIR, POINT } type;
-  
-  union {
-    struct
-    {
-      rovVec3 position;
-      
-      float constant_atten;
-      float linear_atten;
-      float exp_atten;
-      
-    } point;
-    
-    struct
-    {
-      rovVec3 direction;
-    
-    } dir;
-  };
-  
+  rovVec3 position;
+  rovVec3 color;
+
+  float ambient;
+  float diffuse;
+  float specular;
+
+  float atten_constant;
+  float atten_linear;
+  float atten_exp;
 };
 
 
