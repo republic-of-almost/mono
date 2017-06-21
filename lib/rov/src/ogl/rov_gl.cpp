@@ -2,7 +2,7 @@
 
 
 #include <rov/rov.hpp>
-#include <remotery/Remotery.h>
+#include <lib/bench.hpp>
 #include <string>
 #include <stdio.h>
 #include <lib/utilities.hpp>
@@ -646,7 +646,7 @@ api_execute(const rovRenderPass passes[], const size_t pass_count)
     */
     size_t dc_index = 0;
     
-    rmt_BeginOpenGLSample(MeshRender);
+    BENCH_PUSH_GPU(MeshRender);
     
     GLuint last_shd = 0;
 
@@ -829,12 +829,12 @@ api_execute(const rovRenderPass passes[], const size_t pass_count)
       }
     } // For amts
     
-    rmt_EndOpenGLSample();
+    BENCH_POP_GPU;
 
     // Line Renderer
     #ifdef GL_HAS_GEO_SHD
     {
-      rmt_ScopedOpenGLSample(DebugLineRender);
+      BENCH_SCOPED_GPU(DebugLineRender);
     
       glUseProgram(rov_line_shaders[0].program);
       glBindBuffer(GL_ARRAY_BUFFER, 0);

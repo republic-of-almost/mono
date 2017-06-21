@@ -12,9 +12,7 @@
 #include <lib/utilities.hpp>
 
 
-#ifndef NBENCHMARK
-#include <remotery/Remotery.h>
-#endif
+#include <lib/bench.hpp>
 
 
 namespace Nil_ext {
@@ -194,7 +192,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
   
-  rmt_ScopedCPUSample(Logic_Think, 0);
+  BENCH_SCOPED_CPU(Logic_Think)
 
   Nil::Node root = Nil::Node(0, false);
 
