@@ -26,6 +26,7 @@ inline transform    transform_init();
 inline transform    transform_init(const vec3 position, const vec3 scale, const quat &rotation);
 inline transform    transform_init_from_world_matrix(const mat4 &matrix);
 inline mat4         transform_get_world_matrix(const transform &transform);
+inline mat4         transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up);
 inline void         transform_set_with_world_matrix(transform &transform, const mat4 &matrix);
 inline transform    transform_inherited(const transform &parent, const transform &child);
 
@@ -131,6 +132,16 @@ transform_get_world_matrix(const transform &to_world)
   return mat4_multiply(scale, rotation, translation);
 }
 
+
+mat4
+transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up)
+{
+  const math::vec3 cam_fwd  = math::quat_rotate_point(to_view.rotation, world_fwd);
+  const math::vec3 look_fwd = math::vec3_add(to_view.position, cam_fwd);
+  const math::vec3 look_up  = math::quat_rotate_point(to_view.rotation, world_up);
+
+  return math::mat4_lookat(to_view.position, look_fwd, look_up);
+}
 
 _MATH_NS_CLOSE
 

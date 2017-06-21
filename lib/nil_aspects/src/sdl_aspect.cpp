@@ -136,8 +136,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       {
         self->mouse_captured = data[i].capture;
         self->mouse_input_nodes.emplace_back(nodes[i]);
-
-        SDL_SetRelativeMouseMode(data[i].capture ? SDL_TRUE : SDL_FALSE);
+        
+        const SDL_bool capture = data[i].capture ? SDL_TRUE : SDL_FALSE;
+        
+//        SDL_SetWindowGrab(self->sdl_window, capture);
+        SDL_SetRelativeMouseMode(capture);
       }
     }
   }
@@ -156,7 +159,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       {
         self->mouse_captured = data[i].capture;
 
-        SDL_SetRelativeMouseMode(data[i].capture ? SDL_TRUE : SDL_FALSE);
+        const SDL_bool capture = data[i].capture ? SDL_TRUE : SDL_FALSE;
+        
+//        SDL_SetWindowGrab(self->sdl_window, capture);
+        SDL_SetRelativeMouseMode(capture);
       }
     }
   }
@@ -350,8 +356,8 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         #ifdef __EMSCRIPTEN__
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         #endif
@@ -668,7 +674,6 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
     #endif
 
     SDL_Event evt;
-    
     
     while (SDL_PollEvent(&evt))
     {

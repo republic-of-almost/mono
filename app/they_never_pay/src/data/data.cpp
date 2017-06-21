@@ -2,7 +2,9 @@
 #include <nil/data/window.hpp>
 #include <nil/data/developer.hpp>
 #include <nil/data/mouse.hpp>
+#include <nil/data/light.hpp>
 #include <nil/data/keyboard.hpp>
+#include <nil/data/transform.hpp>
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
@@ -11,11 +13,12 @@
 #include <nil/data/texture_resource.hpp>
 #include <nil/data/mesh_resource.hpp>
 #include <nil/data/mesh.hpp>
-#include <nil/data/material.hpp>
+#include <nil/data/renderable.hpp>
 #include <assets/cube_mesh.hpp>
 
 #include <lib/model.hpp>
 #include <stb/stb_image.h>
+#include <math/geometry/misc.hpp>
 
 
 namespace Game_data {
@@ -111,7 +114,7 @@ load_assets()
       
       Nil::Data::Texture_resource tex_data{};
       tex_data.data       = img_data;
-      tex_data.id         = i + 1;
+      tex_data.id         = ++counter;
       tex_data.dimentions = 2;
       tex_data.compoents  = c;
       tex_data.width      = x;
@@ -135,16 +138,42 @@ load_assets()
       
       Nil::Data::set(child, mesh_instance);
       
-      Nil::Data::Material mat{};
-      mat.shader = Nil::Data::Material::DIR_LIGHT;
+      Nil::Data::Renderable mat{};
+      mat.shader = Nil::Data::Renderable::DIR_LIGHT;
       mat.color[0] = 0.6f;
       mat.color[1] = 0.1f;
       mat.color[2] = 0.2f;
       mat.color[3] = 1.f;
       mat.texture_01 = tex_data.id;
+      mat.mesh_id = mesh.id;
       Nil::Data::set(child, mat);
     }
   }
+  
+  lib::model lights = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/lights.obj");
+  {
+    Nil::Node asset;
+    asset.set_parent(assets);
+    asset.set_name("Lights");
+    
+    for(uint32_t i = 0; i < lights.mesh_count; ++i)
+    {
+      Nil::Node child;
+      child.set_parent(asset);
+      child.set_name(lights.name[i]);
+      
+      const math::vec3 origin = math::get_vec3_origin(lights.verts[i], lights.triangle_count[i]);
+      
+      Nil::Data::Transform trans;
+      memcpy(trans.position, origin.data, sizeof(trans.position));
+      
+      Nil::Data::set(child, trans);
+      
+      Nil::Data::Light light;
+      Nil::Data::set(child, light);
+    }
+  }
+  
 }
 
 

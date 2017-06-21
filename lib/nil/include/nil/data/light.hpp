@@ -32,10 +32,18 @@ struct Light
   uint32_t type;
   uint8_t color[3];
   float attenuation;
+  
+  // -- Output -- //
+  
+  float position[3];
 };
 
 
 // -------------------------------------------------------------- [ Get/Set ] --
+
+
+void
+get(size_t *count, Light **out);
 
 
 void

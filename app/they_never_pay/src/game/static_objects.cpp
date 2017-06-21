@@ -1,6 +1,6 @@
 #include <game/static_objects.hpp>
 #include <nil/data/transform.hpp>
-#include <nil/data/material.hpp>
+#include <nil/data/renderable.hpp>
 #include <nil/data/mesh.hpp>
 #include <nil/data/mesh_resource.hpp>
 #include <lib/logging.hpp>
@@ -38,14 +38,14 @@ setup(Static_objects *obj)
   
   // Material
   {
-    Nil::Data::Material material{};
+    Nil::Data::Renderable material{};
     
     const float color[] = {0.5f, 0.f, 0.5f, 1.f};
     memcpy(material.color, color, sizeof(material.color));
     
     LOG_TODO_ONCE("Get rid of magic number");
     
-    material.shader = Nil::Data::Material::FULLBRIGHT;
+    material.shader = Nil::Data::Renderable::FULLBRIGHT;
     
     Nil::Data::set(obj->object, material);
   }

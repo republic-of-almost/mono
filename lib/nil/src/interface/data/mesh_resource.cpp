@@ -32,6 +32,14 @@ namespace Data {
 
 
 void
+get(size_t *out_count, Mesh_resource **out_resource)
+{
+  *out_count    = get_mesh_rsrc_data().data.size();
+  *out_resource = get_mesh_rsrc_data().data.data();
+}
+
+
+void
 get(const Node &node, Mesh_resource &out)
 {
   get_mesh_rsrc_data().get_data(node, out);

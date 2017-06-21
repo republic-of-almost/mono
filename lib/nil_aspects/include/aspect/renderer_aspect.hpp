@@ -6,13 +6,7 @@
 #include <nil/node.hpp>
 #include <math/math.hpp>
 #include <lib/utilities.hpp>
-#include <vector>
-
-
-// ----------------------------------------------- [ Renderer Aspect Config ] --
-
-
-#define IMGUI_DEVELOPER_SUPPORT
+#include <rov/rov.hpp>
 
 
 namespace Nil_ext {
@@ -26,54 +20,14 @@ struct Data
 {
   uint32_t current_viewport[2];
 
-  // Meshes //
-
-  std::vector<uint32_t> mesh_ids;
-  std::vector<Nil::Node> pending_mesh_load;
-  
-  std::vector<uint32_t> texture_ids;
-  std::vector<Nil::Node> pending_texture_load;
-  
+  lib::array<uint32_t> mesh_ids;
+  lib::array<uint32_t> texture_ids;
   
   Nil::Node debug_lines = Nil::Node(nullptr);
   
-  // Camera //
-  
-  struct ROV_Camera
-  {
-    math::mat4 view;
-    math::mat4 proj;
-    
-    uint32_t clear_flags;
-  };
-
-  std::vector<uint32_t> camera_node_ids;
-  std::vector<ROV_Camera> rov_camera;
-  
-  // Draw Calls //
-  
-  struct ROV_Renderable
-  {
-    uint8_t shader_type;
-    math::mat4 world;
-    uint32_t mesh_id;
-    uint32_t texture_01_id;
-    
-    float color[4];
-  };
-
-  
-  std::vector<uint32_t> renderable_node_ids;
-  std::vector<ROV_Renderable> renderables;
-  
   bool has_initialized = false;
-  bool process_pending = true;
-
-  #ifdef IMGUI_DEVELOPER_SUPPORT
-  Nil::Node dev_node;
-  bool renderer_show_info;
-  bool renderer_show_settings;
-  #endif
+  
+  lib::array<rovLight> lights;
 };
 
 

@@ -22,7 +22,6 @@ namespace Data {
 struct Mesh_resource
 {
   uint32_t id;
-  uint32_t status;
   
   float *position_vec3;
   float *normal_vec3;
@@ -30,10 +29,18 @@ struct Mesh_resource
   float *color_vec4;
   
   size_t count;
+  
+  // -- Output -- //
+  
+  enum { PENDING, LOADED, FAILED, } status;
 };
 
 
 // -------------------------------------------------------------- [ Get/Set ] --
+
+
+void
+get(size_t *out_count, Mesh_resource **out_resource);
 
 
 void

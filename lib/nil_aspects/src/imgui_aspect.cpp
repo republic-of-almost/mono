@@ -852,7 +852,19 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       if(ImGui::CollapsingHeader("Light"))
       {
-        ImGui::Text("No UI Impl");
+        Nil::Data::Light light{};
+        Nil::Data::get(self->inspector_node, light);
+        
+        bool updated_light = false;
+        
+        
+        ImGui::Text("* Readonly");
+        ImGui::DragFloat3("*Position", light.position, ImGuiInputTextFlags_ReadOnly);
+        
+        if(updated_light)
+        {
+          Nil::Data::set(self->inspector_node, light);
+        }
       }
     }
 
@@ -885,11 +897,11 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     /*
       Material
     */
-    if(Nil::Data::has_material(self->inspector_node))
+    if(Nil::Data::has_renderable(self->inspector_node))
     {
-      if(ImGui::CollapsingHeader("Material"))
+      if(ImGui::CollapsingHeader("Renderable"))
       {
-        Nil::Data::Material mat{};
+        Nil::Data::Renderable mat{};
         Nil::Data::get(self->inspector_node, mat);
 
         bool update_mat = false;
@@ -908,6 +920,12 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         if(ImGui::InputInt("Texture 03", (int*)&mat.texture_03)) { update_mat = true; }
         if(ImGui::DragFloat2("UV Scale", mat.scale))             { update_mat = true; }
         if(ImGui::DragFloat2("UV Offset", mat.offset))           { update_mat = true; }
+        
+        // Outputs //
+        ImGui::InputFloat4("MatRow0", (float*)&mat.world_mat[0]);
+        ImGui::InputFloat4("MatRow1", (float*)&mat.world_mat[4]);
+        ImGui::InputFloat4("MatRow2", (float*)&mat.world_mat[8]);
+        ImGui::InputFloat4("MatRow3", (float*)&mat.world_mat[12]);
 
         if(update_mat)
         {
@@ -1305,9 +1323,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         }
         case(11):
         {
-          if(!Nil::Data::has_material(self->inspector_node))
+          if(!Nil::Data::has_renderable(self->inspector_node))
           {
-            Nil::Data::Material data{};
+            Nil::Data::Renderable data{};
             Nil::Data::set(self->inspector_node, data);
           }
           break;

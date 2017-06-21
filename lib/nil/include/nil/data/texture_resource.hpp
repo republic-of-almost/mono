@@ -22,14 +22,21 @@ struct Texture_resource
   uint32_t height;
   uint32_t depth;
   uint32_t dimentions;
-  uint32_t status;
     
   uint8_t *data;
   size_t sizeof_data;
+  
+  // -- Output -- //
+  
+  enum { PENDING, LOADED, FAILED, } status;
 };
 
 
 // -------------------------------------------------------------- [ Get/Set ] --
+
+
+void
+get(size_t *out_count, Texture_resource **out_resource);
 
 
 void

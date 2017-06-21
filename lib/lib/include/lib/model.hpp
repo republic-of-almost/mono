@@ -444,11 +444,13 @@ load_obj_from_file(
         */
         else if(strcmp("f", line) == 0)
         {
-          uint32_t index_list[9];
+          uint32_t index_list[9]{};
         
           // Vertex / texture / normal
+          
+          const long int pos = ftell(obj_file);
         
-          const int matched = fscanf(
+          int matched = fscanf(
             obj_file,
             "%d/%d/%d %d/%d/%d %d/%d/%d\n",
             &index_list[0],
@@ -466,8 +468,65 @@ load_obj_from_file(
           
           if(matched != 9)
           {
-            LOG_ERROR("Importer error, need positions, normals, and tex coords defined, and triangulated");
-            break;
+            fseek(obj_file, pos, SEEK_SET);
+            
+            memset(index_list, 0, sizeof(index_list));
+            
+            matched = fscanf(
+              obj_file,
+              "%d//%d %d//%d %d//%d\n",
+              &index_list[0],
+              &index_list[2],
+              
+              &index_list[3],
+              &index_list[5],
+              
+              &index_list[6],
+              &index_list[8]
+            );
+            
+            if(matched != 6)
+            {
+              fseek(obj_file, pos, SEEK_SET);
+            
+              memset(index_list, 0, sizeof(index_list));
+            
+              matched = fscanf(
+                obj_file,
+                "%d/%d %d/%d %d/%d\n",
+                &index_list[0],
+                &index_list[1],
+                
+                &index_list[3],
+                &index_list[4],
+                
+                &index_list[6],
+                &index_list[7]
+              );
+            }
+            
+            if(matched != 6)
+            {
+              fseek(obj_file, pos, SEEK_SET);
+            
+              memset(index_list, 0, sizeof(index_list));
+            
+              int matched = fscanf(
+                obj_file,
+                "%d %d %d\n",
+                &index_list[0],
+                
+                &index_list[3],
+                
+                &index_list[6]
+              );
+              
+              if(matched != 3)
+              {
+                LOG_ERROR("Failed to understand face, try exporting with different settings");
+                break;
+              }
+            }
           }
           
           const size_t curr_mesh = this_mesh - 1;

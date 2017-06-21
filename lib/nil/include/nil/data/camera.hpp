@@ -28,11 +28,18 @@ struct Camera
   bool clear_color_buffer;
   bool clear_depth_buffer;
   
-  uintptr_t user_data;
+  // -- Output -- //
+  
+  float view_mat[16];
+  
 };
 
 
 // -------------------------------------------------------------- [ Get/Set ] --
+
+
+void
+get(size_t *count, Camera **cameras);
 
 
 void
