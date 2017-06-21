@@ -852,7 +852,19 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       if(ImGui::CollapsingHeader("Light"))
       {
-        ImGui::Text("No UI Impl");
+        Nil::Data::Light light{};
+        Nil::Data::get(self->inspector_node, light);
+        
+        bool updated_light = false;
+        
+        
+        ImGui::Text("* Readonly");
+        ImGui::DragFloat3("*Position", light.position, ImGuiInputTextFlags_ReadOnly);
+        
+        if(updated_light)
+        {
+          Nil::Data::set(self->inspector_node, light);
+        }
       }
     }
 

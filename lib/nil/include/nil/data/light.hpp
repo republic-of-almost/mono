@@ -35,11 +35,15 @@ struct Light
   
   // -- Output -- //
   
-  float out_position[3];
+  float position[3];
 };
 
 
 // -------------------------------------------------------------- [ Get/Set ] --
+
+
+void
+get(size_t *count, Light **out);
 
 
 void

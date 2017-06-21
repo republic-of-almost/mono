@@ -6,6 +6,7 @@
 #include <nil/node.hpp>
 #include <math/math.hpp>
 #include <lib/utilities.hpp>
+#include <rov/rov.hpp>
 
 
 namespace Nil_ext {
@@ -25,6 +26,8 @@ struct Data
   Nil::Node debug_lines = Nil::Node(nullptr);
   
   bool has_initialized = false;
+  
+  lib::array<rovLight> lights;
 };
 
 

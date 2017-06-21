@@ -8,6 +8,7 @@
 #include <nil/aspect.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
+#include <nil/data/light.hpp>
 #include <nil/data/window.hpp>
 #include <aspect/math_nil_extensions.hpp>
 #include <lib/utilities.hpp>
@@ -172,6 +173,30 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       texture_resource->status = Nil::Data::Texture_resource::LOADED;
     }
   }
+  
+  /*
+    ROV Lighting
+  */
+  {
+    size_t light_count = 0;
+    Nil::Data::Light *lights;
+    
+    Nil::Data::get(&light_count, &lights);
+    
+    self->lights.clear();
+    self->lights.resize(light_count);
+    
+//    { {0.f,5.f,0.f}, {1,1,0}, 0.f, 4.f, 4.f, 0.01f, 0.14f, 0.07f },
+    
+    for(size_t i = 0; i < light_count; ++i)
+    {
+      memcpy(self->lights[i].position, lights[i].position, sizeof(rovVec3));
+      self->lights[i].atten_constant = 0.01f;
+      self->lights[i].atten_linear = 0.14f;
+      self->lights[i].atten_exp = 0.07f;
+      
+    }
+  }
 }
 
 
@@ -235,7 +260,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         {
           rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
           rov_setShader(render.shader);
-          
+          rov_setLights(self->lights.data(), self->lights.size());
           rov_setMesh(self->mesh_ids[render.mesh_id]);
           
           if(render.texture_01)
