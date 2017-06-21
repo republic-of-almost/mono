@@ -6,6 +6,7 @@
 #include "ray.hpp"
 #include "aabb.hpp"
 #include "plane.hpp"
+#include "misc.hpp"
 
 
 #endif // inc guard
