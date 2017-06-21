@@ -3,11 +3,7 @@
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
 #include <nil/node_event.hpp>
-
-
-#ifndef NBENCHMARK
-#include <remotery/Remotery.h>
-#endif
+#include <lib/bench.hpp>
 
 
 #ifdef IMGUI_DEVELOPER_SUPPORT
@@ -107,7 +103,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
   
-  rmt_ScopedCPUSample(Logic_EarktThink, 0);
+  BENCH_SCOPED_CPU(Logic_EarktThink)
 
   for(size_t i = 0; i < self->logic_nodes.size(); ++i)
   {

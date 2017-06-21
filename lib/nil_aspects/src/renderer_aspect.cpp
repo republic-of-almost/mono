@@ -12,10 +12,7 @@
 #include <nil/data/window.hpp>
 #include <aspect/math_nil_extensions.hpp>
 #include <lib/utilities.hpp>
-
-#ifndef NBENCHMARK
-#include <remotery/Remotery.h>
-#endif
+#include <lib/bench.hpp>
 
 
 namespace Nil_ext {
@@ -107,7 +104,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 
-  rmt_ScopedCPUSample(ROV_EarlyThink, 0);
+  BENCH_SCOPED_CPU(ROV_EarlyThink)
   
   /*
     Resources
@@ -209,7 +206,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
   
-  rmt_ScopedCPUSample(ROV_Think, 0);
+  BENCH_SCOPED_CPU(ROV_Think)
 
   if(self->has_initialized)
   {

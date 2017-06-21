@@ -4,6 +4,7 @@
 #include <nil/data/data.hpp>
 #include <nil/aspect.hpp>
 #include <lib/utilities.hpp>
+#include <lib/bench.hpp>
 #include <math/math.hpp>
 #include <stddef.h>
 
@@ -19,9 +20,6 @@
 //#include <imguizmo/ImGuizmo.h>
 #endif
 
-#ifndef NBENCHMARK
-#include <remotery/Remotery.h>
-#endif
 
 
 namespace {
@@ -324,7 +322,7 @@ sdl_aspect_debug_window(uintptr_t user_data)
 void
 early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-  rmt_ScopedCPUSample(SDL_EarlyThink, 0);
+  BENCH_SCOPED_CPU(SDL_EarlyThink)
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -634,7 +632,7 @@ sdl_key_to_nil(const size_t sdl_key)
 void
 late_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-  rmt_ScopedCPUSample(SDL_LateThink, 0);
+  BENCH_SCOPED_CPU(SDL_LateThink)
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -841,7 +839,7 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
     
-    rmt_ScopedCPUSample(SDL_SwapBuffer, 0);
+    BENCH_SCOPED_CPU(SDL_SwapBuffer)
     SDL_GL_SwapWindow(self->sdl_window);
   }
 }

@@ -7,8 +7,8 @@
 #include <graph/graph_data.hpp>
 #include <lib/array.hpp>
 #include <lib/assert.hpp>
+#include <lib/bench.hpp>
 
-#include <remotery/Remotery.h>
 
 
 namespace Nil {
@@ -26,8 +26,7 @@ struct Engine::Impl
 Engine::Engine()
 : m_impl(new Impl)
 {
-  static Remotery* rmt;
-  rmt_CreateGlobalInstance(&rmt);
+  BENCH_INIT_CPU
 
   LIB_ASSERT(m_impl);
   
@@ -88,7 +87,7 @@ Engine::run()
 {
   LIB_ASSERT(m_impl);
   
-  rmt_ScopedCPUSample(Tick, 0);
+  BENCH_SCOPED_CPU(Tick)
   
   if(!m_impl)
   {
@@ -100,7 +99,7 @@ Engine::run()
     Create list of events
   */
   {
-    rmt_ScopedCPUSample(CreEventList, 0);
+    BENCH_SCOPED_CPU(CreEventList)
   
     m_impl->pending_events.clear();
     
@@ -121,7 +120,7 @@ Engine::run()
   // Distro Events
   if(!m_impl->settings.pause_node_events)
   {
-    rmt_ScopedCPUSample(DistroEvents, 0);
+    BENCH_SCOPED_CPU(DistroEvents)
     
     std::vector<Event_data> nodes;
   
@@ -154,12 +153,12 @@ Engine::run()
   
   // Thinking
   {
-    rmt_ScopedCPUSample(Thinking, 0);
+    BENCH_SCOPED_CPU(Thinking)
     
   
     for(Aspect &asp : m_impl->aspects)
     {
-      rmt_ScopedCPUSample(AspectEarlyThink, 0);
+      BENCH_SCOPED_CPU(AspectEarlyThink)
     
       if(asp.early_think_fn)
       {
@@ -170,7 +169,7 @@ Engine::run()
     // Think
     for(Aspect &asp : m_impl->aspects)
     {
-      rmt_ScopedCPUSample(AspectThink, 0);
+      BENCH_SCOPED_CPU(AspectThink)
     
       if(asp.think_fn)
       {
@@ -181,7 +180,7 @@ Engine::run()
     // Late Think
     for(Aspect &asp : m_impl->aspects)
     {
-      rmt_ScopedCPUSample(AspectLateThink, 0);
+      BENCH_SCOPED_CPU(AspectLateThink)
     
       if(asp.late_think_fn)
       {
