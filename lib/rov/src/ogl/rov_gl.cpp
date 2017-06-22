@@ -93,7 +93,7 @@ namespace
 
 
 uint32_t
-rov_createTexture(const uint8_t *data, uint32_t width, uint32_t height, size_t size, uint32_t format)
+rov_createTexture(uint8_t *data, uint32_t width, uint32_t height, size_t size, uint32_t format)
 {
   #ifdef GL_HAS_VAO
   glBindVertexArray(vao);
@@ -719,10 +719,10 @@ api_execute(const rovRenderPass passes[], const size_t pass_count)
         {
           glUniform1i(shd.uni_light_count, dummy_count);
         
-          glActiveTexture(GL_TEXTURE0 + texture_slots);
+          glActiveTexture(GL_TEXTURE0 + texture_slots + 1);
           glBindTexture(GL_TEXTURE_1D, dummy_tex);
 
-          glUniform1i(shd.uni_buffer_01, texture_slots);
+          glUniform1i(shd.uni_buffer_01, texture_slots + 1);
           
           ++texture_slots;
         }
