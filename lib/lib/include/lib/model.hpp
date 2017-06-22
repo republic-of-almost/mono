@@ -272,6 +272,7 @@ load_obj_from_file(
       
         // This might be a new mesh so zero the counters.
         mesh_count += 1;
+        triangle_count.emplace_back();
       }
       
       if(strcmp("f", line) == 0)
@@ -294,7 +295,7 @@ load_obj_from_file(
       return_model.triangle_count = MODEL_ALLOC(uint32_t, sizeof(uint32_t) * mesh_count);
       return_model.vertex_count   = MODEL_ALLOC(uint32_t, sizeof(uint32_t) * mesh_count);
       return_model.material_id    = MODEL_ALLOC(int32_t, sizeof(int32_t) * mesh_count);
-    
+      
       for(uint32_t i = 0; i < mesh_count; ++i)
       {
         return_model.name[i]            = MODEL_ALLOC(char, sizeof(char) * name_size[i]);
