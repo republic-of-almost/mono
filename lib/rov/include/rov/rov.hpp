@@ -57,7 +57,7 @@ void        rov_execute();
 
 
 uint32_t    rov_createTexture(
-              const uint8_t *data,
+              uint8_t *data,
               uint32_t width,
               uint32_t height,
               size_t size,

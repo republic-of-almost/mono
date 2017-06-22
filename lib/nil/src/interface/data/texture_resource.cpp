@@ -50,7 +50,21 @@ get(const Node &node, Texture_resource &out)
 void
 set(Node &node, const Texture_resource &in)
 {
-  get_texture_rsrc_data().set_data(node, in);
+  Texture_resource cpy_in = in;
+  cpy_in.data = nullptr;
+  
+  if(cpy_in.status == 0)
+  {
+    uint8_t *cpy_data = (uint8_t*)malloc(in.sizeof_data);
+    
+    if(cpy_data)
+    {
+      memcpy(&cpy_data[0], in.data, in.sizeof_data);
+      cpy_in.data = cpy_data;
+    }
+  }
+
+  get_texture_rsrc_data().set_data(node, cpy_in);
 }
 
 
