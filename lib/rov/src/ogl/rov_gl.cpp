@@ -14,6 +14,9 @@
 #include <lib/directory.hpp>
 #include "../rov_platform_exec.hpp"
 
+#include "rov_gl_exec.hpp"
+#include "rov_gl_resources.hpp"
+
 
 #ifdef ROV_GL4
 #define GL_HAS_VAO
