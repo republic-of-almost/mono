@@ -33,7 +33,7 @@ namespace
 void
 load_assets()
 {
-
+  uint32_t texture_id_counter = 0;
   
   Nil::Node assets = get_assets();
 
@@ -92,7 +92,6 @@ load_assets()
   lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
   
   {
-  
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Static");
@@ -103,24 +102,31 @@ load_assets()
       child.set_parent(asset);
       child.set_name(model.name[i]);
       
-      int x = 0;
-      int y = 0;
-      int c = 0;
-      stbi_uc *img_data = nullptr;
-      const char *path = model.mesh_material[model.material_id[i]].texture_01_path;
-      
-      stbi_set_flip_vertically_on_load(true);
-      img_data = stbi_load(path, &x, &y, &c, 0);
-      
       Nil::Data::Texture_resource tex_data{};
-      tex_data.data       = img_data;
-      tex_data.id         = ++counter;
-      tex_data.dimentions = 2;
-      tex_data.compoents  = c;
-      tex_data.width      = x;
-      tex_data.height     = y;
       
-      Nil::Data::set(child, tex_data);
+      if(model.material_id[i] >= 0)
+      {
+        int x = 0;
+        int y = 0;
+        int c = 0;
+        stbi_uc *img_data = nullptr;
+        const char *path = model.mesh_material[model.material_id[i]].texture_01_path;
+        
+        stbi_set_flip_vertically_on_load(true);
+        img_data = stbi_load(path, &x, &y, &c, 0);
+        
+        tex_data.data       = img_data;
+        tex_data.id         = ++texture_id_counter;
+        tex_data.dimentions = 2;
+        tex_data.compoents  = c;
+        tex_data.width      = x;
+        tex_data.height     = y;
+        tex_data.sizeof_data = c * x * y * sizeof(char);
+        
+        Nil::Data::set(child, tex_data);
+        
+        stbi_image_free(img_data);
+      }
     
       Nil::Data::Mesh_resource mesh{};
       
@@ -140,12 +146,12 @@ load_assets()
       
       Nil::Data::Renderable mat{};
       mat.shader = Nil::Data::Renderable::LIT;
-      mat.color[0] = 0.6f;
-      mat.color[1] = 0.1f;
-      mat.color[2] = 0.2f;
-      mat.color[3] = 1.f;
+      mat.color[0]   = 0.6f;
+      mat.color[1]   = 0.1f;
+      mat.color[2]   = 0.2f;
+      mat.color[3]   = 1.f;
       mat.texture_01 = tex_data.id;
-      mat.mesh_id = mesh.id;
+      mat.mesh_id    = mesh.id;
       Nil::Data::set(child, mat);
     }
   }
@@ -173,7 +179,6 @@ load_assets()
       Nil::Data::set(child, light);
     }
   }
-  
 }
 
 
