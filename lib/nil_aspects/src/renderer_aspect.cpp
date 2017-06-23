@@ -199,7 +199,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
         rov_lights[i].ambient         = 0.f;
         rov_lights[i].diffuse         = 4.f;
         rov_lights[i].specular        = 4.f;
-//
+
         rov_lights[i].atten_constant  = 0.1f;
         rov_lights[i].atten_linear    = 0.14f;
         rov_lights[i].atten_exp       = 0.07f;
