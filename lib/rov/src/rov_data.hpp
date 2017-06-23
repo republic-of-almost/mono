@@ -2,6 +2,7 @@
 #define ROV_PLATFORM_EXEC_INCLUDED_A4B15F54_F56E_45BE_8E34_D451F985452C
 
 
+#include <rov/rov.hpp>
 #include <lib/array.hpp>
 
 
@@ -57,6 +58,7 @@ api_execute(const rovRenderPass passes[], const size_t pass_count);
 
 uint32_t
 api_light_buffer(const rovLight lights[], const size_t light_count);
+
 
 }
 

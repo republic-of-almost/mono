@@ -136,15 +136,21 @@ hash_include_string(const std::string &string_to_search, const std::vector<std::
 }
 
 
-inline void
+inline bool
 get_text_between_tags(const char *start_tag,
                       const char *end_tag,
                       const char *text,
                       char *buffer,
                       const size_t sizeof_buffer)
 {
-  const char *start = strstr(text, start_tag) + strlen(start_tag);
-  const char *end = strstr(start, end_tag);
+  const char *start = strstr(text, start_tag);
+  
+  if(!start)
+  {
+    return false;
+  }
+  
+  const char *end = strstr(start+ strlen(start_tag), end_tag);
 
   size_t size_of_target = end - start;
 
@@ -152,6 +158,8 @@ get_text_between_tags(const char *start_tag,
   {
     memcpy(buffer, start, end - start);
   }
+  
+  return true;
 }
 
 
