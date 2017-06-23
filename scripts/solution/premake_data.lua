@@ -48,6 +48,40 @@ make.add_doc(dir)
 end
 
 
+----------------------------------------------------------------- [ CONFIGS ] --
+
+
+code_configs = {
+
+  -- Development --
+  -- Focus's on developer ease
+  -- no errors on warnings etc.
+  {
+    name = "Development",
+    flags = {"Symbols", "Unicode"},
+    defines = {"DEBUG"},
+  },
+
+  -- Stage --
+  -- Release build with symbols.
+  -- Errors on warnings are now on.
+  -- Debug flags still enabled.
+  {
+    name = "Staging",
+    flags = {"Optimize", "Symbols", "Unicode"},
+    defines = {"DEBUG"},
+  },
+
+  -- Release --
+  -- Final build.
+  {
+    name = "Release",
+    flags = {"Optimize", "Unicode"},
+    defines = {"NDEBUG"},
+  },
+}
+
+
 ------------------------------------------------------ [ SOLUTION GENERATOR ] --
 
 
@@ -61,10 +95,15 @@ make.create_solution(solution_data, project_defaults, projects)
   solution(solution_data.name)
   location("./")
 
-  configurations({
-    "Debug",
-    "Release"
-  })
+  -- Create Configs --
+  local configs = {}
+
+  for i, config in ipairs(code_configs) do
+    print(config.name)
+    table.insert(configs, config.name)
+  end
+
+  configurations(configs)
 
   -- Create the projects
   -- for i, proj in ipairs(arg) do -- old way.
@@ -145,78 +184,87 @@ make.create_solution(solution_data, project_defaults, projects)
     -- Links and Link dependencies
     if proj.links then links(proj.links) end
 
-    -- If we have project dependencies then we need
-    -- to check if that project specifies any links
-    -- as dependencies.
-    if proj.project_dependencies then
+    -- dependencies --
+    -- Helper to allow us to recursivly get the dependencies --
+    function
+    get_dependencies(proj, orig_proj)
 
-      -- Loop through each of the dependencies
-      for i, dep in ipairs(proj.project_dependencies) do
+      -- If we have project dependencies then we need
+      -- to check if that project specifies any links
+      -- as dependencies.
+      if proj.project_dependencies then
 
-        -- Loop through the projects we have been given.
-        for j, other_proj in ipairs(projects) do
+        -- Loop through each of the dependencies
+        for i, dep in ipairs(proj.project_dependencies) do
 
-          -- If a match then check for links
-          if dep == other_proj.name then
+          -- Loop through the projects we have been given.
+          for j, other_proj in ipairs(projects) do
 
-            print("  -- Adding Dep: " .. dep);
+            -- If a match then check for links
+            if dep == other_proj.name then
 
-            -- Projects can be marked no link
-            -- But still want to bring in header files etc.
+              get_dependencies(other_proj, orig_proj)
 
-            link = true;
-            if other_proj.no_link == true then link = false end -- deprecated
-            if other_proj.lang_settings then
-              if other_proj.lang_settings.no_link == true then link = false end
+              print("  -- Adding Dep: " .. dep);
+
+              -- Projects can be marked no link
+              -- But still want to bring in header files etc.
+
+              link = true;
+              if other_proj.no_link == true then link = false end -- deprecated
+              if other_proj.lang_settings then
+                if other_proj.lang_settings.no_link == true then link = false end
+              end
+
+              if link and (orig_proj.kind == "WindowedApp" or orig_proj.kind == "ConsoleApp") then
+
+                -- Add this project as a dep
+                links(other_proj.name)
+
+                -- Add listed project deps
+                if other_proj.link_dependencies then links(other_proj.link_dependencies) end
+
+                -- Find platform deps
+                local platform_dep_links = find_table_with_platform(other_proj, "link_dependencies")
+                if platform_dep_links then links(platform_dep_links) end
+
+                -- Add link option dependencies
+                if other_proj.linkoption_dependencies then linkoptions(other_proj.linkoption_dependencies) end
+
+                -- Platform
+                local platform_dep_link_options = find_table_with_platform(other_proj, "linkoption_dependencies")
+                if platform_dep_link_options then linkoptions(platform_dep_link_options) end
+
+              end
+
+              -- Include dirs
+              if other_proj.inc_dirs then includedirs(other_proj.inc_dirs) end
+              local platform_inc_dirs = find_table_with_platform(other_proj, "inc_dirs")
+              if platform_inc_dirs then includedirs(platform_inc_dirs) end
+
+              -- We also need link dirs
+              if proj.kind ~= "StaticLib" then
+                if other_proj.lib_dirs then linkdirs(other_proj.lib_dirs) end
+                local platform_dep_lib_dirs = find_table_with_platform(other_proj, "lib_dirs")
+                if platform_dep_lib_dirs then libdirs(platform_dep_lib_dirs) end
+              end
+
+              -- Preprocessor
+              if other_proj.defines then defines(other_proj.defines) end
+              local platform_defines = find_table_with_platform(other_proj, "defines")
+              if platform_defines then defines(platform_defines) end
+
             end
-
-            if link then
-
-              -- Add this project as a dep
-              links(other_proj.name)
-
-              -- Add listed project deps
-              if other_proj.link_dependencies then links(other_proj.link_dependencies) end
-
-              -- Find platform deps
-              local platform_dep_links = find_table_with_platform(other_proj, "link_dependencies")
-              if platform_dep_links then links(platform_dep_links) end
-
-              -- Add link option dependencies
-              if other_proj.linkoption_dependencies then linkoptions(other_proj.linkoption_dependencies) end
-
-              -- Platform
-              local platform_dep_link_options = find_table_with_platform(other_proj, "linkoption_dependencies")
-              if platform_dep_link_options then linkoptions(platform_dep_link_options) end
-
-            end
-
-            -- Include dirs
-            if other_proj.inc_dirs then includedirs(other_proj.inc_dirs) end
-            local platform_inc_dirs = find_table_with_platform(other_proj, "inc_dirs")
-            if platform_inc_dirs then includedirs(platform_inc_dirs) end
-
-            -- We also need link dirs
-            if proj.kind ~= "StaticLib" then
-              if other_proj.lib_dirs then linkdirs(other_proj.lib_dirs) end
-              local platform_dep_lib_dirs = find_table_with_platform(other_proj, "lib_dirs")
-              if platform_dep_lib_dirs then libdirs(platform_dep_lib_dirs) end
-            end
-
-            -- Preprocessor
-            if other_proj.defines then defines(other_proj.defines) end
-            local platform_defines = find_table_with_platform(other_proj, "defines")
-            if platform_defines then defines(platform_defines) end
-
           end
+
         end
 
       end
-
     end
 
+    get_dependencies(proj, proj)
+
     buildoptions(proj.buildoptions)
-    buildoptions('-x c++')
 
     -- Temp fix to programatically copy assets
     if proj.kind == "WindowedApp" and projects then
@@ -229,80 +277,135 @@ make.create_solution(solution_data, project_defaults, projects)
       end
     end
 
-    -- Global build options
-    if project_defaults.buildoptions then buildoptions(project_defaults.buildoptions) end
+    -- Global build options --
+    if proj.ignore_defaults ~= true then
+      if project_defaults.buildoptions then buildoptions(project_defaults.buildoptions) end
 
-    local plaform_project_default_buildopts = find_table_with_platform(project_defaults, "buildoptions")
-    if plaform_project_default_buildopts then buildoptions(plaform_project_default_buildopts) end
+      local plaform_project_default_buildopts = find_table_with_platform(project_defaults, "buildoptions")
+      if plaform_project_default_buildopts then buildoptions(plaform_project_default_buildopts) end
+
+    end
 
     local output = "../../output/"
     if solution_data.output then output = solution_data.output end
 
-    configuration({"Debug"})
-    defines({"DEBUG"})
+    -- Setup Configs --
+    for j, config in ipairs(code_configs) do
 
-    targetdir(output .. "debug/")
-    objdir(output .. "objects/")
+      configuration(config.name)
+      defines(config.defines)
 
-    if project_defaults.defines then defines(project_defaults.defines); end
+      targetdir(output .. config.name .. "/")
+      objdir(output .. "objects/")
+      flags(config.flags)
+      flags("Unicode")
 
-    local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
-    if platform_project_default_defines then defines(platform_project_default_defines) end
+      if proj.ignore_defaults == true then
+        if project_defaults.defines then defines(project_defaults.defines); end
 
-    flags({"Symbols", "Unicode"})
-    flags(project_defaults.flags)
+        local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
+        if platform_project_default_defines then defines(platform_project_default_defines) end
 
-    local rtti = false
-    if proj.lang_settings then
-      if proj.lang_settings.rtti then rtti = true end
+        flags(project_defaults.flags)
+      end
+
+      -- RTTI --
+      local rtti = false
+      if proj.lang_settings then
+        if proj.lang_settings.rtti then rtti = true end
+      end
+
+      if rtti ~= true then
+        flags("NoRTTI"); -- deprecated premake5
+      end
+
+      -- Exceptions --
+      local exceptions = false
+      if proj.lang_settings then
+        if proj.lang_settings.exceptions then exceptions = true end
+      end
+
+      if exceptions == true then
+        flags("NoExceptions") -- deprecated premake5
+      end
+
     end
 
-    if rtti ~= true then
-      flags("NoRTTI"); -- deprecated premake5
-    end
-
-    local exceptions = false
-    if proj.lang_settings then
-      if proj.lang_settings.exceptions then exceptions = true end
-    end
-    if exceptions ~= true then
-      flags("NoExceptions") -- deprecated premake5
-    end
-
-    -- Release
-
-    configuration({"Release"})
-    defines({"NDEBUG", "NIMGUI"})
-
-    targetdir(output .. "release/")
-    objdir(output .. "objects/")
-
-    if proj.targetdir then targetdir(proj.targetdir) end
-
-    if project_defaults.defines then defines(project_defaults.defines); end
-
-    local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
-    if platform_project_default_defines then defines(platform_project_default_defines) end
-
-    flags { "Optimize", "Unicode" }
-    flags(project_defaults.flags)
-
-    local rtti = false
-    if proj.lang_settings then
-      if proj.lang_settings.rtti then rtti = true end
-    end
-
-    if rtti ~= true then
-      flags("NoRTTI"); -- deprecated premake5
-    end
-
-    local exceptions = false
-    if proj.lang_settings then
-      if proj.lang_settings.exceptions then exceptions = true end
-    end
-    if exceptions ~= true then
-      flags("NoExceptions") -- deprecated premake5
-    end
+    -- configuration({"Debug"})
+    -- defines({"DEBUG"})
+    --
+    -- targetdir(output .. "debug/")
+    -- objdir(output .. "objects/")
+    --
+    -- if proj.ignore_defaults == true then
+    --   if project_defaults.defines then defines(project_defaults.defines); end
+    --
+    --   local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
+    --   if platform_project_default_defines then defines(platform_project_default_defines) end
+    -- end
+    --
+    -- flags({"Symbols", "Unicode"})
+    --
+    -- if proj.ignore_defaults == true then
+    --   flags(project_defaults.flags)
+    -- end
+    --
+    -- local rtti = false
+    -- if proj.lang_settings then
+    --   if proj.lang_settings.rtti then rtti = true end
+    -- end
+    --
+    -- if rtti ~= true then
+    --   flags("NoRTTI"); -- deprecated premake5
+    -- end
+    --
+    -- local exceptions = false
+    -- if proj.lang_settings then
+    --   if proj.lang_settings.exceptions then exceptions = true end
+    -- end
+    -- if exceptions == true then
+    --   flags("NoExceptions") -- deprecated premake5
+    -- end
+    --
+    -- -- Release
+    --
+    -- configuration({"Release"})
+    -- defines({"NDEBUG", "NIMGUI"})
+    --
+    -- targetdir(output .. "release/")
+    -- objdir(output .. "objects/")
+    --
+    -- if proj.targetdir then targetdir(proj.targetdir) end
+    --
+    -- if proj.ignore_defaults == true then
+    --   if project_defaults.defines then defines(project_defaults.defines); end
+    --
+    --   local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
+    --   if platform_project_default_defines then defines(platform_project_default_defines) end
+    -- end
+    --
+    -- flags { "Optimize", "Unicode" }
+    --
+    -- if proj.ignore_defaults == true then
+    --   flags(project_defaults.flags)
+    -- end
+    --
+    -- local rtti = false
+    -- if proj.lang_settings then
+    --   if proj.lang_settings.rtti then rtti = true end
+    -- end
+    --
+    -- if rtti ~= true then
+    --   flags("NoRTTI"); -- deprecated premake5
+    -- end
+    --
+    -- local exceptions = false
+    -- if proj.lang_settings then
+    --   if proj.lang_settings.exceptions then exceptions = true end
+    -- end
+    -- if exceptions ~= true then
+    --   flags("NoExceptions") -- deprecated premake5
+    -- end
 
   end
 
