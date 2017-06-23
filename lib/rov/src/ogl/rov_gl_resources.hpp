@@ -45,6 +45,13 @@ uint32_t    ogl_createLights(
               rovLight *lights,
               size_t count,
               uintptr_t *out_resource_id = nullptr);
+  
+  
+bool        ogl_updateLights(
+              rovGLData *gl_data,
+              uint32_t id,
+              rovLight *lights,
+              size_t count);
 
 
 

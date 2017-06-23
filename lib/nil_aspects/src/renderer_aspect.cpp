@@ -72,6 +72,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
     {
       rov_initialize();
       self->has_initialized = true;
+      
+      self->light_pack = rov_createLights(nullptr, 0);
     }
   }
   
@@ -106,92 +108,104 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   BENCH_SCOPED_CPU(ROV_EarlyThink)
   
-  /*
-    Resources
-  */
+  if(self->has_initialized)
   {
-    size_t                    mesh_rsrc_count = 0;
-    Nil::Data::Mesh_resource *mesh_resources = nullptr;
-    
-    Nil::Data::get(&mesh_rsrc_count, &mesh_resources);
-    
-    for(size_t i = 0; i < mesh_rsrc_count; ++i)
+    /*
+      Resources
+    */
     {
-      Nil::Data::Mesh_resource *mesh_resource = &mesh_resources[i];
+      size_t                    mesh_rsrc_count = 0;
+      Nil::Data::Mesh_resource *mesh_resources = nullptr;
       
-      if(mesh_resource->status == Nil::Data::Mesh_resource::PENDING)
+      Nil::Data::get(&mesh_rsrc_count, &mesh_resources);
+      
+      for(size_t i = 0; i < mesh_rsrc_count; ++i)
       {
-        const uint32_t mesh = rov_createMesh
-        (
-          mesh_resource->position_vec3,
-          mesh_resource->normal_vec3,
-          mesh_resource->texture_coords_vec2,
-          mesh_resource->count
-        );
+        Nil::Data::Mesh_resource *mesh_resource = &mesh_resources[i];
         
-        if((mesh_resource->id + 1) > self->mesh_ids.size())
+        if(mesh_resource->status == Nil::Data::Mesh_resource::PENDING)
         {
-          self->mesh_ids.resize(1 << (mesh_resource->id + 1));
+          const uint32_t mesh = rov_createMesh
+          (
+            mesh_resource->position_vec3,
+            mesh_resource->normal_vec3,
+            mesh_resource->texture_coords_vec2,
+            mesh_resource->count
+          );
+          
+          if((mesh_resource->id + 1) > self->mesh_ids.size())
+          {
+            self->mesh_ids.resize(1 << (mesh_resource->id + 1));
+          }
+          
+          self->mesh_ids[mesh_resource->id] = mesh;
+          
+          mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
+        }
+      }
+      
+      size_t                        texture_rsrc_count = 0;
+      Nil::Data::Texture_resource   *texture_resources = nullptr;
+      
+      Nil::Data::get(&texture_rsrc_count, &texture_resources);
+      
+      for(size_t i = 0; i < texture_rsrc_count; ++i)
+      {
+        Nil::Data::Texture_resource *texture_resource = &texture_resources[i];
+        
+        if(texture_resource->status == Nil::Data::Texture_resource::PENDING)
+        {
+          const uint32_t texture = rov_createTexture(
+            texture_resource->data,
+            texture_resource->width,
+            texture_resource->height,
+            texture_resource->sizeof_data,
+            texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8
+          );
+          
+          if((texture_resource->id + 1) > self->texture_ids.size())
+          {
+            self->texture_ids.resize(1 << (texture_resource->id + 1));
+          }
+          
+          self->texture_ids[texture_resource->id] = texture;
         }
         
-        self->mesh_ids[mesh_resource->id] = mesh;
-        
-        mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
+        texture_resource->status = Nil::Data::Texture_resource::LOADED;
       }
     }
     
-    size_t                        texture_rsrc_count = 0;
-    Nil::Data::Texture_resource   *texture_resources = nullptr;
-    
-    Nil::Data::get(&texture_rsrc_count, &texture_resources);
-    
-    for(size_t i = 0; i < texture_rsrc_count; ++i)
+    /*
+      ROV Lighting
+    */
     {
-      Nil::Data::Texture_resource *texture_resource = &texture_resources[i];
+      size_t light_count = 0;
+      Nil::Data::Light *lights;
       
-      if(texture_resource->status == Nil::Data::Texture_resource::PENDING)
+      Nil::Data::get(&light_count, &lights);
+      
+      lib::array<rovLight, 32> rov_lights;
+      
+      rov_lights.clear();
+      rov_lights.resize(light_count);
+      
+      for(size_t i = 0; i < light_count; ++i)
       {
-        const uint32_t texture = rov_createTexture(
-          texture_resource->data,
-          texture_resource->width,
-          texture_resource->height,
-          texture_resource->sizeof_data,
-          texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8
-        );
-        
-        if((texture_resource->id + 1) > self->texture_ids.size())
-        {
-          self->texture_ids.resize(1 << (texture_resource->id + 1));
-        }
-        
-        self->texture_ids[texture_resource->id] = texture;
+        memcpy(rov_lights[i].position, lights[i].position, sizeof(rovVec3));
+        rov_lights[i].color[0]        = 1.f;
+        rov_lights[i].color[1]        = 1.f;
+        rov_lights[i].color[2]        = 0.f;
+
+        rov_lights[i].ambient         = 0.f;
+        rov_lights[i].diffuse         = 4.f;
+        rov_lights[i].specular        = 4.f;
+//
+        rov_lights[i].atten_constant  = 0.1f;
+        rov_lights[i].atten_linear    = 0.14f;
+        rov_lights[i].atten_exp       = 0.07f;
       }
       
-      texture_resource->status = Nil::Data::Texture_resource::LOADED;
-    }
-  }
-  
-  /*
-    ROV Lighting
-  */
-  {
-    size_t light_count = 0;
-    Nil::Data::Light *lights;
-    
-    Nil::Data::get(&light_count, &lights);
-    
-    self->lights.clear();
-    self->lights.resize(light_count);
-    
-//    { {0.f,5.f,0.f}, {1,1,0}, 0.f, 4.f, 4.f, 0.01f, 0.14f, 0.07f },
-    
-    for(size_t i = 0; i < light_count; ++i)
-    {
-      memcpy(self->lights[i].position, lights[i].position, sizeof(rovVec3));
-      self->lights[i].atten_constant = 0.01f;
-      self->lights[i].atten_linear = 0.14f;
-      self->lights[i].atten_exp = 0.07f;
-      
+      rov_updateLights(self->light_pack, rov_lights.data(), rov_lights.size());
     }
   }
 }
@@ -241,14 +255,15 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         cam.view_mat,
         math::mat4_get_data(proj),
         viewport,
-        clear_flags
+        clear_flags,
+        self->light_pack
       );
       
       size_t renderable_count = 0;
       Nil::Data::Renderable *renderables;
       
       Nil::Data::get(&renderable_count, &renderables);
-    
+      
       for(size_t i = 0; i < renderable_count; ++i)
       {
         Nil::Data::Renderable render = renderables[i];
@@ -257,7 +272,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         {
           rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
           rov_setShader(render.shader);
-          rov_setLights(self->lights.data(), self->lights.size());
           rov_setMesh(self->mesh_ids[render.mesh_id]);
           
           if(render.texture_01)

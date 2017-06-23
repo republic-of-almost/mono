@@ -24,12 +24,6 @@ ogl_exec(
   glCullFace(GL_BACK);
   glEnable(GL_DEPTH_TEST);
   
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }  
-
   /*
     For each renderpass.
   */
@@ -38,12 +32,6 @@ ogl_exec(
   
   for(size_t p = 0; p < pass_count; ++p)
   {
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-  
     const rovRenderPass &rp = passes[p];
   
     GLbitfield cl_flags = 0;
@@ -102,13 +90,6 @@ ogl_exec(
         last_shd = shd.program;
         glUseProgram(shd.program);
       }
-
-
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
       
       
       /*
@@ -129,62 +110,32 @@ ogl_exec(
             rovGLTexture tex = rov_gl_data->rov_textures[texture_maps[t] - 1];
             
             glActiveTexture(GL_TEXTURE0 + texture_slots);
-            
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-            
             glBindTexture(GL_TEXTURE_2D, tex.gl_id);
             
-                {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-
             glUniform1i(shd.uni_tex[t], texture_slots);
             
             ++texture_slots;
-            
-                  
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
           }
         }
-        
-              
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
         
         /*
           Buffers
         */
         if(shd.uni_buffer_01 != -1)
         {
-          glUniform1i(shd.uni_light_count, rov_gl_data->light_buffers[0].count);
-        
-          glActiveTexture(GL_TEXTURE0 + texture_slots + 1);
-          glBindTexture(GL_TEXTURE_1D, rov_gl_data->light_buffers[0].gl_id);
-
-          glUniform1i(shd.uni_buffer_01, texture_slots + 1);
+          const size_t l_index = rp.light_buffer - 1;
+          const rovGLLightPack light_pack = rov_gl_data->light_buffers[l_index];
+          
+          glUniform1i(shd.uni_light_count, light_pack.count);
+          
+          glActiveTexture(GL_TEXTURE0 + texture_slots);
+          glBindTexture(GL_TEXTURE_1D, light_pack.gl_id);
+          
+          glUniform1i(shd.uni_buffer_01, texture_slots);
           
           ++texture_slots;
         }
       }
-      
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
 
       /*
         For each draw call in the material.
@@ -259,7 +210,7 @@ ogl_exec(
             );
           }
         }
-
+        
         /*
           Apply Matrices and other uniforms.
         */
@@ -273,17 +224,11 @@ ogl_exec(
           glUniform3fv(shd.uni_eye, 1, pos.data);
           glUniform4fv(shd.uni_color, 1, colorf);
         }
-
+        
         /*
           Draw
         */
         glDrawArrays(GL_TRIANGLES, 0, vbo.vertex_count);
-   
-        {
-          auto err = glGetError();
-          if(err)
-          printf("ERR %d\n",err);
-        }
       }
     } // For amts
     
@@ -327,14 +272,15 @@ ogl_exec(
         glDrawArrays(GL_POINTS, 0, count);
       }
     }
+    #endif
     
     {
       auto err = glGetError();
       if(err)
-      printf("ERR %d\n",err);
+      {
+        int i = 0;
+      }
     }
-    
-    #endif
   }
 
   #ifdef GL_HAS_VAO

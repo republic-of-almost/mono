@@ -63,16 +63,23 @@ uint32_t    rov_createTexture(
               size_t size,
               uint32_t format);
 
+
 uint32_t    rov_createMesh(
               const float *pos,
               const float *normals,
               const float *tex_coords,
               size_t count);
 
+
 uint32_t    rov_createLights(
               rovLight *lights,
               size_t count);
 
+
+bool        rov_updateLights(
+              uint32_t id,
+              rovLight *lights,
+              size_t count);
 
 // ----------------------------------------------------------- [ Renderpass ] --
 
@@ -81,7 +88,8 @@ void        rov_startRenderPass(
               const rovMat4 view,
               const rovMat4 proj,
               const rovViewport viewport,
-              uint32_t clear_flags);
+              uint32_t clear_flags,
+              uint32_t light_buffer = 0);
 
 
 // ----------------------------------------------------- [ General Settings ] --
@@ -92,7 +100,6 @@ void        rov_setCamera(const float view[16], const float proj[16]);
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);
 void        rov_setShader(uint32_t shader_id);
-void        rov_setLights(const rovLight *lights, size_t light_count);
 
 
 // ---------------------------------------------------- [ Dbg Line Renderer ] --

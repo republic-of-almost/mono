@@ -19,138 +19,6 @@
 // ------------------------------------------------------------- [ Lifetime ] --
 
 
-namespace
-{
-//  ROV_Internal::rovGLMeshProgram rov_mesh_shaders[3]; // Fullbright / Lit / DirLight
-//
-//  ROV_Internal::rovGLLineShader rov_line_shaders[1]; // Line shader
-
-  inline
-  void create_mesh_program(
-    const char *vs_src,
-    const char *gs_src,
-    const char *fs_src,
-    ROV_Internal::rovGLMeshProgram *out)
-  {
-    auto shd_compiled = [](const GLuint shd_id) -> bool
-    {
-      GLint is_compiled = 0;
-
-      glGetShaderiv(shd_id, GL_COMPILE_STATUS, &is_compiled);
-      if(is_compiled == GL_FALSE)
-      {
-        GLint max_length = 0;
-        glGetShaderiv(shd_id, GL_INFO_LOG_LENGTH, &max_length);
-
-        // The maxLength includes the NULL character
-        lib::array<GLchar, 1024> error_log;
-        error_log.resize(max_length);
-
-        glGetShaderInfoLog(shd_id, max_length, &max_length, &error_log[0]);
-
-        // Provide the infolog in whatever manor you deem best.
-        // Exit with failure.
-        glDeleteShader(shd_id); // Don't leak the shader.
-
-        printf("SHD ERR: %s\n", error_log.data());
-
-        return false;
-      }
-
-      return true;
-    };
-
-    const GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vert_shd, 1, &vs_src, NULL);
-    glCompileShader(vert_shd);
-
-    if(!shd_compiled(vert_shd))
-    {
-      LIB_ASSERT(false);
-      return;
-    }
-
-    #ifdef GL_HAS_GEO_SHD
-    GLuint geo_shd;
-    if(gs_src)
-    {
-      geo_shd = glCreateShader(GL_GEOMETRY_SHADER);
-      glShaderSource(geo_shd, 1, &gs_src, NULL);
-      glCompileShader(geo_shd);
-
-      if(!shd_compiled(geo_shd))
-      {
-        LIB_ASSERT(false);
-        return;
-      }
-    }
-    #endif
-
-    const GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(frag_shd, 1, &fs_src, NULL);
-    glCompileShader(frag_shd);
-
-    if(!shd_compiled(frag_shd))
-    {
-      LIB_ASSERT(false);
-      return;
-    }
-
-    GLuint prog = glCreateProgram();
-    glAttachShader(prog, vert_shd);
-
-    if(gs_src)
-    {
-      glAttachShader(prog, vert_shd);
-    }
-
-    glAttachShader(prog, frag_shd);
-    glLinkProgram(prog);
-
-    GLint is_linked = 0;
-
-    glGetProgramiv(prog, GL_LINK_STATUS, &is_linked);
-    if(is_linked == GL_FALSE)
-    {
-      GLint max_length = 0;
-      glGetShaderiv(prog, GL_INFO_LOG_LENGTH, &max_length);
-
-      // The maxLength includes the NULL character
-      lib::array<GLchar, 1024> error_log;
-      error_log.resize(max_length);
-
-      glGetProgramInfoLog(prog, max_length, &max_length, &error_log[0]);
-
-      // Provide the infolog in whatever manor you deem best.
-      // Exit with failure.
-
-      printf("SHD ERR: %s\n", error_log.data());
-    }
-
-
-    glUseProgram(prog);
-
-    out->vs_in_pos       = glGetAttribLocation(prog, "vs_in_position");
-    out->vs_in_norm      = glGetAttribLocation(prog, "vs_in_normal");
-    out->vs_in_uv        = glGetAttribLocation(prog, "vs_in_texture_coords");
-
-    out->uni_tex[0]      = glGetUniformLocation(prog, "uni_map_01");
-    out->uni_tex[1]      = glGetUniformLocation(prog, "uni_map_02");
-    out->uni_tex[2]      = glGetUniformLocation(prog, "uni_map_03");
-    
-    out->uni_buffer_01   = glGetUniformLocation(prog, "uni_light_array");
-    out->uni_light_count = glGetUniformLocation(prog, "uni_light_count");
-
-    out->uni_wvp         = glGetUniformLocation(prog, "uni_wvp");
-    out->uni_world       = glGetUniformLocation(prog, "uni_world");
-    out->uni_eye         = glGetUniformLocation(prog, "uni_eye");
-    out->uni_color       = glGetUniformLocation(prog, "uni_color");
-
-    out->program = prog;
-  }
-}
-
-
 namespace ROV_Internal {
 
 
@@ -164,12 +32,6 @@ ogl_init(rovGLData *gl_data)
   glBindVertexArray(gl_data->vao);
   #endif
   
-      {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-  
   // Mesh Shaders //
   {
     rovGLMeshProgram fullbright{};
@@ -181,14 +43,7 @@ ogl_init(rovGLData *gl_data)
       &fullbright.program
     );
     gl_data->rov_mesh_programs.emplace_back(fullbright);
-    
-    
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-    
+
     rovGLMeshProgram lit{};
     const bool lit_success = ogl_createProgram(
       "../Resources/assets/rov/ogl/lit_ogl.glsl",
@@ -208,13 +63,7 @@ ogl_init(rovGLData *gl_data)
       &dir_light.program
     );
     gl_data->rov_mesh_programs.emplace_back(dir_light);
-    
-        {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-    
+
     LIB_ASSERT(fb_success && lit_success && dir_success);
     
     for(rovGLMeshProgram &prog : gl_data->rov_mesh_programs)
@@ -238,12 +87,6 @@ ogl_init(rovGLData *gl_data)
       prog.uni_color       = glGetUniformLocation(prog.program, "uni_color");
     }
   }
-
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
 
   // Line Renderer //
   #ifdef GL_HAS_GEO_SHD
@@ -270,12 +113,6 @@ ogl_init(rovGLData *gl_data)
   }
   #endif
   
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-
   // Light Buffer //
   {
     rovLight light_data[] = {
@@ -284,12 +121,6 @@ ogl_init(rovGLData *gl_data)
     
     ogl_createLights(gl_data, light_data, 1);
   }
-  
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
 }
 
 

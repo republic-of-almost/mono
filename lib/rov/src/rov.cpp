@@ -89,6 +89,21 @@ rov_createLights(
 }
 
 
+bool
+rov_updateLights(
+  uint32_t id,
+  rovLight *lights,
+  size_t count)
+{
+  return ROV_Internal::ogl_updateLights(
+    &gl_data,
+    id,
+    lights,
+    count
+  );
+}
+
+
 // ----------------------------------------------------------- [ Renderpass ] --
 
 
@@ -97,10 +112,13 @@ rov_startRenderPass(
   const rovMat4 view,
   const rovMat4 proj,
   const rovViewport viewport,
-  uint32_t clear_flags)
+  uint32_t clear_flags,
+  uint32_t light_buffer)
 {
   rov_data.rov_render_passes.emplace_back();
   ROV_Internal::rovRenderPass *rp = &rov_data.rov_render_passes.back();
+
+  rp->light_buffer = light_buffer;
 
   memcpy(rp->view, view, sizeof(rovMat4));
   memcpy(rp->proj, proj, sizeof(rovMat4));
@@ -149,13 +167,6 @@ rov_setShader(uint32_t shader_type)
   LIB_ASSERT(shader_type < rovShader_Count);
 
   rov_data.curr_rov_mesh_shader = shader_type;
-}
-
-
-void
-rov_setLights(const rovLight *lights, size_t light_count)
-{
-//  rov_data.curr_light_buffer = 1;
 }
 
 

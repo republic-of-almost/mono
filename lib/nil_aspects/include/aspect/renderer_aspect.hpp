@@ -27,7 +27,7 @@ struct Data
   
   bool has_initialized = false;
   
-  lib::array<rovLight> lights;
+  uint32_t light_pack = 0;
 };
 
 

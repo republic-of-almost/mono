@@ -128,27 +128,8 @@ ogl_createLights(
   
   GLuint light_buffer;
   
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-  
   glGenTextures(1, &light_buffer);
-  
-      {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-  
   glBindTexture(GL_TEXTURE_1D, light_buffer);
-  
-     {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
   
   glTexImage1D(
     GL_TEXTURE_1D,
@@ -161,27 +142,15 @@ ogl_createLights(
     0
   );
   
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-  
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
   
   glTexSubImage1D(
     GL_TEXTURE_1D,
     0,
     0,
-    count * 4,
+    count * 3,
     GL_RGBA,
     GL_FLOAT,
     lights
@@ -192,13 +161,37 @@ ogl_createLights(
     count
   );
   
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
+  return gl_data->light_buffers.size();
+}
+
+
+bool
+ogl_updateLights(
+  rovGLData *gl_data,
+  uint32_t id,
+  rovLight *lights,
+  size_t count)
+{
+  // -- Param Check -- //
+  LIB_ASSERT(gl_data);
+  LIB_ASSERT(id);
+
+  rovGLLightPack &buffer = gl_data->light_buffers[id - 1];
+  buffer.count = count;
+
+  glBindTexture(GL_TEXTURE_1D, buffer.gl_id);
   
-  return 1;
+  glTexSubImage1D(
+    GL_TEXTURE_1D,
+    0,
+    0,
+    count * 3,
+    GL_RGBA,
+    GL_FLOAT,
+    lights
+  );
+  
+  return true;
 }
 
 
