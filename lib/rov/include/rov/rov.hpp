@@ -61,7 +61,8 @@ uint32_t    rov_createTexture(
               uint32_t width,
               uint32_t height,
               size_t size,
-              uint32_t format);
+              uint32_t format,
+              uintptr_t *out_platform_resource = nullptr);
 
 
 uint32_t    rov_createMesh(

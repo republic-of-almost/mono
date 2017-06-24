@@ -29,6 +29,11 @@ ogl_createTexture(
   GLuint texture;
   glGenTextures(1, &texture);
   
+  if(out_resource_id)
+  {
+    *out_resource_id = (uintptr_t)texture;
+  }
+  
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexImage2D(
     GL_TEXTURE_2D,

@@ -36,9 +36,12 @@ struct Data
   Nil::Node inspector_node;
   bool show_graph;
   bool show_raw_graph;
-  bool show_data;
   bool show_node_events;
   bool show_menu;
+  
+  bool show_data_camera;
+  bool show_data_renderables;
+  bool show_data_textures;
 
   std::vector<Nil::Node> dev_nodes;
   std::vector<Nil::Data::Developer> dev_data;

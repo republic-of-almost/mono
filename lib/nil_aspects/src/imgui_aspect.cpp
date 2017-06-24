@@ -31,9 +31,12 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->inspector_node    = Nil::Node(nullptr);
   self->show_graph        = true;
   self->show_raw_graph    = false;
-  self->show_data         = false;
   self->show_node_events  = false;
   self->show_menu         = true;
+  
+  self->show_data_camera       = false;
+  self->show_data_renderables  = false;
+  self->show_data_textures     = false;
 
   // Aspects can hook into UI callbacks with developer data.
   aspect.data_types = 0;
@@ -267,172 +270,100 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   /*
     Render Data store
   */
-  if(self->show_data)
+  if(self->show_data_camera)
   {
-    ImGui::Begin("Data", &self->show_data);
-
-    ImGui::Text("Data stored in the graph");
-
-    Nil::Engine_state stat;
-    engine.get_state(stat);
-
-    const float count = stat.node_count;
-
-    char buf[16];
-    sprintf(buf, "%zu", stat.node_count);
-
-    ImGui::ProgressBar(1.f, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Node");
-
-    // --
-
-    sprintf(buf, "%zu", stat.bounding_box_count);
-
-    ImGui::ProgressBar(stat.bounding_box_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Bounding_box");
-
-    // --
-
-    sprintf(buf, "%zu", stat.camera_count);
-
-    ImGui::ProgressBar(stat.camera_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Camera");
-
-    // --
-
-    sprintf(buf, "%zu", stat.collider_count);
-
-    ImGui::ProgressBar(stat.collider_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Collider");
-
-    // --
-
-    sprintf(buf, "%zu", stat.developer_count);
-
-    ImGui::ProgressBar(stat.developer_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Developer");
-
-    // --
-
-    sprintf(buf, "%zu", stat.gamepad_count);
-
-    ImGui::ProgressBar(stat.gamepad_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Gamepad");
-
-    // --
-
-    sprintf(buf, "%zu", stat.graphics_count);
-
-    ImGui::ProgressBar(stat.graphics_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Graphics");
-
-    // --
-
-    sprintf(buf, "%zu", stat.keyboard_count);
-
-    ImGui::ProgressBar(stat.keyboard_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Keyboards");
-
-    // --
-
-    sprintf(buf, "%zu", stat.light_count);
-
-    ImGui::ProgressBar(stat.light_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Light");
-
-    // --
-
-    sprintf(buf, "%zu", stat.logic_count);
-
-    ImGui::ProgressBar(stat.logic_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Logic");
-
-    // --
-
-    sprintf(buf, "%zu", stat.material_count);
-
-    ImGui::ProgressBar(stat.material_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Material");
-
-    // --
-
-    sprintf(buf, "%zu", stat.mesh_count);
-
-    ImGui::ProgressBar(stat.mesh_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Mesh");
-
-    // --
-
-    sprintf(buf, "%zu", stat.mesh_resource_count);
-
-    ImGui::ProgressBar(stat.mesh_resource_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Mesh Resource");
-
-    // --
-
-    sprintf(buf, "%zu", stat.mouse_count);
-
-    ImGui::ProgressBar(stat.mouse_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Mouse");
-
-    // --
-
-    sprintf(buf, "%zu", stat.resouce_count);
-
-    ImGui::ProgressBar(stat.resouce_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Resource");
-
-    // --
-
-    sprintf(buf, "%zu", stat.rigidbody_count);
-
-    ImGui::ProgressBar(stat.rigidbody_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Rigidbody");
-
-    // --
-
-    sprintf(buf, "%zu", stat.texture_count);
-
-    ImGui::ProgressBar(stat.texture_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Texture");
-
-    // --
-
-    sprintf(buf, "%zu", stat.transform_count);
-
-    ImGui::ProgressBar(stat.transform_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Transform");
-
-    // --
-
-    sprintf(buf, "%zu", stat.window_count);
-
-    ImGui::ProgressBar(stat.window_count / count, ImVec2(0.0f,0.0f), buf);
-    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-    ImGui::Text("Window");
-
-
+    ImGui::Begin("Camera Data", &self->show_data_camera);
+    
+    size_t count            = 0;
+    Nil::Data::Camera *cams = nullptr;
+    Nil::Data::get(&count, &cams);
+    
+    ImGui::Text("Camera Count %zu", count);
+    
+    ImGui::Columns(8, "camera_list"); // 4-ways, with border
+    ImGui::Separator();
+    ImGui::Text("Type");        ImGui::NextColumn();
+    ImGui::Text("Priority");    ImGui::NextColumn();
+    ImGui::Text("Height");      ImGui::NextColumn();
+    ImGui::Text("Width");       ImGui::NextColumn();
+    ImGui::Text("Near");        ImGui::NextColumn();
+    ImGui::Text("Far");         ImGui::NextColumn();
+    ImGui::Text("Clr Color");   ImGui::NextColumn();
+    ImGui::Text("Clr Depth");   ImGui::NextColumn();
+    
+    ImGui::Separator();
+    
+    for(uint32_t i = 0; i < count; ++i)
+    {
+      ImGui::Text("%s", cams[i].type == Nil::Data::Camera::PERSPECTIVE ? "Pers" : "Ortho"); ImGui::NextColumn();
+      ImGui::Text("%d", cams[i].priority);    ImGui::NextColumn();
+      ImGui::Text("%f", cams[i].height);      ImGui::NextColumn();
+      ImGui::Text("%f", cams[i].width);       ImGui::NextColumn();
+      ImGui::Text("%f", cams[i].near_plane);  ImGui::NextColumn();
+      ImGui::Text("%f", cams[i].far_plane);   ImGui::NextColumn();
+      ImGui::Text("%s", cams[i].clear_color_buffer ? "Yes" : "No"); ImGui::NextColumn();
+      ImGui::Text("%s", cams[i].clear_depth_buffer ? "Yes" : "No"); ImGui::NextColumn();
+      
+      ImGui::Separator();
+    }
+    
     ImGui::End();
   }
 
+
+  /*
+    Textures
+  */
+  if(self->show_data_textures)
+  {
+    ImGui::Begin("Texture Data", &self->show_data_textures);
+    
+    size_t count            = 0;
+    Nil::Data::Texture_resource *textures = nullptr;
+    Nil::Data::get(&count, &textures);
+
+    ImGui::Text("Texture Count %zu", count);
+    
+    static uint32_t tex_slider = 6;
+    char name[32]{};
+    sprintf(name, "Size: %d", 1 << tex_slider);
+    ImGui::SliderInt("Texture Size", (int*)&tex_slider, 6, 10, name);
+    
+    ImGui::Separator();
+    
+    const ImVec2 win_size = ImGui::GetWindowSize();
+    
+    const uint32_t tex_size = 1 << tex_slider;
+    const uint32_t col_size_est = tex_size + 20;
+    
+    const uint32_t cols = math::max(((uint32_t)win_size.x / col_size_est), (uint32_t)1);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      ImGui::Image((ImTextureID)textures[i].platform_resource, ImVec2(tex_size, tex_size));
+    
+      if(ImGui::IsItemHovered())
+      {
+        ImGui::SetTooltip("Dimentions: %d x %d\nChannels: %d", textures[i].width, textures[i].height, textures[i].compoents);
+      }
+      
+      if((i + 1) % (cols ))
+      {
+        ImGui::SameLine();
+      }
+    }
+
+    ImGui::End();
+  }
+  
+  if(self->show_data_renderables)
+  {
+    ImGui::Begin("Renderable Data", &self->show_data_renderables);
+
+    ImGui::Text("Not Impl");
+
+    ImGui::End();
+  }
 
   // ---------------------------------------------------------- [ Raw Graph ] --
 
@@ -1441,7 +1372,14 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       ImGui::MenuItem("Graph", nullptr, &self->show_graph);
       ImGui::MenuItem("Graph-Raw", nullptr, &self->show_raw_graph);
-      ImGui::MenuItem("Data", nullptr, &self->show_data);
+      if(ImGui::BeginMenu("Data##NilMenu"))
+      {
+        ImGui::MenuItem("Camera##NilMenu",      nullptr, &self->show_data_camera);
+        ImGui::MenuItem("Textures##NilMenu",    nullptr, &self->show_data_textures);
+        ImGui::MenuItem("Renderables##NilMenu", nullptr, &self->show_data_renderables);
+        
+        ImGui::EndMenu();
+      }
       ImGui::MenuItem("Node Events", nullptr, &self->show_node_events);
 
       ImGui::Separator();

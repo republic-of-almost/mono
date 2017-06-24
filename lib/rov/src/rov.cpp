@@ -48,7 +48,8 @@ rov_createTexture(
   uint32_t width,
   uint32_t height,
   size_t size,
-  uint32_t format)
+  uint32_t format,
+  uintptr_t *out_platform_resource)
 {
   return ROV_Internal::ogl_createTexture(
     &gl_data,
@@ -56,7 +57,8 @@ rov_createTexture(
     width,
     height,
     size,
-    format
+    format,
+    out_platform_resource
   );
 }
 

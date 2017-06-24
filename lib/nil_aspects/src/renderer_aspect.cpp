@@ -160,7 +160,8 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
             texture_resource->width,
             texture_resource->height,
             texture_resource->sizeof_data,
-            texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8
+            texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8,
+            &texture_resource->platform_resource
           );
           
           if((texture_resource->id + 1) > self->texture_ids.size())
