@@ -3,7 +3,7 @@
   --
   Anything todo with bits and bit packing.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef BITS_INCLUDED_CBA564C2_BA9A_4D4E_A0B8_BCAF9ECE089B
 #define BITS_INCLUDED_CBA564C2_BA9A_4D4E_A0B8_BCAF9ECE089B

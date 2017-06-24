@@ -3,7 +3,7 @@
   --
   High resolution timer.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef TIMER_INCLUDED_3B5C0BA4_B185_4918_A3B3_64FF42D0BD49
 #define TIMER_INCLUDED_3B5C0BA4_B185_4918_A3B3_64FF42D0BD49

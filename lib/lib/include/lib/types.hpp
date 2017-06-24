@@ -3,7 +3,7 @@
   --
   Some type helpers
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef TYPES_INCLUDED_5FD988D5_036E_4258_B281_177280BCEF26
 #define TYPES_INCLUDED_5FD988D5_036E_4258_B281_177280BCEF26

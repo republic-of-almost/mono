@@ -14,7 +14,7 @@
   
   It can be converted to a pointer to store as user_data.
   
-  Copyright: public-domain 2017
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef ENTITY_INCLUDED_FC2233BE_3E33_4739_9B0D_B3EA11F6BEF3
 #define ENTITY_INCLUDED_FC2233BE_3E33_4739_9B0D_B3EA11F6BEF3

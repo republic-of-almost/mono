@@ -8,7 +8,7 @@
   This is a typeless buffer it can lead to some unexpected things. Consider
   using a std::vector or something else instead, I made this for some fun really.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef BUFFER_INCLUDED_7FE56F1E_1D98_4770_B828_7CCB3764E0F9
 #define BUFFER_INCLUDED_7FE56F1E_1D98_4770_B828_7CCB3764E0F9

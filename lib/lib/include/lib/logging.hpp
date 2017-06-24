@@ -3,7 +3,7 @@
   --
   Logging things.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef LOGGING_INCLUDED_55713C67_54CB_4844_B789_EC11EFA4F9E6
 #define LOGGING_INCLUDED_55713C67_54CB_4844_B789_EC11EFA4F9E6

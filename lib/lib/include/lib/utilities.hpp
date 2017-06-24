@@ -3,7 +3,7 @@
   --
   Lazy include that includes all utilities.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef UTILITIES_INCLUDED_7D47F345_CB57_4D84_A636_075DFB3C3411
 #define UTILITIES_INCLUDED_7D47F345_CB57_4D84_A636_075DFB3C3411

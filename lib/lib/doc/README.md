@@ -12,4 +12,5 @@ Collection of odds and ends.
 ### License 
 
 
-public domain
+http://unlicense.org/
+Public domain 2017

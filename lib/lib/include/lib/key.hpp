@@ -3,7 +3,7 @@
   --
   Anything related to keys and key searching
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef KEY_INCLUDED_3DAC3A09_4DD9_45B0_A521_4369D4B4B930
 #define KEY_INCLUDED_3DAC3A09_4DD9_45B0_A521_4369D4B4B930
