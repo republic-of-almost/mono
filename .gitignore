@@ -2,6 +2,9 @@ output/
 assets/
 media_masters/
 
+# Shaders are stored here
+!lib/rov/assets/
+
 # -- General C++ --#
 # https://github.com/github/gitignore
 
