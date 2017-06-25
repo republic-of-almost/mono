@@ -192,23 +192,25 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       
       for(size_t i = 0; i < light_count; ++i)
       {
+        Nil::Data::Light *light = &lights[i];
+      
         if(lights[i].type == Nil::Data::Light::DIR)
         {
-          memcpy(rov_lights[i].position, lights[i].direction, sizeof(float) * 3);
+          memcpy(rov_lights[i].position, light->direction, sizeof(float) * 3);
           rov_lights[i].position[3] = 1.f;
         }
         else
         {
-          memcpy(rov_lights[i].position, lights[i].position, sizeof(float) * 3);
+          memcpy(rov_lights[i].position, light->position, sizeof(float) * 3);
         }
         
         rov_lights[i].color[0] = 1.f;
         rov_lights[i].color[1] = 1.f;
         rov_lights[i].color[2] = 1.f;
         
-        rov_lights[i].attenuation[0] = 0.1f;
-        rov_lights[i].attenuation[1] = 0.14f;
-        rov_lights[i].attenuation[2] = 0.07f;
+        rov_lights[i].attenuation[0] = light->atten_const;//0.1f;
+        rov_lights[i].attenuation[1] = light->atten_linear;//0.14f;
+        rov_lights[i].attenuation[2] = light->atten_exponential;//0.07f;
       }
       
       rov_updateLights(self->light_pack, rov_lights.data(), rov_lights.size());
