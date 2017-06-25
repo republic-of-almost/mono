@@ -23,11 +23,10 @@ struct Light
   float atten_linear;
   float atten_exponential;
   
-  float direction[3];
-  
   // -- Output -- //
   
   float position[3];
+  float direction[3];
 };
 
 

@@ -37,8 +37,8 @@ think(Nil::Node node, uintptr_t user_data)
     const float head_speed = 0.05f;
     const float final_speed = delta_time * head_speed;
     
-    actor->accum_pitch -= ms.delta[1] * final_speed;
-    actor->accum_yaw   += ms.delta[0] * final_speed;
+    actor->accum_pitch += ms.delta[1] * final_speed;
+    actor->accum_yaw   -= ms.delta[0] * final_speed;
     
     actor->accum_pitch = math::clamp(
       actor->accum_pitch,
@@ -217,39 +217,38 @@ think(Nil::Node node, uintptr_t user_data)
         math::vec3 next_step_edge[2];
       
         math::ray_test_closest_edge(
-        actor->nav_mesh,
-        actor->nav_mesh_count,
-        next_step,
-        next_step_edge[0],
-        next_step_edge[1]
-      );
-      
-      Game_data::debug_line(next_step_edge[0], next_step_edge[1], math::vec3_init(1,1,0));
-      
-      const math::vec3 norm_edge = math::vec3_normalize(
-        math::vec3_subtract(next_step_edge[0], next_step_edge[1])
-      );
-      
-      const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
-      
-      const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
-      
-      const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
-      const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
-      const math::ray side_step_ray      = math::ray_init(side_step, side_step_ray_end);
-      
-      distance = 0.f;
-      if(math::ray_test_triangles(side_step_ray, actor->nav_mesh, actor->nav_mesh_count, &distance))
-      {
-        const math::vec3 ray_dir = math::ray_direction(side_step_ray);
-        const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
-        const math::vec3 hit     = math::vec3_add(side_step_ray.start, scale);
-        const math::vec3 pos     = hit;
+          actor->nav_mesh,
+          actor->nav_mesh_count,
+          next_step,
+          next_step_edge[0],
+          next_step_edge[1]
+        );
         
-        memcpy(trans.position, pos.data, sizeof(trans.position));
-        Nil::Data::set(node, trans);
-      }
-
+        Game_data::debug_line(next_step_edge[0], next_step_edge[1], math::vec3_init(1,1,0));
+        
+        const math::vec3 norm_edge = math::vec3_normalize(
+          math::vec3_subtract(next_step_edge[0], next_step_edge[1])
+        );
+        
+        const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
+        
+        const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
+        
+        const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
+        const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
+        const math::ray side_step_ray      = math::ray_init(side_step, side_step_ray_end);
+        
+        distance = 0.f;
+        if(math::ray_test_triangles(side_step_ray, actor->nav_mesh, actor->nav_mesh_count, &distance))
+        {
+          const math::vec3 ray_dir = math::ray_direction(side_step_ray);
+          const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
+          const math::vec3 hit     = math::vec3_add(side_step_ray.start, scale);
+          const math::vec3 pos     = hit;
+          
+          memcpy(trans.position, pos.data, sizeof(trans.position));
+          Nil::Data::set(node, trans);
+        }
       }
     }
   }

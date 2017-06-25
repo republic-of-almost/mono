@@ -794,8 +794,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   
         if(ImGui::Combo("Type", (int*)&light.type, type, 2)) { updated_light = true; }
   
-        if(ImGui::InputFloat3("Direction", light.direction)) { updated_light = true; }
-        
         if(ImGui::DragFloat("Atten Const", &light.atten_const)) { updated_light = true; }
         if(ImGui::DragFloat("Atten Linear", &light.atten_linear)) { updated_light = true; }
         if(ImGui::DragFloat("Atten Exponential", &light.atten_exponential)) { updated_light = true; }
@@ -803,6 +801,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         
         ImGui::Text("* Readonly");
         ImGui::DragFloat3("*Position", light.position, ImGuiInputTextFlags_ReadOnly);
+        ImGui::DragFloat3("*Direction", light.direction, ImGuiInputTextFlags_ReadOnly);
         
         if(updated_light)
         {

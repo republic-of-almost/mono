@@ -49,15 +49,14 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
   */
   {
     size_t count = 0;
-    Nil::Data::Window *win;
-    
-    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &win, nullptr);
+    Nil::Data::Window *win = nullptr;
+    Nil::Data::get(&count, &win);
     
     if(count)
     {
       /* We operate on 1 window idea so grab the first */
       self->current_viewport[0] = win[0].width;
-      self->current_viewport[1] = win[1].height;
+      self->current_viewport[1] = win[0].height;
     }
   }
   
@@ -76,7 +75,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       self->light_pack = rov_createLights(nullptr, 0);
     }
   }
-  
   
   // Debug Lines
   {
