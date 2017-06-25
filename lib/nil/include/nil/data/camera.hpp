@@ -30,6 +30,7 @@ struct Camera
   
   // -- Output -- //
   
+  float position[3];
   float view_mat[16];
   
 };

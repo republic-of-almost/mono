@@ -3,7 +3,7 @@
   --
   Helpers to ident platforms / compilers
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef PLATFORM_INCLUDED_0AD3FC5D_27E8_4FE2_862B_9D854FF664EB
 #define PLATFORM_INCLUDED_0AD3FC5D_27E8_4FE2_862B_9D854FF664EB

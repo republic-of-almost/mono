@@ -1,0 +1,56 @@
+#!lua
+
+--[[
+  GLFW Project Description
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "GLFW",
+    kind     = "StaticLib",
+    language = "C",
+    location = make.get_proj_root(),
+    ignore_defaults = true,
+
+    src_files_macosx = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      --
+      make.get_proj_root() .. "../src/init.c",
+      make.get_proj_root() .. "../src/input.c",
+      make.get_proj_root() .. "../src/monitor.c",
+      make.get_proj_root() .. "../src/context.c",
+      make.get_proj_root() .. "../src/posix_thread.c",
+      make.get_proj_root() .. "../src/window.c",
+      --
+      make.get_proj_root() .. "../src/cocoa_init.m",
+      make.get_proj_root() .. "../src/cocoa_joystick.m",
+      make.get_proj_root() .. "../src/cocoa_monitor.m",
+      make.get_proj_root() .. "../src/cocoa_time.c",
+      make.get_proj_root() .. "../src/cocoa_window.m",
+      make.get_proj_root() .. "../src/nsgl_context.m",
+      make.get_proj_root() .. "../src/osmesa_context.c",
+      make.get_proj_root() .. "../src/vulkan.c",
+      make.get_proj_root() .. "../src/egl_context.c",
+    },
+
+    link_dependencies_macosx = {
+      "OpenGL.framework",
+      "Cocoa.framework",
+      "CoreFoundation.framework",
+      "Foundation.framework",
+      "CoreVideo.framework",
+      "IOKit.framework",
+    },
+
+    defines_macosx = {
+      "_GLFW_COCOA",
+    },
+
+    inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+  }
+)

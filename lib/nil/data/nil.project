@@ -44,12 +44,7 @@ table.insert(
       "Lib",
       "Math",
       "Remotery",
-    },
-
-   link_dependencies_macosx = {
-      "OpenGL.framework",
-      "CoreFoundation.framework",
-      "Foundation.framework",
+      "GLFW",
     },
 
     link_dependencies_windows = {

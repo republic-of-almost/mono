@@ -7,7 +7,7 @@
   This was designed only with POD types in mind. Will not be safe for
   non pod types.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef ARRAY_INCLUDED_E3E1A14B_B476_40C7_9453_ECD5F3F344F2
 #define ARRAY_INCLUDED_E3E1A14B_B476_40C7_9453_ECD5F3F344F2

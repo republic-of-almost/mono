@@ -3,7 +3,7 @@
   --
   Utilitiy for benchmarking.
   
-  Copyright: public-domain 2017
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef BENCHMARK_INCLUDED_022A1DD1_7E69_4862_ADD5_BCC7E9C4090A
 #define BENCHMARK_INCLUDED_022A1DD1_7E69_4862_ADD5_BCC7E9C4090A

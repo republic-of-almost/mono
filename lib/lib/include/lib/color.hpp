@@ -11,7 +11,7 @@
   --
   PPC machines will reverse things.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef INCLUDED_7C3DBCF8_82CC_4FFC_BE00_779FCC633E11
 #define INCLUDED_7C3DBCF8_82CC_4FFC_BE00_779FCC633E11

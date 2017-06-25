@@ -10,6 +10,7 @@
 
 
 using rovMat4     = float[16];
+using rovVec4     = float[4];
 using rovVec3     = float[3];
 using rovViewport = uint32_t[4];
 using rovColor    = float[4];
@@ -32,16 +33,9 @@ constexpr uint32_t rovShader_Count      = 3;
 
 struct rovLight
 {
-  rovVec3 position;
-  rovVec3 color;
-
-  float ambient;
-  float diffuse;
-  float specular;
-
-  float atten_constant;
-  float atten_linear;
-  float atten_exp;
+  rovVec4 position;     // x, y, z, type
+  rovVec4 color;        // r, g, b, extra
+  rovVec4 attenuation;  // const, linear, expo, extra
 };
 
 
@@ -61,7 +55,9 @@ uint32_t    rov_createTexture(
               uint32_t width,
               uint32_t height,
               size_t size,
-              uint32_t format);
+              uint32_t format,
+              uintptr_t *out_platform_resource = nullptr);
+
 
 uint32_t    rov_createMesh(
               const float *pos,
@@ -69,10 +65,16 @@ uint32_t    rov_createMesh(
               const float *tex_coords,
               size_t count);
 
+
 uint32_t    rov_createLights(
               rovLight *lights,
               size_t count);
 
+
+bool        rov_updateLights(
+              uint32_t id,
+              rovLight *lights,
+              size_t count);
 
 // ----------------------------------------------------------- [ Renderpass ] --
 
@@ -80,8 +82,10 @@ uint32_t    rov_createLights(
 void        rov_startRenderPass(
               const rovMat4 view,
               const rovMat4 proj,
+              const rovVec3 eye_pos,
               const rovViewport viewport,
-              uint32_t clear_flags);
+              uint32_t clear_flags,
+              uint32_t light_buffer = 0);
 
 
 // ----------------------------------------------------- [ General Settings ] --
@@ -92,7 +96,6 @@ void        rov_setCamera(const float view[16], const float proj[16]);
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);
 void        rov_setShader(uint32_t shader_id);
-void        rov_setLights(const rovLight *lights, size_t light_count);
 
 
 // ---------------------------------------------------- [ Dbg Line Renderer ] --

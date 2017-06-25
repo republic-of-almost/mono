@@ -7,7 +7,7 @@
   Some of these defines may not be unused, but we follow a naming convention for
   any future use.
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef IMPL_INCLUDED_7AF120D0_6935_4EC8_997B_344B3E9C1A4C
 #define IMPL_INCLUDED_7AF120D0_6935_4EC8_997B_344B3E9C1A4C

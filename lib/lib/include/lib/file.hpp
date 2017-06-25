@@ -3,7 +3,7 @@
   --
   File helpers
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef FILE_INCLUDED_0EC6E03B_3D7F_4AA7_B0B5_28E4F37CD0A1
 #define FILE_INCLUDED_0EC6E03B_3D7F_4AA7_B0B5_28E4F37CD0A1

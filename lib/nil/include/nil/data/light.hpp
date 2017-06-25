@@ -14,24 +14,16 @@ namespace Data {
 // ----------------------------------------------------------------- [ Data ] --
 
 
-namespace Light_type {
-enum ENUM {
-  
-  DIRECTIONAL,
-  POINT,
-  SPOT,
-  
-  COUNT,
-
-};
-} // ns
-
-
 struct Light
 {
-  uint32_t type;
+  enum { POINT, DIR } type;
   uint8_t color[3];
-  float attenuation;
+  
+  float atten_const;
+  float atten_linear;
+  float atten_exponential;
+  
+  float direction[3];
   
   // -- Output -- //
   

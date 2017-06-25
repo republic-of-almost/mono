@@ -7,7 +7,7 @@
   --
   I'd like to get STL out of the header
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef NYAML_INCLUDED_EE4C9622_B507_4F22_A19A_C6547F8AEF1B
 #define NYAML_INCLUDED_EE4C9622_B507_4F22_A19A_C6547F8AEF1B

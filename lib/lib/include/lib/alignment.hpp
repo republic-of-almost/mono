@@ -3,7 +3,7 @@
   --
   Anything todo with memory alignment
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef ALIGMENT_INCLUDED_8FD72235_331D_4FF9_98E0_031C879705D2
 #define ALIGMENT_INCLUDED_8FD72235_331D_4FF9_98E0_031C879705D2

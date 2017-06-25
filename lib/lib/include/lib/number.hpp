@@ -3,7 +3,7 @@
   --
   Some simple number things
 
-  Copyright: public-domain
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef NUMBER_INCLUDED_FCDC3C6E_9E33_45F8_A724_3B4D4AB0A69E
 #define NUMBER_INCLUDED_FCDC3C6E_9E33_45F8_A724_3B4D4AB0A69E

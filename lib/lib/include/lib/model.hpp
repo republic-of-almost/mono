@@ -1,3 +1,10 @@
+/*
+  Model
+  --
+  Mesh / Material Loading
+
+  Copyright: public-domain 2017 - http://unlicense.org/
+*/
 #ifndef MODEL_INCLUDED_96BD3307_4311_4351_9AC5_524CB08EC60E
 #define MODEL_INCLUDED_96BD3307_4311_4351_9AC5_524CB08EC60E
 
@@ -35,7 +42,7 @@ struct material
 
 struct model
 {
-  char **name;
+  char      **name;
   float     **verts;
   float     **normals;
   float     **uvs;

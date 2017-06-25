@@ -31,8 +31,13 @@ enum ENUM {
 struct Texture
 {
   uint32_t id;
-  uint32_t filtering;
-  uintptr_t resource;
+  uint32_t filtering; // Move to resource
+  uint32_t width;
+  uint32_t height;
+  
+  // ** Output ** //
+  
+  uintptr_t platform_id;
 };
 
 

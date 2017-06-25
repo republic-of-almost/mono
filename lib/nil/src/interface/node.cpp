@@ -97,7 +97,7 @@ Node::operator=(const Node &other)
 }
 
 
-Node::Node(Node &&other)
+Node::Node(Node &&other) noexcept
 : m_node_id(!other.is_ref() ? lib::entity::create(node_owned_id, other.get_id()) : lib::entity::create(node_reference_id, other.get_id()))
 {
   if(!other.is_ref())
@@ -108,7 +108,7 @@ Node::Node(Node &&other)
 
   
 Node&
-Node::operator=(Node &&other)
+Node::operator=(Node &&other) noexcept
 {
   // If the old one is owning then we need to destroy it
   if(is_valid() && !is_ref())
