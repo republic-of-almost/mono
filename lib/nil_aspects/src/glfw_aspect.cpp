@@ -83,15 +83,15 @@ glfw_key_to_nil(const int glfw_key)
     case(GLFW_KEY_9) : return Nil::Data::KeyCode::NINE;
     case(GLFW_KEY_0) : return Nil::Data::KeyCode::ZERO;
     
-    case(GLFW_KEY_F1) : return Nil::Data::KeyCode::F1;
-    case(GLFW_KEY_F2) : return Nil::Data::KeyCode::F2;
-    case(GLFW_KEY_F3) : return Nil::Data::KeyCode::F3;
-    case(GLFW_KEY_F4) : return Nil::Data::KeyCode::F4;
-    case(GLFW_KEY_F5) : return Nil::Data::KeyCode::F5;
-    case(GLFW_KEY_F6) : return Nil::Data::KeyCode::F6;
-    case(GLFW_KEY_F7) : return Nil::Data::KeyCode::F7;
-    case(GLFW_KEY_F8) : return Nil::Data::KeyCode::F8;
-    case(GLFW_KEY_F9) : return Nil::Data::KeyCode::F9;
+    case(GLFW_KEY_F1)  : return Nil::Data::KeyCode::F1;
+    case(GLFW_KEY_F2)  : return Nil::Data::KeyCode::F2;
+    case(GLFW_KEY_F3)  : return Nil::Data::KeyCode::F3;
+    case(GLFW_KEY_F4)  : return Nil::Data::KeyCode::F4;
+    case(GLFW_KEY_F5)  : return Nil::Data::KeyCode::F5;
+    case(GLFW_KEY_F6)  : return Nil::Data::KeyCode::F6;
+    case(GLFW_KEY_F7)  : return Nil::Data::KeyCode::F7;
+    case(GLFW_KEY_F8)  : return Nil::Data::KeyCode::F8;
+    case(GLFW_KEY_F9)  : return Nil::Data::KeyCode::F9;
     case(GLFW_KEY_F10) : return Nil::Data::KeyCode::F10;
     case(GLFW_KEY_F11) : return Nil::Data::KeyCode::F11;
     case(GLFW_KEY_F12) : return Nil::Data::KeyCode::F12;
@@ -103,7 +103,7 @@ glfw_key_to_nil(const int glfw_key)
     case(GLFW_KEY_F18) : return Nil::Data::KeyCode::F18;
     case(GLFW_KEY_F19) : return Nil::Data::KeyCode::F19;
     
-    case(GLFW_KEY_SPACE) : return Nil::Data::KeyCode::SPACE;
+    case(GLFW_KEY_SPACE)  : return Nil::Data::KeyCode::SPACE;
     case(GLFW_KEY_ESCAPE) : return Nil::Data::KeyCode::ESCAPE;
     
     default:
