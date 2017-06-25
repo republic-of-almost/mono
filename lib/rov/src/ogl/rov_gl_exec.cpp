@@ -52,7 +52,7 @@ ogl_exec(
     */
     size_t dc_index = 0;
     
-    BENCH_PUSH_GPU(MeshRender);
+//    BENCH_PUSH_GPU(MeshRender); 
     
     GLuint last_shd = 0;
 
@@ -236,12 +236,12 @@ ogl_exec(
       }
     } // For amts
     
-    BENCH_POP_GPU;
+//    BENCH_POP_GPU;
 
     // Line Renderer
     #ifdef GL_HAS_GEO_SHD
     {
-      BENCH_SCOPED_GPU(DebugLineRender);
+//      BENCH_SCOPED_GPU(DebugLineRender);
     
       glUseProgram(rov_gl_data->rov_line_programs[0].program);
       glBindBuffer(GL_ARRAY_BUFFER, 0);

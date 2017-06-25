@@ -11,6 +11,13 @@
 #include <GLFW/glfw3.h>
 
 
+#ifndef NIMGUI
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw_gl3.h>
+//#include <imguizmo/ImGuizmo.h>
+#endif
+
+
 namespace Nil_ext {
 namespace GLFW_Aspect {
 
@@ -140,7 +147,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+        
+        #if __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        #endif
+        
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         
         Nil::Data::Window win_data = data[0];
@@ -173,6 +184,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         gfx.major = 2.0;
         gfx.minor = 1.0;
         
+        #endif
+        
+        #ifndef NIMGUI
+        ImGui_ImplGlfwGL3_Init(self->window, true);
+        ImGui_ImplGlfwGL3_NewFrame();
         #endif
 
         Nil::Data::set(self->window_node, gfx);
@@ -335,6 +351,13 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
     }
     
     glfwPollEvents();
+    
+    #ifndef NIMGUI
+    ImGui::Render();
+    
+    ImGui_ImplGlfwGL3_NewFrame();
+//    ImGuizmo::BeginFrame();
+    #endif
     
     glfwSwapBuffers(self->window);
   }

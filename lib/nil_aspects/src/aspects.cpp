@@ -55,11 +55,11 @@ load_aspects(Nil::Engine &nil_engine)
   }
 
 
-//  /*
-//    SDL Mixer Aspect
-//    --
-//    Handles audio
-//  */
+  /*
+    SDL Mixer Aspect
+    --
+    Handles audio
+  */
 //  static Nil_ext::SDLMixer_Aspect::Data sdl_mixer;
 //  {
 //    Nil::Aspect sdl_mixer_aspect{};
@@ -105,24 +105,24 @@ load_aspects(Nil::Engine &nil_engine)
     nil_engine.add_aspect(logic_aspect);
   }
 
-//  /*
-//    ImGui Aspect
-//    --
-//    Debugging UI
-//  */
-//  #ifndef NIMGUI
-//  static Nil_ext::ImGui_Aspect::Data imgui;
-//  {
-//    Nil::Aspect imgui_aspect{};
-//
-//    imgui_aspect.start_up_fn = Nil_ext::ImGui_Aspect::start_up;
-//    imgui_aspect.events_fn   = Nil_ext::ImGui_Aspect::events;
-//    imgui_aspect.think_fn    = Nil_ext::ImGui_Aspect::think;
-//    imgui_aspect.user_data   = (uintptr_t)&imgui;
-//
-//    nil_engine.add_aspect(imgui_aspect);
-//  }
-//  #endif
+  /*
+    ImGui Aspect
+    --
+    Debugging UI
+  */
+  #ifndef NIMGUI
+  static Nil_ext::ImGui_Aspect::Data imgui;
+  {
+    Nil::Aspect imgui_aspect{};
+
+    imgui_aspect.start_up_fn = Nil_ext::ImGui_Aspect::start_up;
+    imgui_aspect.events_fn   = Nil_ext::ImGui_Aspect::events;
+    imgui_aspect.think_fn    = Nil_ext::ImGui_Aspect::think;
+    imgui_aspect.user_data   = (uintptr_t)&imgui;
+
+    nil_engine.add_aspect(imgui_aspect);
+  }
+  #endif
 }
 
 
