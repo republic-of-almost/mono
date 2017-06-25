@@ -192,18 +192,23 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       
       for(size_t i = 0; i < light_count; ++i)
       {
-        memcpy(rov_lights[i].position, lights[i].position, sizeof(rovVec3));
-        rov_lights[i].color[0]        = 1.f;
-        rov_lights[i].color[1]        = 1.f;
-        rov_lights[i].color[2]        = 0.f;
-
-        rov_lights[i].ambient         = 0.f;
-        rov_lights[i].diffuse         = 4.f;
-        rov_lights[i].specular        = 4.f;
-
-        rov_lights[i].atten_constant  = 0.1f;
-        rov_lights[i].atten_linear    = 0.14f;
-        rov_lights[i].atten_exp       = 0.07f;
+        if(lights[i].type == Nil::Data::Light::DIR)
+        {
+          memcpy(rov_lights[i].position, lights[i].direction, sizeof(float) * 3);
+          rov_lights[i].position[3] = 1.f;
+        }
+        else
+        {
+          memcpy(rov_lights[i].position, lights[i].position, sizeof(float) * 3);
+        }
+        
+        rov_lights[i].color[0] = 1.f;
+        rov_lights[i].color[1] = 1.f;
+        rov_lights[i].color[2] = 1.f;
+        
+        rov_lights[i].attenuation[0] = 0.1f;
+        rov_lights[i].attenuation[1] = 0.14f;
+        rov_lights[i].attenuation[2] = 0.07f;
       }
       
       rov_updateLights(self->light_pack, rov_lights.data(), rov_lights.size());
@@ -255,6 +260,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       rov_startRenderPass(
         cam.view_mat,
         math::mat4_get_data(proj),
+        cam.position,
         viewport,
         clear_flags,
         self->light_pack

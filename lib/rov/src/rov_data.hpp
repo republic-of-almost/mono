@@ -41,6 +41,7 @@ struct rovRenderPass
   rovMat4 proj;
   rovViewport viewport;
   uint32_t light_buffer;
+  rovVec3 eye_position;
 
   uint32_t clear_flags;
 

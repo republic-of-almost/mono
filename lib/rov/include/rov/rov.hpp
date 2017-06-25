@@ -10,6 +10,7 @@
 
 
 using rovMat4     = float[16];
+using rovVec4     = float[4];
 using rovVec3     = float[3];
 using rovViewport = uint32_t[4];
 using rovColor    = float[4];
@@ -32,16 +33,9 @@ constexpr uint32_t rovShader_Count      = 3;
 
 struct rovLight
 {
-  rovVec3 position;
-  rovVec3 color;
-
-  float ambient;
-  float diffuse;
-  float specular;
-
-  float atten_constant;
-  float atten_linear;
-  float atten_exp;
+  rovVec4 position;     // x, y, z, type
+  rovVec4 color;        // r, g, b, extra
+  rovVec4 attenuation;  // const, linear, expo, extra
 };
 
 
@@ -88,6 +82,7 @@ bool        rov_updateLights(
 void        rov_startRenderPass(
               const rovMat4 view,
               const rovMat4 proj,
+              const rovVec3 eye_pos,
               const rovViewport viewport,
               uint32_t clear_flags,
               uint32_t light_buffer = 0);

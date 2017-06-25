@@ -40,6 +40,12 @@ get_camera_data()
         math::mat4_get_data(view),
         sizeof(data->data[index].view_mat)
       );
+      
+      memcpy(
+        data->data[index].position,
+        trans.position,
+        sizeof(data->data[index].position)
+      );
     }
   );
   

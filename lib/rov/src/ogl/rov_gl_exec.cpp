@@ -215,14 +215,18 @@ ogl_exec(
           Apply Matrices and other uniforms.
         */
         {
-          const math::mat4 world   = math::mat4_init_with_array(dc.world);
-          const math::mat4 wvp_mat = math::mat4_multiply(world, view, proj);
-          const math::vec4 pos     = math::mat4_multiply(math::vec4_init(0,0,0,1), view);
-
-          glUniformMatrix4fv(shd.uni_wvp, 1, GL_FALSE, math::mat4_get_data(wvp_mat));
-          glUniformMatrix4fv(shd.uni_world, 1, GL_FALSE, math::mat4_get_data(world));
-          glUniform3fv(shd.uni_eye, 1, pos.data);
-          glUniform4fv(shd.uni_color, 1, colorf);
+          const math::mat4 world    = math::mat4_init_with_array(dc.world);
+          const math::mat4 wvp_mat  = math::mat4_multiply(world, view, proj);
+          const math::vec4 pos      = math::mat4_multiply(math::vec4_init(0,0,0,1), math::mat4_get_inverse(view));
+          const math::mat4 mv_mat   = math::mat4_multiply(view, world);
+          const math::mat4 norm_mat = math::mat4_get_transpose(math::mat4_get_inverse(mv_mat));
+  
+          glUniformMatrix4fv(shd.uni_wvp,     1, GL_FALSE, math::mat4_get_data(wvp_mat));
+          glUniformMatrix4fv(shd.uni_world,   1, GL_FALSE, math::mat4_get_data(world));
+          glUniformMatrix4fv(shd.uni_normal,  1, GL_FALSE, math::mat4_get_data(norm_mat));
+          glUniformMatrix4fv(shd.uni_wv,      1, GL_FALSE, math::mat4_get_data(mv_mat));
+          glUniform3fv(shd.uni_eye,           1, rp.eye_position);
+          glUniform4fv(shd.uni_color,         1, colorf);
         }
         
         /*

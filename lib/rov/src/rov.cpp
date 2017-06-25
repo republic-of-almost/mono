@@ -113,6 +113,7 @@ void
 rov_startRenderPass(
   const rovMat4 view,
   const rovMat4 proj,
+  const rovVec3 eye_pos,
   const rovViewport viewport,
   uint32_t clear_flags,
   uint32_t light_buffer)
@@ -125,6 +126,7 @@ rov_startRenderPass(
   memcpy(rp->view, view, sizeof(rovMat4));
   memcpy(rp->proj, proj, sizeof(rovMat4));
   memcpy(rp->viewport, viewport, sizeof(rovViewport));
+  memcpy(rp->eye_position, eye_pos, sizeof(rovVec3));
 
   rp->clear_flags = clear_flags;
 

@@ -85,6 +85,8 @@ ogl_init(rovGLData *gl_data)
       prog.uni_world       = glGetUniformLocation(prog.program, "uni_world");
       prog.uni_eye         = glGetUniformLocation(prog.program, "uni_eye");
       prog.uni_color       = glGetUniformLocation(prog.program, "uni_color");
+      prog.uni_normal      = glGetUniformLocation(prog.program, "uni_normal");
+      prog.uni_wv          = glGetUniformLocation(prog.program, "uni_wv");
     }
   }
 
@@ -116,7 +118,11 @@ ogl_init(rovGLData *gl_data)
   // Light Buffer //
   {
     rovLight light_data[] = {
-      { {0.f,5.f,0.f}, {1,1,0}, 0.f, 4.f, 4.f, 0.01f, 0.14f, 0.07f },
+      {
+        {0.f,5.f,0.f,0.f},
+        {1.f, 1.f, 1.f, 1.f},
+        {0.01f, 0.14f, 0.07f, 0.f},
+      }
     };
     
     ogl_createLights(gl_data, light_data, 1);
