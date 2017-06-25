@@ -98,7 +98,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         SDL_SetWindowTitle(self->sdl_window, data[0].title);
         SDL_SetWindowSize(self->sdl_window, data[0].width, data[0].height);
         SDL_SetWindowFullscreen(self->sdl_window, data[0].fullscreen ? fullscreen_mode : 0);
-        
       }
     }
   }

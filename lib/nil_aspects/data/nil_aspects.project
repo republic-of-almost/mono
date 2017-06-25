@@ -41,6 +41,7 @@ table.insert(
 
       -- Thrid Party --
 
+      "GLFW",
       "ImGUI",
       "ImGuizmo",
       "OpenGL",

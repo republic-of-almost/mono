@@ -57,7 +57,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
     {
       /* We operate on 1 window idea so grab the first */
       self->current_viewport[0] = win[0].width;
-      self->current_viewport[1] = win[1].height;
+      self->current_viewport[1] = win[0].height;
     }
   }
   
