@@ -289,6 +289,7 @@ load_obj_from_file(
       }
     }
     
+    
     /*
       Setup the return model
     */

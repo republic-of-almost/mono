@@ -287,7 +287,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
     }
   }
   
-  // Keyboard
+  // Quit?
+  aspect.want_to_quit = glfwWindowShouldClose(self->window);
 }
 
 
