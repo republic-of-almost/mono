@@ -6,6 +6,7 @@
 #include <nil/node.hpp>
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
+#include <nil/data/data.hpp>
 
 
 // --------------------------------------------------- [ GLFW Aspect Config ] --
@@ -22,6 +23,14 @@ struct Data
 {
   GLFWwindow *window;
   Nil::Node window_node;
+  
+  float last_mouse_x;
+  float last_mouse_y;
+  
+  float delta_x;
+  float delta_y;
+  
+  uint32_t keys[Nil::Data::KeyCode::COUNT];
 };
 
 

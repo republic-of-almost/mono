@@ -49,9 +49,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
   */
   {
     size_t count = 0;
-    Nil::Data::Window *win;
-    
-    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &win, nullptr);
+    Nil::Data::Window *win = nullptr;
+    Nil::Data::get(&count, &win);
     
     if(count)
     {
@@ -76,7 +75,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       self->light_pack = rov_createLights(nullptr, 0);
     }
   }
-  
   
   // Debug Lines
   {
