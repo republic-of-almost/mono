@@ -5,6 +5,9 @@ media_masters/
 # Shaders are stored here
 !lib/rov/assets/
 
+Makefile
+*.make
+
 # -- General C++ --#
 # https://github.com/github/gitignore
 

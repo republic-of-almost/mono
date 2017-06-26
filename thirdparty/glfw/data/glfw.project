@@ -13,7 +13,11 @@ table.insert(
     location = make.get_proj_root(),
     ignore_defaults = true,
 
-    src_files_macosx = {
+    inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+    src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),
       make.add_headers(make.get_proj_root() .. "../src/"),
       --
@@ -23,16 +27,20 @@ table.insert(
       make.get_proj_root() .. "../src/context.c",
       make.get_proj_root() .. "../src/posix_thread.c",
       make.get_proj_root() .. "../src/window.c",
-      --
+      make.get_proj_root() .. "../src/vulkan.c",
+      make.get_proj_root() .. "../src/egl_context.c",
+      make.get_proj_root() .. "../src/osmesa_context.c",      
+    },
+
+    -- OSX Setup
+
+    src_files_macosx = {
       make.get_proj_root() .. "../src/cocoa_init.m",
       make.get_proj_root() .. "../src/cocoa_joystick.m",
       make.get_proj_root() .. "../src/cocoa_monitor.m",
       make.get_proj_root() .. "../src/cocoa_time.c",
       make.get_proj_root() .. "../src/cocoa_window.m",
       make.get_proj_root() .. "../src/nsgl_context.m",
-      make.get_proj_root() .. "../src/osmesa_context.c",
-      make.get_proj_root() .. "../src/vulkan.c",
-      make.get_proj_root() .. "../src/egl_context.c",
     },
 
     link_dependencies_macosx = {
@@ -48,8 +56,20 @@ table.insert(
       "_GLFW_COCOA",
     },
 
-    inc_dirs = {
-      make.get_proj_root() .. "../include/",
+    -- Linux Setup
+
+    src_files_linux = {
+      make.get_proj_root() .. "../src/x11_init.c",
+      make.get_proj_root() .. "../src/x11_monitor.c",
+      make.get_proj_root() .. "../src/x11_window.c",
+      make.get_proj_root() .. "../src/linux_joystick.c",
+      make.get_proj_root() .. "../src/posix_time.c",
+      make.get_proj_root() .. "../src/glx_context.c",
+      make.get_proj_root() .. "../src/xkb_unicode.c",
+    },
+
+    defines_linux = {
+       "_GLFW_X11",
     },
 
   }

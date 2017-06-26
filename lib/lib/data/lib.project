@@ -24,5 +24,9 @@ table.insert(
     inc_dirs = {
       make.get_proj_root() .. "../include",
     },
+
+    project_dependencies = {
+      "Remotery",
+    },
   }
 )

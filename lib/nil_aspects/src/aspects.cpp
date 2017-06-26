@@ -5,8 +5,6 @@
 
 #include <aspect/glfw_aspect.hpp>
 
-#include <aspect/sdl_aspect.hpp>
-#include <aspect/sdl_mixer_aspect.hpp>
 
 #ifndef NIMGUI
 #include <aspect/imgui_aspect.hpp>

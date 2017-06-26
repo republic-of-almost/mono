@@ -268,12 +268,13 @@ make.create_solution(solution_data, project_defaults, projects)
 
     -- Temp fix to programatically copy assets
     if proj.kind == "WindowedApp" and projects then
-
-      for j, asset_proj in ipairs(projects) do
-        if asset_proj.asset_dir then
-          postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+      if(os.get() == "macosx") then
+        for j, asset_proj in ipairs(projects) do
+          if asset_proj.asset_dir then
+            postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+          end
+          -- postbuildcommands("ditto ${SRCROOT}/../assets/ ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
         end
-        -- postbuildcommands("ditto ${SRCROOT}/../assets/ ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
       end
     end
 
