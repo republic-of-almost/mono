@@ -29,7 +29,7 @@ table.insert(
       make.get_proj_root() .. "../src/window.c",
       make.get_proj_root() .. "../src/vulkan.c",
       make.get_proj_root() .. "../src/egl_context.c",
-      make.get_proj_root() .. "../src/osmesa_context.c",      
+      make.get_proj_root() .. "../src/osmesa_context.c",
     },
 
     -- OSX Setup
@@ -66,6 +66,22 @@ table.insert(
       make.get_proj_root() .. "../src/posix_time.c",
       make.get_proj_root() .. "../src/glx_context.c",
       make.get_proj_root() .. "../src/xkb_unicode.c",
+    },
+
+    link_dependencies_linux = {
+      "dl",
+      "pthread",
+      "GL",
+      "Xrandr",
+      "Xi",
+      "Xrender",
+      "drm",
+      "Xdamage",
+      "Xxf86vm",
+      "Xext",
+      "X11",
+      "Xinerama",
+      "Xcursor",
     },
 
     defines_linux = {

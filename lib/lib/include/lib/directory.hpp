@@ -3,7 +3,7 @@
   --
   Executable directory path.
 
-  Copyright: public-domain 2017 - http://unlicense.org/ 
+  Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef DIRECTORY_INCLUDED_5551C33B_D835_42D2_99FF_661889A068A0
 #define DIRECTORY_INCLUDED_5551C33B_D835_42D2_99FF_661889A068A0
@@ -134,6 +134,8 @@ exe_path()
       strcpy(buffer_exe_path, path);
     }
   }
+
+  return buffer_exe_path;
 }
 
 
