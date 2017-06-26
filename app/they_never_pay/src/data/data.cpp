@@ -104,8 +104,13 @@ load_assets()
       
       Nil::Data::Texture_resource tex_data{};
       
+      static int count = 0;
+      
       if(model.material_id[i] >= 0)
+//      if(count == 0)
       {
+        count++;
+      
         int x = 0;
         int y = 0;
         int c = 0;

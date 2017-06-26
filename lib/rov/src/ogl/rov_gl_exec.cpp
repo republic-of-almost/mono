@@ -2,6 +2,7 @@
 #include "rov_gl.hpp"
 #include <lib/bits.hpp>
 #include <lib/bench.hpp>
+#include <lib/assert.hpp>
 #include <math/mat/mat4.hpp>
 
 
@@ -13,6 +14,8 @@ ogl_exec(
   rovGLData *rov_gl_data,
   rovData *rov_data)
 {
+  BENCH_SCOPED_CPU(OglExec);
+
   #ifdef GL_HAS_VAO
   glBindVertexArray(rov_gl_data->vao);
   #endif
@@ -52,12 +55,17 @@ ogl_exec(
     */
     size_t dc_index = 0;
     
-//    BENCH_PUSH_GPU(MeshRender); 
+    BENCH_PUSH_GPU(MeshRender); 
     
     GLuint last_shd = 0;
 
-    for(auto &mat : rp.materials)
+    const size_t mat_count = rp.materials.size();
+
+    for(size_t k = 0; k < mat_count; ++k)
+//    for(auto &mat : rp.materials)
     {
+      auto &mat = rp.materials[k];
+    
       if(mat.draw_calls == 0)
       {
         continue;
@@ -107,7 +115,14 @@ ogl_exec(
         {
           if(texture_maps[t] && shd.uni_tex[t] != -1)
           {
-            rovGLTexture tex = rov_gl_data->rov_textures[texture_maps[t] - 1];
+            const size_t texture_index = texture_maps[t] - 1;
+            
+            #ifndef NDEBUG
+            const size_t texture_count = rov_gl_data->rov_textures.size();
+            LIB_ASSERT(texture_index < texture_count);
+            #endif
+            
+            const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
             
             glActiveTexture(GL_TEXTURE0 + texture_slots);
             glBindTexture(GL_TEXTURE_2D, tex.gl_id);
@@ -236,7 +251,7 @@ ogl_exec(
       }
     } // For amts
     
-//    BENCH_POP_GPU;
+    BENCH_POP_GPU;
 
     // Line Renderer
     #ifdef GL_HAS_GEO_SHD

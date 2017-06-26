@@ -344,7 +344,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     
       if(ImGui::IsItemHovered())
       {
-        ImGui::SetTooltip("Dimentions: %d x %d\nChannels: %d", textures[i].width, textures[i].height, textures[i].compoents);
+        ImGui::SetTooltip("ID: %d\nDimentions: %d x %d\nChannels: %d", textures[i].id,  textures[i].width, textures[i].height, textures[i].compoents);
       }
       
       if((i + 1) % (cols ))

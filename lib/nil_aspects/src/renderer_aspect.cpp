@@ -166,10 +166,12 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
           if((texture_resource->id + 1) > self->texture_ids.size())
           {
-            self->texture_ids.resize(1 << (texture_resource->id + 1));
+            const size_t new_size = (texture_resource->id + 1);
+            self->texture_ids.resize(new_size);
           }
-
-          self->texture_ids[texture_resource->id] = texture;
+          
+          const size_t id = texture_resource->id;
+          self->texture_ids[id] = texture;
         }
 
         texture_resource->status = Nil::Data::Texture_resource::LOADED;
