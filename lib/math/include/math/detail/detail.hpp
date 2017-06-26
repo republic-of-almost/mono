@@ -31,7 +31,7 @@
 // Windows Inline
 #ifdef _WIN32
 
-#define MATH_INLINE __forceinline
+  #define MATH_INLINE __forceinline
 
 // GCC and Clang support this method.
 #elif defined __has_attribute
@@ -61,12 +61,7 @@
 #define MATH_VEC2_INLINE MATH_INLINE
 #define MATH_VEC3_INLINE MATH_INLINE
 #define MATH_VEC4_INLINE MATH_INLINE
-#define MATH_MAT3_INLINE MATH_INLINE
-#define MATH_MAT4_INLINE MATH_INLINE
 #define MATH_QUAT_INLINE MATH_INLINE
-#define MATH_AABB_INLINE MATH_INLINE
-#define MATH_GENR_INLINE MATH_INLINE
-#define MATH_CONSTEXPR constexpr
 
 
 #endif // include guard

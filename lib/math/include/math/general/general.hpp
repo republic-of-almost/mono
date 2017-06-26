@@ -16,26 +16,33 @@
 #include <random>
 
 
+// --------------------------------------------------------------- [ Config ] --
+
+
+#define MATH_GENR_CONSTEXPR constexpr
+#define MATH_GENR_INLINE MATH_INLINE
+
+
 _MATH_NS_OPEN
 
 
-// ----------------------------------------------------------- [ Constants ] --
+// ------------------------------------------------------------ [ Constants ] --
 
 
-MATH_CONSTEXPR float                pi()          { return 3.14159265359f;  }
-MATH_CONSTEXPR float                two_pi()      { return 2.f * pi();      }
-MATH_CONSTEXPR float                half_pi()     { return pi() * 0.5f;     }
-MATH_CONSTEXPR float                tau()         { return two_pi();        }
-MATH_CONSTEXPR float                half_tau()    { return pi();            }
-MATH_CONSTEXPR float                quart_tau()   { return half_pi();       }
-MATH_CONSTEXPR float                g_ratio()     { return 1.61803398875f;  }
-MATH_CONSTEXPR float                root_two()    { return 1.41421356237f;  }
-MATH_CONSTEXPR float                root_three()  { return 1.73205080757f;  }
-MATH_CONSTEXPR float                epsilon()     { return 0.000000001f;    }
-MATH_CONSTEXPR float                ten_epsilon() { return epsilon() * 10.f;}
+MATH_GENR_CONSTEXPR float           pi()          { return 3.14159265359f;  }
+MATH_GENR_CONSTEXPR float           two_pi()      { return 2.f * pi();      }
+MATH_GENR_CONSTEXPR float           half_pi()     { return pi() * 0.5f;     }
+MATH_GENR_CONSTEXPR float           tau()         { return two_pi();        }
+MATH_GENR_CONSTEXPR float           half_tau()    { return pi();            }
+MATH_GENR_CONSTEXPR float           quart_tau()   { return half_pi();       }
+MATH_GENR_CONSTEXPR float           g_ratio()     { return 1.61803398875f;  }
+MATH_GENR_CONSTEXPR float           root_two()    { return 1.41421356237f;  }
+MATH_GENR_CONSTEXPR float           root_three()  { return 1.73205080757f;  }
+MATH_GENR_CONSTEXPR float           epsilon()     { return 0.000000001f;    }
+MATH_GENR_CONSTEXPR float           ten_epsilon() { return epsilon() * 10.f;}
 
 
-// ---------------------------------------------------------------- [ Trig ] --
+// ----------------------------------------------------------------- [ Trig ] --
 
 
 MATH_GENR_INLINE float              tan(const float x);
@@ -46,14 +53,14 @@ MATH_GENR_INLINE float              sin(const float radians);
 MATH_GENR_INLINE float              a_sin(const float radians);
 
 
-// --------------------------------------------------- [ Degrees / Radians ] --
+// ---------------------------------------------------- [ Degrees / Radians ] --
 
 
-MATH_GENR_INLINE float              radians_to_degrees(const float radians);
-MATH_GENR_INLINE float              degrees_to_radians(const float degrees);
+MATH_GENR_INLINE float              to_degrees(const float radians);
+MATH_GENR_INLINE float              to_radians(const float degrees);
 
 
-// ------------------------------------------------------------- [ Casting ] --
+// -------------------------------------------------------------- [ Casting ] --
 
 
 MATH_GENR_INLINE float              to_float(const uint32_t x);
@@ -62,7 +69,7 @@ MATH_GENR_INLINE int32_t            to_int(const float x);
 MATH_GENR_INLINE uint32_t           to_uint(const float x);
 
 
-// -------------------------------------------------------------- [ Random ] --
+// --------------------------------------------------------------- [ Random ] --
 
 
 MATH_GENR_INLINE float              rand_range(const float start, const float end);
@@ -70,7 +77,7 @@ MATH_GENR_INLINE uint32_t           rand_range(const uint32_t start, const uint3
 MATH_GENR_INLINE int32_t            rand_range(const int32_t start, const int32_t end);
 
 
-// ------------------------------------------------------------- [ General ] --
+// -------------------------------------------------------------- [ General ] --
 
 
 MATH_GENR_INLINE float              sqrt(const float x);
@@ -96,7 +103,151 @@ MATH_GENR_INLINE float              floor(const float x);
 MATH_GENR_INLINE float              nearest_floor(const float x, const float increments);
 
 
-// ** IMPL ** //
+// ------------------------------------------------------------ [ Trig Impl ] --
+
+
+float
+tan(const float x)
+{
+  return tanf(x);
+}
+
+
+float
+a_tan2(const float x, const float y)
+{
+  return atan2f(x, y);
+}
+
+
+float
+cos(const float radians)
+{
+  return cosf(radians);
+}
+
+
+float
+a_cos(const float radians)
+{
+  return acosf(radians);
+}
+
+
+float
+sin(const float radians)
+{
+  return sinf(radians);
+}
+
+
+float
+a_sin(const float radians)
+{
+  return asinf(radians);
+}
+
+
+// ----------------------------------------------- [ Degrees / Radians Impl ] --
+
+
+namespace detail
+{
+  MATH_GENR_CONSTEXPR float over_pi()  { return 180.f / pi(); }
+  MATH_GENR_CONSTEXPR float over_180() { return pi() / 180.f; }
+}
+
+
+float
+to_degrees(const float radians)
+{
+  return radians * detail::over_pi();
+}
+
+
+float
+to_radians(const float degrees)
+{
+  return degrees * detail::over_180();
+}
+
+
+// --------------------------------------------------------- [ Casting Impl ] --
+
+
+float
+to_float(const uint32_t x)
+{
+  return (float)x;
+}
+
+
+float
+to_float(const int32_t x)
+{
+  return (float)x;
+}
+
+
+int32_t
+to_int(const float x)
+{
+  return (int32_t)x;
+}
+
+
+uint32_t
+to_uint(const float x)
+{
+  return (uint32_t)x;
+}
+
+
+// ---------------------------------------------------------- [ Random Impl ] --
+
+
+float
+rand_range(const float start, const float end)
+{
+  // static std::random_device rd;
+  // static std::default_random_engine re(rd());
+
+  // std::uniform_real_distribution<float> dist(start, end);
+
+  // return dist(re);
+
+  const uint32_t range = (MATH_NS_NAME::max(start,end) - MATH_NS_NAME::min(start, end)) * 1000.f;
+  const uint32_t rand_value = rand() % range;
+
+  return MATH_NS_NAME::min(start, end) + MATH_NS_NAME::to_float(rand_value) / 1000.f;
+}
+
+
+uint32_t
+rand_range(const uint32_t start, const uint32_t end)
+{
+  static std::random_device rd;
+  static std::default_random_engine re(rd());
+
+  std::uniform_int_distribution<uint32_t> dist(start, end);
+
+  return dist(re);
+}
+
+
+int32_t
+rand_range(const int32_t start, const int32_t end)
+{
+  static std::random_device rd;
+  static std::default_random_engine re(rd());
+
+  std::uniform_int_distribution<int32_t> dist(start, end);
+
+  return dist(re);
+}
+
+
+// --------------------------------------------------------- [ General Impl ] --
 
 
 float
@@ -223,68 +374,6 @@ abs(const int32_t x)
 }
 
 
-float
-tan(const float x)
-{
-  return tanf(x);
-}
-
-
-float
-a_tan2(const float x, const float y)
-{
-  return atan2f(x, y);
-}
-
-
-float
-cos(const float radians)
-{
-  return cosf(radians);
-}
-
-
-float
-a_cos(const float radians)
-{
-  return acosf(radians);
-}
-
-
-float
-sin(const float radians)
-{
-  return sinf(radians);
-}
-
-
-float
-a_sin(const float radians)
-{
-  return asinf(radians);
-}
-
-
-namespace detail
-{
-  MATH_CONSTEXPR float over_pi()  { return 180.f / pi(); }
-  MATH_CONSTEXPR float over_180() { return pi() / 180.f; }
-}
-
-
-float
-radians_to_degrees(const float radians)
-{
-  return radians * detail::over_pi();
-}
-
-
-float
-degrees_to_radians(const float degrees)
-{
-  return degrees * detail::over_180();
-}
-
 
 float
 sign(const float x)
@@ -335,75 +424,6 @@ nearest_floor(const float x, const float increments)
 {
   const float remainder = mod(x, increments);
   return x - remainder;
-}
-
-
-float
-to_float(const uint32_t x)
-{
-  return (float)x;
-}
-
-
-float
-to_float(const int32_t x)
-{
-  return (float)x;
-}
-
-
-int32_t
-to_int(const float x)
-{
-  return (int32_t)x;
-}
-
-
-uint32_t
-to_uint(const float x)
-{
-  return (uint32_t)x;
-}
-
-
-float
-rand_range(const float start, const float end)
-{
-  // static std::random_device rd;
-  // static std::default_random_engine re(rd());
-
-  // std::uniform_real_distribution<float> dist(start, end);
-
-  // return dist(re);
-
-  const uint32_t range = (MATH_NS_NAME::max(start,end) - MATH_NS_NAME::min(start, end)) * 1000.f;
-  const uint32_t rand_value = rand() % range;
-
-  return MATH_NS_NAME::min(start, end) + MATH_NS_NAME::to_float(rand_value) / 1000.f;
-}
-
-
-uint32_t
-rand_range(const uint32_t start, const uint32_t end)
-{
-  static std::random_device rd;
-  static std::default_random_engine re(rd());
-
-  std::uniform_int_distribution<uint32_t> dist(start, end);
-
-  return dist(re);
-}
-
-
-int32_t
-rand_range(const int32_t start, const int32_t end)
-{
-  static std::random_device rd;
-  static std::default_random_engine re(rd());
-
-  std::uniform_int_distribution<int32_t> dist(start, end);
-
-  return dist(re);
 }
 
 

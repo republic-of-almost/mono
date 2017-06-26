@@ -256,7 +256,7 @@ quat_get_rotation_matrix(const quat to_mat3)
 		1 - 2 * x_sq - 2 * y_sq,
 	};
 
-  return mat3_init_with_array(mat_data);
+  return mat3_init(mat_data);
 }
 
 

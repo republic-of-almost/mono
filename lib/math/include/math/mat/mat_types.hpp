@@ -13,12 +13,12 @@
 _MATH_NS_OPEN
 
 
-class mat3
+struct mat3
 {
 	float data[9];
 };
 
-class mat4
+struct mat4
 {
 	float data[16];
 };

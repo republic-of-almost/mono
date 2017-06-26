@@ -8,8 +8,8 @@
 _MATH_NS_OPEN
 
 
-class mat3;
-class mat4;
+struct mat3;
+struct mat4;
 
 
 _MATH_NS_CLOSE

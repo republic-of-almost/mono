@@ -123,7 +123,7 @@ transform_get_world_matrix(const transform &to_world)
   const mat4 scale = mat4_scale(to_world.scale);
 
   // Get rotation
-  mat4 rotation = mat4_init_with_mat3(quat_get_rotation_matrix(to_world.rotation));
+  mat4 rotation = mat4_init(quat_get_rotation_matrix(to_world.rotation));
   mat4_set(rotation, 3, 3, 1.f);
 
   // Get translation
