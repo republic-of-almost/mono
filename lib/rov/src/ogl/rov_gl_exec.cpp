@@ -43,8 +43,8 @@ ogl_exec(
     glEnable(GL_DEPTH_TEST);
     glViewport(rp.viewport[0], rp.viewport[1], rp.viewport[2], rp.viewport[3]);
 
-    const math::mat4 proj = math::mat4_init_with_array(rp.proj);
-    const math::mat4 view = math::mat4_init_with_array(rp.view);
+    const math::mat4 proj = math::mat4_init(rp.proj);
+    const math::mat4 view = math::mat4_init(rp.view);
     const math::mat4 view_proj = math::mat4_multiply(view, proj);
 
     /*
@@ -215,7 +215,7 @@ ogl_exec(
           Apply Matrices and other uniforms.
         */
         {
-          const math::mat4 world    = math::mat4_init_with_array(dc.world);
+          const math::mat4 world    = math::mat4_init(dc.world);
           const math::mat4 wvp_mat  = math::mat4_multiply(world, view, proj);
           const math::vec4 pos      = math::mat4_multiply(math::vec4_init(0,0,0,1), math::mat4_get_inverse(view));
           const math::mat4 mv_mat   = math::mat4_multiply(view, world);

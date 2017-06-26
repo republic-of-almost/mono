@@ -10,30 +10,36 @@
 #include <assert.h>
 
 
+// --------------------------------------------------------------- [ Config ] --
+
+
+#define MATH_AABB_INLINE inline
+
+
 _MATH_NS_OPEN
 
 
-// ----------------------------------------------------------- [ Interface ] --
+// ------------------------------------------------------------ [ Interface ] --
  
 
-inline aabb         aabb_init(const vec3 min, const vec3 max);
-inline aabb         aabb_init(const vec3 center, const float scale);
-inline aabb         aabb_init_from_xyz_data(const float vertex[], const size_t number_of_floats);
+MATH_AABB_INLINE aabb         aabb_init(const vec3 min, const vec3 max);
+MATH_AABB_INLINE aabb         aabb_init(const vec3 center, const float scale);
+MATH_AABB_INLINE aabb         aabb_init_from_xyz_data(const float vertex[], const size_t number_of_floats);
 
-inline vec3         aabb_get_extents(const aabb &a);
-inline vec3         aabb_get_half_extents(const aabb &a);
-inline vec3         aabb_get_min(const aabb &a);
-inline vec3         aabb_get_max(const aabb &a);
-inline vec3         aabb_get_origin(const aabb &a);
+MATH_AABB_INLINE vec3         aabb_get_extents(const aabb &a);
+MATH_AABB_INLINE vec3         aabb_get_half_extents(const aabb &a);
+MATH_AABB_INLINE vec3         aabb_get_min(const aabb &a);
+MATH_AABB_INLINE vec3         aabb_get_max(const aabb &a);
+MATH_AABB_INLINE vec3         aabb_get_origin(const aabb &a);
 
-inline void         aabb_set_origin(aabb &aabb_to_move, const vec3 new_origin);
-inline void         aabb_scale(aabb &aabb_to_scale, const vec3 scale);
-inline void         aabb_scale(aabb &aabb_to_scale, const float scale);
+MATH_AABB_INLINE void         aabb_set_origin(aabb &aabb_to_move, const vec3 new_origin);
+MATH_AABB_INLINE void         aabb_scale(aabb &aabb_to_scale, const vec3 scale);
+MATH_AABB_INLINE void         aabb_scale(aabb &aabb_to_scale, const float scale);
 
-inline bool         aabb_intersection_test(const aabb &a, const aabb &b);
+MATH_AABB_INLINE bool         aabb_intersection_test(const aabb &a, const aabb &b);
 
 
-// ---------------------------------------------------------------- [ Impl ] --
+// ----------------------------------------------------------------- [ Impl ] --
 
 
 aabb

@@ -13,33 +13,45 @@
 #include "mat_types.hpp"
 #include "mat3.hpp"
 #include "../vec/vec4.hpp"
-#include <assert.h>
+//#include <assert.h>
+
+
+// --------------------------------------------------------------- [ Config ] --
+
+
+#define MATH_MAT4_INLINE inline
 
 
 _MATH_NS_OPEN
 
 
-// Constants
+// ------------------------------------------------------------ [ Constants ] --
+
+
 MATH_MAT4_INLINE mat4                       mat4_id();
 MATH_MAT4_INLINE mat4                       mat4_zero();
 
-// Init
+
+// ----------------------------------------------------------- [ Initialize ] --
+
+
 MATH_MAT4_INLINE mat4                       mat4_init(); // will return an id array
 MATH_MAT4_INLINE mat4                       mat4_init(const float x);
-MATH_MAT4_INLINE mat4                       mat4_init_with_mat3(const mat3 sub_matrix);
-MATH_MAT4_INLINE mat4                       mat4_init_with_array(const float arr[]);
+MATH_MAT4_INLINE mat4                       mat4_init(const mat3 sub_matrix);
+MATH_MAT4_INLINE mat4                       mat4_init(const float arr[]);
 
-// Generate affine/special transformation matrices.
+
+// ---------------------------------------------------- [ View / Projection ] --
+
+
 MATH_MAT4_INLINE mat4                       mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up);
 MATH_MAT4_INLINE mat4                       mat4_projection(const float width, const float height, const float near_plane, const float far_plane, const float fov);
 MATH_MAT4_INLINE mat4                       mat4_orthographic(const float width, const float height, const float near_plane,  const float far_plane);
-MATH_MAT4_INLINE mat4                       mat4_scale(const vec3 scale);
-MATH_MAT4_INLINE mat4                       mat4_scale(const float x, const float y, const float z);
-MATH_MAT4_INLINE mat4                       mat4_translate(const vec3 move);
-MATH_MAT4_INLINE mat4                       mat4_translate(const float x, const float y, const float z);
-MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);
 
-// Operations
+
+// ----------------------------------------------------------- [ Operations ] --
+
+
 MATH_MAT4_INLINE mat4                       mat4_add(const mat4 &lhs, const mat4 &rhs);
 MATH_MAT4_INLINE mat4                       mat4_subtract(const mat4 &lhs, const mat4 &rhs);
 MATH_MAT4_INLINE mat4                       mat4_multiply(const float val, const mat4 &b);
@@ -62,10 +74,17 @@ MATH_MAT4_INLINE vec3                       mat4_get_position(const mat4 &a);
 MATH_MAT4_INLINE vec3                       mat4_get_scale(const mat4 &a);
 MATH_MAT4_INLINE const float*               mat4_get_data(const mat4 &mat);
 
+MATH_MAT4_INLINE mat4                       mat4_scale(const vec3 scale);
+MATH_MAT4_INLINE mat4                       mat4_scale(const float x, const float y, const float z);
+MATH_MAT4_INLINE mat4                       mat4_translate(const vec3 move);
+MATH_MAT4_INLINE mat4                       mat4_translate(const float x, const float y, const float z);
+MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);;
+
 MATH_MAT4_INLINE void                       mat4_to_array(const mat4 &m, float *array);
 
 
-// Impl
+// ------------------------------------------------------- [ Constants Impl ] --
+
 
 namespace detail
 {
@@ -87,7 +106,7 @@ mat4_id()
     0.f, 0.f, 0.f, 1.f,
   };
 
-  return mat4_init_with_array(id_array);
+  return mat4_init(id_array);
 }
 
 
@@ -101,7 +120,7 @@ mat4_zero()
     0.f, 0.f, 0.f, 0.f,
   };
 
-  return mat4_init_with_array(zero_array);
+  return mat4_init(zero_array);
 }
 
 
@@ -118,12 +137,12 @@ mat4_init(const float x)
   float array[16];
   std::fill_n(array, 16, x);
 
-  return mat4_init_with_array(array);
+  return mat4_init(array);
 }
 
 
 mat4
-mat4_init_with_mat3(const mat3 sub_matrix)
+mat4_init(const mat3 sub_matrix)
 {
   //TODO: Get data directly!
   const float mat_data[16] = {
@@ -133,12 +152,12 @@ mat4_init_with_mat3(const mat3 sub_matrix)
     0.f, 0.f, 0.f, 0.f,
   };
   
-  return mat4_init_with_array(mat_data);
+  return mat4_init(mat_data);
 }
 
 
 mat4
-mat4_init_with_array(const float array[])
+mat4_init(const float array[])
 {
   mat4 return_mat;
   detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
@@ -179,7 +198,7 @@ mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up)
     1.f,
   };
 
-  return mat4_init_with_array(array_mat);
+  return mat4_init(array_mat);
 }
 
 
@@ -215,7 +234,7 @@ mat4_projection(const float width, const float height, const float near_plane, c
 
  };
 
- return mat4_init_with_array(proj_mat);
+ return mat4_init(proj_mat);
 }
 
 
@@ -248,7 +267,7 @@ mat4_orthographic(const float width, const float height, const float near_plane,
     1.f,
   };
 
-  return mat4_init_with_array(ortho_mat);
+  return mat4_init(ortho_mat);
 }
 
 
@@ -393,7 +412,7 @@ mat4_get_transpose(const mat4 &to_transpose)
     transpose_data->data[3],  transpose_data->data[7],  transpose_data->data[11], transpose_data->data[15],
   };
   
-  return mat4_init_with_array(mat_transpose);
+  return mat4_init(mat_transpose);
 }
 
 
@@ -528,7 +547,7 @@ mat4_get_inverse(const mat4 &to_inverse)
     i = i * one_over_det;
   }
   
-  return mat4_init_with_array(inverse);
+  return mat4_init(inverse);
 }
 
 
@@ -542,7 +561,7 @@ mat4_get_determinant(const mat4 &det)
     i j k l     12 13 14 15
   */
   
-  const detail::internal_mat3 *mat = reinterpret_cast<const detail::internal_mat3*>(&det);
+  const detail::internal_mat4 *mat = reinterpret_cast<const detail::internal_mat4*>(&det);
 
   const float det_a_data[9]
   {
@@ -551,8 +570,8 @@ mat4_get_determinant(const mat4 &det)
     mat->data[13], mat->data[14], mat->data[15]
   };
 
-  const mat3 det_a_mat = mat3_init_with_array(det_a_data);
-  const float det_a = mat->data[0] * mat3_get_determinant(det_a_mat);
+  const mat3 det_a_mat = mat3_init(det_a_data);
+  const float det_a = mat->data[0] * mat3_determinant(det_a_mat);
 
   const float det_b_data[9]
   {
@@ -561,8 +580,8 @@ mat4_get_determinant(const mat4 &det)
     mat->data[12], mat->data[14], mat->data[15]
   };
   
-  const mat3 det_b_mat = mat3_init_with_array(det_b_data);
-  const float det_b = mat->data[1] * mat3_get_determinant(det_b_mat);
+  const mat3 det_b_mat = mat3_init(det_b_data);
+  const float det_b = mat->data[1] * mat3_determinant(det_b_mat);
   
   const float det_c_data[9]
   {
@@ -571,8 +590,8 @@ mat4_get_determinant(const mat4 &det)
     mat->data[12], mat->data[13], mat->data[15]
   };
   
-  const mat3 det_c_mat = mat3_init_with_array(det_c_data);
-  const float det_c = mat->data[2] * mat3_get_determinant(det_c_mat);
+  const mat3 det_c_mat = mat3_init(det_c_data);
+  const float det_c = mat->data[2] * mat3_determinant(det_c_mat);
   
   const float det_d_data[9]
   {
@@ -581,8 +600,8 @@ mat4_get_determinant(const mat4 &det)
     mat->data[12], mat->data[13], mat->data[14]
   };
 
-  const mat3 det_d_mat = mat3_init_with_array(det_d_data);
-  const float det_d = mat->data[3] * mat3_get_determinant(det_d_mat);
+  const mat3 det_d_mat = mat3_init(det_d_data);
+  const float det_d = mat->data[3] * mat3_determinant(det_d_mat);
 
   return det_a - det_b + det_c - det_d;
 }
@@ -707,7 +726,7 @@ mat4_get_sub_mat3(const mat4 &m)
     internal_mat->data[8], internal_mat->data[9], internal_mat->data[10],
   };
   
-  return mat3_init_with_array(mat_data);
+  return mat3_init(mat_data);
 }
 
 
