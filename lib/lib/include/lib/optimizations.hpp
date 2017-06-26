@@ -47,9 +47,15 @@
 
 
 #ifdef _MSC_VER
-#define FORCE_INLINE __forceinline
+  #define FORCE_INLINE __forceinline
 #else
-#define FORCE_INLINE __attribute__((always_inline))
+  // Will likely always exist, but in case it doesn't.
+  #if __has_attribute(always_inline)
+  #define FORCE_INLINE inline __attribute__((always_inline))
+  // Fallback to regular inline.
+  #else
+  #define FORCE_INLINE inline
+  #endif
 #endif
 
 
