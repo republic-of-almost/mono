@@ -24,6 +24,10 @@ table.insert(
 
     inc_dirs = {
       make.get_proj_root() .. "../include/",
+
+      -- Private inc
+
+      make.get_proj_root() .. "../include/imguizmo/",
     },
 
     project_dependencies = {

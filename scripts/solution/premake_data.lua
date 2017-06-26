@@ -187,7 +187,7 @@ make.create_solution(solution_data, project_defaults, projects)
     -- dependencies --
     -- Helper to allow us to recursivly get the dependencies --
     function
-    get_dependencies(proj, orig_proj)
+    get_dependencies(proj, orig_proj, padding)
 
       -- If we have project dependencies then we need
       -- to check if that project specifies any links
@@ -197,15 +197,13 @@ make.create_solution(solution_data, project_defaults, projects)
         -- Loop through each of the dependencies
         for i, dep in ipairs(proj.project_dependencies) do
 
+          print(padding .. "  Dependency " .. dep)
+
           -- Loop through the projects we have been given.
           for j, other_proj in ipairs(projects) do
 
             -- If a match then check for links
             if dep == other_proj.name then
-
-              get_dependencies(other_proj, orig_proj)
-
-              print("  -- Adding Dep: " .. dep);
 
               -- Projects can be marked no link
               -- But still want to bring in header files etc.
@@ -254,6 +252,9 @@ make.create_solution(solution_data, project_defaults, projects)
               local platform_defines = find_table_with_platform(other_proj, "defines")
               if platform_defines then defines(platform_defines) end
 
+
+              -- dependencies
+              get_dependencies(other_proj, orig_proj, padding .. "  ")
             end
           end
 
@@ -262,18 +263,19 @@ make.create_solution(solution_data, project_defaults, projects)
       end
     end
 
-    get_dependencies(proj, proj)
+    get_dependencies(proj, proj, "  ")
 
     buildoptions(proj.buildoptions)
 
     -- Temp fix to programatically copy assets
     if proj.kind == "WindowedApp" and projects then
-
-      for j, asset_proj in ipairs(projects) do
-        if asset_proj.asset_dir then
-          postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+      if(os.get() == "macosx") then
+        for j, asset_proj in ipairs(projects) do
+          if asset_proj.asset_dir then
+            postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+          end
+          -- postbuildcommands("ditto ${SRCROOT}/../assets/ ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
         end
-        -- postbuildcommands("ditto ${SRCROOT}/../assets/ ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
       end
     end
 

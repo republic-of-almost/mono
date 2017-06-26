@@ -13,6 +13,7 @@
 #include "mat_types.hpp"
 #include "mat3.hpp"
 #include "../vec/vec4.hpp"
+#include <string.h>
 //#include <assert.h>
 
 

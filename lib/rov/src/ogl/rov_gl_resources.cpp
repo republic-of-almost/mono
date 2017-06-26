@@ -25,15 +25,15 @@ ogl_createTexture(
   #ifdef GL_HAS_VAO
   glBindVertexArray(gl_data->vao);
   #endif
-  
+
   GLuint texture;
   glGenTextures(1, &texture);
-  
+
   if(out_resource_id)
   {
     *out_resource_id = (uintptr_t)texture;
   }
-  
+
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexImage2D(
     GL_TEXTURE_2D,
@@ -46,7 +46,7 @@ ogl_createTexture(
     format_to_gl_type(format),
     data
   );
-  
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -56,9 +56,9 @@ ogl_createTexture(
   tex.gl_id  = texture;
   tex.width  = width;
   tex.height = height;
-  
+
   gl_data->rov_textures.emplace_back(tex);
-  
+
   return gl_data->rov_textures.size();
 }
 
@@ -130,12 +130,12 @@ ogl_createLights(
   #ifdef GL_HAS_VAO
   glBindVertexArray(gl_data->vao);
   #endif
-  
+
   GLuint light_buffer;
-  
+
   glGenTextures(1, &light_buffer);
   glBindTexture(GL_TEXTURE_1D, light_buffer);
-  
+
   glTexImage1D(
     GL_TEXTURE_1D,
     0,
@@ -146,11 +146,11 @@ ogl_createLights(
     GL_FLOAT,
     0
   );
-  
+
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  
+
   glTexSubImage1D(
     GL_TEXTURE_1D,
     0,
@@ -160,12 +160,12 @@ ogl_createLights(
     GL_FLOAT,
     lights
   );
-  
+
   gl_data->light_buffers.emplace_back(
     light_buffer,
     count
   );
-  
+
   return gl_data->light_buffers.size();
 }
 
@@ -185,7 +185,7 @@ ogl_updateLights(
   buffer.count = count;
 
   glBindTexture(GL_TEXTURE_1D, buffer.gl_id);
-  
+
   glTexSubImage1D(
     GL_TEXTURE_1D,
     0,
@@ -195,7 +195,7 @@ ogl_updateLights(
     GL_FLOAT,
     lights
   );
-  
+
   return true;
 }
 
@@ -238,20 +238,26 @@ ogl_createProgram(
 
     return true;
   };
-  
+
   // -- Load File -- //
-  
+
   char name[1024]{};
   lib::string::filename_from_path(filename, name);
-  
+
   char path[2048]{};
   const char * exe_path = lib::dir::exe_path();
   strcat(path, exe_path);
   strcat(path, filename);
-  
+
   char program[1 << 13]{};
   lib::file::get_contents(path, program, sizeof(program));
-  
+
+  if(strlen(program) == 0)
+  {
+    LOG_ERROR("Failed to load shader")
+    return false;
+  }
+
   char vert_src[1 << 12]{};
   lib::string::get_text_between_tags(
     "// VERT_START //",
@@ -260,7 +266,7 @@ ogl_createProgram(
     vert_src,
     sizeof(vert_src)
   );
-  
+
   char geo_src[1 << 12]{};
   lib::string::get_text_between_tags(
     "// GEO_START //",
@@ -269,7 +275,7 @@ ogl_createProgram(
     geo_src,
     sizeof(geo_src)
   );
-  
+
   char frag_src[1 << 12]{};
   lib::string::get_text_between_tags(
     "// FRAG_START //",
@@ -278,9 +284,9 @@ ogl_createProgram(
     frag_src,
     sizeof(frag_src)
   );
-  
+
   // -- Create Shader Stages -- //
-  
+
   const GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
   const char *vs_src = &vert_src[0];
   glShaderSource(vert_shd, 1, &vs_src, NULL);
@@ -291,12 +297,12 @@ ogl_createProgram(
     LIB_ASSERT(false);
     return false;
   }
-  
+
     {
       auto err = glGetError();
       if(err)
       printf("ERR %d\n",err);
-    }  
+    }
 
   #ifdef GL_HAS_GEO_SHD
   GLuint geo_shd = 0;
@@ -351,7 +357,7 @@ ogl_createProgram(
   GLint is_linked = 0;
 
   glGetProgramiv(prog, GL_LINK_STATUS, &is_linked);
-  
+
   if(is_linked == GL_FALSE)
   {
     GLint max_length = 0;
@@ -367,23 +373,23 @@ ogl_createProgram(
     // Exit with failure.
 
     printf("PROG ERR: %s\n%s\n", name, error_log.data());
-    
+
     return false;
   }
-  
+
     {
       auto err = glGetError();
       if(err)
       printf("ERR %d\n",err);
     }
-  
+
   // -- Return Values -- //
-  
+
   if(out_vs)      { *out_vs = vert_shd;  }
   if(out_gs)      { *out_gs = geo_shd;   }
   if(out_fs)      { *out_fs = frag_shd;  }
   if(out_program) { *out_program = prog; }
-  
+
   return true;
 }
 

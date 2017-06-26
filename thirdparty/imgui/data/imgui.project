@@ -24,22 +24,16 @@ table.insert(
 
     inc_dirs = {
       make.get_proj_root() .. "../include/",
+
+      -- Private inc
+
+      make.get_proj_root() .. "../include/imgui/",
     },
 
     project_dependencies = {
       "STB",
       "OpenGL",
-    },
-
-    lib_dirs_macosx = {
-      "/usr/local/lib/",
-    },
-
-    linkoptions_macosx = {
-    },
-
-    inc_dirs_macosx = {
-      "/usr/local/include",
+      "GLFW",
     },
   }
 )
