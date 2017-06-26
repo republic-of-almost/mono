@@ -119,9 +119,15 @@ think(Nil::Node node, uintptr_t user_data)
     const float move_speed = 0.5f * delta_time;
     
     Nil::Data::Transform trans{};
+    Nil::Data::Transform head_trans{};
+    
+    Nil::Data::get(actor->head, head_trans);
     Nil::Data::get(node, trans);
     
-    const math::vec3 curr_step = math::vec3_init_with_array(trans.position);
+    math::vec3 height = math::vec3_init_with_array(head_trans.position);
+    math::vec3 pos = math::vec3_init_with_array(trans.position);
+    
+    const math::vec3 curr_step = math::vec3_add(pos, height);
     math::vec3 next_step = curr_step;
     math::vec3 move_dir  = math::vec3_zero();
 
@@ -163,9 +169,7 @@ think(Nil::Node node, uintptr_t user_data)
     {
       math::vec3 scale = math::vec3_scale(math::ray_direction(ray), distance);
       math::vec3 hit = math::vec3_add(ray.start, scale);
-    
-//      const math::vec3 height = math::vec3_init(0, actor->height, 0);
-//      const math::vec3 pos    = math::vec3_add(hit, height);
+
       const math::vec3 pos = hit;
       
       memcpy(trans.position, pos.data, sizeof(trans.position));

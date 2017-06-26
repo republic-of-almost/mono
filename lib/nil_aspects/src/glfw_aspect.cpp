@@ -222,10 +222,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       
       // Mouse
       {
-        glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        
         double x_pos, y_pos;
         glfwGetCursorPos(self->window, &x_pos, &y_pos);
+        
+        glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         
         self->last_mouse_x = (float)x_pos;
         self->last_mouse_y = (float)y_pos;
@@ -300,6 +300,21 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       data[i].key_count = Nil::Data::KeyCode::COUNT;
       
       Nil::Data::set(nodes[i], data[i]);
+    }
+  }
+  
+  // Modified Mice
+  {
+    size_t count = 0;
+    Nil::Data::Mouse *data = nullptr;
+    Nil::Node *nodes;
+    
+    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &nodes);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      const int mode = data[i].capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
+      glfwSetInputMode(self->window, GLFW_CURSOR, mode);
     }
   }
   

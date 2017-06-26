@@ -128,6 +128,9 @@ ray_test_triangles(
 {
   const vec3 r_dir = MATH_NS_NAME::ray_direction(in_ray);
   
+  float distance = 0;
+  bool found = false;
+  
   for(size_t i = 0; i < tri_count; ++i)
   {
     const size_t tri_index = i * 3 * 3;
@@ -171,16 +174,16 @@ ray_test_triangles(
  
     const float t = MATH_NS_NAME::vec3_dot(v2, q_vec) * o_dot;
   
-    if(out_distance)
-    {
-      *out_distance = t;
-    }
-  
-    return true;
+    if(t < distance)
+      distance = t;
     
+    found = true;
   }
   
-  return false;
+  
+  *out_distance = distance;
+  
+  return found;
 }
 
 
