@@ -165,7 +165,7 @@ think(Nil::Node node, uintptr_t user_data)
     //constexpr size_t tri_count = sizeof(Actor::nav_mesh) / (sizeof(float)) / 9;
     
     float distance = 0.f;
-    if(math::ray_test_triangles(ray, actor->nav_mesh, actor->nav_mesh_count, &distance))
+    if((math::ray_test_triangles(ray, actor->nav_mesh, actor->nav_mesh_count, &distance)) && (math::abs(distance) < 2.f))
     {
       math::vec3 scale = math::vec3_scale(math::ray_direction(ray), distance);
       math::vec3 hit = math::vec3_add(ray.start, scale);
@@ -201,7 +201,7 @@ think(Nil::Node node, uintptr_t user_data)
       
       const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
       
-      const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
+      const math::vec3 side_step         = math::vec3_add(curr_step, math::vec3_scale(norm_edge, dot * move_speed));
       const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
       const math::ray side_step_ray      = math::ray_init(side_step, side_step_ray_end);
       
