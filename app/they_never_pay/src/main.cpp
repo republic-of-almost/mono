@@ -17,6 +17,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <lib/memory.hpp>
+
 
 void
 app_tick()
@@ -29,8 +31,6 @@ app_tick()
 int
 main()
 {
-  lib::logging::set_output(lib::logging::out::console);
-  
   Nil::Engine nil_engine;
   Nil_ext::load_aspects(nil_engine);
   

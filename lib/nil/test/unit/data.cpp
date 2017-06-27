@@ -4,5 +4,5 @@
 
 TEST_CASE("Data Store")
 {
-
+  REQUIRE(false);
 }
