@@ -55,8 +55,8 @@
 #define LIB_LOGGING_IMPL
 #include "logging.hpp"
 
-#define LIB_MEMORY_POOL_IMPL
-#include "memory_pool.hpp"
+#define LIB_MEM_IMPL
+#include "memory.hpp"
 
 #define LIB_MODEL_IMPL
 #include "model.hpp"

@@ -23,6 +23,7 @@ namespace Nil_ext {
 void
 load_aspects(Nil::Engine &nil_engine)
 {
+
   /*
     SDL Aspect
     --
