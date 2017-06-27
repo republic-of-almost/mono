@@ -327,87 +327,11 @@ make.create_solution(solution_data, project_defaults, projects)
         if proj.lang_settings.exceptions then exceptions = true end
       end
 
-      if exceptions == true then
+      if exceptions ~= true then
         flags("NoExceptions") -- deprecated premake5
       end
 
     end
-
-    -- configuration({"Debug"})
-    -- defines({"DEBUG"})
-    --
-    -- targetdir(output .. "debug/")
-    -- objdir(output .. "objects/")
-    --
-    -- if proj.ignore_defaults == true then
-    --   if project_defaults.defines then defines(project_defaults.defines); end
-    --
-    --   local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
-    --   if platform_project_default_defines then defines(platform_project_default_defines) end
-    -- end
-    --
-    -- flags({"Symbols", "Unicode"})
-    --
-    -- if proj.ignore_defaults == true then
-    --   flags(project_defaults.flags)
-    -- end
-    --
-    -- local rtti = false
-    -- if proj.lang_settings then
-    --   if proj.lang_settings.rtti then rtti = true end
-    -- end
-    --
-    -- if rtti ~= true then
-    --   flags("NoRTTI"); -- deprecated premake5
-    -- end
-    --
-    -- local exceptions = false
-    -- if proj.lang_settings then
-    --   if proj.lang_settings.exceptions then exceptions = true end
-    -- end
-    -- if exceptions == true then
-    --   flags("NoExceptions") -- deprecated premake5
-    -- end
-    --
-    -- -- Release
-    --
-    -- configuration({"Release"})
-    -- defines({"NDEBUG", "NIMGUI"})
-    --
-    -- targetdir(output .. "release/")
-    -- objdir(output .. "objects/")
-    --
-    -- if proj.targetdir then targetdir(proj.targetdir) end
-    --
-    -- if proj.ignore_defaults == true then
-    --   if project_defaults.defines then defines(project_defaults.defines); end
-    --
-    --   local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
-    --   if platform_project_default_defines then defines(platform_project_default_defines) end
-    -- end
-    --
-    -- flags { "Optimize", "Unicode" }
-    --
-    -- if proj.ignore_defaults == true then
-    --   flags(project_defaults.flags)
-    -- end
-    --
-    -- local rtti = false
-    -- if proj.lang_settings then
-    --   if proj.lang_settings.rtti then rtti = true end
-    -- end
-    --
-    -- if rtti ~= true then
-    --   flags("NoRTTI"); -- deprecated premake5
-    -- end
-    --
-    -- local exceptions = false
-    -- if proj.lang_settings then
-    --   if proj.lang_settings.exceptions then exceptions = true end
-    -- end
-    -- if exceptions ~= true then
-    --   flags("NoExceptions") -- deprecated premake5
-    -- end
 
   end
 
