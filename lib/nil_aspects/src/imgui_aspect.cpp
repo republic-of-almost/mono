@@ -1404,6 +1404,13 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
       ImGui::EndMenu();
     }
+    
+    if(ImGui::BeginMenu("Lib"))
+    {
+      ImGui::MenuItem("Memory", nullptr, &self->show_lib_memory);
+      
+      ImGui::EndMenu();
+    }
 
     for(auto &menu : self->dev_data)
     {
@@ -1427,7 +1434,22 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       ((fn)menu.aux_03)(menu.aux_04);
     }
   }
+  
+  
+  // ----------------------------------------------------------- [ Lib Menu ] --
 
+  if(self->show_lib_memory)
+  {
+    ImGui::Begin("Lib Memory Viewer", &self->show_lib_memory);
+    {
+      ImGui::Text("Bucket Capacity: %zu", lib::mem::bucket_capacity());
+      ImGui::Text("Bucket Stride: %zu", lib::mem::bucket_stride());
+      ImGui::Text("Buckets Used: %zu", lib::mem::buckets_in_use());
+      
+      
+      ImGui::End();
+    }
+  }
 }
 
 

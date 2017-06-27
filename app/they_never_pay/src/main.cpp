@@ -31,6 +31,8 @@ app_tick()
 int
 main()
 {
+  lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
+
   Nil::Engine nil_engine;
   Nil_ext::load_aspects(nil_engine);
   

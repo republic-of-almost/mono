@@ -39,6 +39,8 @@ struct Data
   bool show_node_events;
   bool show_menu;
   
+  bool show_lib_memory;
+  
   bool show_data_camera;
   bool show_data_renderables;
   bool show_data_textures;
