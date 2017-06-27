@@ -7,18 +7,20 @@
 table.insert(
   projects,
   {
-    name     = "UtilitiesTest",
+    name     = "LibTests",
     kind     = "ConsoleApp",
     language = "C++",
     location = make.get_proj_root(),
     no_link  = true,
 
+    lang_settings = {
+      exceptions  = true,
+      rtti        = true,
+    },
+
     src_files = {
       make.add_headers(make.get_proj_root() .. "../test/"),
-      make.add_headers(make.get_proj_root() .. "../test/"),
-      --
       make.add_src(make.get_proj_root() .. "../test/"),
-      --
       make.add_doc(make.get_proj_root() .. "../test/"),
     },
 
@@ -27,7 +29,8 @@ table.insert(
     },
 
     project_dependencies = {
-      "Utilities",
+      "Lib",
+      "Catch",
     },
   }
 )
