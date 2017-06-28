@@ -144,7 +144,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         self->window_node = nodes[0];
 
 //        glfwSetErrorCallback(error_callback);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+//        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 

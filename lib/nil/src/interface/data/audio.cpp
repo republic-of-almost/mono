@@ -71,6 +71,13 @@ has_audio(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Audio &data)
+{
+  return has_audio(node);
+}
+
+
 uint64_t
 get_type_id(const Audio &)
 {

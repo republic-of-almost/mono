@@ -54,6 +54,10 @@ bool
 has_audio(const Node &node);
 
 
+bool
+has(const Node &node, const Audio &data);
+
+
 uint64_t
 get_type_id(const Audio &in);
 
