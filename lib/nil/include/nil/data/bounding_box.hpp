@@ -39,8 +39,16 @@ bool
 has_bounding_box(const Node &node);
 
 
+bool
+has(const Node &node, const Bounding_box &data);
+
+
 uint64_t
 get_type_id(const Bounding_box &in);
+
+
+const char*
+get_type_name(const Bounding_box &in);
 
 
 size_t

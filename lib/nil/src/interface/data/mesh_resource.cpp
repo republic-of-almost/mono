@@ -126,10 +126,24 @@ has_mesh_resource(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Mesh_resource &)
+{
+  return has_mesh_resource(node);
+}
+
+
 uint64_t
 get_type_id(const Mesh_resource &)
 {
   return get_mesh_rsrc_data().type_id;
+}
+
+
+const char*
+get_type_name(const Mesh_resource &in)
+{
+  return "Mesh_resource";
 }
 
 

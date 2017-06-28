@@ -51,8 +51,16 @@ bool
 has_window(const Node &node);
 
 
+bool
+has(const Node &node, const Window &data);
+
+
 uint64_t
 get_type_id(const Window &in);
+
+
+const char*
+get_type_name(const Window &in);
 
 
 size_t

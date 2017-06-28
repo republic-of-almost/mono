@@ -71,10 +71,24 @@ has_mouse(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Mouse &)
+{
+  return has_mouse(node);
+}
+
+
 uint64_t
 get_type_id(const Mouse &)
 {
   return get_ms_data().type_id;
+}
+
+
+const char *
+get_type_name(const Mouse &in)
+{
+  return "Mouse";
 }
 
 

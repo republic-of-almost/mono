@@ -58,13 +58,20 @@ remove_mesh_resource(Node &node);
 // ----------------------------------------------------------------- [ Info ] --
 
 
-
 bool
 has_mesh_resource(const Node &node);
 
 
+bool
+has(const Node &node, const Mesh_resource &data);
+
+
 uint64_t
 get_type_id(const Mesh_resource &mesh);
+
+
+const char*
+get_type_name(const Mesh_resource &in);
 
 
 size_t

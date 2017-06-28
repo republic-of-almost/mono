@@ -121,10 +121,24 @@ has_renderable(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Renderable &data)
+{
+  return has_renderable(node);
+}
+
+
 uint64_t
 get_type_id(const Renderable &)
 {
   return get_mat_data().type_id;
+}
+
+
+const char*
+get_type_name(const Renderable &in)
+{
+  return "Renderable";
 }
 
 

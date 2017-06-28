@@ -79,9 +79,9 @@ render_data(Nil::Data::Light *light)
 
   update(ImGui::Combo("Type", (int*)&light->type, type, 2), &updated);
 
-  update(ImGui::DragFloat("Atten Const",       &light->atten_const),       &updated);
-  update(ImGui::DragFloat("Atten Linear",      &light->atten_linear),      &updated);
-  update(ImGui::DragFloat("Atten Exponential", &light->atten_exponential), &updated);
+  update(ImGui::DragFloat("Atten Const",  &light->atten_const),       &updated);
+  update(ImGui::DragFloat("Atten Linear", &light->atten_linear),      &updated);
+  update(ImGui::DragFloat("Atten Expon",  &light->atten_exponential), &updated);
 
   // -- Readonly -- //
   

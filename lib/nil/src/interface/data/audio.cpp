@@ -72,7 +72,7 @@ has_audio(const Node &node)
 
 
 bool
-has(const Node &node, const Audio &data)
+has(const Node &node, const Audio &)
 {
   return has_audio(node);
 }
@@ -82,6 +82,13 @@ uint64_t
 get_type_id(const Audio &)
 {
   return get_audio_data().type_id;
+}
+
+
+const char*
+get_type_name(const Audio &)
+{
+  return "Audio";
 }
 
 

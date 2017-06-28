@@ -111,10 +111,24 @@ has_transform(const Node &)
 }
 
 
+bool
+has(const Node &node, const Transform &)
+{
+  return has_transform(node);
+}
+
+
 uint64_t
 get_type_id(const Transform &)
 {
   return get_trans_data().type_id;
+}
+
+
+const char*
+get_type_name(const Transform &in)
+{
+  return "Transform";
 }
 
 

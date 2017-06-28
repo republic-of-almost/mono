@@ -73,10 +73,24 @@ has_window(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Window &)
+{
+  return has_window(node);
+}
+
+
 uint64_t
 get_type_id(const Window &)
 {
   return get_win_data().type_id;
+}
+
+
+const char*
+get_type_name(const Window &in)
+{
+  return "Window";
 }
 
 

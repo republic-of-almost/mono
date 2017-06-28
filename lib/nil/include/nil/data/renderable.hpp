@@ -60,8 +60,16 @@ bool
 has_renderable(const Node &node);
 
 
+bool
+has(const Node &node, const Renderable &data);
+
+
 uint64_t
 get_type_id(const Renderable &in);
+
+
+const char*
+get_type_name(const Renderable &in);
 
 
 size_t

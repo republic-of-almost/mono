@@ -33,6 +33,14 @@ namespace Data {
 
 
 void
+get(size_t *count, Graphics **data)
+{
+  *count = get_graphics_data().data.size();
+  *data = get_graphics_data().data.data();
+}
+
+
+void
 get(const Node &node, Graphics &out)
 {
   get_graphics_data().get_data(node, out);
@@ -56,14 +64,6 @@ remove_graphics(Node &node)
 // ----------------------------------------------------------------- [ Info ] --
 
 
-void
-get(size_t *count, Graphics **data)
-{
-  *count = get_graphics_data().data.size();
-  *data = get_graphics_data().data.data();
-}
-
-
 bool
 has_graphics(const Node &node)
 {
@@ -71,10 +71,24 @@ has_graphics(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Graphics &)
+{
+  return has_graphics(node);
+}
+
+
 uint64_t
 get_type_id(const Graphics &)
 {
   return get_graphics_data().type_id;
+}
+
+
+const char *
+get_type_name(const Graphics &in)
+{
+  return "Graphics";
 }
 
 

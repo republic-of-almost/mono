@@ -59,8 +59,16 @@ bool
 has_texture_resource(const Node &node);
 
 
+bool
+has(const Node &node, const Texture_resource &data);
+
+
 uint64_t
 get_type_id(const Texture_resource &in);
+
+
+const char*
+get_type_name(const Texture_resource &in);
 
 
 size_t

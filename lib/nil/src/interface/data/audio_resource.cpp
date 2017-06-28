@@ -71,10 +71,24 @@ has_audio_resource(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Audio_resource &)
+{
+  return has_audio_resource(node);
+}
+
+
 uint64_t
 get_type_id(const Audio_resource &)
 {
   return get_audio_rsrc_data().type_id;
+}
+
+
+const char*
+get_type_name(const Audio_resource &data)
+{
+  return "Audio_resource";
 }
 
 

@@ -56,8 +56,16 @@ bool
 has_light(const Node &node);
 
 
+bool
+has(const Node &node, const Light &data);
+
+
 uint64_t
 get_type_id(const Light &in);
+
+
+const char*
+get_type_name(const Light &in);
 
 
 size_t

@@ -71,10 +71,24 @@ has_resource(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Resource &)
+{
+  return has_resource(node);
+}
+
+
 uint64_t
 get_type_id(const Resource &)
 {
   return get_rsrc_data().type_id;
+}
+
+
+const char*
+get_type_name(const Resource &in)
+{
+  return "Resource";
 }
 
 

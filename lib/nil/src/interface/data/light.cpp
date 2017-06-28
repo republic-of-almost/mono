@@ -102,10 +102,24 @@ has_light(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Light &)
+{
+  return has_light(node);
+}
+
+
 uint64_t
 get_type_id(const Light &)
 {
   return get_light_data().type_id;
+}
+
+
+const char*
+get_type_name(const Light &in)
+{
+  return "Light";
 }
 
 

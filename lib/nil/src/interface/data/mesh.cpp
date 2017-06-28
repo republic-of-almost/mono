@@ -71,10 +71,24 @@ has_mesh(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Mesh &)
+{
+  return has_mesh(node);
+}
+
+
 uint64_t
 get_type_id(const Mesh &)
 {
   return get_mesh_data().type_id;
+}
+
+
+const char*
+get_type_name(const Mesh &in)
+{
+  return "Mesh";
 }
 
 

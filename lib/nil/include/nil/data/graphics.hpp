@@ -60,8 +60,16 @@ bool
 has_graphics(const Node &node);
 
 
+bool
+has(const Node &node, const Graphics &data);
+
+
 uint64_t
 get_type_id(const Graphics &in);
+
+
+const char *
+get_type_name(const Graphics &in);
 
 
 size_t

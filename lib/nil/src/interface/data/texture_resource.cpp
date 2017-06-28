@@ -85,10 +85,24 @@ has_texture_resource(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Texture_resource &)
+{
+  return has_texture_resource(node);
+}
+
+
 uint64_t
 get_type_id(const Texture_resource &)
 {
   return get_texture_rsrc_data().type_id;
+}
+
+
+const char*
+get_type_name(const Texture_resource &in)
+{
+  return "Texture_resource";
 }
 
 

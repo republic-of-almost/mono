@@ -52,8 +52,16 @@ bool
 has_mouse(const Node &node);
 
 
+bool
+has(const Node &node, const Mouse &data);
+
+
 uint64_t
 get_type_id(const Mouse &in);
+
+
+const char*
+get_type_name(const Mouse &in);
 
 
 size_t

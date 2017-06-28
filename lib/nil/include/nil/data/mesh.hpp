@@ -50,8 +50,16 @@ bool
 has_mesh(const Node &node);
 
 
+bool
+has(const Node &node, const Mesh &data);
+
+
 uint64_t
 get_type_id(const Mesh &in);
+
+
+const char*
+get_type_name(const Mesh &in);
 
 
 size_t

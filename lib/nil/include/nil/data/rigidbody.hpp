@@ -46,8 +46,16 @@ bool
 has_rigidbody(const Node &node);
 
 
+bool
+has(const Node &node, const Rigidbody &);
+
+
 uint64_t
 get_type_id(const Rigidbody &in);
+
+
+const char *
+get_type_name(const Rigidbody &in);
 
 
 size_t

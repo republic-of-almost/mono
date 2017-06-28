@@ -122,7 +122,7 @@ has_camera(const Node &node)
 
 
 bool
-has(const Node &node, const Camera &cam)
+has(const Node &node, const Camera &)
 {
   return has_camera(node);
 }
@@ -132,6 +132,13 @@ uint64_t
 get_type_id(const Camera &)
 {
   return get_camera_data().type_id;
+}
+
+
+const char*
+get_type_name(const Camera &in)
+{
+  return "Camera";
 }
 
 

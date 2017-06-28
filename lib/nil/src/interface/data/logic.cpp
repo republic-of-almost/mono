@@ -72,10 +72,24 @@ has_logic(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Logic &)
+{
+  return has_logic(node);
+}
+
+
 uint64_t
 get_type_id(const Logic &)
 {
   return get_logic_data().type_id;
+}
+
+
+const char*
+get_type_name(const Logic &in)
+{
+  return "Logic";
 }
 
 

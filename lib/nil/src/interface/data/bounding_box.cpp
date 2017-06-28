@@ -109,10 +109,24 @@ has_bounding_box(const Node &)
 }
 
 
+bool
+has(const Node &node, const Bounding_box &)
+{
+  return has_bounding_box(node);
+}
+
+
 uint64_t
 get_type_id(const Bounding_box &)
 {
   return get_bbox_data().type_id;
+}
+
+
+const char*
+get_type_name(const Bounding_box &in)
+{
+  return "Bounding_box";
 }
 
 

@@ -149,20 +149,27 @@ namespace {
 
 
 
-#define INSPECTOR_DATA(type)                                   \
-if(Nil::Data::has(self->inspector_node, Nil::Data::type{}))    \
-{                                                 \
-  if(ImGui::CollapsingHeader(#type))         \
-  {                                               \
-    Nil::Data::type data{};                       \
-    Nil::Data::get(self->inspector_node, data);   \
-                                                  \
-    if(Nil::ImGUI::render_data(&data))            \
-    {                                             \
-      Nil::Data::set(self->inspector_node, data); \
-    }                                             \
-  }                                               \
-}                                                 \
+template<typename T>
+inline void
+inspector_data(Nil::Node &node)
+{
+  T data{};
+  
+  if(Nil::Data::has(node, data))
+  {
+    const char *data_name = Nil::Data::get_type_name(data);
+  
+    if(ImGui::CollapsingHeader(data_name))
+    {
+      Nil::Data::get(node, data);
+      
+      if(Nil::ImGUI::render_data(&data))
+      {
+        Nil::Data::set(node, data);
+      }
+    }
+  }
+}
 
 
 void
@@ -625,25 +632,25 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
     // Transform and Bounding box are currently special cases.
 
-    INSPECTOR_DATA(Audio)
-    INSPECTOR_DATA(Audio_resource)
-    INSPECTOR_DATA(Camera)
-    INSPECTOR_DATA(Collider)
-    INSPECTOR_DATA(Developer)
-    INSPECTOR_DATA(Gamepad)
-    INSPECTOR_DATA(Graphics)
-    INSPECTOR_DATA(Keyboard)
-    INSPECTOR_DATA(Light)
-    INSPECTOR_DATA(Logic)
-    INSPECTOR_DATA(Mesh)
-    INSPECTOR_DATA(Mesh_resource)
-    INSPECTOR_DATA(Mouse)
-    INSPECTOR_DATA(Resource)
-    INSPECTOR_DATA(Renderable)
-    INSPECTOR_DATA(Rigidbody)
-    INSPECTOR_DATA(Texture)
-    INSPECTOR_DATA(Texture_resource)
-    INSPECTOR_DATA(Window)
+    inspector_data<Nil::Data::Audio>(self->inspector_node);
+    inspector_data<Nil::Data::Audio_resource>(self->inspector_node);
+    inspector_data<Nil::Data::Camera>(self->inspector_node);
+    inspector_data<Nil::Data::Collider>(self->inspector_node);
+    inspector_data<Nil::Data::Developer>(self->inspector_node);
+    inspector_data<Nil::Data::Gamepad>(self->inspector_node);
+    inspector_data<Nil::Data::Graphics>(self->inspector_node);
+    inspector_data<Nil::Data::Keyboard>(self->inspector_node);
+    inspector_data<Nil::Data::Light>(self->inspector_node);
+    inspector_data<Nil::Data::Logic>(self->inspector_node);
+    inspector_data<Nil::Data::Mesh>(self->inspector_node);
+    inspector_data<Nil::Data::Mesh_resource>(self->inspector_node);
+    inspector_data<Nil::Data::Mouse>(self->inspector_node);
+    inspector_data<Nil::Data::Resource>(self->inspector_node);
+    inspector_data<Nil::Data::Renderable>(self->inspector_node);
+    inspector_data<Nil::Data::Rigidbody>(self->inspector_node);
+    inspector_data<Nil::Data::Texture>(self->inspector_node);
+    inspector_data<Nil::Data::Texture_resource>(self->inspector_node);
+    inspector_data<Nil::Data::Window>(self->inspector_node);
 
     /*
       Audio

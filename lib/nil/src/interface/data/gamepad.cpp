@@ -71,10 +71,24 @@ has_gamepad(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Gamepad &)
+{
+  return has_gamepad(node);
+}
+
+
 uint64_t
 get_type_id(const Gamepad &)
 {
   return get_gamepad_data().type_id;
+}
+
+
+const char*
+get_type_name(const Gamepad &in)
+{
+  return "Gamepad";
 }
 
 

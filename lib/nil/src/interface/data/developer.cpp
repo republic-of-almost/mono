@@ -71,10 +71,24 @@ has_developer(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Developer &)
+{
+  return has_developer(node);
+}
+
+
 uint64_t
 get_type_id(const Developer &)
 {
   return get_developer_data().type_id;
+}
+
+
+const char*
+get_type_name(const Developer &in)
+{
+  return "Developer";
 }
 
 

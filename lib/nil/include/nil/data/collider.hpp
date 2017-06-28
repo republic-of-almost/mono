@@ -82,8 +82,16 @@ bool
 has_collider(const Node &node);
 
 
+bool
+has(const Node &node, const Collider &data);
+
+
 uint64_t
 get_type_id(const Collider &in);
+
+
+const char*
+get_type_name(const Collider &in);
 
 
 size_t

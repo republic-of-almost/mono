@@ -190,8 +190,16 @@ bool
 has_keyboard(const Node &node);
 
 
+bool
+has(const Node &node, const Keyboard &data);
+
+
 uint64_t
 get_type_id(const Keyboard &in);
+
+
+const char*
+get_type_name(const Keyboard &in);
 
 
 size_t

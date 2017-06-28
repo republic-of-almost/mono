@@ -71,10 +71,24 @@ has_keyboard(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Keyboard &)
+{
+  return has_keyboard(node);
+}
+
+
 uint64_t
 get_type_id(const Keyboard &)
 {
   return get_kb_data().type_id;
+}
+
+
+const char*
+get_type_name(const Keyboard &in)
+{
+  return "Keyboard";
 }
 
 

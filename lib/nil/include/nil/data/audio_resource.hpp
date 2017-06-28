@@ -49,8 +49,16 @@ bool
 has_audio_resource(const Node &node);
 
 
+bool
+has(const Node &node, const Audio_resource &data);
+
+
 uint64_t
 get_type_id(const Audio_resource &data);
+
+
+const char*
+get_type_name(const Audio_resource &data);
 
 
 size_t

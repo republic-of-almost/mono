@@ -62,6 +62,10 @@ uint64_t
 get_type_id(const Audio &in);
 
 
+const char*
+get_type_name(const Audio &in);
+
+
 size_t
 audio_count();
 

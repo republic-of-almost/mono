@@ -71,10 +71,24 @@ has_rigidbody(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Rigidbody &)
+{
+  return has_rigidbody(node);
+}
+
+
 uint64_t
 get_type_id(const Rigidbody &)
 {
   return get_rb_data().type_id;
+}
+
+
+const char *
+get_type_name(const Rigidbody &in)
+{
+  return "Rigidbody";
 }
 
 

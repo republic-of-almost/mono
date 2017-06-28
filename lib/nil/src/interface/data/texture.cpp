@@ -71,10 +71,24 @@ has_texture(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Texture &)
+{
+  return has_texture(node);
+}
+
+
 uint64_t
 get_type_id(const Texture &)
 {
   return get_texture_data().type_id;
+}
+
+
+const char*
+get_type_name(const Texture &in)
+{
+  return "Texture";
 }
 
 

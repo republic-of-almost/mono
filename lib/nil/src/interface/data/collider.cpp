@@ -70,10 +70,24 @@ has_collider(const Node &node)
 }
 
 
+bool
+has(const Node &node, const Collider &)
+{
+  return has_collider(node);
+}
+
+
 uint64_t
 get_type_id(const Collider &)
 {
   return get_collider_data().type_id;
+}
+
+
+const char*
+get_type_name(const Collider &in)
+{
+  return "Collider";
 }
 
 
