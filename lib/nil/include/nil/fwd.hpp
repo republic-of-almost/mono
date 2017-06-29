@@ -35,6 +35,7 @@ struct Mesh;
 struct Mesh_resource;
 struct Mouse;
 struct Renderable;
+struct Resource;
 struct Rigidbody;
 struct Texture;
 struct Texture_resource;

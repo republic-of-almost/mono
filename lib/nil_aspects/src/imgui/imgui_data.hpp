@@ -12,16 +12,65 @@ namespace ImGUI {
 
 // ------------------------------------------------------- [ Nil Data Types ] --
 
+
+bool
+render_data(Nil::Data::Audio *data);
+
+
+bool
+render_data(Nil::Data::Bounding_box *data);
+
+
 bool
 render_data(Nil::Data::Camera *data);
+
+
+bool
+render_data(Nil::Data::Developer *data);
+
+
+bool
+render_data(Nil::Data::Graphics *data);
 
 
 bool
 render_data(Nil::Data::Light *data);
 
 
+bool
+render_data(Nil::Data::Renderable *data);
+
+
+bool
+render_data(Nil::Data::Mesh *data);
+
+
+bool
+render_data(Nil::Data::Mesh_resource *data);
+
+
+bool
+render_data(Nil::Data::Mouse *data);
+
+
+bool
+render_data(Nil::Data::Resource *data);
+
+
+bool
+render_data(Nil::Data::Texture_resource *data);
+
+
+bool
+render_data(Nil::Data::Transform *data);
+
+
+bool
+render_data(Nil::Data::Window *data);
+
+
 /*
-  Fallback
+  No renderer found
 */
 template<typename T>
 bool
