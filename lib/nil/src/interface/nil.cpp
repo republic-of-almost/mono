@@ -35,8 +35,6 @@ Engine::Engine()
     LOG_ERROR_ONCE("Engine is in corrupted state.");
     return;
   }
-  
-  m_impl->settings.pause_node_events = false;
 }
 
 
@@ -94,31 +92,8 @@ Engine::run()
     LOG_ERROR_ONCE("Engine is in corrupted state.");
     return false;
   }
-  
-  /*
-    Create list of events
-  */
-  {
-    BENCH_SCOPED_CPU(CreEventList)
-  
-    m_impl->pending_events.clear();
-    
-    Graph::Data *graph = Data::get_graph_data();
-    LIB_ASSERT(graph);
-  
-    for(size_t j = 0; j < graph->node_events.size(); ++j)
-    {
-      m_impl->pending_events.emplace_back(
-        Event_data{
-          graph->node_events[j].node_id,
-          graph->node_events[j].event_action
-        }
-      );
-    }
-  }
  
   // Distro Events
-  if(!m_impl->settings.pause_node_events)
   {
     BENCH_SCOPED_CPU(DistroEvents)
     
@@ -126,21 +101,6 @@ Engine::run()
   
     for(Aspect &asp : m_impl->aspects)
     {
-      const size_t event_count = Data::get_graph_data()->node_events.size();
-      
-      for(size_t j = 0; j < event_count; ++j)
-      {
-        const Node event_node(Data::get_graph_data()->node_events[j].node_id);
-        const uint64_t data_types = asp.data_types;
-
-        if(data_types & event_node.get_data_type_id())
-        {
-          const uint32_t actions = Data::get_graph_data()->node_events[j].event_action;
-          
-          nodes.emplace_back(Event_data{event_node.get_id(), actions});
-        }
-      }
-    
       if(asp.events_fn)
       {
         Event_list evt_list(nodes);

@@ -147,6 +147,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
 
 namespace {
 
+/*
+  I know I know templates, but these helpers reduce alot of the noise in this
+  file.
+*/
 
 template<typename T>
 inline void
@@ -252,8 +256,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     engine.get_state(stat);
 
     bool update_settings = false;
-
-    if(ImGui::Checkbox("Pause Node Events", &set.pause_node_events)) { update_settings = true; }
 
     if(update_settings)
     {
@@ -625,12 +627,13 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGui::Spacing();
     ImGui::Separator();
 
-    ImGui::Text("Add Other Data");
+    ImGui::Text("Add Data");
 
     const char *items[] {
       "Select Data",
       "Audio",
       "AudioResource",
+      "BoundingBox",
       "Camera",
       "Collider",
       "Developer",
@@ -645,6 +648,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Resource",
       "Rigidbody",
       "Texture",
+      "Transform",
       "Window",
     };
     
@@ -657,6 +661,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       nullptr,
       add_data<Nil::Data::Audio>,
       add_data<Nil::Data::Audio_resource>,
+      add_data<Nil::Data::Bounding_box>,
       add_data<Nil::Data::Camera>,
       add_data<Nil::Data::Collider>,
       add_data<Nil::Data::Developer>,
@@ -671,6 +676,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Resource>,
       add_data<Nil::Data::Rigidbody>,
       add_data<Nil::Data::Texture>,
+      add_data<Nil::Data::Transform>,
       add_data<Nil::Data::Window>,
     };
     

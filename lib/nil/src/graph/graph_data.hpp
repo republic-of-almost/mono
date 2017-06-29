@@ -66,6 +66,7 @@ struct Data
   // -- Events -- //
   lib::array<Event>           node_events;        // When changes happen.
   
+  
   struct graph_type
   {
     graph_tick_fn           tick_cb;

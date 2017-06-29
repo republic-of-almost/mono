@@ -15,7 +15,7 @@ constexpr uint32_t version = 0;
 
 struct Engine_settings
 {
-  bool pause_node_events;
+
 };
 
 

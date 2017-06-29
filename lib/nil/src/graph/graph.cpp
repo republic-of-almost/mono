@@ -87,7 +87,7 @@ namespace
   inline Graph::Event*
   add_event(Graph::Data *graph, uint32_t evt_id, uint32_t node_id)
   {
-    // Search for existing event.
+//     Search for existing event.
     {
       const size_t count = graph->node_events.size();
       Graph::Event *events = graph->node_events.data();
