@@ -24,7 +24,6 @@ struct Camera;
 struct Collider;
 struct Developer;
 struct Gamepad;
-struct Graphics;
 struct Keyboard;
 struct Light;
 struct Logic;

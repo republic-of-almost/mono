@@ -16,12 +16,18 @@ namespace Data {
 
 struct Window
 {
-  uint32_t width;
-  uint32_t height;
-  bool fullscreen;
-  char title[32];
+  uint32_t  width;
+  uint32_t  height;
+  bool      fullscreen;
+  char      title[32];
   
   uintptr_t user_data;
+  
+  // Output //
+  
+  enum { NONE, OGL }  type;
+  uint32_t      major;
+  uint32_t      minor;
 };
 
 

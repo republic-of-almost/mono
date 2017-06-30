@@ -49,14 +49,8 @@ table.insert(
 
     link_dependencies_windows = {
       "glew32.lib",
-      "SDL2.lib",
       "opengl32.lib",
       "shlwapi.lib", -- Move to pragma in utilities?
-    },
-
-    linkoption_dependencies_macosx = {
-      "-lsdl2",
-      "-lsdl2_mixer",
     },
   }
 )

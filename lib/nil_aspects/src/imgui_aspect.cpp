@@ -542,7 +542,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       inspector_data<Nil::Data::Collider>(self->inspector_node);
       inspector_data<Nil::Data::Developer>(self->inspector_node);
       inspector_data<Nil::Data::Gamepad>(self->inspector_node);
-      inspector_data<Nil::Data::Graphics>(self->inspector_node);
       inspector_data<Nil::Data::Keyboard>(self->inspector_node);
       inspector_data<Nil::Data::Light>(self->inspector_node);
       inspector_data<Nil::Data::Logic>(self->inspector_node);
@@ -574,7 +573,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Collider",
       "Developer",
       "Gamepad",
-      "Graphics",
       "Keyboard",
       "Light",
       "Logic",
@@ -602,7 +600,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Collider>,
       add_data<Nil::Data::Developer>,
       add_data<Nil::Data::Gamepad>,
-      add_data<Nil::Data::Graphics>,
       add_data<Nil::Data::Keyboard>,
       add_data<Nil::Data::Light>,
       add_data<Nil::Data::Logic>,

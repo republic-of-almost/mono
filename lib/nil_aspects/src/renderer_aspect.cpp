@@ -56,40 +56,35 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       /* We operate on 1 window idea so grab the first */
       self->current_viewport[0] = win[0].width;
       self->current_viewport[1] = win[0].height;
-    }
-  }
-
-  // Initialize
-  {
-    size_t count = 0;
-    Nil::Data::Graphics *win;
-
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &win, nullptr);
-
-    if(count)
-    {
-      LOG_INFO("Initialize ROV")
-
-      rov_initialize();
-      self->has_initialized = true;
-
-      self->light_pack = rov_createLights(nullptr, 0);
-    }
-  }
-
-  // Debug Lines
-  {
-    size_t                count = 0;
-    Nil::Data::Developer *data = nullptr;
-    Nil::Node            *node = nullptr;
-
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
-
-    for(size_t i = 0; i < count; ++i)
-    {
-      if(data[i].type_id == 2)
+      
+      if(!self->has_initialized)
       {
-        self->debug_lines = node[i];
+        if(win[0].type == Nil::Data::Window::OGL)
+        {
+          LOG_INFO("Initialize ROV")
+
+          rov_initialize();
+          self->has_initialized = true;
+
+          self->light_pack = rov_createLights(nullptr, 0);
+        }
+      }
+
+      // Debug Lines
+      {
+        size_t                count = 0;
+        Nil::Data::Developer *data = nullptr;
+        Nil::Node            *node = nullptr;
+
+        Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
+
+        for(size_t i = 0; i < count; ++i)
+        {
+          if(data[i].type_id == 2)
+          {
+            self->debug_lines = node[i];
+          }
+        }
       }
     }
   }

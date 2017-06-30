@@ -148,27 +148,6 @@ render_data(Nil::Data::Developer *data)
 
 
 bool
-render_data(Nil::Data::Graphics *data)
-{
-  bool updated = false;
-
-  const char *types []
-  {
-    "OpenGL",
-    "DirectX",
-  };
-  
-  constexpr size_t count = sizeof(types) / sizeof(decltype(types[0]));
-
-  update(ImGui::Combo("API", (int*)&data->type, types, count),  &updated);
-  update(ImGui::InputInt("Major", (int*)&data->major),          &updated);
-  update(ImGui::InputInt("Minor", (int*)&data->minor),          &updated);
-
-  return updated;
-}
-
-
-bool
 render_data(Nil::Data::Light *data)
 {
   const char *type []
@@ -452,6 +431,27 @@ render_data(Nil::Data::Window *data)
   update(ImGui::DragInt("Width##Win",           (int*)&data->width, 1, 0, 0xFFFF), &updated);
   update(ImGui::DragInt("Height##Win",          (int*)&data->height,1, 0, 0xFFFF), &updated);
   update(ImGui::Checkbox("Fullscreen##Win",     &data->fullscreen),                &updated);
+  
+  // -- Readonly -- //
+  
+  ImGui::Separator();
+  ImGui::Spacing();
+
+  constexpr uint32_t flags = ImGuiInputTextFlags_ReadOnly;
+  
+  ImGui::Text("Readonly Values");
+  
+  const char *types []
+  {
+    "None",
+    "OpenGL",
+  };
+  
+  constexpr size_t count = sizeof(types) / sizeof(decltype(types[0]));
+
+  ImGui::Combo("API", (int*)&data->type, types, count, flags);
+  ImGui::InputInt("Major", (int*)&data->major, flags);
+  ImGui::InputInt("Minor", (int*)&data->minor, flags);
 
   return updated;
 }

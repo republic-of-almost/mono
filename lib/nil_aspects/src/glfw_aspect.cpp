@@ -172,11 +172,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         glfwMakeContextCurrent(self->window);
         gl3wInit();
 
-        Nil::Data::Graphics gfx{};
-        gfx.type = Nil::Data::Graphics::OGL;
+        win_data.type = Nil::Data::Window::OGL;
 
-        glGetIntegerv(GL_MAJOR_VERSION, (GLint*)&gfx.major);
-        glGetIntegerv(GL_MINOR_VERSION, (GLint*)&gfx.minor);
+        glGetIntegerv(GL_MAJOR_VERSION, (GLint*)&win_data.major);
+        glGetIntegerv(GL_MINOR_VERSION, (GLint*)&win_data.minor);
 
         #else
 
@@ -190,7 +189,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         ImGui_ImplGlfwGL3_NewFrame();
         #endif
 
-        Nil::Data::set(self->window_node, gfx);
+        Nil::Data::set(self->window_node, win_data);
 
         // Resize
         glfwSetWindowSizeCallback(

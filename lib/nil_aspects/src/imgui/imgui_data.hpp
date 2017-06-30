@@ -30,10 +30,6 @@ render_data(Nil::Data::Developer *data);
 
 
 bool
-render_data(Nil::Data::Graphics *data);
-
-
-bool
 render_data(Nil::Data::Light *data);
 
 

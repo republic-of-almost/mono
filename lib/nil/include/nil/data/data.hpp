@@ -14,7 +14,6 @@
 #include "collider.hpp"
 #include "developer.hpp"
 #include "gamepad.hpp"
-#include "graphics.hpp"
 #include "keyboard.hpp"
 #include "light.hpp"
 #include "logic.hpp"
