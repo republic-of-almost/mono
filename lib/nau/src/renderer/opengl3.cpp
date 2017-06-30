@@ -93,44 +93,48 @@ void
 nau_gl3_init()
 {
   // Load shader
-    glGenVertexArrays(1, &get_nau_gl3().vao);
-    glBindVertexArray(get_nau_gl3().vao);
+  glGenVertexArrays(1, &get_nau_gl3().vao);
+  glBindVertexArray(get_nau_gl3().vao);
 
-    // Create a Vertex Buffer Object and copy the vertex data to it
-    glGenBuffers(1, &get_nau_gl3().vbo);
+  // Create a Vertex Buffer Object and copy the vertex data to it
+  glGenBuffers(1, &get_nau_gl3().vbo);
 
-    GLfloat vertices[]
-    {
-      -0.5f, -0.5f,
-       0.5f, -0.5f,
-      0.0f,  0.5f,
-    };
+  GLfloat vertices[]
+  {
+    -0.5f, -0.5f,
+     0.5f, -0.5f,
+    -0.5f,  0.5f,
+    
+     0.5f, -0.5f,
+     0.5f,  0.5f,
+    -0.5f,  0.5f,
+  };
 
-    glBindBuffer(GL_ARRAY_BUFFER, get_nau_gl3().vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, get_nau_gl3().vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Create and compile the vertex shader
-    get_nau_gl3().vs_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(get_nau_gl3().vs_shader, 1, &vertexSource, NULL);
-    glCompileShader(get_nau_gl3().vs_shader);
+  // Create and compile the vertex shader
+  get_nau_gl3().vs_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(get_nau_gl3().vs_shader, 1, &vertexSource, NULL);
+  glCompileShader(get_nau_gl3().vs_shader);
 
-    // Create and compile the fragment shader
-    get_nau_gl3().fs_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(get_nau_gl3().fs_shader, 1, &fragmentSource, NULL);
-    glCompileShader(get_nau_gl3().fs_shader);
+  // Create and compile the fragment shader
+  get_nau_gl3().fs_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(get_nau_gl3().fs_shader, 1, &fragmentSource, NULL);
+  glCompileShader(get_nau_gl3().fs_shader);
 
-    // Link the vertex and fragment shader into a shader program
-    get_nau_gl3().program = glCreateProgram();
-    glAttachShader(get_nau_gl3().program, get_nau_gl3().vs_shader);
-    glAttachShader(get_nau_gl3().program, get_nau_gl3().fs_shader);
-    glBindFragDataLocation(get_nau_gl3().program, 0, "outColor");
-    glLinkProgram(get_nau_gl3().program);
-    glUseProgram(get_nau_gl3().program);
+  // Link the vertex and fragment shader into a shader program
+  get_nau_gl3().program = glCreateProgram();
+  glAttachShader(get_nau_gl3().program, get_nau_gl3().vs_shader);
+  glAttachShader(get_nau_gl3().program, get_nau_gl3().fs_shader);
+  glBindFragDataLocation(get_nau_gl3().program, 0, "outColor");
+  glLinkProgram(get_nau_gl3().program);
+  glUseProgram(get_nau_gl3().program);
 
-    // Specify the layout of the vertex data
-    GLint pos = glGetAttribLocation(get_nau_gl3().program, "position");
-    glEnableVertexAttribArray(pos);
-    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  // Specify the layout of the vertex data
+  GLint pos = glGetAttribLocation(get_nau_gl3().program, "position");
+  glEnableVertexAttribArray(pos);
+  glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 
@@ -138,9 +142,7 @@ void
 nau_gl3_render(Nau_renderable *renderables, size_t count)
 {
   glClear(GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_BLEND);
-
+  
   // Render
   glBindVertexArray(get_nau_gl3().vao);
   glUseProgram(get_nau_gl3().program);
@@ -148,7 +150,7 @@ nau_gl3_render(Nau_renderable *renderables, size_t count)
   glBindFragDataLocation(get_nau_gl3().program, 0, "outColor");
   glBindBuffer(GL_ARRAY_BUFFER, get_nau_gl3().vbo);
   
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 
