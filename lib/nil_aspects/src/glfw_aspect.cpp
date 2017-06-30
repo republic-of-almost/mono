@@ -329,6 +329,14 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
 void
 early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
+  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  LIB_ASSERT(self);
+
+
+  if(self->window)
+  {
+    glfwSwapBuffers(self->window);
+  }
 }
 
 
@@ -377,7 +385,7 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
 //    ImGuizmo::BeginFrame();
     #endif
 
-    glfwSwapBuffers(self->window);
+//    glfwSwapBuffers(self->window);
   }
 }
 

@@ -24,7 +24,7 @@ get_ctx()
 {
   static Nau_ctx ctx;
   
-  return &ctx;
+  return ctx;
 }
 
 
@@ -99,7 +99,7 @@ nau_begin(const char *name)
     Nau_renderable{
       { 10, 10, 15, 20 },
       { 10, 10, 15, 20 },
-      inactive_window_color,
+      get_ctx().inactive_window_color,
     }
   );
 }

@@ -25,7 +25,7 @@ namespace ROV_Internal {
 void
 ogl_init(rovGLData *gl_data)
 {
-  rmt_BindOpenGL();
+//  rmt_BindOpenGL();
 
   #ifdef GL_HAS_VAO
   glGenVertexArrays(1, &gl_data->vao);

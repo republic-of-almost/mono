@@ -8,9 +8,9 @@
 // ------------------------------------------------------------- [ Lifetime ] --
 
 
-void      nau_gl_init();
-void      nau_gl3_render();
-void      nau_gl_destroy();
+void      nau_gl3_init();
+void      nau_gl3_render(Nau_renderable *renderables, size_t count);
+void      nau_gl3_destroy();
 
 
 

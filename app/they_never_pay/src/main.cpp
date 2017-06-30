@@ -19,6 +19,9 @@
 
 #include <lib/memory.hpp>
 
+#include <nau/nau.h>
+#include <nau/renderers/opengl3.h>
+
 
 void
 app_tick()
@@ -45,6 +48,12 @@ main()
   Game::Static_objects objs;
   Game::setup(&objs);
   
+  nil_engine.run();
+  nil_engine.run();
+  
+  nau_init();
+  nau_gl3_init();
+  
   /*
     Run Game
   */
@@ -54,8 +63,27 @@ main()
   while(nil_engine.run())
   {
     app_tick();
+    
+    // Nau Test
+    {
+      nau_new_frame();
+    
+      static float flt = 1.f;
+      
+      nau_begin("Foo");
+      nau_float("test", &flt);
+      nau_end();
+      
+      size_t count = 0;
+      Nau_renderable *renderables = nullptr;
+      
+      nau_render_data(&renderables, &count);
+      nau_gl3_render(renderables, count);
+    }
   }
   #endif
+  
+  nau_end();
 
   return 0;
 }
