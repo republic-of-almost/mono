@@ -1,6 +1,5 @@
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
-#include <nil/node_event.hpp>
 #include <nil/aspect.hpp>
 #include <data/data.hpp>
 #include <graph/graph.hpp>
@@ -19,7 +18,6 @@ struct Engine::Impl
   std::vector<Aspect> aspects;
   
   Engine_settings settings;
-  std::vector<Event_data> pending_events;
 };
 
 
@@ -97,14 +95,11 @@ Engine::run()
   {
     BENCH_SCOPED_CPU(DistroEvents)
     
-    std::vector<Event_data> nodes;
-  
     for(Aspect &asp : m_impl->aspects)
     {
       if(asp.events_fn)
       {
-        Event_list evt_list(nodes);
-        asp.events_fn(*this, asp, evt_list);
+        asp.events_fn(*this, asp);
       }
     }
     
@@ -182,19 +177,6 @@ Engine::get_settings(Engine_settings &out)
 void
 Engine::get_state(Engine_state &out)
 {
-  const Graph::Data *graph = Data::get_graph_data();
-  
-  /*
-    Events
-  */
-  out.node_events = m_impl->pending_events.data();
-  out.node_event_count  = m_impl->pending_events.size();
-  
-  /*
-    Set the count of things.
-  */
-  out.node_count              = Graph::node_descendants_count(graph, 0);
-  out.bounding_box_count      = out.node_count;
 }
 
 

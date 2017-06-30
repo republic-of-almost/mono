@@ -4,7 +4,6 @@
 #include <aspect/renderer_aspect.hpp>
 #include <rov/rov.hpp>
 #include <nil/nil.hpp>
-#include <nil/node_event.hpp>
 #include <nil/aspect.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
@@ -39,7 +38,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
+events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);

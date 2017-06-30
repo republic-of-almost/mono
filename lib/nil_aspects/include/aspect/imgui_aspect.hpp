@@ -58,7 +58,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list);
+events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void

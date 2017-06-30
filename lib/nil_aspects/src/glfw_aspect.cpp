@@ -1,6 +1,5 @@
 #include <aspect/glfw_aspect.hpp>
 #include <nil/node.hpp>
-#include <nil/node_event.hpp>
 #include <nil/data/data.hpp>
 #include <nil/data/window.hpp>
 #include <nil/aspect.hpp>
@@ -123,7 +122,7 @@ glfw_key_to_nil(const int glfw_key)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
+events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);

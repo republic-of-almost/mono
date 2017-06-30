@@ -78,7 +78,7 @@ main()
       Nau_renderable *renderables = nullptr;
       
       nau_render_data(&renderables, &count);
-      nau_gl3_render(renderables, count);
+//      nau_gl3_render(renderables, count);
     }
   }
   #endif

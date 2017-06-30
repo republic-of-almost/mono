@@ -6,10 +6,10 @@
 #include <renderable.hpp>
 #include <lib/array.hpp>
 
-Nil::Node window;
+Nil::Node                   window;
 
-lib::array<edgeCamera> cameras;
-lib::array<edgeRenderable> renderables;
+lib::array<edgeCamera>      cameras;
+lib::array<edgeRenderable>  renderables;
 
 int
 main()

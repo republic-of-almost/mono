@@ -8,9 +8,6 @@ namespace Nil {
 class Node;
 class Engine;
 
-struct Event_data;
-class Event_list;
-
 class Node_list;
 class Node_controller;
 

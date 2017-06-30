@@ -3,7 +3,6 @@
 #include <aspect/imgui_aspect.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
-#include <nil/node_event.hpp>
 #include <nil/nil.hpp>
 #include <nil/data/window.hpp>
 #include <imgui/imgui.h>
@@ -49,7 +48,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
+events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -240,69 +239,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   Nil::Node root = Nil::Node(0, false);
 
-  // ----------------------------------------------------------- [ Settings ] --
-
-  /*
-    Render Settings
-  */
-  if(self->show_node_events)
-  {
-    ImGui::Begin("Node Events", &self->show_node_events);
-
-    Nil::Engine_settings set{};
-    engine.get_settings(set);
-
-    Nil::Engine_state stat;
-    engine.get_state(stat);
-
-    bool update_settings = false;
-
-    if(update_settings)
-    {
-      engine.set_settings(set);
-    }
-
-    ImGui::Spacing();
-
-    ImGui::Text("Node Events");
-    ImGui::Columns(5, "pending_events"); // 4-ways, with border
-    ImGui::Separator();
-    ImGui::Text("Node ID");   ImGui::NextColumn();
-    ImGui::Text("Added");     ImGui::NextColumn();
-    ImGui::Text("Updated");   ImGui::NextColumn();
-    ImGui::Text("Moved");     ImGui::NextColumn();
-    ImGui::Text("Removed");   ImGui::NextColumn();
-
-    ImGui::Separator();
-
-    int selected = -1;
-
-    for (int i = 0; i < stat.node_event_count; i++)
-    {
-      Nil::Node event_node = Nil::Node(stat.node_events[i].node_id, false);
-
-      char label[32];
-      sprintf(label, "%04d", event_node.get_id());
-
-      if (ImGui::Selectable(label, selected == event_node.get_id(), ImGuiSelectableFlags_SpanAllColumns))
-          selected = i;
-
-      ImGui::NextColumn();
-
-      ImGui::Text(Nil::Event::node_added(stat.node_events[i]) ? "YES" : "NO");    ImGui::NextColumn();
-      ImGui::Text(Nil::Event::node_updated(stat.node_events[i]) ? "YES" : "NO");  ImGui::NextColumn();
-      ImGui::Text(Nil::Event::node_moved(stat.node_events[i]) ? "YES" : "NO");    ImGui::NextColumn();
-      ImGui::Text(Nil::Event::node_removed(stat.node_events[i]) ? "YES" : "NO");  ImGui::NextColumn();
-    }
-    ImGui::Columns(1);
-
-    if(selected > -1)
-    {
-      self->inspector_node = Nil::Node(stat.node_events[selected].node_id);
-    }
-
-    ImGui::End();
-  }
 
   // --------------------------------------------------------------- [ Data ] --
 
