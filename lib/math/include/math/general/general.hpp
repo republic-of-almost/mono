@@ -94,7 +94,7 @@ MATH_GENR_INLINE float              max_length(const float a, const float b);
 MATH_GENR_INLINE float              min_length(const float a, const float b);
 MATH_GENR_INLINE float              clamp(const float x, const float between_a, const float between_b);
 MATH_GENR_INLINE bool               is_between(const float to_check, const float a, const float b);
-MATH_GENR_INLINE bool               is_near(const float a, const float b, const float error_margin);
+MATH_GENR_INLINE bool               is_near(const float a, const float b, const float error_margin = math::epsilon());
 MATH_GENR_INLINE bool               is_pow_two(const uint32_t i);
 MATH_GENR_INLINE float              sign(const float x); // Returns 1 or -1
 MATH_GENR_INLINE float              mod(const float x, const float divisor);

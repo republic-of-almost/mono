@@ -87,6 +87,7 @@ get_dir_from_filepath(const std::string &filepath)
   {
     return filepath.substr(0, loc + 1);
   }
+  
 
   return ""; // Found no seperator
 }

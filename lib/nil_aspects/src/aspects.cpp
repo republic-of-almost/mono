@@ -23,7 +23,6 @@ namespace Nil_ext {
 void
 load_aspects(Nil::Engine &nil_engine)
 {
-
   static Nil_ext::GLFW_Aspect::Data glfw;
   {
     Nil::Aspect aspect{};
