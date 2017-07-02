@@ -1,7 +1,8 @@
 /*
   Config
   --
-  Helpers to ident platforms / compilers
+  Platform / compiler identities.
+  including other constants.
 
   Copyright: public-domain 2017 - http://unlicense.org/
 */
@@ -12,7 +13,7 @@
 #include <stddef.h>
 
 
-// ----------------------------------------------------- [ Platform Config ] --
+// ------------------------------------------------------ [ Platform Config ] --
 
 
 #ifndef LIB_NS_NAME
@@ -20,7 +21,7 @@
 #endif
 
 
-// ----------------------------------------------------- [ Platform Macros ] --
+// ------------------------------------------------------ [ Platform Macros ] --
 
 
 #if defined(__APPLE__)
@@ -54,7 +55,7 @@
 #endif
 
 
-// -------------------------------------------------- [ Platform Functions ] --
+// --------------------------------------------------- [ Platform Functions ] --
 
 
 namespace LIB_NS_NAME {
@@ -131,7 +132,7 @@ is_emscripten_platform()
 } // ns
 
 
-// ----------------------------------------------------- [ Compiler Macros ] --
+// ------------------------------------------------------ [ Compiler Macros ] --
 
 
 #ifdef __clang__
@@ -145,7 +146,7 @@ is_emscripten_platform()
 #endif
 
 
-// -------------------------------------------------- [ Compiler Functions ] --
+// --------------------------------------------------- [ Compiler Functions ] --
 
 
 namespace LIB_NS_NAME {
@@ -189,7 +190,7 @@ is_msvs_compiler()
 } // ns
 
 
-// -------------------------------------------- [ Platform Constant Macros ] --
+// --------------------------------------------- [ Platform Constant Macros ] --
 
 
 #ifndef LIB_MAX_FILE_PATH_SIZE
@@ -197,7 +198,7 @@ is_msvs_compiler()
 #endif
 
 
-// ----------------------------------------- [ Platform Constant Functions ] --
+// ------------------------------------------ [ Platform Constant Functions ] --
 
 
 namespace LIB_NS_NAME {

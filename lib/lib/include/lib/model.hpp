@@ -612,6 +612,17 @@ load_obj_from_file(
     LOG_ERROR("Failed to open file")
   }
   
+  // Close files
+  if(obj_file)
+  {
+    fclose(obj_file);
+  }
+  
+  if(mat_file)
+  {
+    fclose(mat_file);
+  }
+  
   return return_model;
 }
 

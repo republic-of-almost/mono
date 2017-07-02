@@ -26,14 +26,15 @@ TEST_CASE("Model Test")
     char file[LIB_MAX_FILE_PATH_SIZE];
     strcat(file, lib::dir::exe_path());
     strcat(file, "assets/lib/plane.obj");
-    
+  
     lib::model model = lib::model_import::load_obj_from_file(file);
-    
+      
     REQUIRE(model.mesh_count == 1);
+    REQUIRE(model.material_count == 0);
     REQUIRE(model.vertex_count[0] == 6);
   }
   
-  SECTION("Init Raw With Data")
+  SECTION("Simple obj")
   {
     
   }
