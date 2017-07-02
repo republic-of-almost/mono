@@ -267,16 +267,24 @@ make.create_solution(solution_data, project_defaults, projects)
 
     buildoptions(proj.buildoptions)
 
-    -- Temp fix to programatically copy assets
-    if proj.kind == "WindowedApp" and projects then
-      if(os.get() == "macosx") then
+    -- Asset directories get copied to build --
+    if os.get() == "macosx" then
+
+      if proj.kind == "WindowedApp" and projects then
         for j, asset_proj in ipairs(projects) do
           if asset_proj.asset_dir then
             postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
           end
-          -- postbuildcommands("ditto ${SRCROOT}/../assets/ ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+        end
+      else if proj.kind == "ConsoleApp" and projects then
+          for j, asset_proj in ipairs(projects) do
+            if asset_proj.asset_dir then
+              postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+            end
+          end
         end
       end
+      
     end
 
     -- Global build options --

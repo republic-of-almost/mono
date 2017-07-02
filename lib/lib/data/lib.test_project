@@ -28,6 +28,8 @@ table.insert(
       make.get_proj_root() .. "./",
     },
 
+    asset_dir = "../../../lib/lib/assets",
+
     project_dependencies = {
       "Lib",
       "Catch",
