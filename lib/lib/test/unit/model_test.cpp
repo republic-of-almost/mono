@@ -97,8 +97,10 @@ TEST_CASE("Model Test")
       REQUIRE(model.vertex_count[2] == 36);
       REQUIRE(model.mesh_material != nullptr);
       
-      REQUIRE(strcmp(model.mesh_material[0].name, "Material") == 0);
-      REQUIRE(strcmp(model.mesh_material[0].texture_01_path, "test.png") == 0);
+      REQUIRE(strcmp(model.mesh_material[0].name, "SimpleMat") == 0);
+      
+      REQUIRE(model.mesh_material[0].map_type[0] == lib::map_type::DIFFUSE);
+      REQUIRE(strcmp(model.mesh_material[0].map_path[0], "diff.png") == 0);
     }
   }
 }

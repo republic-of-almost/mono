@@ -31,12 +31,26 @@
 namespace LIB_NS_NAME {
 
 
+namespace map_type {
+enum ENUM {
+
+  DIFFUSE,
+  NORMAL,
+  SPECULAR,
+  AMBIENT,
+  UNKNOWN,
+
+};
+}
+
+
 struct material
 {
   char *name;
-  char *texture_01_path;
-  char *texture_02_path;
-  char *texture_03_path;
+  
+  uint32_t  map_count;
+  uint32_t  *map_type;
+  char      **map_path;
 };
 
 
@@ -160,7 +174,8 @@ load_obj_from_file(
         {
           uint32_t mat_count = 0;
           lib::array<uint32_t, 32> mat_name_size;
-          lib::array<uint32_t, 32> diffuse_map_name_size;
+          lib::array<uint32_t, 32> texture_maps;
+          lib::array<uint32_t, 32> texture_names;
           
           // -- [ Scan through the material first ] --
           
@@ -189,12 +204,15 @@ load_obj_from_file(
               
               const uint32_t str_size = strlen(mat_name) + lib_null;
               mat_name_size.emplace_back(str_size);
-              
-              diffuse_map_name_size.emplace_back(uint32_t{0});
+              texture_maps.emplace_back(uint32_t{0});
             }
-            else if(strcmp("map_Kd", mat_line) == 0)
+            else if(
+              strcmp("map_Kd", mat_line) == 0 ||
+              strcmp("map_Ka", mat_line) == 0 ||
+              strcmp("map_Ns", mat_line) == 0 ||
+              strcmp("map_Bump", mat_line) == 0)
             {
-              char path[1024]{};
+              char path[2048]{};
               
               fscanf(
                 mat_file,
@@ -203,28 +221,43 @@ load_obj_from_file(
               );
               
               const uint32_t str_size = strlen(path) + lib_null;
-              diffuse_map_name_size.back() = str_size;
+              texture_names.emplace_back(str_size);
+              texture_maps.back() += 1;
             }
           }
           
           // -- [ Allocate Memory For Material ] --
           
           {
+            size_t path_counter = 0;
+          
             const size_t mat_bytes = sizeof(material) * mat_count;
             model.mesh_material = MODEL_ALLOC(material, mat_bytes);
             memset(model.mesh_material, 0, sizeof(material));
             
             for(uint32_t i = 0; i < mat_count; ++i)
             {
-              const size_t name_bytes = sizeof(char) * (mat_name_size[i]);
-              model.mesh_material[i].name = MODEL_ALLOC(char, name_bytes);
-              memset(model.mesh_material[i].name, 0, name_bytes);
+              material *mat = &model.mesh_material[i];
               
-              if(diffuse_map_name_size[i])
+              const size_t name_bytes = sizeof(char) * (mat_name_size[i]);
+              mat->name = MODEL_ALLOC(char, name_bytes);
+              memset(mat->name, 0, name_bytes);
+              
+              mat->map_count = texture_maps[i];
+              const size_t map_count_bytes = sizeof(uint32_t) * mat->map_count;
+              mat->map_type = MODEL_ALLOC(uint32_t, map_count_bytes);
+              
+              const size_t map_path_bytes = sizeof(char*) * mat->map_count;
+              mat->map_path = MODEL_ALLOC(char*, map_path_bytes);
+              
+              // For each map
+              for(uint32_t j = 0; j < mat->map_count; ++j)
               {
-                const size_t map_bytes = sizeof(char) * (diffuse_map_name_size[i]);
-                model.mesh_material[i].texture_01_path = MODEL_ALLOC(char, map_bytes);
-                memset(model.mesh_material[i].texture_01_path, 0, map_bytes);
+                const size_t path = texture_names[path_counter++] + lib_null;
+                const size_t path_bytes = sizeof(char) * path;
+              
+                mat->map_path[j] = MODEL_ALLOC(char, path_bytes);
+                memset(mat->map_path[j], 0, path_bytes);
               }
             }
             
@@ -235,6 +268,7 @@ load_obj_from_file(
           
           fseek(mat_file, 0, SEEK_SET);
           int32_t this_mat = -1;
+          size_t texture_map = 0;
           
           while(true)
           {
@@ -259,6 +293,8 @@ load_obj_from_file(
                 mat_name
               );
               
+              texture_map = 0;
+              
               strcat(model.mesh_material[this_mat].name, mat_name);
             }
             
@@ -267,7 +303,7 @@ load_obj_from_file(
             */
             else if(strcmp("map_Kd", mat_line) == 0)
             {
-              char path[1024]{};
+              char path[2048]{};
               
               fscanf(
                 mat_file,
@@ -275,7 +311,66 @@ load_obj_from_file(
                 path
               );
               
-              strcat(model.mesh_material[this_mat].texture_01_path, path);
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::DIFFUSE;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
+            }
+            
+            else if(strcmp("map_Ka", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::AMBIENT;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
+            }
+            
+            else if(strcmp("map_Ns", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::SPECULAR;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
+            }
+            
+            else if(strcmp("map_Bump", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::NORMAL;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
             }
           }
         } // if mat_file
@@ -574,25 +669,40 @@ load_obj_from_file(
           
           // Vertex
           {
-            const size_t pos_offset = index_list[0] * 3;
-            LIB_ASSERT(pos_offset < (size_t)model.vertex_count);
-          
-            model.verts[curr_mesh][vec3_offset + 0] = positions[pos_offset + 0];
-            model.verts[curr_mesh][vec3_offset + 1] = positions[pos_offset + 1];
-            model.verts[curr_mesh][vec3_offset + 2] = positions[pos_offset + 2];
+            // Pos
+            {
+              const size_t pos_offset = index_list[0] * 3;
+              LIB_ASSERT(pos_offset < (size_t)model.vertex_count);
             
-            const size_t uv_offset = index_list[1] * 2;
-            LIB_ASSERT(uv_offset < (size_t)model.vertex_count);
+              float *curr_verts = model.verts[curr_mesh];
             
-            model.uvs[curr_mesh][vec2_offset + 0] = uvs[uv_offset + 0];
-            model.uvs[curr_mesh][vec2_offset + 1] = uvs[uv_offset + 1];
+              curr_verts[vec3_offset + 0] = positions[pos_offset + 0];
+              curr_verts[vec3_offset + 1] = positions[pos_offset + 1];
+              curr_verts[vec3_offset + 2] = positions[pos_offset + 2];
+            }
             
-            const size_t normal_offset = index_list[2] * 3;
-            LIB_ASSERT(normal_offset < (size_t)model.vertex_count);
+            // UVs
+            {
+              const size_t uv_offset = index_list[1] * 2;
+              LIB_ASSERT(uv_offset < (size_t)model.vertex_count);
+              
+              float *curr_uvs = model.uvs[curr_mesh];
+              
+              curr_uvs[vec2_offset + 0] = uvs[uv_offset + 0];
+              curr_uvs[vec2_offset + 1] = uvs[uv_offset + 1];
+            }
             
-            model.normals[curr_mesh][vec3_offset + 0] = normals[normal_offset + 0];
-            model.normals[curr_mesh][vec3_offset + 1] = normals[normal_offset + 1];
-            model.normals[curr_mesh][vec3_offset + 2] = normals[normal_offset + 2];
+            // Normals
+            {
+              const size_t normal_offset = index_list[2] * 3;
+              LIB_ASSERT(normal_offset < (size_t)model.vertex_count);
+              
+              float *curr_norms = model.normals[curr_mesh];
+              
+              curr_norms[vec3_offset + 0] = normals[normal_offset + 0];
+              curr_norms[vec3_offset + 1] = normals[normal_offset + 1];
+              curr_norms[vec3_offset + 2] = normals[normal_offset + 2];
+            }
           }
           
           // Vertex
