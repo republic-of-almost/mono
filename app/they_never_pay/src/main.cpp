@@ -31,6 +31,8 @@ app_tick()
   #endif
 }
 
+
+
 int
 main()
 {
@@ -38,6 +40,8 @@ main()
 
   Nil::Engine nil_engine;
   Nil_ext::load_aspects(nil_engine);
+  
+  
   
   Game_data::setup();
   Game_data::load_assets();

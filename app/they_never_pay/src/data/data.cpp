@@ -107,7 +107,6 @@ load_assets()
       static int count = 0;
       
       if(model.material_id[i] >= 0)
-//      if(count == 0)
       {
         count++;
       
@@ -115,7 +114,7 @@ load_assets()
         int y = 0;
         int c = 0;
         stbi_uc *img_data = nullptr;
-        const char *path = model.mesh_material[model.material_id[i]].texture_01_path;
+        const char *path = model.mesh_material[model.material_id[i]].map_path[0];
         
         stbi_set_flip_vertically_on_load(true);
         img_data = stbi_load(path, &x, &y, &c, 0);
