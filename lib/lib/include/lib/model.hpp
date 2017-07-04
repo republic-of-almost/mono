@@ -16,8 +16,13 @@
 // --------------------------------------------------------- [ Model Config ] --
 
 
+#ifndef MODEL_ALLOC
 #define MODEL_ALLOC(type, bytes) (type*)malloc(bytes)
+#endif
+
+#ifndef MODEL_FREE
 #define MODEL_FREE(ptr) free(ptr)
+#endif
 
 
 #ifndef LIB_NS_NAME

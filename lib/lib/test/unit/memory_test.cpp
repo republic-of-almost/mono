@@ -53,5 +53,5 @@ TEST_CASE("Memory Pool")
     lib::mem::free(foo);
     
     REQUIRE(lib::mem::buckets_in_use() == 0);
-  }
+  }  
 }

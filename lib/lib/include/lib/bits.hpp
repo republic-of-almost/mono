@@ -37,6 +37,24 @@
 #define BIT(n) 1 << n
 
 
+// --------------------------------------------------------- [ Bit Function ] --
+
+
+namespace LIB_NS_NAME {
+namespace bits {
+
+
+LIB_BITS_INLINE size_t
+bit(const uint32_t n)
+{
+  return 1 << n;
+}
+
+
+} // ns
+} // ns
+
+
 // ------------------------------------------------------- [ Bit Un-Packing ] --
 
 
