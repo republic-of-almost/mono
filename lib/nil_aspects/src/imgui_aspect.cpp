@@ -294,7 +294,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGui::Begin("Texture Data", &self->show_data_textures);
     
     size_t count            = 0;
-    Nil::Data::Texture_resource *textures = nullptr;
+    Nil::Data::Texture *textures = nullptr;
     Nil::Data::get(&count, &textures);
 
     ImGui::Text("Texture Count %zu", count);
@@ -315,11 +315,11 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     
     for(size_t i = 0; i < count; ++i)
     {
-      ImGui::Image((ImTextureID)textures[i].platform_resource, ImVec2(tex_size, tex_size));
+      ImGui::Image((ImTextureID)textures[i].platform_id, ImVec2(tex_size, tex_size));
     
       if(ImGui::IsItemHovered())
       {
-        ImGui::SetTooltip("ID: %d\nDimentions: %d x %d\nChannels: %d", textures[i].id,  textures[i].width, textures[i].height, textures[i].compoents);
+        ImGui::SetTooltip("ID: %d\nDimentions: %d x %d\nChannels: %d", textures[i].id,  textures[i].width, textures[i].height, textures[i].components);
       }
       
       if((i + 1) % (cols ))

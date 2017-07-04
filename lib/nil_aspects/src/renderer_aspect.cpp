@@ -108,68 +108,68 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       Resources
     */
     {
-      size_t                    mesh_rsrc_count = 0;
-      Nil::Data::Mesh_resource *mesh_resources = nullptr;
-
-      Nil::Data::get(&mesh_rsrc_count, &mesh_resources);
-
-      for(size_t i = 0; i < mesh_rsrc_count; ++i)
-      {
-        Nil::Data::Mesh_resource *mesh_resource = &mesh_resources[i];
-
-        if(mesh_resource->status == Nil::Data::Mesh_resource::PENDING)
-        {
-          const uint32_t mesh = rov_createMesh
-          (
-            mesh_resource->position_vec3,
-            mesh_resource->normal_vec3,
-            mesh_resource->texture_coords_vec2,
-            mesh_resource->count
-          );
-
-          if((mesh_resource->id + 1) > self->mesh_ids.size())
-          {
-            self->mesh_ids.resize(1 << (mesh_resource->id + 1));
-          }
-
-          self->mesh_ids[mesh_resource->id] = mesh;
-
-          mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
-        }
-      }
-
-      size_t                        texture_rsrc_count = 0;
-      Nil::Data::Texture_resource   *texture_resources = nullptr;
-
-      Nil::Data::get(&texture_rsrc_count, &texture_resources);
-
-      for(size_t i = 0; i < texture_rsrc_count; ++i)
-      {
-        Nil::Data::Texture_resource *texture_resource = &texture_resources[i];
-
-        if(texture_resource->status == Nil::Data::Texture_resource::PENDING)
-        {
-          const uint32_t texture = rov_createTexture(
-            texture_resource->data,
-            texture_resource->width,
-            texture_resource->height,
-            texture_resource->sizeof_data,
-            texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8,
-            &texture_resource->platform_resource
-          );
-
-          if((texture_resource->id + 1) > self->texture_ids.size())
-          {
-            const size_t new_size = (texture_resource->id + 1);
-            self->texture_ids.resize(new_size);
-          }
-          
-          const size_t id = texture_resource->id;
-          self->texture_ids[id] = texture;
-        }
-
-        texture_resource->status = Nil::Data::Texture_resource::LOADED;
-      }
+//      size_t                    mesh_rsrc_count = 0;
+//      Nil::Data::Mesh_resource *mesh_resources = nullptr;
+//
+//      Nil::Data::get(&mesh_rsrc_count, &mesh_resources);
+//
+//      for(size_t i = 0; i < mesh_rsrc_count; ++i)
+//      {
+//        Nil::Data::Mesh_resource *mesh_resource = &mesh_resources[i];
+//
+//        if(mesh_resource->status == Nil::Data::Mesh_resource::PENDING)
+//        {
+//          const uint32_t mesh = rov_createMesh
+//          (
+//            mesh_resource->position_vec3,
+//            mesh_resource->normal_vec3,
+//            mesh_resource->texture_coords_vec2,
+//            mesh_resource->count
+//          );
+//
+//          if((mesh_resource->id + 1) > self->mesh_ids.size())
+//          {
+//            self->mesh_ids.resize(1 << (mesh_resource->id + 1));
+//          }
+//
+//          self->mesh_ids[mesh_resource->id] = mesh;
+//
+//          mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
+//        }
+//      }
+//
+//      size_t                        texture_rsrc_count = 0;
+//      Nil::Data::Texture_resource   *texture_resources = nullptr;
+//
+//      Nil::Data::get(&texture_rsrc_count, &texture_resources);
+//
+//      for(size_t i = 0; i < texture_rsrc_count; ++i)
+//      {
+//        Nil::Data::Texture_resource *texture_resource = &texture_resources[i];
+//
+//        if(texture_resource->status == Nil::Data::Texture_resource::PENDING)
+//        {
+//          const uint32_t texture = rov_createTexture(
+//            texture_resource->data,
+//            texture_resource->width,
+//            texture_resource->height,
+//            texture_resource->sizeof_data,
+//            texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8,
+//            &texture_resource->platform_resource
+//          );
+//
+//          if((texture_resource->id + 1) > self->texture_ids.size())
+//          {
+//            const size_t new_size = (texture_resource->id + 1);
+//            self->texture_ids.resize(new_size);
+//          }
+//          
+//          const size_t id = texture_resource->id;
+//          self->texture_ids[id] = texture;
+//        }
+//
+//        texture_resource->status = Nil::Data::Texture_resource::LOADED;
+//      }
     }
 
     /*

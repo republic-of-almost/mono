@@ -14,24 +14,10 @@ namespace Data {
 // ----------------------------------------------------------------- [ Data ] --
 
 
-namespace Resource_type {
-enum ENUM {
-  DATA,
-  SHADER,
-  TEXTURE,
-  MESH,
-  
-  COUNT,
-};
-} // ns
-
-
 struct Resource
 {
-  uint32_t type;
-  char name[64];
-  
-  uintptr_t data;
+  enum { TEXTURE, MESH } type;
+  char filepath[2048];
 };
 
 

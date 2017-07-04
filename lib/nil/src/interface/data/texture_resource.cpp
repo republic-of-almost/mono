@@ -62,7 +62,7 @@ set(Node &node, const Texture_resource &in)
       memcpy(&cpy_data[0], in.data, in.sizeof_data);
       cpy_in.data = cpy_data;
     }
-		  }
+  }
 
   get_texture_rsrc_data().set_data(node, cpy_in);
 }

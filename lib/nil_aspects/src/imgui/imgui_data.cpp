@@ -364,20 +364,20 @@ render_data(Nil::Data::Resource *data)
 {
   bool updated = false;
 
-  ImGui::Text("Set in code.");
-
-  // -- Readonly -- //
-  
-  ImGui::Separator();
-  ImGui::Spacing();
-
-  constexpr uint32_t flags = ImGuiInputTextFlags_ReadOnly;
-  
-  ImGui::Text("Readonly Values");
-
-  ImGui::InputInt("Type",   (int*)&data->type, 0, 0,  flags);
-  ImGui::InputText("Name",  &data->name[0], 64,       flags);
-  ImGui::InputInt("Ptr",    (int*)&data->data, 0, 0,  flags);
+//  ImGui::Text("Set in code.");
+//
+//  // -- Readonly -- //
+//  
+//  ImGui::Separator();
+//  ImGui::Spacing();
+//
+//  constexpr uint32_t flags = ImGuiInputTextFlags_ReadOnly;
+//  
+//  ImGui::Text("Readonly Values");
+//
+//  ImGui::InputInt("Type",   (int*)&data->type, 0, 0,  flags);
+//  ImGui::InputText("Name",  &data->name[0], 64,       flags);
+//  ImGui::InputInt("Ptr",    (int*)&data->data, 0, 0,  flags);
   
   return updated;
 }

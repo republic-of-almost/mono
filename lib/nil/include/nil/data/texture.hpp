@@ -14,29 +14,20 @@ namespace Data {
 // ----------------------------------------------------------------- [ Data ] --
 
 
-namespace Texture_filtering {
-enum ENUM {
-
-  POINT,
-  LINEAR,
-  ANISO_X2,
-  ANISO_X4,
-  ANISO_X8,
-  ANISO_X16,
-
-}; // enum
-} // ns
-
-
 struct Texture
 {
   uint32_t id;
-  uint32_t filtering; // Move to resource
+  enum { POINT, LINEAR, ANISO_X2, ANISO_X4, ANISO_X8, ANISO_X16 } filtering;
+  
   uint32_t width;
   uint32_t height;
+  uint32_t depth;
+  uint32_t dimentions;
+  uint32_t components;
   
   // ** Output ** //
   
+  enum { PENDING, LOADED, FAILED, } status;
   uintptr_t platform_id;
 };
 

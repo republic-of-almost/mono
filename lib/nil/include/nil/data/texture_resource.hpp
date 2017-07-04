@@ -29,7 +29,7 @@ struct Texture_resource
   // -- Output -- //
   
   enum { PENDING, LOADED, FAILED, } status;
-  uintptr_t platform_resource;
+//  uintptr_t platform_resource;
 };
 
 
