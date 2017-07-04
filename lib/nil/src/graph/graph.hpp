@@ -58,12 +58,6 @@ node_exists(
   const Data *data,
   const uint32_t node_id,
   size_t *out_index = nullptr);
-  
-//bool
-//node_pending(
-//  const Data *data,
-//  const uint32_t node_id,
-//  size_t *out_index = nullptr);
 
 
 uint32_t
@@ -104,10 +98,6 @@ node_get_child(
 
 uint32_t
 node_get_parent(const Data *data, const uint32_t node_id);
-
-
-//bool
-//node_modified(Data *data, const uint32_t node_id);
 
 
 // ------------------------------------------------------------ [ Callbacks ] --

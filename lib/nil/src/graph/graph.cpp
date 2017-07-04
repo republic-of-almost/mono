@@ -159,363 +159,363 @@ namespace
 //  }
   
   
-  void
-  graph_updated(Graph::Data *graph, const Graph::Event *evt)
-  {
-    // Update transforms //
-    // Find this node positions
-    // Find number of chilren
-    
-    // -- Properties -- //
-    const uint32_t this_id = evt->node_id;
-    uint32_t parent_id = 0;
-
-    size_t this_index = 0;
-    uint32_t this_depth = 0;
-    {
-      if(!lib::key::linear_search(
-        this_id,
-        graph->node_id.data(),
-        graph->node_id.size(),
-        &this_index))
-      {
-        return;
-      }
-      
-      this_depth = get_depth(graph->parent_depth_data[this_index]);
-      parent_id = get_parent_id(graph->parent_depth_data[this_index]);
-    }
-    
-    uint32_t nodes_to_update = node_descendants_count(graph, this_id) + 1;
+//  void
+//  graph_updated(Graph::Data *graph, const Graph::Event *evt)
+//  {
+//    // Update transforms //
+//    // Find this node positions
+//    // Find number of chilren
+//    
+//    // -- Properties -- //
+//    const uint32_t this_id = evt->node_id;
+//    uint32_t parent_id = 0;
+//
+//    size_t this_index = 0;
+//    uint32_t this_depth = 0;
+//    {
+//      if(!lib::key::linear_search(
+//        this_id,
+//        graph->node_id.data(),
+//        graph->node_id.size(),
+//        &this_index))
+//      {
+//        return;
+//      }
+//      
+//      this_depth = get_depth(graph->parent_depth_data[this_index]);
+//      parent_id = get_parent_id(graph->parent_depth_data[this_index]);
+//    }
+//    
+//    uint32_t nodes_to_update = node_descendants_count(graph, this_id) + 1;
+//  
+//    // -- //
+//    size_t parent_index   = 0;
+//    size_t insert_index   = graph->node_id.size();
+//    uint32_t parent_depth = 0;
+//    {
+//      if(parent_id > 0)
+//      {
+//        const uint32_t *node_ids = graph->node_id.data();
+//        const size_t node_count = graph->node_id.size();
+//        
+//        if(!lib::key::linear_search(
+//          parent_id,
+//          node_ids,
+//          node_count,
+//          &parent_index))
+//        {
+//          LOG_FATAL("Graph is corrupted");
+//          return;
+//        }
+//
+//        insert_index = parent_index + 1;
+//        parent_depth = get_depth(graph->parent_depth_data[parent_index]);
+//      }
+//    }
+//    
+//    // Update Transforms //
+//    {
+//      lib::array<math::transform, stack_hint> transform_stack;
+//      
+//      if(parent_index)
+//      {
+//        transform_stack.emplace_back(graph->world_transform[parent_index]);
+//      }
+//      else
+//      {
+//        transform_stack.emplace_back(math::transform_init());
+//      }
+//      
+//      uint32_t curr_depth = this_depth;
+//      
+//      for(uint32_t i = 0; i < nodes_to_update; ++i)
+//      {
+//        const size_t   index = this_index + i;
+//        const uint64_t data  = graph->parent_depth_data[index];
+//        const uint32_t depth = get_depth(data);
+//        
+//        // Pop off all unrequired transforms.
+//        while(curr_depth > depth)
+//        {
+//          transform_stack.pop_back();
+//          curr_depth -= 1;
+//        }
+//        
+//        // Calc new world transform.
+//        const math::transform child_world(
+//          math::transform_inherited(
+//            transform_stack.top(),
+//            graph->local_transform[index]
+//          )
+//        );
+//        
+//        graph->world_transform[index] = child_world;
+//        
+//        transform_stack.emplace_back(child_world);
+//        curr_depth += 1;
+//      }
+//    }
+//  }
   
-    // -- //
-    size_t parent_index   = 0;
-    size_t insert_index   = graph->node_id.size();
-    uint32_t parent_depth = 0;
-    {
-      if(parent_id > 0)
-      {
-        const uint32_t *node_ids = graph->node_id.data();
-        const size_t node_count = graph->node_id.size();
-        
-        if(!lib::key::linear_search(
-          parent_id,
-          node_ids,
-          node_count,
-          &parent_index))
-        {
-          LOG_FATAL("Graph is corrupted");
-          return;
-        }
-
-        insert_index = parent_index + 1;
-        parent_depth = get_depth(graph->parent_depth_data[parent_index]);
-      }
-    }
-    
-    // Update Transforms //
-    {
-      lib::array<math::transform, stack_hint> transform_stack;
-      
-      if(parent_index)
-      {
-        transform_stack.emplace_back(graph->world_transform[parent_index]);
-      }
-      else
-      {
-        transform_stack.emplace_back(math::transform_init());
-      }
-      
-      uint32_t curr_depth = this_depth;
-      
-      for(uint32_t i = 0; i < nodes_to_update; ++i)
-      {
-        const size_t   index = this_index + i;
-        const uint64_t data  = graph->parent_depth_data[index];
-        const uint32_t depth = get_depth(data);
-        
-        // Pop off all unrequired transforms.
-        while(curr_depth > depth)
-        {
-          transform_stack.pop_back();
-          curr_depth -= 1;
-        }
-        
-        // Calc new world transform.
-        const math::transform child_world(
-          math::transform_inherited(
-            transform_stack.top(),
-            graph->local_transform[index]
-          )
-        );
-        
-        graph->world_transform[index] = child_world;
-        
-        transform_stack.emplace_back(child_world);
-        curr_depth += 1;
-      }
-    }
-  }
   
-  
-  void
-  graph_move(Graph::Data *graph, const Graph::Event *evt)
-  {
-    // -- Properties -- //
-    const uint32_t this_id = evt->node_id;
-    const uint32_t parent_id = evt->parent;
-  
-    // -- Find this entities details -- //
-    size_t this_index = 0;
-    uint32_t this_depth = 0;
-    {
-      if(!lib::key::linear_search(
-        this_id,
-        graph->node_id.data(),
-        graph->node_id.size(),
-        &this_index))
-      {
-        return;
-      }
-
-      this_depth = get_depth(graph->parent_depth_data[this_index]);
-    }
-
-    // -- Find out how many nodes we need to move -- //
-    uint32_t nodes_to_move = 1;
-    {
-      const size_t node_count = graph->node_id.size();
-      const size_t start_index = this_index + 1;
-
-      for(size_t i = start_index; i < node_count; ++i, ++nodes_to_move)
-      {
-        const uint32_t curr_depth = get_depth(graph->parent_depth_data[i]);
-      
-        if(curr_depth <= this_depth)
-        {
-          break;
-        }
-      }
-    }
-
-    // -- Remove nodes, and insert else where in the tree -- //
-    {
-      // Save the old data
-      lib::array<uint32_t, stack_hint> move_nodes(
-        graph->node_id.begin() + this_index,
-        graph->node_id.begin() + (this_index + nodes_to_move)
-      );
-      graph->node_id.erase(this_index, nodes_to_move);
-      
-      lib::array<uint64_t, stack_hint> move_parent_depth_data(
-        graph->parent_depth_data.begin() + this_index,
-        graph->parent_depth_data.begin() + (this_index + nodes_to_move)
-      );
-      graph->parent_depth_data.erase(this_index, nodes_to_move);
-      
-      lib::array<short_string, stack_hint> move_name(
-        graph->name.begin() + this_index,
-        graph->name.begin() + (this_index + nodes_to_move)
-      );
-      graph->name.erase(this_index, nodes_to_move);
-      
-      lib::array<math::transform, stack_hint> move_local_transform(
-        graph->local_transform.begin() + this_index,
-        graph->local_transform.begin() + (this_index + nodes_to_move)
-      );
-      graph->local_transform.erase(this_index, nodes_to_move);
-      
-      lib::array<math::transform, stack_hint> move_world_transform(
-        graph->world_transform.begin() + this_index,
-        graph->world_transform.begin() + (this_index + nodes_to_move)
-      );
-      graph->world_transform.erase(this_index, nodes_to_move);
-      
-      lib::array<math::aabb, stack_hint> move_bounding_box(
-        graph->bounding_box.begin() + this_index,
-        graph->bounding_box.begin() + (this_index + nodes_to_move)
-      );
-      graph->bounding_box.erase(this_index, nodes_to_move);
-      
-      lib::array<uint64_t, stack_hint> move_node_type_id(
-        graph->node_type_id.begin() + this_index,
-        graph->node_type_id.begin() + (this_index + nodes_to_move)
-      );
-      graph->node_type_id.erase(this_index, nodes_to_move);
-      
-      lib::array<uintptr_t, stack_hint> move_user_data(
-        graph->user_data.begin() + this_index,
-        graph->user_data.begin() + (this_index + nodes_to_move)
-      );
-      graph->user_data.erase(this_index, nodes_to_move);
-      
-      lib::array<uint64_t, stack_hint> move_last_update(
-        graph->last_update.begin() + this_index,
-        graph->last_update.begin() + (this_index + nodes_to_move)
-      );
-      graph->last_update.erase(this_index, nodes_to_move);
-      
-      #ifndef NDEBUG
-      graph_size_check(graph);
-      #endif
-      
-      // Find new insert point
-      size_t parent_index   = 0;
-      size_t insert_index   = graph->node_id.size();
-      uint32_t parent_depth = 0;
-      {
-        if(parent_id > 0)
-        {
-          const uint32_t *node_ids = graph->node_id.data();
-          const size_t node_count = graph->node_id.size();
-          
-          if(!lib::key::linear_search(
-            parent_id,
-            node_ids,
-            node_count,
-            &parent_index))
-          {
-            LOG_FATAL("Graph is corrupted");
-            return;
-          }
-
-          insert_index = parent_index + 1;
-          parent_depth = get_depth(graph->parent_depth_data[parent_index]);
-        }
-      }
-      
-      // Change the first node to point at the new parent.
-      move_parent_depth_data[0] = set_data(parent_id, get_depth(move_parent_depth_data[0]));
-      
-      /*
-        Insert the data into the new positions.
-      */
-      graph->node_id.insert(
-        insert_index,
-        move_nodes.data(),
-        nodes_to_move
-      );
-      
-      graph->parent_depth_data.insert(
-        insert_index,
-        move_parent_depth_data.data(),
-        nodes_to_move
-      );
-
-      graph->name.insert(
-        insert_index,
-        move_name.data(),
-        nodes_to_move
-      );
-      
-      graph->local_transform.insert(
-        insert_index,
-        move_local_transform.data(),
-        nodes_to_move
-      );
-      
-      graph->world_transform.insert(
-        insert_index,
-        move_world_transform.data(),
-        nodes_to_move
-      );
-      
-      graph->bounding_box.insert(
-        insert_index,
-        move_bounding_box.data(),
-        nodes_to_move
-      );
-      
-      graph->node_type_id.insert(
-        insert_index,
-        move_node_type_id.data(),
-        nodes_to_move
-      );
-      
-      graph->user_data.insert(
-        insert_index,
-        move_user_data.data(),
-        nodes_to_move
-      );
-      
-      graph->last_update.insert(
-        insert_index,
-        move_last_update.data(),
-        nodes_to_move
-      );
-      
-      #ifndef NDEBUG
-      graph_size_check(graph);
-      #endif
-      
-      /*
-        Calculate the depth differences between old and new parents.
-        If parent_id = 0 aka root node, we need to add an extra -1 to get the
-        correct depth.
-      */
-      const int32_t old_parent_depth = this_depth - 1;
-      const int32_t parent_diff      = parent_depth - old_parent_depth;
-      const int32_t depth_diff       = parent_diff - (parent_id ? 0 : 1);
-      
-      // Update the depth data
-      for(uint32_t i = 0; i < nodes_to_move; ++i)
-      {
-        const uint64_t old_data  = move_parent_depth_data[i];
-        const uint32_t old_depth = get_depth(old_data);
-        const uint32_t depth     = old_depth + depth_diff;
-        const uint64_t new_data  = set_data(get_parent_id(old_data), depth);
-        const size_t   index     = insert_index + i;
-        
-        graph->parent_depth_data[index] = new_data;
-      }
-      
-      // Update Last Modified
-      for(uint32_t i = 0; i < nodes_to_move; ++i)
-      {
-        graph->last_update[i] = graph->graph_tick;
-      }
-      
-      // -- Update transforms -- //
-      /*
-        Transforms are nested so we keep a stack of transforms that represent
-        the parent transform, we pop off when we walk up the tree.
-      */
-      {
-        lib::array<math::transform, stack_hint> transform_stack;
-        transform_stack.emplace_back(graph->world_transform[parent_index]);
-        
-        uint32_t curr_depth = parent_depth;
-        
-        for(uint32_t i = 0; i < nodes_to_move; ++i)
-        {
-          const size_t index  = insert_index + i;
-          const uint64_t data = graph->parent_depth_data[index];
-          const uint32_t depth = get_depth(data);
-          
-          // Pop off all unrequired transforms.
-          while((curr_depth + 1) < depth)
-          {
-            transform_stack.pop_back();
-            curr_depth -= 1;
-          }
-          
-          curr_depth = depth;
-        
-          // Calc new world transform.
-          const math::transform child_world(
-            math::transform_inherited(
-              transform_stack.top(),
-              graph->local_transform[index]
-            )
-          );
-          
-          graph->world_transform[index] = child_world;
-          
-          transform_stack.emplace_back(child_world);
-        }
-      }
-    }
-  }
+//  void
+//  graph_move(Graph::Data *graph, const Graph::Event *evt)
+//  {
+//    // -- Properties -- //
+//    const uint32_t this_id = evt->node_id;
+//    const uint32_t parent_id = evt->parent;
+//  
+//    // -- Find this entities details -- //
+//    size_t this_index = 0;
+//    uint32_t this_depth = 0;
+//    {
+//      if(!lib::key::linear_search(
+//        this_id,
+//        graph->node_id.data(),
+//        graph->node_id.size(),
+//        &this_index))
+//      {
+//        return;
+//      }
+//
+//      this_depth = get_depth(graph->parent_depth_data[this_index]);
+//    }
+//
+//    // -- Find out how many nodes we need to move -- //
+//    uint32_t nodes_to_move = 1;
+//    {
+//      const size_t node_count = graph->node_id.size();
+//      const size_t start_index = this_index + 1;
+//
+//      for(size_t i = start_index; i < node_count; ++i, ++nodes_to_move)
+//      {
+//        const uint32_t curr_depth = get_depth(graph->parent_depth_data[i]);
+//      
+//        if(curr_depth <= this_depth)
+//        {
+//          break;
+//        }
+//      }
+//    }
+//
+//    // -- Remove nodes, and insert else where in the tree -- //
+//    {
+//      // Save the old data
+//      lib::array<uint32_t, stack_hint> move_nodes(
+//        graph->node_id.begin() + this_index,
+//        graph->node_id.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->node_id.erase(this_index, nodes_to_move);
+//      
+//      lib::array<uint64_t, stack_hint> move_parent_depth_data(
+//        graph->parent_depth_data.begin() + this_index,
+//        graph->parent_depth_data.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->parent_depth_data.erase(this_index, nodes_to_move);
+//      
+//      lib::array<short_string, stack_hint> move_name(
+//        graph->name.begin() + this_index,
+//        graph->name.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->name.erase(this_index, nodes_to_move);
+//      
+//      lib::array<math::transform, stack_hint> move_local_transform(
+//        graph->local_transform.begin() + this_index,
+//        graph->local_transform.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->local_transform.erase(this_index, nodes_to_move);
+//      
+//      lib::array<math::transform, stack_hint> move_world_transform(
+//        graph->world_transform.begin() + this_index,
+//        graph->world_transform.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->world_transform.erase(this_index, nodes_to_move);
+//      
+//      lib::array<math::aabb, stack_hint> move_bounding_box(
+//        graph->bounding_box.begin() + this_index,
+//        graph->bounding_box.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->bounding_box.erase(this_index, nodes_to_move);
+//      
+//      lib::array<uint64_t, stack_hint> move_node_type_id(
+//        graph->node_type_id.begin() + this_index,
+//        graph->node_type_id.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->node_type_id.erase(this_index, nodes_to_move);
+//      
+//      lib::array<uintptr_t, stack_hint> move_user_data(
+//        graph->user_data.begin() + this_index,
+//        graph->user_data.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->user_data.erase(this_index, nodes_to_move);
+//      
+//      lib::array<uint64_t, stack_hint> move_last_update(
+//        graph->last_update.begin() + this_index,
+//        graph->last_update.begin() + (this_index + nodes_to_move)
+//      );
+//      graph->last_update.erase(this_index, nodes_to_move);
+//      
+//      #ifndef NDEBUG
+//      graph_size_check(graph);
+//      #endif
+//      
+//      // Find new insert point
+//      size_t parent_index   = 0;
+//      size_t insert_index   = graph->node_id.size();
+//      uint32_t parent_depth = 0;
+//      {
+//        if(parent_id > 0)
+//        {
+//          const uint32_t *node_ids = graph->node_id.data();
+//          const size_t node_count = graph->node_id.size();
+//          
+//          if(!lib::key::linear_search(
+//            parent_id,
+//            node_ids,
+//            node_count,
+//            &parent_index))
+//          {
+//            LOG_FATAL("Graph is corrupted");
+//            return;
+//          }
+//
+//          insert_index = parent_index + 1;
+//          parent_depth = get_depth(graph->parent_depth_data[parent_index]);
+//        }
+//      }
+//      
+//      // Change the first node to point at the new parent.
+//      move_parent_depth_data[0] = set_data(parent_id, get_depth(move_parent_depth_data[0]));
+//      
+//      /*
+//        Insert the data into the new positions.
+//      */
+//      graph->node_id.insert(
+//        insert_index,
+//        move_nodes.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->parent_depth_data.insert(
+//        insert_index,
+//        move_parent_depth_data.data(),
+//        nodes_to_move
+//      );
+//
+//      graph->name.insert(
+//        insert_index,
+//        move_name.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->local_transform.insert(
+//        insert_index,
+//        move_local_transform.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->world_transform.insert(
+//        insert_index,
+//        move_world_transform.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->bounding_box.insert(
+//        insert_index,
+//        move_bounding_box.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->node_type_id.insert(
+//        insert_index,
+//        move_node_type_id.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->user_data.insert(
+//        insert_index,
+//        move_user_data.data(),
+//        nodes_to_move
+//      );
+//      
+//      graph->last_update.insert(
+//        insert_index,
+//        move_last_update.data(),
+//        nodes_to_move
+//      );
+//      
+//      #ifndef NDEBUG
+//      graph_size_check(graph);
+//      #endif
+//      
+//      /*
+//        Calculate the depth differences between old and new parents.
+//        If parent_id = 0 aka root node, we need to add an extra -1 to get the
+//        correct depth.
+//      */
+//      const int32_t old_parent_depth = this_depth - 1;
+//      const int32_t parent_diff      = parent_depth - old_parent_depth;
+//      const int32_t depth_diff       = parent_diff - (parent_id ? 0 : 1);
+//      
+//      // Update the depth data
+//      for(uint32_t i = 0; i < nodes_to_move; ++i)
+//      {
+//        const uint64_t old_data  = move_parent_depth_data[i];
+//        const uint32_t old_depth = get_depth(old_data);
+//        const uint32_t depth     = old_depth + depth_diff;
+//        const uint64_t new_data  = set_data(get_parent_id(old_data), depth);
+//        const size_t   index     = insert_index + i;
+//        
+//        graph->parent_depth_data[index] = new_data;
+//      }
+//      
+//      // Update Last Modified
+//      for(uint32_t i = 0; i < nodes_to_move; ++i)
+//      {
+//        graph->last_update[i] = graph->graph_tick;
+//      }
+//      
+//      // -- Update transforms -- //
+//      /*
+//        Transforms are nested so we keep a stack of transforms that represent
+//        the parent transform, we pop off when we walk up the tree.
+//      */
+//      {
+//        lib::array<math::transform, stack_hint> transform_stack;
+//        transform_stack.emplace_back(graph->world_transform[parent_index]);
+//        
+//        uint32_t curr_depth = parent_depth;
+//        
+//        for(uint32_t i = 0; i < nodes_to_move; ++i)
+//        {
+//          const size_t index  = insert_index + i;
+//          const uint64_t data = graph->parent_depth_data[index];
+//          const uint32_t depth = get_depth(data);
+//          
+//          // Pop off all unrequired transforms.
+//          while((curr_depth + 1) < depth)
+//          {
+//            transform_stack.pop_back();
+//            curr_depth -= 1;
+//          }
+//          
+//          curr_depth = depth;
+//        
+//          // Calc new world transform.
+//          const math::transform child_world(
+//            math::transform_inherited(
+//              transform_stack.top(),
+//              graph->local_transform[index]
+//            )
+//          );
+//          
+//          graph->world_transform[index] = child_world;
+//          
+//          transform_stack.emplace_back(child_world);
+//        }
+//      }
+//    }
+//  }
   
   
 //  void
@@ -895,9 +895,259 @@ node_set_parent(
   LIB_ASSERT(graph);
   LIB_ASSERT(this_id);
   
-  // -- Create Event -- //
-  add_event(graph, Graph::Event::MOVED, this_id)->parent = parent_id;
+//   -- Create Event -- //
+//  add_event(graph, Graph::Event::MOVED, this_id)->parent = parent_id;
 
+  // -- Find this entities details -- //
+  size_t this_index = 0;
+  uint32_t this_depth = 0;
+  {
+    if(!lib::key::linear_search(
+      this_id,
+      graph->node_id.data(),
+      graph->node_id.size(),
+      &this_index))
+    {
+      return false;
+    }
+
+    this_depth = get_depth(graph->parent_depth_data[this_index]);
+  }
+
+  // -- Find out how many nodes we need to move -- //
+  uint32_t nodes_to_move = 1;
+  {
+    const size_t node_count = graph->node_id.size();
+    const size_t start_index = this_index + 1;
+
+    for(size_t i = start_index; i < node_count; ++i, ++nodes_to_move)
+    {
+      const uint32_t curr_depth = get_depth(graph->parent_depth_data[i]);
+    
+      if(curr_depth <= this_depth)
+      {
+        break;
+      }
+    }
+  }
+
+  // -- Remove nodes, and insert else where in the tree -- //
+  {
+    // Save the old data
+    lib::array<uint32_t, stack_hint> move_nodes(
+      graph->node_id.begin() + this_index,
+      graph->node_id.begin() + (this_index + nodes_to_move)
+    );
+    graph->node_id.erase(this_index, nodes_to_move);
+    
+    lib::array<uint64_t, stack_hint> move_parent_depth_data(
+      graph->parent_depth_data.begin() + this_index,
+      graph->parent_depth_data.begin() + (this_index + nodes_to_move)
+    );
+    graph->parent_depth_data.erase(this_index, nodes_to_move);
+    
+    lib::array<short_string, stack_hint> move_name(
+      graph->name.begin() + this_index,
+      graph->name.begin() + (this_index + nodes_to_move)
+    );
+    graph->name.erase(this_index, nodes_to_move);
+    
+    lib::array<math::transform, stack_hint> move_local_transform(
+      graph->local_transform.begin() + this_index,
+      graph->local_transform.begin() + (this_index + nodes_to_move)
+    );
+    graph->local_transform.erase(this_index, nodes_to_move);
+    
+    lib::array<math::transform, stack_hint> move_world_transform(
+      graph->world_transform.begin() + this_index,
+      graph->world_transform.begin() + (this_index + nodes_to_move)
+    );
+    graph->world_transform.erase(this_index, nodes_to_move);
+    
+    lib::array<math::aabb, stack_hint> move_bounding_box(
+      graph->bounding_box.begin() + this_index,
+      graph->bounding_box.begin() + (this_index + nodes_to_move)
+    );
+    graph->bounding_box.erase(this_index, nodes_to_move);
+    
+    lib::array<uint64_t, stack_hint> move_node_type_id(
+      graph->node_type_id.begin() + this_index,
+      graph->node_type_id.begin() + (this_index + nodes_to_move)
+    );
+    graph->node_type_id.erase(this_index, nodes_to_move);
+    
+    lib::array<uintptr_t, stack_hint> move_user_data(
+      graph->user_data.begin() + this_index,
+      graph->user_data.begin() + (this_index + nodes_to_move)
+    );
+    graph->user_data.erase(this_index, nodes_to_move);
+    
+    lib::array<uint64_t, stack_hint> move_last_update(
+      graph->last_update.begin() + this_index,
+      graph->last_update.begin() + (this_index + nodes_to_move)
+    );
+    graph->last_update.erase(this_index, nodes_to_move);
+    
+    #ifndef NDEBUG
+    graph_size_check(graph);
+    #endif
+    
+    // Find new insert point
+    size_t parent_index   = 0;
+    size_t insert_index   = graph->node_id.size();
+    uint32_t parent_depth = 0;
+    {
+      if(parent_id > 0)
+      {
+        const uint32_t *node_ids = graph->node_id.data();
+        const size_t node_count = graph->node_id.size();
+        
+        if(!lib::key::linear_search(
+          parent_id,
+          node_ids,
+          node_count,
+          &parent_index))
+        {
+          LOG_FATAL("Graph is corrupted");
+          return false;
+        }
+
+        insert_index = parent_index + 1;
+        parent_depth = get_depth(graph->parent_depth_data[parent_index]);
+      }
+    }
+    
+    // Change the first node to point at the new parent.
+    move_parent_depth_data[0] = set_data(parent_id, get_depth(move_parent_depth_data[0]));
+    
+    /*
+      Insert the data into the new positions.
+    */
+    graph->node_id.insert(
+      insert_index,
+      move_nodes.data(),
+      nodes_to_move
+    );
+    
+    graph->parent_depth_data.insert(
+      insert_index,
+      move_parent_depth_data.data(),
+      nodes_to_move
+    );
+
+    graph->name.insert(
+      insert_index,
+      move_name.data(),
+      nodes_to_move
+    );
+    
+    graph->local_transform.insert(
+      insert_index,
+      move_local_transform.data(),
+      nodes_to_move
+    );
+    
+    graph->world_transform.insert(
+      insert_index,
+      move_world_transform.data(),
+      nodes_to_move
+    );
+    
+    graph->bounding_box.insert(
+      insert_index,
+      move_bounding_box.data(),
+      nodes_to_move
+    );
+    
+    graph->node_type_id.insert(
+      insert_index,
+      move_node_type_id.data(),
+      nodes_to_move
+    );
+    
+    graph->user_data.insert(
+      insert_index,
+      move_user_data.data(),
+      nodes_to_move
+    );
+    
+    graph->last_update.insert(
+      insert_index,
+      move_last_update.data(),
+      nodes_to_move
+    );
+    
+    #ifndef NDEBUG
+    graph_size_check(graph);
+    #endif
+    
+    /*
+      Calculate the depth differences between old and new parents.
+      If parent_id = 0 aka root node, we need to add an extra -1 to get the
+      correct depth.
+    */
+    const int32_t old_parent_depth = this_depth - 1;
+    const int32_t parent_diff      = parent_depth - old_parent_depth;
+    const int32_t depth_diff       = parent_diff - (parent_id ? 0 : 1);
+    
+    // Update the depth data
+    for(uint32_t i = 0; i < nodes_to_move; ++i)
+    {
+      const uint64_t old_data  = move_parent_depth_data[i];
+      const uint32_t old_depth = get_depth(old_data);
+      const uint32_t depth     = old_depth + depth_diff;
+      const uint64_t new_data  = set_data(get_parent_id(old_data), depth);
+      const size_t   index     = insert_index + i;
+      
+      graph->parent_depth_data[index] = new_data;
+    }
+    
+    // Update Last Modified
+    for(uint32_t i = 0; i < nodes_to_move; ++i)
+    {
+      graph->last_update[i] = graph->graph_tick;
+    }
+    
+    // -- Update transforms -- //
+    /*
+      Transforms are nested so we keep a stack of transforms that represent
+      the parent transform, we pop off when we walk up the tree.
+    */
+    {
+      lib::array<math::transform, stack_hint> transform_stack;
+      transform_stack.emplace_back(graph->world_transform[parent_index]);
+      
+      uint32_t curr_depth = parent_depth;
+      
+      for(uint32_t i = 0; i < nodes_to_move; ++i)
+      {
+        const size_t index  = insert_index + i;
+        const uint64_t data = graph->parent_depth_data[index];
+        const uint32_t depth = get_depth(data);
+        
+        // Pop off all unrequired transforms.
+        while((curr_depth + 1) < depth)
+        {
+          transform_stack.pop_back();
+          curr_depth -= 1;
+        }
+        
+        curr_depth = depth;
+      
+        // Calc new world transform.
+        const math::transform child_world(
+          math::transform_inherited(
+            transform_stack.top(),
+            graph->local_transform[index]
+          )
+        );
+        
+        graph->world_transform[index] = child_world;
+        
+        transform_stack.emplace_back(child_world);
+      }
+    }
+  }
 
   return true;
 }
@@ -1202,33 +1452,129 @@ node_get_transform(
 
 bool
 node_set_transform(
-  Data *data,
+  Data *graph,
   const uint32_t node_id,
   const math::transform *trans)
 {
   size_t index = 0;
   
-  if(node_exists(data, node_id, &index))
+  if(node_exists(graph, node_id, &index))
   {
-    const size_t child_count = node_descendants_count(data, node_id);
+    const size_t child_count = node_descendants_count(graph, node_id);
     
-    data->local_transform[index] = *trans;
+    graph->local_transform[index] = *trans;
     
     for(uint32_t i = 0; i < child_count + 1; ++i)
     {
       const size_t update = index + i;
-      add_event(data, Graph::Event::UPDATED_DATA, data->node_id[update]);
+//      add_event(data, Graph::Event::UPDATED_DATA, data->node_id[update]);
+
+      // Update transforms //
+      // Find this node positions
+      // Find number of chilren
+      
+      // -- Properties -- //
+      const uint32_t this_id = node_id;
+      uint32_t parent_id = 0;
+
+      size_t this_index = 0;
+      uint32_t this_depth = 0;
+      {
+        if(!lib::key::linear_search(
+          this_id,
+          graph->node_id.data(),
+          graph->node_id.size(),
+          &this_index))
+        {
+          return false;
+        }
+        
+        this_depth = get_depth(graph->parent_depth_data[this_index]);
+        parent_id = get_parent_id(graph->parent_depth_data[this_index]);
+      }
+      
+      uint32_t nodes_to_update = node_descendants_count(graph, this_id) + 1;
+    
+      // -- //
+      size_t parent_index   = 0;
+      size_t insert_index   = graph->node_id.size();
+      uint32_t parent_depth = 0;
+      {
+        if(parent_id > 0)
+        {
+          const uint32_t *node_ids = graph->node_id.data();
+          const size_t node_count = graph->node_id.size();
+          
+          if(!lib::key::linear_search(
+            parent_id,
+            node_ids,
+            node_count,
+            &parent_index))
+          {
+            LOG_FATAL("Graph is corrupted");
+            return false;
+          }
+
+          insert_index = parent_index + 1;
+          parent_depth = get_depth(graph->parent_depth_data[parent_index]);
+        }
+      }
+      
+      // Update Transforms //
+      {
+        lib::array<math::transform, stack_hint> transform_stack;
+        
+        if(parent_index)
+        {
+          transform_stack.emplace_back(graph->world_transform[parent_index]);
+        }
+        else
+        {
+          transform_stack.emplace_back(math::transform_init());
+        }
+        
+        uint32_t curr_depth = this_depth;
+        
+        for(uint32_t i = 0; i < nodes_to_update; ++i)
+        {
+          const size_t   index = this_index + i;
+          const uint64_t data  = graph->parent_depth_data[index];
+          const uint32_t depth = get_depth(data);
+          
+          // Pop off all unrequired transforms.
+          while(curr_depth > depth)
+          {
+            transform_stack.pop_back();
+            curr_depth -= 1;
+          }
+          
+          // Calc new world transform.
+          const math::transform child_world(
+            math::transform_inherited(
+              transform_stack.top(),
+              graph->local_transform[index]
+            )
+          );
+          
+          graph->world_transform[index] = child_world;
+          
+          transform_stack.emplace_back(child_world);
+          curr_depth += 1;
+        }
+      }
+
+
     }
     return true;
-  }
+//  }
 //  else if(node_pending(data, node_id, &index))
 //  {
 //    data->node_events[index].transform = *trans;
 //    add_event(data, Graph::Event::UPDATED_DATA, node_id);
 //    return true;
-//  }
+  }
   
-  Graph::think(data);
+//  Graph::think(data);
   
   return false;
 }

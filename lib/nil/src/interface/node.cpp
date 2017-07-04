@@ -189,9 +189,9 @@ Node::is_valid() const
     Graph::Data *graph = Data::get_graph_data();
     
     const bool is_valid = Graph::node_exists(graph, instance_id);
-    const bool is_pending = Graph::node_pending(graph, instance_id);
+//    const bool is_pending = Graph::node_pending(graph, instance_id);
     
-    return is_valid || is_pending;
+    return is_valid;// || is_pending;
   }
   
   return false;

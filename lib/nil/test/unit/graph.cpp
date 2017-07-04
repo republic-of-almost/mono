@@ -30,6 +30,7 @@ TEST_CASE("Graph")
   SECTION("Child")
   {
     Nil::Node parent;
+    REQUIRE(nil_engine.graph_data_count() == 1);
     Nil::Node child;
     REQUIRE(nil_engine.graph_data_count() == 2);
     
