@@ -3,6 +3,7 @@
 #include <lib/bits.hpp>
 #include <lib/bench.hpp>
 #include <lib/assert.hpp>
+#include <lib/logging.hpp>
 #include <math/mat/mat4.hpp>
 
 
@@ -119,7 +120,12 @@ ogl_exec(
             
             #ifndef NDEBUG
             const size_t texture_count = rov_gl_data->rov_textures.size();
-            LIB_ASSERT(texture_index < texture_count);
+//            LIB_ASSERT(texture_index < texture_count);
+            if(!texture_index)
+            {
+              // Temp fix while removeing texture resource
+              break;
+            }
             #endif
             
             const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
@@ -138,15 +144,17 @@ ogl_exec(
         */
         if(shd.uni_buffer_01 != -1)
         {
+          const GLuint slot = texture_slots + 1; // Unsure why, if I bind to slot 0 we get 1282's.
+          
           const size_t l_index = rp.light_buffer - 1;
           const rovGLLightPack light_pack = rov_gl_data->light_buffers[l_index];
           
           glUniform1i(shd.uni_light_count, light_pack.count);
           
-          glActiveTexture(GL_TEXTURE0 + texture_slots);
+          glActiveTexture(GL_TEXTURE0 + slot);
           glBindTexture(GL_TEXTURE_1D, light_pack.gl_id);
           
-          glUniform1i(shd.uni_buffer_01, texture_slots);
+          glUniform1i(shd.uni_buffer_01, slot);
           
           ++texture_slots;
         }
@@ -248,6 +256,15 @@ ogl_exec(
           Draw
         */
         glDrawArrays(GL_TRIANGLES, 0, vbo.vertex_count);
+        
+        /*
+          Error Check
+        */
+        const GLuint err = glGetError();
+        if(err)
+        {
+          LOG_ERROR("GL Error - Mesh Drawing")
+        }
       }
     } // For amts
     

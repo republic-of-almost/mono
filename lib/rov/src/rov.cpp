@@ -140,10 +140,10 @@ rov_startRenderPass(
 void
 rov_setColor(float r, float g, float b, float a)
 {
-  rov_data.curr_rov_clear_color[0] = r;
-  rov_data.curr_rov_clear_color[1] = g;
-  rov_data.curr_rov_clear_color[2] = b;
-  rov_data.curr_rov_clear_color[3] = a;
+  rov_data.curr_rov_color[0] = r;
+  rov_data.curr_rov_color[1] = g;
+  rov_data.curr_rov_color[2] = b;
+  rov_data.curr_rov_color[3] = a;
 }
 
 
@@ -183,7 +183,7 @@ rov_submitLine(const float start[3], const float end[3])
   ROV_Internal::rovLineDrawCall dc;
   memcpy(dc.start, start, sizeof(rovVec3));
   memcpy(dc.end, end, sizeof(rovVec3));
-  memcpy(dc.color, rov_data.curr_rov_clear_color, sizeof(rovVec3));
+  memcpy(dc.color, rov_data.curr_rov_color, sizeof(rovVec3));
 
   rov_data.rov_render_passes.back().line_draw_calls.emplace_back(dc);
 }

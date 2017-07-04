@@ -80,13 +80,14 @@ in vec3 in_ps_world_pos;
 /*
   Uniforms
 */
-uniform vec4      uni_color = vec4(1,0,0,1);
 uniform sampler2D uni_map_01; // Diffuse.
 uniform sampler2D uni_map_03; // Specular
 
 uniform vec3      uni_eye;
 uniform int       uni_light_count;
 uniform sampler1D uni_light_array;
+
+uniform vec4      uni_color;// = vec4(1,1,1,1);
 
 
 /*
@@ -177,8 +178,8 @@ calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
 void
 main()
 {
-  vec4 diffuse_map = texture(uni_map_01, in_ps_texcoord);
-  vec4 diffuse_color  = vec4(1,0,0,1);//mix(vec4(1,0,0,1), diffuse_map, diffuse_map.a);
+  vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
+  vec4 diffuse_color = mix(diffuse_map, uni_color, uni_color.a);
   
   vec4 specular_map = texture(uni_map_03, in_ps_texcoord);
 
@@ -240,12 +241,12 @@ main()
     }
   
     // Final
-
     accum_color += (final_light * final_atten);
   }
 
   // Output Result //
   vec3 const_amb = vec3(CONST_AMB);
   out_ps_color = vec4((const_amb + accum_color), 1.0);
+  
 }
 // FRAG_END //

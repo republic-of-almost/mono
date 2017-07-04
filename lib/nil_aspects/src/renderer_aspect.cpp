@@ -108,36 +108,36 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
       Resources
     */
     {
-//      size_t                    mesh_rsrc_count = 0;
-//      Nil::Data::Mesh_resource *mesh_resources = nullptr;
-//
-//      Nil::Data::get(&mesh_rsrc_count, &mesh_resources);
-//
-//      for(size_t i = 0; i < mesh_rsrc_count; ++i)
-//      {
-//        Nil::Data::Mesh_resource *mesh_resource = &mesh_resources[i];
-//
-//        if(mesh_resource->status == Nil::Data::Mesh_resource::PENDING)
-//        {
-//          const uint32_t mesh = rov_createMesh
-//          (
-//            mesh_resource->position_vec3,
-//            mesh_resource->normal_vec3,
-//            mesh_resource->texture_coords_vec2,
-//            mesh_resource->count
-//          );
-//
-//          if((mesh_resource->id + 1) > self->mesh_ids.size())
-//          {
-//            self->mesh_ids.resize(1 << (mesh_resource->id + 1));
-//          }
-//
-//          self->mesh_ids[mesh_resource->id] = mesh;
-//
-//          mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
-//        }
-//      }
-//
+      size_t                    mesh_rsrc_count = 0;
+      Nil::Data::Mesh_resource *mesh_resources = nullptr;
+
+      Nil::Data::get(&mesh_rsrc_count, &mesh_resources);
+
+      for(size_t i = 0; i < mesh_rsrc_count; ++i)
+      {
+        Nil::Data::Mesh_resource *mesh_resource = &mesh_resources[i];
+
+        if(mesh_resource->status == Nil::Data::Mesh_resource::PENDING)
+        {
+          const uint32_t mesh = rov_createMesh
+          (
+            mesh_resource->position_vec3,
+            mesh_resource->normal_vec3,
+            mesh_resource->texture_coords_vec2,
+            mesh_resource->count
+          );
+
+          if((mesh_resource->id + 1) > self->mesh_ids.size())
+          {
+            self->mesh_ids.resize(1 << (mesh_resource->id + 1));
+          }
+
+          self->mesh_ids[mesh_resource->id] = mesh;
+
+          mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
+        }
+      }
+
 //      size_t                        texture_rsrc_count = 0;
 //      Nil::Data::Texture_resource   *texture_resources = nullptr;
 //

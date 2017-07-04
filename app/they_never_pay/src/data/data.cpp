@@ -150,9 +150,9 @@ load_assets()
       
       Nil::Data::Renderable mat{};
       mat.shader = Nil::Data::Renderable::LIT;
-      mat.color[0]   = 0.6f;
-      mat.color[1]   = 0.1f;
-      mat.color[2]   = 0.2f;
+      mat.color[0]   = 1.f;
+      mat.color[1]   = 0.f;
+      mat.color[2]   = 0.f;
       mat.color[3]   = 1.f;
       mat.texture_01 = tex_data.id;
       mat.mesh_id    = mesh.id;
