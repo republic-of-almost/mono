@@ -84,43 +84,43 @@ namespace
 //  }
   
   
-  inline Graph::Event*
-  add_event(Graph::Data *graph, uint32_t evt_id, uint32_t node_id)
-  {
-//     Search for existing event.
-    {
-      const size_t count = graph->node_events.size();
-      Graph::Event *events = graph->node_events.data();
-    
-      for(size_t i = 0; i < count; ++i)
-      {
-        Graph::Event *evt = &events[i];
-      
-        if(evt->node_id == node_id)
-        {
-          const uint32_t curr_events = evt->event_action;
-        
-          if(!(curr_events & evt_id))
-          {
-            evt->event_action = curr_events | evt_id;
-          }
-          
-          return evt;
-        }
-      }
-    }
-    
-    graph->node_events.emplace_back(
-      evt_id,
-      node_id
-    );
-    memset(graph->node_events.back().name.data, 0, sizeof(short_string));
-    graph->node_events.back().last_update = graph->graph_tick;
-    
-    graph->node_events.back().transform = math::transform_init();
-    
-    return &graph->node_events.back();
-  }
+//  inline Graph::Event*
+//  add_event(Graph::Data *graph, uint32_t evt_id, uint32_t node_id)
+//  {
+////     Search for existing event.
+//    {
+//      const size_t count = graph->node_events.size();
+//      Graph::Event *events = graph->node_events.data();
+//    
+//      for(size_t i = 0; i < count; ++i)
+//      {
+//        Graph::Event *evt = &events[i];
+//      
+//        if(evt->node_id == node_id)
+//        {
+//          const uint32_t curr_events = evt->event_action;
+//        
+//          if(!(curr_events & evt_id))
+//          {
+//            evt->event_action = curr_events | evt_id;
+//          }
+//          
+//          return evt;
+//        }
+//      }
+//    }
+//    
+//    graph->node_events.emplace_back(
+//      evt_id,
+//      node_id
+//    );
+//    memset(graph->node_events.back().name.data, 0, sizeof(short_string));
+//    graph->node_events.back().last_update = graph->graph_tick;
+//    
+//    graph->node_events.back().transform = math::transform_init();
+//    
+//    return &graph->node_events.back();
+//  }
 
 } // anon ns
 
@@ -138,25 +138,25 @@ initialize(Data *graph)
 
 namespace
 {
-  void
-  graph_add(Graph::Data *graph, const Graph::Event *evt)
-  {
-    static short_string default_name {"Node"};
-  
-    graph->node_id.emplace_back(evt->node_id);
-    graph->parent_depth_data.emplace_back(uint64_t{0});
-    graph->name.emplace_back(strlen(evt->name.data) > 0 ? evt->name : default_name);
-    graph->local_transform.emplace_back(evt->transform);
-    graph->world_transform.emplace_back(evt->transform);
-    graph->bounding_box.emplace_back(evt->boundinb_box);
-    graph->node_type_id.emplace_back(evt->node_type_id);
-    graph->user_data.emplace_back(evt->user_data);
-    graph->last_update.emplace_back(evt->last_update);
-
-    #ifndef NDEBUG
-    graph_size_check(graph);
-    #endif
-  }
+//  void
+//  graph_add(Graph::Data *graph, const Graph::Event *evt)
+//  {
+//    static short_string default_name {"Node"};
+//  
+//    graph->node_id.emplace_back(evt->node_id);
+//    graph->parent_depth_data.emplace_back(uint64_t{0});
+//    graph->name.emplace_back(strlen(evt->name.data) > 0 ? evt->name : default_name);
+//    graph->local_transform.emplace_back(evt->transform);
+//    graph->world_transform.emplace_back(evt->transform);
+//    graph->bounding_box.emplace_back(evt->boundinb_box);
+//    graph->node_type_id.emplace_back(evt->node_type_id);
+//    graph->user_data.emplace_back(evt->user_data);
+//    graph->last_update.emplace_back(evt->last_update);
+//
+//    #ifndef NDEBUG
+//    graph_size_check(graph);
+//    #endif
+//  }
   
   
   void
@@ -518,43 +518,43 @@ namespace
   }
   
   
-  void
-  graph_remove(Graph::Data *graph, const Graph::Event *evt)
-  {
-    const uint32_t node_id = evt->node_id;
-  
-    // -- Remove The Node -- //
-    size_t index = 0;
-
-    if(node_exists(graph, node_id, &index))
-    {
-      graph->node_id.erase(index);
-      graph->name.erase(index);
-      graph->parent_depth_data.erase(index);
-      graph->local_transform.erase(index);
-      graph->world_transform.erase(index);
-      graph->bounding_box.erase(index);
-      graph->node_type_id.erase(index);
-      graph->user_data.erase(index);
-      graph->last_update.erase(index);
-
-      #ifndef NDEBUG
-      graph_size_check(graph);
-      #endif
-    }
-    
-    // -- Remove The Data -- //
-    for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
-    {
-      if(graph->graph_type_data[i].delete_cb)
-      {
-        graph->graph_type_data[i].delete_cb(
-          node_id,
-          graph->graph_type_data[i].user_data
-        );
-      }
-    }
-  }
+//  void
+//  graph_remove(Graph::Data *graph, const Graph::Event *evt)
+//  {
+//    const uint32_t node_id = evt->node_id;
+//  
+//    // -- Remove The Node -- //
+//    size_t index = 0;
+//
+//    if(node_exists(graph, node_id, &index))
+//    {
+//      graph->node_id.erase(index);
+//      graph->name.erase(index);
+//      graph->parent_depth_data.erase(index);
+//      graph->local_transform.erase(index);
+//      graph->world_transform.erase(index);
+//      graph->bounding_box.erase(index);
+//      graph->node_type_id.erase(index);
+//      graph->user_data.erase(index);
+//      graph->last_update.erase(index);
+//
+//      #ifndef NDEBUG
+//      graph_size_check(graph);
+//      #endif
+//    }
+//    
+//    // -- Remove The Data -- //
+//    for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
+//    {
+//      if(graph->graph_type_data[i].delete_cb)
+//      {
+//        graph->graph_type_data[i].delete_cb(
+//          node_id,
+//          graph->graph_type_data[i].user_data
+//        );
+//      }
+//    }
+//  }
   
 } // ns
 
@@ -570,67 +570,67 @@ think(Data *graph)
     otherwise we get into a situation where parenting tries to happen
     and the parent has yet to be created.
   */
-  {
-    for(const Graph::Event &event : graph->node_events)
-    {
-      if(event.event_action & Graph::Event::ADDED)
-      {
-        graph_add(graph, &event);
-      }
-      
-      size_t index = 0;
-      if(node_exists(graph, event.node_id, &index))
-      {
-        graph->last_update[index] = graph->graph_tick;
-      }
-    }
-    
-    for(const Graph::Event &event : graph->node_events)
-    {
-      if(event.event_action & Graph::Event::MOVED)
-      {
-        graph_move(graph, &event);
-      }
-      
-      size_t index = 0;
-      if(node_exists(graph, event.node_id, &index))
-      {
-        graph->last_update[index] = graph->graph_tick;
-      }
-    }
-
-    for(const Graph::Event &event : graph->node_events)
-    {
-      if(event.event_action & Graph::Event::REMOVED)
-      {
-        graph_remove(graph, &event);
-      }
-      
-      size_t index = 0;
-      if(node_exists(graph, event.node_id, &index))
-      {
-        graph->last_update[index] = graph->graph_tick;
-      }
-    }
-    
-    for(const Graph::Event &event : graph->node_events)
-    {
-      if(event.event_action & Graph::Event::UPDATED_DATA)
-      {
-        graph_updated(graph, &event);
-      }
-      
-      size_t index = 0;
-      if(node_exists(graph, event.node_id, &index))
-      {
-        graph->last_update[index] = graph->graph_tick;
-      }
-    }
-  }
+//  {
+//    for(const Graph::Event &event : graph->node_events)
+//    {
+//      if(event.event_action & Graph::Event::ADDED)
+//      {
+//        graph_add(graph, &event);
+//      }
+//      
+//      size_t index = 0;
+//      if(node_exists(graph, event.node_id, &index))
+//      {
+//        graph->last_update[index] = graph->graph_tick;
+//      }
+//    }
+//    
+//    for(const Graph::Event &event : graph->node_events)
+//    {
+//      if(event.event_action & Graph::Event::MOVED)
+//      {
+//        graph_move(graph, &event);
+//      }
+//      
+//      size_t index = 0;
+//      if(node_exists(graph, event.node_id, &index))
+//      {
+//        graph->last_update[index] = graph->graph_tick;
+//      }
+//    }
+//
+//    for(const Graph::Event &event : graph->node_events)
+//    {
+//      if(event.event_action & Graph::Event::REMOVED)
+//      {
+//        graph_remove(graph, &event);
+//      }
+//      
+//      size_t index = 0;
+//      if(node_exists(graph, event.node_id, &index))
+//      {
+//        graph->last_update[index] = graph->graph_tick;
+//      }
+//    }
+//    
+//    for(const Graph::Event &event : graph->node_events)
+//    {
+//      if(event.event_action & Graph::Event::UPDATED_DATA)
+//      {
+//        graph_updated(graph, &event);
+//      }
+//      
+//      size_t index = 0;
+//      if(node_exists(graph, event.node_id, &index))
+//      {
+//        graph->last_update[index] = graph->graph_tick;
+//      }
+//    }
+//  }
   
   
   // Temp
-  graph->node_events.clear();
+//  graph->node_events.clear();
   
   const size_t count = graph->graph_type_data.size();
   
@@ -766,31 +766,31 @@ node_exists(
 }
 
 
-bool
-node_pending(
-  const Data *data,
-  const uint32_t node_id,
-  size_t *index)
-{
-  size_t count = 0;
-
-  for(const auto &evt : data->node_events)
-  {
-    if(evt.node_id == node_id)
-    {
-      if(index)
-      {
-        *index = count;
-      }
-    
-      return true;
-    }
-    
-    ++count;
-  }
-  
-  return false;
-}
+//bool
+//node_pending(
+//  const Data *data,
+//  const uint32_t node_id,
+//  size_t *index)
+//{
+//  size_t count = 0;
+//
+//  for(const auto &evt : data->node_events)
+//  {
+//    if(evt.node_id == node_id)
+//    {
+//      if(index)
+//      {
+//        *index = count;
+//      }
+//    
+//      return true;
+//    }
+//    
+//    ++count;
+//  }
+//  
+//  return false;
+//}
 
 
 uint32_t
@@ -808,7 +808,22 @@ node_create(Data *graph)
   );
   
   // -- Create Event -- //
-  add_event(graph, Graph::Event::ADDED, new_id);
+//  add_event(graph, Graph::Event::ADDED, new_id);
+  static short_string default_name {"Node"};
+
+  graph->node_id.emplace_back(new_id);
+  graph->parent_depth_data.emplace_back(uint64_t{0});
+  graph->name.emplace_back(default_name);
+  graph->local_transform.emplace_back(math::transform_init());
+  graph->world_transform.emplace_back(math::transform_init());
+  graph->bounding_box.emplace_back(math::aabb_init(math::vec3_zero(), math::vec3_zero()));
+  graph->node_type_id.emplace_back(uint64_t{0});
+  graph->user_data.emplace_back(uintptr_t{0});
+  graph->last_update.emplace_back(uint64_t{0});
+
+  #ifndef NDEBUG
+  graph_size_check(graph);
+  #endif
 
   return new_id;
 }
@@ -822,10 +837,46 @@ node_remove(Data *graph, const uint32_t node_id)
   LIB_ASSERT(node_id);
   
   // -- Remove The Node -- //
-  if(node_exists(graph, node_id) || node_pending(graph, node_id))
+  if(node_exists(graph, node_id))
   {
     // -- Create Event -- //
-    add_event(graph, Graph::Event::REMOVED, node_id);
+    size_t index = 0;
+
+    if(node_exists(graph, node_id, &index))
+    {
+      const size_t decendent_count = node_descendants_count(graph, node_id);
+      
+      for(uint32_t i = 0; i < decendent_count; ++i)
+      {
+        const uint32_t this_id = graph->node_id[index];
+      
+        graph->node_id.erase(index);
+        graph->name.erase(index);
+        graph->parent_depth_data.erase(index);
+        graph->local_transform.erase(index);
+        graph->world_transform.erase(index);
+        graph->bounding_box.erase(index);
+        graph->node_type_id.erase(index);
+        graph->user_data.erase(index);
+        graph->last_update.erase(index);
+
+        #ifndef NDEBUG
+        graph_size_check(graph);
+        #endif
+        
+        // -- Remove Other Data -- //
+        for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
+        {
+          if(graph->graph_type_data[i].delete_cb)
+          {
+            graph->graph_type_data[i].delete_cb(
+              this_id,
+              graph->graph_type_data[i].user_data
+            );
+          }
+        }
+      }
+    }
   
     return true;
   }
@@ -1025,19 +1076,19 @@ node_get_parent(const Data *graph, const uint32_t node_id)
   return 0;
 }
 
-
-bool
-node_modified(Data *data, const uint32_t node_id)
-{
-  add_event(data, Event::UPDATED_DATA, node_id);
-
-//  Event evt{};
-//  evt.node_id = node_id;
-//  evt.event_action  |= Event::UPDATED_DATA;
-//  data->node_events.emplace_back(evt);
-  
-  return true; // ?
-}
+//
+//bool
+//node_modified(Data *data, const uint32_t node_id)
+//{
+//  add_event(data, Event::UPDATED_DATA, node_id);
+//
+////  Event evt{};
+////  evt.node_id = node_id;
+////  evt.event_action  |= Event::UPDATED_DATA;
+////  data->node_events.emplace_back(evt);
+//  
+//  return true; // ?
+//}
 
 
 // ------------------------------------------------------------ [ Callbacks ] --
@@ -1079,11 +1130,11 @@ node_get_name(
     *name = data->name[index].data;
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    *name = data->node_events[index].name.data;
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    *name = data->node_events[index].name.data;
+//    return true;
+//  }
   
   return false;
 }
@@ -1104,15 +1155,15 @@ node_set_name(
   if(node_exists(data, node_id, &index))
   {
     strlcpy(data->name[index].data, clipped, str_len);
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    strlcpy(data->node_events[index].name.data, clipped, str_len);
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    strlcpy(data->node_events[index].name.data, clipped, str_len);
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    return true;
+//  }
   
   return false;
 }
@@ -1139,11 +1190,11 @@ node_get_transform(
     }
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    *trans = data->node_events[index].transform;
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    *trans = data->node_events[index].transform;
+//    return true;
+//  }
   
   return false;
 }
@@ -1170,12 +1221,12 @@ node_set_transform(
     }
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    data->node_events[index].transform = *trans;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    data->node_events[index].transform = *trans;
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    return true;
+//  }
   
   Graph::think(data);
   
@@ -1196,11 +1247,11 @@ node_get_bounding_box(
     *aabb = data->bounding_box[index];
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    *aabb = data->node_events[index].boundinb_box;
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    *aabb = data->node_events[index].boundinb_box;
+//    return true;
+//  }
   
   return false;
 }
@@ -1217,15 +1268,15 @@ node_set_bounding_box(
   if(node_exists(data, node_id, &index))
   {
     data->bounding_box[index] = *aabb;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    data->node_events[index].boundinb_box = *aabb;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    data->node_events[index].boundinb_box = *aabb;
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    return true;
+//  }
   
   return false;
 }
@@ -1244,11 +1295,11 @@ node_get_data_type_id(
     *type_id = data->node_type_id[index];
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    *type_id = data->node_events[index].node_type_id;
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    *type_id = data->node_events[index].node_type_id;
+//    return true;
+//  }
   
   return false;
 }
@@ -1265,15 +1316,15 @@ node_set_data_type_id(
   if(node_exists(data, node_id, &index))
   {
     data->node_type_id[index] = *type_id;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    data->node_events[index].node_type_id = *type_id;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    data->node_events[index].node_type_id = *type_id;
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    return true;
+//  }
   
   return false;
 }
@@ -1292,11 +1343,11 @@ node_get_user_data(
     *user_data = data->user_data[index];
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    *user_data = data->node_events[index].user_data;
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    *user_data = data->node_events[index].user_data;
+//    return true;
+//  }
   
   return false;
 }
@@ -1313,15 +1364,15 @@ node_set_user_data(
   if(node_exists(data, node_id, &index))
   {
     data->user_data[index] = *user_data;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
     return true;
   }
-  else if(node_pending(data, node_id, &index))
-  {
-    data->user_data[index] = *user_data;
-    add_event(data, Graph::Event::UPDATED_DATA, node_id);
-    return true;
-  }
+//  else if(node_pending(data, node_id, &index))
+//  {
+//    data->user_data[index] = *user_data;
+//    add_event(data, Graph::Event::UPDATED_DATA, node_id);
+//    return true;
+//  }
   
   return false;
 }
