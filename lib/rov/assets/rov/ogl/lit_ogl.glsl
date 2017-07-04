@@ -56,7 +56,6 @@ main()
 // VERT_END //
 
 
-
 // FRAG_START //
 // ------------------------------------------------------ [ Fragment Shader ] --
 
@@ -87,7 +86,7 @@ uniform vec3      uni_eye;
 uniform int       uni_light_count;
 uniform sampler1D uni_light_array;
 
-uniform vec4      uni_color;// = vec4(1,1,1,1);
+uniform vec4      uni_color;
 
 
 /*
@@ -131,9 +130,9 @@ calculate_attenuation(
 struct Light
 {
 	vec3 position;
-	vec3 La;        // Ambient intensity
-	vec3 Ld;        // Diffuse intensity
-	vec3 Ls;        // Specular intensity
+	vec3 La;          // Ambient intensity
+	vec3 Ld;          // Diffuse intensity
+	vec3 Ls;          // Specular intensity
 };
  
 struct Material
@@ -204,7 +203,6 @@ main()
     vec4 atten_data = texelFetch(uni_light_array, index + 2, 0);
     
     // Light
-    
     Light light;
     light.position = pos_data.xyz;
 
@@ -226,7 +224,6 @@ main()
     vec3 final_light  = calculate_light(light, mat, L, V, N);
     
     // Attenuation
-    
     Attenuation atten;
     atten.constant    = atten_data.x;
     atten.linear      = atten_data.y;

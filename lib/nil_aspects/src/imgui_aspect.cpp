@@ -315,7 +315,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     
     for(size_t i = 0; i < count; ++i)
     {
-      ImGui::Image((ImTextureID)textures[i].platform_id, ImVec2(tex_size, tex_size));
+      ImGui::Image((ImTextureID)textures[i].platform_resource, ImVec2(tex_size, tex_size));
     
       if(ImGui::IsItemHovered())
       {

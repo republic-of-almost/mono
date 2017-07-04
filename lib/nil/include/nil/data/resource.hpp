@@ -16,7 +16,7 @@ namespace Data {
 
 struct Resource
 {
-  enum { TEXTURE, MESH } type;
+  enum { UNKNOWN, TEXTURE, MESH, AUDIO } type;
   char filepath[2048];
 };
 

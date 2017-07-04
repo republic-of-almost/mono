@@ -21,7 +21,7 @@ struct Engine_settings
 
 struct Engine_state
 {
-
+  size_t node_count;
 };
 
 

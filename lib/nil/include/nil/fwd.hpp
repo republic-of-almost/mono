@@ -14,6 +14,16 @@ class Node_controller;
 struct Aspect;
 
 
+namespace Resource {
+
+struct Audio;
+struct Material;
+struct Mesh;
+struct Texture;
+
+} // ns
+
+
 namespace Data {
 
 

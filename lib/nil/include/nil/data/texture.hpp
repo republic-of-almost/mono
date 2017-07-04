@@ -16,19 +16,27 @@ namespace Data {
 
 struct Texture
 {
-  uint32_t id;
-  enum { POINT, LINEAR, ANISO_X2, ANISO_X4, ANISO_X8, ANISO_X16 } filtering;
+  enum { POINT, LINEAR, ANISO_X2, ANISO_X4, ANISO_X8, ANISO_X16 } filter;
+  
+  // ** Input ** //
+  
+  enum { FILENAME, RAW_DATA } data_type;
+  
+  uintptr_t data;
+  size_t data_size;
+  
+  // ** Input / Output ** //
   
   uint32_t width;
   uint32_t height;
-  uint32_t depth;
-  uint32_t dimentions;
   uint32_t components;
   
   // ** Output ** //
   
   enum { PENDING, LOADED, FAILED, } status;
-  uintptr_t platform_id;
+  uintptr_t platform_resource;
+  
+  uint32_t id;
 };
 
 

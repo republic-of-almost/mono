@@ -50,7 +50,18 @@ get(const Node &node, Texture &out)
 void
 set(Node &node, const Texture &in)
 {
-  get_texture_data().set_data(node, in);
+  Texture cpy_in = in;
+  
+  if(in.id == 0)
+  {
+    const_cast<Texture&>(in).id = get_texture_data().data.size();
+   
+    void *owned_mem = malloc(in.data_size);
+    memcpy(owned_mem, (void*)in.data, in.data_size);
+    
+    cpy_in.data = (uintptr_t)owned_mem;
+  }
+  get_texture_data().set_data(node, cpy_in);
 }
 
 

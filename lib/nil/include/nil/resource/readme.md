@@ -1,6 +1,6 @@
-# Nil Data
+# Nil Resource
 
-These types of data can be attached to nodes.
+Resources unlike data are not attached to nodes. Typically these represent assests.
 
 ## POD Types
 

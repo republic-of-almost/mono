@@ -105,6 +105,42 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   if(self->has_initialized)
   {
     /*
+      Texture
+    */
+    {
+      size_t texture_count = 0;
+      Nil::Data::Texture *textures = nullptr;
+      Nil::Node *nodes = nullptr;
+      
+      Nil::Data::events(Nil::Data::Event::ADDED, &texture_count, &textures, &nodes);
+      
+      for(size_t i = 0; i < texture_count; ++i)
+      {
+        //        ++count;
+//        int x = 0;
+//        int y = 0;
+//        int c = 0;
+//        stbi_uc *img_data = nullptr;
+//        const char *path = model.mesh_material[model.material_id[i]].map_path[0];
+//        
+//        stbi_set_flip_vertically_on_load(true);
+//        img_data = stbi_load(path, &x, &y, &c, 0);
+//        
+//        tex_data.data       = img_data;
+//        tex_data.id         = ++texture_id_counter;
+//        tex_data.dimentions = 2;
+//        tex_data.compoents  = c;
+//        tex_data.width      = x;
+//        tex_data.height     = y;
+//        tex_data.sizeof_data = c * x * y * sizeof(char);
+//        
+//        Nil::Data::set(child, tex_data);
+//        
+//        stbi_image_free(img_data);
+      }
+    }
+  
+    /*
       Resources
     */
     {

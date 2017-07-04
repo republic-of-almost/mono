@@ -177,6 +177,7 @@ Engine::get_settings(Engine_settings &out)
 void
 Engine::get_state(Engine_state &out)
 {
+
 }
 
 
