@@ -4,6 +4,7 @@
 #include <lib/file.hpp>
 #include <lib/string.hpp>
 #include <lib/directory.hpp>
+#include <lib/logging.hpp>
 
 
 namespace ROV_Internal {
