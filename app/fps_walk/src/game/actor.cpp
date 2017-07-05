@@ -120,7 +120,7 @@ think(Nil::Node node, uintptr_t user_data)
     Nil::Data::Transform trans{};
     Nil::Data::get(node, trans);
     
-    math::vec3 next_step = math::vec3_init_with_array(trans.position);
+    math::vec3 next_step = math::vec3_init(trans.position);
     math::vec3 move_dir  = math::vec3_zero();
 
     const math::vec3 local_movement = math::vec3_init(x_move, 0.f, z_move);
@@ -130,7 +130,7 @@ think(Nil::Node node, uintptr_t user_data)
     */
     if(math::vec3_length(local_movement) > math::epsilon())
     {
-      const math::quat rot           = math::quat_init_with_array(trans.rotation);
+      const math::quat rot           = math::quat_init(trans.rotation);
       const math::vec3 norm_movement = math::vec3_normalize(local_movement);
       
       const math::vec3 ent_fwd = math::quat_rotate_point(rot, Game_data::get_world_fwd());
@@ -191,7 +191,7 @@ think(Nil::Node node, uintptr_t user_data)
       
       const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
       
-      const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
+      const math::vec3 curr_pos = math::vec3_init(trans.position);
       
       const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
       const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));

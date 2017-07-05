@@ -34,8 +34,8 @@ get_mat_data()
       Nil::Data::get(node, trans, true);
 
       math::transform internal_trans = math::transform_init(
-      math::vec3_init_with_array(trans.position),
-      math::vec3_init_with_array(trans.scale),
+      math::vec3_init(trans.position),
+      math::vec3_init(trans.scale),
       math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
       );
 
@@ -87,8 +87,8 @@ set(Node &node, const Renderable &in)
   Nil::Data::get(node, trans, true);
 
   math::transform internal_trans = math::transform_init(
-  math::vec3_init_with_array(trans.position),
-  math::vec3_init_with_array(trans.scale),
+  math::vec3_init(trans.position),
+  math::vec3_init(trans.scale),
   math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
   );
 

@@ -124,8 +124,8 @@ think(Nil::Node node, uintptr_t user_data)
     Nil::Data::get(actor->head, head_trans);
     Nil::Data::get(node, trans);
     
-    math::vec3 height = math::vec3_init_with_array(head_trans.position);
-    math::vec3 pos = math::vec3_init_with_array(trans.position);
+    math::vec3 height = math::vec3_init(head_trans.position);
+    math::vec3 pos = math::vec3_init(trans.position);
     
     const math::vec3 curr_step = math::vec3_add(pos, height);
     math::vec3 next_step = curr_step;
@@ -138,7 +138,7 @@ think(Nil::Node node, uintptr_t user_data)
     */
     if(math::vec3_length(local_movement) > math::epsilon())
     {
-      const math::quat rot           = math::quat_init_with_array(trans.rotation);
+      const math::quat rot           = math::quat_init(trans.rotation);
       const math::vec3 norm_movement = math::vec3_normalize(local_movement);
       
       const math::vec3 ent_fwd = math::quat_rotate_point(rot, Game_data::get_world_fwd());
@@ -199,7 +199,7 @@ think(Nil::Node node, uintptr_t user_data)
       
       const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
       
-      const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
+      const math::vec3 curr_pos = math::vec3_init(trans.position);
       
       const math::vec3 side_step         = math::vec3_add(curr_step, math::vec3_scale(norm_edge, dot * move_speed));
       const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
@@ -236,7 +236,7 @@ think(Nil::Node node, uintptr_t user_data)
         
         const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
         
-        const math::vec3 curr_pos = math::vec3_init_with_array(trans.position);
+        const math::vec3 curr_pos = math::vec3_init(trans.position);
         
         const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
         const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
@@ -265,22 +265,22 @@ think(Nil::Node node, uintptr_t user_data)
   
     Game_data::debug_line
     (
-      math::vec3_init_with_array(&actor->nav_mesh[index + 0]),
-      math::vec3_init_with_array(&actor->nav_mesh[index + 3]),
+      math::vec3_init(&actor->nav_mesh[index + 0]),
+      math::vec3_init(&actor->nav_mesh[index + 3]),
       math::vec3_init(1,0,0)
     );
 
     Game_data::debug_line
     (
-      math::vec3_init_with_array(&actor->nav_mesh[index + 3]),
-      math::vec3_init_with_array(&actor->nav_mesh[index + 6]),
+      math::vec3_init(&actor->nav_mesh[index + 3]),
+      math::vec3_init(&actor->nav_mesh[index + 6]),
       math::vec3_init(1,0,0)
     );
 
     Game_data::debug_line
     (
-      math::vec3_init_with_array(&actor->nav_mesh[index + 6]),
-      math::vec3_init_with_array(&actor->nav_mesh[index + 0]),
+      math::vec3_init(&actor->nav_mesh[index + 6]),
+      math::vec3_init(&actor->nav_mesh[index + 0]),
       math::vec3_init(1,0,0)
     );
   }
