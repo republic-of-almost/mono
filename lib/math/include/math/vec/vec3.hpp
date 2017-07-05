@@ -9,6 +9,7 @@
 
 
 #include "../detail/detail.hpp"
+#include "../general/constants.hpp"
 #include "vec_types.hpp"
 
 
