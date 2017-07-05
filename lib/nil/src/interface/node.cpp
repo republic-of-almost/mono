@@ -9,7 +9,7 @@ namespace {
 
 
 constexpr uint32_t node_owned_id = 1;
-constexpr uint32_t node_reference_id = 0;
+constexpr uint32_t node_ref_id = 0;
 
 constexpr char node_msg_trying_to_destroy_null_node[] = "Trying to destroy null node";
 constexpr char node_msg_invalid_node[] = "Node is invalid";
@@ -19,31 +19,33 @@ constexpr char node_msg_invalid_node[] = "Node is invalid";
 
 namespace Nil {
 
+namespace lib_ent = lib::entity;
+
 
 Node::Node()
-: m_node_id(lib::entity::create(node_owned_id, Graph::node_create(Data::get_graph_data())))
+: m_node_id(lib_ent::create(node_owned_id, Graph::node_create(Data::get_graph_data())))
 {
 }
 
 
 Node::Node(const decltype(nullptr))
-: m_node_id(lib::entity::create(node_reference_id, 16777214))
+: m_node_id(lib_ent::create(node_ref_id, 0))
 {
 }
 
 
 Node::Node(const uint32_t node_id, const bool is_owning)
-: m_node_id(lib::entity::create(is_owning ? node_owned_id : node_reference_id, node_id))
+: m_node_id(lib_ent::create(is_owning ? node_owned_id : node_ref_id, node_id))
 {
 }
 
 
 Node::~Node()
 {
-  const uint32_t type_id = lib::entity::type(m_node_id);
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t type_id = lib_ent::type(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
-  if(type_id > node_reference_id && instance_id > 0)
+  if(type_id > node_ref_id && instance_id > 0)
   {
     Graph::node_remove(Data::get_graph_data(), instance_id);
   }
@@ -77,7 +79,7 @@ Node::operator bool() const
 
 
 Node::Node(const Node &other)
-: m_node_id(other.get_id() ? lib::entity::create(node_reference_id, other.get_id()) : 0)
+: m_node_id(other.get_id() ? lib_ent::create(node_ref_id, other.get_id()) : 0)
 {
 }
 
@@ -91,18 +93,18 @@ Node::operator=(const Node &other)
     destroy();
   }
 
-  this->m_node_id = other.get_id() ? lib::entity::create(node_reference_id, other.get_id()) : 0;
+  m_node_id = other.get_id() ? lib_ent::create(node_ref_id, other.get_id()) : 0;
   
   return *this;
 }
 
 
 Node::Node(Node &&other) noexcept
-: m_node_id(!other.is_ref() ? lib::entity::create(node_owned_id, other.get_id()) : lib::entity::create(node_reference_id, other.get_id()))
+: m_node_id(!other.is_ref() ? lib_ent::create(node_owned_id, other.get_id()) : lib_ent::create(node_ref_id, other.get_id()))
 {
   if(!other.is_ref())
   {
-    other.m_node_id = lib::entity::create(node_reference_id, other.get_id());
+    other.m_node_id = lib_ent::create(node_ref_id, other.get_id());
   }
 }
 
@@ -117,10 +119,10 @@ Node::operator=(Node &&other) noexcept
   }
 
   // Clean up this node if its an owning node.
-  const uint32_t type_id = lib::entity::type(m_node_id);
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t type_id = lib_ent::type(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
-  if(type_id > node_reference_id && instance_id)
+  if(type_id > node_ref_id && instance_id)
   {
     Graph::node_remove(Data::get_graph_data(), instance_id);
   }
@@ -128,8 +130,8 @@ Node::operator=(Node &&other) noexcept
   // Move other node.
   if(instance_id)
   {
-    this->m_node_id = lib::entity::create(node_owned_id, other.get_id());
-    other.m_node_id = lib::entity::create(node_reference_id, other.get_id());
+    this->m_node_id = lib_ent::create(node_owned_id, other.get_id());
+    other.m_node_id = lib_ent::create(node_ref_id, other.get_id());
   }
   
   return *this;
@@ -143,7 +145,7 @@ Node::operator=(Node &&other) noexcept
 bool
 Node::destroy()
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -159,14 +161,19 @@ Node::destroy()
 bool
 Node::is_ref() const
 {
-  return lib::entity::type(m_node_id) == node_reference_id;
+  if(!is_valid())
+  {
+    return false;
+  }
+  
+  return (lib_ent::type(m_node_id) == node_ref_id);
 }
 
 
 bool
 Node::is_top_level() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -182,7 +189,7 @@ Node::is_top_level() const
 bool
 Node::is_valid() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -204,11 +211,13 @@ Node::is_valid() const
 bool
 Node::set_parent(const Node &other)
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
-    m_node_id = lib::entity::create(node_reference_id, instance_id);
+    const uint32_t ref_type = other.is_valid() ? node_ref_id : node_owned_id;
+  
+    m_node_id = lib_ent::create(ref_type, instance_id);
     return Graph::node_set_parent(Data::get_graph_data(), other.get_id(), instance_id);
   }
   
@@ -221,7 +230,7 @@ Node::set_parent(const Node &other)
 Node
 Node::get_parent() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -237,7 +246,7 @@ Node::get_parent() const
 size_t
 Node::get_child_count() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
 //  if(instance_id)
   {
@@ -253,7 +262,7 @@ Node::get_child_count() const
 Node
 Node::get_child(const size_t i) const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
 //  if(instance_id)
   {
@@ -270,7 +279,7 @@ Node::get_child(const size_t i) const
 size_t
 Node::get_descendant_count() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -289,7 +298,7 @@ Node::get_descendant_count() const
 const char*
 Node::get_name() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -308,7 +317,7 @@ Node::get_name() const
 void
 Node::set_name(const char *name)
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -325,7 +334,7 @@ Node::set_name(const char *name)
 uint32_t
 Node::get_id() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   return instance_id;
 }
 
@@ -333,7 +342,7 @@ Node::get_id() const
 uint64_t
 Node::get_data_type_id() const
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {
@@ -351,7 +360,7 @@ Node::get_data_type_id() const
 void
 Node::set_data_type_id(const uint64_t type_id)
 {
-  const uint32_t instance_id = lib::entity::instance(m_node_id);
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
   
   if(instance_id)
   {

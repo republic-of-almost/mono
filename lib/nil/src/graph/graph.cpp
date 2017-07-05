@@ -844,7 +844,7 @@ node_remove(Data *graph, const uint32_t node_id)
 
     if(node_exists(graph, node_id, &index))
     {
-      const size_t decendent_count = node_descendants_count(graph, node_id);
+      const size_t decendent_count = node_descendants_count(graph, node_id) + 1;
       
       for(uint32_t i = 0; i < decendent_count; ++i)
       {
