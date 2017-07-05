@@ -25,7 +25,7 @@ MATH_VEC3_INLINE vec3                   vec3_zero_zero_one();
 // Initialize vector.
 MATH_VEC3_INLINE vec3                   vec3_init(const float val);
 MATH_VEC3_INLINE vec3                   vec3_init(const float x, const float y, const float z);
-MATH_VEC3_INLINE vec3                   vec3_init_with_array(const float *arr);
+MATH_VEC3_INLINE vec3                   vec3_init(const float *arr);
 
 // Get components.
 MATH_VEC3_INLINE float                  vec3_get_x(const vec3 vec);
@@ -54,7 +54,7 @@ MATH_VEC3_INLINE float                  vec3_dot(const vec3 a, const vec3 b);
 // ** Equal Test ** //
 MATH_VEC3_INLINE bool                   vec3_is_equal(const vec3 a, const vec3 b);
 MATH_VEC3_INLINE bool                   vec3_is_not_equal(const vec3 a, const vec3 b);
-MATH_VEC3_INLINE bool                   vec3_is_near(const vec3 a, const vec3 b, const float error);
+MATH_VEC3_INLINE bool                   vec3_is_near(const vec3 a, const vec3 b, const float error = math::epsilon());
 MATH_VEC3_INLINE bool                   vec3_is_not_near(const vec3 a, const vec3 b, const float error);
 
 

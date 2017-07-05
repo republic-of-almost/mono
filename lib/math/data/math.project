@@ -18,6 +18,7 @@ table.insert(
 
     src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_inlines(make.get_proj_root() .. "../include/"),
       --
       make.add_doc(make.get_proj_root() .. "../include/"),
     },

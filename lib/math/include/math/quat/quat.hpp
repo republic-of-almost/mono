@@ -26,7 +26,7 @@ inline quat             quat_init(const float x, const float y, const float z, c
 inline quat             quat_init_with_axis_angle(const float x, const float y, const float z, const float theta_radians);
 inline quat             quat_init_with_axis_angle(const vec3 axis, const float theta_radians);
 inline quat             quat_init_with_euler_angles(const float pitch_radians, const float yaw_radians, const float roll_radians);
-inline quat             quat_init_with_array(const float arr[]);
+inline quat             quat_init(const float arr[]);
 inline quat             quat_init_with_mat3(const mat3 &mat);
 
 inline quat             quat_conjugate(const quat to_conj);
@@ -46,6 +46,8 @@ inline float            quat_get_y(const quat quat);
 inline float            quat_get_z(const quat quat);
 inline float            quat_get_w(const quat quat);
 inline float            quat_get(const quat quat, const uint32_t i);
+
+inline bool             quat_is_near(const quat a, const quat b, float err = math::epsilon());
 
 
 // Shorthand getters
@@ -143,7 +145,7 @@ quat_init_with_euler_angles(const float pitch_radians, const float yaw_radians, 
 
 
 quat
-quat_init_with_array(const float rot[])
+quat_init(const float rot[])
 {
   return quat_init(rot[0],rot[1],rot[2],rot[3]);
 }
@@ -257,6 +259,21 @@ quat_get_rotation_matrix(const quat to_mat3)
 	};
 
   return mat3_init(mat_data);
+}
+
+
+inline bool
+quat_is_near(const quat a, const quat b, float err)
+{
+  for(uint32_t i = 0; i < 4; ++i)
+  {
+    if(!MATH_NS_NAME::is_near(a.data[i], b.data[i], err))
+    {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 
