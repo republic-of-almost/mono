@@ -26,13 +26,10 @@ namespace
     LIB_ASSERT(graph);
 
     LIB_ASSERT(graph->node_id.size() == graph->parent_depth_data.size());
-    LIB_ASSERT(graph->node_id.size() == graph->name.size());
     LIB_ASSERT(graph->node_id.size() == graph->local_transform.size());
     LIB_ASSERT(graph->node_id.size() == graph->world_transform.size());
     LIB_ASSERT(graph->node_id.size() == graph->bounding_box.size());
-    LIB_ASSERT(graph->node_id.size() == graph->node_type_id.size());
-    LIB_ASSERT(graph->node_id.size() == graph->user_data.size());
-    LIB_ASSERT(graph->node_id.size() == graph->last_update.size());
+    LIB_ASSERT(graph->node_id.size() == graph->data.size());
     
     #else
       return;
@@ -103,13 +100,6 @@ think(Data *graph)
 void
 destroy(Data *graph)
 {
-}
-
-
-uint64_t
-last_tick(Data *graph)
-{
-  return graph->graph_tick;
 }
 
 
@@ -233,18 +223,29 @@ node_create(Data *graph)
   );
   
   // -- Create Event -- //
-//  add_event(graph, Graph::Event::ADDED, new_id);
-  static short_string default_name {"Node"};
-
-  graph->node_id.emplace_back(new_id);
-  graph->parent_depth_data.emplace_back(uint64_t{0});
-  graph->name.emplace_back(default_name);
-  graph->local_transform.emplace_back(math::transform_init());
-  graph->world_transform.emplace_back(math::transform_init());
-  graph->bounding_box.emplace_back(math::aabb_init(math::vec3_zero(), math::vec3_zero()));
-  graph->node_type_id.emplace_back(uint64_t{0});
-  graph->user_data.emplace_back(uintptr_t{0});
-  graph->last_update.emplace_back(uint64_t{0});
+  graph->node_id.emplace_back(
+    new_id
+  );
+  graph->parent_depth_data.emplace_back(
+    uint64_t{0}
+  );
+  graph->local_transform.emplace_back(
+    math::transform_init()
+  );
+  graph->world_transform.emplace_back(
+    math::transform_init()
+  );
+  graph->bounding_box.emplace_back(
+    math::aabb_init(math::vec3_zero(), math::vec3_zero())
+  );
+  
+  constexpr short_string default_name {"Node"};
+  
+  graph->data.emplace_back(
+    uintptr_t{0},
+    uint64_t{0},
+    default_name
+  );
 
   #ifndef NDEBUG
   graph_size_check(graph);
@@ -276,14 +277,11 @@ node_remove(Data *graph, const uint32_t node_id)
         const uint32_t this_id = graph->node_id[index];
       
         graph->node_id.erase(index);
-        graph->name.erase(index);
         graph->parent_depth_data.erase(index);
         graph->local_transform.erase(index);
         graph->world_transform.erase(index);
         graph->bounding_box.erase(index);
-        graph->node_type_id.erase(index);
-        graph->user_data.erase(index);
-        graph->last_update.erase(index);
+        graph->data.erase(index);
 
         #ifndef NDEBUG
         graph_size_check(graph);
@@ -319,9 +317,6 @@ node_set_parent(
   // -- Param Check -- //
   LIB_ASSERT(graph);
   LIB_ASSERT(this_id);
-  
-//   -- Create Event -- //
-//  add_event(graph, Graph::Event::MOVED, this_id)->parent = parent_id;
 
   // -- Find this entities details -- //
   size_t this_index = 0;
@@ -371,12 +366,6 @@ node_set_parent(
     );
     graph->parent_depth_data.erase(this_index, nodes_to_move);
     
-    lib::array<short_string, stack_hint> move_name(
-      graph->name.begin() + this_index,
-      graph->name.begin() + (this_index + nodes_to_move)
-    );
-    graph->name.erase(this_index, nodes_to_move);
-    
     lib::array<math::transform, stack_hint> move_local_transform(
       graph->local_transform.begin() + this_index,
       graph->local_transform.begin() + (this_index + nodes_to_move)
@@ -395,23 +384,13 @@ node_set_parent(
     );
     graph->bounding_box.erase(this_index, nodes_to_move);
     
-    lib::array<uint64_t, stack_hint> move_node_type_id(
-      graph->node_type_id.begin() + this_index,
-      graph->node_type_id.begin() + (this_index + nodes_to_move)
+    lib::array<node_data, stack_hint> data_to_move(
+      graph->data.begin() + this_index,
+      graph->data.begin() + (this_index + nodes_to_move)
     );
-    graph->node_type_id.erase(this_index, nodes_to_move);
+    graph->data.erase(this_index, nodes_to_move);
+
     
-    lib::array<uintptr_t, stack_hint> move_user_data(
-      graph->user_data.begin() + this_index,
-      graph->user_data.begin() + (this_index + nodes_to_move)
-    );
-    graph->user_data.erase(this_index, nodes_to_move);
-    
-    lib::array<uint64_t, stack_hint> move_last_update(
-      graph->last_update.begin() + this_index,
-      graph->last_update.begin() + (this_index + nodes_to_move)
-    );
-    graph->last_update.erase(this_index, nodes_to_move);
     
     #ifndef NDEBUG
     graph_size_check(graph);
@@ -459,12 +438,6 @@ node_set_parent(
       move_parent_depth_data.data(),
       nodes_to_move
     );
-
-    graph->name.insert(
-      insert_index,
-      move_name.data(),
-      nodes_to_move
-    );
     
     graph->local_transform.insert(
       insert_index,
@@ -483,22 +456,10 @@ node_set_parent(
       move_bounding_box.data(),
       nodes_to_move
     );
-    
-    graph->node_type_id.insert(
+
+    graph->data.insert(
       insert_index,
-      move_node_type_id.data(),
-      nodes_to_move
-    );
-    
-    graph->user_data.insert(
-      insert_index,
-      move_user_data.data(),
-      nodes_to_move
-    );
-    
-    graph->last_update.insert(
-      insert_index,
-      move_last_update.data(),
+      data_to_move.data(),
       nodes_to_move
     );
     
@@ -527,17 +488,6 @@ node_set_parent(
       graph->parent_depth_data[index] = new_data;
     }
     
-    // Update Last Modified
-    for(uint32_t i = 0; i < nodes_to_move; ++i)
-    {
-      graph->last_update[i] = graph->graph_tick;
-    }
-    
-    // -- Update transforms -- //
-    /*
-      Transforms are nested so we keep a stack of transforms that represent
-      the parent transform, we pop off when we walk up the tree.
-    */
     {
       lib::array<math::transform, stack_hint> transform_stack;
       transform_stack.emplace_back(graph->world_transform[parent_index]);
@@ -762,6 +712,8 @@ callback_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data)
     cb,
     user_data
   );
+  
+  return true;
 }
 
 
@@ -772,6 +724,8 @@ callback_node_delete(Data *data, const node_delete_fn &cb, uintptr_t user_data)
     cb,
     user_data
   );
+  
+  return true;
 }
 
 
@@ -788,7 +742,7 @@ node_get_name(
   
   if(node_exists(data, node_id, &index))
   {
-    *name = data->name[index].data;
+    *name = data->data[index].name.data;
     return true;
   }
   
@@ -810,7 +764,7 @@ node_set_name(
   
   if(node_exists(data, node_id, &index))
   {
-    strlcpy(data->name[index].data, clipped, str_len);
+    strlcpy(data->data[index].name.data, clipped, str_len);
     return true;
   }
   
@@ -860,8 +814,6 @@ node_set_transform(
     
     for(uint32_t i = 0; i < child_count + 1; ++i)
     {
-      const size_t update = index + i;
-
       // -- Properties -- //
       const uint32_t this_id = node_id;
       uint32_t parent_id = 0;
@@ -1007,7 +959,7 @@ node_get_data_type_id(
   
   if(node_exists(data, node_id, &index))
   {
-    *type_id = data->node_type_id[index];
+    *type_id = data->data[index].node_type_id;
     return true;
   }
   
@@ -1025,7 +977,7 @@ node_set_data_type_id(
   
   if(node_exists(data, node_id, &index))
   {
-    data->node_type_id[index] = *type_id;
+    data->data[index].node_type_id = *type_id;
     return true;
   }
   
@@ -1043,7 +995,7 @@ node_get_user_data(
   
   if(node_exists(data, node_id, &index))
   {
-    *user_data = data->user_data[index];
+    *user_data = data->data[index].user_data;
     return true;
   }
 
@@ -1061,7 +1013,7 @@ node_set_user_data(
   
   if(node_exists(data, node_id, &index))
   {
-    data->user_data[index] = *user_data;
+    data->data[index].user_data = *user_data;
     return true;
   }
   

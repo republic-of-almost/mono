@@ -19,6 +19,14 @@ struct short_string
   char data[16];
 };
 
+struct node_data
+{
+  uintptr_t user_data;
+  uint64_t node_type_id;
+  short_string name;
+};
+
+
 
 // ----------------------------------------------------------------- [ Data ] --
 
@@ -32,16 +40,10 @@ struct Data
   
   lib::array<uint32_t>        node_id;            // Unique instance IDs.
   lib::array<uint64_t>        parent_depth_data;  // Parent ID and Depth.
-  lib::array<short_string>    name;               // Name
   lib::array<math::transform> local_transform;    // Local.
   lib::array<math::transform> world_transform;    // World.
   lib::array<math::aabb>      bounding_box;       // Bounding box.
-  lib::array<uint64_t>        node_type_id;       // Node type id.
-  lib::array<uintptr_t>       user_data;          // External extra data.
-  lib::array<uint64_t>        last_update;        // graph_tick was updated.
-  
-  // -- Events -- //
-//  lib::array<Event>           node_events;        // When changes happen.
+  lib::array<node_data>       data;
   
   
   struct graph_type

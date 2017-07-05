@@ -28,10 +28,6 @@ void
 destroy(Data *data);
 
 
-uint64_t
-last_tick(Data *data);
-
-
 // ----------------------------------------------------------- [ Graph Data ] --
 
 
