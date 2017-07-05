@@ -38,6 +38,15 @@ make.add_headers(dir)
 end
 
 
+-- Adds inline file patterns
+function
+make.add_inlines(dir)
+  return {
+    dir .. "**.inl",
+  }
+end
+
+
 -- Adds doc file patterns
 function
 make.add_doc(dir)
@@ -284,7 +293,7 @@ make.create_solution(solution_data, project_defaults, projects)
           end
         end
       end
-      
+
     end
 
     -- Global build options --
