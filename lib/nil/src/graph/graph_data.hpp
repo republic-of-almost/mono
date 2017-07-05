@@ -20,29 +20,6 @@ struct short_string
 };
 
 
-//struct Event
-//{
-//  enum {
-//    ADDED         = 1 << 0,
-//    REMOVED       = 1 << 1,
-//    MOVED         = 1 << 2,
-//    UPDATED_DATA  = 1 << 3,
-//  };
-//  
-//  uint32_t        event_action;
-//  
-//  uint32_t        node_id;
-//  
-//  uint32_t        parent;
-//  short_string    name;
-//  math::transform transform;
-//  math::aabb      boundinb_box;
-//  uint64_t        node_type_id;
-//  uintptr_t       user_data;
-//  uint64_t        last_update;
-//};
-
-
 // ----------------------------------------------------------------- [ Data ] --
 
 
