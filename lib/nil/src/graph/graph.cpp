@@ -387,8 +387,6 @@ node_set_parent(
     );
     graph->data.erase(this_index, nodes_to_move);
 
-    
-    
     #ifndef NDEBUG
     graph_size_check(graph);
     #endif

@@ -136,7 +136,7 @@ load_assets()
 //        
 //        stbi_image_free(img_data);
       }
-    
+      
       Nil::Data::Mesh_resource mesh{};
       
       mesh.id = ++counter;
