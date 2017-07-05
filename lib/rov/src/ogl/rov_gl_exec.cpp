@@ -100,7 +100,6 @@ ogl_exec(
         glUseProgram(shd.program);
       }
       
-      
       /*
         Load the textures and buffers
       */
@@ -128,14 +127,17 @@ ogl_exec(
             }
             #endif
             
-            const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
+            if(texture_index < rov_gl_data->rov_textures.size())
+            {
+              const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
+              
+              glActiveTexture(GL_TEXTURE0 + texture_slots);
+              glBindTexture(GL_TEXTURE_2D, tex.gl_id);
+              
+              glUniform1i(shd.uni_tex[t], texture_slots);
             
-            glActiveTexture(GL_TEXTURE0 + texture_slots);
-            glBindTexture(GL_TEXTURE_2D, tex.gl_id);
-            
-            glUniform1i(shd.uni_tex[t], texture_slots);
-            
-            ++texture_slots;
+              ++texture_slots;
+            }
           }
         }
         
@@ -159,7 +161,7 @@ ogl_exec(
           ++texture_slots;
         }
       }
-
+      
       /*
         For each draw call in the material.
       */

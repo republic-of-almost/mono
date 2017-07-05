@@ -317,7 +317,10 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
           if(render.texture_01)
           {
-            rov_setTexture(self->texture_ids[render.texture_01], 0);
+            if(self->texture_ids.size() < render.texture_01)
+            {
+              rov_setTexture(self->texture_ids[render.texture_01], 0);
+            }
           }
 
           rov_submitMeshTransform(render.world_mat);
