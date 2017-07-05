@@ -2,12 +2,11 @@
 #define GRAPH_DATA_INCLUDED_9B0564E7_3925_432D_B08E_4F5C35A8DCCE
 
 
-#include <lib/utilities.hpp>
 #include "graph_fwd.hpp"
-#include <math/math.hpp>
+#include <lib/array.hpp>
+#include <math/geometry/geometry_types.hpp>
+#include <math/transform/transform_types.hpp>
 #include <stdint.h>
-
-#include <nil/data/data.hpp>
 
 
 namespace Nil {
@@ -37,7 +36,6 @@ struct Data
   /*
    * We store common attributes for all nodes.
    */
-  
   lib::array<uint32_t>        node_id;            // Unique instance IDs.
   lib::array<uint64_t>        parent_depth_data;  // Parent ID and Depth.
   lib::array<math::transform> local_transform;    // Local.
@@ -59,7 +57,6 @@ struct Data
   lib::array<graph_type>    graph_type_data;
 
   // -- Other -- //
-  uint64_t                    graph_tick;
   uint32_t                    instance_counter;
   
   // -- Callbacks -- //

@@ -1,9 +1,12 @@
 #include "graph.hpp"
 #include "graph_data.hpp"
-#include <lib/utilities.hpp>
-#include <nil/data/window.hpp>
-#include <nil/data/transform.hpp>
-#include <nil/data/bounding_box.hpp>
+#include <math/transform/transform.hpp>
+#include <math/geometry/aabb.hpp>
+#include <lib/logging.hpp>
+#include <lib/assert.hpp>
+#include <lib/bits.hpp>
+#include <lib/key.hpp>
+#include <lib/entity.hpp>
 
 
 namespace Nil {
@@ -70,17 +73,11 @@ void
 initialize(Data *graph)
 {
   graph->instance_counter = 0;
-  graph->graph_tick = 0;
 }
 
 void
 think(Data *graph)
 {
-  ++(graph->graph_tick);
-  
-  // Temp
-  // graph->node_events.clear();
-  
   const size_t count = graph->graph_type_data.size();
   
   for(size_t i = 0; i < count; ++i)

@@ -7,7 +7,8 @@
 #include <lib/array.hpp>
 #include <lib/assert.hpp>
 #include <lib/bench.hpp>
-
+#include <lib/logging.hpp>
+#include <lib/assert.hpp>
 
 
 namespace Nil {

@@ -6,6 +6,10 @@
 #include <nil/data/transform.hpp>
 #include <graph/graph_data.hpp>
 #include <data/data.hpp>
+#include <lib/key.hpp>
+#include <lib/optimizations.hpp>
+#include <lib/logging.hpp>
+#include <lib/assert.hpp>
 #include <stddef.h>
 
 

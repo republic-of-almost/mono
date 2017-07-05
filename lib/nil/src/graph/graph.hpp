@@ -3,8 +3,7 @@
 
 
 #include "graph_fwd.hpp"
-#include <lib/utilities.hpp>
-#include <math/math.hpp>
+#include <math/fwd.hpp>
 #include <stdint.h>
 #include <stddef.h>
 

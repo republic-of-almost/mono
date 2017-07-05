@@ -3,6 +3,7 @@
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
 #include <lib/entity.hpp>
+#include <lib/logging.hpp>
 
 
 namespace {
