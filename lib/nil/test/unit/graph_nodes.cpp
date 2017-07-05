@@ -1,7 +1,6 @@
 #include <catch/catch.hpp>
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
-#include <nil/data/data.hpp>
 
 
 TEST_CASE("Graph Nodes")
