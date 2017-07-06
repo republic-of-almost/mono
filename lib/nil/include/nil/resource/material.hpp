@@ -15,12 +15,15 @@ namespace Resource {
 
 struct Material
 {
-  uint64_t id;
   enum { FULLBRIGHT, LIT, } shader_type;
   uint32_t color;
   uint32_t texture_01;
   uint32_t texture_02;
   uint32_t texture_03;
+  
+  // -- Output -- //
+  
+  uint32_t id;
 };
 
 
@@ -34,7 +37,7 @@ find_by_name(const char *name, Material &out);
 // ------------------------------------------------------------ [ Set / Get ] --
 
 
-void
+bool
 load(const char *name, Material &in_out);
 
 

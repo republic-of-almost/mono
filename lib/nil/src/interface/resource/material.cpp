@@ -1,12 +1,14 @@
 #include <nil/resource/material.hpp>
 #include <lib/array.hpp>
+#include <lib/string_pool.hpp>
+#include <lib/logging.hpp>
 
 
 namespace {
 
 
-lib::array<uint32_t> keys;
-lib::array<Nil::Resource::Material> materials;
+lib::array<uint32_t> keys(uint32_t{0});
+lib::array<Nil::Resource::Material> materials(Nil::Resource::Material{});
 
 
 } // anon ns
@@ -22,17 +24,43 @@ namespace Resource {
 void
 find_by_name(const char *name, Material &out)
 {
+  const uint32_t find_key = lib::string_pool::find(name);
   
+  for(size_t i = 0; i < keys.size(); ++i)
+  {
+    if(keys[i] == find_key)
+    {
+      out = materials[i];
+      return;
+    }
+  }
 }
 
 
 // ----------------------------------------------------------- [ Get / Load ] --
 
 
-void
+bool
 load(const char *name, Material &in_out)
 {
-  materials.emplace_back(in_out);
+  const uint32_t check_key = lib::string_pool::find(name);
+  
+  if(check_key)
+  {
+    LOG_WARNING("Material with this name already exists.");
+    return false;
+  }
+  else
+  {
+    const uint32_t key = lib::string_pool::add(name);
+    
+    in_out.id = keys.size();
+    
+    keys.emplace_back(key);
+    materials.emplace_back(in_out);
+    
+    return true;
+  }
 }
 
 
@@ -42,7 +70,6 @@ get(size_t *count, Material **out)
   *count = keys.size();
   *out = materials.data();
 }
-
 
 
 } // ns
