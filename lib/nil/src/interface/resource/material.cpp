@@ -32,7 +32,7 @@ find_by_name(const char *name, Material &out)
 void
 load(const char *name, Material &in_out)
 {
-  
+  materials.emplace_back(in_out);
 }
 
 

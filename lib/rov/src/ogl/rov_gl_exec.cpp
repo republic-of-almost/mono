@@ -115,7 +115,7 @@ ogl_exec(
         {
           if(texture_maps[t] && shd.uni_tex[t] != -1)
           {
-            const size_t texture_index = texture_maps[t] - 1;
+            const size_t texture_index = texture_maps[t];
             
             #ifndef NDEBUG
             const size_t texture_count = rov_gl_data->rov_textures.size();

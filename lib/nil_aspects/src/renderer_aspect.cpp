@@ -377,7 +377,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         
           
 //          rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
+          rov_setColor(1, 1, 1, 0);
 //          rov_setShader(render.shader);
+          rov_setShader(rovShader_Lit);
           rov_setMesh(self->mesh_ids[render.mesh_id]);
           
           const uint32_t texture_01 = mats[render.material_id].texture_01;

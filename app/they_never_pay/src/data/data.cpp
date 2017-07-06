@@ -118,15 +118,16 @@ load_assets()
       
       Nil::Data::set(child, mesh_instance);
       
-      Nil::Data::Renderable mat{};
+      Nil::Data::Renderable renderable{};
 //      mat.shader = Nil::Data::Renderable::LIT;
 //      mat.color[0]   = 1.f;
 //      mat.color[1]   = 0.f;
 //      mat.color[2]   = 0.f;
 //      mat.color[3]   = 0.f;
 //      mat.texture_01 = 2;
-      mat.mesh_id    = mesh.id;
-      Nil::Data::set(child, mat);
+      renderable.material_id = 1;
+      renderable.mesh_id    = mesh.id;
+      Nil::Data::set(child, renderable);
     }
   }
   
