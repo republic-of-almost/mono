@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/helpers.hpp>
+#include <lib/utilities.hpp>
 
 
 TEST_CASE("Helper Test")

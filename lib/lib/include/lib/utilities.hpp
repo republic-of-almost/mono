@@ -32,6 +32,7 @@
 #include "packing.hpp"
 #include "platform.hpp"
 #include "string.hpp"
+#include "string_pool.hpp"
 #include "timer.hpp"
 #include "types.hpp"
 

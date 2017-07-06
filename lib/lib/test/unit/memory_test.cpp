@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/memory.hpp>
+#include <lib/utilities.hpp>
 #include <cstring>
 
 

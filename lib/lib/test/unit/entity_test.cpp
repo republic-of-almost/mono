@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/entity.hpp>
+#include <lib/utilities.hpp>
 
 
 TEST_CASE("entity")

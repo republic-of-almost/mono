@@ -1,8 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/model.hpp>
-#include <lib/platform.hpp>
-#include <lib/logging.hpp>
-#include <lib/directory.hpp>
+#include <lib/utilities.hpp>
 #include <math/general/general.hpp>
 #include <stdint.h>
 #include <string.h>

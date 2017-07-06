@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/directory.hpp>
+#include <lib/utilities.hpp>
 #include <stdio.h>
 
 TEST_CASE("Dir Test")

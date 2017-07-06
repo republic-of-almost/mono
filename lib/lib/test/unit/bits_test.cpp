@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/bits.hpp>
+#include <lib/utilities.hpp>
 
 
 TEST_CASE("Bits")
