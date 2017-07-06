@@ -1,7 +1,7 @@
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
 #include <nil/aspect.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
 #include <lib/array.hpp>

@@ -9,9 +9,11 @@
 #include <nil/data/data.hpp>
 #include <nil/data/light.hpp>
 #include <nil/data/window.hpp>
+#include <nil/resource/texture.hpp>
 #include <aspect/math_nil_extensions.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
+#include <stb/stb_image.h>
 
 
 namespace Nil_ext {
@@ -88,6 +90,62 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   }
+  
+  /*
+    Load textures
+  */
+  {
+    size_t count = 0;
+    Nil::Resource::Texture *textures = nullptr;
+    
+    Nil::Resource::get(&count, &textures);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      Nil::Resource::Texture *tex = &textures[i];
+    
+      if(tex->status == Nil::Resource::Texture::PENDING)
+      {
+        if(tex->data_type == Nil::Resource::Texture::FILENAME)
+        {
+          int x = 0;
+          int y = 0;
+          int c = 0;
+          stbi_uc *img_data = nullptr;
+          const char *path = (const char*)tex->data;
+
+          stbi_set_flip_vertically_on_load(true);
+          img_data = stbi_load(path, &x, &y, &c, 0);
+
+          const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
+  
+          const uint32_t tex_id = rov_createTexture(
+            img_data,
+            x,
+            y,
+            x * y * c,
+            format,
+            &tex->platform_resource
+          );
+          
+          tex->id = tex_id;
+          
+          if((tex->id) > self->texture_ids.size())
+          {
+            const size_t new_size = (tex->id + 1);
+            self->texture_ids.resize(new_size);
+          }
+          
+          const size_t id = tex->id;
+          self->texture_ids[id] = tex_id;
+
+          stbi_image_free(img_data);
+          
+          tex->status = Nil::Resource::Texture::LOADED;
+        }
+      }
+    }
+  } // Load Textures
 }
 
 
@@ -317,7 +375,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
           if(render.texture_01)
           {
-            if(self->texture_ids.size() < render.texture_01)
+            const uint32_t texture_count = self->texture_ids.size();
+          
+            if(texture_count > render.texture_01)
             {
               rov_setTexture(self->texture_ids[render.texture_01], 0);
             }

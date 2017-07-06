@@ -5,6 +5,7 @@
 #include "audio.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
+#include "model.hpp"
 #include "texture.hpp"
 
 

@@ -19,7 +19,7 @@ struct Texture
   
   // ** Input ** //
   
-  enum { FILENAME, RAW_DATA } data_type;
+  enum { FILENAME } data_type;
   
   uintptr_t data;
   size_t data_size;
@@ -28,6 +28,7 @@ struct Texture
   
   uint32_t width;
   uint32_t height;
+  uint32_t depth;
   uint32_t components;
   
   // ** Output ** //
@@ -39,11 +40,15 @@ struct Texture
 };
 
 
-// ----------------------------------------------------------------- [ Load ] --
+// ----------------------------------------------------------- [ Get / Load ] --
 
 
 void
 load(const char *name, Texture &in);
+
+
+void
+get(size_t *count, Texture **in_out);
 
 
 } // ns

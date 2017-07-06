@@ -20,7 +20,7 @@ load(const char *filename)
     LOG_ERROR("Can't find file to load");
     return false;
   }
-
+  
   const lib::model model = lib::model_import::load_obj_from_file(filename);
 
   // Load meshes

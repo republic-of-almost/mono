@@ -1,4 +1,5 @@
 #include <data/data.hpp>
+#include <nil/resource/resource.hpp>
 #include <nil/data/window.hpp>
 #include <nil/data/developer.hpp>
 #include <nil/data/mouse.hpp>
@@ -7,7 +8,6 @@
 #include <nil/data/transform.hpp>
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
-
 
 #include <nil/data/texture.hpp>
 #include <nil/data/texture_resource.hpp>
@@ -158,8 +158,8 @@ load_assets()
       mat.color[0]   = 1.f;
       mat.color[1]   = 0.f;
       mat.color[2]   = 0.f;
-      mat.color[3]   = 1.f;
-      mat.texture_01 = tex_data.id;
+      mat.color[3]   = 0.f;
+      mat.texture_01 = 2;
       mat.mesh_id    = mesh.id;
       Nil::Data::set(child, mat);
     }
@@ -191,6 +191,11 @@ load_assets()
       
       Nil::Data::set(child, light);
     }
+  }
+  
+  // Resource load
+  {
+    Nil::Resource::Model::load("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
   }
 }
 

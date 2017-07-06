@@ -1,4 +1,4 @@
-#include "data.hpp"
+#include "internal_data.hpp"
 #include <graph/graph_data.hpp>
 #include <nil/node.hpp>
 #include <lib/bits.hpp>
