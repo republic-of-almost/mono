@@ -16,17 +16,8 @@ namespace Data {
 
 struct Renderable
 {
-  enum { FULLBRIGHT, LIT, DIR_LIGHT }  shader;
-  float     color[4];
-  
-  uint32_t  texture_01;
-  uint32_t  texture_02;
-  uint32_t  texture_03;
-  
-  float     scale[2];
-  float     offset[2];
-  
-  uint32_t  mesh_id;
+  uint32_t mesh_id;
+  uint32_t material_id;
   
   // -- Output -- //
   

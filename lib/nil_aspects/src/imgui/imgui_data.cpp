@@ -194,14 +194,14 @@ render_data(Nil::Data::Renderable *data)
   };
   
   constexpr size_t count = sizeof(shaders) / sizeof(decltype(shaders[0]));
-
-  update(ImGui::Combo("Shader",         (int*)&data->shader, shaders, count), &updated);
-  update(ImGui::ColorEdit4("Color",     data->color),                         &updated);
-  update(ImGui::InputInt("Texture 01",  (int*)&data->texture_01),             &updated);
-  update(ImGui::InputInt("Texture 02",  (int*)&data->texture_02),             &updated);
-  update(ImGui::InputInt("Texture 03",  (int*)&data->texture_03),             &updated);
-  update(ImGui::DragFloat2("UV Scale",  data->scale),                         &updated);
-  update(ImGui::DragFloat2("UV Offset", data->offset),                        &updated);
+//
+//  update(ImGui::Combo("Shader",         (int*)&data->shader, shaders, count), &updated);
+//  update(ImGui::ColorEdit4("Color",     data->color),                         &updated);
+//  update(ImGui::InputInt("Texture 01",  (int*)&data->texture_01),             &updated);
+//  update(ImGui::InputInt("Texture 02",  (int*)&data->texture_02),             &updated);
+//  update(ImGui::InputInt("Texture 03",  (int*)&data->texture_03),             &updated);
+//  update(ImGui::DragFloat2("UV Scale",  data->scale),                         &updated);
+//  update(ImGui::DragFloat2("UV Offset", data->offset),                        &updated);
 
   // -- Readonly -- //
   

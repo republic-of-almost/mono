@@ -10,6 +10,7 @@
 #include <nil/data/light.hpp>
 #include <nil/data/window.hpp>
 #include <nil/resource/texture.hpp>
+#include <nil/resource/material.hpp>
 #include <aspect/math_nil_extensions.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
@@ -325,6 +326,10 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     size_t cam_count = 0;
     Nil::Data::Camera *cameras;
     Nil::Data::get(&cam_count, &cameras);
+    
+    size_t mat_count = 0;
+    Nil::Resource::Material *mats;
+    Nil::Resource::get(&mat_count, &mats);
 
     for(uint32_t j = 0; j < cam_count; ++j)
     {
@@ -366,20 +371,24 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       for(size_t i = 0; i < renderable_count; ++i)
       {
         Nil::Data::Renderable render = renderables[i];
-
+        
         if(self->mesh_ids.size() > render.mesh_id)
         {
-          rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
-          rov_setShader(render.shader);
+        
+          
+//          rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
+//          rov_setShader(render.shader);
           rov_setMesh(self->mesh_ids[render.mesh_id]);
-
-          if(render.texture_01)
+          
+          const uint32_t texture_01 = mats[render.material_id].texture_01;
+          
+          if(texture_01)
           {
             const uint32_t texture_count = self->texture_ids.size();
           
-            if(texture_count > render.texture_01)
+            if(texture_count > texture_01)
             {
-              rov_setTexture(self->texture_ids[render.texture_01], 0);
+              rov_setTexture(self->texture_ids[texture_01], 0);
             }
           }
 

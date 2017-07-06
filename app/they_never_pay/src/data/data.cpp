@@ -119,12 +119,12 @@ load_assets()
       Nil::Data::set(child, mesh_instance);
       
       Nil::Data::Renderable mat{};
-      mat.shader = Nil::Data::Renderable::LIT;
-      mat.color[0]   = 1.f;
-      mat.color[1]   = 0.f;
-      mat.color[2]   = 0.f;
-      mat.color[3]   = 0.f;
-      mat.texture_01 = 2;
+//      mat.shader = Nil::Data::Renderable::LIT;
+//      mat.color[0]   = 1.f;
+//      mat.color[1]   = 0.f;
+//      mat.color[2]   = 0.f;
+//      mat.color[3]   = 0.f;
+//      mat.texture_01 = 2;
       mat.mesh_id    = mesh.id;
       Nil::Data::set(child, mat);
     }
@@ -302,7 +302,6 @@ debug_line(const math::vec3 start, const math::vec3 end, const math::vec3 col)
     {
       line_info.resize(count + 9);
     }
-
     
     line_info[count + 0] = (math::get_x(start));
     line_info[count + 1] = (math::get_y(start));
