@@ -102,41 +102,6 @@ load_assets()
       child.set_parent(asset);
       child.set_name(model.name[i]);
       
-      Nil::Data::Texture tex_data{};
-      
-      static int count = 0;
-      
-      if(model.material_id[i] >= 0)
-      {
-        tex_data.data_type = Nil::Data::Texture::FILENAME;
-        tex_data.data = (uintptr_t)model.mesh_material[model.material_id[i]].map_path[0];
-        tex_data.data_size = strlen(model.mesh_material[model.material_id[i]].map_path[0]);
-        
-        Nil::Data::set(child, tex_data);
-      
-//        ++count;
-//        int x = 0;
-//        int y = 0;
-//        int c = 0;
-//        stbi_uc *img_data = nullptr;
-//        const char *path = model.mesh_material[model.material_id[i]].map_path[0];
-//        
-//        stbi_set_flip_vertically_on_load(true);
-//        img_data = stbi_load(path, &x, &y, &c, 0);
-//        
-//        tex_data.data       = img_data;
-//        tex_data.id         = ++texture_id_counter;
-//        tex_data.dimentions = 2;
-//        tex_data.compoents  = c;
-//        tex_data.width      = x;
-//        tex_data.height     = y;
-//        tex_data.sizeof_data = c * x * y * sizeof(char);
-//        
-//        Nil::Data::set(child, tex_data);
-//        
-//        stbi_image_free(img_data);
-      }
-      
       Nil::Data::Mesh_resource mesh{};
       
       mesh.id = ++counter;

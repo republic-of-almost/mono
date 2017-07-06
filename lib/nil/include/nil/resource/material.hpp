@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {
@@ -15,7 +16,7 @@ namespace Resource {
 struct Material
 {
   uint64_t id;
-  uint32_t shader_type;
+  enum { FULLBRIGHT, LIT, } shader_type;
   uint32_t color;
   uint32_t texture_01;
   uint32_t texture_02;
@@ -33,8 +34,12 @@ find_by_name(const char *name, Material &out);
 // ------------------------------------------------------------ [ Set / Get ] --
 
 
-bool
+void
 load(const char *name, Material &in_out);
+
+
+void
+get(size_t *count, Material **out);
 
 
 } // ns

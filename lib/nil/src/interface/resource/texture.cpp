@@ -11,12 +11,22 @@ namespace {
 lib::array<uint32_t> keys;
 lib::array<Nil::Resource::Texture> textures;
 
-  
+
 } // anon ns
 
 
 namespace Nil {
 namespace Resource {
+
+
+// ----------------------------------------------------------------- [ Find ] --
+
+
+void
+find_by_name(const char *name, Texture &out)
+{
+  
+}
 
 
 // ----------------------------------------------------------- [ Get / Load ] --
