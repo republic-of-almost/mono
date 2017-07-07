@@ -11,6 +11,7 @@
 #include <nil/data/window.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/material.hpp>
+#include <nil/resource/mesh.hpp>
 #include <aspect/math_nil_extensions.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
@@ -147,6 +148,47 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   } // Load Textures
+  
+  /*
+    Load Meshes
+  */
+  {
+    size_t count = 0;
+    Nil::Resource::Mesh *meshes = nullptr;
+    
+    Nil::Resource::get(&count, &meshes);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      Nil::Resource::Mesh *mesh_resource = &meshes[i];
+    
+      if(mesh_resource->status == Nil::Resource::Mesh::PENDING)
+      {
+        if(mesh_resource->count == 0)
+        {
+          mesh_resource->status = Nil::Resource::Mesh::LOADED;
+          continue;
+        }
+        
+        const uint32_t mesh = rov_createMesh
+        (
+          mesh_resource->position_vec3,
+          mesh_resource->normal_vec3,
+          mesh_resource->texture_coords_vec2,
+          mesh_resource->count
+        );
+        
+        if((mesh_resource->id + 1) > self->mesh_ids.size())
+        {
+          self->mesh_ids.resize(1 << (mesh_resource->id + 1));
+        }
+
+        self->mesh_ids[mesh_resource->id] = mesh;
+
+        mesh_resource->status = Nil::Resource::Mesh::LOADED;
+      }
+    }
+  } // Load Meshes
 }
 
 

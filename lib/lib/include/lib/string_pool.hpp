@@ -129,8 +129,9 @@ add(const char *name)
     }
   }
   
-  const size_t count = strlen(name);
+  const size_t count = strlen(name) + 1;
   char *new_str = LIB_STRING_POOL_MALLOC(char, count);
+  memset(new_str, 0, sizeof(char) * count);
   memcpy(new_str, name, count * sizeof(char));
   
   str_pool.emplace_back(new_str);
@@ -143,7 +144,9 @@ find(const char *name)
 {
   for(size_t i = 0; i < str_pool.size(); ++i)
   {
-    if(strcmp(name, str_pool[i]) == 0)
+    const char *search = str_pool[i];
+  
+    if(strcmp(name, search) == 0)
     {
       return i + 1;
     }

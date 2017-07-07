@@ -37,98 +37,62 @@ load_assets()
   
   Nil::Node assets = get_assets();
 
-  // Load assets
+//  // Load assets
+//  {
+//    Nil::Node asset;
+//    asset.set_parent(assets);
+//    asset.set_name("Cube Bev");
+//    
+//    Nil::Data::Mesh_resource mesh{};
+//
+//    mesh.id = (uint32_t)Game_asset::CUBE_BEV;
+//
+//    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
+//    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
+//
+//    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
+//    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
+//
+//    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
+//    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
+//
+//    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
+//
+//    Nil::Data::set(asset, mesh);
+//  }
+//  
+//  // Load assets
+//  {
+//    Nil::Node asset;
+//    asset.set_parent(assets);
+//    asset.set_name("Cube");
+//    
+//    Nil::Data::Mesh_resource mesh{};
+//
+//    mesh.id = (uint32_t)Game_asset::CUBE;
+//
+//    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_positions));
+//    memcpy(mesh.position_vec3, Nil_ext::Mesh::cube_positions, sizeof(Nil_ext::Mesh::cube_positions));
+//
+//    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_normals));
+//    memcpy(mesh.normal_vec3, Nil_ext::Mesh::cube_normals, sizeof(Nil_ext::Mesh::cube_normals));
+//
+//    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_texture_coords));
+//    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::cube_texture_coords, sizeof(Nil_ext::Mesh::cube_texture_coords));
+//
+//    mesh.count = Nil_ext::Mesh::cube_mesh_vert_count;
+//
+//    Nil::Data::set(asset, mesh);
+//  }
+  
+  // Load static assets
   {
-    Nil::Node asset;
-    asset.set_parent(assets);
-    asset.set_name("Cube Bev");
-    
-    Nil::Data::Mesh_resource mesh{};
-
-    mesh.id = (uint32_t)Game_asset::CUBE_BEV;
-
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
-
-    Nil::Data::set(asset, mesh);
-  }
-  
-  // Load assets
-  {
-    Nil::Node asset;
-    asset.set_parent(assets);
-    asset.set_name("Cube");
-    
-    Nil::Data::Mesh_resource mesh{};
-
-    mesh.id = (uint32_t)Game_asset::CUBE;
-
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::cube_positions, sizeof(Nil_ext::Mesh::cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::cube_normals, sizeof(Nil_ext::Mesh::cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::cube_texture_coords, sizeof(Nil_ext::Mesh::cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::cube_mesh_vert_count;
-
-    Nil::Data::set(asset, mesh);
-  }
-  
-  // Load asset
-
-  uint32_t counter = (uint32_t)Game_asset::STATIC;
-  
-  lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
-  
-  {
+    const char *file = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj";
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Static");
     
-    for(uint32_t i = 0; i < model.mesh_count; ++i)
-    {
-      Nil::Node child;
-      child.set_parent(asset);
-      child.set_name(model.name[i]);
-      
-      Nil::Data::Mesh_resource mesh{};
-      
-      mesh.id = ++counter;
-      
-      mesh.position_vec3       = model.verts[i];
-      mesh.normal_vec3         = model.normals[i];
-      mesh.texture_coords_vec2 = model.uvs[i];
-      mesh.count               = model.vertex_count[i];
-      
-      Nil::Data::set(child, mesh);
-      
-      Nil::Data::Mesh mesh_instance{};
-      mesh_instance.mesh_id = mesh.id;
-      
-      Nil::Data::set(child, mesh_instance);
-      
-      Nil::Data::Renderable renderable{};
-//      mat.shader = Nil::Data::Renderable::LIT;
-//      mat.color[0]   = 1.f;
-//      mat.color[1]   = 0.f;
-//      mat.color[2]   = 0.f;
-//      mat.color[3]   = 0.f;
-//      mat.texture_01 = 2;
-      renderable.material_id = 1;
-      renderable.mesh_id    = mesh.id;
-      Nil::Data::set(child, renderable);
-    }
+    Nil::Resource::Scene::load(asset, file);
   }
   
   lib::model lights = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/lights.obj");
@@ -161,7 +125,7 @@ load_assets()
   
   // Resource load
   {
-    Nil::Resource::Model::load("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
+//    Nil::Resource::Model::load("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
   }
 }
 

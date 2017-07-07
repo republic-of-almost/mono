@@ -7,6 +7,7 @@
 #include <lib/model.hpp>
 #include <lib/logging.hpp>
 #include <lib/file.hpp>
+#include <stdio.h>
 
 
 namespace Nil {
@@ -30,10 +31,12 @@ load(Nil::Node &node, const char *filename)
     return false;
   }
   
-  // Load model
+  // -- Load Model -- //
+  
   const lib::model model = lib::model_import::load_obj_from_file(filename);
 
-  // Load meshes
+  // -- Load Meshes -- //
+  
   for(size_t i = 0; i < model.mesh_count; ++i)
   {
     Nil::Resource::Mesh mesh{};
@@ -46,7 +49,8 @@ load(Nil::Node &node, const char *filename)
     Nil::Resource::load(model.name[i], mesh);
   }
   
-  // Load textures
+  // -- Load Textures -- //
+  
   for(size_t i = 0; i < model.material_count; ++i)
   {
     for(size_t j = 0; j < model.mesh_material[i].map_count; ++j)
@@ -61,7 +65,8 @@ load(Nil::Node &node, const char *filename)
     }
   }
   
-  // Load materials
+  // -- Load Materials -- //
+  
   for(size_t i = 0; i < model.material_count; ++i)
   {
     lib::material *mesh_mat = &model.mesh_material[i];
@@ -79,15 +84,18 @@ load(Nil::Node &node, const char *filename)
     Nil::Resource::load(model.mesh_material[i].name, mat);
   }
   
-  // Load nodes
+  // -- Create Nodes and Renderables -- //
+  
   for(size_t i = 0; i < model.mesh_count; ++i)
   {
     Nil::Node child_node;
     child_node.set_parent(node);
     child_node.set_name(model.name[i]);
     
+    const char *mesh_name = model.name[i];
+    
     Nil::Resource::Mesh mesh{};
-    Nil::Resource::find_by_name(model.name[i], mesh);
+    Nil::Resource::find_by_name(mesh_name, mesh);
     
     Nil::Resource::Material mat{};
     const int32_t mat_id = model.material_id[i];
