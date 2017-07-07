@@ -15,8 +15,6 @@ namespace Resource {
 
 struct Mesh
 {
-  uint32_t id;
-  
   float   *position_vec3;
   float   *normal_vec3;
   float   *texture_coords_vec2;
@@ -27,16 +25,27 @@ struct Mesh
   // -- Output -- //
   
   enum { PENDING, LOADED, FAILED, } status;
+  uint32_t id;
 
 };
 
 
-// ----------------------------------------------------------------- [ Load ] --
+// ----------------------------------------------------------------- [ Find ] --
 
 
 void
+find_by_name(const char *name, Mesh &out);
+
+
+// ----------------------------------------------------------- [ Get / Load ] --
+
+
+bool
 load(const char *name, Mesh &in);
 
+
+void
+get(size_t *count, Mesh **out);
 
 
 } // ns

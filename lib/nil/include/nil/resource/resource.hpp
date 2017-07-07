@@ -6,6 +6,7 @@
 #include "material.hpp"
 #include "mesh.hpp"
 #include "model.hpp"
+#include "scene.hpp"
 #include "texture.hpp"
 
 
