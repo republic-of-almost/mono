@@ -20,7 +20,7 @@ struct Data
 {
   uint32_t current_viewport[2];
 
-  lib::array<uint32_t> mesh_ids;
+  lib::array<uint32_t, 128> mesh_ids;
   lib::array<uint32_t> texture_ids;
   
   Nil::Node debug_lines = Nil::Node(nullptr);

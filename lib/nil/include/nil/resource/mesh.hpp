@@ -26,6 +26,7 @@ struct Mesh
   
   enum { PENDING, LOADED, FAILED, } status;
   uint32_t id;
+  uintptr_t platform_resource;
 
 };
 

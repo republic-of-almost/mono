@@ -175,15 +175,17 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           mesh_resource->position_vec3,
           mesh_resource->normal_vec3,
           mesh_resource->texture_coords_vec2,
-          mesh_resource->count
+          mesh_resource->count,
+          &mesh_resource->platform_resource
         );
         
-        if((mesh_resource->id + 1) > self->mesh_ids.size())
-        {
-          self->mesh_ids.resize(1 << (mesh_resource->id + 1));
-        }
-
-        self->mesh_ids[mesh_resource->id] = mesh;
+//        if((mesh_resource->id + 1) > self->mesh_ids.size())
+//        {
+//          self->mesh_ids.resize(1 << (mesh_resource->id + 1));
+//        }
+//
+//        self->mesh_ids[mesh_resource->id] = mesh;
+        self->mesh_ids.emplace_back(mesh);
 
         mesh_resource->status = Nil::Resource::Mesh::LOADED;
       }
@@ -205,42 +207,6 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   if(self->has_initialized)
   {
-    /*
-      Texture
-    */
-    {
-      size_t texture_count = 0;
-      Nil::Data::Texture *textures = nullptr;
-      Nil::Node *nodes = nullptr;
-      
-      Nil::Data::events(Nil::Data::Event::ADDED, &texture_count, &textures, &nodes);
-      
-      for(size_t i = 0; i < texture_count; ++i)
-      {
-        //        ++count;
-//        int x = 0;
-//        int y = 0;
-//        int c = 0;
-//        stbi_uc *img_data = nullptr;
-//        const char *path = model.mesh_material[model.material_id[i]].map_path[0];
-//        
-//        stbi_set_flip_vertically_on_load(true);
-//        img_data = stbi_load(path, &x, &y, &c, 0);
-//        
-//        tex_data.data       = img_data;
-//        tex_data.id         = ++texture_id_counter;
-//        tex_data.dimentions = 2;
-//        tex_data.compoents  = c;
-//        tex_data.width      = x;
-//        tex_data.height     = y;
-//        tex_data.sizeof_data = c * x * y * sizeof(char);
-//        
-//        Nil::Data::set(child, tex_data);
-//        
-//        stbi_image_free(img_data);
-      }
-    }
-  
     /*
       Resources
     */
@@ -274,39 +240,6 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
           mesh_resource->status = Nil::Data::Mesh_resource::LOADED;
         }
       }
-
-//      size_t                        texture_rsrc_count = 0;
-//      Nil::Data::Texture_resource   *texture_resources = nullptr;
-//
-//      Nil::Data::get(&texture_rsrc_count, &texture_resources);
-//
-//      for(size_t i = 0; i < texture_rsrc_count; ++i)
-//      {
-//        Nil::Data::Texture_resource *texture_resource = &texture_resources[i];
-//
-//        if(texture_resource->status == Nil::Data::Texture_resource::PENDING)
-//        {
-//          const uint32_t texture = rov_createTexture(
-//            texture_resource->data,
-//            texture_resource->width,
-//            texture_resource->height,
-//            texture_resource->sizeof_data,
-//            texture_resource->compoents == 3 ? rovPixel_RGB8 : rovPixel_RGBA8,
-//            &texture_resource->platform_resource
-//          );
-//
-//          if((texture_resource->id + 1) > self->texture_ids.size())
-//          {
-//            const size_t new_size = (texture_resource->id + 1);
-//            self->texture_ids.resize(new_size);
-//          }
-//          
-//          const size_t id = texture_resource->id;
-//          self->texture_ids[id] = texture;
-//        }
-//
-//        texture_resource->status = Nil::Data::Texture_resource::LOADED;
-//      }
     }
 
     /*
@@ -414,7 +347,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         Nil::Data::Renderable render = renderables[i];
         
-        if(self->mesh_ids.size() > render.mesh_id)
+        const uint32_t mesh_count = self->mesh_ids.size();
+        
+        if(mesh_count > render.mesh_id)
         {
         
           
@@ -426,13 +361,14 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
           
           const uint32_t texture_01 = mats[render.material_id].texture_01;
           
-          if(texture_01)
+//          if(texture_01)
           {
             const uint32_t texture_count = self->texture_ids.size();
           
-            if(texture_count > texture_01)
+//            if(texture_count > texture_01)
             {
-              rov_setTexture(self->texture_ids[texture_01], 0);
+              const uint32_t texture_id = self->texture_ids[texture_01];
+              rov_setTexture(texture_id, 0);
             }
           }
 

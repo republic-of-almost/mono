@@ -67,14 +67,16 @@ rov_createMesh(
   const float *pos,
   const float *normals,
   const float *tex_coords,
-  size_t count)
+  size_t count,
+  uintptr_t *out_platform_resource)
 {
   return ROV_Internal::ogl_createMesh(
     &gl_data,
     pos,
     normals,
     tex_coords,
-    count
+    count,
+    out_platform_resource
   );
 }
 

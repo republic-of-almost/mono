@@ -8,8 +8,8 @@
 namespace {
 
 
-lib::array<uint32_t> keys(uint32_t{0});
-lib::array<Nil::Resource::Mesh> meshes(Nil::Resource::Mesh{});
+lib::array<uint32_t, 128> keys(uint32_t{0});
+lib::array<Nil::Resource::Mesh, 128> meshes(Nil::Resource::Mesh{});
 
 
 } // anon ns
@@ -58,7 +58,7 @@ load(const char *name, Mesh &in_out)
     const uint32_t key = lib::string_pool::add(name);
     Mesh cpy_in_out = in_out;
     
-    if(in_out.status == 0)
+//    if(in_out.status == 0)
 //    if(false)
     {
       // Copy all the mesh data.
@@ -118,7 +118,7 @@ void
 get(size_t *count, Mesh **out)
 {
   *count = keys.size();
-  *out = meshes.data();
+  *out = meshes.begin();
 }
 
 

@@ -43,14 +43,14 @@ struct Texture
 // ----------------------------------------------------------------- [ Find ] --
 
 
-void
+bool
 find_by_name(const char *name, Texture &out);
 
 
 // ----------------------------------------------------------- [ Get / Load ] --
 
 
-void
+bool
 load(const char *name, Texture &in);
 
 

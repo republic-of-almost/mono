@@ -63,7 +63,8 @@ uint32_t    rov_createMesh(
               const float *pos,
               const float *normals,
               const float *tex_coords,
-              size_t count);
+              size_t count,
+              uintptr_t *out_platform_resource = nullptr);
 
 
 uint32_t    rov_createLights(

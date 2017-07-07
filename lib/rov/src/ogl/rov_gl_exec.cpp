@@ -88,7 +88,7 @@ ogl_exec(
       const uint8_t texture_01 = lib::bits::second8(details);
       const uint8_t texture_02 = lib::bits::third8(details);
       const uint8_t texture_03 = lib::bits::forth8(details);
-
+      
       const rovGLMeshProgram shd = rov_gl_data->rov_mesh_programs[shader];
 
       /*
@@ -116,18 +116,18 @@ ogl_exec(
           if(texture_maps[t] && shd.uni_tex[t] != -1)
           {
             const size_t texture_index = texture_maps[t];
+//            
+//            #ifndef NDEBUG
+//            const size_t texture_count = rov_gl_data->rov_textures.size();
+////            LIB_ASSERT(texture_index < texture_count);
+//            if(!texture_index)
+//            {
+//              // Temp fix while removeing texture resource
+//              break;
+//            }
+//            #endif
             
-            #ifndef NDEBUG
-            const size_t texture_count = rov_gl_data->rov_textures.size();
-//            LIB_ASSERT(texture_index < texture_count);
-            if(!texture_index)
-            {
-              // Temp fix while removeing texture resource
-              break;
-            }
-            #endif
-            
-            if(texture_index < rov_gl_data->rov_textures.size())
+//            if(texture_index < rov_gl_data->rov_textures.size())
             {
               const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
               
@@ -135,7 +135,7 @@ ogl_exec(
               glBindTexture(GL_TEXTURE_2D, tex.gl_id);
               
               glUniform1i(shd.uni_tex[t], texture_slots);
-            
+              
               ++texture_slots;
             }
           }

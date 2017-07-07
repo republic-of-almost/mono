@@ -79,7 +79,7 @@ load(Nil::Node &node, const char *filename)
     Nil::Resource::Texture tex{};
     Nil::Resource::find_by_name(mesh_mat->map_path[0], tex);
     
-    mat.texture_01 = 1;//tex.id;
+    mat.texture_01 = tex.id;
     
     Nil::Resource::load(model.mesh_material[i].name, mat);
   }

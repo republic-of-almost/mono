@@ -113,6 +113,11 @@ ogl_createMesh(
 
   const rovGLMesh rov_mesh{vbo, 8, count};
   gl_data->rov_meshes.emplace_back(rov_mesh);
+  
+  if(out_resource_id)
+  {
+    *out_resource_id = vbo;
+  }
 
   return (uint32_t)gl_data->rov_meshes.size();
 }

@@ -7,8 +7,8 @@
 namespace {
 
 
-lib::array<uint32_t> keys(uint32_t{0});
-lib::array<Nil::Resource::Material> materials(Nil::Resource::Material{});
+lib::array<uint32_t, 128> keys(uint32_t{0});
+lib::array<Nil::Resource::Material, 128> materials(Nil::Resource::Material{});
 
 
 } // anon ns

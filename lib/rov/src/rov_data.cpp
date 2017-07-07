@@ -38,7 +38,7 @@ rov_curr_material(rovData *data)
   uint8_t texture_03 = data->curr_rov_textures[2];
 
   const uint32_t details = lib::bits::pack8888(shader_type, texture_01, texture_02, texture_03);
-
+  
   return lib::bits::pack3232(details, color);
 }
 
