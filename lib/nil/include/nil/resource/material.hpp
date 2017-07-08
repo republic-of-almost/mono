@@ -30,7 +30,7 @@ struct Material
 // ----------------------------------------------------------------- [ Find ] --
 
 
-void
+bool
 find_by_name(const char *name, Material &out);
 
 

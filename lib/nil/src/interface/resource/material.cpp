@@ -1,5 +1,6 @@
 #include <nil/resource/material.hpp>
 #include <lib/array.hpp>
+#include <lib/key.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
 
@@ -21,7 +22,7 @@ namespace Resource {
 // ----------------------------------------------------------------- [ Find ] --
 
 
-void
+bool
 find_by_name(const char *name, Material &out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
@@ -31,9 +32,11 @@ find_by_name(const char *name, Material &out)
     if(keys[i] == find_key)
     {
       out = materials[i];
-      return;
+      return true;
     }
   }
+  
+  return false;
 }
 
 
@@ -47,7 +50,13 @@ load(const char *name, Material &in_out)
   
   if(check_key)
   {
-    LOG_WARNING("Material with this name already exists.");
+    size_t index = 0;
+    if(lib::key::linear_search(check_key, keys.data(), keys.size(), &index))
+    {
+      materials[index] = in_out;
+      return true;
+    }
+    
     return false;
   }
   else
