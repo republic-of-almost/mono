@@ -1,7 +1,6 @@
 #include <game/environment.hpp>
-#include <nil/data/material.hpp>
-#include <nil/data/transform.hpp>
-#include <nil/data/logic.hpp>
+#include <nil/resource/resource.hpp>
+#include <nil/data/data.hpp>
 #include <lib/assert.hpp>
 #include <math/math.hpp>
 
@@ -39,12 +38,12 @@ think(Nil::Node node, uintptr_t user_data)
     
     float rgba[] = {1.f, (y / 10.f) * 1.f, 1.f, 1.f};
     
-    Nil::Data::Material material{};
-    Nil::Data::get(child, material);
+//    Nil::Resource::Material material{};
+//    Nil::Resource::get(child, material);
     
-    memcpy(material.color, rgba, sizeof(material.color));
+//    memcpy(material.color, rgba, sizeof(material.color));
     
-    Nil::Data::set(child, material);
+//    Nil::Data::set(child, material);
     
     const float default_scale = 2.f;
     const float scale_up = default_scale * ((float)i / 10.f);
@@ -82,8 +81,8 @@ setup(Environment *env)
     node.set_name("Env");
     node.set_parent(env->entity);
     
-    Nil::Data::Material material{};
-    Nil::Data::set(node, material);
+//    Nil::Data::Material material{};
+//    Nil::Data::set(node, material);
   }
   
   // Callbacks

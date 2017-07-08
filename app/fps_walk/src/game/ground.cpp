@@ -31,23 +31,20 @@ setup(Ground *ground)
   }
   
   // Material
+  Nil::Resource::Material material{};
   {
-    Nil::Resource::Material material{};
-    
-    const float color[] = {0.5f, 0.f, 0.5f, 1.f};
-    memcpy(material.color, color, sizeof(material.color));
+    material.color = 0x888888FF;
     
     LOG_TODO_ONCE("Get rid of magic number");
     
-    material.shader = Nil::Data::Material::FULLBRIGHT;
+    material.shader_type = Nil::Resource::Material::FULLBRIGHT;
     
-    Nil::Data::set(ground->entity, material);
+    Nil::Resource::load("CubeMat", material);
   }
   
   // Mesh Resource
+  Nil::Resource::Mesh mesh{};
   {
-    Nil::Data::Mesh_resource mesh{};
-
     mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
     memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
 
@@ -59,7 +56,16 @@ setup(Ground *ground)
 
     mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
 
-    Nil::Data::set(ground->entity, mesh);
+    Nil::Resource::load("Cube", mesh);
+  }
+  
+  // Renderable
+  {
+    Nil::Data::Renderable renderable;
+    renderable.material_id = material.id;
+    renderable.mesh_id = mesh.id;
+    
+    Nil::Data::set(ground->entity, renderable);
   }
 }
 

@@ -1,11 +1,7 @@
 #include <game/actor.hpp>
 #include <game/data.hpp>
-#include <nil/data/logic.hpp>
-#include <nil/data/camera.hpp>
-#include <nil/data/mouse.hpp>
-#include <nil/data/keyboard.hpp>
-#include <nil/data/material.hpp>
-#include <nil/data/transform.hpp>
+#include <nil/data/data.hpp>
+#include <nil/resource/resource.hpp>
 #include <math/geometry/ray.hpp>
 #include <math/general/general.hpp>
 #include <math/quat/quat.hpp>
@@ -172,7 +168,7 @@ think(Nil::Node node, uintptr_t user_data)
     /*
       Else try and find an alternative step.
     */
-    else
+    else if(math::vec3_length(move_dir))
     {
       math::vec3 start;
       math::vec3 end;
@@ -295,14 +291,14 @@ setup(Actor *actor)
     
     // Head Material
     {
-      Nil::Data::Material mat{};
-      
-      float color[] = {1.f, 1.f, 0.f, 1.f};
-      memcpy(mat.color, color, sizeof(mat.color));
-      
-      mat.shader = Nil::Data::Material::FULLBRIGHT;
-      
-      Nil::Data::set(head, mat);
+//      Nil::Resource::Material mat{};
+//      
+//      float color[] = {1.f, 1.f, 0.f, 1.f};
+//      memcpy(mat.color, color, sizeof(mat.color));
+//      
+//      mat.shader = Nil::Data::Material::FULLBRIGHT;
+//      
+//      Nil::Data::set(head, mat);
     }
     
     // Camera
