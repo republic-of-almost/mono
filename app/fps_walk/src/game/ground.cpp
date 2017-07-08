@@ -33,13 +33,10 @@ setup(Ground *ground)
   // Material
   Nil::Resource::Material material{};
   {
-    material.color = 0x888888FF;
-    
-    LOG_TODO_ONCE("Get rid of magic number");
-    
+    material.color = 0x880088FF;
     material.shader_type = Nil::Resource::Material::FULLBRIGHT;
     
-    Nil::Resource::load("CubeMat", material);
+    Nil::Resource::load("GroundMat", material);
   }
   
   // Mesh Resource

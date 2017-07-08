@@ -1,7 +1,8 @@
 #include <game/environment.hpp>
+#include <assets/cube_mesh.hpp>
 #include <nil/resource/resource.hpp>
 #include <nil/data/data.hpp>
-#include <lib/assert.hpp>
+#include <lib/utilities.hpp>
 #include <math/math.hpp>
 
 
@@ -36,14 +37,19 @@ think(Nil::Node node, uintptr_t user_data)
     const float x = math::clamp(math::cos(time + env_time), -half_root_two, +half_root_two) * (radius + y);
     const float z = math::clamp(math::sin(time + env_time), -half_root_two, +half_root_two) * (radius + y);
     
-    float rgba[] = {1.f, (y / 10.f) * 1.f, 1.f, 1.f};
+    float rgba[] = {1.f, (y / 10.f), 1.f, 1.f};
     
-//    Nil::Resource::Material material{};
-//    Nil::Resource::get(child, material);
+    char name[16]{};
+    sprintf(name, "Env%dMat", i);
     
-//    memcpy(material.color, rgba, sizeof(material.color));
+    Nil::Resource::Material mat{};
+    const bool found = Nil::Resource::find_by_name(name, mat);
+    LIB_ASSERT(found);
     
-//    Nil::Data::set(child, material);
+    mat.color = lib::color::init(rgba);
+    mat.shader_type = Nil::Resource::Material::FULLBRIGHT;
+    
+    Nil::Resource::load(name, mat);
     
     const float default_scale = 2.f;
     const float scale_up = default_scale * ((float)i / 10.f);
@@ -74,15 +80,42 @@ setup(Environment *env)
   
   env->entity.set_name("Environment");
   
+  // Mesh Resource
+  Nil::Resource::Mesh mesh{};
+  {
+    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
+    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
+
+    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
+    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
+
+    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
+    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
+
+    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
+
+    Nil::Resource::load("EnvCube", mesh);
+  }  
+  
   // Child nodes
   for(uint32_t i = 0; i < env_count; ++i)
   {
     Nil::Node node;
     node.set_name("Env");
     node.set_parent(env->entity);
+
+    char name[16]{};
+    sprintf(name, "Env%dMat", i);
     
-//    Nil::Data::Material material{};
-//    Nil::Data::set(node, material);
+    Nil::Resource::Material material{};
+    material.shader_type = Nil::Resource::Material::FULLBRIGHT;
+    material.color = 0xFF0000FF;
+    Nil::Resource::load(name, material);
+    
+    Nil::Data::Renderable renderable;
+    renderable.material_id = material.id;
+    renderable.mesh_id = mesh.id;
+    Nil::Data::set(node, renderable);
   }
   
   // Callbacks

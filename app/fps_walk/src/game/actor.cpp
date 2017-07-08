@@ -32,8 +32,8 @@ think(Nil::Node node, uintptr_t user_data)
     const float head_speed = 0.05f;
     const float final_speed = delta_time * head_speed;
     
-    actor->accum_pitch -= ms.delta[1] * final_speed;
-    actor->accum_yaw   += ms.delta[0] * final_speed;
+    actor->accum_pitch += ms.delta[1] * final_speed;
+    actor->accum_yaw   -= ms.delta[0] * final_speed;
     
     actor->accum_pitch = math::clamp(
       actor->accum_pitch,
