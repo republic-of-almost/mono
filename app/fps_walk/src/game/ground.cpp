@@ -1,8 +1,7 @@
 #include <game/ground.hpp>
 #include <assets/cube_mesh.hpp>
-#include <nil/data/transform.hpp>
-#include <nil/data/material.hpp>
-#include <nil/data/mesh_resource.hpp>
+#include <nil/data/data.hpp>
+#include <nil/resource/resource.hpp>
 #include <lib/assert.hpp>
 #include <lib/logging.hpp>
 
@@ -33,7 +32,7 @@ setup(Ground *ground)
   
   // Material
   {
-    Nil::Data::Material material{};
+    Nil::Resource::Material material{};
     
     const float color[] = {0.5f, 0.f, 0.5f, 1.f};
     memcpy(material.color, color, sizeof(material.color));
