@@ -17,8 +17,6 @@
 #include "keyboard.hpp"
 #include "light.hpp"
 #include "logic.hpp"
-#include "mesh.hpp"
-#include "mesh_resource.hpp"
 #include "mouse.hpp"
 #include "resource.hpp"
 #include "renderable.hpp"

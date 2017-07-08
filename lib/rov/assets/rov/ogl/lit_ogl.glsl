@@ -48,7 +48,7 @@ void
 main()
 {
   in_ps_texcoord  = vs_in_texture_coords;
-  in_ps_normal    = normalize(transpose(mat3(inverse(uni_world))) * vs_in_normal);
+  in_ps_normal    = normalize(transpose(mat3(inverse(uni_world))) * vs_in_normal); // todo fix C++ mat4 inverse
   in_ps_world_pos = vec3(uni_world * vec4(vs_in_position, 1.0)).xyz;
 
   gl_Position    = uni_wvp * vec4(vs_in_position, 1.0);

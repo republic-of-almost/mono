@@ -9,8 +9,6 @@
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
-#include <nil/data/mesh_resource.hpp>
-#include <nil/data/mesh.hpp>
 #include <nil/data/renderable.hpp>
 #include <assets/cube_mesh.hpp>
 

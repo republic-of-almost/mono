@@ -37,8 +37,6 @@ struct Gamepad;
 struct Keyboard;
 struct Light;
 struct Logic;
-struct Mesh;
-struct Mesh_resource;
 struct Mouse;
 struct Renderable;
 struct Resource;

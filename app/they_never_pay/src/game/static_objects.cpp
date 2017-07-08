@@ -1,8 +1,6 @@
 #include <game/static_objects.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/data/renderable.hpp>
-#include <nil/data/mesh.hpp>
-#include <nil/data/mesh_resource.hpp>
 #include <lib/logging.hpp>
 #include <math/general/general.hpp>
 #include <assets/cube_mesh.hpp>
@@ -48,15 +46,7 @@ setup(Static_objects *obj)
 //    material.shader = Nil::Data::Renderable::FULLBRIGHT;
     
     Nil::Data::set(obj->object, renderable);
-  }
-  
-  // Mesh Instance
-  {
-    Nil::Data::Mesh mesh{};
-    mesh.mesh_id = (uint32_t)Game_asset::CUBE;
-    
-    Nil::Data::set(obj->object, mesh);
-  }
+  }  
 }
 
 

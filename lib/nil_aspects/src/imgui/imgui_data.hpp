@@ -38,14 +38,6 @@ render_data(Nil::Data::Renderable *data);
 
 
 bool
-render_data(Nil::Data::Mesh *data);
-
-
-bool
-render_data(Nil::Data::Mesh_resource *data);
-
-
-bool
 render_data(Nil::Data::Mouse *data);
 
 
