@@ -10,24 +10,21 @@
 #include <stdio.h>
 
 
-namespace Nil {
-namespace Resource {
-namespace Scene {
+namespace {
 
 
-bool
-load(Nil::Node &node, const char *filename)
+/*
+  Loading scene and model is the same with the exception that nodes are
+  created for scene, so we funnel both through here.
+*/
+inline bool
+load_assets(Nil::Node node, const char *filename)
 {
   // -- Param Check -- //
 
   if(!lib::file::exists(filename))
   {
     LOG_ERROR("Can't find file to load");
-    return false;
-  }
-  
-  if(!node.is_valid())
-  {
     return false;
   }
   
@@ -73,7 +70,7 @@ load(Nil::Node &node, const char *filename)
     
     Nil::Resource::Material mat{};
     
-    mat.shader_type = Nil::Resource::Material::FULLBRIGHT;
+    mat.shader_type = Nil::Resource::Material::LIT;
     mat.color = 0xFF000000;
     
     Nil::Resource::Texture tex{};
@@ -86,32 +83,68 @@ load(Nil::Node &node, const char *filename)
   
   // -- Create Nodes and Renderables -- //
   
-  for(size_t i = 0; i < model.mesh_count; ++i)
+  if(node)
   {
-    Nil::Node child_node;
-    child_node.set_parent(node);
-    child_node.set_name(model.name[i]);
-    
-    const char *mesh_name = model.name[i];
-    
-    Nil::Resource::Mesh mesh{};
-    Nil::Resource::find_by_name(mesh_name, mesh);
-    
-    Nil::Resource::Material mat{};
-    const int32_t mat_id = model.material_id[i];
-    if(mat_id > -1)
+    for(size_t i = 0; i < model.mesh_count; ++i)
     {
-      Nil::Resource::find_by_name(model.mesh_material[mat_id].name, mat);
+      Nil::Node child_node;
+      child_node.set_parent(node);
+      child_node.set_name(model.name[i]);
+      
+      const char *mesh_name = model.name[i];
+      
+      Nil::Resource::Mesh mesh{};
+      Nil::Resource::find_by_name(mesh_name, mesh);
+      
+      Nil::Resource::Material mat{};
+      const int32_t mat_id = model.material_id[i];
+      if(mat_id > -1)
+      {
+        Nil::Resource::find_by_name(model.mesh_material[mat_id].name, mat);
+      }
+      
+      Nil::Data::Renderable renderable{};
+      renderable.material_id = mat.id;
+      renderable.mesh_id = mesh.id;
+      
+      Nil::Data::set(child_node, renderable);
     }
-    
-    Nil::Data::Renderable renderable{};
-    renderable.material_id = mat.id;
-    renderable.mesh_id = mesh.id;
-    
-    Nil::Data::set(child_node, renderable);
   }
   
   return true;
+}
+
+
+} // ns
+
+
+
+namespace Nil {
+namespace Resource {
+namespace Model {
+
+
+bool
+load(const char *filename)
+{
+  return load_assets(Nil::Node(nullptr), filename);
+}
+
+
+} // ns
+} // ns
+} // ns
+
+
+namespace Nil {
+namespace Resource {
+namespace Scene {
+
+
+bool
+load(Nil::Node &node, const char *filename)
+{
+  return load_assets(node, filename);
 }
 
 
