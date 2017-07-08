@@ -264,7 +264,7 @@ ogl_createProgram(
     return false;
   }
 
-  char vert_src[1 << 12]{};
+  char vert_src[1 << 13]{};
   lib::string::get_text_between_tags(
     "// VERT_START //",
     "// VERT_END //",
@@ -273,7 +273,7 @@ ogl_createProgram(
     sizeof(vert_src)
   );
 
-  char geo_src[1 << 12]{};
+  char geo_src[1 << 13]{};
   lib::string::get_text_between_tags(
     "// GEO_START //",
     "// GEO_END //",
@@ -282,7 +282,7 @@ ogl_createProgram(
     sizeof(geo_src)
   );
 
-  char frag_src[1 << 12]{};
+  char frag_src[1 << 13]{};
   lib::string::get_text_between_tags(
     "// FRAG_START //",
     "// FRAG_END //",

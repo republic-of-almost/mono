@@ -1,6 +1,6 @@
 
 /*
-  Basic Forward lighting.
+  Mesh Renderer Shader
   --
   
   TODO
@@ -177,73 +177,82 @@ calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
 void
 main()
 {
-  vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
-  vec4 diffuse_color = mix(diffuse_map, uni_color, uni_color.a);
-  
-  vec4 specular_map = texture(uni_map_03, in_ps_texcoord);
-
-  Material mat;
-  mat.Ka = vec3(0.0);
-  mat.Kd = diffuse_color.rgb;
-  mat.Ks = vec3(0.2,0.2,0.2);//specular_map.rgb;
-  mat.shininess = CONST_SHININESS;
-
-  vec3 accum_color = vec3(0,0,0);
-
-  /*
-    For all the lights, we should tile this if we can.
-  */
-  for(int i = 0; i < uni_light_count; ++i)
+  if(uni_light_count > 0)
   {
-    // Data
-    int index = i * 3;
-
-    vec4 pos_data   = texelFetch(uni_light_array, index + 0, 0);
-    vec4 color_data = texelFetch(uni_light_array, index + 1, 0);
-    vec4 atten_data = texelFetch(uni_light_array, index + 2, 0);
+    vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
+    vec4 diffuse_color = mix(diffuse_map, uni_color, uni_color.a);
     
-    // Light
-    Light light;
-    light.position = pos_data.xyz;
+    vec4 specular_map = texture(uni_map_03, in_ps_texcoord);
 
-    // We just pass the color here
-    light.La = color_data.rgb;
-    light.Ld = color_data.rgb;
-    light.Ls = color_data.rgb;
+    Material mat;
+    mat.Ka = vec3(0.0);
+    mat.Kd = diffuse_color.rgb;
+    mat.Ks = vec3(0.2,0.2,0.2);//specular_map.rgb;
+    mat.shininess = CONST_SHININESS;
 
-    vec3 L = normalize(light.position - in_ps_world_pos);
-    vec3 V = normalize(uni_eye - in_ps_world_pos);
-    vec3 N = normalize(in_ps_normal);
-    
-    // Is directional?
-    if(pos_data.w > 0.f)
+    vec3 accum_color = vec3(0,0,0);
+
+    /*
+      For all the lights, we should tile this if we can.
+    */
+    for(int i = 0; i < uni_light_count; ++i)
     {
-      L = pos_data.xyz;
+      // Data
+      int index = i * 3;
+
+      vec4 pos_data   = texelFetch(uni_light_array, index + 0, 0);
+      vec4 color_data = texelFetch(uni_light_array, index + 1, 0);
+      vec4 atten_data = texelFetch(uni_light_array, index + 2, 0);
+      
+      // Light
+      Light light;
+      light.position = pos_data.xyz;
+
+      // We just pass the color here
+      light.La = color_data.rgb;
+      light.Ld = color_data.rgb;
+      light.Ls = color_data.rgb;
+
+      vec3 L = normalize(light.position - in_ps_world_pos);
+      vec3 V = normalize(uni_eye - in_ps_world_pos);
+      vec3 N = normalize(in_ps_normal);
+      
+      // Is directional?
+      if(pos_data.w > 0.f)
+      {
+        L = pos_data.xyz;
+      }
+      
+      vec3 final_light  = calculate_light(light, mat, L, V, N);
+      
+      // Attenuation
+      Attenuation atten;
+      atten.constant    = atten_data.x;
+      atten.linear      = atten_data.y;
+      atten.exponential = atten_data.z;
+      
+      float final_atten = calculate_attenuation(light.position, in_ps_world_pos, atten);
+      
+      // Is directional?
+      if(pos_data.w > 0.f)
+      {
+        final_atten = 1.0;
+      }
+    
+      // Final
+      accum_color += (final_light * final_atten);
     }
-    
-    vec3 final_light  = calculate_light(light, mat, L, V, N);
-    
-    // Attenuation
-    Attenuation atten;
-    atten.constant    = atten_data.x;
-    atten.linear      = atten_data.y;
-    atten.exponential = atten_data.z;
-    
-    float final_atten = calculate_attenuation(light.position, in_ps_world_pos, atten);
-    
-    // Is directional?
-    if(pos_data.w > 0.f)
-    {
-      final_atten = 1.0;
-    }
-  
-    // Final
-    accum_color += (final_light * final_atten);
+
+    // Output Result //
+    vec3 const_amb = vec3(CONST_AMB);
+    out_ps_color = vec4((const_amb + accum_color), 1.0);
   }
-
-  // Output Result //
-  vec3 const_amb = vec3(CONST_AMB);
-  out_ps_color = vec4((const_amb + accum_color), 1.0);
-  
+  else
+  {
+    vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
+    vec4 diffuse_color = mix(diffuse_map, uni_color, uni_color.a);
+    
+    out_ps_color = diffuse_color;
+  }
 }
 // FRAG_END //
