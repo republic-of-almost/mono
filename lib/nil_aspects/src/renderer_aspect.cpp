@@ -35,6 +35,8 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
   self->current_viewport[0] = 800;
   self->current_viewport[1] = 600;
+  
+  self->mesh_ids.emplace_back(uint32_t{0});
 }
 
 
@@ -179,12 +181,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           &mesh_resource->platform_resource
         );
         
-//        if((mesh_resource->id + 1) > self->mesh_ids.size())
-//        {
-//          self->mesh_ids.resize(1 << (mesh_resource->id + 1));
-//        }
-//
-//        self->mesh_ids[mesh_resource->id] = mesh;
         self->mesh_ids.emplace_back(mesh);
 
         mesh_resource->status = Nil::Resource::Mesh::LOADED;
@@ -351,21 +347,21 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         
         if(mesh_count > render.mesh_id)
         {
-        
-          
 //          rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
           rov_setColor(1, 1, 1, 0);
 //          rov_setShader(render.shader);
           rov_setShader(rovShader_Lit);
-          rov_setMesh(self->mesh_ids[render.mesh_id]);
+          
+          const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
+          rov_setMesh(mesh_id);
           
           const uint32_t texture_01 = mats[render.material_id].texture_01;
           
-//          if(texture_01)
+          if(texture_01)
           {
             const uint32_t texture_count = self->texture_ids.size();
           
-//            if(texture_count > texture_01)
+            if(texture_count > texture_01)
             {
               const uint32_t texture_id = self->texture_ids[texture_01];
               rov_setTexture(texture_id, 0);
