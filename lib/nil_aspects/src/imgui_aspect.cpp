@@ -3,6 +3,7 @@
 #include <aspect/imgui_aspect.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
+#include <nil/resource/resource.hpp>
 #include <nil/nil.hpp>
 #include <nil/data/window.hpp>
 #include <imgui/imgui.h>
@@ -294,8 +295,8 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGui::Begin("Texture Data", &self->show_data_textures);
     
     size_t count            = 0;
-    Nil::Data::Texture *textures = nullptr;
-    Nil::Data::get(&count, &textures);
+    Nil::Resource::Texture *textures = nullptr;
+    Nil::Resource::get(&count, &textures);
 
     ImGui::Text("Texture Count %zu", count);
     
@@ -551,8 +552,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       inspector_data<Nil::Data::Resource>(self->inspector_node);
       inspector_data<Nil::Data::Renderable>(self->inspector_node);
       inspector_data<Nil::Data::Rigidbody>(self->inspector_node);
-      inspector_data<Nil::Data::Texture>(self->inspector_node);
-      inspector_data<Nil::Data::Texture_resource>(self->inspector_node);
       inspector_data<Nil::Data::Window>(self->inspector_node);
     }
 
@@ -581,7 +580,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Mouse",
       "Resource",
       "Rigidbody",
-      "Texture",
       "Transform",
       "Window",
     };
@@ -608,7 +606,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Mouse>,
       add_data<Nil::Data::Resource>,
       add_data<Nil::Data::Rigidbody>,
-      add_data<Nil::Data::Texture>,
       add_data<Nil::Data::Transform>,
       add_data<Nil::Data::Window>,
     };

@@ -23,8 +23,6 @@
 #include "resource.hpp"
 #include "renderable.hpp"
 #include "rigidbody.hpp"
-#include "texture.hpp"
-#include "texture_resource.hpp"
 #include "transform.hpp"
 #include "window.hpp"
 

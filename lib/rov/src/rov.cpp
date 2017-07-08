@@ -140,6 +140,13 @@ rov_startRenderPass(
 
 
 void
+rov_setColor(const float col[4])
+{
+  rov_setColor(col[0], col[1], col[2], col[3]);
+}
+
+
+void
 rov_setColor(float r, float g, float b, float a)
 {
   rov_data.curr_rov_color[0] = r;

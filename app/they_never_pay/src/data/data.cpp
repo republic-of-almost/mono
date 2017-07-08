@@ -9,8 +9,6 @@
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
-#include <nil/data/texture.hpp>
-#include <nil/data/texture_resource.hpp>
 #include <nil/data/mesh_resource.hpp>
 #include <nil/data/mesh.hpp>
 #include <nil/data/renderable.hpp>
@@ -33,58 +31,8 @@ namespace
 void
 load_assets()
 {
-  uint32_t texture_id_counter = 0;
-  
   Nil::Node assets = get_assets();
 
-//  // Load assets
-//  {
-//    Nil::Node asset;
-//    asset.set_parent(assets);
-//    asset.set_name("Cube Bev");
-//    
-//    Nil::Data::Mesh_resource mesh{};
-//
-//    mesh.id = (uint32_t)Game_asset::CUBE_BEV;
-//
-//    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
-//    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
-//
-//    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
-//    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
-//
-//    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-//    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-//
-//    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
-//
-//    Nil::Data::set(asset, mesh);
-//  }
-//  
-//  // Load assets
-//  {
-//    Nil::Node asset;
-//    asset.set_parent(assets);
-//    asset.set_name("Cube");
-//    
-//    Nil::Data::Mesh_resource mesh{};
-//
-//    mesh.id = (uint32_t)Game_asset::CUBE;
-//
-//    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_positions));
-//    memcpy(mesh.position_vec3, Nil_ext::Mesh::cube_positions, sizeof(Nil_ext::Mesh::cube_positions));
-//
-//    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_normals));
-//    memcpy(mesh.normal_vec3, Nil_ext::Mesh::cube_normals, sizeof(Nil_ext::Mesh::cube_normals));
-//
-//    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_texture_coords));
-//    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::cube_texture_coords, sizeof(Nil_ext::Mesh::cube_texture_coords));
-//
-//    mesh.count = Nil_ext::Mesh::cube_mesh_vert_count;
-//
-//    Nil::Data::set(asset, mesh);
-//  }
-  
   // Load static assets
   {
     const char *file = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj";
@@ -121,11 +69,6 @@ load_assets()
       
       Nil::Data::set(child, light);
     }
-  }
-  
-  // Resource load
-  {
-//    Nil::Resource::Model::load("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
   }
 }
 

@@ -54,10 +54,6 @@ render_data(Nil::Data::Resource *data);
 
 
 bool
-render_data(Nil::Data::Texture_resource *data);
-
-
-bool
 render_data(Nil::Data::Transform *data);
 
 

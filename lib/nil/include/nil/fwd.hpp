@@ -43,8 +43,6 @@ struct Mouse;
 struct Renderable;
 struct Resource;
 struct Rigidbody;
-struct Texture;
-struct Texture_resource;
 struct Transform;
 struct Window;
 

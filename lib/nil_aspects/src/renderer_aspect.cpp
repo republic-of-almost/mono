@@ -270,9 +270,9 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
         rov_lights[i].color[1] = 1.f;
         rov_lights[i].color[2] = 1.f;
 
-        rov_lights[i].attenuation[0] = light->atten_const;//0.1f;
-        rov_lights[i].attenuation[1] = light->atten_linear;//0.14f;
-        rov_lights[i].attenuation[2] = light->atten_exponential;//0.07f;
+        rov_lights[i].attenuation[0] = light->atten_const;
+        rov_lights[i].attenuation[1] = light->atten_linear;
+        rov_lights[i].attenuation[2] = light->atten_exponential;
       }
 
       rov_updateLights(self->light_pack, rov_lights.data(), rov_lights.size());
@@ -347,8 +347,17 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         
         if(mesh_count > render.mesh_id)
         {
-//          rov_setColor(render.color[0], render.color[1], render.color[2], render.color[3]);
-          rov_setColor(1, 1, 1, 0);
+          const Nil::Resource::Material mat = mats[render.material_id];
+          
+          const float colorf[4]
+          {
+            lib::color::get_channel_1f(mat.color),
+            lib::color::get_channel_2f(mat.color),
+            lib::color::get_channel_3f(mat.color),
+            lib::color::get_channel_4f(mat.color),
+          };
+          
+          rov_setColor(colorf);
 //          rov_setShader(render.shader);
           rov_setShader(rovShader_Lit);
           
@@ -388,7 +397,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         for(size_t i = 0; i < lines; ++i)
         {
           const size_t index = i * 9;
-
+          
           rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
           rov_submitLine(&data[index + 0], &data[index + 3]);
         }

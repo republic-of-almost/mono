@@ -185,7 +185,7 @@ main()
   Material mat;
   mat.Ka = vec3(0.0);
   mat.Kd = diffuse_color.rgb;
-  mat.Ks = specular_map.rgb;
+  mat.Ks = vec3(0.2,0.2,0.2);//specular_map.rgb;
   mat.shininess = CONST_SHININESS;
 
   vec3 accum_color = vec3(0,0,0);

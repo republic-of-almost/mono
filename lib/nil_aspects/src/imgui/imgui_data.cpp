@@ -358,7 +358,7 @@ bool
 render_data(Nil::Data::Resource *data)
 {
   bool updated = false;
-
+  
 //  ImGui::Text("Set in code.");
 //
 //  // -- Readonly -- //
@@ -367,39 +367,13 @@ render_data(Nil::Data::Resource *data)
 //  ImGui::Spacing();
 //
 //  constexpr uint32_t flags = ImGuiInputTextFlags_ReadOnly;
-//  
+//
 //  ImGui::Text("Readonly Values");
 //
 //  ImGui::InputInt("Type",   (int*)&data->type, 0, 0,  flags);
 //  ImGui::InputText("Name",  &data->name[0], 64,       flags);
 //  ImGui::InputInt("Ptr",    (int*)&data->data, 0, 0,  flags);
   
-  return updated;
-}
-
-
-bool
-render_data(Nil::Data::Texture_resource *data)
-{
-  bool updated = false;
-
-  update(ImGui::InputInt("ID##TexR", (int*)&data->id), &updated);
-  
-  // -- Readonly -- //
-  
-  ImGui::Separator();
-  ImGui::Spacing();
-
-  constexpr uint32_t flags = ImGuiInputTextFlags_ReadOnly;
-  
-  ImGui::Text("Readonly Values");
-
-  ImGui::InputInt("Components*##TexR",  (int*)&data->compoents,  flags);
-  ImGui::InputInt("Width*##TexR",       (int*)&data->width,      flags);
-  ImGui::InputInt("Height*##TexR",      (int*)&data->height,     flags);
-  ImGui::InputInt("Depth*##TexR",       (int*)&data->depth,      flags);
-  ImGui::InputInt("Dimentions*##TexR",  (int*)&data->dimentions, flags);
-
   return updated;
 }
 
