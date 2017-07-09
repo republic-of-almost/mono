@@ -325,7 +325,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
             lib::color::get_channel_4f(mat.color),
           };
           
-          rov_setShader(mat.shader_type);
           rov_setColor(colorf);
           
           const uint32_t mesh_id = self->mesh_ids[render.mesh_id];

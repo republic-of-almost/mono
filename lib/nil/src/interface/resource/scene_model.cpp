@@ -70,7 +70,6 @@ load_assets(Nil::Node node, const char *filename)
     
     Nil::Resource::Material mat{};
     
-    mat.shader_type = Nil::Resource::Material::LIT;
     mat.color = 0xFF000000;
     
     Nil::Resource::Texture tex{};

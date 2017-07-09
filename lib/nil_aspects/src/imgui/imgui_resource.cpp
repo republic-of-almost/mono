@@ -63,7 +63,13 @@ render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
 void
 render_resource(const Nil::Resource::Material *rsrc, const size_t count)
 {
-  
+  ImGui::Text("Material Count %zu", count);
+
+  for(size_t i = 0; i < count; ++i)
+  {
+    char name[16]{};
+    sprintf(name, "Material#%zu", i + 1);
+  }
 }
 
 

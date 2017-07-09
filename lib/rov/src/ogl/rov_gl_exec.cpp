@@ -84,14 +84,12 @@ ogl_exec(
 
       const uint32_t details = lib::bits::lower32(mat.material);
 
-      const uint8_t shader = lib::bits::first8(details);
+      const uint8_t shader = rovShader_Lit;//lib::bits::first8(details);
       const uint8_t texture_01 = lib::bits::second8(details);
       const uint8_t texture_02 = lib::bits::third8(details);
       const uint8_t texture_03 = lib::bits::forth8(details);
       
-      const uint8_t select_shader = math::max(shader, 1);
-      
-      const rovGLMeshProgram shd = rov_gl_data->rov_mesh_programs[select_shader];
+      const rovGLMeshProgram shd = rov_gl_data->rov_mesh_programs[shader];
       
 
       /*
@@ -154,14 +152,7 @@ ogl_exec(
           const size_t l_index = rp.light_buffer - 1;
           const rovGLLightPack light_pack = rov_gl_data->light_buffers[l_index];
           
-          if(shader != 0)
-          {
-            glUniform1i(shd.uni_light_count, light_pack.count);
-          }
-          else
-          {
-            glUniform1i(shd.uni_light_count, 0);
-          }
+          glUniform1i(shd.uni_light_count, light_pack.count);
           
           glActiveTexture(GL_TEXTURE0 + slot);
           glBindTexture(GL_TEXTURE_1D, light_pack.gl_id);

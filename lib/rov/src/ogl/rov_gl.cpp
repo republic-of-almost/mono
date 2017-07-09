@@ -46,7 +46,7 @@ ogl_init(rovGLData *gl_data)
 
     rovGLMeshProgram lit{};
     const bool lit_success = ogl_createProgram(
-      "../Resources/assets/rov/ogl/lit_ogl.glsl",
+      "../Resources/assets/rov/ogl/mesh_renderer.glsl",
       nullptr,
       nullptr,
       nullptr,

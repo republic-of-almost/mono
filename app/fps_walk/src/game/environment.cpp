@@ -47,7 +47,6 @@ think(Nil::Node node, uintptr_t user_data)
     LIB_ASSERT(found);
     
     mat.color = lib::color::init(rgba);
-    mat.shader_type = Nil::Resource::Material::FULLBRIGHT;
     
     Nil::Resource::load(name, mat);
     
@@ -108,7 +107,6 @@ setup(Environment *env)
     sprintf(name, "Env%dMat", i);
     
     Nil::Resource::Material material{};
-    material.shader_type = Nil::Resource::Material::FULLBRIGHT;
     material.color = 0xFF0000FF;
     Nil::Resource::load(name, material);
     

@@ -15,7 +15,6 @@ namespace Resource {
 
 struct Material
 {
-  enum { FULLBRIGHT, LIT, } shader_type;
   uint32_t color;
   uint32_t texture_01;
   uint32_t texture_02;

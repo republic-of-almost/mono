@@ -34,7 +34,6 @@ setup(Ground *ground)
   Nil::Resource::Material material{};
   {
     material.color = 0x880088FF;
-    material.shader_type = Nil::Resource::Material::FULLBRIGHT;
     
     Nil::Resource::load("GroundMat", material);
   }
