@@ -69,11 +69,13 @@ load_assets(Nil::Node node, const char *filename)
     lib::material *mesh_mat = &model.mesh_material[i];
     
     Nil::Resource::Material mat{};
-    
-    mat.color = 0xFF000000;
+    mat.color = 0xEEEEFF00;
     
     Nil::Resource::Texture tex{};
-    Nil::Resource::find_by_name(mesh_mat->map_path[0], tex);
+    if(!Nil::Resource::find_by_name(mesh_mat->map_path[0], tex))
+    {
+      mat.color = mat.color | 0x000000FF;
+    }
     
     mat.texture_01 = tex.id;
     

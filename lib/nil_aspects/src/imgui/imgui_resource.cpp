@@ -2,6 +2,7 @@
 #include <nil/resource/resource.hpp>
 #include <math/general/general.hpp>
 #include <imgui/imgui.h>
+#include <lib/color.hpp>
 #include <stdio.h>
 
 
@@ -67,8 +68,46 @@ render_resource(const Nil::Resource::Material *rsrc, const size_t count)
 
   for(size_t i = 0; i < count; ++i)
   {
+    const Nil::Resource::Material *data = &rsrc[i];
+  
     char name[16]{};
     sprintf(name, "Material#%zu", i + 1);
+    
+    if(ImGui::CollapsingHeader(name))
+    {
+      size_t tex_count = 0;
+      Nil::Resource::Texture *textures;
+      Nil::Resource::get(&tex_count, &textures);
+      
+      ImGui::Image(
+        (void*)textures[data->texture_01].platform_resource,
+        ImVec2(64, 64)
+      );
+      
+      ImGui::SameLine();
+      
+      ImGui::Image(
+        (void*)textures[data->texture_02].platform_resource,
+        ImVec2(64, 64)
+      );
+      
+      ImGui::SameLine();
+      
+      ImGui::Image(
+        (void*)textures[data->texture_03].platform_resource,
+        ImVec2(64, 64)
+      );
+    
+      float color[4]
+      {
+        lib::color::get_channel_1f(data->color),
+        lib::color::get_channel_2f(data->color),
+        lib::color::get_channel_3f(data->color),
+        lib::color::get_channel_4f(data->color),
+      };
+    
+      ImGui::ColorEdit4("Color##Mat", color);
+    }
   }
 }
 

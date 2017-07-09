@@ -289,52 +289,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     
     ImGui::End();
   }
-
-
-  /*
-    Textures
-  */
-  if(self->show_data_textures)
-  {
-    ImGui::Begin("Texture Data", &self->show_data_textures);
-    
-    size_t count            = 0;
-    Nil::Resource::Texture *textures = nullptr;
-    Nil::Resource::get(&count, &textures);
-
-    ImGui::Text("Texture Count %zu", count);
-    
-    static uint32_t tex_slider = 6;
-    char name[32]{};
-    sprintf(name, "Size: %d", 1 << tex_slider);
-    ImGui::SliderInt("Texture Size", (int*)&tex_slider, 6, 10, name);
-    
-    ImGui::Separator();
-    
-    const ImVec2 win_size = ImGui::GetWindowSize();
-    
-    const uint32_t tex_size = 1 << tex_slider;
-    const uint32_t col_size_est = tex_size + 20;
-    
-    const uint32_t cols = math::max(((uint32_t)win_size.x / col_size_est), (uint32_t)1);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      ImGui::Image((ImTextureID)textures[i].platform_resource, ImVec2(tex_size, tex_size));
-    
-      if(ImGui::IsItemHovered())
-      {
-        ImGui::SetTooltip("ID: %d\nDimentions: %d x %d\nChannels: %d", textures[i].id,  textures[i].width, textures[i].height, textures[i].components);
-      }
-      
-      if((i + 1) % (cols ))
-      {
-        ImGui::SameLine();
-      }
-    }
-
-    ImGui::End();
-  }
   
   /*
     Renderables
@@ -354,7 +308,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       
     }
     
-
     ImGui::End();
   }
   
