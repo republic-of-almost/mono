@@ -10,7 +10,7 @@
 //#include <imguizmo/ImGuizmo.h>
 #include <string.h>
 #include <lib/utilities.hpp>
-
+#include "imgui/imgui_resource.hpp"
 #include "imgui/imgui_data.hpp"
 
 #include <lib/bench.hpp>
@@ -38,6 +38,10 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->show_data_camera       = false;
   self->show_data_renderables  = false;
   self->show_data_textures     = false;
+  
+  self->show_rsrc_materials = false;
+  self->show_rsrc_textures  = false;
+  self->show_rsrc_meshes    = false;
 
   // Aspects can hook into UI callbacks with developer data.
   aspect.data_types = 0;
@@ -353,6 +357,50 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
     ImGui::End();
   }
+  
+  
+  // ---------------------------------------------------------- [ Resources ] --
+  
+  
+  if(self->show_rsrc_textures)
+  {
+    ImGui::Begin("Textures##RSrc", &self->show_rsrc_textures);
+    
+    size_t count = 0;
+    Nil::Resource::Texture *rsrc;
+    Nil::Resource::get(&count, &rsrc);
+    
+    Nil::ImGUI::render_resource(rsrc, count);
+    
+    ImGui::End();
+  }
+  
+  if(self->show_rsrc_meshes)
+  {
+    ImGui::Begin("Meshes##Rsrc", &self->show_rsrc_meshes);
+    
+    size_t count = 0;
+    Nil::Resource::Mesh *rsrc;
+    Nil::Resource::get(&count, &rsrc);
+    
+    Nil::ImGUI::render_resource(rsrc, count);
+    
+    ImGui::End();
+  }
+  
+  if(self->show_rsrc_materials)
+  {
+    ImGui::Begin("Materials##Rsrc", &self->show_rsrc_materials);
+    
+    size_t count = 0;
+    Nil::Resource::Material *rsrc;
+    Nil::Resource::get(&count, &rsrc);
+    
+    Nil::ImGUI::render_resource(rsrc, count);
+    
+    ImGui::End();
+  }
+  
 
   // ---------------------------------------------------------- [ Raw Graph ] --
 
@@ -675,14 +723,25 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       ImGui::MenuItem("Graph", nullptr, &self->show_graph);
       ImGui::MenuItem("Graph-Raw", nullptr, &self->show_raw_graph);
+      
       if(ImGui::BeginMenu("Data##NilMenu"))
       {
-        ImGui::MenuItem("Camera##NilMenu",      nullptr, &self->show_data_camera);
-        ImGui::MenuItem("Textures##NilMenu",    nullptr, &self->show_data_textures);
-        ImGui::MenuItem("Renderables##NilMenu", nullptr, &self->show_data_renderables);
+        ImGui::MenuItem("Camera##NMenu",      nullptr, &self->show_data_camera);
+        ImGui::MenuItem("Textures##NMenu",    nullptr, &self->show_data_textures);
+        ImGui::MenuItem("Renderables##NMenu", nullptr, &self->show_data_renderables);
         
         ImGui::EndMenu();
       }
+      
+      if(ImGui::BeginMenu("Resources##NilMenu"))
+      {
+        ImGui::MenuItem("Materials##NMenu", nullptr, &self->show_rsrc_materials);
+        ImGui::MenuItem("Textures##NMenu",  nullptr, &self->show_rsrc_textures);
+        ImGui::MenuItem("Meshes##NMenu",    nullptr, &self->show_rsrc_meshes);
+        
+        ImGui::EndMenu();
+      }
+      
       ImGui::MenuItem("Node Events", nullptr, &self->show_node_events);
 
       ImGui::Separator();

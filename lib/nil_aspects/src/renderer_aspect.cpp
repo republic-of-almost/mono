@@ -132,7 +132,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             &tex->platform_resource
           );
           
-          tex->id = tex_id;
+          tex->id         = tex_id;
+          tex->width      = x;
+          tex->height     = y;
+          tex->components = c;
           
           if((tex->id) > self->texture_ids.size())
           {

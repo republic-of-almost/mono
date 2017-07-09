@@ -41,6 +41,10 @@ struct Data
   bool show_data_camera;
   bool show_data_renderables;
   bool show_data_textures;
+  
+  bool show_rsrc_materials;
+  bool show_rsrc_textures;
+  bool show_rsrc_meshes;
 
   std::vector<Nil::Node> dev_nodes;
   std::vector<Nil::Data::Developer> dev_data;
