@@ -25,7 +25,7 @@ struct Data
   std::vector<uintptr_t> user_data;
 
   #ifdef IMGUI_DEVELOPER_SUPPORT
-  Nil::Node dev_node;
+  Nil::Node dev_node{nullptr};
   #endif
 };
 

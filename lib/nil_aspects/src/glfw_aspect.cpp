@@ -222,8 +222,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         double x_pos, y_pos;
         glfwGetCursorPos(self->window, &x_pos, &y_pos);
-        
-        glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         
         self->last_mouse_x = (float)x_pos;
         self->last_mouse_y = (float)y_pos;

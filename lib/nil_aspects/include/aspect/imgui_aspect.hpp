@@ -30,7 +30,7 @@ constexpr uint32_t developer_type_id = 1;
 
 struct Data
 {
-  Nil::Node inspector_node;
+  Nil::Node inspector_node{nullptr};
   bool show_graph;
   bool show_raw_graph;
   bool show_node_events;

@@ -54,17 +54,7 @@ ogl_init(rovGLData *gl_data)
     );
     gl_data->rov_mesh_programs.emplace_back(lit);
     
-    rovGLMeshProgram dir_light{};
-    const bool dir_success = ogl_createProgram(
-      "../Resources/assets/rov/ogl/dir_light_ogl.glsl",
-      nullptr,
-      nullptr,
-      nullptr,
-      &dir_light.program
-    );
-    gl_data->rov_mesh_programs.emplace_back(dir_light);
-
-    LIB_ASSERT(fb_success && lit_success && dir_success);
+    LIB_ASSERT(fb_success && lit_success);
     
     for(rovGLMeshProgram &prog : gl_data->rov_mesh_programs)
     {

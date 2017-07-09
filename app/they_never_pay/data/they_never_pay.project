@@ -22,19 +22,6 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
-    -- asset_dir = "assets/",
-
-    lib_dirs_macosx = {
-      "/usr/local/lib/",
-    },
-
-    linkoptions_macosx = {
-    },
-
-    inc_dirs_macosx = {
-      "/usr/local/include",
-    },
-
     project_dependencies = {
       "Nil",
       "Lib",
@@ -42,7 +29,7 @@ table.insert(
       "AspectsControllers",
       "Assets",
       "Nau",
-      
+
       -- Thirdparty
 
       "STB",

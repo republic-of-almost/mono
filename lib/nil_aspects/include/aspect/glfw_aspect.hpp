@@ -22,7 +22,7 @@ namespace GLFW_Aspect {
 struct Data
 {
   GLFWwindow *window;
-  Nil::Node window_node;
+  Nil::Node window_node{nullptr};
   
   float last_mouse_x;
   float last_mouse_y;
