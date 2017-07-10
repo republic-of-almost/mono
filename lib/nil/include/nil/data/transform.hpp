@@ -33,10 +33,6 @@ void
 set(Node &node, const Transform &in);
 
 
-// You cannot remove a transform
-// Hense why no function.
-
-
 // ----------------------------------------------------------------- [ Info ] --
 
 

@@ -50,12 +50,19 @@ namespace Data {
 
 
 void
-get(const Node &node, Bounding_box &out)
+get(const Node &node, Bounding_box &out, const bool inherited)
 {
   if(node.is_valid())
   {
     math::aabb internal;
-    if(Graph::node_get_bounding_box(Data::get_graph_data(), node.get_id(), &internal))
+    const bool found = Graph::node_get_bounding_box(
+      Data::get_graph_data(),
+      node.get_id(),
+      &internal,
+      inherited
+    );
+    
+    if(found)
     {
       memcpy(out.min, &internal.min, sizeof(float) * 3);
       memcpy(out.max, &internal.max, sizeof(float) * 3);

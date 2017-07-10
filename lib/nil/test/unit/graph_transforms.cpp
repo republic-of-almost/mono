@@ -89,9 +89,4 @@ TEST_CASE("Graph Transforms")
       );
     }
   }
-  
-  SECTION("Simple Inherited World Scale")
-  {
-    
-  }
 }

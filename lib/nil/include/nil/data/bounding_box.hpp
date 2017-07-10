@@ -25,7 +25,7 @@ struct Bounding_box
 
 
 void
-get(const Node &node, Bounding_box &out);
+get(const Node &node, Bounding_box &out, const bool inherited = false);
 
 
 void

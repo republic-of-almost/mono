@@ -50,12 +50,12 @@ namespace Data {
 
 
 void
-get(const Node &node, Transform &out, const bool world)
+get(const Node &node, Transform &out, const bool inherited)
 {
   if(node.is_valid())
   {
     math::transform internal;
-    if(Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal, world))
+    if(Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal, inherited))
     {
       memcpy(out.position, &internal.position, sizeof(float) * 3);
       memcpy(out.scale,    &internal.scale,    sizeof(float) * 3);

@@ -18,6 +18,7 @@
 
 Nil::Node app;
 Nil::Node camera;
+Nil::Node scene;
 
 
 void
@@ -55,6 +56,8 @@ main()
   {
     camera.set_name("Camera");
     Nil::Data::Camera cam{};
+    cam.width = 1.f;
+    cam.height = 1.f;
     cam.near_plane = 0.1f;
     cam.far_plane = 1000.f;
     cam.fov = math::tau() * 0.125;
@@ -64,6 +67,13 @@ main()
     Nil::Data::set(camera, cam);
   }
   
+    // Load static assets
+  {
+    scene.set_name("Scene");
+    const char *file = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj";
+    
+    Nil::Resource::Scene::load(scene, file);
+  }
 
   /*
     Run Game
