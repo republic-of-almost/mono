@@ -18,7 +18,7 @@
 #define MATH_TO_STRING_INLINE inline
 
 
-namespace MATH_NS_NAME {
+_MATH_NS_OPEN
 
 
 // ------------------------------------------------------------ [ Interface ] --
@@ -145,7 +145,7 @@ to_string(const transform &str, char out_buffer[128])
 }
 
 
-} // ns
+_MATH_NS_CLOSE
 
 
 #endif // inc guard
