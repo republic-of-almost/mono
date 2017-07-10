@@ -154,7 +154,7 @@ constexpr float cube_texture_coords[]
 constexpr uint32_t bev_cube_mesh_vert_count = 132;
 
 
-constexpr float bev_cube_positions[]
+float bev_cube_positions[]
 {
   0.951000f, -0.951000f, -1.000000f, 
   -0.951000f, -0.951000f, -1.000000f, 
@@ -290,7 +290,7 @@ constexpr float bev_cube_positions[]
   -0.951000f, -1.000000f, -0.951000f, };
 
 
-constexpr float bev_cube_normals[]
+float bev_cube_normals[]
 {
    0.000000f, 0.000000f, -1.000000f,
    0.000000f, 0.000000f, -1.000000f,
@@ -427,7 +427,7 @@ constexpr float bev_cube_normals[]
 };
 
 
-constexpr float bev_cube_texture_coords[]
+float bev_cube_texture_coords[]
 {
   1.000000f, 0.000000f,
   1.000000f, 1.000000f,
