@@ -332,6 +332,51 @@ Node::set_name(const char *name)
 }
 
 
+uintptr_t
+Node::get_user_data() const
+{
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
+  
+  if(instance_id)
+  {
+    uintptr_t user_data;
+    if(Graph::node_get_user_data(
+        Data::get_graph_data(),
+        instance_id,
+        &user_data)
+      )
+    {
+      return user_data;
+    }
+  }
+  
+  LOG_ERROR(node_msg_invalid_node);
+  return 0;
+}
+  
+  
+
+void
+Node::set_user_data(const uintptr_t user_data)
+{
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
+  
+  if(instance_id)
+  {
+    if(Graph::node_set_user_data(
+        Data::get_graph_data(),
+        instance_id,
+        &user_data)
+      )
+    {
+      return;
+    }
+  }
+  
+  LOG_ERROR(node_msg_invalid_node);
+}
+
+
 uint32_t
 Node::get_id() const
 {

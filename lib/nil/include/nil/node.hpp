@@ -173,6 +173,20 @@ public:
   
   
   /*!
+    Gets the user data
+  */
+  uintptr_t
+  get_user_data() const;
+  
+  
+  /*!
+    Sets the user data
+  */
+  void
+  set_user_data(const uintptr_t user_data);
+  
+  
+  /*!
    * Internal mechanism to get a the node ID.
    */
   uint32_t
