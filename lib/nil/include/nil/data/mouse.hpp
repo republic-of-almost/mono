@@ -19,7 +19,7 @@ struct Mouse
   uint32_t id;
 
   int32_t position[2];
-  int32_t delta[2];
+  float delta[2];
   float scroll[2];
   float buttons[5];
   bool capture;

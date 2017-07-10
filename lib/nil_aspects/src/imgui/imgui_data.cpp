@@ -347,8 +347,8 @@ render_data(Nil::Data::Mouse *data)
   
   ImGui::Text("Readonly Values");
   
-  ImGui::InputInt2("Pos",   (int*)data->position, flags);
-  ImGui::InputInt2("Delta", (int*)data->delta,    flags);
+  ImGui::InputFloat2("Pos",   (float*)data->position, flags);
+  ImGui::InputFloat2("Delta", data->delta,    flags);
 
   return updated;
 }
