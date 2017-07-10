@@ -36,11 +36,12 @@ struct Data
   /*
    * We store common attributes for all nodes.
    */
-  lib::array<uint32_t>        node_id;            // Unique instance IDs.
-  lib::array<uint64_t>        parent_depth_data;  // Parent ID and Depth.
-  lib::array<math::transform> local_transform;    // Local.
-  lib::array<math::transform> world_transform;    // World.
-  lib::array<math::aabb>      bounding_box;       // Bounding box.
+  lib::array<uint32_t>        node_id;                  // Unique instance IDs.
+  lib::array<uint64_t>        parent_depth_data;        // Parent ID and Depth.
+  lib::array<math::transform> local_transform;          // Local.
+  lib::array<math::transform> world_transform;          // World.
+  lib::array<math::aabb>      bounding_box;             // Bounding box.
+  lib::array<math::aabb>      inherited_bounding_box;   // Bounding box.
   lib::array<node_data>       data;
   
   

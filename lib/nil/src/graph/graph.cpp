@@ -2,6 +2,7 @@
 #include "graph_data.hpp"
 #include <math/transform/transform.hpp>
 #include <math/geometry/aabb.hpp>
+#include <math/to_string.hpp>
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/bits.hpp>
@@ -305,6 +306,87 @@ node_remove(Data *graph, const uint32_t node_id)
 }
 
 
+namespace {
+
+
+bool
+node_recalc_branch(
+  Data *graph,
+  const uint32_t this_id)
+{
+  size_t this_index = 0;
+  const bool exists = node_exists(graph, this_id, &this_index);
+  
+  if(!exists)
+  {
+    LOG_FATAL("Graph corrupted");
+    return false;
+  }
+
+  lib::array<math::transform, stack_hint> transform_stack;
+  
+  uint32_t curr_depth = get_depth(this_index);
+  size_t update_index = this_index;
+  
+  const uint32_t parent_id = node_get_parent(graph, this_id);
+  
+  if(parent_id)
+  {
+    size_t parent_index = 0;
+    
+    bool parent_exists = node_exists(graph, parent_id, &parent_index);
+    
+    if(!parent_exists)
+    {
+      LOG_FATAL("Graph corrupted");
+      return false;
+    }
+    
+    curr_depth = get_depth(graph->parent_depth_data[parent_index]) + 1;
+    transform_stack.emplace_back(graph->world_transform[parent_index]);
+  }
+  else
+  {
+    transform_stack.emplace_back(math::transform_init());
+  }
+  
+  const size_t nodes_to_calc = node_descendants_count(graph, this_id) + 1;
+  
+  for(uint32_t i = 0; i < nodes_to_calc; ++i)
+  {
+    const size_t   index = update_index + i;
+    const uint64_t data  = graph->parent_depth_data[index];
+    const uint32_t depth = get_depth(data);
+    
+    // Pop off all unrequired transforms.
+    while(curr_depth > depth)
+    {
+      transform_stack.pop_back();
+      curr_depth -= 1;
+    }
+    
+    curr_depth = depth;
+    
+    const math::transform local_transform = graph->local_transform[index];
+  
+    // Calc new world transform.
+    const math::transform child_world(
+      math::transform_inherited(
+        transform_stack.top(),
+        local_transform
+      )
+    );
+
+    graph->world_transform[index] = child_world;
+    transform_stack.emplace_back(child_world);
+  }
+  
+  return true;
+}
+
+} // anon ns
+
+
 bool
 node_set_parent(
   Data *graph,
@@ -410,7 +492,7 @@ node_set_parent(
           LOG_FATAL("Graph is corrupted");
           return false;
         }
-
+        
         insert_index = parent_index + 1;
         parent_depth = get_depth(graph->parent_depth_data[parent_index]);
       }
@@ -483,43 +565,14 @@ node_set_parent(
       graph->parent_depth_data[index] = new_data;
     }
     
-    {
-      lib::array<math::transform, stack_hint> transform_stack;
-      transform_stack.emplace_back(graph->world_transform[parent_index]);
-      
-      uint32_t curr_depth = parent_depth;
-      
-      for(uint32_t i = 0; i < nodes_to_move; ++i)
-      {
-        const size_t index  = insert_index + i;
-        const uint64_t data = graph->parent_depth_data[index];
-        const uint32_t depth = get_depth(data);
-        
-        // Pop off all unrequired transforms.
-        while((curr_depth + 1) < depth)
-        {
-          transform_stack.pop_back();
-          curr_depth -= 1;
-        }
-        
-        curr_depth = depth;
-      
-        // Calc new world transform.
-        const math::transform child_world(
-          math::transform_inherited(
-            transform_stack.top(),
-            graph->local_transform[index]
-          )
-        );
-        
-        graph->world_transform[index] = child_world;
-        
-        transform_stack.emplace_back(child_world);
-      }
-    }
+    
+    return node_recalc_branch(
+      graph,
+      this_id
+    );
   }
-
-  return true;
+  
+  return false;
 }
 
 
@@ -772,13 +825,13 @@ node_get_transform(
   const Data *data,
   const uint32_t node_id,
   math::transform *trans,
-  const bool world)
+  const bool inherited)
 {
   size_t index = 0;
   
   if(node_exists(data, node_id, &index))
   {
-    if(!world)
+    if(!inherited)
     {
       *trans = data->local_transform[index];
     }
@@ -800,108 +853,17 @@ node_set_transform(
   const math::transform *trans)
 {
   size_t index = 0;
+  const bool found = node_exists(graph, node_id, &index);
   
-  if(node_exists(graph, node_id, &index))
+  if(found)
   {
-    const size_t child_count = node_descendants_count(graph, node_id);
-    
     graph->local_transform[index] = *trans;
-    
-    for(uint32_t i = 0; i < child_count + 1; ++i)
-    {
-      // -- Properties -- //
-      const uint32_t this_id = node_id;
-      uint32_t parent_id = 0;
 
-      size_t this_index = 0;
-      uint32_t this_depth = 0;
-      {
-        if(!lib::key::linear_search(
-          this_id,
-          graph->node_id.data(),
-          graph->node_id.size(),
-          &this_index))
-        {
-          return false;
-        }
-        
-        this_depth = get_depth(graph->parent_depth_data[this_index]);
-        parent_id = get_parent_id(graph->parent_depth_data[this_index]);
-      }
-      
-      uint32_t nodes_to_update = node_descendants_count(graph, this_id) + 1;
-    
-      // -- //
-      size_t parent_index   = 0;
-      size_t insert_index   = graph->node_id.size();
-      uint32_t parent_depth = 0;
-      {
-        if(parent_id > 0)
-        {
-          const uint32_t *node_ids = graph->node_id.data();
-          const size_t node_count = graph->node_id.size();
-          
-          if(!lib::key::linear_search(
-            parent_id,
-            node_ids,
-            node_count,
-            &parent_index))
-          {
-            LOG_FATAL("Graph is corrupted");
-            return false;
-          }
-
-          insert_index = parent_index + 1;
-          parent_depth = get_depth(graph->parent_depth_data[parent_index]);
-        }
-      }
-      
-      // Update Transforms //
-      {
-        lib::array<math::transform, stack_hint> transform_stack;
-        
-        if(parent_index)
-        {
-          transform_stack.emplace_back(graph->world_transform[parent_index]);
-        }
-        else
-        {
-          transform_stack.emplace_back(math::transform_init());
-        }
-        
-        uint32_t curr_depth = this_depth;
-        
-        for(uint32_t i = 0; i < nodes_to_update; ++i)
-        {
-          const size_t   index = this_index + i;
-          const uint64_t data  = graph->parent_depth_data[index];
-          const uint32_t depth = get_depth(data);
-          
-          // Pop off all unrequired transforms.
-          while(curr_depth > depth)
-          {
-            transform_stack.pop_back();
-            curr_depth -= 1;
-          }
-          
-          // Calc new world transform.
-          const math::transform child_world(
-            math::transform_inherited(
-              transform_stack.top(),
-              graph->local_transform[index]
-            )
-          );
-          
-          graph->world_transform[index] = child_world;
-          
-          transform_stack.emplace_back(child_world);
-          curr_depth += 1;
-        }
-      }
-
-
-    }
-    return true;
+    return node_recalc_branch(
+      graph,
+      node_id
+    );
+  
   }
   
   return false;
@@ -912,13 +874,21 @@ bool
 node_get_bounding_box(
   const Data *data,
   const uint32_t node_id,
-  math::aabb *aabb)
+  math::aabb *aabb,
+  const bool inherited)
 {
   size_t index = 0;
   
   if(node_exists(data, node_id, &index))
   {
-    *aabb = data->bounding_box[index];
+    if(!inherited)
+    {
+      *aabb = data->bounding_box[index];
+    }
+    else
+    {
+      *aabb = data->inherited_bounding_box[index];
+    }
     return true;
   }
   

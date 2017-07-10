@@ -128,7 +128,7 @@ node_get_transform(
   const Data *data,
   const uint32_t node_id,
   math::transform *trans,
-  const bool world = false);
+  const bool inherited = false);
 
 
 bool
@@ -142,7 +142,8 @@ bool
 node_get_bounding_box(
   const Data *data,
   const uint32_t node_id,
-  math::aabb *aabb);
+  math::aabb *aabb,
+  const bool inherited = false);
 
 
 bool
