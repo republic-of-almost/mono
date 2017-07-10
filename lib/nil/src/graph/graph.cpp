@@ -76,6 +76,7 @@ initialize(Data *graph)
   graph->instance_counter = 0;
 }
 
+
 void
 think(Data *graph)
 {
@@ -220,7 +221,6 @@ node_create(Data *graph)
     ++graph->instance_counter
   );
   
-  // -- Create Event -- //
   graph->node_id.emplace_back(
     new_id
   );
@@ -309,8 +309,12 @@ node_remove(Data *graph, const uint32_t node_id)
 namespace {
 
 
+/*
+  Recalculates the transforms and bounding boxes of a branch that has been
+  updated.
+*/
 bool
-node_recalc_branch(
+node_recalc_transform_branch(
   Data *graph,
   const uint32_t this_id)
 {
@@ -382,6 +386,88 @@ node_recalc_branch(
   }
   
   return true;
+}
+
+
+bool
+node_recalc_aabb_branch(
+  Data *graph,
+  const uint32_t this_id)
+{
+  return true;
+  
+  /*
+    This code is very wrong, we have to work up the branch not down.
+  */
+
+//  size_t this_index = 0;
+//  const bool exists = node_exists(graph, this_id, &this_index);
+//  
+//  if(!exists)
+//  {
+//    LOG_FATAL("Graph corrupted");
+//    return false;
+//  }
+//
+//  lib::array<math::aabb, stack_hint> aabb_stack;
+//  
+//  uint32_t curr_depth = get_depth(this_index);
+//  size_t update_index = this_index;
+//  
+//  const uint32_t parent_id = node_get_parent(graph, this_id);
+//  
+//  if(parent_id)
+//  {
+//    size_t parent_index = 0;
+//    
+//    bool parent_exists = node_exists(graph, parent_id, &parent_index);
+//    
+//    if(!parent_exists)
+//    {
+//      LOG_FATAL("Graph corrupted");
+//      return false;
+//    }
+//    
+//    curr_depth = get_depth(graph->parent_depth_data[parent_index]) + 1;
+//    aabb_stack.emplace_back(graph->inherited_bounding_box[parent_index]);
+//  }
+//  else
+//  {
+//    aabb_stack.emplace_back(math::aabb_init());
+//  }
+//  
+//  const size_t nodes_to_calc = node_descendants_count(graph, this_id) + 1;
+//  
+//  for(uint32_t i = 0; i < nodes_to_calc; ++i)
+//  {
+//    const size_t   index = update_index + i;
+//    const uint64_t data  = graph->parent_depth_data[index];
+//    const uint32_t depth = get_depth(data);
+//    
+//    // Pop off all unrequired transforms.
+//    while(curr_depth > depth)
+//    {
+//      aabb_stack.pop_back();
+//      curr_depth -= 1;
+//    }
+//    
+//    curr_depth = depth;
+//    
+//    const math::aabb local_bb = graph->bounding_box[index];
+//  
+//    // Calc new world transform.
+//    const math::aabb child_bb(
+//      math::aabb_combine(
+//        aabb_stack.top(),
+//        local_bb
+//      )
+//    );
+//
+//    graph->inherited_bounding_box[index] = child_bb;
+//    aabb_stack.emplace_back(child_bb);
+//  }
+//  
+//  return true;
 }
 
 } // anon ns
@@ -565,11 +651,17 @@ node_set_parent(
       graph->parent_depth_data[index] = new_data;
     }
     
-    
-    return node_recalc_branch(
+    const bool update_transform = node_recalc_transform_branch(
       graph,
       this_id
     );
+    
+    const bool update_aabb = node_recalc_aabb_branch(
+      graph,
+      this_id
+    );
+  
+    return update_transform & update_aabb;
   }
   
   return false;
@@ -859,11 +951,10 @@ node_set_transform(
   {
     graph->local_transform[index] = *trans;
 
-    return node_recalc_branch(
+    return node_recalc_transform_branch(
       graph,
       node_id
     );
-  
   }
   
   return false;
@@ -903,11 +994,16 @@ node_set_bounding_box(
   const math::aabb *aabb)
 {
   size_t index = 0;
+  const bool found = node_exists(data, node_id, &index);
   
-  if(node_exists(data, node_id, &index))
+  if(found)
   {
     data->bounding_box[index] = *aabb;
-    return true;
+
+    return node_recalc_aabb_branch(
+      data,
+      node_id
+    );
   }
   
   return false;

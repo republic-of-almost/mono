@@ -63,10 +63,19 @@ TEST_CASE("Graph Bounding Box")
       Nil::Data::set(gran_child, gran_child_box);
     }
     
+    // Get Boxes
     {
+      Nil::Data::Bounding_box bb{};
+      Nil::Data::get(parent, bb, true);
       
+//      REQUIRE(bb.min[0] == -4.f);
+//      REQUIRE(bb.min[1] == -3.f);
+//      REQUIRE(bb.min[2] == -2.f);
+//      
+//      REQUIRE(bb.max[0] == -4.f);
+//      REQUIRE(bb.max[1] == -2.f);
+//      REQUIRE(bb.max[2] == -3.f);
     }
     
-//    REQUIRE(false);
   }
 }
