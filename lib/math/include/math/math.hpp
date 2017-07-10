@@ -13,6 +13,7 @@
 #include "transform/transform.hpp"
 #include "geometry/geometry.hpp"
 #include "general/general.hpp"
+#include "to_string.hpp"
 
 
 #endif // inc guard
