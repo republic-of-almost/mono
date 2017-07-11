@@ -7,7 +7,7 @@
 #include <nil/nil.hpp>
 #include <nil/data/window.hpp>
 #include <imgui/imgui.h>
-//#include <imguizmo/ImGuizmo.h>
+#include <imguizmo/ImGuizmo.h>
 #include <string.h>
 #include <lib/utilities.hpp>
 #include "imgui/imgui_resource.hpp"
@@ -29,11 +29,11 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 
-  self->inspector_node    = Nil::Node(nullptr);
-  self->show_graph        = true;
-  self->show_raw_graph    = false;
-  self->show_node_events  = false;
-  self->show_menu         = true;
+  self->inspector_node        = Nil::Node(nullptr);
+  self->show_graph            = true;
+  self->show_raw_graph        = false;
+  self->show_node_events      = false;
+  self->show_menu             = true;
   
   self->show_data_overview    = false;
   self->show_data_audio       = false;
@@ -51,10 +51,10 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->show_data_transform   = false;
   self->show_data_window      = false;
   
-  self->show_rsrc_overview  = false;
-  self->show_rsrc_materials = false;
-  self->show_rsrc_textures  = false;
-  self->show_rsrc_meshes    = false;
+  self->show_rsrc_overview    = false;
+  self->show_rsrc_materials   = false;
+  self->show_rsrc_textures    = false;
+  self->show_rsrc_meshes      = false;
 
   // Aspects can hook into UI callbacks with developer data.
   aspect.data_types = 0;
@@ -310,7 +310,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   // --------------------------------------------------------------- [ Data ] --
 
 
-//  render_data<Nil::Data::Audio>(&self->show_data_overview);
+  // Overview
   render_data<Nil::Data::Audio>(&self->show_data_audio);
 //  render_data<Nil::Data::Bounding_box>(&self->show_data_bbox);
   render_data<Nil::Data::Camera>(&self->show_data_camera);
@@ -330,6 +330,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   // ---------------------------------------------------------- [ Resources ] --
   
 
+  // Overview
   render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
   render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
   render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
@@ -442,6 +443,50 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   if(self->inspector_node.is_valid())
   {
+    size_t count = 0;
+    Nil::Data::Camera *cam = 0;
+    Nil::Data::get(&count, &cam);
+    
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+    
+    Nil::Data::Transform trans{};
+    Nil::Data::get(self->inspector_node, trans);
+    
+    math::transform m_trans = math::transform_init(
+      math::vec3_init(trans.position),
+      math::vec3_init(trans.scale),
+      math::quat_init(trans.rotation)
+    );
+    
+    math::mat4 view = math::mat4_lookat(
+      m_trans.position,
+      math::vec3_add(m_trans.position, math::transform_fwd(m_trans)),
+      math::transform_up(m_trans)
+    );
+    
+    math::mat4 proj = math::mat4_projection(
+      cam[0].width,
+      cam[0].height,
+      cam[0].near_plane,
+      cam[0].far_plane,
+      cam[0].fov
+    );
+    
+//    math::mat4 world = math::transform_get_world_matrix(m_trans);
+    math::mat4 world = math::mat4_id();
+    
+    ImGuizmo::Enable(true);
+    
+    ImGuizmo::DrawCube(view.data, proj.data, world.data);
+    ImGuizmo::Manipulate(
+      view.data,
+      proj.data,
+      ImGuizmo::OPERATION::TRANSLATE,
+      ImGuizmo::MODE::WORLD,
+      world.data
+    );
+  
     bool inspector_open = true;
     ImGui::Begin("Inspector", &inspector_open);
 
@@ -515,7 +560,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       inspector_data<Nil::Data::Transform>(self->inspector_node);
       inspector_data<Nil::Data::Bounding_box>(self->inspector_node);
     }
-
+    
     // Additional Data
     {
       inspector_data<Nil::Data::Audio>(self->inspector_node);

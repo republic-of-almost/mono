@@ -13,7 +13,7 @@
 #ifndef NIMGUI
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
-//#include <imguizmo/ImGuizmo.h>
+#include <imguizmo/ImGuizmo.h>
 #endif
 
 
@@ -390,7 +390,7 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGui::Render();
 
     ImGui_ImplGlfwGL3_NewFrame();
-//    ImGuizmo::BeginFrame();
+    ImGuizmo::BeginFrame();
     #endif
 
 //    glfwSwapBuffers(self->window);
