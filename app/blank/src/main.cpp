@@ -16,10 +16,17 @@
 #include <stddef.h>
 #include <string.h>
 
+
+/*
+  Viewer Nodes.
+*/
 Nil::Node app;
 Nil::Node camera;
 Nil::Node scene;
 
+/*
+  Frame Tick
+*/
 void
 app_tick()
 {
@@ -48,6 +55,9 @@ app_tick()
 }
 
 
+/*
+  Entry
+*/
 int
 main()
 {
@@ -109,11 +119,11 @@ main()
   {
     camera.set_name("Camera");
     Nil::Data::Camera cam{};
-    cam.width = 1.f;
-    cam.height = 1.f;
-    cam.near_plane = 0.1f;
-    cam.far_plane = 1000.f;
-    cam.fov = math::tau() * 0.125;
+    cam.width              = 1.f;
+    cam.height             = 1.f;
+    cam.near_plane         = 0.1f;
+    cam.far_plane          = 1000.f;
+    cam.fov                = math::tau() * 0.125;
     cam.clear_color_buffer = true;
     cam.clear_depth_buffer = true;
     

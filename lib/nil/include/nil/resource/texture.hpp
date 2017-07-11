@@ -58,6 +58,13 @@ void
 get(size_t *count, Texture **in_out);
 
 
+// ----------------------------------------------------------------- [ Info ] --
+
+
+const char *
+get_type_name(const Texture &in);
+
+
 } // ns
 } // ns
 

@@ -122,5 +122,15 @@ get(size_t *count, Mesh **out)
 }
 
 
+// ----------------------------------------------------------------- [ Info ] --
+
+
+const char *
+get_type_name(const Mesh &)
+{
+  return "Mesh";
+}
+
+
 } // ns
 } // ns

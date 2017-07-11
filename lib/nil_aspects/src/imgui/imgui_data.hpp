@@ -25,6 +25,10 @@ bool
 render_data(Nil::Data::Camera *data);
 
 
+void
+render_data(Nil::Data::Camera *data, const size_t count);
+
+
 bool
 render_data(Nil::Data::Developer *data);
 
@@ -59,6 +63,15 @@ render_data(Nil::Data::Window *data);
 template<typename T>
 bool
 render_data(T *data)
+{
+  ImGui::Text("No UI Impl");
+  return false;
+}
+
+
+template<typename T>
+bool
+render_data(T *data, const size_t count)
 {
   ImGui::Text("No UI Impl");
   return false;

@@ -35,10 +35,23 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->show_node_events  = false;
   self->show_menu         = true;
   
-  self->show_data_camera       = false;
-  self->show_data_renderables  = false;
-  self->show_data_textures     = false;
+  self->show_data_overview    = false;
+  self->show_data_audio       = false;
+  self->show_data_bbox        = false;
+  self->show_data_camera      = false;
+  self->show_data_collider    = false;
+  self->show_data_developer   = false;
+  self->show_data_gamepad     = false;
+  self->show_data_keyboard    = false;
+  self->show_data_light       = false;
+  self->show_data_logic       = false;
+  self->show_data_mouse       = false;
+  self->show_data_renderables = false;
+  self->show_data_rigidbody   = false;
+  self->show_data_transform   = false;
+  self->show_data_window      = false;
   
+  self->show_rsrc_overview  = false;
   self->show_rsrc_materials = false;
   self->show_rsrc_textures  = false;
   self->show_rsrc_meshes    = false;
@@ -231,6 +244,55 @@ render_node(const Nil::Node &node, Nil::Node &inspect)
 };
 
 
+template<typename T>
+inline void
+render_data(bool *window)
+{
+  if(*window)
+  {
+    char name[1024]{};
+    strcat(name, Nil::Data::get_type_name(T{}));
+    strcat(name, " Data##DPool");
+  
+    ImGui::Begin(name, window);
+    
+    size_t count = 0;
+    T *data = nullptr;
+    Nil::Data::get(&count, &data);
+
+    if(data)
+    {
+      Nil::ImGUI::render_data(data, count);
+    }
+    
+    ImGui::End();
+  }
+}
+
+
+template<typename T>
+inline void
+render_rsrc(bool *window)
+{
+  if(*window)
+  {
+    char name[1024]{};
+    strcat(name, Nil::Resource::get_type_name(T{}));
+    strcat(name, " Resource##RPool");
+  
+    ImGui::Begin(name, window);
+    
+    size_t count = 0;
+    T *rsrc;
+    Nil::Resource::get(&count, &rsrc);
+    
+    Nil::ImGUI::render_resource(rsrc, count);
+    
+    ImGui::End();
+  }
+}
+
+
 } // anon ns
 
 
@@ -247,112 +309,30 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   // --------------------------------------------------------------- [ Data ] --
 
-  /*
-    Render Data store
-  */
-  if(self->show_data_camera)
-  {
-    ImGui::Begin("Camera Data", &self->show_data_camera);
-    
-    size_t count            = 0;
-    Nil::Data::Camera *cams = nullptr;
-    Nil::Data::get(&count, &cams);
-    
-    ImGui::Text("Camera Count %zu", count);
-    
-    ImGui::Columns(8, "camera_list"); // 4-ways, with border
-    ImGui::Separator();
-    ImGui::Text("Type");        ImGui::NextColumn();
-    ImGui::Text("Priority");    ImGui::NextColumn();
-    ImGui::Text("Height");      ImGui::NextColumn();
-    ImGui::Text("Width");       ImGui::NextColumn();
-    ImGui::Text("Near");        ImGui::NextColumn();
-    ImGui::Text("Far");         ImGui::NextColumn();
-    ImGui::Text("Clr Color");   ImGui::NextColumn();
-    ImGui::Text("Clr Depth");   ImGui::NextColumn();
-    
-    ImGui::Separator();
-    
-    for(uint32_t i = 0; i < count; ++i)
-    {
-      ImGui::Text("%s", cams[i].type == Nil::Data::Camera::PERSPECTIVE ? "Pers" : "Ortho"); ImGui::NextColumn();
-      ImGui::Text("%d", cams[i].priority);    ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].height);      ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].width);       ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].near_plane);  ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].far_plane);   ImGui::NextColumn();
-      ImGui::Text("%s", cams[i].clear_color_buffer ? "Yes" : "No"); ImGui::NextColumn();
-      ImGui::Text("%s", cams[i].clear_depth_buffer ? "Yes" : "No"); ImGui::NextColumn();
-      
-      ImGui::Separator();
-    }
-    
-    ImGui::End();
-  }
-  
-  /*
-    Renderables
-  */
-  if(self->show_data_renderables)
-  {
-    ImGui::Begin("Renderable Data", &self->show_data_renderables);
 
-    size_t count = 0;
-    Nil::Data::Renderable *renderables = nullptr;
-    Nil::Data::get(&count, &renderables);
-    
-    ImGui::Text("Renderable Count %zu", count);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      
-    }
-    
-    ImGui::End();
-  }
+//  render_data<Nil::Data::Audio>(&self->show_data_overview);
+  render_data<Nil::Data::Audio>(&self->show_data_audio);
+//  render_data<Nil::Data::Bounding_box>(&self->show_data_bbox);
+  render_data<Nil::Data::Camera>(&self->show_data_camera);
+  render_data<Nil::Data::Collider>(&self->show_data_collider);
+  render_data<Nil::Data::Developer>(&self->show_data_developer);
+  render_data<Nil::Data::Gamepad>(&self->show_data_gamepad);
+  render_data<Nil::Data::Keyboard>(&self->show_data_keyboard);
+  render_data<Nil::Data::Light>(&self->show_data_light);
+  render_data<Nil::Data::Logic>(&self->show_data_logic);
+  render_data<Nil::Data::Mouse>(&self->show_data_mouse);
+  render_data<Nil::Data::Renderable>(&self->show_data_renderables);
+  render_data<Nil::Data::Rigidbody>(&self->show_data_rigidbody);
+//  render_data<Nil::Data::Transform>(&self->show_data_transform);
+  render_data<Nil::Data::Window>(&self->show_data_window);
   
   
   // ---------------------------------------------------------- [ Resources ] --
   
-  
-  if(self->show_rsrc_textures)
-  {
-    ImGui::Begin("Textures##RSrc", &self->show_rsrc_textures);
-    
-    size_t count = 0;
-    Nil::Resource::Texture *rsrc;
-    Nil::Resource::get(&count, &rsrc);
-    
-    Nil::ImGUI::render_resource(rsrc, count);
-    
-    ImGui::End();
-  }
-  
-  if(self->show_rsrc_meshes)
-  {
-    ImGui::Begin("Meshes##Rsrc", &self->show_rsrc_meshes);
-    
-    size_t count = 0;
-    Nil::Resource::Mesh *rsrc;
-    Nil::Resource::get(&count, &rsrc);
-    
-    Nil::ImGUI::render_resource(rsrc, count);
-    
-    ImGui::End();
-  }
-  
-  if(self->show_rsrc_materials)
-  {
-    ImGui::Begin("Materials##Rsrc", &self->show_rsrc_materials);
-    
-    size_t count = 0;
-    Nil::Resource::Material *rsrc;
-    Nil::Resource::get(&count, &rsrc);
-    
-    Nil::ImGUI::render_resource(rsrc, count);
-    
-    ImGui::End();
-  }
+
+  render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
+  render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
+  render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
   
 
   // ---------------------------------------------------------- [ Raw Graph ] --
@@ -539,7 +519,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     // Additional Data
     {
       inspector_data<Nil::Data::Audio>(self->inspector_node);
-      inspector_data<Nil::Data::Audio_resource>(self->inspector_node);
       inspector_data<Nil::Data::Camera>(self->inspector_node);
       inspector_data<Nil::Data::Collider>(self->inspector_node);
       inspector_data<Nil::Data::Developer>(self->inspector_node);
@@ -565,7 +544,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     const char *items[] {
       "Select Data",
       "Audio",
-      "AudioResource",
       "BoundingBox",
       "Camera",
       "Collider",
@@ -590,7 +568,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     adder_fn adders[] {
       nullptr,
       add_data<Nil::Data::Audio>,
-      add_data<Nil::Data::Audio_resource>,
       add_data<Nil::Data::Bounding_box>,
       add_data<Nil::Data::Camera>,
       add_data<Nil::Data::Collider>,
@@ -679,15 +656,31 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       
       if(ImGui::BeginMenu("Data##NilMenu"))
       {
+        ImGui::MenuItem("Overview##NMenu",  nullptr, &self->show_data_overview);
+        ImGui::Separator();
+        ImGui::MenuItem("Audio##NMenu",       nullptr, &self->show_data_audio);
+        ImGui::MenuItem("BoundingBox##NMenu", nullptr, &self->show_data_bbox);
         ImGui::MenuItem("Camera##NMenu",      nullptr, &self->show_data_camera);
-        ImGui::MenuItem("Textures##NMenu",    nullptr, &self->show_data_textures);
-        ImGui::MenuItem("Renderables##NMenu", nullptr, &self->show_data_renderables);
+        ImGui::MenuItem("Collider##NMenu",    nullptr, &self->show_data_collider);
+        ImGui::MenuItem("Developer##NMenu",   nullptr, &self->show_data_developer);
+        ImGui::MenuItem("Gamepad##NMenu",     nullptr, &self->show_data_gamepad);
+        ImGui::MenuItem("Keyboard##NMenu",    nullptr, &self->show_data_keyboard);
+        ImGui::MenuItem("Light##NMenu",       nullptr, &self->show_data_light);
+        ImGui::MenuItem("Logic##NMenu",       nullptr, &self->show_data_logic);
+        ImGui::MenuItem("Mouse##NMenu",       nullptr, &self->show_data_mouse);
+        ImGui::MenuItem("Renderable##NMenu",  nullptr, &self->show_data_renderables);
+        ImGui::MenuItem("Rigidbody##NMenu",   nullptr, &self->show_data_rigidbody);
+        ImGui::MenuItem("Transform##NMenu",   nullptr, &self->show_data_transform);
+        ImGui::MenuItem("Window##NMenu",      nullptr, &self->show_data_window);
         
         ImGui::EndMenu();
       }
       
       if(ImGui::BeginMenu("Resources##NilMenu"))
       {
+        ImGui::MenuItem("Overview##NMenu",  nullptr, &self->show_rsrc_overview);
+        ImGui::Separator();
+      
         ImGui::MenuItem("Materials##NMenu", nullptr, &self->show_rsrc_materials);
         ImGui::MenuItem("Textures##NMenu",  nullptr, &self->show_rsrc_textures);
         ImGui::MenuItem("Meshes##NMenu",    nullptr, &self->show_rsrc_meshes);

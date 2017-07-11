@@ -81,5 +81,15 @@ get(size_t *count, Material **out)
 }
 
 
+// ----------------------------------------------------------------- [ Info ] --
+
+
+const char *
+get_type_name(const Material &)
+{
+  return "Material";
+}
+
+
 } // ns
 } // ns

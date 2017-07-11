@@ -124,6 +124,40 @@ render_data(Nil::Data::Camera *data)
 }
 
 
+void
+render_data(Nil::Data::Camera *cams, const size_t count)
+{
+  ImGui::Text("Camera Count %zu", count);
+  
+  ImGui::Columns(8, "camera_list"); // 4-ways, with border
+  ImGui::Separator();
+  ImGui::Text("Type");        ImGui::NextColumn();
+  ImGui::Text("Priority");    ImGui::NextColumn();
+  ImGui::Text("Height");      ImGui::NextColumn();
+  ImGui::Text("Width");       ImGui::NextColumn();
+  ImGui::Text("Near");        ImGui::NextColumn();
+  ImGui::Text("Far");         ImGui::NextColumn();
+  ImGui::Text("Clr Color");   ImGui::NextColumn();
+  ImGui::Text("Clr Depth");   ImGui::NextColumn();
+  
+  ImGui::Separator();
+  
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    ImGui::Text("%s", cams[i].type == Nil::Data::Camera::PERSPECTIVE ? "Pers" : "Ortho"); ImGui::NextColumn();
+    ImGui::Text("%d", cams[i].priority);    ImGui::NextColumn();
+    ImGui::Text("%f", cams[i].height);      ImGui::NextColumn();
+    ImGui::Text("%f", cams[i].width);       ImGui::NextColumn();
+    ImGui::Text("%f", cams[i].near_plane);  ImGui::NextColumn();
+    ImGui::Text("%f", cams[i].far_plane);   ImGui::NextColumn();
+    ImGui::Text("%s", cams[i].clear_color_buffer ? "Yes" : "No"); ImGui::NextColumn();
+    ImGui::Text("%s", cams[i].clear_depth_buffer ? "Yes" : "No"); ImGui::NextColumn();
+    
+    ImGui::Separator();
+  }
+}
+
+
 bool
 render_data(Nil::Data::Developer *data)
 {

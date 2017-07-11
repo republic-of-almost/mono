@@ -277,6 +277,19 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
                 self->keys[nil_key] = input_action;
               }
             }
+            
+            // IMGUI
+            ImGuiIO& io = ImGui::GetIO();
+            if (action == GLFW_PRESS)
+                io.KeysDown[key] = true;
+            if (action == GLFW_RELEASE)
+                io.KeysDown[key] = false;
+
+            (void)mods; // Modifiers are not reliable across systems
+            io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+            io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+            io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+            io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
           }
         );
       }
@@ -373,8 +386,6 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
 
-    glfwPollEvents();
-
     #ifndef NIMGUI
     ImGui::Render();
 
@@ -383,6 +394,8 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
     #endif
 
 //    glfwSwapBuffers(self->window);
+
+    glfwPollEvents();
   }
 }
 

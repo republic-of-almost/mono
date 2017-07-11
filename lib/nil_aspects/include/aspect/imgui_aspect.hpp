@@ -38,10 +38,23 @@ struct Data
   
   bool show_lib_memory;
   
+  bool show_data_overview;
+  bool show_data_audio;
+  bool show_data_bbox;
   bool show_data_camera;
+  bool show_data_collider;
+  bool show_data_developer;
+  bool show_data_gamepad;
+  bool show_data_keyboard;
+  bool show_data_light;
+  bool show_data_logic;
+  bool show_data_mouse;
   bool show_data_renderables;
-  bool show_data_textures;
+  bool show_data_rigidbody;
+  bool show_data_transform;
+  bool show_data_window;
   
+  bool show_rsrc_overview;
   bool show_rsrc_materials;
   bool show_rsrc_textures;
   bool show_rsrc_meshes;
