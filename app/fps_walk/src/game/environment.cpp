@@ -1,5 +1,4 @@
 #include <game/environment.hpp>
-#include <assets/cube_mesh.hpp>
 #include <nil/resource/resource.hpp>
 #include <nil/data/data.hpp>
 #include <lib/utilities.hpp>
@@ -32,10 +31,11 @@ think(Nil::Node node, uintptr_t user_data)
     constexpr float radius = 15.f;
     const float time = i;
     const float half_root_two = math::root_two() * 0.5f;
+    const float offset = time + env_time;
     
     const float y = i / 20.f;
-    const float x = math::clamp(math::cos(time + env_time), -half_root_two, +half_root_two) * (radius + y);
-    const float z = math::clamp(math::sin(time + env_time), -half_root_two, +half_root_two) * (radius + y);
+    const float x = math::clamp(math::cos(offset), -half_root_two, +half_root_two) * (radius + y);
+    const float z = math::clamp(math::sin(offset), -half_root_two, +half_root_two) * (radius + y);
     
     float rgba[] = {1.f, (y / 10.f), 1.f, 1.f};
     

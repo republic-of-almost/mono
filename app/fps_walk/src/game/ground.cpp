@@ -1,5 +1,4 @@
 #include <game/ground.hpp>
-#include <assets/cube_mesh.hpp>
 #include <nil/data/data.hpp>
 #include <nil/resource/resource.hpp>
 #include <lib/assert.hpp>
@@ -18,7 +17,7 @@ setup(Ground *ground)
   {
     Nil::Data::Transform transform{};
 
-    const float scale[] = {10.f, 0.25f, 10.f};
+    const float scale[] = {10.f, 3.f, 10.f};
     memcpy(transform.scale, scale, sizeof(transform.scale));
     
     const float position[] = {0.f, -0.3f, 0.f};
@@ -39,21 +38,12 @@ setup(Ground *ground)
   }
   
   // Mesh Resource
+  Nil::Resource::Model::load(
+    Nil::Resource::directory("mesh/unit_bev_cube.obj")
+  );
+  
   Nil::Resource::Mesh mesh{};
-  {
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
-
-    Nil::Resource::load("Cube", mesh);
-  }
+  Nil::Resource::find_by_name("Unit_bev_cube", mesh);
   
   // Renderable
   {

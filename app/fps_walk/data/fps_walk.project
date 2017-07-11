@@ -30,7 +30,6 @@ table.insert(
       "Nil",
       "Lib",
       "Math",
-      "Assets",
       "AspectsControllers",
     },
 

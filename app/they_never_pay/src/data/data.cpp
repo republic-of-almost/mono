@@ -10,7 +10,6 @@
 #include <lib/array.hpp>
 
 #include <nil/data/renderable.hpp>
-#include <assets/cube_mesh.hpp>
 
 #include <lib/model.hpp>
 #include <stb/stb_image.h>

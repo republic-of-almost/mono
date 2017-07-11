@@ -3,7 +3,6 @@
 #include <nil/data/data.hpp>
 #include <nil/resource/resource.hpp>
 #include <aspect/aspects.hpp>
-#include <assets/cube_mesh.hpp>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -97,13 +96,13 @@ main()
   
   // Load bev cube
   {
-    Nil::Resource::Mesh mesh{};
-    mesh.position_vec3       = Nil_ext::Mesh::bev_cube_positions;
-    mesh.texture_coords_vec2 = Nil_ext::Mesh::bev_cube_texture_coords;
-    mesh.normal_vec3         = Nil_ext::Mesh::bev_cube_normals;
-    mesh.count               = Nil_ext::Mesh::bev_cube_mesh_vert_count;
+    // Mesh Resource
+    Nil::Resource::Model::load(
+      Nil::Resource::directory("mesh/unit_bev_cube.obj")
+    );
     
-    Nil::Resource::load("Bev Cube", mesh);
+    Nil::Resource::Mesh mesh{};
+    Nil::Resource::find_by_name("Unit_bev_cube", mesh);
     
     Nil::Resource::Material mat{};
     mat.color = 0xFF0033FF;

@@ -32,7 +32,6 @@ table.insert(
       "Lib",
       "Math",
       "AspectsControllers",
-      "Assets",
       "Nau",
 
       -- Thirdparty

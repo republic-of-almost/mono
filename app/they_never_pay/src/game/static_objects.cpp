@@ -3,7 +3,6 @@
 #include <nil/data/renderable.hpp>
 #include <lib/logging.hpp>
 #include <math/general/general.hpp>
-#include <assets/cube_mesh.hpp>
 #include <data/data.hpp>
 #include <stdlib.h>
 
