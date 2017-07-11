@@ -459,33 +459,38 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       math::quat_init(trans.rotation)
     );
     
-    math::mat4 view = math::mat4_lookat(
-      m_trans.position,
-      math::vec3_add(m_trans.position, math::transform_fwd(m_trans)),
-      math::transform_up(m_trans)
-    );
+//    math::mat4 view = math::mat4_lookat(
+//      m_trans.position,
+//      math::vec3_add(m_trans.position, math::transform_fwd(m_trans)),
+//      math::transform_up(m_trans)
+//    );
     
     math::mat4 proj = math::mat4_projection(
-      cam[0].width,
-      cam[0].height,
+      cam[0].width * io.DisplaySize.x,
+      cam[0].height * io.DisplaySize.y,
       cam[0].near_plane,
       cam[0].far_plane,
       cam[0].fov
     );
     
-//    math::mat4 world = math::transform_get_world_matrix(m_trans);
-    math::mat4 world = math::mat4_id();
+    math::mat4 world = math::transform_get_world_matrix(m_trans);
+//    math::mat4 world = math::mat4_id();
     
     ImGuizmo::Enable(true);
     
-    ImGuizmo::DrawCube(view.data, proj.data, world.data);
+//    ImGuizmo::DrawCube(cam[0].view_mat, proj.data, world.data);
     ImGuizmo::Manipulate(
-      view.data,
+      cam[0].view_mat,
       proj.data,
       ImGuizmo::OPERATION::TRANSLATE,
       ImGuizmo::MODE::WORLD,
       world.data
     );
+    
+    float rot[3];
+    ImGuizmo::DecomposeMatrixToComponents(world.data, trans.position, rot, trans.scale);
+    
+    Nil::Data::set(self->inspector_node, trans);
   
     bool inspector_open = true;
     ImGui::Begin("Inspector", &inspector_open);
