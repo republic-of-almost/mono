@@ -22,6 +22,8 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
+    asset_dir = "../../assets/they_never_pay/",
+
     project_dependencies = {
       "Nil",
       "Lib",
