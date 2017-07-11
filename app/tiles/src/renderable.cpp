@@ -222,7 +222,6 @@ edgeInit()
 
   // --------------------------------------------------------- [ Load Shader ]
 
-//   ogl_createProgram("/home/philck/rnd_dev/rep_of_a_work/app/tiles/assets/multi_shader.glsl",
    ogl_createProgram("/Users/PhilCK/Desktop/rep_of_a/app/tiles/assets/multi_shader.glsl",
       nullptr,
       nullptr,

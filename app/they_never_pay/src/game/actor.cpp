@@ -6,6 +6,7 @@
 #include <nil/data/keyboard.hpp>
 #include <nil/data/renderable.hpp>
 #include <nil/data/transform.hpp>
+#include <nil/resource/directory.hpp>
 #include <math/geometry/ray.hpp>
 #include <math/general/general.hpp>
 #include <math/quat/quat.hpp>
@@ -312,8 +313,7 @@ setup(Actor *actor)
   
   // Nav mesh
   {
-    constexpr char static_items[] = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/nav_mesh.obj";
-    lib::model model = lib::model_import::load_obj_from_file(static_items);
+    lib::model model = lib::model_import::load_obj_from_file(Nil::Resource::directory("mesh/nav_mesh.obj"));
     
     actor->nav_mesh = model.verts[0];
     actor->nav_mesh_count = model.triangle_count[0];

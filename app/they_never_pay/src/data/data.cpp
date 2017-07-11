@@ -32,15 +32,20 @@ load_assets()
 
   // Load static assets
   {
-    const char *file = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj";
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Static");
     
-    Nil::Resource::Scene::load(asset, file);
+    Nil::Resource::Scene::load(
+      asset,
+      Nil::Resource::directory("mesh/static.obj")
+    );
   }
   
-  lib::model lights = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/lights.obj");
+  const lib::model lights = lib::model_import::load_obj_from_file(
+    Nil::Resource::directory("mesh/lights.obj")
+  );
+  
   {
     Nil::Node asset;
     asset.set_parent(assets);
