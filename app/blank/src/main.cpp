@@ -24,6 +24,7 @@ Nil::Node app;
 Nil::Node camera;
 Nil::Node scene;
 
+
 /*
   Frame Tick
 */
@@ -87,7 +88,7 @@ main()
     scene.set_user_data(0);
   }
   
-    // Load static assets
+  // Load static assets
   {
 //    const char *file = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj";
 //    
@@ -140,6 +141,7 @@ main()
     
     Nil::Data::set(camera, trans);
   }
+
 
   /*
     Run Game

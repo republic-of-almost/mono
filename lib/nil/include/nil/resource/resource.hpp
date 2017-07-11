@@ -3,6 +3,7 @@
 
 
 #include "audio.hpp"
+#include "directory.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
 #include "model.hpp"

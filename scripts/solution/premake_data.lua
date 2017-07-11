@@ -281,14 +281,22 @@ make.create_solution(solution_data, project_defaults, projects)
 
       if proj.kind == "WindowedApp" and projects then
         for j, asset_proj in ipairs(projects) do
-          if asset_proj.asset_dir then
-            postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+          if(asset_proj.assets) then
+          for k, asset_dir in ipairs(asset_proj.assets) do
+            if asset_dir then
+              postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+            end
+          end
           end
         end
       else if proj.kind == "ConsoleApp" and projects then
           for j, asset_proj in ipairs(projects) do
-            if asset_proj.asset_dir then
-              postbuildcommands("ditto ${SRCROOT}/".. asset_proj.asset_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+            if(asset_proj.assets) then
+            for k, asset_dir in ipairs(asset_proj.assets) do
+              if asset_dir then
+                postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+              end
+            end
             end
           end
         end

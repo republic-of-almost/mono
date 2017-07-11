@@ -50,7 +50,7 @@ think(Nil::Node node, uintptr_t user_data)
     
     Nil::Resource::load(name, mat);
     
-    const float default_scale = 2.f;
+    const float default_scale = 4.f;
     const float scale_up = default_scale * ((float)i / 10.f);
     
     Nil::Data::Transform transform{};
@@ -80,22 +80,13 @@ setup(Environment *env)
   env->entity.set_name("Environment");
   
   // Mesh Resource
-  Nil::Resource::Mesh mesh{};
-  {
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
-
-    Nil::Resource::load("EnvCube", mesh);
-  }  
+  Nil::Resource::Model::load(
+    Nil::Resource::directory("mesh/unit_bev_cube.obj")
+  );
   
+  Nil::Resource::Mesh mesh{};
+  Nil::Resource::find_by_name("Unit_bev_cube", mesh);
+
   // Child nodes
   for(uint32_t i = 0; i < env_count; ++i)
   {

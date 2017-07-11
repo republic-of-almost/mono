@@ -28,7 +28,9 @@ table.insert(
       make.get_proj_root() .. "../include/",
     },
 
-    asset_dir = "../../../lib/rov/assets",
+    assets = {
+      "../../../lib/rov/assets",
+    },
 
     defines = {
       "ROV_GL4",

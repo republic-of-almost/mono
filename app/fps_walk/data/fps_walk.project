@@ -22,6 +22,10 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
+    assets = {
+      "../../../assets/generic/",
+    },
+
     project_dependencies = {
       "Nil",
       "Lib",
