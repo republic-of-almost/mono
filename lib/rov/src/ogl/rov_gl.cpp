@@ -91,7 +91,7 @@ ogl_init(rovGLData *gl_data)
       nullptr,
       &line.program
     );
-
+    
     gl_data->rov_line_programs.emplace_back(line);
 
     // Get Uniforms //

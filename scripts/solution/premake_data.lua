@@ -17,13 +17,21 @@ end
 -- Adds source file patterns
 function
 make.add_src(dir)
-  return {
-    dir .. "**.cpp",
-    dir .. "**.cc",
-    dir .. "**.mm",
-    dir .. "**.c",
-    dir .. "**.m",
-  }
+  if os.get() == "macosx" then
+    return {
+      dir .. "**.cpp",
+      dir .. "**.cc",
+      dir .. "**.mm",
+      dir .. "**.c",
+      dir .. "**.m",
+    }
+  else
+    return {
+      dir .. "**.cpp",
+      dir .. "**.cc",
+      dir .. "**.c",
+    }
+  end
 end
 
 
@@ -68,7 +76,7 @@ code_configs = {
   {
     name = "Development",
     flags = {"Symbols", "Unicode"},
-    defines = {"DEBUG"},
+    defines = {"DEBUG", "NIL_DEVELOPMENT"},
   },
 
   -- Stage --
@@ -78,7 +86,7 @@ code_configs = {
   {
     name = "Staging",
     flags = {"Optimize", "Symbols", "Unicode"},
-    defines = {"DEBUG"},
+    defines = {"DEBUG", , "NIL_STAGE"},
   },
 
   -- Release --
@@ -86,7 +94,7 @@ code_configs = {
   {
     name = "Release",
     flags = {"Optimize", "Unicode"},
-    defines = {"NDEBUG"},
+    defines = {"NDEBUG", "NIL_RELEASE"},
   },
 }
 
@@ -122,17 +130,15 @@ make.create_solution(solution_data, project_defaults, projects)
     print("Building project: " .. proj.name)
 
     -- Fill in the default information.
-    if not proj.kind                  then proj.kind = "ConsoleApp"        end
-    if not proj.lib_directories       then proj.lib_directories = {""}     end
-    if not proj.include_directories   then proj.include_directories = {""} end
+    if not proj.kind                then proj.kind = "ConsoleApp"        end
+    if not proj.lib_directories     then proj.lib_directories = {""}     end
+    if not proj.include_directories then proj.include_directories = {""} end
 
     -- Generate the project data.
     project(proj.name)
     location(proj.location)
     language(proj.language)
     kind(proj.kind)
-
-    if proj.uuid then uuid(proj.uuid) end
 
     -- Thie function takes a string that represents a field
     -- to search in the table. it will then append the premakes
@@ -229,18 +235,24 @@ make.create_solution(solution_data, project_defaults, projects)
                 links(other_proj.name)
 
                 -- Add listed project deps
-                if other_proj.link_dependencies then links(other_proj.link_dependencies) end
+                if other_proj.link_dependencies then
+                  links(other_proj.link_dependencies)
+                end
 
                 -- Find platform deps
                 local platform_dep_links = find_table_with_platform(other_proj, "link_dependencies")
                 if platform_dep_links then links(platform_dep_links) end
 
                 -- Add link option dependencies
-                if other_proj.linkoption_dependencies then linkoptions(other_proj.linkoption_dependencies) end
+                if other_proj.linkoption_dependencies then
+                  linkoptions(other_proj.linkoption_dependencies)
+                end
 
                 -- Platform
                 local platform_dep_link_options = find_table_with_platform(other_proj, "linkoption_dependencies")
-                if platform_dep_link_options then linkoptions(platform_dep_link_options) end
+                if platform_dep_link_options then
+                  linkoptions(platform_dep_link_options)
+                end
 
               end
 
@@ -282,21 +294,21 @@ make.create_solution(solution_data, project_defaults, projects)
       if proj.kind == "WindowedApp" and projects then
         for j, asset_proj in ipairs(projects) do
           if(asset_proj.assets) then
-          for k, asset_dir in ipairs(asset_proj.assets) do
-            if asset_dir then
-              postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+            for k, asset_dir in ipairs(asset_proj.assets) do
+              if asset_dir then
+                postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+              end
             end
-          end
           end
         end
       else if proj.kind == "ConsoleApp" and projects then
           for j, asset_proj in ipairs(projects) do
             if(asset_proj.assets) then
-            for k, asset_dir in ipairs(asset_proj.assets) do
-              if asset_dir then
-                postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+              for k, asset_dir in ipairs(asset_proj.assets) do
+                if asset_dir then
+                  postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+                end
               end
-            end
             end
           end
         end
