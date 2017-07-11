@@ -17,7 +17,6 @@
 #include "light.hpp"
 #include "logic.hpp"
 #include "mouse.hpp"
-#include "resource.hpp"
 #include "renderable.hpp"
 #include "rigidbody.hpp"
 #include "transform.hpp"

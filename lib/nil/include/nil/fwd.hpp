@@ -28,7 +28,6 @@ namespace Data {
 
 
 struct Audio;
-struct Audio_resource;
 struct Bounding_box;
 struct Camera;
 struct Collider;
@@ -39,7 +38,6 @@ struct Light;
 struct Logic;
 struct Mouse;
 struct Renderable;
-struct Resource;
 struct Rigidbody;
 struct Transform;
 struct Window;

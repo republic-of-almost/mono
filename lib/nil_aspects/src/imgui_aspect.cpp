@@ -527,7 +527,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       inspector_data<Nil::Data::Light>(self->inspector_node);
       inspector_data<Nil::Data::Logic>(self->inspector_node);
       inspector_data<Nil::Data::Mouse>(self->inspector_node);
-      inspector_data<Nil::Data::Resource>(self->inspector_node);
       inspector_data<Nil::Data::Renderable>(self->inspector_node);
       inspector_data<Nil::Data::Rigidbody>(self->inspector_node);
       inspector_data<Nil::Data::Window>(self->inspector_node);
@@ -554,7 +553,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Logic",
       "Renderable",
       "Mouse",
-      "Resource",
       "Rigidbody",
       "Transform",
       "Window",
@@ -578,7 +576,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Logic>,
       add_data<Nil::Data::Renderable>,
       add_data<Nil::Data::Mouse>,
-      add_data<Nil::Data::Resource>,
       add_data<Nil::Data::Rigidbody>,
       add_data<Nil::Data::Transform>,
       add_data<Nil::Data::Window>,

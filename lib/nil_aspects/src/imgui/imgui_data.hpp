@@ -46,10 +46,6 @@ render_data(Nil::Data::Mouse *data);
 
 
 bool
-render_data(Nil::Data::Resource *data);
-
-
-bool
 render_data(Nil::Data::Transform *data);
 
 
