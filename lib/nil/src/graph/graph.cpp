@@ -321,15 +321,10 @@ node_recalc_transform_branch(
     return false;
   }
 
-  lib::array<math::transform, stack_hint> transform_stack;
-  
   uint32_t curr_depth = get_depth(this_index);
-  size_t update_index = this_index;
+  math::transform last_world_trans = math::transform_init();
   
   const uint32_t parent_id = node_get_parent(graph, this_id);
-  
-  math::transform last_world_trans = math::transform_init();
-  transform_stack.emplace_back(last_world_trans); // Root transform.
   
   if(parent_id)
   {
@@ -346,11 +341,14 @@ node_recalc_transform_branch(
     last_world_trans = graph->world_transform[parent_index];
   }
   
+  lib::array<math::transform, stack_hint> transform_stack;
+  transform_stack.emplace_back(last_world_trans); // Root transform.
+  
   const size_t nodes_to_calc = node_descendants_count(graph, this_id) + 1;
   
   for(uint32_t i = 0; i < nodes_to_calc; ++i)
   {
-    const size_t   index = update_index + i;
+    const size_t   index = this_index + i;
     const uint64_t data  = graph->parent_depth_data[index];
     const uint32_t depth = get_depth(data);
     
@@ -359,8 +357,7 @@ node_recalc_transform_branch(
     {
       transform_stack.pop_back();
     }
-    
-    if(curr_depth < depth)
+    else if(curr_depth < depth)
     {
       transform_stack.emplace_back(last_world_trans);
     }
