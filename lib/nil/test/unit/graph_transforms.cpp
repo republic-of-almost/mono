@@ -37,13 +37,13 @@ TEST_CASE("Graph Transforms")
     
     // Move Child
     {
-      Nil::Data::Transform child_trans;
+      Nil::Data::Transform child_trans{};
       Nil::Data::get(child, child_trans);
       
       memcpy(child_trans.position, move_to, sizeof(child_trans.position));
       Nil::Data::set(child, child_trans);
       
-      Nil::Data::Transform gran_world_trans;
+      Nil::Data::Transform gran_world_trans{};
       Nil::Data::get(gran_child, gran_world_trans, true);
       
       float expected_01[] {0.f, 1.f, 0.f};
@@ -58,7 +58,7 @@ TEST_CASE("Graph Transforms")
     
     // Move Parent
     {
-      Nil::Data::Transform parent_trans;
+      Nil::Data::Transform parent_trans{};
       Nil::Data::get(parent, parent_trans);
       
       memcpy(parent_trans.position, move_to, sizeof(parent_trans.position));
@@ -66,7 +66,7 @@ TEST_CASE("Graph Transforms")
       
       float expected_02[] {0.f, 2.f, 0.f};
       
-      Nil::Data::Transform child_world_trans;
+      Nil::Data::Transform child_world_trans{};
       Nil::Data::get(child, child_world_trans, true);
       
       REQUIRE(

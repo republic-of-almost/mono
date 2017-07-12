@@ -59,7 +59,9 @@ load_assets()
       
       const math::vec3 origin = math::get_vec3_origin(lights.verts[i], lights.triangle_count[i]);
       
-      Nil::Data::Transform trans;
+      Nil::Data::Transform trans{};
+      Nil::Data::get(child, trans);
+      
       memcpy(trans.position, origin.data, sizeof(trans.position));
       
       Nil::Data::set(child, trans);

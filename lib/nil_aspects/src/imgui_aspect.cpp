@@ -491,20 +491,20 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGuizmo::DecomposeMatrixToComponents(world.data, trans.position, rot, trans.scale);
     
     Nil::Data::set(self->inspector_node, trans);
-  
+    
     bool inspector_open = true;
     ImGui::Begin("Inspector", &inspector_open);
-
+    
     ImGui::Text("Node Information");
-
+    
     char name_buf[16]{0};
     strcat(name_buf, self->inspector_node.get_name());
-
+    
     if(ImGui::InputText("Name##Node", name_buf, 16))
     {
       self->inspector_node.set_name(name_buf);
     }
-
+    
     uint32_t node_id = self->inspector_node.get_id();
     ImGui::InputInt("ID", (int*)&node_id, 0, 0, ImGuiInputTextFlags_ReadOnly);
 

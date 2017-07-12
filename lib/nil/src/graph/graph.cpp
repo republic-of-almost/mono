@@ -134,12 +134,6 @@ data_register_type(
 void
 data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendents)
 {
-  /*
-    Further Work.
-    Instead of spamming all the callbacks we should check here if a node has the
-    type id and selectivly call the callbacks.
-  */
-
   // -- Param Check -- //
   LIB_ASSERT(graph);
   
@@ -334,6 +328,9 @@ node_recalc_transform_branch(
   
   const uint32_t parent_id = node_get_parent(graph, this_id);
   
+  math::transform last_world_trans = math::transform_init();
+  transform_stack.emplace_back(last_world_trans); // Root transform.
+  
   if(parent_id)
   {
     size_t parent_index = 0;
@@ -346,12 +343,7 @@ node_recalc_transform_branch(
       return false;
     }
     
-    curr_depth = get_depth(graph->parent_depth_data[parent_index]) + 1;
-    transform_stack.emplace_back(graph->world_transform[parent_index]);
-  }
-  else
-  {
-    transform_stack.emplace_back(math::transform_init());
+    last_world_trans = graph->world_transform[parent_index];
   }
   
   const size_t nodes_to_calc = node_descendants_count(graph, this_id) + 1;
@@ -363,10 +355,14 @@ node_recalc_transform_branch(
     const uint32_t depth = get_depth(data);
     
     // Pop off all unrequired transforms.
-    while(curr_depth > depth)
+    if(curr_depth > depth)
     {
       transform_stack.pop_back();
-      curr_depth -= 1;
+    }
+    
+    if(curr_depth < depth)
+    {
+      transform_stack.emplace_back(last_world_trans);
     }
     
     curr_depth = depth;
@@ -382,7 +378,7 @@ node_recalc_transform_branch(
     );
 
     graph->world_transform[index] = child_world;
-    transform_stack.emplace_back(child_world);
+    last_world_trans = child_world;
   }
   
   return true;
