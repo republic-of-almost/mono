@@ -99,6 +99,7 @@ think(Data *graph)
 void
 destroy(Data *graph)
 {
+  
 }
 
 
@@ -128,6 +129,30 @@ data_register_type(
   );
   
   return graph->graph_type_data.back().type_id;
+}
+
+
+bool
+data_unregister_type(
+  Data *data,
+  uint64_t type_id
+)
+{
+  // -- Param Check -- //
+  LIB_ASSERT(data);
+  
+  const size_t count = data->graph_type_data.size();
+  
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(data->graph_type_data[i].type_id == type_id)
+    {
+      data->graph_type_data.erase(i);
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 

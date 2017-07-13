@@ -41,6 +41,13 @@ data_register_type(
 );
 
 
+bool
+data_unregister_type(
+  Data *data,
+  uint64_t type_id
+);
+
+
 void
 data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendent = false);
 

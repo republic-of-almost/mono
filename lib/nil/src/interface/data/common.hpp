@@ -87,7 +87,7 @@ struct Generic_data
   
   // --
   
-  setter_cb cb = nullptr;
+  setter_cb setter_fn = nullptr;
   
   explicit
   Generic_data(
@@ -95,7 +95,7 @@ struct Generic_data
     const setter_cb &set_cb = nullptr
   )
   {
-//    cb = set_cb;
+    setter_fn = set_cb;
   
     type_id = Nil::Graph::data_register_type(
       Nil::Data::get_graph_data(),
@@ -154,15 +154,26 @@ struct Generic_data
         {
           data->actions[index] |= Nil::Data::Event::UPDATED;
           
-          if(data->cb)
+          if(data->setter_fn)
           {
-            data->cb(id, user_data, index);
+            data->setter_fn(id, user_data, index);
           }
         }
       },
       
       (uintptr_t)this,
       dependent_types
+    );
+  }
+  
+  
+  ~Generic_data()
+  {
+    setter_fn = nullptr;
+  
+    Nil::Graph::data_unregister_type(
+      Nil::Data::get_graph_data(),
+      type_id
     );
   }
   
