@@ -75,7 +75,14 @@ get(size_t *count, Renderable **renderables)
 void
 get(const Node &node, Renderable &out)
 {
-  get_mat_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_mat_data().data.data(),
+    get_mat_data().keys.data(),
+    get_mat_data().keys.size()
+  );
+
 }
 
 
@@ -118,7 +125,12 @@ remove_renderable(Node &node)
 bool
 has_renderable(const Node &node)
 {
-  return get_mat_data().find(node);
+  return find_node(
+    node,
+    get_mat_data().keys.data(),
+    get_mat_data().keys.size()
+  );
+
 }
 
 

@@ -30,7 +30,6 @@ namespace Data {
 struct Audio;
 struct Bounding_box;
 struct Camera;
-struct Collider;
 struct Developer;
 struct Gamepad;
 struct Keyboard;

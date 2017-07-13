@@ -45,7 +45,14 @@ get(size_t *out_count, Window **out_resource)
 void
 get(const Node &node, Window &out)
 {
-  get_win_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_win_data().data.data(),
+    get_win_data().keys.data(),
+    get_win_data().keys.size()
+  );
+
 }
 
 
@@ -69,7 +76,12 @@ remove_window(Node &node)
 bool
 has_window(const Node &node)
 {
-  return get_win_data().find(node);
+  return find_node(
+    node,
+    get_win_data().keys.data(),
+    get_win_data().keys.size()
+  );
+
 }
 
 

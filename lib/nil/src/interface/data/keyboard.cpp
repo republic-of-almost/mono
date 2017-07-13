@@ -43,7 +43,13 @@ get(size_t *count, Keyboard **data)
 void
 get(const Node &node, Keyboard &out)
 {
-  get_kb_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_kb_data().data.data(),
+    get_kb_data().keys.data(),
+    get_kb_data().keys.size()
+  );
 }
 
 
@@ -67,7 +73,12 @@ remove_keyboard(Node &node)
 bool
 has_keyboard(const Node &node)
 {
-  return get_kb_data().find(node);
+  return find_node(
+    node,
+    get_kb_data().keys.data(),
+    get_kb_data().keys.size()
+  );
+
 }
 
 

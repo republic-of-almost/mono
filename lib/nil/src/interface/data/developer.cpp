@@ -43,7 +43,14 @@ get(size_t *count, Developer **data)
 void
 get(const Node &node, Developer &out)
 {
-  get_developer_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_developer_data().data.data(),
+    get_developer_data().keys.data(),
+    get_developer_data().keys.size()
+  );
+
 }
 
 
@@ -67,7 +74,12 @@ remove_developer(Node &node)
 bool
 has_developer(const Node &node)
 {
-  return get_developer_data().find(node);
+  return find_node(
+    node,
+    get_developer_data().keys.data(),
+    get_developer_data().keys.size()
+  );
+
 }
 
 

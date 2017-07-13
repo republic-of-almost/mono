@@ -146,18 +146,19 @@ node_set_transform(
 
 
 bool
-node_get_bounding_box(
-  const Data *data,
+node_register_type(
+  Data *data,
   const uint32_t node_id,
-  math::aabb *aabb,
-  const bool inherited = false);
+  const uint64_t type_id
+);
 
 
 bool
-node_set_bounding_box(
+node_unregister_type(
   Data *data,
   const uint32_t node_id,
-  const math::aabb *aabb);
+  const uint64_t type_id
+);
 
 
 bool
@@ -165,13 +166,6 @@ node_get_data_type_id(
   const Data *data,
   const uint32_t node_id,
   uint64_t *type_id);
-
-
-bool
-node_set_data_type_id(
-  Data *data,
-  const uint32_t node_id,
-  const uint64_t *type_id);
 
 
 bool

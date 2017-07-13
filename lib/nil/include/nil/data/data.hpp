@@ -10,7 +10,6 @@
 #include "audio.hpp"
 #include "bounding_box.hpp"
 #include "camera.hpp"
-#include "collider.hpp"
 #include "developer.hpp"
 #include "gamepad.hpp"
 #include "keyboard.hpp"
@@ -18,7 +17,6 @@
 #include "logic.hpp"
 #include "mouse.hpp"
 #include "renderable.hpp"
-#include "rigidbody.hpp"
 #include "transform.hpp"
 #include "window.hpp"
 

@@ -32,19 +32,62 @@ namespace Data {
 using setter_cb = void(*)(uint32_t id, uintptr_t user_data, size_t index);
 
 
-template<typename S>
-bool
-has(const uint32_t id, const S &id_arr)
+inline bool
+find_node(
+  const Nil::Node &node,
+  uint32_t *keys,
+  size_t key_size,
+  size_t *index = nullptr)
 {
-  if(lib::key::linear_search(
+  const uint32_t id   = node.get_id();
+  
+  const bool found = lib::key::linear_search(
     id,
-    id_arr.data(),
-    id_arr.size()))
+    keys,
+    key_size,
+    index
+  );
+  
+  return found;
+}
+
+
+template<typename T>
+inline bool
+get_data(
+  const Node &node,
+  T &out,
+  T *data,
+  uint32_t *keys,
+  size_t key_size)
+{
+  size_t out_index = 0;
+
+  const bool found = find_node(node, keys, key_size, &out_index);
+
+  if(likely(found))
   {
+    out = data[out_index];
     return true;
+  }
+  else
+  {
+    NIL_DATA_GETTER_ERROR(Window)
   }
   
   return false;
+}
+
+
+template<typename T>
+inline bool
+set_data(
+  const Node &node,
+  T &in,
+  uint32_t *keys,
+  size_t key_count)
+{
+  
 }
 
 
@@ -170,7 +213,7 @@ struct Generic_data
   ~Generic_data()
   {
     setter_fn = nullptr;
-  
+    
     Nil::Graph::data_unregister_type(
       Nil::Data::get_graph_data(),
       type_id
@@ -209,29 +252,11 @@ struct Generic_data
   
   
   void
-  get_data(const Nil::Node &node, T &out)
-  {
-    size_t out_index = 0;
-
-    const bool found = find(node, &out_index);
-
-    if(likely(found))
-    {
-      out = data[out_index];
-    }
-    else
-    {
-      NIL_DATA_GETTER_ERROR(Window)
-    }
-  }
-  
-  
-  void
   set_data(Nil::Node &node, const T &in)
   {
     size_t out_index = 0;
 
-    const bool found = find(node, &out_index);
+    const bool found = find_node(node, keys.data(), keys.size(), &out_index);
 
     if(found)
     {
@@ -240,20 +265,10 @@ struct Generic_data
     }
     else
     {
-      uint64_t type_ids = 0;
-      
-      Graph::node_get_data_type_id(
+      Graph::node_register_type(
         Nil::Data::get_graph_data(),
         node.get_id(),
-        &type_ids
-      );
-      
-      type_ids |= get_type_id(in);
-      
-      Graph::node_set_data_type_id(
-        Nil::Data::get_graph_data(),
-        node.get_id(),
-        &type_ids
+        type_id
       );
       
       keys.emplace_back(node.get_id());
@@ -270,26 +285,14 @@ struct Generic_data
   {
     size_t out_index = 0;
 
-    const bool found = find(node, &out_index);
+    const bool found = find_node(node, keys.data(), keys.size(), &out_index);
 
     if(found)
     {
-      uint64_t type_ids = 0;
-      
-      Graph::node_get_data_type_id(
+      Graph::node_unregister_type(
         Nil::Data::get_graph_data(),
         node.get_id(),
-        &type_ids
-      );
-      
-      T dummy_data;
-      
-      type_ids &= ~get_type_id(dummy_data);
-      
-      Graph::node_set_data_type_id(
-        Nil::Data::get_graph_data(),
-        node.get_id(),
-        &type_ids
+        type_id
       );
       
       removed_nodes.emplace_back(node);
@@ -298,24 +301,6 @@ struct Generic_data
       data.erase(out_index);
       keys.erase(out_index);
     }
-  }
-  
-  
-  bool
-  find(const Nil::Node &node, size_t *index = nullptr)
-  {
-    const uint32_t id   = node.get_id();
-    const uint32_t *ids = keys.data();
-    const size_t count  = keys.size();
-    
-    const bool found = lib::key::linear_search(
-      id,
-      ids,
-      count,
-      index
-    );
-    
-    return found;
   }
   
   

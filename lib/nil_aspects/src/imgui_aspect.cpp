@@ -314,7 +314,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   render_data<Nil::Data::Audio>(&self->show_data_audio);
 //  render_data<Nil::Data::Bounding_box>(&self->show_data_bbox);
   render_data<Nil::Data::Camera>(&self->show_data_camera);
-  render_data<Nil::Data::Collider>(&self->show_data_collider);
   render_data<Nil::Data::Developer>(&self->show_data_developer);
   render_data<Nil::Data::Gamepad>(&self->show_data_gamepad);
   render_data<Nil::Data::Keyboard>(&self->show_data_keyboard);
@@ -322,7 +321,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   render_data<Nil::Data::Logic>(&self->show_data_logic);
   render_data<Nil::Data::Mouse>(&self->show_data_mouse);
   render_data<Nil::Data::Renderable>(&self->show_data_renderables);
-  render_data<Nil::Data::Rigidbody>(&self->show_data_rigidbody);
 //  render_data<Nil::Data::Transform>(&self->show_data_transform);
   render_data<Nil::Data::Window>(&self->show_data_window);
   
@@ -570,7 +568,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       inspector_data<Nil::Data::Audio>(self->inspector_node);
       inspector_data<Nil::Data::Camera>(self->inspector_node);
-      inspector_data<Nil::Data::Collider>(self->inspector_node);
       inspector_data<Nil::Data::Developer>(self->inspector_node);
       inspector_data<Nil::Data::Gamepad>(self->inspector_node);
       inspector_data<Nil::Data::Keyboard>(self->inspector_node);
@@ -578,7 +575,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       inspector_data<Nil::Data::Logic>(self->inspector_node);
       inspector_data<Nil::Data::Mouse>(self->inspector_node);
       inspector_data<Nil::Data::Renderable>(self->inspector_node);
-      inspector_data<Nil::Data::Rigidbody>(self->inspector_node);
       inspector_data<Nil::Data::Window>(self->inspector_node);
     }
 
@@ -618,7 +614,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Audio>,
       add_data<Nil::Data::Bounding_box>,
       add_data<Nil::Data::Camera>,
-      add_data<Nil::Data::Collider>,
       add_data<Nil::Data::Developer>,
       add_data<Nil::Data::Gamepad>,
       add_data<Nil::Data::Keyboard>,
@@ -626,7 +621,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Logic>,
       add_data<Nil::Data::Renderable>,
       add_data<Nil::Data::Mouse>,
-      add_data<Nil::Data::Rigidbody>,
       add_data<Nil::Data::Transform>,
       add_data<Nil::Data::Window>,
     };

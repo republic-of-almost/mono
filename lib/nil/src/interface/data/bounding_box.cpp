@@ -2,6 +2,7 @@
 #include <nil/node.hpp>
 #include <data/internal_data.hpp>
 #include <graph/graph.hpp>
+#include <math/geometry/geometry.hpp>
 #include <string.h>
 #include "common.hpp"
 
@@ -14,32 +15,68 @@ namespace {
 
 struct Bounding_box_data
 {
-  explicit Bounding_box_data()
-  {
-    type_id = Nil::Graph::data_register_type(
-      Nil::Data::get_graph_data(),
-      nullptr,
-      nullptr,
-      nullptr,
-      (uintptr_t)this,
-      0
-    );
-  }
+  lib::array<uint32_t> keys;
+  lib::array<uint32_t> actions;
+  
+  lib::array<Nil::Data::Bounding_box> local_bb;
+  lib::array<Nil::Data::Bounding_box> world_bb;
   
   uint64_t type_id;
+  
+  // -- Cached Event Data -- //
+  
+  std::vector<Nil::Node>              added_bb_nodes;
+  lib::array<Nil::Data::Bounding_box> added_bb_data;
+
+  std::vector<Nil::Node>              updated_bb_nodes;
+  lib::array<Nil::Data::Bounding_box> updated_bb_data;
+  
+  std::vector<Nil::Node>              removed_bb_nodes;
+  lib::array<Nil::Data::Bounding_box> removed_bb_data;
+  
+  // --
+  
+  Nil::Data::setter_cb setter_fn = nullptr;
+  
+  explicit
+  Bounding_box_data()
+  {
+  }
+  
 };
 
 
 // -- Lazy Getter -- //
-Bounding_box_data
-get_bbox_data()
+Nil::Data::Generic_data<Nil::Data::Bounding_box>&
+get_bb_data()
 {
-  static Bounding_box_data data;
+  static Nil::Data::Generic_data<Nil::Data::Bounding_box> data(
+    Nil::Data::get_type_id(Nil::Data::Transform{}),
+    [](uint32_t id, uintptr_t user_data, size_t index)
+    {
+      Nil::Data::Generic_data<Nil::Data::Camera> *data = reinterpret_cast<Nil::Data::Generic_data<Nil::Data::Camera>*>(user_data);
+      LIB_ASSERT(data);
+      
+      Nil::Node node(id);
+      
+      Nil::Data::Transform trans;
+      Nil::Data::get(node, trans, true);
+      
+      Nil::Data::Bounding_box bb;
+      Nil::Data::get(node, bb);
+
+      math::aabb aabb = math::aabb_init(
+        math::vec3_init(bb.min),
+        math::vec3_init(bb.max)
+      );
+    }
+  );
+  
   return data;
 }
 
 
-} // ns
+} // anon ns
 
 
 namespace Nil {
@@ -52,57 +89,14 @@ namespace Data {
 void
 get(const Node &node, Bounding_box &out, const bool inherited)
 {
-  if(node.is_valid())
-  {
-    math::aabb internal;
-    const bool found = Graph::node_get_bounding_box(
-      Data::get_graph_data(),
-      node.get_id(),
-      &internal,
-      inherited
-    );
-    
-    if(found)
-    {
-      memcpy(out.min, &internal.min, sizeof(float) * 3);
-      memcpy(out.max, &internal.max, sizeof(float) * 3);
-    }
-    else
-    {
-      LIB_ASSERT(false);
-      LOG_ERROR("Something went wrong getting bounding box");
-    }
-  }
-  else
-  {
-    LIB_ASSERT(false);
-    LOG_ERROR("Invalid Node");
-  }
+
 }
 
 
 void
 set(Node &node, const Bounding_box &in)
 {
-  if(node.is_valid())
-  {
-    math::aabb internal;
-    memcpy(&internal.min, in.min, sizeof(float) * 3);
-    memcpy(&internal.max, in.max, sizeof(float) * 3);
-    
-    if(!Graph::node_set_bounding_box(Data::get_graph_data(), node.get_id(), &internal))
-    {
-      LIB_ASSERT(false);
-      LOG_ERROR("Something went wrong setting bounding box");
-    }
-  }
-  else
-  {
-    LIB_ASSERT(false);
-    LOG_ERROR("Invalid Node");
-  }
-  
-  Graph::data_updated(Data::get_graph_data(), node.get_id(), get_bbox_data().type_id, true);
+
 }
 
 
@@ -112,28 +106,28 @@ set(Node &node, const Bounding_box &in)
 bool
 has_bounding_box(const Node &)
 {
-  return true;
+  
 }
 
 
 bool
 has(const Node &node, const Bounding_box &)
 {
-  return has_bounding_box(node);
+  
 }
 
 
 uint64_t
 get_type_id(const Bounding_box &)
 {
-  return get_bbox_data().type_id;
+  
 }
 
 
 const char*
 get_type_name(const Bounding_box &in)
 {
-  return "Bounding_box";
+  
 }
 
 
@@ -143,7 +137,7 @@ get_type_name(const Bounding_box &in)
 void
 events(const uint32_t data, size_t *count, Bounding_box_data **out_data, Node **out_node)
 {
-  LIB_ASSERT(false); // Not impl'd unsure if needed right now!
+  
 }
 
 

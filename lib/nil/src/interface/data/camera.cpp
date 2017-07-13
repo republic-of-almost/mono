@@ -75,7 +75,13 @@ get(size_t *count, Camera **cameras)
 void
 get(const Node &node, Camera &out)
 {
-  get_camera_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_camera_data().data.data(),
+    get_camera_data().keys.data(),
+    get_camera_data().keys.size()
+  );
 }
 
 
@@ -118,7 +124,12 @@ remove_camera(Node &node)
 bool
 has_camera(const Node &node)
 {
-  return get_camera_data().find(node);
+  return find_node(
+    node,
+    get_camera_data().keys.data(),
+    get_camera_data().keys.size()
+  );
+
 }
 
 

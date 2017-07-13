@@ -43,7 +43,14 @@ get(size_t *count, Mouse **data)
 void
 get(const Node &node, Mouse &out)
 {
-  get_ms_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_ms_data().data.data(),
+    get_ms_data().keys.data(),
+    get_ms_data().keys.size()
+  );
+
 }
 
 
@@ -67,7 +74,12 @@ remove_mouse(Node &node)
 bool
 has_mouse(const Node &node)
 {
-  return get_ms_data().find(node);
+  return find_node(
+    node,
+    get_ms_data().keys.data(),
+    get_ms_data().keys.size()
+  );
+
 }
 
 

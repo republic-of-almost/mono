@@ -63,7 +63,14 @@ get(size_t *count, Light **out)
 void
 get(const Node &node, Light &out)
 {
-  get_light_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_light_data().data.data(),
+    get_light_data().keys.data(),
+    get_light_data().keys.size()
+  );
+
 }
 
 
@@ -98,7 +105,12 @@ remove_light(Node &node)
 bool
 has_light(const Node &node)
 {
-  return get_light_data().find(node);
+  return find_node(
+    node,
+    get_light_data().keys.data(),
+    get_light_data().keys.size()
+  );
+
 }
 
 

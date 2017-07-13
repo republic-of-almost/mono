@@ -43,7 +43,13 @@ get(size_t *count, Gamepad **data)
 void
 get(const Node &node, Gamepad &out)
 {
-  get_gamepad_data().get_data(node, out);
+  get_data(
+    node,
+    out,
+    get_gamepad_data().data.data(),
+    get_gamepad_data().keys.data(),
+    get_gamepad_data().keys.size()
+  );
 }
 
 
@@ -67,7 +73,12 @@ remove_gamepad(Node &node)
 bool
 has_gamepad(const Node &node)
 {
-  return get_gamepad_data().find(node);
+  return find_node(
+    node,
+    get_gamepad_data().keys.data(),
+    get_gamepad_data().keys.size()
+  );
+
 }
 
 

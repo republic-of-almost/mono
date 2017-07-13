@@ -25,7 +25,7 @@ struct Bounding_box
 
 
 void
-get(const Node &node, Bounding_box &out, const bool inherited = false);
+get(const Node &node, Bounding_box &out, const bool world = false);
 
 
 void
@@ -60,7 +60,6 @@ bounding_box_count();
 
 void
 events(const uint32_t data, size_t *count, Window **out_data, Node **out_node);
-
 
 
 } // ns

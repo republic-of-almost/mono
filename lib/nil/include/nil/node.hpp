@@ -199,12 +199,6 @@ public:
   uint64_t
   get_data_type_id() const;
   
-  /*!
-   * Set the data type id
-   */
-  void
-  set_data_type_id(const uint64_t type_id);
-  
 
 private:
 

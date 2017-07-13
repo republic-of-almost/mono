@@ -403,19 +403,4 @@ Node::get_data_type_id() const
 }
 
 
-void
-Node::set_data_type_id(const uint64_t type_id)
-{
-  const uint32_t instance_id = lib_ent::instance(m_node_id);
-  
-  if(instance_id)
-  {
-    Graph::node_set_data_type_id(Data::get_graph_data(), instance_id, &type_id);
-    return;
-  }
-  
-  LOG_ERROR(node_msg_invalid_node);
-}
-
-
 } // ns
