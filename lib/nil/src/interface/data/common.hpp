@@ -72,22 +72,54 @@ get_data(
   }
   else
   {
-    NIL_DATA_GETTER_ERROR(Window)
+    LOG_ERROR("Failed to find data")
   }
   
   return false;
 }
 
 
-template<typename T>
-inline bool
+template<typename T, typename S, typename U>
+inline void
 set_data(
   const Node &node,
   T &in,
   uint32_t *keys,
-  size_t key_count)
+  size_t key_size,
+  uint64_t type_id,
+  const S &update,
+  const U &insert)
 {
+  size_t out_index = 0;
+
+  if(find_node(
+    node,
+    keys,
+    key_size,
+    &out_index
+  ))
+  {
+    // Update existing data
+    update(out_index, in);
+  }
+  else
+  {
+    Graph::node_register_type(
+        Nil::Data::get_graph_data(),
+        node.get_id(),
+        type_id
+      );
   
+    // Insert new data.
+    insert(node.get_id(), in);
+  }
+  
+  // Signal graph this is an updated node.
+  Graph::data_updated(
+    Nil::Data::get_graph_data(),
+    node.get_id(),
+    type_id
+  );
 }
 
 

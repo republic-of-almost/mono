@@ -474,7 +474,7 @@ node_set_parent(
       graph->world_transform.begin() + (this_index + nodes_to_move)
     );
     graph->world_transform.erase(this_index, nodes_to_move);
-        
+    
     lib::array<node_data, stack_hint> data_to_move(
       graph->data.begin() + this_index,
       graph->data.begin() + (this_index + nodes_to_move)

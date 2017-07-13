@@ -56,28 +56,27 @@ get(const Node &node, Audio &out)
 void
 set(Node &node, const Audio &in)
 {
-  // get_audio_data().set_data(node, in);
-  size_t out_index = 0;
-
-  if(find_node(
+  set_data(
     node,
+    in,
     get_audio_data().keys.data(),
     get_audio_data().keys.size(),
-    &out_index
-  ))
-  {
-    get_audio_data().data[out_index] = in;
-    get_audio_data().actions[out_index] |= Nil::Data::Event::UPDATED;
-  }
-  else
-  {
-    // Graph add type_id info
-  }
-  
-  Graph::data_updated(
-    Nil::Data::get_graph_data(),
-    node.get_id(),
-    get_audio_data().type_id
+    get_audio_data().type_id,
+    
+    // Update Current Data
+    [](const size_t index, const Audio &in)
+    {
+      get_audio_data().data[index] = in;
+      get_audio_data().actions[index] |= Nil::Data::Event::UPDATED;
+    },
+    
+    // Insert New Data
+    [](const uint32_t node_id, const Audio &in)
+    {
+      get_audio_data().keys.emplace_back(node_id);
+      get_audio_data().data.emplace_back(in);
+      get_audio_data().actions.emplace_back(Nil::Data::Event::ADDED);
+    }
   );
 }
 
