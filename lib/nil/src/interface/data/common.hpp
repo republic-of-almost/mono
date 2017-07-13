@@ -29,7 +29,7 @@ namespace Nil {
 namespace Data {
 
 
-using test_cb = void(*)(uint32_t id, uintptr_t user_data, size_t index);
+using setter_cb = void(*)(uint32_t id, uintptr_t user_data, size_t index);
 
 
 template<typename S>
@@ -87,15 +87,15 @@ struct Generic_data
   
   // --
   
-  test_cb cb = nullptr;
+  setter_cb cb = nullptr;
   
   explicit
   Generic_data(
     const uint64_t dependent_types = 0,
-    const test_cb &set_cb = nullptr
+    const setter_cb &set_cb = nullptr
   )
   {
-    cb = set_cb;
+//    cb = set_cb;
   
     type_id = Nil::Graph::data_register_type(
       Nil::Data::get_graph_data(),

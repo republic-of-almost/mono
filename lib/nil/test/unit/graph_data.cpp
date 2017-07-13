@@ -8,7 +8,7 @@ TEST_CASE("Data")
 {
   Nil::Engine nil_engine;
   
-  SECTION("Camera")
+  SECTION("Camera - Remove by Destroy")
   {
     Nil::Node node;
     
