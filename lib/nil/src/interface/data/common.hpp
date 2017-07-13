@@ -281,7 +281,11 @@ struct Generic_data
         &type_ids
       );
       
-      actions[out_index] |= Nil::Data::Event::REMOVED;
+      removed_nodes.emplace_back(node);
+      removed_data.emplace_back(data[out_index]);
+      
+      data.erase(out_index);
+      keys.erase(out_index);
     }
   }
   
