@@ -75,13 +75,7 @@ get(size_t *count, Camera **cameras)
 void
 get(const Node &node, Camera &out)
 {
-  get_data(
-    node,
-    out,
-    get_camera_data().data.data(),
-    get_camera_data().keys.data(),
-    get_camera_data().keys.size()
-  );
+  get_camera_data().get_data(node, out);
 }
 
 

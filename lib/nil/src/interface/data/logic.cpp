@@ -43,13 +43,7 @@ get(size_t *count, Logic **data)
 void
 get(const Node &node, Logic &out)
 {
-  get_data(
-    node,
-    out,
-    get_logic_data().data.data(),
-    get_logic_data().keys.data(),
-    get_logic_data().keys.size()
-  );
+  get_logic_data().get_data(node, out);
 }
 
 

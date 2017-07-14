@@ -47,32 +47,11 @@ struct Bounding_box_data
 
 
 // -- Lazy Getter -- //
-Nil::Data::Generic_data<Nil::Data::Bounding_box>&
+Bounding_box_data&
 get_bb_data()
 {
-  static Nil::Data::Generic_data<Nil::Data::Bounding_box> data(
-    Nil::Data::get_type_id(Nil::Data::Transform{}),
-    [](uint32_t id, uintptr_t user_data, size_t index)
-    {
-      Nil::Data::Generic_data<Nil::Data::Camera> *data = reinterpret_cast<Nil::Data::Generic_data<Nil::Data::Camera>*>(user_data);
-      LIB_ASSERT(data);
-      
-      Nil::Node node(id);
-      
-      Nil::Data::Transform trans;
-      Nil::Data::get(node, trans, true);
-      
-      Nil::Data::Bounding_box bb;
-      Nil::Data::get(node, bb);
-
-      math::aabb aabb = math::aabb_init(
-        math::vec3_init(bb.min),
-        math::vec3_init(bb.max)
-      );
-    }
-  );
-  
-  return data;
+  static Bounding_box_data bb;
+  return bb;
 }
 
 
@@ -87,16 +66,90 @@ namespace Data {
 
 
 void
-get(const Node &node, Bounding_box &out, const bool inherited)
+get(const Node &node, Bounding_box &out, const bool world)
 {
-
+  get_data_helper(
+    node,
+    out,
+    get_bb_data().keys.data(),
+    get_bb_data().keys.size(),
+    (uintptr_t)&world,
+    
+    // Found
+    [](const size_t index, Bounding_box &out, uintptr_t user_data)
+    {
+      const bool world = *(bool*)user_data;
+      
+      if(world)
+      {
+        out = get_bb_data().world_bb[index];
+      }
+      else
+      {
+        out = get_bb_data().local_bb[index];
+      }
+    },
+    
+    // Not Found
+    [](const uint32_t node_id, Bounding_box &out, uintptr_t user_data)
+    {
+      LOG_ERROR("Failed to fnid data")
+    }
+  );
 }
 
 
 void
 set(Node &node, const Bounding_box &in)
 {
-
+  set_data_helper(
+    node,
+    in,
+    get_bb_data().keys.data(),
+    get_bb_data().keys.size(),
+    get_bb_data().type_id,
+    (uintptr_t)&node,
+    
+    // Updated existing data
+    [](const size_t index, const Bounding_box &in, uintptr_t user_data)
+    {
+      Node *node = reinterpret_cast<Node*>(user_data);
+      
+      Nil::Data::Transform trans;
+      Nil::Data::get(*node, trans);
+      
+      const math::vec3 pos = math::vec3_init(trans.position);
+      const math::vec3 min = math::vec3_add(math::vec3_init(in.min), pos);
+      const math::vec3 max = math::vec3_add(math::vec3_init(in.max), pos);
+      
+      Nil::Data::Bounding_box world_in = in;
+      memcpy(world_in.min, min.data, sizeof(world_in.min));
+      memcpy(world_in.max, max.data, sizeof(world_in.max));
+    
+      get_bb_data().local_bb[index] = in;
+      get_bb_data().world_bb[index] = world_in;
+    },
+    
+    // Set new data
+    [](const uint32_t node_id, const Bounding_box &in, uintptr_t user_data)
+    {
+      Node node(node_id);
+      
+      Nil::Data::Transform trans;
+      Nil::Data::get(node, trans);
+      
+      const math::vec3 pos = math::vec3_init(trans.position);
+      const math::vec3 min = math::vec3_add(math::vec3_init(in.min), pos);
+      const math::vec3 max = math::vec3_add(math::vec3_init(in.max), pos);
+      
+      Nil::Data::Bounding_box world_in = in;
+      memcpy(world_in.min, min.data, sizeof(world_in.min));
+      memcpy(world_in.max, max.data, sizeof(world_in.max));
+      
+      get_bb_data().local_bb.emplace_back(in);
+      get_bb_data().world_bb.emplace_back(world_in);
+    }
+  );
 }
 
 
@@ -104,30 +157,30 @@ set(Node &node, const Bounding_box &in)
 
 
 bool
-has_bounding_box(const Node &)
+has_bounding_box(const Node &node)
 {
-  
+  return find_node(node, get_bb_data().keys.data(), get_bb_data().keys.size());
 }
 
 
 bool
 has(const Node &node, const Bounding_box &)
 {
-  
+  return has_bounding_box(node);
 }
 
 
 uint64_t
 get_type_id(const Bounding_box &)
 {
-  
+  return get_bb_data().type_id;
 }
 
 
 const char*
 get_type_name(const Bounding_box &in)
 {
-  
+  return "BoundingBox";
 }
 
 

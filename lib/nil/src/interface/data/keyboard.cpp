@@ -43,13 +43,7 @@ get(size_t *count, Keyboard **data)
 void
 get(const Node &node, Keyboard &out)
 {
-  get_data(
-    node,
-    out,
-    get_kb_data().data.data(),
-    get_kb_data().keys.data(),
-    get_kb_data().keys.size()
-  );
+  get_kb_data().get_data(node, out);
 }
 
 

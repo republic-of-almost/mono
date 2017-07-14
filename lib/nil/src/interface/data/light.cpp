@@ -55,22 +55,14 @@ namespace Data {
 void
 get(size_t *count, Light **out)
 {
-  *count = get_light_data().data.size();
-  *out = get_light_data().data.data();
+  get_light_data().get_access(count, out);
 }
 
 
 void
 get(const Node &node, Light &out)
 {
-  get_data(
-    node,
-    out,
-    get_light_data().data.data(),
-    get_light_data().keys.data(),
-    get_light_data().keys.size()
-  );
-
+  get_light_data().get_data(node, out);
 }
 
 

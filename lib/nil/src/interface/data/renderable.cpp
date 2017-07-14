@@ -67,22 +67,14 @@ namespace Data {
 void
 get(size_t *count, Renderable **renderables)
 {
-  *renderables = get_mat_data().data.begin();
-  *count       = get_mat_data().data.size();
+  get_mat_data().get_access(count, renderables);
 }
 
 
 void
 get(const Node &node, Renderable &out)
 {
-  get_data(
-    node,
-    out,
-    get_mat_data().data.data(),
-    get_mat_data().keys.data(),
-    get_mat_data().keys.size()
-  );
-
+  get_mat_data().get_data(node, out);
 }
 
 

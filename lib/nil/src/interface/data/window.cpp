@@ -45,14 +45,7 @@ get(size_t *out_count, Window **out_resource)
 void
 get(const Node &node, Window &out)
 {
-  get_data(
-    node,
-    out,
-    get_win_data().data.data(),
-    get_win_data().keys.data(),
-    get_win_data().keys.size()
-  );
-
+  get_win_data().get_data(node, out);
 }
 
 

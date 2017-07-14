@@ -43,13 +43,7 @@ get(size_t *count, Gamepad **data)
 void
 get(const Node &node, Gamepad &out)
 {
-  get_data(
-    node,
-    out,
-    get_gamepad_data().data.data(),
-    get_gamepad_data().keys.data(),
-    get_gamepad_data().keys.size()
-  );
+  get_gamepad_data().get_data(node, out);
 }
 
 

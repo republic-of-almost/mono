@@ -43,41 +43,14 @@ get(size_t *count, Audio **data)
 void
 get(const Node &node, Audio &out)
 {
-  get_data(
-    node,
-    out,
-    get_audio_data().data.data(),
-    get_audio_data().keys.data(),
-    get_audio_data().keys.size()
-  );
+  get_audio_data().get_data(node, out);
 }
 
 
 void
 set(Node &node, const Audio &in)
 {
-  set_data(
-    node,
-    in,
-    get_audio_data().keys.data(),
-    get_audio_data().keys.size(),
-    get_audio_data().type_id,
-    
-    // Update Current Data
-    [](const size_t index, const Audio &in)
-    {
-      get_audio_data().data[index] = in;
-      get_audio_data().actions[index] |= Nil::Data::Event::UPDATED;
-    },
-    
-    // Insert New Data
-    [](const uint32_t node_id, const Audio &in)
-    {
-      get_audio_data().keys.emplace_back(node_id);
-      get_audio_data().data.emplace_back(in);
-      get_audio_data().actions.emplace_back(Nil::Data::Event::ADDED);
-    }
-  );
+  get_audio_data().set_data(node, in);
 }
 
 

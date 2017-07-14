@@ -43,14 +43,7 @@ get(size_t *count, Developer **data)
 void
 get(const Node &node, Developer &out)
 {
-  get_data(
-    node,
-    out,
-    get_developer_data().data.data(),
-    get_developer_data().keys.data(),
-    get_developer_data().keys.size()
-  );
-
+  get_developer_data().get_data(node, out);
 }
 
 
