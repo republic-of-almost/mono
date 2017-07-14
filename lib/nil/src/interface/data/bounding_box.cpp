@@ -34,13 +34,104 @@ struct Bounding_box_data
   std::vector<Nil::Node>              removed_bb_nodes;
   lib::array<Nil::Data::Bounding_box> removed_bb_data;
   
-  // --
-  
-  Nil::Data::setter_cb setter_fn = nullptr;
-  
   explicit
   Bounding_box_data()
   {
+    type_id = Nil::Graph::data_register_type(
+      Nil::Data::get_graph_data(),
+      
+      // Tick Callback
+      [](uintptr_t user_data)
+      {
+        Bounding_box_data *data = reinterpret_cast<Bounding_box_data*>(user_data);
+        LIB_ASSERT(data);
+        
+        // -- Clear Actions -- //
+        
+        memset(
+          data->actions.data(),
+          0,
+          sizeof(decltype(data->actions[0])) * data->actions.size()
+        );
+        
+        // -- Clear Event Caches -- //
+        
+        data->added_bb_nodes.clear();
+        data->added_bb_data.clear();
+        data->updated_bb_data.clear();
+        data->updated_bb_nodes.clear();
+        data->removed_bb_nodes.clear();
+        data->removed_bb_data.clear();
+      },
+      
+      // Node deleted callback
+      [](const uint32_t id, uintptr_t user_data)
+      {
+        Bounding_box_data *data = reinterpret_cast<Bounding_box_data*>(user_data);
+        LIB_ASSERT(data);
+        
+        Nil::Data::remove_data_helper(
+          Nil::Node(id),
+          data->keys.data(),
+          data->keys.size(),
+          data->type_id,
+          0,
+          // Remove
+          [](const size_t index, uintptr_t user_data)
+          {
+            
+          },
+          // Not found
+          [](const uint32_t node_id, uintptr_t user_data)
+          {
+            LOG_ERROR("Failed to remove Bounding box.")
+          }
+        );
+      },
+      
+      // Dependency callback
+      [](const uint32_t id, uintptr_t user_data)
+      {
+        Bounding_box_data *data = reinterpret_cast<Bounding_box_data*>(user_data);
+        LIB_ASSERT(data);
+      
+        size_t index = 0;
+        const uint32_t *ids = data->keys.data();
+        const size_t id_count = data->keys.size();
+        
+        const bool found = lib::key::linear_search(
+          id,
+          ids,
+          id_count,
+          &index
+        );
+        
+        if(found)
+        {
+          data->actions[index] |= Nil::Data::Event::UPDATED;
+          
+          Nil::Node node(id);
+          
+          Nil::Data::Bounding_box in = data->local_bb[index];
+          
+          Nil::Data::Transform trans;
+          Nil::Data::get(node, trans);
+          
+          const math::vec3 pos = math::vec3_init(trans.position);
+          const math::vec3 min = math::vec3_add(math::vec3_init(in.min), pos);
+          const math::vec3 max = math::vec3_add(math::vec3_init(in.max), pos);
+          
+          Nil::Data::Bounding_box world_in = in;
+          memcpy(world_in.min, min.data, sizeof(world_in.min));
+          memcpy(world_in.max, max.data, sizeof(world_in.max));
+        
+          data->world_bb[index] = world_in;
+        }
+      },
+      
+      (uintptr_t)this,
+      Nil::Data::get_type_id(Nil::Data::Transform{})
+    );
   }
   
 };
@@ -113,7 +204,7 @@ set(Node &node, const Bounding_box &in)
     // Updated existing data
     [](const size_t index, const Bounding_box &in, uintptr_t user_data)
     {
-      Node *node = reinterpret_cast<Node*>(user_data);
+      const Node *node = reinterpret_cast<Node*>(user_data);
       
       Nil::Data::Transform trans;
       Nil::Data::get(*node, trans);
@@ -190,7 +281,7 @@ get_type_name(const Bounding_box &in)
 void
 events(const uint32_t data, size_t *count, Bounding_box_data **out_data, Node **out_node)
 {
-  
+  LIB_ASSERT(false);
 }
 
 
