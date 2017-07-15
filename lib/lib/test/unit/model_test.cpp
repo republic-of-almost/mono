@@ -20,7 +20,9 @@ TEST_CASE("Model Test")
     
     FOR_MODEL_STRESS
     {
-      lib::model model = lib::model_import::load_obj_from_file("does_not_exist");
+      lib::model model(
+        lib::model_import::load_obj_from_file("does_not_exist")
+      );
       
       REQUIRE(model.mesh_count == 0);
       REQUIRE(model.material_count == 0);

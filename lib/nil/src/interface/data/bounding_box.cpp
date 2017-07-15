@@ -163,6 +163,22 @@ namespace Data {
 
 
 void
+get(size_t *count, Bounding_box **box, const bool world)
+{
+  *count = get_bb_data().keys.size();
+
+  if(world)
+  {
+    *box = get_bb_data().world_bb.data();
+  }
+  else
+  {
+    *box = get_bb_data().local_bb.data();
+  }
+}
+
+
+void
 get(const Node &node, Bounding_box &out, const bool world)
 {
   get_data_helper(
@@ -278,6 +294,13 @@ const char*
 get_type_name(const Bounding_box &in)
 {
   return "BoundingBox";
+}
+
+
+size_t
+bounding_box_count()
+{
+  return get_bb_data().keys.size();
 }
 
 

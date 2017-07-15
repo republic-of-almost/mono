@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <nil/data/bounding_box.hpp>
 
 
 namespace Nil {
@@ -27,7 +28,8 @@ struct Mesh
   enum { PENDING, LOADED, FAILED, } status;
   uint32_t id;
   uintptr_t platform_resource;
-
+  
+  Nil::Data::Bounding_box bounding_box;
 };
 
 

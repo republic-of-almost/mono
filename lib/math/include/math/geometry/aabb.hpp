@@ -25,7 +25,7 @@ _MATH_NS_OPEN
 MATH_AABB_INLINE aabb         aabb_init();
 MATH_AABB_INLINE aabb         aabb_init(const vec3 min, const vec3 max);
 MATH_AABB_INLINE aabb         aabb_init(const vec3 center, const float scale);
-MATH_AABB_INLINE aabb         aabb_init_from_xyz_data(const float vertex[], const size_t number_of_floats);
+MATH_AABB_INLINE aabb         aabb_init(const float vertex[], const size_t number_of_floats);
 
 MATH_AABB_INLINE aabb         aabb_combine(const aabb &a, const aabb &b);
 
@@ -79,10 +79,16 @@ aabb_init(const vec3 center, const float scale)
 
 
 aabb
-aabb_init_from_xyz_data(const float vertex[],
-                        const size_t number_of_floats)
+aabb_init(
+  const float vertex[],
+  const size_t number_of_floats)
 {
-  aabb out_aabb;
+  aabb out_aabb = aabb_init();
+  
+  if(number_of_floats == 0)
+  {
+    return out_aabb;
+  }
 
   // Check is valid.
   assert((number_of_floats % 3) == 0);

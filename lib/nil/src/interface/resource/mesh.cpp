@@ -2,6 +2,7 @@
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
+#include <math/geometry/aabb.hpp>
 #include <stdio.h>
 
 
@@ -55,7 +56,31 @@ load(const char *name, Mesh &in_out)
   }
   else
   {
-    const uint32_t key = lib::string_pool::add(name);
+    // Generate bounding box
+    {
+      const math::aabb bouding_box(
+        math::aabb_init(in_out.position_vec3, in_out.count)
+      );
+      
+      memcpy(
+        in_out.bounding_box.min,
+        bouding_box.min.data,
+        sizeof(in_out.bounding_box.min)
+      );
+      
+      memcpy(
+        in_out.bounding_box.max,
+        bouding_box.max.data,
+        sizeof(in_out.bounding_box.max)
+      );
+    }
+    
+    // Generate new id
+    {
+      const uint32_t new_id = keys.size();
+      in_out.id = new_id;
+    }
+  
     Mesh cpy_in_out = in_out;
     
 //    if(in_out.status == 0)
@@ -101,11 +126,7 @@ load(const char *name, Mesh &in_out)
       }
     }
     
-    const uint32_t new_id = keys.size();
-    
-    in_out.id = new_id;
-    cpy_in_out.id = new_id;
-    
+    const uint32_t key = lib::string_pool::add(name);
     keys.emplace_back(key);
     meshes.emplace_back(cpy_in_out);
     

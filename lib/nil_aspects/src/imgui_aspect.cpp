@@ -591,7 +591,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Audio",
       "BoundingBox",
       "Camera",
-      "Collider",
       "Developer",
       "Gamepad",
       "Keyboard",
@@ -599,7 +598,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Logic",
       "Renderable",
       "Mouse",
-      "Rigidbody",
       "Transform",
       "Window",
     };

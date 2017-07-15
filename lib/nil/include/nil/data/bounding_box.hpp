@@ -23,6 +23,9 @@ struct Bounding_box
 
 // -------------------------------------------------------------- [ Get/Set ] --
 
+void
+get(size_t *count, Bounding_box **box, const bool world = false);
+
 
 void
 get(const Node &node, Bounding_box &out, const bool world = false);
@@ -30,6 +33,10 @@ get(const Node &node, Bounding_box &out, const bool world = false);
 
 void
 set(Node &node, const Bounding_box &in);
+
+
+void
+remove_bounding_box(Node &node);
 
 
 // ----------------------------------------------------------------- [ Info ] --
