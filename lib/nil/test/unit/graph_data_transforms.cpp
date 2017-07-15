@@ -5,13 +5,16 @@
 #include <math/math.hpp>
 
 
-TEST_CASE("Graph Transforms")
+TEST_CASE("Graph Data Transforms")
 {
   Nil::Engine nil_engine;
   
   SECTION("Sensible Default Transform")
   {
     const Nil::Node node;
+    
+    REQUIRE(Nil::Data::has_transform(node)); // Should exist by default.
+    
     Nil::Data::Transform trans;
     Nil::Data::get(node, trans);
     
