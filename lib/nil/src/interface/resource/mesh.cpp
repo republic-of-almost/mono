@@ -132,5 +132,12 @@ get_type_name(const Mesh &)
 }
 
 
+size_t
+mesh_count()
+{
+  return keys.size() - 1; // We have an inital mesh for failures.
+}
+
+
 } // ns
 } // ns

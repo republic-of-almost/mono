@@ -56,6 +56,10 @@ const char *
 get_type_name(const Mesh &in);
 
 
+size_t
+mesh_count();
+
+
 } // ns
 } // ns
 
