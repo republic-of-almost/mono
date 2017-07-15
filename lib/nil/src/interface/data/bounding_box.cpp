@@ -79,7 +79,13 @@ struct Bounding_box_data
           // Remove
           [](const size_t index, uintptr_t user_data)
           {
-            
+            Bounding_box_data *data = reinterpret_cast<Bounding_box_data*>(user_data);
+            LIB_ASSERT(data);
+          
+            data->keys.erase(index);
+            data->local_bb.erase(index);
+            data->world_bb.erase(index);
+            data->actions.erase(index);
           },
           // Not found
           [](const uint32_t node_id, uintptr_t user_data)

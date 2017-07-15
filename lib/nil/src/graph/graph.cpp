@@ -21,7 +21,7 @@ namespace
   
   
   // ------------------------------------------------------- [ Misc Helpers ] --
-
+  
 
   void
   graph_size_check(const Nil::Graph::Data *graph)
@@ -288,6 +288,7 @@ node_remove(Data *graph, const uint32_t node_id)
       for(uint32_t i = 0; i < decendent_count; ++i)
       {
         const uint32_t this_id = graph->node_id[index];
+        const uint64_t type_id = graph->data[index].node_type_id;
       
         graph->node_id.erase(index);
         graph->parent_depth_data.erase(index);
@@ -300,16 +301,19 @@ node_remove(Data *graph, const uint32_t node_id)
         #endif
         
         // -- Remove Other Data -- //
-        for(size_t i = 0; i < graph->graph_type_data.size(); ++i)
+        for(size_t j = 0; j < graph->graph_type_data.size(); ++j)
         {
-          if(graph->graph_type_data[i].delete_cb)
+          if(graph->graph_type_data[j].type_id & type_id)
           {
-            graph->graph_type_data[i].delete_cb(
-              this_id,
-              graph->graph_type_data[i].user_data
-            );
+            if(graph->graph_type_data[j].delete_cb)
+            {
+              graph->graph_type_data[j].delete_cb(
+                this_id,
+                graph->graph_type_data[j].user_data
+              );
+            }
           }
-        }
+        } // for
       }
     }
   
