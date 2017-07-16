@@ -113,6 +113,8 @@ main()
     renderable.material_id = mat.id;
     
     Nil::Data::set(scene, renderable);
+    
+    Nil::Data::set(scene, mesh.bounding_box);
   }
   
   // Camera
@@ -123,19 +125,25 @@ main()
     cam.height             = 1.f;
     cam.near_plane         = 0.1f;
     cam.far_plane          = 1000.f;
-    cam.fov                = math::tau() * 0.125;
+    cam.fov                = math::tau() * 0.125f;
     cam.clear_color_buffer = true;
     cam.clear_depth_buffer = true;
     
     Nil::Data::set(camera, cam);
     
-    // TODO: Base this off the bounding box.
-    math::quat rot = math::quat_init_with_axis_angle(1, 0, 0, -0.1f);
+    Nil::Data::Bounding_box target_bb{};
+    Nil::Data::get(scene, target_bb);
+    
+    const math::vec3 a = math::vec3_init(target_bb.min);
+    const math::vec3 b = math::vec3_init(target_bb.max);
+    
+    const float y = (math::abs(math::get_y(a)) + math::abs(math::get_y(b))) * 0.7f;
+    const float z = (math::abs(math::get_z(a)) + math::abs(math::get_z(b))) * -4.f;
     
     Nil::Data::Transform trans{
-      {0.f, 1.5f, -7.f},
+      {0.f, y, z},
       {1.f, 1.f, 1.f},
-      {math::get_x(rot), math::get_y(rot), math::get_z(rot), math::get_w(rot)},
+      {0.f, 0.f, 0.f, 1.f},
     };
     
     Nil::Data::set(camera, trans);
