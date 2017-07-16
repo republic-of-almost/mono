@@ -75,7 +75,7 @@ struct Bounding_box_data
           data->keys.data(),
           data->keys.size(),
           data->type_id,
-          0,
+          (uintptr_t)data,
           // Remove
           [](const size_t index, uintptr_t user_data)
           {
@@ -206,7 +206,35 @@ get(const Node &node, Bounding_box &out, const bool world)
     // Not Found
     [](const uint32_t node_id, Bounding_box &out, uintptr_t user_data)
     {
-      LOG_ERROR("Failed to fnid data")
+      LOG_ERROR("Failed to find data")
+    }
+  );
+}
+
+
+void
+remove_bounding_box(Node &node)
+{
+  remove_data_helper(
+    node,
+    get_bb_data().keys.data(),
+    get_bb_data().keys.size(),
+    get_bb_data().type_id,
+    0,
+    
+    // Remove
+    [](const size_t index, uintptr_t user_data)
+    {
+      get_bb_data().keys.erase(index);
+      get_bb_data().world_bb.erase(index);
+      get_bb_data().local_bb.erase(index);
+      get_bb_data().actions.erase(index);
+    },
+    
+    // Not found
+    [](const uint32_t node_id, uintptr_t user_data)
+    {
+      LOG_ERROR("Failed to find data");
     }
   );
 }
@@ -261,6 +289,7 @@ set(Node &node, const Bounding_box &in)
       
       get_bb_data().local_bb.emplace_back(in);
       get_bb_data().world_bb.emplace_back(world_in);
+      get_bb_data().keys.emplace_back(node_id);
     }
   );
 }
@@ -272,7 +301,11 @@ set(Node &node, const Bounding_box &in)
 bool
 has_bounding_box(const Node &node)
 {
-  return find_node(node, get_bb_data().keys.data(), get_bb_data().keys.size());
+  return find_node(
+    node,
+    get_bb_data().keys.data(),
+    get_bb_data().keys.size()
+  );
 }
 
 

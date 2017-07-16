@@ -27,7 +27,7 @@ TEST_CASE("Data - Bounding box")
       
       Nil::Data::set(node, box);
       
-      REQUIRE(Nil::Data::has_bounding_box(node));
+      REQUIRE(Nil::Data::has_bounding_box(node) == true);
     }
 
     // Get
