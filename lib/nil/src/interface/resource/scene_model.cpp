@@ -105,8 +105,8 @@ load_assets(Nil::Node node, const char *filename)
       }
       
       Nil::Data::Renderable renderable{};
-      renderable.material_id = mat.id;
-      renderable.mesh_id = mesh.id;
+      renderable.material_id  = mat.id;
+      renderable.mesh_id      = mesh.id;
       
       Nil::Data::set(child_node, renderable);
       Nil::Data::set(child_node, mesh.bounding_box);

@@ -48,20 +48,20 @@ struct Bounding_box_data
         
         // -- Clear Actions -- //
         
-        memset(
-          data->actions.data(),
-          0,
-          sizeof(decltype(data->actions[0])) * data->actions.size()
-        );
-        
-        // -- Clear Event Caches -- //
-        
-        data->added_bb_nodes.clear();
-        data->added_bb_data.clear();
-        data->updated_bb_data.clear();
-        data->updated_bb_nodes.clear();
-        data->removed_bb_nodes.clear();
-        data->removed_bb_data.clear();
+//        memset(
+//          data->actions.data(),
+//          0,
+//          sizeof(decltype(data->actions[0])) * data->actions.size()
+//        );
+//        
+//        // -- Clear Event Caches -- //
+//        
+//        data->added_bb_nodes.clear();
+//        data->added_bb_data.clear();
+//        data->updated_bb_data.clear();
+//        data->updated_bb_nodes.clear();
+//        data->removed_bb_nodes.clear();
+//        data->removed_bb_data.clear();
       },
       
       // Node deleted callback

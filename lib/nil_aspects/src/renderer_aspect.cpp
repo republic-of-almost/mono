@@ -9,6 +9,7 @@
 #include <nil/data/data.hpp>
 #include <nil/data/light.hpp>
 #include <nil/data/window.hpp>
+#include <nil/data/bounding_box.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/material.hpp>
 #include <nil/resource/mesh.hpp>
@@ -16,6 +17,7 @@
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
 #include <stb/stb_image.h>
+#include <GL/gl3w.h>
 
 
 namespace Nil_ext {
@@ -76,7 +78,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         }
       }
 
-      // Debug Lines
+      // Added Debug Lines
       {
         size_t                count = 0;
         Nil::Data::Developer *data = nullptr;
@@ -371,6 +373,148 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         // Signal to line renderer not reset the data buffer.
         line_data.aux_02 = 0;
         Nil::Data::set(self->debug_lines, line_data);
+      }
+      
+      // Bounding boxes
+      {
+        size_t count = 0;
+        Nil::Data::Bounding_box *data = nullptr;
+        
+        Nil::Data::get(&count, &data, true);
+        
+        rov_setColor(0, 1, 0, 1);
+        
+        float start[3];
+        float end[3];
+        
+        for(size_t i = 0; i < count; ++i)
+        {
+          // Y lines
+        
+          start[0] = data[i].min[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].min[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].min[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].max[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].min[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].max[2];
+          
+          end[0] = data[i].min[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].max[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].max[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          // X Lines
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].min[1];
+          end[2] = data[i].min[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].max[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].min[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].max[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].min[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].max[1];
+          start[2] = data[i].max[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          // Z lines
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].min[0];
+          end[1] = data[i].min[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].max[0];
+          start[1] = data[i].min[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].min[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].min[0];
+          start[1] = data[i].max[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].min[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+          
+          start[0] = data[i].max[0];
+          start[1] = data[i].max[1];
+          start[2] = data[i].min[2];
+          
+          end[0] = data[i].max[0];
+          end[1] = data[i].max[1];
+          end[2] = data[i].max[2];
+          
+          rov_submitLine(start, end);
+        }
       }
     }
 
