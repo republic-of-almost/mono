@@ -1,6 +1,7 @@
 #include "rov_gl_exec.hpp"
 #include "rov_gl.hpp"
 #include <lib/bits.hpp>
+#include <lib/color.hpp>
 #include <lib/bench.hpp>
 #include <lib/assert.hpp>
 #include <lib/logging.hpp>
@@ -23,7 +24,6 @@ ogl_exec(
 
   glUseProgram(0);
   glDisable(GL_BLEND);
-//  glDisable(GL_CULL_FACE);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glEnable(GL_DEPTH_TEST);
@@ -42,7 +42,15 @@ ogl_exec(
     if(rp.clear_flags & rovClearFlag_Color) { cl_flags |= GL_COLOR_BUFFER_BIT; }
     if(rp.clear_flags & rovClearFlag_Depth) { cl_flags |= GL_DEPTH_BUFFER_BIT; }
 
-    glClearColor(1, 1, 0, 1);
+    const float cl_color[4]
+    {
+      lib::color::get_channel_1f(rp.clear_color),
+      lib::color::get_channel_2f(rp.clear_color),
+      lib::color::get_channel_3f(rp.clear_color),
+      lib::color::get_channel_4f(rp.clear_color),
+    };
+
+    glClearColor(cl_color[0], cl_color[1], cl_color[2], cl_color[3]);
     glClear(cl_flags);
     glEnable(GL_DEPTH_TEST);
     glViewport(rp.viewport[0], rp.viewport[1], rp.viewport[2], rp.viewport[3]);
@@ -313,14 +321,6 @@ ogl_exec(
       }
     }
     #endif
-    
-    {
-      auto err = glGetError();
-      if(err)
-      {
-        int i = 0;
-      }
-    }
   }
 
   #ifdef GL_HAS_VAO

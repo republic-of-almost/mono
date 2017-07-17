@@ -44,6 +44,7 @@ struct rovRenderPass
   rovVec3 eye_position;
 
   uint32_t clear_flags;
+  uint32_t clear_color;
 
   lib::array<rovMaterial> materials;
   lib::array<rovDrawCall> draw_calls;

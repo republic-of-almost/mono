@@ -3,6 +3,7 @@
 #include "ogl/rov_gl_resources.hpp"
 #include "ogl/rov_gl_exec.hpp"
 #include "rov_data.hpp"
+#include <lib/color.hpp>
 #include <lib/assert.hpp>
 
 
@@ -130,6 +131,7 @@ rov_startRenderPass(
   memcpy(rp->viewport, viewport, sizeof(rovViewport));
   memcpy(rp->eye_position, eye_pos, sizeof(rovVec3));
 
+  rp->clear_color = lib::color::init(rov_data.curr_rov_color);
   rp->clear_flags = clear_flags;
 
   rp->materials.emplace_back(rov_curr_material(&rov_data), size_t{0});
@@ -153,6 +155,16 @@ rov_setColor(float r, float g, float b, float a)
   rov_data.curr_rov_color[1] = g;
   rov_data.curr_rov_color[2] = b;
   rov_data.curr_rov_color[3] = a;
+}
+
+
+void
+rov_setColor(uint32_t col)
+{
+  rov_data.curr_rov_color[0] = lib::color::get_channel_1f(col);
+  rov_data.curr_rov_color[1] = lib::color::get_channel_2f(col);
+  rov_data.curr_rov_color[2] = lib::color::get_channel_3f(col);
+  rov_data.curr_rov_color[3] = lib::color::get_channel_4f(col);
 }
 
 

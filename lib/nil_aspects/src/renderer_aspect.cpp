@@ -307,6 +307,8 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         cam.fov
       );
 
+      rov_setColor(0x114444FF);
+
       rov_startRenderPass(
         cam.view_mat,
         math::mat4_get_data(proj),

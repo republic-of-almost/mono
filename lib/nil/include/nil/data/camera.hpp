@@ -25,6 +25,8 @@ struct Camera
   float near_plane;
   float far_plane;
   
+  uint32_t clear_color;
+  
   bool clear_color_buffer;
   bool clear_depth_buffer;
   

@@ -94,6 +94,8 @@ void        rov_startRenderPass(
 
 void        rov_setColor(const float col[4]);
 void        rov_setColor(float r, float g, float b, float a);
+void        rov_setColor(uint32_t color);
+
 void        rov_setCamera(const float view[16], const float proj[16]);
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);

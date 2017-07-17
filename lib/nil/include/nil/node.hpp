@@ -28,6 +28,7 @@ public:
   /*!
     Create an invalid entity.
   */
+  explicit
   Node(const decltype(nullptr));
   
   /*!
