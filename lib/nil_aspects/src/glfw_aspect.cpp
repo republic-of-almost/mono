@@ -391,8 +391,6 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGuizmo::BeginFrame();
     #endif
 
-//    glfwSwapBuffers(self->window);
-
     glfwPollEvents();
   }
 }

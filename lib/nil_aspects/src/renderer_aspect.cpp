@@ -1,14 +1,16 @@
 #include <aspect/renderer_aspect.hpp>
-#include <rov/rov.hpp>
 #include <nil/nil.hpp>
 #include <nil/aspect.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
 #include <nil/resource/resource.hpp>
+#include <rov/rov.hpp>
 #include <lib/utilities.hpp>
-#include <lib/bench.hpp>
 #include <stb/stb_image.h>
+
+#ifndef NIMGUI
 #include <imgui/imgui.h>
+#endif
 
 
 namespace Nil_ext {
@@ -25,14 +27,12 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-
-  self->current_viewport[0] = 800;
-  self->current_viewport[1] = 600;
   
   self->mesh_ids.emplace_back(uint32_t{0});
   
-//  Nil::Node render_node;
-//  self->renderer = static_cast<Nil::Node&&>(render_node);
+  #ifndef NIMGUI
+  Nil::Node render_node;
+  self->renderer = static_cast<Nil::Node&&>(render_node);
   self->renderer.set_name("Renderer");
   
   Nil::Data::Developer dev{};
@@ -41,6 +41,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   dev.aux_02 = (uintptr_t)self;
   
   Nil::Data::set(self->renderer, dev);
+  #endif
 }
 
 
@@ -297,7 +298,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         cam.fov
       );
 
-      rov_setColor(0x114444FF);
+      rov_setColor(cam.clear_color);
 
       rov_startRenderPass(
         cam.view_mat,
@@ -531,6 +532,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 void
 ui_menu(uintptr_t user_data)
 {
+  #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(
     reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
   );
@@ -544,6 +546,7 @@ ui_menu(uintptr_t user_data)
     
     ImGui::EndMenu();
   }
+  #endif
 }
 
 
