@@ -49,6 +49,23 @@ TEST_CASE("Graph Nodes")
     REQUIRE(nil_engine.graph_data_count() == 0);
   }
   
+  SECTION("Try to move a ref")
+  {
+    Nil::Node owner;
+    Nil::Node ref(owner);
+    
+    REQUIRE(owner.is_ref() == false);
+    REQUIRE(ref.is_ref() == true);
+    
+    Nil::Node try_to_move(nullptr);
+    REQUIRE(try_to_move.is_valid() == false);
+    
+    try_to_move = static_cast<Nil::Node&&>(ref);
+    
+    REQUIRE(try_to_move.is_valid() == false);
+    REQUIRE(ref.is_valid() == true);
+  }
+  
   SECTION("Child")
   {
     {

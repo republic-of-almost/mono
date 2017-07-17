@@ -118,6 +118,12 @@ Node::operator=(Node &&other) noexcept
   {
     destroy();
   }
+  
+  // Refs cannot be moved.
+  if(other.is_ref())
+  {
+    return *this;
+  }
 
   // Clean up this node if its an owning node.
   const uint32_t type_id = lib_ent::type(m_node_id);

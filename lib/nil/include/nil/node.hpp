@@ -10,6 +10,11 @@
 namespace Nil {
 
 
+/*!
+  Node
+  --
+  These represent a place in the graph. they have complicated semantics. An owning node that goes out of scope will destroy all its data. A non owning node (ref) will not. You can move an owning node. You cannot move a a ref.
+*/
 class Node final
 {
 public:
