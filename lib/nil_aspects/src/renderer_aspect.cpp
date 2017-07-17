@@ -4,17 +4,10 @@
 #include <nil/aspect.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
-#include <nil/data/light.hpp>
-#include <nil/data/window.hpp>
-#include <nil/data/bounding_box.hpp>
-#include <nil/resource/texture.hpp>
-#include <nil/resource/material.hpp>
-#include <nil/resource/mesh.hpp>
-#include <aspect/math_nil_extensions.hpp>
+#include <nil/resource/resource.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
 #include <stb/stb_image.h>
-#include <GL/gl3w.h>
 #include <imgui/imgui.h>
 
 

@@ -1,14 +1,12 @@
 #include <aspect/glfw_aspect.hpp>
-#include <nil/node.hpp>
-#include <nil/data/data.hpp>
-#include <nil/data/window.hpp>
 #include <nil/aspect.hpp>
+#include <nil/data/data.hpp>
+#include <math/math.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
-#include <math/math.hpp>
-#include <stddef.h>
+#include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
-
+#include <stddef.h>
 
 #ifndef NIMGUI
 #include <imgui/imgui.h>
@@ -224,8 +222,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         glfwGetCursorPos(self->window, &x_pos, &y_pos);
         glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         
-        self->last_mouse_x = (float)x_pos;
-        self->last_mouse_y = (float)y_pos;
+        self->last_mouse[0] = (float)x_pos;
+        self->last_mouse[1] = (float)y_pos;
 
         glfwSetCursorPosCallback(
           self->window,
@@ -237,11 +235,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             const float this_mouse_x = (float)x;
             const float this_mouse_y = (float)y;
 
-            self->delta_x = self->last_mouse_x - this_mouse_x;
-            self->delta_y = self->last_mouse_y - this_mouse_y;
+            self->delta_mouse[0] = self->last_mouse[0] - this_mouse_x;
+            self->delta_mouse[1] = self->last_mouse[1] - this_mouse_y;
 
-            self->last_mouse_x = this_mouse_x;
-            self->last_mouse_y = this_mouse_y;
+            self->last_mouse[0] = this_mouse_x;
+            self->last_mouse[1] = this_mouse_y;
 
             size_t count = 0;
             Nil::Data::Mouse *mouse;
@@ -251,8 +249,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             {
               if(mouse->id == 0)
               {
-                mouse[i].delta[0] = math::to_int(self->delta_x);
-                mouse[i].delta[1] = math::to_int(self->delta_y);
+                mouse[i].delta[0] = math::to_int(self->delta_mouse[0]);
+                mouse[i].delta[1] = math::to_int(self->delta_mouse[1]);
               }
             }
           }

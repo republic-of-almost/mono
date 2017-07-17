@@ -12,15 +12,14 @@ Other than controlling callbacks and the graph. Nil doesn't actually do any work
 
 ## Data and Resources
 
-Most data has to be attached to a node for it to exist. The exceptions are Transforms and bounding boxes that are added by default. This data is special cased because both are quite often used anyway and both have inherited properties.
+Most data has to be attached to a node for it to exist. The exceptions are Transforms that are added by default. This data is special cased because both are quite often used anyway and have inherited properties.
 
 Nil also has the concept of resources which are assets, data's who's lifetime is not attached to the lifetime of a node.
 
 
 ## Future Things and TODO
 
-  - Bounding box, not inherited nor implimented or used right now.
-  - Nice to move out transforms and bounding boxes from the graph, and have graph just nodes, and transforms/boxes as data like the rest of them.
+  - Nice to move out transforms from the graph, and have graph just nodes, and transforms as data like the rest of them.
 
 
 ## Examples

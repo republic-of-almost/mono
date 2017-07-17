@@ -18,13 +18,13 @@ struct short_string
   char data[16];
 };
 
+
 struct node_data
 {
   uintptr_t user_data;
   uint64_t node_type_id;
   short_string name;
 };
-
 
 
 // ----------------------------------------------------------------- [ Data ] --
