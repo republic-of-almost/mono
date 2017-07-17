@@ -36,7 +36,7 @@ struct Bounding_box_data
   
   ~Bounding_box_data()
   {
-    LOG_INFO("BB Out");
+    
   }
   
   explicit
@@ -344,8 +344,6 @@ set(Node &node, const Bounding_box &in)
     [](const uint32_t node_id, const Bounding_box &in, uintptr_t user_data)
     {
       Node node(node_id);
-      
-      printf("BB %d\n", node_id);
       
       Nil::Data::Transform trans;
       Nil::Data::get(node, trans);
