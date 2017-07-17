@@ -68,12 +68,27 @@ main()
   // Generate the primitive //
 
   ps_in_color = uni_line[color];
+  
+  // Small offset to stop z-fight as often used with bounding boxes etc //
+  float offset_scale = -0.002;
 
-  gl_Position = uni_wvp_mat * vec4(uni_line[start], 1);
-  EmitVertex();
+  // Start Vert //
+  {
+    vec4 pos = uni_wvp_mat * vec4(uni_line[start], 1);
+    vec4 offset = vec4(0,0,offset_scale, 0);
+    gl_Position = pos + offset;
+    
+    EmitVertex();
+  }
 
-  gl_Position = uni_wvp_mat * vec4(uni_line[end], 1);
-  EmitVertex();
+  // End Vert //
+  {
+    vec4 pos = uni_wvp_mat * vec4(uni_line[end], 1);
+    vec4 offset = vec4(0,0,offset_scale, 0);
+    gl_Position = pos + offset;
+    
+    EmitVertex();
+  }
 
   EndPrimitive();
 }

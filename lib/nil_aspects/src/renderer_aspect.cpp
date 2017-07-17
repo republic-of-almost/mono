@@ -1,6 +1,3 @@
-//#include <GL/gl3w.h>
-//
-//#define ROV_GL_IMPL
 #include <aspect/renderer_aspect.hpp>
 #include <rov/rov.hpp>
 #include <nil/nil.hpp>
