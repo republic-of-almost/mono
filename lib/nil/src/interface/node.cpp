@@ -129,7 +129,6 @@ Node::operator=(Node &&other) noexcept
   }
 
   // Move other node.
-  if(instance_id)
   {
     this->m_node_id = lib_ent::create(node_owned_id, other.get_id());
     other.m_node_id = lib_ent::create(node_ref_id, other.get_id());
