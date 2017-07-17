@@ -90,7 +90,7 @@ struct Bounding_box_data
             
             const size_t key_size = data->keys.size();
             LIB_ASSERT(index < key_size);
-                        
+            
             data->keys.erase(index);
             data->local_bb.erase(index);
             data->world_bb.erase(index);

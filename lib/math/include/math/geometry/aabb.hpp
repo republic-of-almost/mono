@@ -98,26 +98,32 @@ aabb_init(
   }
 
   // Calculate min, max
-  float max_x(vertex[0]);
-  float max_y(vertex[1]);
-  float max_z(vertex[2]);
+  float max_x(float_min());
+  float max_y(float_min());
+  float max_z(float_min());
 
-  float min_x(vertex[0]);
-  float min_y(vertex[1]);
-  float min_z(vertex[2]);
+  float min_x(float_max());
+  float min_y(float_max());
+  float min_z(float_max());
 
-  for(size_t i = 0; i < number_of_floats / 3; ++i)
+  const size_t count = number_of_floats / 3;
+
+  for(size_t i = 0; i < count; ++i)
   {
     size_t index = i * 3;
 
-    max_x = max(vertex[index + 0], max_x);
-    min_x = min(vertex[index + 0], min_x);
+    const float x_val = vertex[index + 0];
+    
+    max_x = max(x_val, max_x);
+    min_x = min(x_val, min_x);
 
-    max_y = max(vertex[index + 1], max_y);
-    min_y = min(vertex[index + 1], min_y);
+    const float y_val = vertex[index + 1];
+    max_y = max(y_val, max_y);
+    min_y = min(y_val, min_y);
 
-    max_z = max(vertex[index + 2], max_z);
-    min_z = min(vertex[index + 2], min_z);
+    const float z_val = vertex[index + 2];
+    max_z = max(z_val, max_z);
+    min_z = min(z_val, min_z);
   }
 
   out_aabb.max = vec3_init(max_x, max_y, max_z);

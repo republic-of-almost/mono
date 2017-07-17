@@ -58,19 +58,19 @@ load(const char *name, Mesh &in_out)
   {
     // Generate bounding box
     {
-      const math::aabb bouding_box(
-        math::aabb_init(in_out.position_vec3, in_out.count)
+      const math::aabb box(
+        math::aabb_init(in_out.position_vec3, in_out.count * 3)
       );
       
       memcpy(
         in_out.bounding_box.min,
-        bouding_box.min.data,
+        box.min.data,
         sizeof(in_out.bounding_box.min)
       );
       
       memcpy(
         in_out.bounding_box.max,
-        bouding_box.max.data,
+        box.max.data,
         sizeof(in_out.bounding_box.max)
       );
     }
