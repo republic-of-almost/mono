@@ -414,6 +414,8 @@ struct Generic_data
       [](const size_t index, uintptr_t user_data)
       {
         Generic_data<T> *self = reinterpret_cast<Generic_data<T>*>(user_data);
+        
+        LIB_ASSERT(index < self->keys.size());
       
         self->removed_nodes.emplace_back(
           Nil::Node(self->keys[index])

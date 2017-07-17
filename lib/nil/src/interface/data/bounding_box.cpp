@@ -34,6 +34,11 @@ struct Bounding_box_data
   std::vector<Nil::Node>              removed_bb_nodes;
   lib::array<Nil::Data::Bounding_box> removed_bb_data;
   
+  ~Bounding_box_data()
+  {
+    LOG_INFO("BB Out");
+  }
+  
   explicit
   Bounding_box_data()
   {
@@ -83,10 +88,13 @@ struct Bounding_box_data
             Bounding_box_data *data = reinterpret_cast<Bounding_box_data*>(user_data);
             LIB_ASSERT(data);
             
+            const size_t key_size = data->keys.size();
+            LIB_ASSERT(index < key_size);
+                        
             data->keys.erase(index);
             data->local_bb.erase(index);
             data->world_bb.erase(index);
-            data->actions.erase(index);
+//            data->actions.erase(index);
           },
           
           // Not found
@@ -116,7 +124,7 @@ struct Bounding_box_data
         
         if(found)
         {
-          data->actions[index] |= Nil::Data::Event::UPDATED;
+//          data->actions[index] |= Nil::Data::Event::UPDATED;
           
           Nil::Node node(id);
           
@@ -125,7 +133,8 @@ struct Bounding_box_data
           Nil::Data::Transform trans;
           Nil::Data::get(node, trans);
           
-          const math::vec3 corners[] {
+          const math::vec3 corners[]
+          {
             math::vec3_init(in.min),
             math::vec3_init(in.max[0], in.min[1], in.min[2]),
             math::vec3_init(in.min[0], in.min[1], in.max[2]),
@@ -153,15 +162,16 @@ struct Bounding_box_data
           float min[3] {math::float_max(),math::float_max(),math::float_max()};
           float max[3] {math::float_min(),math::float_min(),math::float_min()};
           
-          for(int i = 0; i < count; ++i)
+//          for(int i = 0; i < count; ++i)
+          for(auto &rot_pt : rot_corners)
           {
-            max[0] = math::max(max[0], math::get_x(rot_corners[i]));
-            max[1] = math::max(max[1], math::get_y(rot_corners[i]));
-            max[2] = math::max(max[2], math::get_z(rot_corners[i]));
+            max[0] = math::max(max[0], math::get_x(rot_pt));
+            max[1] = math::max(max[1], math::get_y(rot_pt));
+            max[2] = math::max(max[2], math::get_z(rot_pt));
             
-            min[0] = math::min(min[0], math::get_x(rot_corners[i]));
-            min[1] = math::min(min[1], math::get_y(rot_corners[i]));
-            min[2] = math::min(min[2], math::get_z(rot_corners[i]));
+            min[0] = math::min(min[0], math::get_x(rot_pt));
+            min[1] = math::min(min[1], math::get_y(rot_pt));
+            min[2] = math::min(min[2], math::get_z(rot_pt));
           }
           
           // -- Scale -- //
@@ -287,7 +297,7 @@ remove_bounding_box(Node &node)
       get_bb_data().keys.erase(index);
       get_bb_data().world_bb.erase(index);
       get_bb_data().local_bb.erase(index);
-      get_bb_data().actions.erase(index);
+//      get_bb_data().actions.erase(index);
     },
     
     // Not found
@@ -335,6 +345,8 @@ set(Node &node, const Bounding_box &in)
     {
       Node node(node_id);
       
+      printf("BB %d\n", node_id);
+      
       Nil::Data::Transform trans;
       Nil::Data::get(node, trans);
       
@@ -345,6 +357,8 @@ set(Node &node, const Bounding_box &in)
       Nil::Data::Bounding_box world_in = in;
       memcpy(world_in.min, min.data, sizeof(world_in.min));
       memcpy(world_in.max, max.data, sizeof(world_in.max));
+      
+      uint32_t *key_arr = get_bb_data().keys.data();
       
       get_bb_data().local_bb.emplace_back(in);
       get_bb_data().world_bb.emplace_back(world_in);
