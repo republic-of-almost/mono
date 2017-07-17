@@ -24,6 +24,17 @@ TEST_CASE("Graph Nodes")
     REQUIRE(node.is_ref() == false);
   }
   
+  SECTION("Init a Null Node")
+  {
+    Nil::Node node(nullptr);
+    
+    // Moves
+    node = static_cast<Nil::Node&&>(Nil::Node());
+    
+    REQUIRE(node.is_valid() == true);
+    REQUIRE(node.is_ref() == false);
+  }
+  
   SECTION("Basic Out of Scope")
   {
     REQUIRE(nil_engine.graph_data_count() == 0);
