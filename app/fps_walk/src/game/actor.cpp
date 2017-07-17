@@ -328,6 +328,7 @@ setup(Actor *actor)
         cam_data.far_plane          = 100.f;
         cam_data.clear_color_buffer = true;
         cam_data.clear_depth_buffer = true;
+        cam_data.clear_color        = 0x222233FF;
         
         Nil::Data::set(camera, cam_data);
       }
