@@ -100,8 +100,8 @@ setup()
     // Line data
     Nil::Data::Developer line_data;
     line_data.type_id = 2;
-    line_data.aux_01 = (uintptr_t)line_info.data();
-    line_data.aux_02 = 0;
+    line_data.aux_01  = (uintptr_t)line_info.data();
+    line_data.aux_02  = 0;
     
     Nil::Data::set(node, line_data);
   }

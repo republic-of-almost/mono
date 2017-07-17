@@ -28,6 +28,11 @@ struct Data
   bool has_initialized = false;
   
   uint32_t light_pack = 0;
+  
+  Nil::Node renderer;// = Nil::Node(nullptr);
+  
+  bool show_debug_lines = true;
+  bool show_debug_bounding_boxes = true;
 };
 
 
@@ -48,6 +53,10 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect);
 
 void
 think(Nil::Engine &engine, Nil::Aspect &aspect);
+
+
+void
+ui_menu(uintptr_t user_data);
 
 
 } // ns

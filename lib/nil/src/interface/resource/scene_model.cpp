@@ -7,7 +7,6 @@
 #include <lib/model.hpp>
 #include <lib/logging.hpp>
 #include <lib/file.hpp>
-#include <stdio.h>
 
 
 namespace {
@@ -118,7 +117,6 @@ load_assets(Nil::Node node, const char *filename)
 
 
 } // ns
-
 
 
 namespace Nil {

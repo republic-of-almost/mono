@@ -68,94 +68,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 void
 events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
-  LIB_ASSERT(self);
-  
-  // Developer Data Removed
-  {
-    size_t count;
-    Nil::Data::Developer *data;
-    Nil::Node *node;
-    
-    Nil::Data::events(Nil::Data::Event::REMOVED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      size_t j = 0;
-    
-      while(j < self->dev_nodes.size())
-      {
-        if(self->dev_nodes[j] == node[i])
-        {
-          self->dev_data.erase(self->dev_data.begin() + j);
-          self->dev_nodes.erase(self->dev_nodes.begin() + j);
-          break;
-        }
-        else
-        {
-          ++j;
-        }
-      }
-    }
-  } // removed dev data
 
-  // Developer Data Added
-  {
-    size_t count;
-    Nil::Data::Developer *data;
-    Nil::Node *node;
-    
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      if(data[i].type_id == 1)
-      {
-        bool duplicate = false;
-      
-        for(Nil::Node &n : self->dev_nodes)
-        {
-          if(n == node[i])
-          {
-            duplicate = true;
-            break;
-          }
-        }
-      
-        if(!duplicate)
-        {
-          self->dev_data.emplace_back(data[i]);
-          self->dev_nodes.emplace_back(node[i]);
-        }
-      }
-    }
-  } // new dev data
-  
-  // Developer Data Modified
-  {
-    size_t count;
-    Nil::Data::Developer *data;
-    Nil::Node *node;
-    
-    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      size_t j = 0;
-    
-      while(j < self->dev_nodes.size())
-      {
-        if(self->dev_nodes[j] == node[i])
-        {
-          self->dev_data[j] = data[i];
-        }
-        else
-        {
-          ++j;
-        }
-      }
-    }
-  } // Mod dev data
 }
 
 
@@ -745,12 +658,21 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       
       ImGui::EndMenu();
     }
-
-    for(auto &menu : self->dev_data)
+    
     {
-      using fn = void(*)(uintptr_t user_data);
-
-      ((fn)menu.aux_01)(menu.aux_02);
+      size_t count = 0;
+      Nil::Data::Developer *dev = nullptr;
+      
+      Nil::Data::get(&count, &dev);
+      
+      for(size_t i = 0; i < count; ++i)
+      {
+        if(dev[i].type_id == 1 && dev[i].aux_01)
+        {
+          using fn = void(*)(uintptr_t user_data);
+          ((fn)dev[i].aux_01)(dev[i].aux_02);
+        }
+      }
     }
 
     ImGui::EndMainMenuBar();
@@ -759,13 +681,20 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   // --------------------------------------------------------- [ Other Menu ] --
 
-  for(auto &menu : self->dev_data)
+  
   {
-    using fn = void(*)(uintptr_t user_data);
+    size_t count = 0;
+    Nil::Data::Developer *dev = nullptr;
     
-    if(menu.aux_03)
+    Nil::Data::get(&count, &dev);
+    
+    for(size_t i = 0; i < count; ++i)
     {
-      ((fn)menu.aux_03)(menu.aux_04);
+      if(dev[i].type_id == 1 && dev[i].aux_03)
+      {
+        using fn = void(*)(uintptr_t user_data);
+        ((fn)dev[i].aux_03)(dev[i].aux_04);
+      }
     }
   }
   

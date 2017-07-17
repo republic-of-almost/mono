@@ -105,7 +105,7 @@ main()
     Nil::Resource::find_by_name("Unit_bev_cube", mesh);
     
     Nil::Resource::Material mat{};
-    mat.color = 0xFF0033FF;
+    mat.color = 0xFF0000FF;
     Nil::Resource::load("Basic Mat", mat);
     
     Nil::Data::Renderable renderable{};

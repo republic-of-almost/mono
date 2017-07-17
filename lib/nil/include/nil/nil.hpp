@@ -7,15 +7,12 @@
 #include <stddef.h>
 #include <math/math.hpp> // temp
 
+
 namespace Nil {
-
-
-constexpr uint32_t version = 0;
 
 
 struct Engine_settings
 {
-
 };
 
 
@@ -34,12 +31,14 @@ public:
 
   explicit
   Engine();
+  
+  
   ~Engine();
   
   
   void
   add_aspect(Nil::Aspect aspect);
-    
+  
   
   size_t
   aspect_count() const;

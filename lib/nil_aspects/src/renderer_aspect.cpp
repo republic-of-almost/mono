@@ -18,6 +18,7 @@
 #include <lib/bench.hpp>
 #include <stb/stb_image.h>
 #include <GL/gl3w.h>
+#include <imgui/imgui.h>
 
 
 namespace Nil_ext {
@@ -39,6 +40,17 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->current_viewport[1] = 600;
   
   self->mesh_ids.emplace_back(uint32_t{0});
+  
+//  Nil::Node render_node;
+//  self->renderer = static_cast<Nil::Node&&>(render_node);
+  self->renderer.set_name("Renderer");
+  
+  Nil::Data::Developer dev{};
+  dev.type_id = 1;
+  dev.aux_01 = (uintptr_t)ui_menu;
+  dev.aux_02 = (uintptr_t)self;
+  
+  Nil::Data::set(self->renderer, dev);
 }
 
 
@@ -82,7 +94,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         size_t                count = 0;
         Nil::Data::Developer *data = nullptr;
-        Nil::Node            *node = nullptr;
+        Nil::Node             *node = nullptr;
 
         Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
 
@@ -350,7 +362,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
 
       // debug_lines
-      if(self->debug_lines)
+      if(self->debug_lines && self->show_debug_lines)
       {
         Nil::Data::Developer line_data{};
         Nil::Data::get(self->debug_lines, line_data);
@@ -376,6 +388,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
       
       // Bounding boxes
+      if(self->show_debug_bounding_boxes)
       {
         size_t count = 0;
         Nil::Data::Bounding_box *data = nullptr;
@@ -519,6 +532,25 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     }
 
     rov_execute();
+  }
+}
+
+
+void
+ui_menu(uintptr_t user_data)
+{
+  Nil_ext::ROV_Aspect::Data *self(
+    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
+  );
+
+  LIB_ASSERT(self);
+  
+  if(ImGui::BeginMenu("Renderer"))
+  {
+    ImGui::MenuItem("Show Debug Lines", nullptr, &self->show_debug_lines);
+    ImGui::MenuItem("Show Debug Bounding Boxes", nullptr, &self->show_debug_bounding_boxes);
+    
+    ImGui::EndMenu();
   }
 }
 
