@@ -30,6 +30,8 @@ MATH_CONST_CONSTEXPR float           root_two()    { return 1.41421356237f;  }
 MATH_CONST_CONSTEXPR float           root_three()  { return 1.73205080757f;  }
 MATH_CONST_CONSTEXPR float           epsilon()     { return 0.000000001f;    }
 MATH_CONST_CONSTEXPR float           ten_epsilon() { return epsilon() * 10.f;}
+MATH_CONST_CONSTEXPR float           float_max()   { return __FLT_MAX__;     }
+MATH_CONST_CONSTEXPR float           float_min()   { return __FLT_MIN__;     }
 
 
 
