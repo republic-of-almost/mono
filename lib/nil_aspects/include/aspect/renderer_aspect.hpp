@@ -31,8 +31,15 @@ struct Data
   
   #ifndef NIMGUI
   Nil::Node renderer{nullptr};
+  
+  #ifdef NIL_DEVELOPMENT
   bool show_debug_lines{true};
   bool show_debug_bounding_boxes{true};
+  #else
+  bool show_debug_lines{false};
+  bool show_debug_bounding_boxes{false};
+  #endif
+  
   #endif
 };
 
