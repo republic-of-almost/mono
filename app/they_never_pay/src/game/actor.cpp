@@ -1,15 +1,8 @@
 #include <game/actor.hpp>
 #include <data/data.hpp>
-#include <nil/data/logic.hpp>
-#include <nil/data/camera.hpp>
-#include <nil/data/mouse.hpp>
-#include <nil/data/keyboard.hpp>
-#include <nil/data/renderable.hpp>
-#include <nil/data/transform.hpp>
+#include <nil/data/data.hpp>
 #include <nil/resource/directory.hpp>
-#include <math/geometry/ray.hpp>
-#include <math/general/general.hpp>
-#include <math/quat/quat.hpp>
+#include <math/math.hpp>
 #include <lib/assert.hpp>
 #include <lib/platform.hpp>
 #include <lib/model.hpp>
@@ -284,6 +277,43 @@ think(Nil::Node node, uintptr_t user_data)
       math::vec3_init(&actor->nav_mesh[index + 0]),
       math::vec3_init(1,0,0)
     );
+  }
+  
+  // Raytest into the scene
+  {
+    size_t count = 0;
+    Nil::Data::Bounding_box *boxes = nullptr;
+    Nil::Data::get(&count, &boxes, true);
+    
+    Nil::Data::Transform transform;
+    Nil::Data::get(actor->head, transform, true);
+    
+    math::transform trans = math::transform_init(
+      math::vec3_init(transform.position),
+      math::vec3_init(transform.scale),
+      math::quat_init(transform.rotation)
+    );
+    
+    math::vec3 start = math::vec3_init(transform.position);
+    math::vec3 dir   = math::transform_fwd(trans);
+    math::vec3 end   = math::vec3_add(start, math::vec3_scale(dir, 1000.f));
+    
+    math::ray ray = math::ray_init(start, end);
+    
+    for(int j = 0; j < count; ++j)
+    {
+      math::aabb box = math::aabb_init(
+        math::vec3_init(boxes[j].min),
+        math::vec3_init(boxes[j].max)
+      );
+      
+      float hit = math::ray_test_aabb(ray, box);
+      
+      if(hit)
+      {
+        int k = 0;
+      }
+    }
   }
 }
 

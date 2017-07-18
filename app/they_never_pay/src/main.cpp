@@ -42,7 +42,6 @@ main()
   Nil_ext::load_aspects(nil_engine);
   
   
-  
   Game_data::setup();
   Game_data::load_assets();
 
