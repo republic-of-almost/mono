@@ -33,11 +33,11 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   #ifndef NIMGUI
   Nil::Node render_node;
   self->renderer = static_cast<Nil::Node&&>(render_node);
-  self->renderer.set_name("Renderer");
+  self->renderer.set_name("ROV");
   
   Nil::Data::Developer dev{};
   dev.type_id = 1;
-  dev.aux_01 = (uintptr_t)ui_menu;
+  dev.aux_01  = (uintptr_t)ui_menu;
   dev.aux_02 = (uintptr_t)self;
   
   Nil::Data::set(self->renderer, dev);
@@ -539,7 +539,7 @@ ui_menu(uintptr_t user_data)
 
   LIB_ASSERT(self);
   
-  if(ImGui::BeginMenu("Renderer"))
+  if(ImGui::BeginMenu("ROV"))
   {
     ImGui::MenuItem("Show Debug Lines", nullptr, &self->show_debug_lines);
     ImGui::MenuItem("Show Debug Bounding Boxes", nullptr, &self->show_debug_bounding_boxes);
