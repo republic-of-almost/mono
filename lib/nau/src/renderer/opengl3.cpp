@@ -26,32 +26,36 @@ get_nau_gl3()
 };
 
 
-constexpr char vs_src[] = R"GLSL(
-
-  in vec3 vs_in_posiiton;
-  in vec4 vs_in_color;
-  in vec2 vs_in_tex_coord;
+const GLchar* vs_src = R"GLSL(
+  #version 150 core
+  in vec2 position;
+//  in vec4 vs_in_color;
+//  in vec2 vs_in_tex_coord;
   
-  uniform vec3 uni_viewport;
+//  uniform vec3 uni_viewport;
   
-  out vec4 fs_in_color;
-  out vec2 fs_in_tex_coord;
+//  out vec4 fs_in_color;
+//  out vec2 fs_in_tex_coord;
 
   void
   main()
   {
-    gl_FragCoord    = vs_in_position / uni_viewport;
-    fs_in_color     = vs_in_color;
-    fs_in_tex_coord = vs_in_tex_coord;
+    vec2 foo = vec2(800, 600);
+  
+    gl_Position    = vec4(position / foo, 0.0, 1.0);
+//    gl_Position = vec4(position, 0.0, 1.0);
+//    fs_in_color     = vs_in_color;
+//    fs_in_tex_coord = vs_in_tex_coord;
+
   }
 
 )GLSL";
 
 
-constexpr char fs_src[] = R"GLSL(
-
-  in vec4 fs_in_color;
-  in vec2 fs_in_tex_coord;
+const GLchar* fs_src = R"GLSL(
+  #version 150 core
+//  in vec4 fs_in_color;
+//  in vec2 fs_in_tex_coord;
 
   out vec4 fs_out_color;
   
@@ -101,13 +105,13 @@ nau_gl3_init()
 
   GLfloat vertices[]
   {
-    -0.5f, -0.5f,
-     0.5f, -0.5f,
-    -0.5f,  0.5f,
+    -100.5f, -100.5f,
+     100.5f, -100.5f,
+    -100.5f,  100.5f,
     
-     0.5f, -0.5f,
-     0.5f,  0.5f,
-    -0.5f,  0.5f,
+     100.5f, -100.5f,
+     100.5f,  100.5f,
+    -100.5f,  100.5f,
   };
 
   glBindBuffer(GL_ARRAY_BUFFER, get_nau_gl3().vbo);
@@ -115,7 +119,7 @@ nau_gl3_init()
 
   // Create and compile the vertex shader
   get_nau_gl3().vs_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(get_nau_gl3().vs_shader, 1, &vertexSource, NULL);
+  glShaderSource(get_nau_gl3().vs_shader, 1, &vs_src, NULL);
   glCompileShader(get_nau_gl3().vs_shader);
 
   // Create and compile the fragment shader
@@ -150,7 +154,12 @@ nau_gl3_render(Nau_renderable *renderables, size_t count)
   glBindFragDataLocation(get_nau_gl3().program, 0, "outColor");
   glBindBuffer(GL_ARRAY_BUFFER, get_nau_gl3().vbo);
   
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+  for(size_t i = 0; i < count; ++i)
+  {
+    
+    
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+  }
 }
 
 

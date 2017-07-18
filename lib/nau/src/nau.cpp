@@ -11,7 +11,6 @@ struct Nau_ctx
   
   std::vector<Nau_renderable> renderable;
   
-  
   // -- Colors -- //
   
   uint32_t inactive_window_color;
