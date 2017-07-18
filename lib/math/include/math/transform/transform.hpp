@@ -151,30 +151,30 @@ transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, cons
 vec3
 transform_fwd(const transform &trans)
 {
-  math::vec3 dir = math::vec3_init(0,0,1);
-  math::quat_rotate_point(trans.rotation, dir);
+  const math::vec3 dir = math::vec3_init(0,0,1);
+  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
   
-  return math::vec3_normalize(dir);
+  return math::vec3_normalize(rot_dir);
 }
 
 
 vec3
 transform_up(const transform &trans)
 {
-  math::vec3 dir = math::vec3_init(0,1,0);
-  math::quat_rotate_point(trans.rotation, dir);
+  const math::vec3 dir = math::vec3_init(0,1,0);
+  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
   
-  return math::vec3_normalize(dir);
+  return math::vec3_normalize(rot_dir);
 }
 
 
 vec3
 transform_left(const transform &trans)
 {
-  math::vec3 dir = math::vec3_init(1,0,0);
-  math::quat_rotate_point(trans.rotation, dir);
+  const math::vec3 dir = math::vec3_init(1,0,0);
+  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
   
-  return math::vec3_normalize(dir);
+  return math::vec3_normalize(rot_dir);
 }
 
 
