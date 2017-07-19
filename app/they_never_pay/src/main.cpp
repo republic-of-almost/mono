@@ -22,6 +22,8 @@
 #include <nau/nau.h>
 #include <nau/renderers/opengl3.h>
 
+#include <roa/object.hpp>
+
 
 void
 app_tick()
@@ -41,6 +43,8 @@ main()
   Nil::Engine nil_engine;
   Nil_ext::load_aspects(nil_engine);
   
+  ROA::Object obj;
+  obj.set_name("FooFoo");
   
   Game_data::setup();
   Game_data::load_assets();

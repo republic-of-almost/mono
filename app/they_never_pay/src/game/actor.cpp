@@ -307,7 +307,7 @@ think(Nil::Node node, uintptr_t user_data)
         math::vec3_init(boxes[j].max)
       );
       
-      float hit = math::ray_test_aabb(ray, box);
+      const float hit = math::ray_test_aabb(ray, box);
       
       if(hit)
       {

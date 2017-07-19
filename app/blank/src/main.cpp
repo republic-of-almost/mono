@@ -11,48 +11,28 @@
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 
+#include <roa/application.hpp>
+#include <roa/object.hpp>
+#include <roa/camera.hpp>
+#include <roa/transform.hpp>
+#include <roa/bounding_box.hpp>
+#include <roa/vector3.hpp>
+#include <roa/quaternion.hpp>
+
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
 
 /*
-  Viewer Nodes.
+  Viewer.
 */
-Nil::Node app;
-Nil::Node camera;
 Nil::Node scene;
 
 
-/*
-  Frame Tick
-*/
-void
-app_tick()
-{
-  #ifdef __EMSCRIPTEN__
-  nil_engine.run();
-  #endif
-  
-  // Rotate the scene
-  {
-    uintptr_t user_data = scene.get_user_data();
-    user_data += 7;
-    scene.set_user_data(user_data);
-    
-//    printf("UD: %d\n", user_data);
-    
-    const float rot_angle = (float)user_data / 1000.f;
-    
-    const math::quat rot = math::quat_init_with_axis_angle(0, 1, 0, rot_angle);
-    
-    Nil::Data::Transform trans{};
-    Nil::Data::get(scene, trans);
-    math::quat_to_array(rot, trans.rotation);
-    
-    Nil::Data::set(scene, trans);
-  }
-}
+ROA::Application app;
+ROA::Object obj_camera;
+ROA::Object obj_scene;
 
 
 /*
@@ -62,24 +42,6 @@ int
 main()
 {
   lib::logging::set_output(lib::logging::out::console);
-  
-  Nil::Engine nil_engine;
-  Nil_ext::load_aspects(nil_engine);
-  
-  // Basic App
-  {
-    app.set_name("App");
-    Nil::Node node = app;
-    
-    Nil::Data::Window win{};
-    constexpr char title[] = "Viewer";
-    strcat(win.title, title);
-    
-    Nil::Data::set(node, win);
-    Nil::Data::set(node, Nil::Data::Mouse{});
-    Nil::Data::set(node, Nil::Data::Keyboard{});
-  }
-  
   
   // Scene
   {
@@ -119,17 +81,10 @@ main()
   
   // Camera
   {
-    camera.set_name("Camera");
-    Nil::Data::Camera cam{};
-    cam.width              = 1.f;
-    cam.height             = 1.f;
-    cam.near_plane         = 0.1f;
-    cam.far_plane          = 1000.f;
-    cam.fov                = math::tau() * 0.125f;
-    cam.clear_color_buffer = true;
-    cam.clear_depth_buffer = true;
+    obj_camera.set_name("ROA_Camera");
     
-    Nil::Data::set(camera, cam);
+    ROA::Camera camera;
+    obj_camera.set_camera(camera);
     
     Nil::Data::Bounding_box target_bb{};
     Nil::Data::get(scene, target_bb);
@@ -140,27 +95,41 @@ main()
     const float y = (math::abs(math::get_y(a)) + math::abs(math::get_y(b))) * 0.7f;
     const float z = (math::abs(math::get_z(a)) + math::abs(math::get_z(b))) * -4.f;
     
-    Nil::Data::Transform trans{
-      {0.f, y, z},
-      {1.f, 1.f, 1.f},
-      {0.f, 0.f, 0.f, 1.f},
-    };
+    ROA::Transform transform;
+    transform.set_position(ROA::Vector3(0.f, y, z));
+    transform.set_scale(ROA::Vector3(1.f, 1.f, 1.f));
+    transform.set_rotation(ROA::Quaternion());
     
-    Nil::Data::set(camera, trans);
+    obj_camera.set_transform(transform);
   }
 
 
   /*
-    Run Game
+    Run application
   */
-  #ifdef __EMSCRIPTEN__
-  emscripten_set_main_loop(app_tick, -1, 1);
-  #else
-  while(nil_engine.run())
-  {
-    app_tick();
-  }
-  #endif
+  app.run(
+    [](uintptr_t user_data)
+    {
+      /*
+        Custom tick stuff.
+      */
+    
+      static uint32_t spin = 0;
+      spin += 7;
+      
+      const float rot_angle = (float)spin / 1000.f;
+      
+      const math::quat rot = math::quat_init_with_axis_angle(0, 1, 0, rot_angle);
+      
+      Nil::Data::Transform trans{};
+      Nil::Data::get(scene, trans);
+      math::quat_to_array(rot, trans.rotation);
+      
+      Nil::Data::set(scene, trans);
+    
+    },
+    0
+  );
 
   return 0;
 }

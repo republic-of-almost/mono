@@ -1,0 +1,34 @@
+#!lua
+
+--[[
+  ROA Project Description
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "ROA",
+    kind     = "StaticLib",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      --
+      make.add_src(make.get_proj_root() .. "../src/"),
+      --
+      make.add_doc(make.get_proj_root() .. "../"),
+    },
+
+    inc_dirs = {
+      make.get_proj_root() .. "../include/",
+      make.get_proj_root() .. "../src/", -- this will come up in dependencies paths
+    },
+
+    project_dependencies = {
+      "Nil",
+      "AspectsControllers", -- Can we move into Nil?
+    },
+  }
+)
