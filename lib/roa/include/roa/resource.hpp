@@ -19,10 +19,15 @@ public:
   explicit            Resource();
                       ~Resource();
   
+  // ---------------------------------------------------------- [ Attibutes ] --
   
-private:
+  
+  inline uint32_t     get_id() const { return m_id; }
+  
+  
+protected:
 
-  uint64_t            m_id;
+  uint32_t            m_id;
 
 };
 

@@ -3,12 +3,13 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/resource.hpp>
 
 
 namespace ROA {
 
 
-class Mesh final
+class Mesh final : public Resource
 {
 public:
   
@@ -16,13 +17,16 @@ public:
   // ----------------------------------------------------------- [ Lifetime ] --
   
   
-  explicit        Mesh(const char *name);
+  explicit          Mesh(const char *name);
+  
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  
+  
+  Bounding_box      get_bounding_box() const;
   
   
 private:
-
-
-  uint32_t        m_id;
   
 
 };

@@ -27,8 +27,6 @@ public:
   Color             get_color() const;
   void              set_color(const Color &col);
   
-  
-
 };
 
 

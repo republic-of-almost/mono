@@ -52,28 +52,30 @@ main()
   
   // Load bev cube
   {
-    // Mesh Resource
-    Nil::Resource::Model::load(
-      Nil::Resource::directory("mesh/unit_bev_cube.obj")
-    );
-    
-    Nil::Resource::Mesh mesh{};
-    Nil::Resource::find_by_name("Unit_bev_cube", mesh);
-    
-    Nil::Resource::Material mat{};
-    mat.color = 0xFF0000FF;
-    Nil::Resource::load("Basic Mat", mat);
-    
-    Nil::Data::Renderable renderable{};
-    renderable.mesh_id = mesh.id;
-    renderable.material_id = mat.id;
-    
-    Nil::Data::set(scene, renderable);
-    
-    Nil::Data::set(scene, mesh.bounding_box);
+//    // Mesh Resource
+//    Nil::Resource::Model::load(
+//      Nil::Resource::directory("mesh/unit_bev_cube.obj")
+//    );
+//    
+//    Nil::Resource::Mesh mesh{};
+//    Nil::Resource::find_by_name("Unit_bev_cube", mesh);
+//    
+//    Nil::Resource::Material mat{};
+//    mat.color = 0xFF0000FF;
+//    Nil::Resource::load("Basic Mat", mat);
+//    
+//    Nil::Data::Renderable renderable{};
+//    renderable.mesh_id = mesh.id;
+//    renderable.material_id = mat.id;
+//    
+//    Nil::Data::set(scene, renderable);
+//    
+//    Nil::Data::set(scene, mesh.bounding_box);
   }
   
   {
+    obj_scene.set_name("ROA_Scene");
+  
     ROA::Model::load("mesh/unit_bev_cube.obj");
     ROA::Mesh mesh("Unit_bev_cube");
     
@@ -85,6 +87,7 @@ main()
     renderable.set_material(mat);
     
     obj_scene.set_renderable(renderable);
+    obj_scene.set_bounding_box(mesh.get_bounding_box());
   }
   
   // Camera
@@ -94,11 +97,14 @@ main()
     ROA::Camera camera;
     obj_camera.set_camera(camera);
     
-    Nil::Data::Bounding_box target_bb{};
-    Nil::Data::get(scene, target_bb);
+//    const ROA::Bounding_box bb = obj_scene.get_bounding_box();
+    ROA::Bounding_box bb(ROA::Vector3(-0.5f, -0.5f, -0.5f), ROA::Vector3(0.5f, 0.5f, 0.5f));
     
-    const math::vec3 a = math::vec3_init(target_bb.min);
-    const math::vec3 b = math::vec3_init(target_bb.max);
+//    Nil::Data::Bounding_box target_bb{};
+//    Nil::Data::get(scene, target_bb);
+    
+    const math::vec3 a = math::vec3_init(bb.get_min().get_x(), bb.get_min().get_y(), bb.get_min().get_z());
+    const math::vec3 b = math::vec3_init(bb.get_max().get_x(), bb.get_max().get_y(), bb.get_max().get_z());
     
     const float y = (math::abs(math::get_y(a)) + math::abs(math::get_y(b))) * 0.7f;
     const float z = (math::abs(math::get_z(a)) + math::abs(math::get_z(b))) * -4.f;

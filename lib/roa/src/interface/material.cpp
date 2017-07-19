@@ -1,5 +1,6 @@
 #include <roa/material.hpp>
 #include <roa/color.hpp>
+#include <nil/resource/material.hpp>
 
 
 namespace ROA {
@@ -9,7 +10,13 @@ namespace ROA {
 
 
 Material::Material(const char *name)
+: Resource()
 {
+  Nil::Resource::Material mat{};
+  mat.color = 0xFF0000FF;
+  Nil::Resource::load(name, mat);
+  
+  m_id = mat.id;
 }
 
 

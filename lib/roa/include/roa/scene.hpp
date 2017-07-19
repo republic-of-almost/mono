@@ -10,7 +10,8 @@ namespace ROA {
 namespace Scene {
 
 
-void        load(Object obj, const char *filename);
+bool
+load(Object obj, const char *filename);
 
 
 } // ns

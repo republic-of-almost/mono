@@ -8,6 +8,7 @@ namespace ROA {
 
 
 Resource::Resource()
+: m_id(0)
 {
 }
 

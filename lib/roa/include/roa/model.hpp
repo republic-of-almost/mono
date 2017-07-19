@@ -9,7 +9,7 @@ namespace ROA {
 namespace Model {
 
 
-void
+bool
 load(const char *filename);
 
 

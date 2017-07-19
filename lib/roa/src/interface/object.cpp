@@ -203,13 +203,23 @@ Object::get_instance_id() const
 Bounding_box
 Object::get_bounding_box() const
 {
-  return Bounding_box();
+  return *reinterpret_cast<Bounding_box*>(const_cast<Object*>(this));
 }
 
 
 void
 Object::set_bounding_box(const ROA::Bounding_box &in)
 {
+  if(in.get_instance_id() != get_instance_id())
+  {
+    Nil::Data::Bounding_box data{};
+    
+    Nil::Node other_node = ROA_detail::get_node(in);
+    Nil::Node this_node = ROA_detail::get_node(*this);
+    
+    Nil::Data::get(other_node, data);
+    Nil::Data::set(this_node, data);
+  }
 }
 
 

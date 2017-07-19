@@ -13,10 +13,20 @@ class Bounding_box : public Object
 {
 public:
 
+
+  // ----------------------------------------------------------- [ Lifetime ] --
+
+
   explicit      Bounding_box();
+  explicit      Bounding_box(const Vector3 &min, const Vector3 &max);
+  
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  
   
   Vector3       get_min() const;
   void          set_min(const Vector3 &in);
+  
   
   Vector3       get_max() const;
   void          set_max(const Vector3 &in);

@@ -1,6 +1,9 @@
 #include <roa/renderable.hpp>
 #include <roa/mesh.hpp>
 #include <roa/material.hpp>
+#include <common/common.hpp>
+#include <nil/data/renderable.hpp>
+#include <nil/node.hpp>
 
 
 namespace ROA {
@@ -10,7 +13,12 @@ namespace ROA {
 
 
 Renderable::Renderable()
+: Object()
 {
+  Nil::Node node = ROA_detail::get_node(*this);
+
+  Nil::Data::Renderable renderable{};
+  Nil::Data::set(node, renderable);
 }
 
 
@@ -31,6 +39,10 @@ Renderable::get_mesh() const
 void
 Renderable::set_mesh(const Mesh &mesh)
 {
+  Nil::Data::Renderable data{};
+  ROA_detail::get_nil_data(*this, data);
+  data.mesh_id = mesh.get_id();
+  ROA_detail::set_nil_data(*this, data);
 }
 
 
@@ -43,7 +55,10 @@ Renderable::get_material() const
 void
 Renderable::set_material(const ROA::Material &mat)
 {
-  
+  Nil::Data::Renderable data{};
+  ROA_detail::get_nil_data(*this, data);
+  data.material_id = mat.get_id();
+  ROA_detail::set_nil_data(*this, data);
 }
 
 
