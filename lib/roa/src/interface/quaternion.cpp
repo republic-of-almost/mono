@@ -1,4 +1,6 @@
 #include <roa/quaternion.hpp>
+#include <roa/vector3.hpp>
+#include <math/quat/quat.hpp>
 
 
 namespace ROA {
@@ -9,6 +11,19 @@ namespace ROA {
 
 Quaternion::Quaternion()
 : Quaternion(0.f, 0.f, 0.f, 1.f)
+{
+}
+
+
+Quaternion::Quaternion(const Vector3 &axis, const float angle)
+: Quaternion(
+    math::quat_init_with_axis_angle(
+      axis.get_x(),
+      axis.get_y(),
+      axis.get_z(),
+      angle
+      ).data
+    )
 {
 }
 

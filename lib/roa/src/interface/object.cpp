@@ -44,6 +44,13 @@ Object::Object()
 }
 
 
+Object::Object(const uint64_t data_bitfield)
+: Object()
+{
+  
+}
+
+
 Object::Object(const ROA_nullptr)
 : m_id(0)
 {
@@ -261,7 +268,7 @@ Object::set_logic(const ROA::Logic &in)
 Transform
 Object::get_transform() const
 {
-  return Transform();
+  return *reinterpret_cast<Transform*>(const_cast<Object*>(this));
 }
 
 

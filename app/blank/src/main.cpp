@@ -1,27 +1,5 @@
-#include <nil/nil.hpp>
-#include <nil/node.hpp>
-#include <nil/data/data.hpp>
-#include <nil/resource/resource.hpp>
-#include <aspect/aspects.hpp>
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-
-#include <lib/logging.hpp>
-#include <lib/string.hpp>
-
 #include <roa/roa.hpp>
-
-#include <assert.h>
-#include <stddef.h>
-#include <string.h>
-
-
-/*
-  Viewer.
-*/
-Nil::Node scene;
+#include <math/math.hpp>
 
 
 ROA::Application app;
@@ -29,50 +7,14 @@ ROA::Object obj_camera;
 ROA::Object obj_scene;
 
 
-/*
-  Entry
-*/
 int
 main()
 {
-  lib::logging::set_output(lib::logging::out::console);
+  /*
+    Setup Objects
+  */
   
   // Scene
-  {
-    scene.set_name("Scene");
-    scene.set_user_data(0);
-  }
-  
-  // Load static assets
-  {
-//    const char *file = "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj";
-//    
-//    Nil::Resource::Scene::load(scene, file);
-  }
-  
-  // Load bev cube
-  {
-//    // Mesh Resource
-//    Nil::Resource::Model::load(
-//      Nil::Resource::directory("mesh/unit_bev_cube.obj")
-//    );
-//    
-//    Nil::Resource::Mesh mesh{};
-//    Nil::Resource::find_by_name("Unit_bev_cube", mesh);
-//    
-//    Nil::Resource::Material mat{};
-//    mat.color = 0xFF0000FF;
-//    Nil::Resource::load("Basic Mat", mat);
-//    
-//    Nil::Data::Renderable renderable{};
-//    renderable.mesh_id = mesh.id;
-//    renderable.material_id = mat.id;
-//    
-//    Nil::Data::set(scene, renderable);
-//    
-//    Nil::Data::set(scene, mesh.bounding_box);
-  }
-  
   {
     obj_scene.set_name("ROA_Scene");
   
@@ -100,9 +42,6 @@ main()
 //    const ROA::Bounding_box bb = obj_scene.get_bounding_box();
     ROA::Bounding_box bb(ROA::Vector3(-0.5f, -0.5f, -0.5f), ROA::Vector3(0.5f, 0.5f, 0.5f));
     
-//    Nil::Data::Bounding_box target_bb{};
-//    Nil::Data::get(scene, target_bb);
-    
     const math::vec3 a = math::vec3_init(bb.get_min().get_x(), bb.get_min().get_y(), bb.get_min().get_z());
     const math::vec3 b = math::vec3_init(bb.get_max().get_x(), bb.get_max().get_y(), bb.get_max().get_z());
     
@@ -127,22 +66,18 @@ main()
       /*
         Custom tick stuff.
       */
+      ROA::Object *obj = reinterpret_cast<ROA::Object*>(user_data);
     
       static uint32_t spin = 0;
       spin += 7;
       
       const float rot_angle = (float)spin / 1000.f;
+      const ROA::Quaternion rot(ROA::Vector3(0.f, 1.f, 0.f), rot_angle);
       
-      const math::quat rot = math::quat_init_with_axis_angle(0, 1, 0, rot_angle);
-      
-      Nil::Data::Transform trans{};
-      Nil::Data::get(scene, trans);
-      math::quat_to_array(rot, trans.rotation);
-      
-      Nil::Data::set(scene, trans);
-    
+      ROA::Transform trans = obj->get_transform();
+      trans.set_rotation(rot);
     },
-    0
+    (uintptr_t)&obj_scene
   );
 
   return 0;

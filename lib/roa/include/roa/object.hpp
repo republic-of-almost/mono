@@ -8,6 +8,18 @@
 namespace ROA {
 
 
+namespace Data {
+enum ENUM : uint64_t {
+
+  BOUNDING_BOX    = 1 << 0,
+  CAMERA          = 1 << 1,
+  LOGIC           = 1 << 2,
+  RENDERABLE      = 1 << 3,
+
+};
+} // ns
+
+
 class Object
 {
 
@@ -21,6 +33,7 @@ public:
   
 
   explicit              Object();
+  explicit              Object(const uint64_t data_bitfield);
   explicit              Object(const ROA_nullptr);
   
                         Object(const Object &other);

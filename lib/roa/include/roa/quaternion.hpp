@@ -17,6 +17,7 @@ public:
   
 
   explicit        Quaternion();
+  explicit        Quaternion(const Vector3 &axis, const float angle);
   explicit        Quaternion(const float *data);
   explicit        Quaternion(const float x,
                              const float y,
