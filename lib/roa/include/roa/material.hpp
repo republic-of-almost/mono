@@ -3,12 +3,13 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/resource.hpp>
 
 
 namespace ROA {
 
 
-class Material final
+class Material final : public Resource
 {
 public:
 
@@ -17,14 +18,16 @@ public:
 
 
   explicit          Material(const char *name);
+                    ~Material();
   
   
   // ---------------------------------------------------------- [ Attibutes ] --
-
-
-private:
-
-  uint32_t          m_id;
+  
+  
+  Color             get_color() const;
+  void              set_color(const Color &col);
+  
+  
 
 };
 

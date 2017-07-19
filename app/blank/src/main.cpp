@@ -11,13 +11,7 @@
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
 
-#include <roa/application.hpp>
-#include <roa/object.hpp>
-#include <roa/camera.hpp>
-#include <roa/transform.hpp>
-#include <roa/bounding_box.hpp>
-#include <roa/vector3.hpp>
-#include <roa/quaternion.hpp>
+#include <roa/roa.hpp>
 
 #include <assert.h>
 #include <stddef.h>
@@ -77,6 +71,20 @@ main()
     Nil::Data::set(scene, renderable);
     
     Nil::Data::set(scene, mesh.bounding_box);
+  }
+  
+  {
+    ROA::Model::load("mesh/unit_bev_cube.obj");
+    ROA::Mesh mesh("Unit_bev_cube");
+    
+    ROA::Material mat("Basic Mat");
+    mat.set_color(ROA::Color(0xFF0000FF));
+    
+    ROA::Renderable renderable;
+    renderable.set_mesh(mesh);
+    renderable.set_material(mat);
+    
+    obj_scene.set_renderable(renderable);
   }
   
   // Camera

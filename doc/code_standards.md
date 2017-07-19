@@ -30,4 +30,4 @@ The rule of thumb is use what you _need_, ask yourself does using this make the 
   - STL.
   - Exceptions / Gotos.
   - RTTI / String Compares
-  - Treating the next coder that comes along like a mornon.
+  - Treating the next coder that comes along like a moron.

@@ -35,6 +35,7 @@ class Object;
 class Quaternion;
 class Ray;
 class Renderable;
+class Resource;
 class Transform;
 class Vector3;
 

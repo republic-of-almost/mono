@@ -3,6 +3,7 @@
 #include <roa/transform.hpp>
 #include <roa/logic.hpp>
 #include <roa/camera.hpp>
+#include <roa/renderable.hpp>
 #include <common/common.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
@@ -260,6 +261,28 @@ Object::set_transform(const ROA::Transform &in)
   if(in.get_instance_id() != get_instance_id())
   {
     Nil::Data::Transform data{};
+    
+    Nil::Node other_node = ROA_detail::get_node(in);
+    Nil::Node this_node = ROA_detail::get_node(*this);
+    
+    Nil::Data::get(other_node, data);
+    Nil::Data::set(this_node, data);
+  }
+}
+
+
+Renderable
+Object::get_renderable() const
+{
+}
+
+
+void
+Object::set_renderable(const Renderable &in)
+{
+  if(in.get_instance_id() != get_instance_id())
+  {
+    Nil::Data::Renderable data{};
     
     Nil::Node other_node = ROA_detail::get_node(in);
     Nil::Node this_node = ROA_detail::get_node(*this);

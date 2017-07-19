@@ -71,6 +71,9 @@ public:
   Transform             get_transform() const;
   void                  set_transform(const Transform &in);
   
+  Renderable            get_renderable() const;
+  void                  set_renderable(const Renderable &in);
+  
   
 private:
 
