@@ -44,35 +44,20 @@ think(uint32_t node_id, uintptr_t user_data)
     
     float rgba[] = {1.f, (y / 10.f), 1.f, 1.f};
     
-    char name[16]{};
-    sprintf(name, "Env%dMat", i);
+    char name[32]{};
+    sprintf(name, "Env%zuMat", i);
     
     ROA::Material mat(name);
     LIB_ASSERT(mat.is_valid());
     
-    mat.set_color(ROA::Color(rgba)); //lib::color::init(rgba);
-    
-//    Nil::Resource::load(name, mat);
+    mat.set_color(ROA::Color(rgba));
     
     const float default_scale = 4.f;
     const float scale_up = default_scale * ((float)i / 10.f);
     
-//    Nil::Data::Transform transform{};
-//    Nil::Data::get(child, transform);
-    
     ROA::Transform transform = child.get_transform();
     transform.set_scale(ROA::Vector3(default_scale, scale_up, default_scale));
     transform.set_position(ROA::Vector3(x, y, z));
-    
-//    transform.scale[0] = default_scale;
-//    transform.scale[1] = scale_up;
-//    transform.scale[2] = default_scale;
-//    
-//    transform.position[0] = x;
-//    transform.position[1] = y;
-//    transform.position[2] = z;
-//    
-//    Nil::Data::set(child, transform);
   }
 }
 
