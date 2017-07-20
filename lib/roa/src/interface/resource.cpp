@@ -24,4 +24,14 @@ Resource::~Resource()
 }
 
 
+// ----------------------------------------------------------- [ Attributes ] --
+
+
+bool
+Resource::is_valid() const
+{
+  return m_id > 0;
+}
+
+
 } // ns

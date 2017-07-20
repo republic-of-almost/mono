@@ -18,6 +18,7 @@ public:
 
   explicit          Color();
   explicit          Color(const uint32_t hex);
+  explicit          Color(const float *rgba);
   
   
   // --------------------------------------------------------- [ Attributes ] --

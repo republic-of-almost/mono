@@ -22,17 +22,14 @@ enum ENUM : uint64_t {
 
 class Object
 {
+public:
+
 
   // ----------------------------------------------------------- [ Lifetime ] --
   
 
-  explicit              Object(const uint32_t instance_id);
-
-
-public:
-  
-
   explicit              Object();
+  explicit              Object(const uint32_t instance_id);
   explicit              Object(const uint64_t data_bitfield);
   explicit              Object(const ROA_nullptr);
   
@@ -54,6 +51,8 @@ public:
   
   
   Object                get_parent() const;
+  void                  set_parent(const Object obj);
+  
   Object                get_child(const size_t child) const;
   size_t                get_child_count() const;
   

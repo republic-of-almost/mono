@@ -7,6 +7,7 @@
 #include <common/common.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
+#include <lib/assert.hpp>
 #include <new>
 
 
@@ -168,10 +169,32 @@ Object::get_parent() const
 }
 
 
+void
+Object::set_parent(const ROA::Object obj)
+{
+  const char *name = get_name();
+
+  Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
+  Nil::Node *that_node = reinterpret_cast<Nil::Node*>(&obj.m_id);
+  
+  this_node->set_parent(*that_node);
+  
+  LIB_ASSERT(this_node->is_ref());
+  LIB_ASSERT(is_ref());
+  
+  size_t count = that_node->get_child_count();
+  
+  int i = 0;
+}
+
+
 Object
 Object::get_child(const size_t child) const
 {
-  return Object(nullptr);
+  Nil::Node this_node = *reinterpret_cast<Nil::Node*>(&m_id);
+  Nil::Node child_node = this_node.get_child(child);
+  
+  return Object(child_node.get_id());
 }
 
 
@@ -237,7 +260,7 @@ Object::get_bounding_box() const
 
 
 void
-Object::set_bounding_box(const ROA::Bounding_box &in)
+Object::set_bounding_box(const Bounding_box &in)
 {
   if(in.get_instance_id() != get_instance_id())
   {
@@ -260,7 +283,7 @@ Object::get_camera() const
 
 
 void
-Object::set_camera(const ROA::Camera &in)
+Object::set_camera(const Camera &in)
 {
   if(in.get_instance_id() != get_instance_id())
   {
@@ -283,7 +306,7 @@ Object::get_logic() const
 
 
 void
-Object::set_logic(const ROA::Logic &in)
+Object::set_logic(const Logic &in)
 {
 }
 
@@ -296,7 +319,7 @@ Object::get_transform() const
 
 
 void
-Object::set_transform(const ROA::Transform &in)
+Object::set_transform(const Transform &in)
 {
   if(in.get_instance_id() != get_instance_id())
   {

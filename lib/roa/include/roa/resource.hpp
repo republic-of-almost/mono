@@ -25,10 +25,13 @@ public:
   explicit            Resource();
                       ~Resource();
   
+  
   // ---------------------------------------------------------- [ Attibutes ] --
   
   
   inline uint32_t     get_id() const { return m_id; }
+  
+  bool                is_valid() const;
   
   
 protected:

@@ -1,4 +1,5 @@
 #include <roa/color.hpp>
+#include <lib/color.hpp>
 
 
 namespace ROA {
@@ -17,6 +18,13 @@ Color::Color(const uint32_t hex)
 : m_data(hex)
 {
 }
+
+
+Color::Color(const float *rgba)
+: Color(lib::color::init(rgba))
+{
+}
+
 
 
 } // ns
