@@ -106,7 +106,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   for(size_t i = 0; i < self->logic_nodes.size(); ++i)
   {
-    self->update[i](self->logic_nodes[i], self->user_data[i]);
+    self->update[i](self->logic_nodes[i].get_id(), self->user_data[i]);
   }
 }
 

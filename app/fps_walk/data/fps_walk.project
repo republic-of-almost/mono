@@ -27,6 +27,7 @@ table.insert(
     },
 
     project_dependencies = {
+      "ROA",
       "Nil",
       "Lib",
       "Math",

@@ -64,7 +64,7 @@ main()
         Custom tick stuff.
       */
       ROA::Object *obj = reinterpret_cast<ROA::Object*>(user_data);
-    
+      
       static uint32_t spin = 0;
       spin += 7;
       

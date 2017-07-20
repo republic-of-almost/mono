@@ -10,7 +10,7 @@
 
 namespace Nil {
 
-using generic_callback_fn = void(*)(Nil::Node node, uintptr_t user_data);
+using generic_callback_fn = void(*)(uint32_t node, uintptr_t user_data);
 
 namespace Data {
 

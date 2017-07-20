@@ -16,8 +16,10 @@ namespace {
 
 
 inline void
-think(Nil::Node node, uintptr_t user_data)
+think(uint32_t node_id, uintptr_t user_data)
 {
+  Nil::Node node(node_id);
+
   Actor *actor = reinterpret_cast<Actor*>(user_data);
   LIB_ASSERT(actor);
   

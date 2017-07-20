@@ -3,6 +3,7 @@
 #include <nil/data/data.hpp>
 #include <lib/utilities.hpp>
 #include <math/math.hpp>
+#include <nil/node.hpp>
 
 
 namespace {
@@ -19,14 +20,18 @@ namespace {
 
 
 inline void
-think(Nil::Node node, uintptr_t user_data)
+think(uint32_t node_id, uintptr_t user_data)
 {
+  ROA::Object node(node_id);
+
   static float env_time = 0.f;
   env_time += 0.16f * 0.005f;
+  
+  const size_t child_count = node.get_child_count();
 
-  for(uint32_t i = 0; i < env_count; ++i)
+  for(size_t i = 0; i < child_count; ++i)
   {
-    Nil::Node child = node.get_child(i);
+    ROA::Object child = node.get_child(i);
     
     constexpr float radius = 15.f;
     const float time = i;
@@ -42,29 +47,32 @@ think(Nil::Node node, uintptr_t user_data)
     char name[16]{};
     sprintf(name, "Env%dMat", i);
     
-    Nil::Resource::Material mat{};
-    const bool found = Nil::Resource::find_by_name(name, mat);
-    LIB_ASSERT(found);
+    ROA::Material mat(name);
+    LIB_ASSERT(mat.is_valid());
     
-    mat.color = lib::color::init(rgba);
+    mat.set_color(ROA::Color(rgba)); //lib::color::init(rgba);
     
-    Nil::Resource::load(name, mat);
+//    Nil::Resource::load(name, mat);
     
     const float default_scale = 4.f;
     const float scale_up = default_scale * ((float)i / 10.f);
     
-    Nil::Data::Transform transform{};
-    Nil::Data::get(child, transform);
+//    Nil::Data::Transform transform{};
+//    Nil::Data::get(child, transform);
     
-    transform.scale[0] = default_scale;
-    transform.scale[1] = scale_up;
-    transform.scale[2] = default_scale;
+    ROA::Transform transform = child.get_transform();
+    transform.set_scale(ROA::Vector3(default_scale, scale_up, default_scale));
+    transform.set_position(ROA::Vector3(x, y, z));
     
-    transform.position[0] = x;
-    transform.position[1] = y;
-    transform.position[2] = z;
-    
-    Nil::Data::set(child, transform);
+//    transform.scale[0] = default_scale;
+//    transform.scale[1] = scale_up;
+//    transform.scale[2] = default_scale;
+//    
+//    transform.position[0] = x;
+//    transform.position[1] = y;
+//    transform.position[2] = z;
+//    
+//    Nil::Data::set(child, transform);
   }
 }
 
@@ -84,27 +92,39 @@ setup(Environment *env)
     Nil::Resource::directory("mesh/unit_bev_cube.obj")
   );
   
-  Nil::Resource::Mesh mesh{};
-  Nil::Resource::find_by_name("Unit_bev_cube", mesh);
+//  Nil::Resource::Mesh mesh{};
+//  Nil::Resource::find_by_name("Unit_bev_cube", mesh);
+
+  ROA::Mesh mesh("Unit_bev_cube");
 
   // Child nodes
   for(uint32_t i = 0; i < env_count; ++i)
   {
-    Nil::Node node;
+//    Nil::Node node;
+    ROA::Object node;
     node.set_name("Env");
     node.set_parent(env->entity);
 
     char name[16]{};
     sprintf(name, "Env%dMat", i);
     
-    Nil::Resource::Material material{};
-    material.color = 0xFF0000FF;
-    Nil::Resource::load(name, material);
+    ROA::Material mat(name);
+    mat.set_color(ROA::Color(0xFF0000FF));
     
-    Nil::Data::Renderable renderable;
-    renderable.material_id = material.id;
-    renderable.mesh_id = mesh.id;
-    Nil::Data::set(node, renderable);
+//    Nil::Resource::Material material{};
+//    material.color = 0xFF0000FF;
+//    Nil::Resource::load(name, material);
+
+    ROA::Renderable renderable;
+    renderable.set_material(mat);
+    renderable.set_mesh(mesh);
+    
+    node.set_renderable(renderable);
+
+//    Nil::Data::Renderable renderable;
+//    renderable.material_id = material.id;
+//    renderable.mesh_id = mesh.id;
+//    Nil::Data::set(node, renderable);
   }
   
   // Callbacks
@@ -116,7 +136,9 @@ setup(Environment *env)
     
     logic.think_01 = think;
     
-    Nil::Data::set(env->entity, logic);
+    Nil::Node set_node(env->entity.get_instance_id());
+    
+    Nil::Data::set(set_node, logic);
   }
 }
 
