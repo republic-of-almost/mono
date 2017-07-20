@@ -172,19 +172,10 @@ Object::get_parent() const
 void
 Object::set_parent(const ROA::Object obj)
 {
-  const char *name = get_name();
-
   Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
   Nil::Node *that_node = reinterpret_cast<Nil::Node*>(&obj.m_id);
   
   this_node->set_parent(*that_node);
-  
-  LIB_ASSERT(this_node->is_ref());
-  LIB_ASSERT(is_ref());
-  
-  size_t count = that_node->get_child_count();
-  
-  int i = 0;
 }
 
 
@@ -250,12 +241,20 @@ Object::get_instance_id() const
 
 
 // ------------------------------------------------------ [ Data Components ] --
+
+
+
+const Bounding_box
+Object::get_bounding_box() const
+{
+  return const_cast<Object*>(this)->get_bounding_box();
+}
   
   
 Bounding_box
-Object::get_bounding_box() const
+Object::get_bounding_box()
 {
-  return *reinterpret_cast<Bounding_box*>(const_cast<Object*>(this));
+  return *reinterpret_cast<const Bounding_box*>(this);
 }
 
 
@@ -275,10 +274,16 @@ Object::set_bounding_box(const Bounding_box &in)
 }
 
 
-Camera
+const Camera
 Object::get_camera() const
 {
-  return *reinterpret_cast<Camera*>(const_cast<Object*>(this));
+  return const_cast<Object*>(this)->get_camera();
+}
+
+Camera
+Object::get_camera()
+{
+  return *reinterpret_cast<Camera*>(this);
 }
 
 
@@ -298,10 +303,16 @@ Object::set_camera(const Camera &in)
 }
 
 
-Logic
+const Logic
 Object::get_logic() const
 {
-  return *reinterpret_cast<Logic*>(const_cast<Object*>(this));
+  return const_cast<Object*>(this)->get_logic();
+}
+
+Logic
+Object::get_logic()
+{
+  return *reinterpret_cast<Logic*>(this);
 }
 
 
@@ -311,10 +322,17 @@ Object::set_logic(const Logic &in)
 }
 
 
-Transform
+const Transform
 Object::get_transform() const
 {
-  return *reinterpret_cast<Transform*>(const_cast<Object*>(this));
+  return const_cast<Object*>(this)->get_transform();
+}
+
+
+Transform
+Object::get_transform()
+{
+  return *reinterpret_cast<Transform*>(this);
 }
 
 
@@ -334,10 +352,17 @@ Object::set_transform(const Transform &in)
 }
 
 
-Renderable
+const Renderable
 Object::get_renderable() const
 {
-  return *reinterpret_cast<Renderable*>(const_cast<Object*>(this));
+  return const_cast<Object*>(this)->get_renderable();
+}
+
+
+Renderable
+Object::get_renderable()
+{
+  return *reinterpret_cast<Renderable*>(this);
 }
 
 

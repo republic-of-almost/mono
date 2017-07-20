@@ -71,19 +71,24 @@ public:
   // ---------------------------------------------------- [ Data Components ] --
   
   
-  Bounding_box          get_bounding_box() const;
+  const Bounding_box    get_bounding_box() const;
+  Bounding_box          get_bounding_box();
   void                  set_bounding_box(const Bounding_box &in);
   
-  Camera                get_camera() const;
+  const Camera          get_camera() const;
+  Camera                get_camera();
   void                  set_camera(const Camera &in);
   
-  Logic                 get_logic() const;
+  const Logic           get_logic() const;
+  Logic                 get_logic();
   void                  set_logic(const Logic &in);
   
-  Transform             get_transform() const;
+  const Transform       get_transform() const;
+  Transform             get_transform();
   void                  set_transform(const Transform &in);
   
-  Renderable            get_renderable() const;
+  const Renderable      get_renderable() const;
+  Renderable            get_renderable();
   void                  set_renderable(const Renderable &in);
   
   

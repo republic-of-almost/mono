@@ -18,7 +18,8 @@ public:
 
   explicit          Color();
   explicit          Color(const uint32_t hex);
-  explicit          Color(const float *rgba);
+  explicit          Color(const float rgba[]);
+  explicit          Color(const uint8_t rgba[]);
   
   
   // --------------------------------------------------------- [ Attributes ] --

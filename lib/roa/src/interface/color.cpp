@@ -20,7 +20,13 @@ Color::Color(const uint32_t hex)
 }
 
 
-Color::Color(const float *rgba)
+Color::Color(const float rgba[])
+: Color(lib::color::init(rgba))
+{
+}
+
+
+Color::Color(const uint8_t rgba[])
 : Color(lib::color::init(rgba))
 {
 }
