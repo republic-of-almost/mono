@@ -10,12 +10,18 @@ namespace ROA {
 
 class Resource
 {
-public:
+protected:
 
 
   // ----------------------------------------------------------- [ Lifetime ] --
   
-  
+
+  explicit            Resource(const uint32_t id);
+
+
+public:
+
+
   explicit            Resource();
                       ~Resource();
   

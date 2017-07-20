@@ -15,9 +15,12 @@ public:
 
 
   // ----------------------------------------------------------- [ Lifetime ] --
+  
 
-
+  explicit          Material();
+  explicit          Material(const uint32_t id);
   explicit          Material(const char *name);
+  explicit          Material(const char *name, const Color &col);
                     ~Material();
   
   

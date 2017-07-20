@@ -13,10 +13,10 @@ class Ray
 {
 public:
 
-  explicit    Ray(const Vector3 &start, const Vector3 &end);
+  explicit            Ray(const Vector3 &start, const Vector3 &end);
   
-  Vector3     get_start();
-  Vector3     get_end();
+  inline Vector3      get_start() const { return m_start; }
+  inline Vector3      get_end() const   { return m_end; }
   
 private:
 

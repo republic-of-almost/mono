@@ -53,6 +53,7 @@ load(const char *name, Material &in_out)
     size_t index = 0;
     if(lib::key::linear_search(check_key, keys.data(), keys.size(), &index))
     {
+      in_out.id = materials[index].id;
       materials[index] = in_out;
       return true;
     }

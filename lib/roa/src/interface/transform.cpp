@@ -2,6 +2,7 @@
 #include <roa/vector3.hpp>
 #include <roa/quaternion.hpp>
 #include <common/common.hpp>
+#include <math/math.hpp>
 
 
 namespace ROA {
@@ -13,6 +14,19 @@ namespace ROA {
 Transform::Transform()
 : Object()
 {
+}
+
+
+Transform::Transform(
+  const Vector3 &pos,
+  const Vector3 &scale,
+  const Quaternion &rot
+)
+: Transform()
+{
+  set_position(pos);
+  set_scale(scale);
+  set_rotation(rot);
 }
 
 
@@ -95,21 +109,54 @@ Transform::set_rotation(const Quaternion &in)
 Vector3
 Transform::get_forward() const
 {
-  return Vector3();
+  Nil::Data::Transform data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  const math::transform trans = math::transform_init(
+    math::vec3_init(data.position),
+    math::vec3_init(data.scale),
+    math::quat_init(data.rotation)
+  );
+  
+  const math::vec3 dir = math::transform_fwd(trans);
+  
+  return Vector3(dir.data);
 }
 
 
 Vector3
 Transform::get_up() const
 {
-  return Vector3();
+  Nil::Data::Transform data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  const math::transform trans = math::transform_init(
+    math::vec3_init(data.position),
+    math::vec3_init(data.scale),
+    math::quat_init(data.rotation)
+  );
+  
+  const math::vec3 dir = math::transform_up(trans);
+  
+  return Vector3(dir.data);
 }
 
 
 Vector3
 Transform::get_left() const
 {
-  return Vector3();
+  Nil::Data::Transform data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  const math::transform trans = math::transform_init(
+    math::vec3_init(data.position),
+    math::vec3_init(data.scale),
+    math::quat_init(data.rotation)
+  );
+  
+  const math::vec3 dir = math::transform_left(trans);
+  
+  return Vector3(dir.data);
 }
 
 

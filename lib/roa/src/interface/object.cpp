@@ -47,7 +47,29 @@ Object::Object()
 Object::Object(const uint64_t data_bitfield)
 : Object()
 {
+  if(data_bitfield & Data::BOUNDING_BOX)
+  {
+    Bounding_box data;
+    this->set_bounding_box(data);
+  }
   
+  if(data_bitfield & Data::CAMERA)
+  {
+    Camera data;
+    this->set_camera(data);
+  }
+  
+  if(data_bitfield & Data::LOGIC)
+  {
+    Logic data;
+    this->set_logic(data);
+  }
+  
+  if(data_bitfield & Data::RENDERABLE)
+  {
+    Renderable data;
+    this->set_renderable(data);
+  }
 }
 
 
@@ -233,6 +255,7 @@ Object::set_bounding_box(const ROA::Bounding_box &in)
 Camera
 Object::get_camera() const
 {
+  return *reinterpret_cast<Camera*>(const_cast<Object*>(this));
 }
 
 
@@ -255,7 +278,7 @@ Object::set_camera(const ROA::Camera &in)
 Logic
 Object::get_logic() const
 {
-  return Logic();
+  return *reinterpret_cast<Logic*>(const_cast<Object*>(this));
 }
 
 
@@ -291,6 +314,7 @@ Object::set_transform(const ROA::Transform &in)
 Renderable
 Object::get_renderable() const
 {
+  return *reinterpret_cast<Renderable*>(const_cast<Object*>(this));
 }
 
 

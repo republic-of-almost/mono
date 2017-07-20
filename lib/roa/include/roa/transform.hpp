@@ -14,6 +14,9 @@ class Transform : public Object
 public:
 
   explicit      Transform();
+  explicit      Transform(const Vector3 &pos,
+                          const Vector3 &scale,
+                          const Quaternion &rotation);
   
   Vector3       get_position() const;
   void          set_position(const Vector3 &in);

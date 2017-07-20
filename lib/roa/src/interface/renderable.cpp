@@ -21,6 +21,13 @@ Renderable::Renderable()
   Nil::Data::set(node, renderable);
 }
 
+Renderable::Renderable(const Mesh &mesh, const Material &mat)
+: Renderable()
+{
+  set_mesh(mesh);
+  set_material(mat);
+}
+
 
 Renderable::~Renderable()
 {
@@ -33,6 +40,10 @@ Renderable::~Renderable()
 Mesh
 Renderable::get_mesh() const
 {
+  Nil::Data::Renderable data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  return Mesh(data.mesh_id);
 }
 
 
@@ -49,6 +60,10 @@ Renderable::set_mesh(const Mesh &mesh)
 Material
 Renderable::get_material() const
 {
+  Nil::Data::Renderable data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  return Material(data.material_id);
 }
 
 
