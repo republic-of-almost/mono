@@ -3,13 +3,15 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/keycodes.hpp>
 
 
 namespace ROA {
 namespace Keyboard {
 
 
-uint32_t      key_state(const uint32_t key);
+uint32_t      key_state(const uint32_t keycode);
+const char*   key_name(const uint32_t keycode);
 
 
 } // ns

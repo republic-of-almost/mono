@@ -63,35 +63,32 @@ think(ROA::Object node)
   
   // Movement
   {
-    Nil::Data::Keyboard kb{};
-    Nil::Data::get(Game_data::get_keyboard(), kb);
-
     float z_move = 0.f;
     float x_move = 0.f;
     
     #ifndef LIB_PLATFORM_WEB
-    if(kb.key_state)
     {
-      if(kb.key_state[Nil::Data::KeyCode::W] == Nil::Data::KeyState::DOWN)
+      if(ROA::Keyboard::key_state(ROA::KeyCode::W) == ROA::KeyState::DOWN)
       {
         z_move += 1.f;
       }
-      if(kb.key_state[Nil::Data::KeyCode::S] == Nil::Data::KeyState::DOWN)
+      if(ROA::Keyboard::key_state(ROA::KeyCode::S) == ROA::KeyState::DOWN)
       {
         z_move -= 1.f;
       }
-      if(kb.key_state[Nil::Data::KeyCode::A] == Nil::Data::KeyState::DOWN)
+      if(ROA::Keyboard::key_state(ROA::KeyCode::A) == ROA::KeyState::DOWN)
       {
         x_move += 1.f;
       }
-      if(kb.key_state[Nil::Data::KeyCode::D] == Nil::Data::KeyState::DOWN)
+      if(ROA::Keyboard::key_state(ROA::KeyCode::D) == ROA::KeyState::DOWN)
       {
         x_move -= 1.f;
       }
-      
+    
+    
       // Toggle mouse capture //
       #ifndef LIB_PLATFORM_WEB
-      if(kb.key_state[Nil::Data::KeyCode::ESCAPE] == Nil::Data::KeyState::UP_ON_FRAME)
+      if(ROA::Keyboard::key_state(ROA::KeyCode::ESCAPE) == ROA::KeyState::UP_ON_FRAME)
       {
         const bool capture = !ROA::Mouse::is_captured();
         ROA::Mouse::set_captured(capture);
