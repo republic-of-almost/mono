@@ -22,7 +22,7 @@
 #include <nau/nau.h>
 #include <nau/renderers/opengl3.h>
 
-#include <roa/object.hpp>
+#include <roa/roa.hpp>
 
 
 void
@@ -40,12 +40,8 @@ main()
 {
   lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
 
-  Nil::Engine nil_engine;
-  Nil_ext::load_aspects(nil_engine);
-  
-  ROA::Object obj;
-  obj.set_name("FooFoo");
-  
+  ROA::Application app;
+
   Game_data::setup();
   Game_data::load_assets();
 
@@ -55,42 +51,33 @@ main()
   Game::Static_objects objs;
   Game::setup(&objs);
   
-  nil_engine.run();
-  nil_engine.run();
-  
-  nau_init();
-  nau_gl3_init();
+//  nau_init();
+//  nau_gl3_init();
   
   /*
     Run Game
   */
-  #ifdef __EMSCRIPTEN__
-  emscripten_set_main_loop(app_tick, -1, 1);
-  #else
-  while(nil_engine.run())
-  {
-    app_tick();
-    
+  app.run([](uintptr_t user_data)
     // Nau Test
     {
-      nau_new_frame();
+//      nau_new_frame();
     
-      static float flt = 1.f;
+//      static float flt = 1.f;
       
-      nau_begin("Foo");
-      nau_float("test", &flt);
-      nau_end();
+//      nau_begin("Foo");
+//      nau_float("test", &flt);
+//      nau_end();
+//      
+//      size_t count = 0;
+//      Nau_renderable *renderables = nullptr;
       
-      size_t count = 0;
-      Nau_renderable *renderables = nullptr;
-      
-      nau_render_data(&renderables, &count);
+//      nau_render_data(&renderables, &count);
 //      nau_gl3_render(renderables, count);
-    }
-  }
-  #endif
-  
-  nau_end();
+    },
+    0
+  );
+
+//  nau_end();
 
   return 0;
 }

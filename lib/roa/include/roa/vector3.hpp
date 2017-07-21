@@ -16,17 +16,20 @@ public:
   // ----------------------------------------------------------- [ Lifetime ] --
   
   
-  explicit          Vector3();
-  explicit          Vector3(const float x, const float y, const float z);
-  explicit          Vector3(const float *data);
+  explicit            Vector3();
+  explicit            Vector3(const float x, const float y, const float z);
+  explicit            Vector3(const float *data);
   
   
   // --------------------------------------------------------- [ Attributes ] --
 
 
-  inline float      get_x() const { return data[0]; };
-  inline float      get_y() const { return data[1]; };
-  inline float      get_z() const { return data[2]; };
+  inline float        get_x() const { return data[0]; };
+  inline float        get_y() const { return data[1]; };
+  inline float        get_z() const { return data[2]; };
+  
+  inline const float* get_data() const  { return data; }
+  inline float*       get_data()        { return data; }
 
 
 private:

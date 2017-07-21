@@ -1,4 +1,5 @@
 #include <roa/camera.hpp>
+#include <roa/color.hpp>
 #include <common/common.hpp>
 #include <nil/node.hpp>
 #include <nil/data/camera.hpp>
@@ -16,11 +17,11 @@ Camera::Camera()
 : Object()
 {
   Nil::Data::Camera data{};
-  data.width = 1.f;
-  data.height = 1.f;
-  data.near_plane = 0.1f;
-  data.far_plane = 1000.f;
-  data.fov = math::tau() * 0.125f;
+  data.width              = 1.f;
+  data.height             = 1.f;
+  data.near_plane         = 0.1f;
+  data.far_plane          = 1000.f;
+  data.fov                = math::tau() * 0.125f;
   data.clear_depth_buffer = true;
   data.clear_color_buffer = true;
   
@@ -133,6 +134,26 @@ Camera::set_far_plane(const float far)
   Nil::Data::Camera data{};
   ROA_detail::get_nil_data(*this, data);
   data.far_plane = far;
+  ROA_detail::set_nil_data(*this, data);
+}
+
+
+Color
+Camera::get_clear_color() const
+{
+  Nil::Data::Camera data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  return Color(data.clear_color);
+}
+
+
+void
+Camera::set_clear_color(const Color &color)
+{
+  Nil::Data::Camera data{};
+  ROA_detail::get_nil_data(*this, data);
+  data.clear_color = color.get_uint();
   ROA_detail::set_nil_data(*this, data);
 }
 

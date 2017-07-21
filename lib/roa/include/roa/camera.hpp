@@ -38,6 +38,9 @@ public:
   
   float             get_far_plane() const;
   void              set_far_plane(const float far);
+  
+  Color             get_clear_color() const;
+  void              set_clear_color(const Color &color);
 
 };
 

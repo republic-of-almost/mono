@@ -293,6 +293,7 @@ setup(Actor *actor)
       
       ROA::Camera cam_data;
       cam_data.set_field_of_view(math::tau() * 0.2f);
+      cam_data.set_clear_color(ROA::Color(0xFFFF00FF));
       camera.set_camera(cam_data);
     } // cam
   } // head

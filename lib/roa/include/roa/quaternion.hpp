@@ -16,22 +16,25 @@ public:
   // ----------------------------------------------------------- [ Lifetime ] --
   
 
-  explicit        Quaternion();
-  explicit        Quaternion(const Vector3 &axis, const float angle);
-  explicit        Quaternion(const float *data);
-  explicit        Quaternion(const float x,
-                             const float y,
-                             const float z,
-                             const float w);
+  explicit              Quaternion();
+  explicit              Quaternion(const Vector3 &axis, const float angle);
+  explicit              Quaternion(const float *data);
+  explicit              Quaternion(const float x,
+                                   const float y,
+                                   const float z,
+                                   const float w);
   
   
   // --------------------------------------------------------- [ Attributes ] --
   
   
-  inline float    get_x() const { return data[0]; }
-  inline float    get_y() const { return data[1]; }
-  inline float    get_z() const { return data[2]; }
-  inline float    get_w() const { return data[3]; }
+  inline float          get_x() const { return data[0]; }
+  inline float          get_y() const { return data[1]; }
+  inline float          get_z() const { return data[2]; }
+  inline float          get_w() const { return data[3]; }
+  
+  inline const float*   get_data() const { return data; }
+  inline float*         get_data()       { return data; }
 
 
 private:
