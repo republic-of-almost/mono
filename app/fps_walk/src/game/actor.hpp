@@ -3,6 +3,7 @@
 
 
 #include <nil/node.hpp>
+#include <roa/roa.hpp>
 
 
 namespace Game {
@@ -10,8 +11,8 @@ namespace Game {
 
 struct Actor
 {
-  Nil::Node entity;
-  Nil::Node head;
+  ROA::Object entity;
+  ROA::Object head;
   
   float accum_pitch;
   float accum_yaw;

@@ -16,11 +16,9 @@ namespace {
 
 
 inline void
-think(uint32_t node_id, uintptr_t user_data)
+think(ROA::Object node)
 {
-  Nil::Node node(node_id);
-
-  Actor *actor = reinterpret_cast<Actor*>(user_data);
+  Actor *actor = reinterpret_cast<Actor*>(node.get_user_data());
   LIB_ASSERT(actor);
   
   Nil::Node ms_node = Game_data::get_mouse();
@@ -51,12 +49,8 @@ think(uint32_t node_id, uintptr_t user_data)
       actor->accum_yaw
     );
     
-    Nil::Data::Transform trans{};
-    Nil::Data::get(node, trans);
-    
-    memcpy(trans.rotation, yaw.data, sizeof(trans.rotation));
-
-    Nil::Data::set(node, trans);
+    ROA::Transform trans = node.get_transform();
+    trans.set_rotation(ROA::Quaternion(yaw.data));
   }
   
   // Head trans
@@ -66,12 +60,8 @@ think(uint32_t node_id, uintptr_t user_data)
       actor->accum_pitch
     );
     
-    Nil::Data::Transform trans{};
-    Nil::Data::get(actor->head, trans);
-    
-    memcpy(trans.rotation, pitch.data, sizeof(trans.rotation));
-    
-    Nil::Data::set(actor->head, trans);
+    ROA::Transform trans = actor->head.get_transform();
+    trans.set_rotation(ROA::Quaternion(pitch.data));
   }
   
   // Movement
@@ -115,10 +105,14 @@ think(uint32_t node_id, uintptr_t user_data)
 
     const float move_speed = 0.5f * delta_time;
     
-    Nil::Data::Transform trans{};
-    Nil::Data::get(node, trans);
+    ROA::Transform trans = node.get_transform();
     
-    math::vec3 next_step = math::vec3_init(trans.position);
+    math::vec3 next_step = math::vec3_init(
+      trans.get_position().get_x(),
+      trans.get_position().get_y(),
+      trans.get_position().get_z()
+    );
+    
     math::vec3 move_dir  = math::vec3_zero();
 
     const math::vec3 local_movement = math::vec3_init(x_move, 0.f, z_move);
@@ -128,7 +122,12 @@ think(uint32_t node_id, uintptr_t user_data)
     */
     if(math::vec3_length(local_movement) > math::epsilon())
     {
-      const math::quat rot           = math::quat_init(trans.rotation);
+      const math::quat rot = math::quat_init(
+        trans.get_rotation().get_x(),
+        trans.get_rotation().get_y(),
+        trans.get_rotation().get_z(),
+        trans.get_rotation().get_w()
+      );
       const math::vec3 norm_movement = math::vec3_normalize(local_movement);
       
       const math::vec3 ent_fwd = math::quat_rotate_point(rot, Game_data::get_world_fwd());
@@ -163,8 +162,7 @@ think(uint32_t node_id, uintptr_t user_data)
       const math::vec3 height = math::vec3_init(0, actor->height, 0);
       const math::vec3 pos    = math::vec3_add(hit, height);
       
-      memcpy(trans.position, pos.data, sizeof(trans.position));
-      Nil::Data::set(node, trans);
+      trans.set_position(ROA::Vector3(pos.data));
     }
     
     /*
@@ -189,7 +187,11 @@ think(uint32_t node_id, uintptr_t user_data)
       
       const float dot = math::vec3_dot(norm_edge, math::vec3_normalize(move_dir));
       
-      const math::vec3 curr_pos = math::vec3_init(trans.position);
+      const math::vec3 curr_pos = math::vec3_init(
+        trans.get_position().get_x(),
+        trans.get_position().get_y(),
+        trans.get_position().get_z()
+      );
       
       const math::vec3 side_step         = math::vec3_add(curr_pos, math::vec3_scale(norm_edge, dot * move_speed));
       const math::vec3 side_step_ray_end = math::vec3_add(side_step, math::vec3_init(0.f, -10000.f, 0.f));
@@ -203,9 +205,10 @@ think(uint32_t node_id, uintptr_t user_data)
         
         const math::vec3 height = math::vec3_init(0, actor->height, 0);
         const math::vec3 pos    = math::vec3_add(hit, height);
-        
-        memcpy(trans.position, pos.data, sizeof(trans.position));
-        Nil::Data::set(node, trans);
+
+        trans.set_position(ROA::Vector3(
+          pos.data
+        ));
       }
     }
   }
@@ -222,6 +225,8 @@ setup(Actor *actor)
   
   actor->height = 2.f;
   actor->entity.set_name("Actor");
+  
+  actor->entity.set_user_data((uintptr_t)actor);
   
   // Mouse Capture
   {
@@ -253,128 +258,82 @@ setup(Actor *actor)
   
   // Main Entity
   {
-    Nil::Data::Transform trans{};
-    
     float pos[] = {0.f, 0.f, 0.f};
-    memcpy(trans.position, pos, sizeof(trans.position));
-    
     float scale[] = {1.f, 1.f, 1.f};
-    memcpy(trans.scale, scale, sizeof(trans.scale));
-    
     float rot[] = {0.f, 0.f, 0.f, 1.f};
-    memcpy(trans.rotation, rot, sizeof(trans.rotation));
     
-    Nil::Data::set(actor->entity, trans);
+    ROA::Transform trans = actor->entity.get_transform();
+    trans.set_position(ROA::Vector3(pos));
+    trans.set_scale(ROA::Vector3(scale));
+    trans.set_rotation(ROA::Quaternion(rot));
   }
   
   // Head
   {
-    Nil::Node head;
+    ROA::Object head;
     head.set_name("Head");
     head.set_parent(actor->entity);
     
     actor->head = head;
     
+    LIB_ASSERT(head.is_ref());
+    LIB_ASSERT(actor->head.is_ref());
+    
+    
+    LIB_ASSERT(head.get_instance_id() == actor->head.get_instance_id());
+    
     // Head Trans
     {
-      Nil::Data::Transform trans{};
-      
       float pos[] = {0.f, 1 + math::g_ratio(), 0.f};
-      memcpy(trans.position, pos, sizeof(trans.position));
-      
       float scale[] = {1.f, 1.f, 1.f};
-      memcpy(trans.scale, scale, sizeof(trans.scale));
-      
       float rot[] = {0.f, 0.f, 0.f, 1.f};
-      memcpy(trans.rotation, rot, sizeof(trans.rotation));
       
-      Nil::Data::set(head, trans);
-    }
-    
-    // Head Material
-    {
-//      Nil::Resource::Material mat{};
-//      
-//      float color[] = {1.f, 1.f, 0.f, 1.f};
-//      memcpy(mat.color, color, sizeof(mat.color));
-//      
-//      mat.shader = Nil::Data::Material::FULLBRIGHT;
-//      
-//      Nil::Data::set(head, mat);
+      ROA::Transform trans = head.get_transform();
+      trans.set_position(ROA::Vector3(pos));
+      trans.set_scale(ROA::Vector3(scale));
+      trans.set_rotation(ROA::Quaternion(rot));
     }
     
     // Camera
     {
-      Nil::Node camera;
+      ROA::Object camera;
       camera.set_name("Camera");
       camera.set_parent(head);
-    
-      // Transform
-      {
-        Nil::Data::Transform trans{};
-        
-        float rot[] = {0.f, 0.f, 0.f, 1.f};
-        memcpy(trans.rotation, rot, sizeof(trans.rotation));
-        
-        Nil::Data::set(camera, trans);
-      }
       
-      // Camera
-      {
-        Nil::Data::Camera cam_data{};
-        
-        cam_data.width              = 1.f;
-        cam_data.height             = 1.f;
-        cam_data.fov                = math::tau() * 0.2f;
-        cam_data.near_plane         = 1.f;
-        cam_data.far_plane          = 100.f;
-        cam_data.clear_color_buffer = true;
-        cam_data.clear_depth_buffer = true;
-        cam_data.clear_color        = 0x222233FF;
-        
-        Nil::Data::set(camera, cam_data);
-      }
+      ROA::Camera cam_data;
+      cam_data.set_field_of_view(math::tau() * 0.2f);
+      camera.set_camera(cam_data);
+    
     } // cam
   } // head
   
   // Body
   {
-    Nil::Node body;
+    ROA::Object body;
     body.set_name("Body");
     body.set_parent(actor->entity);
     
-    // Body Transform
-    {
-      Nil::Data::Transform trans{};
-      
-      float pos[] = {0.f, 0.f, 0.f};
-      memcpy(trans.position, pos, sizeof(trans.position));
-      
-      float scale[] = {1.f, 1 + math::g_ratio(), 1.f};
-      memcpy(trans.scale, scale, sizeof(trans.scale));
-      
-      float rot[] = {0.f, 0.f, 0.f, 1.f};
-      memcpy(trans.rotation, rot, sizeof(trans.rotation));
-      
-      Nil::Data::set(body, trans);
-    }
+    float pos[] = {0.f, 0.f, 0.f};
+    float scale[] = {1.f, 1 + math::g_ratio(), 1.f};
+    float rot[] = {0.f, 0.f, 0.f, 1.f};
+
+    ROA::Transform trans = body.get_transform();
+    trans.set_position(ROA::Vector3(pos));
+    trans.set_scale(ROA::Vector3(scale));
+    trans.set_rotation(ROA::Quaternion(rot));
   }
   
   // Callbacks
   {
-    Nil::Data::Logic logic{};
+    ROA::Logic logic;
     
-    logic.logic_id = 1;
-    logic.user_data = (uintptr_t)actor;
-    
-    logic.think_01 = think;
-    
-    Nil::Data::set(actor->entity, logic);
+    logic.update_func(think);
+    actor->entity.set_logic(logic);
   }
   
   // Do one think to get actor into the right place
   {
-    think(actor->entity, (uintptr_t)actor);
+    think(actor->entity);
   }
 }
 

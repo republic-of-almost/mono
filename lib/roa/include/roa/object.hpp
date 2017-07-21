@@ -67,6 +67,9 @@ public:
   virtual uint32_t      get_type_id() const;
   uint32_t              get_instance_id() const;
   
+  uintptr_t             get_user_data() const;
+  void                  set_user_data(uintptr_t user_data);
+  
   
   // ---------------------------------------------------- [ Data Components ] --
   

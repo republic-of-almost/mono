@@ -113,6 +113,11 @@ Object::~Object()
 Object&
 Object::operator=(const Object &other)
 {
+  Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
+  Nil::Node *that_node = reinterpret_cast<Nil::Node*>(&other.m_id);
+
+  this_node->operator=(*that_node);
+  
   return *this;
 }
 
@@ -120,6 +125,11 @@ Object::operator=(const Object &other)
 Object&
 Object::operator=(const Object &&other)
 {
+  Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
+  Nil::Node *that_node = reinterpret_cast<Nil::Node*>(&other.m_id);
+
+  this_node->operator=(static_cast<Nil::Node&&>(*that_node)); // hmm
+
   return *this;
 }
 
@@ -198,6 +208,7 @@ Object::get_child_count() const
 
 // ----------------------------------------------------------- [ Attributes ] --
 
+
 const char*
 Object::get_name() const
 {
@@ -240,8 +251,29 @@ Object::get_instance_id() const
 }
 
 
-// ------------------------------------------------------ [ Data Components ] --
+uintptr_t
+Object::get_user_data() const
+{
+  if(m_id)
+  {
+    return reinterpret_cast<Nil::Node*>(&m_id)->get_user_data();
+  }
 
+  return 0;
+}
+
+
+void
+Object::set_user_data(uintptr_t user_data)
+{
+  if(m_id)
+  {
+    reinterpret_cast<Nil::Node*>(&m_id)->set_user_data(user_data);
+  }
+}
+
+
+// ------------------------------------------------------ [ Data Components ] --
 
 
 const Bounding_box
@@ -319,6 +351,16 @@ Object::get_logic()
 void
 Object::set_logic(const Logic &in)
 {
+  if(in.get_instance_id() != get_instance_id())
+  {
+    Nil::Data::Logic data{};
+    
+    Nil::Node other_node = ROA_detail::get_node(in);
+    Nil::Node this_node = ROA_detail::get_node(*this);
+    
+    Nil::Data::get(other_node, data);
+    Nil::Data::set(this_node, data);
+  }
 }
 
 

@@ -9,12 +9,25 @@
 namespace ROA {
 
 
-class Logic : public Object
+using Logic_update_func = void(*)(ROA::Object obj);
+
+
+class Logic final : public Object
 {
 public:
 
-//  explicit        Logic();
-//                  ~Logic();
+
+  // ----------------------------------------------------------- [ Lifetime ] --
+  
+
+  explicit        Logic();
+                  ~Logic();
+  
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  
+  
+  void            update_func(Logic_update_func update_fn);
   
 
 };
