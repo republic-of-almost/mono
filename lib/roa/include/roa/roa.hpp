@@ -9,11 +9,14 @@
 #include <roa/bounding_box.hpp>
 #include <roa/camera.hpp>
 #include <roa/color.hpp>
+#include <roa/keyboard.hpp>
 #include <roa/logic.hpp>
 #include <roa/material.hpp>
 #include <roa/mesh.hpp>
 #include <roa/model.hpp>
+#include <roa/mouse.hpp>
 #include <roa/object.hpp>
+#include <roa/point.hpp>
 #include <roa/quaternion.hpp>
 #include <roa/renderable.hpp>
 #include <roa/resource.hpp>

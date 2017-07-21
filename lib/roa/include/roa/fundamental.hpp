@@ -33,6 +33,7 @@ class Material;
 class Mesh;
 class Object;
 class Quaternion;
+struct Point;
 class Ray;
 class Renderable;
 class Resource;

@@ -21,19 +21,17 @@ think(ROA::Object node)
   Actor *actor = reinterpret_cast<Actor*>(node.get_user_data());
   LIB_ASSERT(actor);
   
-  Nil::Node ms_node = Game_data::get_mouse();
-  Nil::Data::Mouse ms{};
-  Nil::Data::get(ms_node, ms);
-  
   const float delta_time = 0.16f;
   
-  if(ms.capture)
+  if(ROA::Mouse::is_captured())
   {
+    const ROA::Point ms_delta = ROA::Mouse::get_delta();
+    
     const float head_speed = 0.05f;
     const float final_speed = delta_time * head_speed;
     
-    actor->accum_pitch += ms.delta[1] * final_speed;
-    actor->accum_yaw   -= ms.delta[0] * final_speed;
+    actor->accum_pitch += ms_delta.y * final_speed;
+    actor->accum_yaw   -= ms_delta.x * final_speed;
     
     actor->accum_pitch = math::clamp(
       actor->accum_pitch,
@@ -96,8 +94,8 @@ think(ROA::Object node)
       #ifndef LIB_PLATFORM_WEB
       if(kb.key_state[Nil::Data::KeyCode::ESCAPE] == Nil::Data::KeyState::UP_ON_FRAME)
       {
-        ms.capture = !ms.capture;
-        Nil::Data::set(ms_node, ms);
+        const bool capture = !ROA::Mouse::is_captured();
+        ROA::Mouse::set_captured(capture);
       }
       #endif
     }
@@ -200,9 +198,8 @@ think(ROA::Object node)
       distance = 0.f;
       if(math::ray_test_triangles(side_step_ray, actor->nav_mesh, tri_count, &distance))
       {
-        const math::vec3 scale = math::vec3_scale(math::ray_direction(side_step_ray), distance);
-        const math::vec3 hit = math::vec3_add(side_step_ray.start, scale);
-        
+        const math::vec3 scale  = math::vec3_scale(math::ray_direction(side_step_ray), distance);
+        const math::vec3 hit    = math::vec3_add(side_step_ray.start, scale);
         const math::vec3 height = math::vec3_init(0, actor->height, 0);
         const math::vec3 pos    = math::vec3_add(hit, height);
 
@@ -276,12 +273,6 @@ setup(Actor *actor)
     
     actor->head = head;
     
-    LIB_ASSERT(head.is_ref());
-    LIB_ASSERT(actor->head.is_ref());
-    
-    
-    LIB_ASSERT(head.get_instance_id() == actor->head.get_instance_id());
-    
     // Head Trans
     {
       float pos[] = {0.f, 1 + math::g_ratio(), 0.f};
@@ -303,7 +294,6 @@ setup(Actor *actor)
       ROA::Camera cam_data;
       cam_data.set_field_of_view(math::tau() * 0.2f);
       camera.set_camera(cam_data);
-    
     } // cam
   } // head
   

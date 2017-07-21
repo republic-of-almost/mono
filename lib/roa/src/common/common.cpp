@@ -6,6 +6,14 @@ namespace ROA_detail {
 
 
 Nil::Node
+get_application_node()
+{
+  static Nil::Node node;
+  return node;
+}
+
+
+Nil::Node
 get_node(ROA::Object obj)
 {
   return Nil::Node(obj.get_instance_id());

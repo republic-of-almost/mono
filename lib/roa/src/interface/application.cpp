@@ -1,4 +1,5 @@
 #include <roa/application.hpp>
+#include <common/common.hpp>
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
@@ -11,7 +12,6 @@ namespace ROA {
 struct Application::Impl
 {
   Nil::Engine nil_engine;
-  Nil::Node app_window;
 };
 
 
@@ -20,15 +20,16 @@ Application::Application()
 {
   Nil_ext::load_aspects(m_impl->nil_engine);
   
-  m_impl->app_window.set_name("Application");
+  Nil::Node app_node = ROA_detail::get_application_node();
+  app_node.set_name("Application");
   
   Nil::Data::Window win{};
   constexpr char title[] = "ROA";
   strcat(win.title, title);
   
-  Nil::Data::set(m_impl->app_window, win);
-  Nil::Data::set(m_impl->app_window, Nil::Data::Mouse{});
-  Nil::Data::set(m_impl->app_window, Nil::Data::Keyboard{});
+  Nil::Data::set(app_node, win);
+  Nil::Data::set(app_node, Nil::Data::Mouse{});
+  Nil::Data::set(app_node, Nil::Data::Keyboard{});
 }
 
 

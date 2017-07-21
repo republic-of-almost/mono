@@ -13,6 +13,10 @@ namespace ROA_detail {
 
 
 Nil::Node
+get_application_node();
+
+
+Nil::Node
 get_node(ROA::Object obj);
 
 

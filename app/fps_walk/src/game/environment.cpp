@@ -82,7 +82,7 @@ setup(Environment *env)
     sprintf(name, "Env%dMat", i);
     
     ROA::Material mat(name);
-    mat.set_color(ROA::Color(0xFF0000FF));
+    mat.set_color(ROA::Color(0xFF00FFFF));
     
     ROA::Renderable renderable;
     renderable.set_material(mat);

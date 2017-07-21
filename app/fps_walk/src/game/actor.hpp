@@ -14,9 +14,9 @@ struct Actor
   ROA::Object entity;
   ROA::Object head;
   
-  float accum_pitch;
-  float accum_yaw;
-  float height;
+  float accum_pitch  = 1.f;
+  float accum_yaw    = 0.f;
+  float height       = 2.f;
   float nav_mesh[18];
 };
 
