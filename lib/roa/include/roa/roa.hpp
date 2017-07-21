@@ -8,6 +8,7 @@
 #include <roa/application.hpp>
 #include <roa/bounding_box.hpp>
 #include <roa/camera.hpp>
+#include <roa/collection.hpp>
 #include <roa/color.hpp>
 #include <roa/keyboard.hpp>
 #include <roa/logic.hpp>
@@ -18,6 +19,7 @@
 #include <roa/object.hpp>
 #include <roa/point.hpp>
 #include <roa/quaternion.hpp>
+#include <roa/query.hpp>
 #include <roa/renderable.hpp>
 #include <roa/resource.hpp>
 #include <roa/scene.hpp>

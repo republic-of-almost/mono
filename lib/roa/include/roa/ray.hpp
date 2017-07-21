@@ -9,6 +9,14 @@
 namespace ROA {
 
 
+enum class Ray_search {
+
+  NEAREST,
+  ALL,
+
+};
+
+
 class Ray
 {
 public:

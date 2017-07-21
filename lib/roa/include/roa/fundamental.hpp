@@ -27,6 +27,7 @@ namespace ROA {
 class Application;
 class Bounding_box;
 class Camera;
+class Collection;
 class Color;
 class Logic;
 class Material;
@@ -39,6 +40,9 @@ class Renderable;
 class Resource;
 class Transform;
 class Vector3;
+
+
+enum class Ray_search;
 
 
 } // ns
