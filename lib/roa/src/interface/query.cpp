@@ -42,12 +42,26 @@ bounding_boxes(const Ray &ray, Ray_search search)
     
     if(dist != 0.f)
     {
+      if(dist < closest)
+      {
+        closest_obj = ROA::Object(node_ids[i]);
+      }
+      
       objs.emplace_back(ROA::Object(node_ids[i]));
       closest = math::min(dist, closest);
     }
   }
   
-  return Collection(objs.data(), objs.size());
+  if(Ray_search::ALL == search)
+  {
+    return Collection(objs.data(), objs.size());
+  }
+  else if(Ray_search::NEAREST == search)
+  {
+    return Collection(&closest_obj, 1);
+  }
+  
+  return Collection(nullptr, 0);
 }
 
 
