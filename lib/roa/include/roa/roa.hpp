@@ -20,6 +20,7 @@
 #include <roa/point.hpp>
 #include <roa/quaternion.hpp>
 #include <roa/query.hpp>
+#include <roa/ray.hpp>
 #include <roa/renderable.hpp>
 #include <roa/resource.hpp>
 #include <roa/scene.hpp>

@@ -1,21 +1,9 @@
-#include <nil/nil.hpp>
-#include <aspect/aspects.hpp>
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-
 #include <lib/logging.hpp>
-#include <lib/string.hpp>
 
 #include <game/static_objects.hpp>
 #include <game/actor.hpp>
 
 #include <data/data.hpp>
-
-#include <assert.h>
-#include <stddef.h>
-#include <string.h>
 
 #include <lib/memory.hpp>
 
@@ -23,16 +11,6 @@
 #include <nau/renderers/opengl3.h>
 
 #include <roa/roa.hpp>
-
-
-void
-app_tick()
-{
-  #ifdef __EMSCRIPTEN__
-  nil_engine.run();
-  #endif
-}
-
 
 
 int
@@ -61,9 +39,8 @@ main()
     // Nau Test
     {
 //      nau_new_frame();
-    
 //      static float flt = 1.f;
-      
+//
 //      nau_begin("Foo");
 //      nau_float("test", &flt);
 //      nau_end();

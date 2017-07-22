@@ -31,6 +31,8 @@ public:
   inline const float* get_data() const  { return data; }
   inline float*       get_data()        { return data; }
 
+  Vector3             add(const Vector3 &other) const;
+  Vector3             scale(const float scale) const;
 
 private:
 

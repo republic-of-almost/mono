@@ -232,6 +232,14 @@ namespace Data {
 
 
 void
+get(size_t *count, uint32_t **node_ids)
+{
+  *count = get_bb_data().keys.size();
+  *node_ids = get_bb_data().keys.data();
+}
+
+
+void
 get(size_t *count, Bounding_box **box, const bool world)
 {
   *count = get_bb_data().keys.size();

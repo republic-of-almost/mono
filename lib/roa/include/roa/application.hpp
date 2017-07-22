@@ -17,7 +17,7 @@ public:
 
 
   // ----------------------------------------------------------- [ Lifetime ] --
-
+  
 
   explicit        Application();
                   ~Application();

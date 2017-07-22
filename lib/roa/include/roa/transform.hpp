@@ -21,6 +21,8 @@ public:
   Vector3       get_position() const;
   void          set_position(const Vector3 &in);
   
+  Vector3       get_world_position() const;
+  
   Vector3       get_scale() const;
   void          set_scale(const Vector3 &in);
   

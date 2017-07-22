@@ -261,40 +261,60 @@ think(ROA::Object node)
   }
   
   // Raytest into the scene
-  {
-    size_t count = 0;
-    Nil::Data::Bounding_box *boxes = nullptr;
-    Nil::Data::get(&count, &boxes, true);
+//  {
+//    size_t count = 0;
+//    Nil::Data::Bounding_box *boxes = nullptr;
+//    Nil::Data::get(&count, &boxes, true);
+//
+//    ROA::Transform transform = actor->head.get_transform();
+//    
+//    math::transform trans = math::transform_init(
+//      math::vec3_init(transform.get_position().get_data()),
+//      math::vec3_init(transform.get_scale().get_data()),
+//      math::quat_init(transform.get_rotation().get_data())
+//    );
+//    
+//    math::vec3 start = math::vec3_init(transform.get_position().get_data());
+//    math::vec3 dir   = math::transform_fwd(trans);
+//    math::vec3 end   = math::vec3_add(start, math::vec3_scale(dir, 1000.f));
+//    
+//    math::ray ray = math::ray_init(start, end);
+//    
+//    for(int j = 0; j < count; ++j)
+//    {
+//      math::aabb box = math::aabb_init(
+//        math::vec3_init(boxes[j].min),
+//        math::vec3_init(boxes[j].max)
+//      );
+//      
+//      const float hit = math::ray_test_aabb(ray, box);
+//      
+//      if(hit)
+//      {
+//        int k = 0;
+//      }
+//    }
+//  }
 
-    ROA::Transform transform = actor->head.get_transform();
+  // Ray Test
+  {
+    ROA::Transform trans = actor->head.get_transform();
     
-    math::transform trans = math::transform_init(
-      math::vec3_init(transform.get_position().get_data()),
-      math::vec3_init(transform.get_scale().get_data()),
-      math::quat_init(transform.get_rotation().get_data())
-    );
+    const ROA::Vector3 origin = trans.get_world_position();
+    const ROA::Vector3 end = trans.get_world_position().add(trans.get_forward().scale(1000.f));
     
-    math::vec3 start = math::vec3_init(transform.get_position().get_data());
-    math::vec3 dir   = math::transform_fwd(trans);
-    math::vec3 end   = math::vec3_add(start, math::vec3_scale(dir, 1000.f));
+    ROA::Ray ray(origin, end);
     
-    math::ray ray = math::ray_init(start, end);
+    ROA::Collection collection = ROA::Query::bounding_boxes(ray, ROA::Ray_search::NEAREST);
     
-    for(int j = 0; j < count; ++j)
+    size_t size = collection.size();
+    
+    for(auto &col : collection)
     {
-      math::aabb box = math::aabb_init(
-        math::vec3_init(boxes[j].min),
-        math::vec3_init(boxes[j].max)
-      );
-      
-      const float hit = math::ray_test_aabb(ray, box);
-      
-      if(hit)
-      {
-        int k = 0;
-      }
+      int k = 0;
     }
   }
+
 }
 
 

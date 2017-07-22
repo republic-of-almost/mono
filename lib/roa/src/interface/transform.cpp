@@ -43,6 +43,17 @@ Transform::get_position() const
 }
 
 
+Vector3
+Transform::get_world_position() const
+{
+  Nil::Data::Transform data{};
+  Nil::Node node = ROA_detail::get_node(*this);
+  Nil::Data::get(node, data, true);
+  
+  return Vector3(data.position);
+}
+
+
 void
 Transform::set_position(const ROA::Vector3 &in)
 {
@@ -110,7 +121,8 @@ Vector3
 Transform::get_forward() const
 {
   Nil::Data::Transform data{};
-  ROA_detail::get_nil_data(*this, data);
+  Nil::Node node = ROA_detail::get_node(*this);
+  Nil::Data::get(node, data, true);
   
   const math::transform trans = math::transform_init(
     math::vec3_init(data.position),
@@ -128,7 +140,8 @@ Vector3
 Transform::get_up() const
 {
   Nil::Data::Transform data{};
-  ROA_detail::get_nil_data(*this, data);
+  Nil::Node node = ROA_detail::get_node(*this);
+  Nil::Data::get(node, data, true);
   
   const math::transform trans = math::transform_init(
     math::vec3_init(data.position),
@@ -146,7 +159,8 @@ Vector3
 Transform::get_left() const
 {
   Nil::Data::Transform data{};
-  ROA_detail::get_nil_data(*this, data);
+  Nil::Node node = ROA_detail::get_node(*this);
+  Nil::Data::get(node, data, true);
   
   const math::transform trans = math::transform_init(
     math::vec3_init(data.position),

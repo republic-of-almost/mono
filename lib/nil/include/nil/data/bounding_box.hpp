@@ -25,6 +25,10 @@ struct Bounding_box
 
 
 void
+get(size_t *count, uint32_t **node_ids);
+
+
+void
 get(size_t *count, Bounding_box **box, const bool world = false);
 
 
