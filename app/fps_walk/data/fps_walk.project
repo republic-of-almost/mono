@@ -22,24 +22,15 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
-    -- asset_dir = "assets/",
-
-    lib_dirs_macosx = {
-      "/usr/local/lib/",
-    },
-
-    linkoptions_macosx = {
-    },
-
-    inc_dirs_macosx = {
-      "/usr/local/include",
+    assets = {
+      "../../../assets/generic/",
     },
 
     project_dependencies = {
+      "ROA",
       "Nil",
       "Lib",
       "Math",
-      "Assets",
       "AspectsControllers",
     },
 

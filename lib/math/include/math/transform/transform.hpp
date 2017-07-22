@@ -30,6 +30,10 @@ inline mat4         transform_get_lookat_matrix(const transform &to_view, const 
 inline void         transform_set_with_world_matrix(transform &transform, const mat4 &matrix);
 inline transform    transform_inherited(const transform &parent, const transform &child);
 
+inline vec3         transform_fwd(const transform &trans);
+inline vec3         transform_up(const transform &trans);
+inline vec3         transform_left(const transform &trans);
+
 
 // ----------------------------------------------------------------- [ Impl ] --
 
@@ -142,6 +146,37 @@ transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, cons
 
   return math::mat4_lookat(to_view.position, look_fwd, look_up);
 }
+
+
+vec3
+transform_fwd(const transform &trans)
+{
+  const math::vec3 dir = math::vec3_init(0,0,1);
+  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
+  
+  return math::vec3_normalize(rot_dir);
+}
+
+
+vec3
+transform_up(const transform &trans)
+{
+  const math::vec3 dir = math::vec3_init(0,1,0);
+  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
+  
+  return math::vec3_normalize(rot_dir);
+}
+
+
+vec3
+transform_left(const transform &trans)
+{
+  const math::vec3 dir = math::vec3_init(1,0,0);
+  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
+  
+  return math::vec3_normalize(rot_dir);
+}
+
 
 _MATH_NS_CLOSE
 

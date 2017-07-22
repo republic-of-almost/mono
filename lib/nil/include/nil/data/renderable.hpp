@@ -16,17 +16,8 @@ namespace Data {
 
 struct Renderable
 {
-  enum { FULLBRIGHT, LIT, DIR_LIGHT }  shader;
-  float     color[4];
-  
-  uint32_t  texture_01;
-  uint32_t  texture_02;
-  uint32_t  texture_03;
-  
-  float     scale[2];
-  float     offset[2];
-  
-  uint32_t  mesh_id;
+  uint32_t mesh_id;
+  uint32_t material_id;
   
   // -- Output -- //
   
@@ -60,8 +51,16 @@ bool
 has_renderable(const Node &node);
 
 
+bool
+has(const Node &node, const Renderable &data);
+
+
 uint64_t
 get_type_id(const Renderable &in);
+
+
+const char*
+get_type_name(const Renderable &in);
 
 
 size_t

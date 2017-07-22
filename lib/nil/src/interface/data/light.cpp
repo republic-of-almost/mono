@@ -1,7 +1,7 @@
 #include <nil/data/light.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
 #include <lib/utilities.hpp>
@@ -55,8 +55,7 @@ namespace Data {
 void
 get(size_t *count, Light **out)
 {
-  *count = get_light_data().data.size();
-  *out = get_light_data().data.data();
+  get_light_data().get_access(count, out);
 }
 
 
@@ -98,7 +97,19 @@ remove_light(Node &node)
 bool
 has_light(const Node &node)
 {
-  return get_light_data().find(node);
+  return find_node(
+    node,
+    get_light_data().keys.data(),
+    get_light_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Light &)
+{
+  return has_light(node);
 }
 
 
@@ -106,6 +117,13 @@ uint64_t
 get_type_id(const Light &)
 {
   return get_light_data().type_id;
+}
+
+
+const char*
+get_type_name(const Light &in)
+{
+  return "Light";
 }
 
 

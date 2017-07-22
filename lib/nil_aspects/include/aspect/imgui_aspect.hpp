@@ -1,8 +1,5 @@
 #ifndef NIMGUI
-/*
-  SDL_Asepct create a window.
-  and OpenGL context.
-*/
+
 #ifndef IMGUI_ASPECT_INCLUDED_76A60511_5EA9_453A_A2BF_6A7EC1E35B08
 #define IMGUI_ASPECT_INCLUDED_76A60511_5EA9_453A_A2BF_6A7EC1E35B08
 
@@ -33,18 +30,34 @@ constexpr uint32_t developer_type_id = 1;
 
 struct Data
 {
-  Nil::Node inspector_node;
+  Nil::Node inspector_node{nullptr};
   bool show_graph;
   bool show_raw_graph;
   bool show_node_events;
   bool show_menu;
   
+  bool show_lib_memory;
+  
+  bool show_data_overview;
+  bool show_data_audio;
+  bool show_data_bbox;
   bool show_data_camera;
+  bool show_data_collider;
+  bool show_data_developer;
+  bool show_data_gamepad;
+  bool show_data_keyboard;
+  bool show_data_light;
+  bool show_data_logic;
+  bool show_data_mouse;
   bool show_data_renderables;
-  bool show_data_textures;
-
-  std::vector<Nil::Node> dev_nodes;
-  std::vector<Nil::Data::Developer> dev_data;
+  bool show_data_rigidbody;
+  bool show_data_transform;
+  bool show_data_window;
+  
+  bool show_rsrc_overview;
+  bool show_rsrc_materials;
+  bool show_rsrc_textures;
+  bool show_rsrc_meshes;
 };
 
 
@@ -56,7 +69,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list);
+events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void

@@ -1,14 +1,14 @@
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
-#include <nil/node_event.hpp>
 #include <nil/aspect.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
 #include <lib/array.hpp>
 #include <lib/assert.hpp>
 #include <lib/bench.hpp>
-
+#include <lib/logging.hpp>
+#include <lib/assert.hpp>
 
 
 namespace Nil {
@@ -19,7 +19,6 @@ struct Engine::Impl
   std::vector<Aspect> aspects;
   
   Engine_settings settings;
-  std::vector<Event_data> pending_events;
 };
 
 
@@ -35,8 +34,6 @@ Engine::Engine()
     LOG_ERROR_ONCE("Engine is in corrupted state.");
     return;
   }
-  
-  m_impl->settings.pause_node_events = false;
 }
 
 
@@ -94,57 +91,16 @@ Engine::run()
     LOG_ERROR_ONCE("Engine is in corrupted state.");
     return false;
   }
-  
-  /*
-    Create list of events
-  */
-  {
-    BENCH_SCOPED_CPU(CreEventList)
-  
-    m_impl->pending_events.clear();
-    
-    Graph::Data *graph = Data::get_graph_data();
-    LIB_ASSERT(graph);
-  
-    for(size_t j = 0; j < graph->node_events.size(); ++j)
-    {
-      m_impl->pending_events.emplace_back(
-        Event_data{
-          graph->node_events[j].node_id,
-          graph->node_events[j].event_action
-        }
-      );
-    }
-  }
  
   // Distro Events
-  if(!m_impl->settings.pause_node_events)
   {
     BENCH_SCOPED_CPU(DistroEvents)
     
-    std::vector<Event_data> nodes;
-  
     for(Aspect &asp : m_impl->aspects)
     {
-      const size_t event_count = Data::get_graph_data()->node_events.size();
-      
-      for(size_t j = 0; j < event_count; ++j)
-      {
-        const Node event_node(Data::get_graph_data()->node_events[j].node_id);
-        const uint64_t data_types = asp.data_types;
-
-        if(data_types & event_node.get_data_type_id())
-        {
-          const uint32_t actions = Data::get_graph_data()->node_events[j].event_action;
-          
-          nodes.emplace_back(Event_data{event_node.get_id(), actions});
-        }
-      }
-    
       if(asp.events_fn)
       {
-        Event_list evt_list(nodes);
-        asp.events_fn(*this, asp, evt_list);
+        asp.events_fn(*this, asp);
       }
     }
     
@@ -222,19 +178,7 @@ Engine::get_settings(Engine_settings &out)
 void
 Engine::get_state(Engine_state &out)
 {
-  const Graph::Data *graph = Data::get_graph_data();
-  
-  /*
-    Events
-  */
-  out.node_events = m_impl->pending_events.data();
-  out.node_event_count  = m_impl->pending_events.size();
-  
-  /*
-    Set the count of things.
-  */
-  out.node_count              = Graph::node_descendants_count(graph, 0);
-  out.bounding_box_count      = out.node_count;
+
 }
 
 

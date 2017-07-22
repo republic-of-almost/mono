@@ -10,6 +10,11 @@
 namespace Nil {
 
 
+/*!
+  Node
+  --
+  These represent a place in the graph. they have complicated semantics. An owning node that goes out of scope will destroy all its data. A non owning node (ref) will not. You can move an owning node. You cannot move a a ref.
+*/
 class Node final
 {
 public:
@@ -23,6 +28,7 @@ public:
   /*!
     Create an invalid entity.
   */
+  explicit
   Node(const decltype(nullptr));
   
   /*!
@@ -173,6 +179,20 @@ public:
   
   
   /*!
+    Gets the user data
+  */
+  uintptr_t
+  get_user_data() const;
+  
+  
+  /*!
+    Sets the user data
+  */
+  void
+  set_user_data(const uintptr_t user_data);
+  
+  
+  /*!
    * Internal mechanism to get a the node ID.
    */
   uint32_t
@@ -184,12 +204,6 @@ public:
    */
   uint64_t
   get_data_type_id() const;
-  
-  /*!
-   * Set the data type id
-   */
-  void
-  set_data_type_id(const uint64_t type_id);
   
 
 private:

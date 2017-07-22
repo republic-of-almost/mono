@@ -88,7 +88,7 @@ struct rovGLData
   GLuint vao;
 
   lib::array<rovGLTexture>      rov_textures;
-  lib::array<rovGLMesh>         rov_meshes;
+  lib::array<rovGLMesh, 128>         rov_meshes;
   lib::array<rovGLLightPack>    light_buffers;
   lib::array<rovGLMeshProgram>  rov_mesh_programs;
   lib::array<rovGLLineProgram>  rov_line_programs;

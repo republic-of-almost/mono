@@ -10,7 +10,7 @@
 
 namespace Nil {
 
-using generic_callback_fn = void(*)(Nil::Node node, uintptr_t user_data);
+using generic_callback_fn = void(*)(uint32_t node, uintptr_t user_data);
 
 namespace Data {
 
@@ -60,8 +60,16 @@ bool
 has_logic(const Node &node);
 
 
+bool
+has(const Node &node, const Logic &data);
+
+
 uint64_t
 get_type_id(const Logic &in);
+
+
+const char*
+get_type_name(const Logic &in);
 
 
 size_t

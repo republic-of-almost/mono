@@ -4,6 +4,7 @@
 #include <lib/file.hpp>
 #include <lib/string.hpp>
 #include <lib/directory.hpp>
+#include <lib/logging.hpp>
 
 
 namespace ROV_Internal {
@@ -112,6 +113,11 @@ ogl_createMesh(
 
   const rovGLMesh rov_mesh{vbo, 8, count};
   gl_data->rov_meshes.emplace_back(rov_mesh);
+  
+  if(out_resource_id)
+  {
+    *out_resource_id = vbo;
+  }
 
   return (uint32_t)gl_data->rov_meshes.size();
 }
@@ -258,7 +264,7 @@ ogl_createProgram(
     return false;
   }
 
-  char vert_src[1 << 12]{};
+  char vert_src[1 << 13]{};
   lib::string::get_text_between_tags(
     "// VERT_START //",
     "// VERT_END //",
@@ -267,7 +273,7 @@ ogl_createProgram(
     sizeof(vert_src)
   );
 
-  char geo_src[1 << 12]{};
+  char geo_src[1 << 13]{};
   lib::string::get_text_between_tags(
     "// GEO_START //",
     "// GEO_END //",
@@ -276,7 +282,7 @@ ogl_createProgram(
     sizeof(geo_src)
   );
 
-  char frag_src[1 << 12]{};
+  char frag_src[1 << 13]{};
   lib::string::get_text_between_tags(
     "// FRAG_START //",
     "// FRAG_END //",

@@ -25,7 +25,7 @@ struct Data
   std::vector<uintptr_t> user_data;
 
   #ifdef IMGUI_DEVELOPER_SUPPORT
-  Nil::Node dev_node;
+  Nil::Node dev_node{nullptr};
   #endif
 };
 
@@ -38,7 +38,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list);
+events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void

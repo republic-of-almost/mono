@@ -10,6 +10,7 @@
 
 
 #include "../detail/detail.hpp"
+#include "constants.hpp"
 #include <math.h>
 #include <cmath>
 #include <algorithm>
@@ -24,22 +25,6 @@
 
 
 _MATH_NS_OPEN
-
-
-// ------------------------------------------------------------ [ Constants ] --
-
-
-MATH_GENR_CONSTEXPR float           pi()          { return 3.14159265359f;  }
-MATH_GENR_CONSTEXPR float           two_pi()      { return 2.f * pi();      }
-MATH_GENR_CONSTEXPR float           half_pi()     { return pi() * 0.5f;     }
-MATH_GENR_CONSTEXPR float           tau()         { return two_pi();        }
-MATH_GENR_CONSTEXPR float           half_tau()    { return pi();            }
-MATH_GENR_CONSTEXPR float           quart_tau()   { return half_pi();       }
-MATH_GENR_CONSTEXPR float           g_ratio()     { return 1.61803398875f;  }
-MATH_GENR_CONSTEXPR float           root_two()    { return 1.41421356237f;  }
-MATH_GENR_CONSTEXPR float           root_three()  { return 1.73205080757f;  }
-MATH_GENR_CONSTEXPR float           epsilon()     { return 0.000000001f;    }
-MATH_GENR_CONSTEXPR float           ten_epsilon() { return epsilon() * 10.f;}
 
 
 // ----------------------------------------------------------------- [ Trig ] --
@@ -94,7 +79,7 @@ MATH_GENR_INLINE float              max_length(const float a, const float b);
 MATH_GENR_INLINE float              min_length(const float a, const float b);
 MATH_GENR_INLINE float              clamp(const float x, const float between_a, const float between_b);
 MATH_GENR_INLINE bool               is_between(const float to_check, const float a, const float b);
-MATH_GENR_INLINE bool               is_near(const float a, const float b, const float error_margin);
+MATH_GENR_INLINE bool               is_near(const float a, const float b, const float error_margin = math::epsilon());
 MATH_GENR_INLINE bool               is_pow_two(const uint32_t i);
 MATH_GENR_INLINE float              sign(const float x); // Returns 1 or -1
 MATH_GENR_INLINE float              mod(const float x, const float divisor);

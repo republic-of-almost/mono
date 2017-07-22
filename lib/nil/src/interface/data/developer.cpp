@@ -1,6 +1,6 @@
 #include <nil/data/developer.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
 #include <lib/utilities.hpp>
@@ -67,7 +67,19 @@ remove_developer(Node &node)
 bool
 has_developer(const Node &node)
 {
-  return get_developer_data().find(node);
+  return find_node(
+    node,
+    get_developer_data().keys.data(),
+    get_developer_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Developer &)
+{
+  return has_developer(node);
 }
 
 
@@ -75,6 +87,13 @@ uint64_t
 get_type_id(const Developer &)
 {
   return get_developer_data().type_id;
+}
+
+
+const char*
+get_type_name(const Developer &in)
+{
+  return "Developer";
 }
 
 

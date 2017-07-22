@@ -2,12 +2,11 @@
 #define GRAPH_DATA_INCLUDED_9B0564E7_3925_432D_B08E_4F5C35A8DCCE
 
 
-#include <lib/utilities.hpp>
 #include "graph_fwd.hpp"
-#include <math/math.hpp>
+#include <lib/array.hpp>
+#include <math/geometry/geometry_types.hpp>
+#include <math/transform/transform_types.hpp>
 #include <stdint.h>
-
-#include <nil/data/data.hpp>
 
 
 namespace Nil {
@@ -20,26 +19,11 @@ struct short_string
 };
 
 
-struct Event
+struct node_data
 {
-  enum {
-    ADDED         = 1 << 0,
-    REMOVED       = 1 << 1,
-    MOVED         = 1 << 2,
-    UPDATED_DATA  = 1 << 3,
-  };
-  
-  uint32_t        event_action;
-  
-  uint32_t        node_id;
-  
-  uint32_t        parent;
-  short_string    name;
-  math::transform transform;
-  math::aabb      boundinb_box;
-  uint64_t        node_type_id;
-  uintptr_t       user_data;
-  uint64_t        last_update;
+  uintptr_t user_data;
+  uint64_t node_type_id;
+  short_string name;
 };
 
 
@@ -52,19 +36,12 @@ struct Data
   /*
    * We store common attributes for all nodes.
    */
+  lib::array<uint32_t>        node_id;                  // Unique instance IDs.
+  lib::array<uint64_t>        parent_depth_data;        // Parent ID and Depth.
+  lib::array<math::transform> local_transform;          // Local.
+  lib::array<math::transform> world_transform;          // World.
+  lib::array<node_data>       data;
   
-  lib::array<uint32_t>        node_id;            // Unique instance IDs.
-  lib::array<uint64_t>        parent_depth_data;  // Parent ID and Depth.
-  lib::array<short_string>    name;               // Name
-  lib::array<math::transform> local_transform;    // Local.
-  lib::array<math::transform> world_transform;    // World.
-  lib::array<math::aabb>      bounding_box;       // Bounding box.
-  lib::array<uint64_t>        node_type_id;       // Node type id.
-  lib::array<uintptr_t>       user_data;          // External extra data.
-  lib::array<uint64_t>        last_update;        // graph_tick was updated.
-  
-  // -- Events -- //
-  lib::array<Event>           node_events;        // When changes happen.
   
   struct graph_type
   {
@@ -79,7 +56,6 @@ struct Data
   lib::array<graph_type>    graph_type_data;
 
   // -- Other -- //
-  uint64_t                    graph_tick;
   uint32_t                    instance_counter;
   
   // -- Callbacks -- //

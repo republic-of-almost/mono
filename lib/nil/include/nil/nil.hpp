@@ -7,45 +7,18 @@
 #include <stddef.h>
 #include <math/math.hpp> // temp
 
+
 namespace Nil {
-
-
-constexpr uint32_t version = 0;
 
 
 struct Engine_settings
 {
-  bool pause_node_events;
 };
 
 
 struct Engine_state
 {
-  // Events
-  Event_data*   node_events;
-  size_t        node_event_count;
-  
-  // Data Count
-  size_t        node_count;
-  size_t        bounding_box_count;
-  size_t        camera_count;
-  size_t        collider_count;
-  size_t        developer_count;
-  size_t        gamepad_count;
-  size_t        graphics_count;
-  size_t        keyboard_count;
-  size_t        light_count;
-  size_t        logic_count;
-  size_t        material_count;
-  size_t        mesh_count;
-  size_t        mesh_resource_count;
-  size_t        mouse_count;
-  size_t        resouce_count;
-  size_t        rigidbody_count;
-  size_t        texture_count;
-  size_t        texture_resource_count;
-  size_t        transform_count;
-  size_t        window_count;
+  size_t node_count;
 };
 
 
@@ -58,12 +31,14 @@ public:
 
   explicit
   Engine();
+  
+  
   ~Engine();
   
   
   void
   add_aspect(Nil::Aspect aspect);
-    
+  
   
   size_t
   aspect_count() const;

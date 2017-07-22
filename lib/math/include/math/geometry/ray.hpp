@@ -135,16 +135,16 @@ ray_test_triangles(
   {
     const size_t tri_index = i * 3 * 3;
    
-    const vec3 v0 = MATH_NS_NAME::vec3_init_with_array(
+    const vec3 v0 = MATH_NS_NAME::vec3_init(
       &tris[tri_index]
     );
     
     const vec3 v1 = MATH_NS_NAME::vec3_subtract(
-      MATH_NS_NAME::vec3_init_with_array(&tris[tri_index + 3]), v0
+      MATH_NS_NAME::vec3_init(&tris[tri_index + 3]), v0
     );
     
     const vec3 v2 = MATH_NS_NAME::vec3_subtract(
-      MATH_NS_NAME::vec3_init_with_array(&tris[tri_index + 6]), v0
+      MATH_NS_NAME::vec3_init(&tris[tri_index + 6]), v0
     );
 
     const vec3 p_vec = MATH_NS_NAME::vec3_cross(r_dir, v2);
@@ -204,9 +204,9 @@ ray_test_closest_edge(const float tris[], const size_t tri_count, const vec3 poi
     const size_t tri_index = i * 3 * 3;
     
     const vec3 verts[] {
-      vec3_init_with_array(&tris[tri_index + 0]),
-      vec3_init_with_array(&tris[tri_index + 3]),
-      vec3_init_with_array(&tris[tri_index + 6]),
+      vec3_init(&tris[tri_index + 0]),
+      vec3_init(&tris[tri_index + 3]),
+      vec3_init(&tris[tri_index + 6]),
     };
     
     // Segments

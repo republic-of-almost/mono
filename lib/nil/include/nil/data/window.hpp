@@ -16,12 +16,18 @@ namespace Data {
 
 struct Window
 {
-  uint32_t width;
-  uint32_t height;
-  bool fullscreen;
-  char title[32];
+  uint32_t  width;
+  uint32_t  height;
+  bool      fullscreen;
+  char      title[32];
   
   uintptr_t user_data;
+  
+  // Output //
+  
+  enum { NONE, OGL }  type;
+  uint32_t      major;
+  uint32_t      minor;
 };
 
 
@@ -51,8 +57,16 @@ bool
 has_window(const Node &node);
 
 
+bool
+has(const Node &node, const Window &data);
+
+
 uint64_t
 get_type_id(const Window &in);
+
+
+const char*
+get_type_name(const Window &in);
 
 
 size_t

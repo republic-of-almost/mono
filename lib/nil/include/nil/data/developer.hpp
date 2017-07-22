@@ -56,8 +56,16 @@ bool
 has_developer(const Node &node);
 
 
+bool
+has(const Node &node, const Developer &data);
+
+
 uint64_t
 get_type_id(const Developer &in);
+
+
+const char*
+get_type_name(const Developer &in);
 
 
 size_t

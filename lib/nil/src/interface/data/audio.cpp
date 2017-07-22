@@ -1,6 +1,6 @@
 #include <nil/data/audio.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
 #include <lib/utilities.hpp>
@@ -67,7 +67,18 @@ remove_audio(Node &node)
 bool
 has_audio(const Node &node)
 {
-  return get_audio_data().find(node);
+  return find_node(
+    node,
+    get_audio_data().keys.data(),
+    get_audio_data().keys.size()
+  );
+}
+
+
+bool
+has(const Node &node, const Audio &)
+{
+  return has_audio(node);
 }
 
 
@@ -75,6 +86,13 @@ uint64_t
 get_type_id(const Audio &)
 {
   return get_audio_data().type_id;
+}
+
+
+const char*
+get_type_name(const Audio &)
+{
+  return "Audio";
 }
 
 

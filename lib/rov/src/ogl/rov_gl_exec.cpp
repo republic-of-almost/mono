@@ -1,8 +1,10 @@
 #include "rov_gl_exec.hpp"
 #include "rov_gl.hpp"
 #include <lib/bits.hpp>
+#include <lib/color.hpp>
 #include <lib/bench.hpp>
 #include <lib/assert.hpp>
+#include <lib/logging.hpp>
 #include <math/mat/mat4.hpp>
 
 
@@ -22,7 +24,6 @@ ogl_exec(
 
   glUseProgram(0);
   glDisable(GL_BLEND);
-//  glDisable(GL_CULL_FACE);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glEnable(GL_DEPTH_TEST);
@@ -41,7 +42,15 @@ ogl_exec(
     if(rp.clear_flags & rovClearFlag_Color) { cl_flags |= GL_COLOR_BUFFER_BIT; }
     if(rp.clear_flags & rovClearFlag_Depth) { cl_flags |= GL_DEPTH_BUFFER_BIT; }
 
-    glClearColor(1, 1, 0, 1);
+    const float cl_color[4]
+    {
+      lib::color::get_channel_1f(rp.clear_color),
+      lib::color::get_channel_2f(rp.clear_color),
+      lib::color::get_channel_3f(rp.clear_color),
+      lib::color::get_channel_4f(rp.clear_color),
+    };
+
+    glClearColor(cl_color[0], cl_color[1], cl_color[2], cl_color[3]);
     glClear(cl_flags);
     glEnable(GL_DEPTH_TEST);
     glViewport(rp.viewport[0], rp.viewport[1], rp.viewport[2], rp.viewport[3]);
@@ -83,12 +92,13 @@ ogl_exec(
 
       const uint32_t details = lib::bits::lower32(mat.material);
 
-      const uint8_t shader = lib::bits::first8(details);
+      const uint8_t shader = rovShader_Lit;//lib::bits::first8(details);
       const uint8_t texture_01 = lib::bits::second8(details);
       const uint8_t texture_02 = lib::bits::third8(details);
       const uint8_t texture_03 = lib::bits::forth8(details);
-
+      
       const rovGLMeshProgram shd = rov_gl_data->rov_mesh_programs[shader];
+      
 
       /*
         Bind the shader
@@ -98,7 +108,6 @@ ogl_exec(
         last_shd = shd.program;
         glUseProgram(shd.program);
       }
-      
       
       /*
         Load the textures and buffers
@@ -115,21 +124,29 @@ ogl_exec(
         {
           if(texture_maps[t] && shd.uni_tex[t] != -1)
           {
-            const size_t texture_index = texture_maps[t] - 1;
+            const size_t texture_index = texture_maps[t];
+//            
+//            #ifndef NDEBUG
+//            const size_t texture_count = rov_gl_data->rov_textures.size();
+////            LIB_ASSERT(texture_index < texture_count);
+//            if(!texture_index)
+//            {
+//              // Temp fix while removeing texture resource
+//              break;
+//            }
+//            #endif
             
-            #ifndef NDEBUG
-            const size_t texture_count = rov_gl_data->rov_textures.size();
-            LIB_ASSERT(texture_index < texture_count);
-            #endif
-            
-            const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
-            
-            glActiveTexture(GL_TEXTURE0 + texture_slots);
-            glBindTexture(GL_TEXTURE_2D, tex.gl_id);
-            
-            glUniform1i(shd.uni_tex[t], texture_slots);
-            
-            ++texture_slots;
+//            if(texture_index < rov_gl_data->rov_textures.size())
+            {
+              const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
+              
+              glActiveTexture(GL_TEXTURE0 + texture_slots);
+              glBindTexture(GL_TEXTURE_2D, tex.gl_id);
+              
+              glUniform1i(shd.uni_tex[t], texture_slots);
+              
+              ++texture_slots;
+            }
           }
         }
         
@@ -138,20 +155,23 @@ ogl_exec(
         */
         if(shd.uni_buffer_01 != -1)
         {
+          const GLuint slot = texture_slots + 1; // Unsure why, if I bind to slot 0 we get 1282's.
+          
           const size_t l_index = rp.light_buffer - 1;
           const rovGLLightPack light_pack = rov_gl_data->light_buffers[l_index];
           
           glUniform1i(shd.uni_light_count, light_pack.count);
           
-          glActiveTexture(GL_TEXTURE0 + texture_slots);
+          glActiveTexture(GL_TEXTURE0 + slot);
           glBindTexture(GL_TEXTURE_1D, light_pack.gl_id);
           
-          glUniform1i(shd.uni_buffer_01, texture_slots);
+          glUniform1i(shd.uni_buffer_01, slot);
           
           ++texture_slots;
+        
         }
       }
-
+      
       /*
         For each draw call in the material.
       */
@@ -234,11 +254,11 @@ ogl_exec(
           const math::mat4 wvp_mat  = math::mat4_multiply(world, view, proj);
           const math::vec4 pos      = math::mat4_multiply(math::vec4_init(0,0,0,1), math::mat4_get_inverse(view));
           const math::mat4 mv_mat   = math::mat4_multiply(view, world);
-          const math::mat4 norm_mat = math::mat4_get_transpose(math::mat4_get_inverse(mv_mat));
+//          const math::mat4 norm_mat = math::mat4_get_transpose(math::mat4_get_inverse(mv_mat));
   
           glUniformMatrix4fv(shd.uni_wvp,     1, GL_FALSE, math::mat4_get_data(wvp_mat));
           glUniformMatrix4fv(shd.uni_world,   1, GL_FALSE, math::mat4_get_data(world));
-          glUniformMatrix4fv(shd.uni_normal,  1, GL_FALSE, math::mat4_get_data(norm_mat));
+//          glUniformMatrix4fv(shd.uni_normal,  1, GL_FALSE, math::mat4_get_data(norm_mat));
           glUniformMatrix4fv(shd.uni_wv,      1, GL_FALSE, math::mat4_get_data(mv_mat));
           glUniform3fv(shd.uni_eye,           1, rp.eye_position);
           glUniform4fv(shd.uni_color,         1, colorf);
@@ -248,6 +268,15 @@ ogl_exec(
           Draw
         */
         glDrawArrays(GL_TRIANGLES, 0, vbo.vertex_count);
+        
+        /*
+          Error Check
+        */
+        const GLuint err = glGetError();
+        if(err)
+        {
+          LOG_ERROR("GL Error - Mesh Drawing")
+        }
       }
     } // For amts
     
@@ -292,14 +321,6 @@ ogl_exec(
       }
     }
     #endif
-    
-    {
-      auto err = glGetError();
-      if(err)
-      {
-        int i = 0;
-      }
-    }
   }
 
   #ifdef GL_HAS_VAO

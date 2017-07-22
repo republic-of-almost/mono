@@ -13,7 +13,8 @@
 
 
 #ifndef NBENCHMARK
-#define LIB_BENCH_USE_REMOTERY
+#define LIB_BENCH_NONE
+//#define LIB_BENCH_USE_REMOTERY
 #else
 #define LIB_BENCH_NONE
 #endif

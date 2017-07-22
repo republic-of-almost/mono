@@ -1,6 +1,6 @@
 #include <nil/data/mouse.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
 #include <lib/utilities.hpp>
@@ -67,7 +67,19 @@ remove_mouse(Node &node)
 bool
 has_mouse(const Node &node)
 {
-  return get_ms_data().find(node);
+  return find_node(
+    node,
+    get_ms_data().keys.data(),
+    get_ms_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Mouse &)
+{
+  return has_mouse(node);
 }
 
 
@@ -75,6 +87,13 @@ uint64_t
 get_type_id(const Mouse &)
 {
   return get_ms_data().type_id;
+}
+
+
+const char *
+get_type_name(const Mouse &in)
+{
+  return "Mouse";
 }
 
 

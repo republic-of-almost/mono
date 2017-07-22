@@ -61,8 +61,8 @@ inline math::transform
 init_with_nil_transform(const Nil::Data::Transform &trans)
 {
   return math::transform_init(
-    math::vec3_init_with_array(trans.position),
-    math::vec3_init_with_array(trans.scale),
+    math::vec3_init(trans.position),
+    math::vec3_init(trans.scale),
     math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
   );
 }
@@ -74,8 +74,8 @@ init_with_nil_transform(const Nil::Data::Transform &trans)
 inline math::mat4
 mat4_from_nil_transform(const Nil::Data::Transform &trans)
 {
-  const math::vec3 pos   = math::vec3_init_with_array(trans.position);
-  const math::vec3 scale = math::vec3_init_with_array(trans.scale);
+  const math::vec3 pos   = math::vec3_init(trans.position);
+  const math::vec3 scale = math::vec3_init(trans.scale);
   const math::quat rot   = math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3]);
 
   const math::transform math_trans = math::transform_init(pos, scale, rot);
@@ -89,7 +89,7 @@ mat4_lookat_from_nil_transform(const Nil::Data::Transform &trans)
 {
   const math::transform math_trans = math::init_with_nil_transform(trans);
 
-  const math::vec3 cam_pos  = math::vec3_init_with_array(trans.position);
+  const math::vec3 cam_pos  = math::vec3_init(trans.position);
   const math::quat cam_rot  = math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3]);
   const math::vec3 cam_fwd  = math::quat_rotate_point(cam_rot, vec3_nil_world_fwd());
   const math::vec3 look_fwd = math::vec3_add(cam_pos, cam_fwd);

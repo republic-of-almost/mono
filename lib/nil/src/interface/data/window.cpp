@@ -1,6 +1,6 @@
 #include <nil/data/window.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
 #include <lib/utilities.hpp>
@@ -69,7 +69,19 @@ remove_window(Node &node)
 bool
 has_window(const Node &node)
 {
-  return get_win_data().find(node);
+  return find_node(
+    node,
+    get_win_data().keys.data(),
+    get_win_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Window &)
+{
+  return has_window(node);
 }
 
 
@@ -77,6 +89,13 @@ uint64_t
 get_type_id(const Window &)
 {
   return get_win_data().type_id;
+}
+
+
+const char*
+get_type_name(const Window &in)
+{
+  return "Window";
 }
 
 

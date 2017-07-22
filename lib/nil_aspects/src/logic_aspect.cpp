@@ -2,7 +2,6 @@
 #include <lib/utilities.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
-#include <nil/node_event.hpp>
 #include <lib/bench.hpp>
 
 
@@ -55,7 +54,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
+events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -107,7 +106,7 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   for(size_t i = 0; i < self->logic_nodes.size(); ++i)
   {
-    self->update[i](self->logic_nodes[i], self->user_data[i]);
+    self->update[i](self->logic_nodes[i].get_id(), self->user_data[i]);
   }
 }
 

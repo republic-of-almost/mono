@@ -1,9 +1,10 @@
 #include <nil/data/camera.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
+#include <math/transform/transform.hpp>
 #include <lib/utilities.hpp>
 #include "common.hpp"
 
@@ -28,8 +29,8 @@ get_camera_data()
       Nil::Data::get(node, trans, true);
 
       math::transform internal_trans = math::transform_init(
-      math::vec3_init_with_array(trans.position),
-      math::vec3_init_with_array(trans.scale),
+      math::vec3_init(trans.position),
+      math::vec3_init(trans.scale),
       math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
       );
 
@@ -87,8 +88,8 @@ set(Node &node, const Camera &in)
   Nil::Data::get(node, trans, true);
 
   math::transform internal_trans = math::transform_init(
-  math::vec3_init_with_array(trans.position),
-  math::vec3_init_with_array(trans.scale),
+  math::vec3_init(trans.position),
+  math::vec3_init(trans.scale),
   math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
   );
 
@@ -117,7 +118,19 @@ remove_camera(Node &node)
 bool
 has_camera(const Node &node)
 {
-  return get_camera_data().find(node);
+  return find_node(
+    node,
+    get_camera_data().keys.data(),
+    get_camera_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Camera &)
+{
+  return has_camera(node);
 }
 
 
@@ -125,6 +138,13 @@ uint64_t
 get_type_id(const Camera &)
 {
   return get_camera_data().type_id;
+}
+
+
+const char*
+get_type_name(const Camera &in)
+{
+  return "Camera";
 }
 
 

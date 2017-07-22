@@ -33,10 +33,6 @@ void
 set(Node &node, const Transform &in);
 
 
-// You cannot remove a transform
-// Hense why no function.
-
-
 // ----------------------------------------------------------------- [ Info ] --
 
 
@@ -44,8 +40,16 @@ bool
 has_transform(const Node &node);
 
 
+bool
+has(const Node &node, const Transform &data);
+
+
 uint64_t
 get_type_id(const Transform &in);
+
+
+const char*
+get_type_name(const Transform &in);
 
 
 size_t

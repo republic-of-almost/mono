@@ -3,12 +3,19 @@
   --
   Memory pool and tracking.
   
+  This memory pool isn't really meant to be super fast, its designed to be general
+  so that we can track allocation by tag, and use it to create pools ontop of it.
+  
+  It serves as a good place to track alloc callstacks and memory corruptions.
+  
   Copyright: public-domain 2017 - http://unlicense.org/
 */
 #ifndef MEMORY_INCLUDED_F78EEBC6_56DC_4B4A_8BEC_2E616E0F02AD
 #define MEMORY_INCLUDED_F78EEBC6_56DC_4B4A_8BEC_2E616E0F02AD
 
 
+#include "logging.hpp"
+#include "assert.hpp"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -31,11 +38,6 @@
 #endif
 
 
-#ifndef LIB_POOL_ALIGN
-#define LIB_POOL_ALIGN 16
-#endif
-
-
 // -------------------------------------------------------- [ Mem Interface ] --
 
 
@@ -46,13 +48,13 @@ namespace mem {
 namespace tag {
 enum ENUM {
   FREE,
-  UNKNOWN,
+  GENERAL,
   NUMBER,
   STRING,
   TEXTURE,
   AUDIO,
   MESH,
-  SUB_POOL,
+  FILE,
 };
 }
 
@@ -65,16 +67,26 @@ struct header
 };
 
 
+size_t
+bucket_stride();
+
+size_t
+bucket_capacity();
+
+size_t
+buckets_in_use();
+
+
 header*
 get_headers();
 
 
-template<typename T, uint32_t tag = tag::UNKNOWN, size_t count = 1>
+template<typename T, uint32_t tag = tag::GENERAL, size_t count = 1>
 T*
 alloc()
 {
   constexpr size_t bucket_count = LIB_POOL_BYTE_SIZE / LIB_POOL_BUCKET_SIZE;
-  const size_t buckets_needed = (sizeof(T) * count) / LIB_POOL_BUCKET_SIZE;
+  const size_t buckets_needed = ((sizeof(T) * count) / LIB_POOL_BUCKET_SIZE) + 1;
 
   header* headers = get_headers();
   
@@ -119,22 +131,45 @@ alloc()
   
   if(possible)
   {
-    for(size_t i = start_bucket; start_bucket < start_bucket + buckets_needed; ++i)
+    for(size_t j = start_bucket; j < (start_bucket + buckets_needed); ++j)
     {
-      headers[i].mem_tag = tag;
-      headers[i].number_of_buckets = buckets_needed;
+      headers[j].mem_tag = tag;
+      headers[j].number_of_buckets = buckets_needed;
     }
+    
+    return static_cast<T*>(possible->data);
   }
   
-  return static_cast<T*>(possible->data);
+  return nullptr;
 }
 
 
 template<typename T>
 void
-free(T*)
+free(T *free)
 {
-  // Find header, mark as free or merge.
+  header* headers = get_headers();
+
+  const size_t count = bucket_capacity();
+
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(headers[i].data == free)
+    {
+      size_t bucket_count = headers[i].number_of_buckets;
+    
+      for(size_t j = 0; j < bucket_count; ++j)
+      {
+        headers[i + j].mem_tag = tag::FREE;
+        headers[i + j].number_of_buckets = 0;
+      }
+      
+      return;
+    }
+  }
+  
+  LIB_ASSERT(false);
+  LOG_ERROR("This pointer wasn't in the pool");
 }
 
 
@@ -149,8 +184,8 @@ free(T*)
 
 
 #ifdef LIB_MEM_IMPL
-#ifndef LIB_FILE_IMPL_INCLUDED
-#define LIB_FILE_IMPL_INCLUDED
+#ifndef LIB_MEM_IMPL_INCLUDED
+#define LIB_MEM_IMPL_INCLUDED
 
 
 namespace LIB_NS_NAME {
@@ -164,37 +199,74 @@ header*
 init_memory()
 {
   static int once = 1;
-  static header *headers;
+  static LIB_NS_NAME::mem::header *headers;
   
   if(once)
   {
     constexpr size_t header_count = LIB_POOL_BYTE_SIZE / LIB_POOL_BUCKET_SIZE;
     constexpr size_t header_bytes = header_count * sizeof(header);
     
-    header = (header*)malloc(header_bytes);
-    memset(header, 0, sizeof(header_bytes));
+    headers = (LIB_NS_NAME::mem::header*)malloc(header_bytes);
+    memset(headers, 0, sizeof(header_bytes));
     
     uint8_t *mem = (uint8_t*)malloc(LIB_POOL_BYTE_SIZE);
     
     for(size_t i = 0; i < header_count; ++i)
     {
-      header[i].data = mem[i * LIB_POOL_BUCK_SIZE];
+      headers[i].data = (void*)&mem[i * LIB_POOL_BUCKET_SIZE];
     }
     
     once = 0;
   }
   
-  return &smem_header;
+  return headers;
 }
 
 
 };
 
 
+size_t
+bucket_stride()
+{
+  return LIB_POOL_BUCKET_SIZE;
+}
+
+
+size_t
+bucket_capacity()
+{
+  return LIB_POOL_BYTE_SIZE / LIB_POOL_BUCKET_SIZE;
+}
+
+
+size_t
+buckets_in_use()
+{
+  header *head = get_headers();
+  
+  const size_t count = bucket_capacity();
+  
+  size_t buckets_in_use = 0;
+  
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(head[i].mem_tag != tag::FREE)
+    {
+      ++buckets_in_use;
+    }
+  }
+  
+  return buckets_in_use;
+}
+
+
 header*
 get_headers()
 {
   static header *mem_header = init_memory();
+  
+  return mem_header;
 };
 
 

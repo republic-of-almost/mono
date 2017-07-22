@@ -8,36 +8,36 @@ namespace Nil {
 class Node;
 class Engine;
 
-struct Event_data;
-class Event_list;
-
 class Node_list;
 class Node_controller;
 
 struct Aspect;
 
 
+namespace Resource {
+
+struct Audio;
+struct Material;
+struct Mesh;
+struct Texture;
+
+} // ns
+
+
 namespace Data {
 
 
 struct Audio;
-struct Audio_resource;
 struct Bounding_box;
 struct Camera;
-struct Collider;
 struct Developer;
 struct Gamepad;
-struct Graphics;
 struct Keyboard;
 struct Light;
 struct Logic;
-struct Mesh;
-struct Mesh_resource;
 struct Mouse;
 struct Renderable;
 struct Rigidbody;
-struct Texture;
-struct Texture_resource;
 struct Transform;
 struct Window;
 
