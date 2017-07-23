@@ -284,6 +284,26 @@ think(Nil::Node node, uintptr_t user_data)
       math::vec3_init(1,0,0)
     );
   }
+
+  // Ray Test
+  {
+    ROA::Transform trans = actor->head.get_transform();
+    
+    const ROA::Vector3 origin = trans.get_world_position();
+    const ROA::Vector3 end = trans.get_world_position().add(trans.get_forward().scale(1000.f));
+    
+    ROA::Ray ray(origin, end);
+    
+    ROA::Collection collection = ROA::Query::bounding_boxes(ray, ROA::Ray_search::NEAREST);
+    
+    size_t size = collection.size();
+    
+    for(auto &col : collection)
+    {
+      int k = 0;
+    }
+  }
+
 }
 
 
