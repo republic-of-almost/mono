@@ -14,7 +14,7 @@ namespace Nil {
   Callback prototypes.
 */
 using aspect_startup_fn     = void(*)(Engine &engine, Aspect &aspect);
-using aspect_node_events_fn = void(*)(Engine &engine, Aspect &aspect, Event_list &event_list);
+using aspect_node_events_fn = void(*)(Engine &engine, Aspect &aspect);
 using aspect_early_think_fn = void(*)(Engine &engine, Aspect &aspect);
 using aspect_think_fn       = void(*)(Engine &engine, Aspect &aspect);
 using aspect_late_think_fn  = void(*)(Engine &engine, Aspect &aspect);

@@ -62,7 +62,7 @@ vec3_init(const float x, const float y, const float z)
 
 
 vec3
-vec3_init_with_array(const float *arr)
+vec3_init(const float *arr)
 {
   constexpr float zero = 0;
   enum { x = 0, y, z };

@@ -1,6 +1,6 @@
 #include <nil/data/transform.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph.hpp>
 #include <string.h>
 #include "common.hpp"
@@ -50,12 +50,12 @@ namespace Data {
 
 
 void
-get(const Node &node, Transform &out, const bool world)
+get(const Node &node, Transform &out, const bool inherited)
 {
   if(node.is_valid())
   {
     math::transform internal;
-    if(Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal, world))
+    if(Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal, inherited))
     {
       memcpy(out.position, &internal.position, sizeof(float) * 3);
       memcpy(out.scale,    &internal.scale,    sizeof(float) * 3);
@@ -111,10 +111,24 @@ has_transform(const Node &)
 }
 
 
+bool
+has(const Node &node, const Transform &)
+{
+  return has_transform(node);
+}
+
+
 uint64_t
 get_type_id(const Transform &)
 {
   return get_trans_data().type_id;
+}
+
+
+const char*
+get_type_name(const Transform &in)
+{
+  return "Transform";
 }
 
 

@@ -208,7 +208,7 @@ mat3_multiply(const vec3 lhs, const mat3 &rhs)
     vec_data[i] = vec3_dot(lhs, dot_vec);
   }
 
-  return vec3_init_with_array(vec_data);
+  return vec3_init(vec_data);
 }
 
 

@@ -1,6 +1,6 @@
 #include <nil/data/gamepad.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
 #include <lib/utilities.hpp>
@@ -67,7 +67,19 @@ remove_gamepad(Node &node)
 bool
 has_gamepad(const Node &node)
 {
-  return get_gamepad_data().find(node);
+  return find_node(
+    node,
+    get_gamepad_data().keys.data(),
+    get_gamepad_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Gamepad &)
+{
+  return has_gamepad(node);
 }
 
 
@@ -75,6 +87,13 @@ uint64_t
 get_type_id(const Gamepad &)
 {
   return get_gamepad_data().type_id;
+}
+
+
+const char*
+get_type_name(const Gamepad &in)
+{
+  return "Gamepad";
 }
 
 

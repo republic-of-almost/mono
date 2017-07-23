@@ -25,6 +25,8 @@ struct Camera
   float near_plane;
   float far_plane;
   
+  uint32_t clear_color;
+  
   bool clear_color_buffer;
   bool clear_depth_buffer;
   
@@ -62,8 +64,16 @@ bool
 has_camera(const Node &node);
 
 
+bool
+has(const Node &node, const Camera &data);
+
+
 uint64_t
 get_type_id(const Camera &in);
+
+
+const char*
+get_type_name(const Camera &in);
 
 
 size_t

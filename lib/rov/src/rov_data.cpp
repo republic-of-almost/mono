@@ -18,10 +18,10 @@ rov_curr_material(rovData *data)
   /*
     Convert color to uint8_t
   */
-  uint8_t red   = (uint8_t)(data->curr_rov_clear_color[0] * 255);
-  uint8_t green = (uint8_t)(data->curr_rov_clear_color[1] * 255);
-  uint8_t blue  = (uint8_t)(data->curr_rov_clear_color[2] * 255);
-  uint8_t alpha = (uint8_t)(data->curr_rov_clear_color[3] * 255);
+  uint8_t red   = (uint8_t)(data->curr_rov_color[0] * 255);
+  uint8_t green = (uint8_t)(data->curr_rov_color[1] * 255);
+  uint8_t blue  = (uint8_t)(data->curr_rov_color[2] * 255);
+  uint8_t alpha = (uint8_t)(data->curr_rov_color[3] * 255);
 
   /*
     Pack color together
@@ -38,7 +38,7 @@ rov_curr_material(rovData *data)
   uint8_t texture_03 = data->curr_rov_textures[2];
 
   const uint32_t details = lib::bits::pack8888(shader_type, texture_01, texture_02, texture_03);
-
+  
   return lib::bits::pack3232(details, color);
 }
 

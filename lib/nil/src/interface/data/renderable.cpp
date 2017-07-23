@@ -1,9 +1,10 @@
 #include <nil/data/renderable.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/node.hpp>
-#include <data/data.hpp>
+#include <data/internal_data.hpp>
 #include <graph/graph_data.hpp>
 #include <graph/graph.hpp>
+#include <math/transform/transform.hpp>
 #include <lib/utilities.hpp>
 #include "common.hpp"
 
@@ -34,8 +35,8 @@ get_mat_data()
       Nil::Data::get(node, trans, true);
 
       math::transform internal_trans = math::transform_init(
-      math::vec3_init_with_array(trans.position),
-      math::vec3_init_with_array(trans.scale),
+      math::vec3_init(trans.position),
+      math::vec3_init(trans.scale),
       math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
       );
 
@@ -66,8 +67,7 @@ namespace Data {
 void
 get(size_t *count, Renderable **renderables)
 {
-  *renderables = get_mat_data().data.begin();
-  *count       = get_mat_data().data.size();
+  get_mat_data().get_access(count, renderables);
 }
 
 
@@ -87,8 +87,8 @@ set(Node &node, const Renderable &in)
   Nil::Data::get(node, trans, true);
 
   math::transform internal_trans = math::transform_init(
-  math::vec3_init_with_array(trans.position),
-  math::vec3_init_with_array(trans.scale),
+  math::vec3_init(trans.position),
+  math::vec3_init(trans.scale),
   math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
   );
 
@@ -117,7 +117,19 @@ remove_renderable(Node &node)
 bool
 has_renderable(const Node &node)
 {
-  return get_mat_data().find(node);
+  return find_node(
+    node,
+    get_mat_data().keys.data(),
+    get_mat_data().keys.size()
+  );
+
+}
+
+
+bool
+has(const Node &node, const Renderable &data)
+{
+  return has_renderable(node);
 }
 
 
@@ -125,6 +137,13 @@ uint64_t
 get_type_id(const Renderable &)
 {
   return get_mat_data().type_id;
+}
+
+
+const char*
+get_type_name(const Renderable &in)
+{
+  return "Renderable";
 }
 
 

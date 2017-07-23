@@ -59,8 +59,16 @@ bool
 has_gamepad(const Node &node);
 
 
+bool
+has(const Node &node, const Gamepad &data);
+
+
 uint64_t
 get_type_id(const Gamepad &in);
+
+
+const char*
+get_type_name(const Gamepad &in);
 
 
 size_t

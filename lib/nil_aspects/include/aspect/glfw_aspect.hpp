@@ -4,33 +4,31 @@
 
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
-#include <GL/gl3w.h>
-#include <GLFW/glfw3.h>
-#include <nil/data/data.hpp>
+#include <nil/data/keyboard.hpp>
 
 
 // --------------------------------------------------- [ GLFW Aspect Config ] --
+
+
+struct GLFWwindow;
+
+
+// ----------------------------------------------------- [ GLFW Aspect Data ] --
 
 
 namespace Nil_ext {
 namespace GLFW_Aspect {
 
 
-// ----------------------------------------------------- [ GLFW Aspect Data ] --
-
-
 struct Data
 {
-  GLFWwindow *window;
-  Nil::Node window_node;
+  GLFWwindow *window{nullptr};
+  Nil::Node window_node{nullptr};
   
-  float last_mouse_x;
-  float last_mouse_y;
+  float last_mouse[2]{0.f,0.f};
+  float delta_mouse[2]{0.f, 0.f};
   
-  float delta_x;
-  float delta_y;
-  
-  uint32_t keys[Nil::Data::KeyCode::COUNT];
+  uint32_t keys[Nil::Data::KeyCode::COUNT]{};
 };
 
 
@@ -42,7 +40,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list);
+events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void

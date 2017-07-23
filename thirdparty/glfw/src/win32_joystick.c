@@ -726,4 +726,3 @@ int _glfwPlatformPollJoystick(int jid, int mode)
 
     return GLFW_TRUE;
 }
-

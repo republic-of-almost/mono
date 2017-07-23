@@ -1,4 +1,5 @@
 #include <data/data.hpp>
+#include <nil/resource/resource.hpp>
 #include <nil/data/window.hpp>
 #include <nil/data/developer.hpp>
 #include <nil/data/mouse.hpp>
@@ -8,13 +9,7 @@
 #include <math/vec/vec3.hpp>
 #include <lib/array.hpp>
 
-
-#include <nil/data/texture.hpp>
-#include <nil/data/texture_resource.hpp>
-#include <nil/data/mesh_resource.hpp>
-#include <nil/data/mesh.hpp>
 #include <nil/data/renderable.hpp>
-#include <assets/cube_mesh.hpp>
 
 #include <lib/model.hpp>
 #include <stb/stb_image.h>
@@ -33,135 +28,24 @@ namespace
 void
 load_assets()
 {
-  uint32_t texture_id_counter = 0;
-  
   Nil::Node assets = get_assets();
 
-  // Load assets
-  {
-    Nil::Node asset;
-    asset.set_parent(assets);
-    asset.set_name("Cube Bev");
-    
-    Nil::Data::Mesh_resource mesh{};
-
-    mesh.id = (uint32_t)Game_asset::CUBE_BEV;
-
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::bev_cube_positions, sizeof(Nil_ext::Mesh::bev_cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::bev_cube_normals, sizeof(Nil_ext::Mesh::bev_cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::bev_cube_texture_coords, sizeof(Nil_ext::Mesh::bev_cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::bev_cube_mesh_vert_count;
-
-    Nil::Data::set(asset, mesh);
-  }
-  
-  // Load assets
-  {
-    Nil::Node asset;
-    asset.set_parent(assets);
-    asset.set_name("Cube");
-    
-    Nil::Data::Mesh_resource mesh{};
-
-    mesh.id = (uint32_t)Game_asset::CUBE;
-
-    mesh.position_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_positions));
-    memcpy(mesh.position_vec3, Nil_ext::Mesh::cube_positions, sizeof(Nil_ext::Mesh::cube_positions));
-
-    mesh.normal_vec3 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_normals));
-    memcpy(mesh.normal_vec3, Nil_ext::Mesh::cube_normals, sizeof(Nil_ext::Mesh::cube_normals));
-
-    mesh.texture_coords_vec2 = (float*)malloc(sizeof(Nil_ext::Mesh::cube_texture_coords));
-    memcpy(mesh.texture_coords_vec2, Nil_ext::Mesh::cube_texture_coords, sizeof(Nil_ext::Mesh::cube_texture_coords));
-
-    mesh.count = Nil_ext::Mesh::cube_mesh_vert_count;
-
-    Nil::Data::set(asset, mesh);
-  }
-  
-  // Load asset
-
-  uint32_t counter = (uint32_t)Game_asset::STATIC;
-  
-  lib::model model = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/static.obj");
-  
+  // Load static assets
   {
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Static");
     
-    for(uint32_t i = 0; i < model.mesh_count; ++i)
-    {
-      Nil::Node child;
-      child.set_parent(asset);
-      child.set_name(model.name[i]);
-      
-      Nil::Data::Texture_resource tex_data{};
-      
-      static int count = 0;
-      
-      if(model.material_id[i] >= 0)
-//      if(count == 0)
-      {
-        count++;
-      
-        int x = 0;
-        int y = 0;
-        int c = 0;
-        stbi_uc *img_data = nullptr;
-        const char *path = model.mesh_material[model.material_id[i]].texture_01_path;
-        
-        stbi_set_flip_vertically_on_load(true);
-        img_data = stbi_load(path, &x, &y, &c, 0);
-        
-        tex_data.data       = img_data;
-        tex_data.id         = ++texture_id_counter;
-        tex_data.dimentions = 2;
-        tex_data.compoents  = c;
-        tex_data.width      = x;
-        tex_data.height     = y;
-        tex_data.sizeof_data = c * x * y * sizeof(char);
-        
-        Nil::Data::set(child, tex_data);
-        
-        stbi_image_free(img_data);
-      }
-    
-      Nil::Data::Mesh_resource mesh{};
-      
-      mesh.id = ++counter;
-      
-      mesh.position_vec3       = model.verts[i];
-      mesh.normal_vec3         = model.normals[i];
-      mesh.texture_coords_vec2 = model.uvs[i];
-      mesh.count               = model.vertex_count[i];
-      
-      Nil::Data::set(child, mesh);
-      
-      Nil::Data::Mesh mesh_instance{};
-      mesh_instance.mesh_id = mesh.id;
-      
-      Nil::Data::set(child, mesh_instance);
-      
-      Nil::Data::Renderable mat{};
-      mat.shader = Nil::Data::Renderable::LIT;
-      mat.color[0]   = 0.6f;
-      mat.color[1]   = 0.1f;
-      mat.color[2]   = 0.2f;
-      mat.color[3]   = 1.f;
-      mat.texture_01 = tex_data.id;
-      mat.mesh_id    = mesh.id;
-      Nil::Data::set(child, mat);
-    }
+    Nil::Resource::Scene::load(
+      asset,
+      Nil::Resource::directory("mesh/static.obj")
+    );
   }
   
-  lib::model lights = lib::model_import::load_obj_from_file("/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/mesh/lights.obj");
+  const lib::model lights = lib::model_import::load_obj_from_file(
+    Nil::Resource::directory("mesh/lights.obj")
+  );
+  
   {
     Nil::Node asset;
     asset.set_parent(assets);
@@ -175,7 +59,9 @@ load_assets()
       
       const math::vec3 origin = math::get_vec3_origin(lights.verts[i], lights.triangle_count[i]);
       
-      Nil::Data::Transform trans;
+      Nil::Data::Transform trans{};
+      Nil::Data::get(child, trans);
+      
       memcpy(trans.position, origin.data, sizeof(trans.position));
       
       Nil::Data::set(child, trans);
@@ -214,8 +100,8 @@ setup()
     // Line data
     Nil::Data::Developer line_data;
     line_data.type_id = 2;
-    line_data.aux_01 = (uintptr_t)line_info.data();
-    line_data.aux_02 = 0;
+    line_data.aux_01  = (uintptr_t)line_info.data();
+    line_data.aux_02  = 0;
     
     Nil::Data::set(node, line_data);
   }
@@ -328,7 +214,6 @@ debug_line(const math::vec3 start, const math::vec3 end, const math::vec3 col)
     {
       line_info.resize(count + 9);
     }
-
     
     line_info[count + 0] = (math::get_x(start));
     line_info[count + 1] = (math::get_y(start));

@@ -16,8 +16,13 @@
 // --------------------------------------------------------- [ Model Config ] --
 
 
+#ifndef MODEL_ALLOC
 #define MODEL_ALLOC(type, bytes) (type*)malloc(bytes)
+#endif
+
+#ifndef MODEL_FREE
 #define MODEL_FREE(ptr) free(ptr)
+#endif
 
 
 #ifndef LIB_NS_NAME
@@ -31,12 +36,26 @@
 namespace LIB_NS_NAME {
 
 
+namespace map_type {
+enum ENUM {
+
+  DIFFUSE,
+  NORMAL,
+  SPECULAR,
+  AMBIENT,
+  UNKNOWN,
+
+};
+}
+
+
 struct material
 {
   char *name;
-  char *texture_01_path;
-  char *texture_02_path;
-  char *texture_03_path;
+  
+  uint32_t  map_count;
+  uint32_t  *map_type;
+  char      **map_path;
 };
 
 
@@ -87,6 +106,15 @@ load_obj_from_file(
 // ----------------------------------------------------------- [ Model Impl ] --
 
 
+namespace {
+
+
+constexpr uint32_t lib_null = 1; // decorative text - including null terminator
+
+
+} // anon ns
+
+
 namespace LIB_NS_NAME {
 namespace model_import {
 
@@ -96,7 +124,7 @@ load_obj_from_file(
   const char *filename,
   const size_t size_hint)
 {
-  LIB_NS_NAME::model return_model{};
+  LIB_NS_NAME::model model{};
 
   // Load file
   FILE *obj_file = fopen(filename, "r");
@@ -117,7 +145,7 @@ load_obj_from_file(
     lib::array<uint32_t, 32> triangle_count;
     lib::array<uint32_t, 32> name_size;
     
-    char line[128]{};
+    char line[512]{};
     
     while(true)
     {
@@ -125,22 +153,16 @@ load_obj_from_file(
       
       const int result = fscanf(obj_file, "%s", line);
       
-      /*
-        All done.
-      */
       if(result == EOF)
       {
         break;
       }
       
-      /*
-        Material
-        --
-        If there is a material file listed go get its details.
-      */
+      // -- [ Material ] --
+      
       else if(strcmp("mtllib", line) == 0)
       {
-        char name[128]{};
+        char name[512]{};
         
         fscanf(
           obj_file,
@@ -149,23 +171,22 @@ load_obj_from_file(
         );
       
         std::string path = LIB_NS_NAME::string::get_dir_from_filepath(filename) + std::string(name);
-        
         mat_file = fopen(path.c_str(), "r");
         
-        /*
-          Found a mat file, we need to parse it if we can.
-        */
+        // -- [ Found a Material - Stop and do this ] --
+        
         if(mat_file)
         {
-          uint32_t material_count = 0;
+          uint32_t mat_count = 0;
           lib::array<uint32_t, 32> mat_name_size;
+          lib::array<uint32_t, 32> texture_maps;
+          lib::array<uint32_t, 32> texture_names;
           
-          /*
-            Scan through the
-          */
+          // -- [ Scan through the material first ] --
+          
           while(true)
           {
-            char mat_line[128]{};
+            char mat_line[512]{};
           
             const int result = fscanf(mat_file, "%s", mat_line);
             
@@ -174,11 +195,11 @@ load_obj_from_file(
               break;
             }
             
-            if(strcmp("newmtl", mat_line) == 0)
+            else if(strcmp("newmtl", mat_line) == 0)
             {
-              material_count += 1;
+              mat_count += 1;
               
-              char mat_name[128]{};
+              char mat_name[512]{};
               
               fscanf(
                 mat_file,
@@ -186,64 +207,17 @@ load_obj_from_file(
                 mat_name
               );
               
-              mat_name_size.emplace_back((uint32_t)strlen(mat_name));
+              const uint32_t str_size = strlen(mat_name) + lib_null;
+              mat_name_size.emplace_back(str_size);
+              texture_maps.emplace_back(uint32_t{0});
             }
-          }
-          
-          /*
-            Allocate the materials.
-          */
-          
-          {
-            return_model.mesh_material = MODEL_ALLOC(material, sizeof(material) * material_count);
-            for(uint32_t i = 0; i < material_count; ++i)
+            else if(
+              strcmp("map_Kd", mat_line) == 0 ||
+              strcmp("map_Ka", mat_line) == 0 ||
+              strcmp("map_Ns", mat_line) == 0 ||
+              strcmp("map_Bump", mat_line) == 0)
             {
-              return_model.mesh_material[i].name = MODEL_ALLOC(char, sizeof(char) * mat_name_size[i]);
-            }
-            return_model.material_count = material_count;
-          }
-          
-          fseek(mat_file, 0, SEEK_SET);
-          
-          int32_t this_mat = -1;
-          
-          while(true)
-          {
-            memset(line, 0, sizeof(line));
-          
-            const int result = fscanf(mat_file, "%s", line);
-            
-            /*
-              All done with material file.
-            */
-            if(result == EOF)
-            {
-              break;
-            }
-            
-            /*
-              New material
-            */
-            else if(strcmp("newmtl", line) == 0)
-            {
-              this_mat += 1;
-              char mat_name[128]{};
-              
-              fscanf(
-                mat_file,
-                "%s\n",
-                mat_name
-              );
-              
-              strcat(return_model.mesh_material[this_mat].name, mat_name);
-            }
-            
-            /*
-              Diffuse map
-            */
-            else if(strcmp("map_Kd", line) == 0)
-            {
-              char path[1024]{};
+              char path[2048]{};
               
               fscanf(
                 mat_file,
@@ -251,11 +225,157 @@ load_obj_from_file(
                 path
               );
               
-              const size_t bytes = strlen(path) * sizeof(char);
-              return_model.mesh_material[this_mat].texture_01_path = MODEL_ALLOC(char, bytes);
+              const uint32_t str_size = strlen(path) + lib_null;
+              texture_names.emplace_back(str_size);
+              texture_maps.back() += 1;
+            }
+          }
+          
+          // -- [ Allocate Memory For Material ] --
+          
+          {
+            size_t path_counter = 0;
+          
+            const size_t mat_bytes = sizeof(material) * mat_count;
+            model.mesh_material = MODEL_ALLOC(material, mat_bytes);
+            memset(model.mesh_material, 0, sizeof(material));
+            
+            for(uint32_t i = 0; i < mat_count; ++i)
+            {
+              material *mat = &model.mesh_material[i];
               
-              memset(return_model.mesh_material[this_mat].texture_01_path, 0, bytes);
-              strcat(return_model.mesh_material[this_mat].texture_01_path, path);
+              const size_t name_bytes = sizeof(char) * (mat_name_size[i]);
+              mat->name = MODEL_ALLOC(char, name_bytes);
+              memset(mat->name, 0, name_bytes);
+              
+              mat->map_count = texture_maps[i];
+              const size_t map_count_bytes = sizeof(uint32_t) * mat->map_count;
+              mat->map_type = MODEL_ALLOC(uint32_t, map_count_bytes);
+              
+              const size_t map_path_bytes = sizeof(char*) * mat->map_count;
+              mat->map_path = MODEL_ALLOC(char*, map_path_bytes);
+              
+              // For each map
+              for(uint32_t j = 0; j < mat->map_count; ++j)
+              {
+                const size_t path = texture_names[path_counter++] + lib_null;
+                const size_t path_bytes = sizeof(char) * path;
+              
+                mat->map_path[j] = MODEL_ALLOC(char, path_bytes);
+                memset(mat->map_path[j], 0, path_bytes);
+              }
+            }
+            
+            model.material_count = mat_count;
+          }
+          
+          // -- [ Read the material in ] --
+          
+          fseek(mat_file, 0, SEEK_SET);
+          int32_t this_mat = -1;
+          size_t texture_map = 0;
+          
+          while(true)
+          {
+            char mat_line[512]{};
+            memset(mat_line, 0, sizeof(mat_line));
+          
+            const int result = fscanf(mat_file, "%s", mat_line);
+            
+            if(result == EOF)
+            {
+              break;
+            }
+            
+            else if(strcmp("newmtl", mat_line) == 0)
+            {
+              this_mat += 1;
+              char mat_name[512]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                mat_name
+              );
+              
+              texture_map = 0;
+              
+              strcat(model.mesh_material[this_mat].name, mat_name);
+            }
+            
+            /*
+              Diffuse map
+            */
+            else if(strcmp("map_Kd", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::DIFFUSE;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
+            }
+            
+            else if(strcmp("map_Ka", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::AMBIENT;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
+            }
+            
+            else if(strcmp("map_Ns", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::SPECULAR;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
+            }
+            
+            else if(strcmp("map_Bump", mat_line) == 0)
+            {
+              char path[2048]{};
+              
+              fscanf(
+                mat_file,
+                "%s\n",
+                path
+              );
+              
+              material *mat = &model.mesh_material[this_mat];
+              
+              mat->map_type[texture_map] = map_type::NORMAL;
+              strcat(mat->map_path[texture_map], path);
+              
+              ++texture_map;
             }
           }
         } // if mat_file
@@ -266,7 +386,7 @@ load_obj_from_file(
       */
       else if(strcmp("o", line) == 0)
       {
-        char name[128]{};
+        char name[512]{};
       
         fscanf(
           obj_file,
@@ -294,25 +414,36 @@ load_obj_from_file(
       Setup the return model
     */
     {
-      return_model.mesh_count     = mesh_count;
+      model.mesh_count     = mesh_count;
       
-      return_model.name           = MODEL_ALLOC(char*, sizeof(char*) * mesh_count);
-      return_model.verts          = MODEL_ALLOC(float*, sizeof(float*) * mesh_count);
-      return_model.normals        = MODEL_ALLOC(float*, sizeof(float*) * mesh_count);
-      return_model.uvs            = MODEL_ALLOC(float*, sizeof(float*) * mesh_count);
-      return_model.triangle_count = MODEL_ALLOC(uint32_t, sizeof(uint32_t) * mesh_count);
-      return_model.vertex_count   = MODEL_ALLOC(uint32_t, sizeof(uint32_t) * mesh_count);
-      return_model.material_id    = MODEL_ALLOC(int32_t, sizeof(int32_t) * mesh_count);
+      model.name           = MODEL_ALLOC(char*, sizeof(char*) * mesh_count);
+      model.verts          = MODEL_ALLOC(float*, sizeof(float*) * mesh_count);
+      model.normals        = MODEL_ALLOC(float*, sizeof(float*) * mesh_count);
+      model.uvs            = MODEL_ALLOC(float*, sizeof(float*) * mesh_count);
+      model.triangle_count = MODEL_ALLOC(uint32_t, sizeof(uint32_t) * mesh_count);
+      model.vertex_count   = MODEL_ALLOC(uint32_t, sizeof(uint32_t) * mesh_count);
+      model.material_id    = MODEL_ALLOC(int32_t, sizeof(int32_t) * mesh_count);
       
       for(uint32_t i = 0; i < mesh_count; ++i)
       {
-        return_model.name[i]            = MODEL_ALLOC(char, sizeof(char) * name_size[i]);
-        return_model.verts[i]           = MODEL_ALLOC(float, sizeof(float) * triangle_count[i] * 9);
-        return_model.normals[i]         = MODEL_ALLOC(float, sizeof(float) * triangle_count[i] * 9);
-        return_model.uvs[i]             = MODEL_ALLOC(float, sizeof(float) * triangle_count[i] * 6);
-        return_model.triangle_count[i]  = triangle_count[i];
-        return_model.vertex_count[i]    = triangle_count[i] * 3;
-        return_model.material_id[i]     = -1;
+        const uint32_t name_bytes = sizeof(char) * name_size[i] + 1;
+        model.name[i] = MODEL_ALLOC(char, name_bytes);
+        memset(model.name[i], 0, name_bytes);
+        
+        const uint32_t vec3_bytes = sizeof(float) * triangle_count[i] * 9;
+        model.verts[i] = MODEL_ALLOC(float, vec3_bytes);
+        memset(model.verts[i], 0, vec3_bytes);
+        
+        model.normals[i] = MODEL_ALLOC(float, vec3_bytes);
+        memset(model.normals[i], 0, vec3_bytes);
+        
+        const uint32_t vec2_bytes = sizeof(float) * triangle_count[i] * 6;
+        model.uvs[i] = MODEL_ALLOC(float, sizeof(float) * triangle_count[i] * 6);
+        memset(model.uvs[i], 0, vec2_bytes);
+        
+        model.triangle_count[i]  = triangle_count[i];
+        model.vertex_count[i]    = triangle_count[i] * 3;
+        model.material_id[i]     = -1;
       }
     }
     
@@ -360,8 +491,7 @@ load_obj_from_file(
             name
           );
           
-          memset(return_model.name[this_mesh], 0, strlen(name) * sizeof(char));
-          strcat(return_model.name[this_mesh], name);
+          strcat(model.name[this_mesh], name);
         
           curr_tri = 0;
           this_mesh += 1;
@@ -427,7 +557,7 @@ load_obj_from_file(
         
         else if(strcmp("usemtl", line) == 0)
         {
-          char mat_name[128];
+          char mat_name[512];
         
           fscanf(
             obj_file,
@@ -436,11 +566,11 @@ load_obj_from_file(
           );
           
           // Search mats for this
-          for(uint32_t i = 0; i < return_model.material_count; ++i)
+          for(uint32_t i = 0; i < model.material_count; ++i)
           {
-            if(strcmp(return_model.mesh_material[i].name, mat_name) == 0)
+            if(strcmp(model.mesh_material[i].name, mat_name) == 0)
             {
-              return_model.material_id[this_mesh - 1] = i;
+              model.material_id[this_mesh - 1] = i;
               break;
             }
           }
@@ -544,62 +674,86 @@ load_obj_from_file(
           
           // Vertex
           {
-            const size_t pos_offset = index_list[0] * 3;
-          
-            return_model.verts[curr_mesh][vec3_offset + 0] = positions[pos_offset + 0];
-            return_model.verts[curr_mesh][vec3_offset + 1] = positions[pos_offset + 1];
-            return_model.verts[curr_mesh][vec3_offset + 2] = positions[pos_offset + 2];
+            // Pos
+            {
+              const size_t pos_offset = index_list[0] * 3;
+              LIB_ASSERT(pos_offset < (size_t)model.vertex_count);
             
-            const size_t uv_offset = index_list[1] * 2;
+              float *curr_verts = model.verts[curr_mesh];
             
-            return_model.uvs[curr_mesh][vec2_offset + 0] = uvs[uv_offset + 0];
-            return_model.uvs[curr_mesh][vec2_offset + 1] = uvs[uv_offset + 1];
+              curr_verts[vec3_offset + 0] = positions[pos_offset + 0];
+              curr_verts[vec3_offset + 1] = positions[pos_offset + 1];
+              curr_verts[vec3_offset + 2] = positions[pos_offset + 2];
+            }
             
-            const size_t normal_offset = index_list[2] * 3;
+            // UVs
+            {
+              const size_t uv_offset = index_list[1] * 2;
+              LIB_ASSERT(uv_offset < (size_t)model.vertex_count);
+              
+              float *curr_uvs = model.uvs[curr_mesh];
+              
+              curr_uvs[vec2_offset + 0] = uvs[uv_offset + 0];
+              curr_uvs[vec2_offset + 1] = uvs[uv_offset + 1];
+            }
             
-            return_model.normals[curr_mesh][vec3_offset + 0] = normals[normal_offset + 0];
-            return_model.normals[curr_mesh][vec3_offset + 1] = normals[normal_offset + 1];
-            return_model.normals[curr_mesh][vec3_offset + 2] = normals[normal_offset + 2];
+            // Normals
+            {
+              const size_t normal_offset = index_list[2] * 3;
+              LIB_ASSERT(normal_offset < (size_t)model.vertex_count);
+              
+              float *curr_norms = model.normals[curr_mesh];
+              
+              curr_norms[vec3_offset + 0] = normals[normal_offset + 0];
+              curr_norms[vec3_offset + 1] = normals[normal_offset + 1];
+              curr_norms[vec3_offset + 2] = normals[normal_offset + 2];
+            }
           }
           
           // Vertex
           {
             const size_t pos_offset = index_list[3] * 3;
+            LIB_ASSERT(pos_offset < (size_t)model.vertex_count);
           
-            return_model.verts[curr_mesh][vec3_offset + 3] = positions[pos_offset + 0];
-            return_model.verts[curr_mesh][vec3_offset + 4] = positions[pos_offset + 1];
-            return_model.verts[curr_mesh][vec3_offset + 5] = positions[pos_offset + 2];
+            model.verts[curr_mesh][vec3_offset + 3] = positions[pos_offset + 0];
+            model.verts[curr_mesh][vec3_offset + 4] = positions[pos_offset + 1];
+            model.verts[curr_mesh][vec3_offset + 5] = positions[pos_offset + 2];
             
             const size_t uv_offset = index_list[4] * 2;
+            LIB_ASSERT(uv_offset < (size_t)model.vertex_count);
             
-            return_model.uvs[curr_mesh][vec2_offset + 2] = uvs[uv_offset + 0];
-            return_model.uvs[curr_mesh][vec2_offset + 3] = uvs[uv_offset + 1];
+            model.uvs[curr_mesh][vec2_offset + 2] = uvs[uv_offset + 0];
+            model.uvs[curr_mesh][vec2_offset + 3] = uvs[uv_offset + 1];
             
             const size_t normal_offset = index_list[5] * 3;
+            LIB_ASSERT(normal_offset < (size_t)model.vertex_count);
             
-            return_model.normals[curr_mesh][vec3_offset + 3] = normals[normal_offset + 0];
-            return_model.normals[curr_mesh][vec3_offset + 4] = normals[normal_offset + 1];
-            return_model.normals[curr_mesh][vec3_offset + 5] = normals[normal_offset + 2];
+            model.normals[curr_mesh][vec3_offset + 3] = normals[normal_offset + 0];
+            model.normals[curr_mesh][vec3_offset + 4] = normals[normal_offset + 1];
+            model.normals[curr_mesh][vec3_offset + 5] = normals[normal_offset + 2];
           }
           
           // Vertex
           {
             const size_t pos_offset = index_list[6] * 3;
+            LIB_ASSERT(pos_offset < (size_t)model.vertex_count);
           
-            return_model.verts[curr_mesh][vec3_offset + 6] = positions[pos_offset + 0];
-            return_model.verts[curr_mesh][vec3_offset + 7] = positions[pos_offset + 1];
-            return_model.verts[curr_mesh][vec3_offset + 8] = positions[pos_offset + 2];
+            model.verts[curr_mesh][vec3_offset + 6] = positions[pos_offset + 0];
+            model.verts[curr_mesh][vec3_offset + 7] = positions[pos_offset + 1];
+            model.verts[curr_mesh][vec3_offset + 8] = positions[pos_offset + 2];
             
             const size_t uv_offset = index_list[7] * 2;
+            LIB_ASSERT(uv_offset < (size_t)model.vertex_count);
             
-            return_model.uvs[curr_mesh][vec2_offset + 4] = uvs[uv_offset + 0];
-            return_model.uvs[curr_mesh][vec2_offset + 5] = uvs[uv_offset + 1];
+            model.uvs[curr_mesh][vec2_offset + 4] = uvs[uv_offset + 0];
+            model.uvs[curr_mesh][vec2_offset + 5] = uvs[uv_offset + 1];
             
             const size_t normal_offset = index_list[8] * 3;
+            LIB_ASSERT(normal_offset < (size_t)model.vertex_count);
             
-            return_model.normals[curr_mesh][vec3_offset + 6] = normals[normal_offset + 0];
-            return_model.normals[curr_mesh][vec3_offset + 7] = normals[normal_offset + 1];
-            return_model.normals[curr_mesh][vec3_offset + 8] = normals[normal_offset + 2];
+            model.normals[curr_mesh][vec3_offset + 6] = normals[normal_offset + 0];
+            model.normals[curr_mesh][vec3_offset + 7] = normals[normal_offset + 1];
+            model.normals[curr_mesh][vec3_offset + 8] = normals[normal_offset + 2];
           }
         
           curr_tri += 1;
@@ -612,7 +766,18 @@ load_obj_from_file(
     LOG_ERROR("Failed to open file")
   }
   
-  return return_model;
+  // Close files
+  if(obj_file)
+  {
+    fclose(obj_file);
+  }
+  
+  if(mat_file)
+  {
+    fclose(mat_file);
+  }
+  
+  return model;
 }
 
 

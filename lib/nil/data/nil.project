@@ -18,21 +18,7 @@ table.insert(
       --
       make.add_src(make.get_proj_root() .. "../src/"),
       --
-      make.add_doc(make.get_proj_root() .. "../include/"),
-      make.add_doc(make.get_proj_root() .. "../src/"),
-    },
-
-    -- asset_dir = "assets/",
-
-    lib_dirs_macosx = {
-      "/usr/local/lib/",
-    },
-
-    linkoptions_macosx = {
-    },
-
-    inc_dirs_macosx = {
-      "/usr/local/include",
+      make.add_doc(make.get_proj_root() .. "../"),
     },
 
     inc_dirs = {
@@ -45,18 +31,6 @@ table.insert(
       "Math",
       "Remotery",
       "GLFW",
-    },
-
-    link_dependencies_windows = {
-      "glew32.lib",
-      "SDL2.lib",
-      "opengl32.lib",
-      "shlwapi.lib", -- Move to pragma in utilities?
-    },
-
-    linkoption_dependencies_macosx = {
-      "-lsdl2",
-      "-lsdl2_mixer",
     },
   }
 )

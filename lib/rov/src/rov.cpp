@@ -3,6 +3,7 @@
 #include "ogl/rov_gl_resources.hpp"
 #include "ogl/rov_gl_exec.hpp"
 #include "rov_data.hpp"
+#include <lib/color.hpp>
 #include <lib/assert.hpp>
 
 
@@ -67,14 +68,16 @@ rov_createMesh(
   const float *pos,
   const float *normals,
   const float *tex_coords,
-  size_t count)
+  size_t count,
+  uintptr_t *out_platform_resource)
 {
   return ROV_Internal::ogl_createMesh(
     &gl_data,
     pos,
     normals,
     tex_coords,
-    count
+    count,
+    out_platform_resource
   );
 }
 
@@ -128,6 +131,7 @@ rov_startRenderPass(
   memcpy(rp->viewport, viewport, sizeof(rovViewport));
   memcpy(rp->eye_position, eye_pos, sizeof(rovVec3));
 
+  rp->clear_color = lib::color::init(rov_data.curr_rov_color);
   rp->clear_flags = clear_flags;
 
   rp->materials.emplace_back(rov_curr_material(&rov_data), size_t{0});
@@ -138,12 +142,29 @@ rov_startRenderPass(
 
 
 void
+rov_setColor(const float col[4])
+{
+  rov_setColor(col[0], col[1], col[2], col[3]);
+}
+
+
+void
 rov_setColor(float r, float g, float b, float a)
 {
-  rov_data.curr_rov_clear_color[0] = r;
-  rov_data.curr_rov_clear_color[1] = g;
-  rov_data.curr_rov_clear_color[2] = b;
-  rov_data.curr_rov_clear_color[3] = a;
+  rov_data.curr_rov_color[0] = r;
+  rov_data.curr_rov_color[1] = g;
+  rov_data.curr_rov_color[2] = b;
+  rov_data.curr_rov_color[3] = a;
+}
+
+
+void
+rov_setColor(uint32_t col)
+{
+  rov_data.curr_rov_color[0] = lib::color::get_channel_1f(col);
+  rov_data.curr_rov_color[1] = lib::color::get_channel_2f(col);
+  rov_data.curr_rov_color[2] = lib::color::get_channel_3f(col);
+  rov_data.curr_rov_color[3] = lib::color::get_channel_4f(col);
 }
 
 
@@ -183,7 +204,7 @@ rov_submitLine(const float start[3], const float end[3])
   ROV_Internal::rovLineDrawCall dc;
   memcpy(dc.start, start, sizeof(rovVec3));
   memcpy(dc.end, end, sizeof(rovVec3));
-  memcpy(dc.color, rov_data.curr_rov_clear_color, sizeof(rovVec3));
+  memcpy(dc.color, rov_data.curr_rov_color, sizeof(rovVec3));
 
   rov_data.rov_render_passes.back().line_draw_calls.emplace_back(dc);
 }

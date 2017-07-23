@@ -79,6 +79,9 @@
 #define LIB_STRING_IMPL
 #include "string.hpp"
 
+#define LIB_STRING_POOL_IMPL
+#include "string_pool.hpp"
+
 #define LIB_TIMER_IMPL
 #include "timer.hpp"
 

@@ -1,20 +1,17 @@
 #include <aspect/glfw_aspect.hpp>
-#include <nil/node.hpp>
-#include <nil/node_event.hpp>
-#include <nil/data/data.hpp>
-#include <nil/data/window.hpp>
 #include <nil/aspect.hpp>
+#include <nil/data/data.hpp>
+#include <math/math.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
-#include <math/math.hpp>
-#include <stddef.h>
+#include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
-
+#include <stddef.h>
 
 #ifndef NIMGUI
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
-//#include <imguizmo/ImGuizmo.h>
+#include <imguizmo/ImGuizmo.h>
 #endif
 
 
@@ -123,7 +120,7 @@ glfw_key_to_nil(const int glfw_key)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
+events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -144,7 +141,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         self->window_node = nodes[0];
 
 //        glfwSetErrorCallback(error_callback);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+//        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
@@ -173,11 +170,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         glfwMakeContextCurrent(self->window);
         gl3wInit();
 
-        Nil::Data::Graphics gfx{};
-        gfx.type = Nil::Data::Graphics::OGL;
+        win_data.type = Nil::Data::Window::OGL;
 
-        glGetIntegerv(GL_MAJOR_VERSION, (GLint*)&gfx.major);
-        glGetIntegerv(GL_MINOR_VERSION, (GLint*)&gfx.minor);
+        glGetIntegerv(GL_MAJOR_VERSION, (GLint*)&win_data.major);
+        glGetIntegerv(GL_MINOR_VERSION, (GLint*)&win_data.minor);
 
         #else
 
@@ -191,7 +187,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
         ImGui_ImplGlfwGL3_NewFrame();
         #endif
 
-        Nil::Data::set(self->window_node, gfx);
+        Nil::Data::set(self->window_node, win_data);
 
         // Resize
         glfwSetWindowSizeCallback(
@@ -224,11 +220,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
       {
         double x_pos, y_pos;
         glfwGetCursorPos(self->window, &x_pos, &y_pos);
+        glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         
-        glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        
-        self->last_mouse_x = (float)x_pos;
-        self->last_mouse_y = (float)y_pos;
+        self->last_mouse[0] = (float)x_pos;
+        self->last_mouse[1] = (float)y_pos;
 
         glfwSetCursorPosCallback(
           self->window,
@@ -240,11 +235,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
             const float this_mouse_x = (float)x;
             const float this_mouse_y = (float)y;
 
-            self->delta_x = self->last_mouse_x - this_mouse_x;
-            self->delta_y = self->last_mouse_y - this_mouse_y;
+            self->delta_mouse[0] = self->last_mouse[0] - this_mouse_x;
+            self->delta_mouse[1] = self->last_mouse[1] - this_mouse_y;
 
-            self->last_mouse_x = this_mouse_x;
-            self->last_mouse_y = this_mouse_y;
+            self->last_mouse[0] = this_mouse_x;
+            self->last_mouse[1] = this_mouse_y;
 
             size_t count = 0;
             Nil::Data::Mouse *mouse;
@@ -254,8 +249,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
             {
               if(mouse->id == 0)
               {
-                mouse[i].delta[0] = math::to_int(self->delta_x);
-                mouse[i].delta[1] = math::to_int(self->delta_y);
+                mouse[i].delta[0] = math::to_int(self->delta_mouse[0]);
+                mouse[i].delta[1] = math::to_int(self->delta_mouse[1]);
               }
             }
           }
@@ -280,6 +275,19 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
                 self->keys[nil_key] = input_action;
               }
             }
+            
+            // IMGUI
+            ImGuiIO& io = ImGui::GetIO();
+            if (action == GLFW_PRESS)
+                io.KeysDown[key] = true;
+            if (action == GLFW_RELEASE)
+                io.KeysDown[key] = false;
+
+            (void)mods; // Modifiers are not reliable across systems
+            io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+            io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+            io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+            io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
           }
         );
       }
@@ -329,6 +337,14 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
 void
 early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
+  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  LIB_ASSERT(self);
+
+
+  if(self->window)
+  {
+    glfwSwapBuffers(self->window);
+  }
 }
 
 
@@ -368,16 +384,14 @@ late_think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
 
-    glfwPollEvents();
-
     #ifndef NIMGUI
     ImGui::Render();
 
     ImGui_ImplGlfwGL3_NewFrame();
-//    ImGuizmo::BeginFrame();
+    ImGuizmo::BeginFrame();
     #endif
 
-    glfwSwapBuffers(self->window);
+    glfwPollEvents();
   }
 }
 

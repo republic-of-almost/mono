@@ -3,14 +3,15 @@
 #include <aspect/imgui_aspect.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
-#include <nil/node_event.hpp>
+#include <nil/resource/resource.hpp>
 #include <nil/nil.hpp>
 #include <nil/data/window.hpp>
 #include <imgui/imgui.h>
-//#include <imguizmo/ImGuizmo.h>
+#include <imguizmo/ImGuizmo.h>
 #include <string.h>
 #include <lib/utilities.hpp>
-
+#include "imgui/imgui_resource.hpp"
+#include "imgui/imgui_data.hpp"
 
 #include <lib/bench.hpp>
 
@@ -28,15 +29,32 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
 
-  self->inspector_node    = Nil::Node(nullptr);
-  self->show_graph        = true;
-  self->show_raw_graph    = false;
-  self->show_node_events  = false;
-  self->show_menu         = true;
+  self->inspector_node        = Nil::Node(nullptr);
+  self->show_graph            = true;
+  self->show_raw_graph        = false;
+  self->show_node_events      = false;
+  self->show_menu             = true;
   
-  self->show_data_camera       = false;
-  self->show_data_renderables  = false;
-  self->show_data_textures     = false;
+  self->show_data_overview    = false;
+  self->show_data_audio       = false;
+  self->show_data_bbox        = false;
+  self->show_data_camera      = false;
+  self->show_data_collider    = false;
+  self->show_data_developer   = false;
+  self->show_data_gamepad     = false;
+  self->show_data_keyboard    = false;
+  self->show_data_light       = false;
+  self->show_data_logic       = false;
+  self->show_data_mouse       = false;
+  self->show_data_renderables = false;
+  self->show_data_rigidbody   = false;
+  self->show_data_transform   = false;
+  self->show_data_window      = false;
+  
+  self->show_rsrc_overview    = false;
+  self->show_rsrc_materials   = false;
+  self->show_rsrc_textures    = false;
+  self->show_rsrc_meshes      = false;
 
   // Aspects can hook into UI callbacks with developer data.
   aspect.data_types = 0;
@@ -48,96 +66,9 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
+events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
-  LIB_ASSERT(self);
-  
-  // Developer Data Removed
-  {
-    size_t count;
-    Nil::Data::Developer *data;
-    Nil::Node *node;
-    
-    Nil::Data::events(Nil::Data::Event::REMOVED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      size_t j = 0;
-    
-      while(j < self->dev_nodes.size())
-      {
-        if(self->dev_nodes[j] == node[i])
-        {
-          self->dev_data.erase(self->dev_data.begin() + j);
-          self->dev_nodes.erase(self->dev_nodes.begin() + j);
-          break;
-        }
-        else
-        {
-          ++j;
-        }
-      }
-    }
-  } // removed dev data
 
-  // Developer Data Added
-  {
-    size_t count;
-    Nil::Data::Developer *data;
-    Nil::Node *node;
-    
-    Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      if(data[i].type_id == 1)
-      {
-        bool duplicate = false;
-      
-        for(Nil::Node &n : self->dev_nodes)
-        {
-          if(n == node[i])
-          {
-            duplicate = true;
-            break;
-          }
-        }
-      
-        if(!duplicate)
-        {
-          self->dev_data.emplace_back(data[i]);
-          self->dev_nodes.emplace_back(node[i]);
-        }
-      }
-    }
-  } // new dev data
-  
-  // Developer Data Modified
-  {
-    size_t count;
-    Nil::Data::Developer *data;
-    Nil::Node *node;
-    
-    Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &node);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      size_t j = 0;
-    
-      while(j < self->dev_nodes.size())
-      {
-        if(self->dev_nodes[j] == node[i])
-        {
-          self->dev_data[j] = data[i];
-        }
-        else
-        {
-          ++j;
-        }
-      }
-    }
-  } // Mod dev data
 }
 
 
@@ -145,6 +76,46 @@ events(Nil::Engine &engine, Nil::Aspect &aspect, Nil::Event_list &event_list)
 
 
 namespace {
+
+/*
+  I know I know templates, but these helpers reduce alot of the noise in this
+  file.
+*/
+
+template<typename T>
+inline void
+inspector_data(Nil::Node &node)
+{
+  T data{};
+  
+  if(Nil::Data::has(node, data))
+  {
+    const char *data_name = Nil::Data::get_type_name(data);
+  
+    if(ImGui::CollapsingHeader(data_name))
+    {
+      Nil::Data::get(node, data);
+      
+      if(Nil::ImGUI::render_data(&data))
+      {
+        Nil::Data::set(node, data);
+      }
+    }
+  }
+}
+
+
+template<typename T>
+inline void
+add_data(Nil::Node &node)
+{
+  T data{};
+
+  if(!Nil::Data::has(node, data))
+  {
+    Nil::Data::set(node, data);
+  }
+}
 
 
 void
@@ -186,6 +157,55 @@ render_node(const Nil::Node &node, Nil::Node &inspect)
 };
 
 
+template<typename T>
+inline void
+render_data(bool *window)
+{
+  if(*window)
+  {
+    char name[1024]{};
+    strcat(name, Nil::Data::get_type_name(T{}));
+    strcat(name, " Data##DPool");
+  
+    ImGui::Begin(name, window);
+    
+    size_t count = 0;
+    T *data = nullptr;
+    Nil::Data::get(&count, &data);
+
+    if(data)
+    {
+      Nil::ImGUI::render_data(data, count);
+    }
+    
+    ImGui::End();
+  }
+}
+
+
+template<typename T>
+inline void
+render_rsrc(bool *window)
+{
+  if(*window)
+  {
+    char name[1024]{};
+    strcat(name, Nil::Resource::get_type_name(T{}));
+    strcat(name, " Resource##RPool");
+  
+    ImGui::Begin(name, window);
+    
+    size_t count = 0;
+    T *rsrc;
+    Nil::Resource::get(&count, &rsrc);
+    
+    Nil::ImGUI::render_resource(rsrc, count);
+    
+    ImGui::End();
+  }
+}
+
+
 } // anon ns
 
 
@@ -199,171 +219,33 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   Nil::Node root = Nil::Node(0, false);
 
-  // ----------------------------------------------------------- [ Settings ] --
-
-  /*
-    Render Settings
-  */
-  if(self->show_node_events)
-  {
-    ImGui::Begin("Node Events", &self->show_node_events);
-
-    Nil::Engine_settings set{};
-    engine.get_settings(set);
-
-    Nil::Engine_state stat;
-    engine.get_state(stat);
-
-    bool update_settings = false;
-
-    if(ImGui::Checkbox("Pause Node Events", &set.pause_node_events)) { update_settings = true; }
-
-    if(update_settings)
-    {
-      engine.set_settings(set);
-    }
-
-    ImGui::Spacing();
-
-    ImGui::Text("Node Events");
-    ImGui::Columns(5, "pending_events"); // 4-ways, with border
-    ImGui::Separator();
-    ImGui::Text("Node ID");   ImGui::NextColumn();
-    ImGui::Text("Added");     ImGui::NextColumn();
-    ImGui::Text("Updated");   ImGui::NextColumn();
-    ImGui::Text("Moved");     ImGui::NextColumn();
-    ImGui::Text("Removed");   ImGui::NextColumn();
-
-    ImGui::Separator();
-
-    int selected = -1;
-
-    for (int i = 0; i < stat.node_event_count; i++)
-    {
-      Nil::Node event_node = Nil::Node(stat.node_events[i].node_id, false);
-
-      char label[32];
-      sprintf(label, "%04d", event_node.get_id());
-
-      if (ImGui::Selectable(label, selected == event_node.get_id(), ImGuiSelectableFlags_SpanAllColumns))
-          selected = i;
-
-      ImGui::NextColumn();
-
-      ImGui::Text(Nil::Event::node_added(stat.node_events[i]) ? "YES" : "NO");    ImGui::NextColumn();
-      ImGui::Text(Nil::Event::node_updated(stat.node_events[i]) ? "YES" : "NO");  ImGui::NextColumn();
-      ImGui::Text(Nil::Event::node_moved(stat.node_events[i]) ? "YES" : "NO");    ImGui::NextColumn();
-      ImGui::Text(Nil::Event::node_removed(stat.node_events[i]) ? "YES" : "NO");  ImGui::NextColumn();
-    }
-    ImGui::Columns(1);
-
-    if(selected > -1)
-    {
-      self->inspector_node = Nil::Node(stat.node_events[selected].node_id);
-    }
-
-    ImGui::End();
-  }
 
   // --------------------------------------------------------------- [ Data ] --
 
-  /*
-    Render Data store
-  */
-  if(self->show_data_camera)
-  {
-    ImGui::Begin("Camera Data", &self->show_data_camera);
-    
-    size_t count            = 0;
-    Nil::Data::Camera *cams = nullptr;
-    Nil::Data::get(&count, &cams);
-    
-    ImGui::Text("Camera Count %zu", count);
-    
-    ImGui::Columns(8, "camera_list"); // 4-ways, with border
-    ImGui::Separator();
-    ImGui::Text("Type");        ImGui::NextColumn();
-    ImGui::Text("Priority");    ImGui::NextColumn();
-    ImGui::Text("Height");      ImGui::NextColumn();
-    ImGui::Text("Width");       ImGui::NextColumn();
-    ImGui::Text("Near");        ImGui::NextColumn();
-    ImGui::Text("Far");         ImGui::NextColumn();
-    ImGui::Text("Clr Color");   ImGui::NextColumn();
-    ImGui::Text("Clr Depth");   ImGui::NextColumn();
-    
-    ImGui::Separator();
-    
-    for(uint32_t i = 0; i < count; ++i)
-    {
-      ImGui::Text("%s", cams[i].type == Nil::Data::Camera::PERSPECTIVE ? "Pers" : "Ortho"); ImGui::NextColumn();
-      ImGui::Text("%d", cams[i].priority);    ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].height);      ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].width);       ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].near_plane);  ImGui::NextColumn();
-      ImGui::Text("%f", cams[i].far_plane);   ImGui::NextColumn();
-      ImGui::Text("%s", cams[i].clear_color_buffer ? "Yes" : "No"); ImGui::NextColumn();
-      ImGui::Text("%s", cams[i].clear_depth_buffer ? "Yes" : "No"); ImGui::NextColumn();
-      
-      ImGui::Separator();
-    }
-    
-    ImGui::End();
-  }
 
-
-  /*
-    Textures
-  */
-  if(self->show_data_textures)
-  {
-    ImGui::Begin("Texture Data", &self->show_data_textures);
-    
-    size_t count            = 0;
-    Nil::Data::Texture_resource *textures = nullptr;
-    Nil::Data::get(&count, &textures);
-
-    ImGui::Text("Texture Count %zu", count);
-    
-    static uint32_t tex_slider = 6;
-    char name[32]{};
-    sprintf(name, "Size: %d", 1 << tex_slider);
-    ImGui::SliderInt("Texture Size", (int*)&tex_slider, 6, 10, name);
-    
-    ImGui::Separator();
-    
-    const ImVec2 win_size = ImGui::GetWindowSize();
-    
-    const uint32_t tex_size = 1 << tex_slider;
-    const uint32_t col_size_est = tex_size + 20;
-    
-    const uint32_t cols = math::max(((uint32_t)win_size.x / col_size_est), (uint32_t)1);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      ImGui::Image((ImTextureID)textures[i].platform_resource, ImVec2(tex_size, tex_size));
-    
-      if(ImGui::IsItemHovered())
-      {
-        ImGui::SetTooltip("ID: %d\nDimentions: %d x %d\nChannels: %d", textures[i].id,  textures[i].width, textures[i].height, textures[i].compoents);
-      }
-      
-      if((i + 1) % (cols ))
-      {
-        ImGui::SameLine();
-      }
-    }
-
-    ImGui::End();
-  }
+  // Overview
+  render_data<Nil::Data::Audio>(&self->show_data_audio);
+//  render_data<Nil::Data::Bounding_box>(&self->show_data_bbox);
+  render_data<Nil::Data::Camera>(&self->show_data_camera);
+  render_data<Nil::Data::Developer>(&self->show_data_developer);
+  render_data<Nil::Data::Gamepad>(&self->show_data_gamepad);
+  render_data<Nil::Data::Keyboard>(&self->show_data_keyboard);
+  render_data<Nil::Data::Light>(&self->show_data_light);
+  render_data<Nil::Data::Logic>(&self->show_data_logic);
+  render_data<Nil::Data::Mouse>(&self->show_data_mouse);
+  render_data<Nil::Data::Renderable>(&self->show_data_renderables);
+//  render_data<Nil::Data::Transform>(&self->show_data_transform);
+  render_data<Nil::Data::Window>(&self->show_data_window);
   
-  if(self->show_data_renderables)
-  {
-    ImGui::Begin("Renderable Data", &self->show_data_renderables);
+  
+  // ---------------------------------------------------------- [ Resources ] --
+  
 
-    ImGui::Text("Not Impl");
-
-    ImGui::End();
-  }
+  // Overview
+  render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
+  render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
+  render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
+  
 
   // ---------------------------------------------------------- [ Raw Graph ] --
 
@@ -472,19 +354,68 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   if(self->inspector_node.is_valid())
   {
+    size_t count = 0;
+    Nil::Data::Camera *cam = 0;
+    Nil::Data::get(&count, &cam);
+    
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+    
+    Nil::Data::Transform trans{};
+    Nil::Data::get(self->inspector_node, trans);
+    
+    math::transform m_trans = math::transform_init(
+      math::vec3_init(trans.position),
+      math::vec3_init(trans.scale),
+      math::quat_init(trans.rotation)
+    );
+    
+//    math::mat4 view = math::mat4_lookat(
+//      m_trans.position,
+//      math::vec3_add(m_trans.position, math::transform_fwd(m_trans)),
+//      math::transform_up(m_trans)
+//    );
+    
+    math::mat4 proj = math::mat4_projection(
+      cam[0].width * io.DisplaySize.x,
+      cam[0].height * io.DisplaySize.y,
+      cam[0].near_plane,
+      cam[0].far_plane,
+      cam[0].fov
+    );
+    
+    math::mat4 world = math::transform_get_world_matrix(m_trans);
+//    math::mat4 world = math::mat4_id();
+    
+    ImGuizmo::Enable(true);
+    
+//    ImGuizmo::DrawCube(cam[0].view_mat, proj.data, world.data);
+    ImGuizmo::Manipulate(
+      cam[0].view_mat,
+      proj.data,
+      ImGuizmo::OPERATION::TRANSLATE,
+      ImGuizmo::MODE::WORLD,
+      world.data
+    );
+    
+    float rot[3];
+    ImGuizmo::DecomposeMatrixToComponents(world.data, trans.position, rot, trans.scale);
+    
+    Nil::Data::set(self->inspector_node, trans);
+    
     bool inspector_open = true;
     ImGui::Begin("Inspector", &inspector_open);
-
+    
     ImGui::Text("Node Information");
-
+    
     char name_buf[16]{0};
     strcat(name_buf, self->inspector_node.get_name());
-
+    
     if(ImGui::InputText("Name##Node", name_buf, 16))
     {
       self->inspector_node.set_name(name_buf);
     }
-
+    
     uint32_t node_id = self->inspector_node.get_id();
     ImGui::InputInt("ID", (int*)&node_id, 0, 0, ImGuiInputTextFlags_ReadOnly);
 
@@ -538,794 +469,83 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::Text("Default Node Data");
-
-    /*
-      Transform Data
-    */
-    if(Nil::Data::has_transform(self->inspector_node))
+    ImGui::Text("Node Data");
+    
+    // Default Data
     {
-      if(ImGui::CollapsingHeader("Transform"))
-      {
-        Nil::Data::Transform trans{};
-        Nil::Data::get(self->inspector_node, trans);
-
-        bool update_transform = false;
-        if(ImGui::DragFloat3("Position##Tra", trans.position, 0.1f)) { update_transform = true; }
-        if(ImGui::DragFloat3("Scale##Tra",    trans.scale, 0.1f))    { update_transform = true; }
-        if(ImGui::DragFloat4("Rotation##Tra", trans.rotation, 0.1f)) { update_transform = true; }
-
-        if(update_transform)
-        {
-          Nil::Data::set(self->inspector_node, trans);
-        }
-      }
-    }
-
-
-    /*
-      Bounding Box
-    */
-    if(Nil::Data::has_bounding_box(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Bounding Box"))
-      {
-        Nil::Data::Bounding_box box{};
-        Nil::Data::get(self->inspector_node, box);
-
-        bool update_bounding_box = false;
-        if(ImGui::DragFloat3("Min##BB", box.min, 0.1f)) { update_bounding_box = true; }
-        if(ImGui::DragFloat3("Max##BB", box.max, 0.1f)) { update_bounding_box = true; }
-
-        if(update_bounding_box)
-        {
-          Nil::Data::set(self->inspector_node, box);
-        }
-      }
-    }
-
-
-    // --------------------------------------------- [ Other Inspector Data ] --
-
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Text("Other Node Data");
-
-    /*
-      Camera
-    */
-    if(Nil::Data::has_camera(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Camera"))
-      {
-        Nil::Data::Camera cam{};
-        Nil::Data::get(self->inspector_node, cam);
-
-        const char *proj[]
-        {
-          "Perpective",
-          "Orthographic",
-        };
-
-        bool update_cam = false;
-        if(ImGui::Combo("Projection##Cam", (int*)&cam.type, proj, 2))           { update_cam = true; }
-        if(ImGui::DragInt("Priority##Cam",  (int*)&cam.priority))               { update_cam = true; }
-        if(ImGui::DragFloat("Width##Cam",  &cam.width, 0.01f))                  { update_cam = true; }
-        if(ImGui::DragFloat("Height##Cam", &cam.height, 0.01f))                 { update_cam = true; }
-        if(ImGui::DragFloat("FOV##Cam",  &cam.fov, 0.01f))                      { update_cam = true; }
-        if(ImGui::DragFloat("Near Plane##Cam",  &cam.near_plane, 0.1f))         { update_cam = true; }
-        if(ImGui::DragFloat("Far Plane##Cam",  &cam.far_plane, 0.1f))           { update_cam = true; }
-        if(ImGui::Checkbox("Clear Color Buffer##Cam", &cam.clear_color_buffer)) { update_cam = true; }
-        if(ImGui::Checkbox("Clear Depth Buffer##Cam", &cam.clear_depth_buffer)) { update_cam = true; }
-
-        if(update_cam)
-        {
-          Nil::Data::set(self->inspector_node, cam);
-        }
-      }
-    }
-
-    /*
-      Audio
-    */
-    if(Nil::Data::has_audio(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Audio"))
-      {
-        Nil::Data::Audio audio{};
-        Nil::Data::get(self->inspector_node, audio);
-        
-        bool update_audio = false;
-        if(ImGui::InputInt("ID##AudioPlayer", (int*)&audio.audio_id)) { update_audio = true; }
-        
-        const char *request[] {
-          "NONE",
-          "PLAY",
-          "STOP",
-        };
-        
-        if(ImGui::Combo("Request##AudioPlayer", (int*)&audio.request_state, request, sizeof(request) / sizeof(char*)))
-        {
-          update_audio = true;
-        }
-        
-        const char *state[] {
-          "NONE",
-          "PLAYING",
-          "STOPPED",
-        };
-
-        if(ImGui::Combo("Current State##AudioPlayer", (int*)&audio.current_state, state, sizeof(state) / sizeof(char*)))
-        {
-          update_audio = true;
-        }
-        
-        if(ImGui::SliderFloat("Volume##AudioPlayer", &audio.volume, 0.f, 1.f)) { update_audio = true; }
-        if(ImGui::Checkbox("Looping##AudioPlayer", &audio.loop))               { update_audio = true; }
-        
-        // Update the Data //
-        if(update_audio)
-        {
-          Nil::Data::set(self->inspector_node, audio);
-        }
-      }
-    }
-
-
-    /*
-      Audio Resource
-    */
-    if(Nil::Data::has_audio_resource(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Audio Resource"))
-      {
-        ImGui::Text("No UI Impl");
-      }
-    }
-
-
-    /*
-      Collider
-    */
-    if(Nil::Data::has_collider(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Collider"))
-      {
-        ImGui::Text("No UI Impl");
-      }
-    }
-
-    /*
-      Developer Data
-    */
-    if(Nil::Data::has_developer(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Developer"))
-      {
-        Nil::Data::Developer dev{};
-        Nil::Data::get(self->inspector_node, dev);
-
-        bool update_developer = false;
-        if(ImGui::InputInt("AUX0", (int*)&dev.aux_01)) { update_developer = true; }
-        if(ImGui::InputInt("AUX1", (int*)&dev.aux_02)) { update_developer = true; }
-        if(ImGui::InputInt("AUX2", (int*)&dev.aux_03)) { update_developer = true; }
-        if(ImGui::InputInt("AUX3", (int*)&dev.aux_04)) { update_developer = true; }
-
-        if(update_developer)
-        {
-          Nil::Data::set(self->inspector_node, dev);
-        }
-      }
-    }
-
-
-    /*
-      Gamepad
-    */
-    if(Nil::Data::has_gamepad(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Gamepad"))
-      {
-        ImGui::Text("No UI Impl");
-      }
-    }
-
-
-    /*
-      Graphics
-    */
-    if(Nil::Data::has_graphics(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Graphics"))
-      {
-        Nil::Data::Graphics gfx{};
-        Nil::Data::get(self->inspector_node, gfx);
-
-        bool update_gfx = false;
-
-        const char *types []
-        {
-          "OpenGL",
-          "DirectX",
-        };
-
-        if(ImGui::Combo("API", (int*)&gfx.type, types, 2))  { update_gfx = true; }
-        if(ImGui::InputInt("Major", (int*)&gfx.major))      { update_gfx = true; }
-        if(ImGui::InputInt("Minor", (int*)&gfx.minor))      { update_gfx = true; }
-
-        if(update_gfx)
-        {
-          Nil::Data::set(self->inspector_node, gfx);
-        }
-      }
-    }
-
-
-    /*
-      Keyboard
-    */
-    if(Nil::Data::has_keyboard(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Keyboard"))
-      {
-        ImGui::Text("No UI Impl");
-      }
-    }
-
-
-    /*
-      Light
-    */
-    if(Nil::Data::has_light(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Light"))
-      {
-        Nil::Data::Light light{};
-        Nil::Data::get(self->inspector_node, light);
-        
-        bool updated_light = false;
-        
-        const char *type []
-        {
-          "Point",
-          "Directional",
-        };
-  
-        if(ImGui::Combo("Type", (int*)&light.type, type, 2)) { updated_light = true; }
-  
-        if(ImGui::DragFloat("Atten Const", &light.atten_const)) { updated_light = true; }
-        if(ImGui::DragFloat("Atten Linear", &light.atten_linear)) { updated_light = true; }
-        if(ImGui::DragFloat("Atten Exponential", &light.atten_exponential)) { updated_light = true; }
-        
-        
-        ImGui::Text("* Readonly");
-        ImGui::DragFloat3("*Position", light.position, ImGuiInputTextFlags_ReadOnly);
-        ImGui::DragFloat3("*Direction", light.direction, ImGuiInputTextFlags_ReadOnly);
-        
-        if(updated_light)
-        {
-          Nil::Data::set(self->inspector_node, light);
-        }
-      }
-    }
-
-
-    /*
-      Logic
-    */
-    if(Nil::Data::has_logic(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Logic"))
-      {
-        Nil::Data::Logic logic{};
-        Nil::Data::get(self->inspector_node, logic);
-
-        bool update_logic = false;
-
-//        if(ImGui::InputInt("Type",  (int*)&logic.type))       { update_logic = true; }
-//        if(ImGui::InputInt("ID",    (int*)&logic.logic_id))   { update_logic = true; }
-//        if(ImGui::InputInt("Major", (int*)&logic.aux_01))     { update_logic = true; }
-//        if(ImGui::InputInt("Minor", (int*)&logic.aux_02))     { update_logic = true; }
-
-        if(update_logic)
-        {
-          Nil::Data::set(self->inspector_node, logic);
-        }
-      }
-    }
-
-
-    /*
-      Material
-    */
-    if(Nil::Data::has_renderable(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Renderable"))
-      {
-        Nil::Data::Renderable mat{};
-        Nil::Data::get(self->inspector_node, mat);
-
-        bool update_mat = false;
-
-        const char *shaders[] {
-          "FULLBRIGHT",
-          "LIT",
-          "DIR_LIGHT",
-        };
-
-        if(ImGui::Combo("Shader", (int*)&mat.shader, shaders, sizeof(shaders) / sizeof (char*))) { update_mat = true; }
-
-        if(ImGui::ColorEdit4("Color", mat.color))                { update_mat = true; }
-        if(ImGui::InputInt("Texture 01", (int*)&mat.texture_01)) { update_mat = true; }
-        if(ImGui::InputInt("Texture 02", (int*)&mat.texture_02)) { update_mat = true; }
-        if(ImGui::InputInt("Texture 03", (int*)&mat.texture_03)) { update_mat = true; }
-        if(ImGui::DragFloat2("UV Scale", mat.scale))             { update_mat = true; }
-        if(ImGui::DragFloat2("UV Offset", mat.offset))           { update_mat = true; }
-        
-        // Outputs //
-        ImGui::InputFloat4("MatRow0", (float*)&mat.world_mat[0]);
-        ImGui::InputFloat4("MatRow1", (float*)&mat.world_mat[4]);
-        ImGui::InputFloat4("MatRow2", (float*)&mat.world_mat[8]);
-        ImGui::InputFloat4("MatRow3", (float*)&mat.world_mat[12]);
-
-        if(update_mat)
-        {
-          Nil::Data::set(self->inspector_node, mat);
-        }
-      }
-    }
-
-
-    /*
-      Mesh
-    */
-    if(Nil::Data::has_mesh(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Mesh"))
-      {
-        Nil::Data::Mesh mesh{};
-        Nil::Data::get(self->inspector_node, mesh);
-        
-        bool update_mesh = false;
-        
-        if(ImGui::InputInt("Mesh ID", (int*)&mesh.mesh_id))   { update_mesh = true; }
-        if(ImGui::InputInt("Index ID", (int*)&mesh.index_id)) { update_mesh = true; }
-        
-        if(update_mesh)
-        {
-          Nil::Data::set(self->inspector_node, mesh);
-        }
-      }
-    }
-
-
-    /*
-      Mesh Resource
-    */
-    if(Nil::Data::has_mesh_resource(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Mesh_resource"))
-      {
-        Nil::Data::Mesh_resource mesh_resource{};
-        Nil::Data::get(self->inspector_node, mesh_resource);
-      
-        bool update_resource = false;
-        
-        if(ImGui::InputInt("Mesh_id", (int*)&mesh_resource.id)) { update_resource = true; }
-        
-
-        float columns = 3; // put position as default.
-
-        if(mesh_resource.normal_vec3)         { columns += 3.f; }
-        if(mesh_resource.texture_coords_vec2) { columns += 2.f; }
-        if(mesh_resource.color_vec4)          { columns += 4.f; }
-
-        float col_ratio = (1.f / columns) * 0.9f;
-
-        ImGui::Text("Vertex Count: %zu", mesh_resource.count);
-
-        // Positions
-        if(mesh_resource.position_vec3)
-        {
-          ImGui::BeginGroup();
-          ImGui::Text("Positions");
-          ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)0), ImVec2(ImGui::GetWindowWidth() * col_ratio * 3, 200.0f), true);
-          for (int line = 0; line < mesh_resource.count; line++)
-          {
-            int index = line * 3;
-            char pos[16];
-            memset(pos, 0, sizeof(pos));
-            sprintf(pos, "%.2f,%.2f,%.2f", mesh_resource.position_vec3[index + 0], mesh_resource.position_vec3[index + 1], mesh_resource.position_vec3[index + 2]);
-            ImGui::Text("%s", pos);
-          }
-          ImGui::EndChild();
-          ImGui::EndGroup();
-        }
-
-        ImGui::SameLine();
-
-        // Normals
-        if(mesh_resource.normal_vec3)
-        {
-          ImGui::BeginGroup();
-          ImGui::Text("Normals");
-          ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)1), ImVec2(ImGui::GetWindowWidth() * col_ratio * 3, 200.0f), true);
-          for (int line = 0; line < mesh_resource.count; line++)
-          {
-            int index = line * 3;
-            char pos[16];
-            memset(pos, 0, sizeof(pos));
-            sprintf(pos, "%.2f,%.2f,%.2f", mesh_resource.normal_vec3[index + 0], mesh_resource.normal_vec3[index + 1], mesh_resource.normal_vec3[index + 2]);
-            ImGui::Text("%s", pos);
-          }
-          ImGui::EndChild();
-          ImGui::EndGroup();
-        }
-
-        ImGui::SameLine();
-
-        // UV
-        if(mesh_resource.texture_coords_vec2)
-        {
-          ImGui::BeginGroup();
-          ImGui::Text("UVs");
-          ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)2), ImVec2(ImGui::GetWindowWidth() * col_ratio * 2, 200.0f), true);
-          for (int line = 0; line < mesh_resource.count; line++)
-          {
-            int index = line * 2;
-            char pos[16];
-            memset(pos, 0, sizeof(pos));
-            sprintf(pos, "%.2f,%.2f", mesh_resource.texture_coords_vec2[index + 0], mesh_resource.texture_coords_vec2[index + 1]);
-            ImGui::Text("%s", pos);
-          }
-          ImGui::EndChild();
-          ImGui::EndGroup();
-        }
-
-        ImGui::SameLine();
-
-        // Colors
-        if(mesh_resource.color_vec4)
-        {
-          ImGui::BeginGroup();
-          ImGui::Text("Colors");
-          ImGui::BeginChild(ImGui::GetID((void*)(intptr_t)3), ImVec2(ImGui::GetWindowWidth() * col_ratio * 4, 200.0f), true);
-          for (int line = 0; line < mesh_resource.count; line++)
-          {
-            int index = line * 4;
-            char pos[16];
-            memset(pos, 0, sizeof(pos));
-            sprintf(pos, "%.2f,%.2f,%.2f,%.2f", mesh_resource.color_vec4[index + 0], mesh_resource.color_vec4[index + 1], mesh_resource.color_vec4[index + 2], mesh_resource.color_vec4[index + 3]);
-            ImGui::Text("%s", pos);
-          }
-          ImGui::EndChild();
-          ImGui::EndGroup();
-          ImGui::EndChild();
-          ImGui::EndGroup();
-        }
-        
-        if(update_resource)
-        {
-          Nil::Data::set(self->inspector_node, mesh_resource);
-        }
-      }
-    }
-
-
-    /*
-      Mouse
-    */
-    if(Nil::Data::has_mouse(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Mouse"))
-      {
-        Nil::Data::Mouse mouse{};
-        Nil::Data::get(self->inspector_node, mouse);
-
-        constexpr ImGuiInputTextFlags_ flags = ImGuiInputTextFlags_ReadOnly;
-
-        bool update_input = false;
-
-        ImGui::InputInt2("Pos",   (int*)mouse.position, flags);
-        ImGui::InputInt2("Delta", (int*)mouse.delta,    flags);
-        if(ImGui::Checkbox("Capture", &mouse.capture)) { update_input = true; }
-
-        if(update_input)
-        {
-          Nil::Data::set(self->inspector_node, mouse);
-        }
-      }
-    }
-
-
-    /*
-      Resource
-    */
-    if(Nil::Data::has_resource(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Resource"))
-      {
-        Nil::Data::Resource resource{};
-        Nil::Data::get(self->inspector_node, resource);
-
-        ImGui::Text("Resources are readonly atm");
-
-        constexpr ImGuiInputTextFlags_ flags = ImGuiInputTextFlags_ReadOnly;
-
-        ImGui::InputInt("Type", (int*)&resource.type, 0, 0, flags);
-        ImGui::InputText("Name", &resource.name[0], 64, flags);
-        ImGui::InputInt("Ptr", (int*)&resource.data, 0, 0, flags);
-      }
-    }
-
-
-    /*
-      Rigidbody
-    */
-    if(Nil::Data::has_rigidbody(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Rigidbody"))
-      {
-        ImGui::Text("No UI Impl");
-      }
-    }
-
-
-    /*
-      Texture
-    */
-    if(Nil::Data::has_texture(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Texture"))
-      {
-        ImGui::Text("No UI Impl");
-      }
+      inspector_data<Nil::Data::Transform>(self->inspector_node);
+      inspector_data<Nil::Data::Bounding_box>(self->inspector_node);
     }
     
-    
-    /*
-      Texture Resource
-    */
-    if(Nil::Data::has_texture_resource(self->inspector_node))
+    // Additional Data
     {
-      if(ImGui::CollapsingHeader("Texture Resource"))
-      {
-        Nil::Data::Texture_resource tex_resource{};
-        Nil::Data::get(self->inspector_node, tex_resource);
-        
-        const int flags = ImGuiInputTextFlags_ReadOnly;
-        
-        bool update_resource = false;
-        
-        if(ImGui::InputInt("ID##TexR", (int*)&tex_resource.id)) { update_resource = true; }
-        ImGui::InputInt("Components*##TexR", (int*)&tex_resource.compoents, flags);
-        ImGui::InputInt("Width*##TexR", (int*)&tex_resource.width, flags);
-        ImGui::InputInt("Height*##TexR", (int*)&tex_resource.height, flags);
-        ImGui::InputInt("Depth*##TexR", (int*)&tex_resource.depth, flags);
-        ImGui::InputInt("Dimentions*##TexR", (int*)&tex_resource.dimentions, flags);
-        
-        ImGui::Text("* Readonly");
-        
-        if(update_resource)
-        {
-          Nil::Data::set(self->inspector_node, tex_resource);
-        }
-      }
+      inspector_data<Nil::Data::Audio>(self->inspector_node);
+      inspector_data<Nil::Data::Camera>(self->inspector_node);
+      inspector_data<Nil::Data::Developer>(self->inspector_node);
+      inspector_data<Nil::Data::Gamepad>(self->inspector_node);
+      inspector_data<Nil::Data::Keyboard>(self->inspector_node);
+      inspector_data<Nil::Data::Light>(self->inspector_node);
+      inspector_data<Nil::Data::Logic>(self->inspector_node);
+      inspector_data<Nil::Data::Mouse>(self->inspector_node);
+      inspector_data<Nil::Data::Renderable>(self->inspector_node);
+      inspector_data<Nil::Data::Window>(self->inspector_node);
     }
 
-
-    /*
-      Window Data
-    */
-    if(Nil::Data::has_window(self->inspector_node))
-    {
-      if(ImGui::CollapsingHeader("Window"))
-      {
-        Nil::Data::Window window{};
-        Nil::Data::get(self->inspector_node, window);
-
-        bool update_window = false;
-        if(ImGui::InputText("Window Title##Win", window.title, 32))          { update_window = true; }
-        if(ImGui::DragInt("Width##Win", (int*)&window.width, 1, 0, 0xFFFF))  { update_window = true; }
-        if(ImGui::DragInt("Height##Win", (int*)&window.height,1, 0, 0xFFFF)) { update_window = true; }
-        if(ImGui::Checkbox("Fullscreen##Win", &window.fullscreen))           { update_window = true; }
-
-        if(update_window)
-        {
-          Nil::Data::set(self->inspector_node, window);
-        }
-      }
-    }
 
     // --------------------------------------------------------- [ Add Data ] --
 
     ImGui::Spacing();
     ImGui::Separator();
 
-    ImGui::Text("Add Other Data");
+    ImGui::Text("Add Data");
 
-    const size_t item_count = 18;
-
-    const char *items[item_count] {
+    const char *items[] {
       "Select Data",
-      "Audio",          // 1
-      "AudioResource",  // 2
-      "Camera",         // 3
-      "Collider",       // 4
-      "Developer",      // 5
-      "Gamepad",        // 6
-      "Graphics",       // 7
-      "Keyboard",       // 8
-      "Light",          // 9
-      "Logic",          // 10
-      "Material",       // 11
-      "Mesh",           // 12
-      "Mouse",          // 13
-      "Resource",       // 14
-      "Rigidbody",      // 15
-      "Texture",        // 16
-      "Window",         // 17
+      "Audio",
+      "BoundingBox",
+      "Camera",
+      "Developer",
+      "Gamepad",
+      "Keyboard",
+      "Light",
+      "Logic",
+      "Renderable",
+      "Mouse",
+      "Transform",
+      "Window",
     };
+    
+    const size_t items_count = sizeof(items) / sizeof(decltype(items[0]));
+    
+    
+    using adder_fn = void(*)(Nil::Node &node);
+    
+    adder_fn adders[] {
+      nullptr,
+      add_data<Nil::Data::Audio>,
+      add_data<Nil::Data::Bounding_box>,
+      add_data<Nil::Data::Camera>,
+      add_data<Nil::Data::Developer>,
+      add_data<Nil::Data::Gamepad>,
+      add_data<Nil::Data::Keyboard>,
+      add_data<Nil::Data::Light>,
+      add_data<Nil::Data::Logic>,
+      add_data<Nil::Data::Renderable>,
+      add_data<Nil::Data::Mouse>,
+      add_data<Nil::Data::Transform>,
+      add_data<Nil::Data::Window>,
+    };
+    
+    const size_t adders_count = sizeof(adders) / sizeof(decltype(adders[0]));
+    
+    LIB_ASSERT(adders_count == items_count);
 
     int item = 0;
-    if(ImGui::Combo("Data##New", &item, items, item_count))
+    if(ImGui::Combo("Data##New", &item, items, items_count))
     {
-      switch(item)
+      if(item && item < adders_count && adders[item])
       {
-        case(1):
-        {
-          if(!Nil::Data::has_audio(self->inspector_node))
-          {
-            Nil::Data::Audio data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(2):
-        {
-          if(!Nil::Data::has_audio_resource(self->inspector_node))
-          {
-            Nil::Data::Audio_resource data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(3):
-        {
-          if(!Nil::Data::has_camera(self->inspector_node))
-          {
-            Nil::Data::Camera data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(4):
-        {
-          if(!Nil::Data::has_collider(self->inspector_node))
-          {
-            Nil::Data::Collider data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(5):
-        {
-          if(!Nil::Data::has_developer(self->inspector_node))
-          {
-            Nil::Data::Developer data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(6):
-        {
-          if(!Nil::Data::has_gamepad(self->inspector_node))
-          {
-            Nil::Data::Gamepad data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(7):
-        {
-          if(!Nil::Data::has_graphics(self->inspector_node))
-          {
-            Nil::Data::Graphics data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(8):
-        {
-          if(!Nil::Data::has_keyboard(self->inspector_node))
-          {
-            Nil::Data::Keyboard data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(9):
-        {
-          if(!Nil::Data::has_light(self->inspector_node))
-          {
-            Nil::Data::Light data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(10):
-        {
-          if(!Nil::Data::has_logic(self->inspector_node))
-          {
-            Nil::Data::Logic data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(11):
-        {
-          if(!Nil::Data::has_renderable(self->inspector_node))
-          {
-            Nil::Data::Renderable data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(12):
-        {
-          if(!Nil::Data::has_mesh(self->inspector_node))
-          {
-            Nil::Data::Mesh data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(13):
-        {
-          if(!Nil::Data::has_mouse(self->inspector_node))
-          {
-            Nil::Data::Mouse data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(14):
-        {
-          if(!Nil::Data::has_resource(self->inspector_node))
-          {
-            Nil::Data::Resource data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(15):
-        {
-          if(!Nil::Data::has_rigidbody(self->inspector_node))
-          {
-            Nil::Data::Rigidbody data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(16):
-        {
-          if(!Nil::Data::has_texture(self->inspector_node))
-          {
-            Nil::Data::Texture data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
-        case(17):
-        {
-          if(!Nil::Data::has_window(self->inspector_node))
-          {
-            Nil::Data::Window data{};
-            Nil::Data::set(self->inspector_node, data);
-          }
-          break;
-        }
+        adders[item](self->inspector_node);
       }
     }
 
@@ -1385,14 +605,41 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       ImGui::MenuItem("Graph", nullptr, &self->show_graph);
       ImGui::MenuItem("Graph-Raw", nullptr, &self->show_raw_graph);
+      
       if(ImGui::BeginMenu("Data##NilMenu"))
       {
-        ImGui::MenuItem("Camera##NilMenu",      nullptr, &self->show_data_camera);
-        ImGui::MenuItem("Textures##NilMenu",    nullptr, &self->show_data_textures);
-        ImGui::MenuItem("Renderables##NilMenu", nullptr, &self->show_data_renderables);
+        ImGui::MenuItem("Overview##NMenu",  nullptr, &self->show_data_overview);
+        ImGui::Separator();
+        ImGui::MenuItem("Audio##NMenu",       nullptr, &self->show_data_audio);
+        ImGui::MenuItem("BoundingBox##NMenu", nullptr, &self->show_data_bbox);
+        ImGui::MenuItem("Camera##NMenu",      nullptr, &self->show_data_camera);
+        ImGui::MenuItem("Collider##NMenu",    nullptr, &self->show_data_collider);
+        ImGui::MenuItem("Developer##NMenu",   nullptr, &self->show_data_developer);
+        ImGui::MenuItem("Gamepad##NMenu",     nullptr, &self->show_data_gamepad);
+        ImGui::MenuItem("Keyboard##NMenu",    nullptr, &self->show_data_keyboard);
+        ImGui::MenuItem("Light##NMenu",       nullptr, &self->show_data_light);
+        ImGui::MenuItem("Logic##NMenu",       nullptr, &self->show_data_logic);
+        ImGui::MenuItem("Mouse##NMenu",       nullptr, &self->show_data_mouse);
+        ImGui::MenuItem("Renderable##NMenu",  nullptr, &self->show_data_renderables);
+        ImGui::MenuItem("Rigidbody##NMenu",   nullptr, &self->show_data_rigidbody);
+        ImGui::MenuItem("Transform##NMenu",   nullptr, &self->show_data_transform);
+        ImGui::MenuItem("Window##NMenu",      nullptr, &self->show_data_window);
         
         ImGui::EndMenu();
       }
+      
+      if(ImGui::BeginMenu("Resources##NilMenu"))
+      {
+        ImGui::MenuItem("Overview##NMenu",  nullptr, &self->show_rsrc_overview);
+        ImGui::Separator();
+      
+        ImGui::MenuItem("Materials##NMenu", nullptr, &self->show_rsrc_materials);
+        ImGui::MenuItem("Textures##NMenu",  nullptr, &self->show_rsrc_textures);
+        ImGui::MenuItem("Meshes##NMenu",    nullptr, &self->show_rsrc_meshes);
+        
+        ImGui::EndMenu();
+      }
+      
       ImGui::MenuItem("Node Events", nullptr, &self->show_node_events);
 
       ImGui::Separator();
@@ -1404,12 +651,28 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
       ImGui::EndMenu();
     }
-
-    for(auto &menu : self->dev_data)
+    
+    if(ImGui::BeginMenu("Lib"))
     {
-      using fn = void(*)(uintptr_t user_data);
-
-      ((fn)menu.aux_01)(menu.aux_02);
+      ImGui::MenuItem("Memory", nullptr, &self->show_lib_memory);
+      
+      ImGui::EndMenu();
+    }
+    
+    {
+      size_t count = 0;
+      Nil::Data::Developer *dev = nullptr;
+      
+      Nil::Data::get(&count, &dev);
+      
+      for(size_t i = 0; i < count; ++i)
+      {
+        if(dev[i].type_id == 1 && dev[i].aux_01)
+        {
+          using fn = void(*)(uintptr_t user_data);
+          ((fn)dev[i].aux_01)(dev[i].aux_02);
+        }
+      }
     }
 
     ImGui::EndMainMenuBar();
@@ -1418,16 +681,37 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   // --------------------------------------------------------- [ Other Menu ] --
 
-  for(auto &menu : self->dev_data)
+  
   {
-    using fn = void(*)(uintptr_t user_data);
+    size_t count = 0;
+    Nil::Data::Developer *dev = nullptr;
     
-    if(menu.aux_03)
+    Nil::Data::get(&count, &dev);
+    
+    for(size_t i = 0; i < count; ++i)
     {
-      ((fn)menu.aux_03)(menu.aux_04);
+      if(dev[i].type_id == 1 && dev[i].aux_03)
+      {
+        using fn = void(*)(uintptr_t user_data);
+        ((fn)dev[i].aux_03)(dev[i].aux_04);
+      }
     }
   }
+  
+  
+  // ----------------------------------------------------------- [ Lib Menu ] --
 
+  if(self->show_lib_memory)
+  {
+    ImGui::Begin("Lib Memory Viewer", &self->show_lib_memory);
+    {
+      ImGui::Text("Bucket Capacity: %zu", lib::mem::bucket_capacity());
+      ImGui::Text("Bucket Stride: %zu", lib::mem::bucket_stride());
+      ImGui::Text("Buckets Used: %zu", lib::mem::buckets_in_use());
+      
+      ImGui::End();
+    }
+  }
 }
 
 

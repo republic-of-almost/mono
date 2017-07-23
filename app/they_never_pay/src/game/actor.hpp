@@ -2,7 +2,7 @@
 #define ACTOR_INCLUDED_2F369057_567B_46D2_8C7F_3D3EC28523A9
 
 
-#include <nil/node.hpp>
+#include <roa/roa.hpp>
 
 
 namespace Game {
@@ -10,8 +10,8 @@ namespace Game {
 
 struct Actor
 {
-  Nil::Node entity;
-  Nil::Node head;
+  ROA::Object entity;
+  ROA::Object head;
   
   float accum_pitch;
   float accum_yaw;

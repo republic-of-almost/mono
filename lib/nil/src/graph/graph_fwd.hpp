@@ -18,7 +18,7 @@ namespace Graph {
 
 
 struct Data;
-struct Event;
+//struct Event;
 
 
 } // ns

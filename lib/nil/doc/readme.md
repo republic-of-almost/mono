@@ -3,10 +3,28 @@
 Nil is a combination of the data that represents the application and a scene graph.
 
 
-## Data
+## Design Goal
 
-Most data has to be attached to a node for it to exist. The exceptions are Transforms and bounding boxes that are added by default. This data is special cased because both are quite often used anyway and both have inherited properties.
+The goal of Nil is to provide a graph which data can be attached, and a mechanism to allow other libraries to deal with resources and object lifetime.
 
+Other than controlling callbacks and the graph. Nil doesn't actually do any work.
+
+
+## Data and Resources
+
+Most data has to be attached to a node for it to exist. The exceptions are Transforms that are added by default. This data is special cased because both are quite often used anyway and have inherited properties.
+
+Nil also has the concept of resources which are assets, data's who's lifetime is not attached to the lifetime of a node.
+
+
+## Future Things and TODO
+
+  - Nice to move out transforms from the graph, and have graph just nodes, and transforms as data like the rest of them.
+
+
+## Examples
+
+How to examples.
 
 ### Setting Data
 

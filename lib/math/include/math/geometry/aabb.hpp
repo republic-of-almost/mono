@@ -22,9 +22,12 @@ _MATH_NS_OPEN
 // ------------------------------------------------------------ [ Interface ] --
  
 
+MATH_AABB_INLINE aabb         aabb_init();
 MATH_AABB_INLINE aabb         aabb_init(const vec3 min, const vec3 max);
 MATH_AABB_INLINE aabb         aabb_init(const vec3 center, const float scale);
-MATH_AABB_INLINE aabb         aabb_init_from_xyz_data(const float vertex[], const size_t number_of_floats);
+MATH_AABB_INLINE aabb         aabb_init(const float vertex[], const size_t number_of_floats);
+
+MATH_AABB_INLINE aabb         aabb_combine(const aabb &a, const aabb &b);
 
 MATH_AABB_INLINE vec3         aabb_get_extents(const aabb &a);
 MATH_AABB_INLINE vec3         aabb_get_half_extents(const aabb &a);
@@ -40,6 +43,13 @@ MATH_AABB_INLINE bool         aabb_intersection_test(const aabb &a, const aabb &
 
 
 // ----------------------------------------------------------------- [ Impl ] --
+
+
+aabb
+aabb_init()
+{
+  return aabb_init(MATH_NS_NAME::vec3_zero(), MATH_NS_NAME::vec3_zero());
+}
 
 
 aabb
@@ -69,10 +79,16 @@ aabb_init(const vec3 center, const float scale)
 
 
 aabb
-aabb_init_from_xyz_data(const float vertex[],
-                        const size_t number_of_floats)
+aabb_init(
+  const float vertex[],
+  const size_t number_of_floats)
 {
-  aabb out_aabb;
+  aabb out_aabb = aabb_init();
+  
+  if(number_of_floats == 0)
+  {
+    return out_aabb;
+  }
 
   // Check is valid.
   assert((number_of_floats % 3) == 0);
@@ -82,32 +98,56 @@ aabb_init_from_xyz_data(const float vertex[],
   }
 
   // Calculate min, max
-  float max_x(vertex[0]);
-  float max_y(vertex[1]);
-  float max_z(vertex[2]);
+  float max_x(float_min());
+  float max_y(float_min());
+  float max_z(float_min());
 
-  float min_x(vertex[0]);
-  float min_y(vertex[1]);
-  float min_z(vertex[2]);
+  float min_x(float_max());
+  float min_y(float_max());
+  float min_z(float_max());
 
-  for(size_t i = 0; i < number_of_floats / 3; ++i)
+  const size_t count = number_of_floats / 3;
+
+  for(size_t i = 0; i < count; ++i)
   {
     size_t index = i * 3;
 
-    max_x = max(vertex[index + 0], max_x);
-    min_x = min(vertex[index + 0], min_x);
+    const float x_val = vertex[index + 0];
+    
+    max_x = max(x_val, max_x);
+    min_x = min(x_val, min_x);
 
-    max_y = max(vertex[index + 1], max_y);
-    min_y = min(vertex[index + 1], min_y);
+    const float y_val = vertex[index + 1];
+    max_y = max(y_val, max_y);
+    min_y = min(y_val, min_y);
 
-    max_z = max(vertex[index + 2], max_z);
-    min_z = min(vertex[index + 2], min_z);
+    const float z_val = vertex[index + 2];
+    max_z = max(z_val, max_z);
+    min_z = min(z_val, min_z);
   }
 
   out_aabb.max = vec3_init(max_x, max_y, max_z);
   out_aabb.min = vec3_init(min_x, min_y, min_z);
 
   return out_aabb;
+}
+
+
+aabb
+aabb_combine(const aabb &a, const aabb &b)
+{
+  return aabb_init(
+    MATH_NS_NAME::vec3_init(
+      MATH_NS_NAME::min(MATH_NS_NAME::get_x(a.min), MATH_NS_NAME::get_x(b.min)),
+      MATH_NS_NAME::min(MATH_NS_NAME::get_y(a.min), MATH_NS_NAME::get_y(b.min)),
+      MATH_NS_NAME::min(MATH_NS_NAME::get_z(a.min), MATH_NS_NAME::get_z(b.min))
+    ),
+    MATH_NS_NAME::vec3_init(
+      MATH_NS_NAME::max(MATH_NS_NAME::get_x(a.max), MATH_NS_NAME::get_x(b.max)),
+      MATH_NS_NAME::max(MATH_NS_NAME::get_y(a.max), MATH_NS_NAME::get_y(b.max)),
+      MATH_NS_NAME::max(MATH_NS_NAME::get_z(a.max), MATH_NS_NAME::get_z(b.max))
+    )
+  );
 }
 
 

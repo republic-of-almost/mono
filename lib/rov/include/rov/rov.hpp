@@ -63,7 +63,8 @@ uint32_t    rov_createMesh(
               const float *pos,
               const float *normals,
               const float *tex_coords,
-              size_t count);
+              size_t count,
+              uintptr_t *out_platform_resource = nullptr);
 
 
 uint32_t    rov_createLights(
@@ -91,7 +92,10 @@ void        rov_startRenderPass(
 // ----------------------------------------------------- [ General Settings ] --
 
 
+void        rov_setColor(const float col[4]);
 void        rov_setColor(float r, float g, float b, float a);
+void        rov_setColor(uint32_t color);
+
 void        rov_setCamera(const float view[16], const float proj[16]);
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);

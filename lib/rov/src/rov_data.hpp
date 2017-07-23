@@ -44,6 +44,7 @@ struct rovRenderPass
   rovVec3 eye_position;
 
   uint32_t clear_flags;
+  uint32_t clear_color;
 
   lib::array<rovMaterial> materials;
   lib::array<rovDrawCall> draw_calls;
@@ -56,7 +57,8 @@ constexpr uint32_t rov_max_textures = 3;
 
 struct rovData
 {
-  float       curr_rov_clear_color[4]{0, 0, 0, 1};
+  rovVec4     curr_rov_clear_color;
+  rovVec4     curr_rov_color;
   uint8_t     curr_rov_textures[rov_max_textures]{0};
   uint32_t    curr_rov_mesh = curr_rov_mesh;
   uint8_t     curr_rov_mesh_shader = rovShader_Fullbright;

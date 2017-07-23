@@ -1,8 +1,5 @@
 #include <game/environment.hpp>
-#include <nil/data/material.hpp>
-#include <nil/data/transform.hpp>
-#include <nil/data/logic.hpp>
-#include <lib/assert.hpp>
+#include <lib/utilities.hpp>
 #include <math/math.hpp>
 
 
@@ -20,47 +17,43 @@ namespace {
 
 
 inline void
-think(Nil::Node node, uintptr_t user_data)
+think(ROA::Object node)
 {
   static float env_time = 0.f;
   env_time += 0.16f * 0.005f;
+  
+  const size_t child_count = node.get_child_count();
 
-  for(uint32_t i = 0; i < env_count; ++i)
+  for(size_t i = 0; i < child_count; ++i)
   {
-    Nil::Node child = node.get_child(i);
+    ROA::Object child = node.get_child(i);
     
     constexpr float radius = 15.f;
     const float time = i;
     const float half_root_two = math::root_two() * 0.5f;
+    const float offset = time + env_time;
     
     const float y = i / 20.f;
-    const float x = math::clamp(math::cos(time + env_time), -half_root_two, +half_root_two) * (radius + y);
-    const float z = math::clamp(math::sin(time + env_time), -half_root_two, +half_root_two) * (radius + y);
+    const float x = math::clamp(math::cos(offset), -half_root_two, +half_root_two) * (radius + y);
+    const float z = math::clamp(math::sin(offset), -half_root_two, +half_root_two) * (radius + y);
     
-    float rgba[] = {1.f, (y / 10.f) * 1.f, 1.f, 1.f};
+    float rgba[] = {1.f, (y / 10.f), 1.f, 1.f};
     
-    Nil::Data::Material material{};
-    Nil::Data::get(child, material);
+    char name[32]{};
+    sprintf(name, "Env%zuMat", i);
     
-    memcpy(material.color, rgba, sizeof(material.color));
+    const ROA::Material mat(
+      name,
+      ROA::Color(rgba)
+    );
+    LIB_ASSERT(mat.is_valid());
     
-    Nil::Data::set(child, material);
-    
-    const float default_scale = 2.f;
+    const float default_scale = 4.f;
     const float scale_up = default_scale * ((float)i / 10.f);
     
-    Nil::Data::Transform transform{};
-    Nil::Data::get(child, transform);
-    
-    transform.scale[0] = default_scale;
-    transform.scale[1] = scale_up;
-    transform.scale[2] = default_scale;
-    
-    transform.position[0] = x;
-    transform.position[1] = y;
-    transform.position[2] = z;
-    
-    Nil::Data::set(child, transform);
+    ROA::Transform transform = child.get_transform();
+    transform.set_scale(ROA::Vector3(default_scale, scale_up, default_scale));
+    transform.set_position(ROA::Vector3(x, y, z));
   }
 }
 
@@ -75,27 +68,36 @@ setup(Environment *env)
   
   env->entity.set_name("Environment");
   
+  ROA::Model::load("mesh/unit_bev_cube.obj");
+  ROA::Mesh mesh("Unit_bev_cube");
+
   // Child nodes
   for(uint32_t i = 0; i < env_count; ++i)
   {
-    Nil::Node node;
+    ROA::Object node;
     node.set_name("Env");
     node.set_parent(env->entity);
     
-    Nil::Data::Material material{};
-    Nil::Data::set(node, material);
+    char name[16]{};
+    sprintf(name, "Env%dMat", i);
+    
+    ROA::Material mat(name);
+    mat.set_color(ROA::Color(0xFF00FFFF));
+    
+    ROA::Renderable renderable;
+    renderable.set_material(mat);
+    renderable.set_mesh(mesh);
+    
+    node.set_renderable(renderable);
   }
   
   // Callbacks
   {
-    Nil::Data::Logic logic{};
+    ROA::Logic logic;
     
-    logic.logic_id = 1;
-    logic.user_data = (uintptr_t)env;
+    logic.update_func(think);
     
-    logic.think_01 = think;
-    
-    Nil::Data::set(env->entity, logic);
+    env->entity.set_logic(logic);
   }
 }
 

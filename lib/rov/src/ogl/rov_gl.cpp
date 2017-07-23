@@ -25,7 +25,7 @@ namespace ROV_Internal {
 void
 ogl_init(rovGLData *gl_data)
 {
-  rmt_BindOpenGL();
+//  rmt_BindOpenGL();
 
   #ifdef GL_HAS_VAO
   glGenVertexArrays(1, &gl_data->vao);
@@ -46,7 +46,7 @@ ogl_init(rovGLData *gl_data)
 
     rovGLMeshProgram lit{};
     const bool lit_success = ogl_createProgram(
-      "../Resources/assets/rov/ogl/lit_ogl.glsl",
+      "../Resources/assets/rov/ogl/mesh_renderer.glsl",
       nullptr,
       nullptr,
       nullptr,
@@ -54,17 +54,7 @@ ogl_init(rovGLData *gl_data)
     );
     gl_data->rov_mesh_programs.emplace_back(lit);
     
-    rovGLMeshProgram dir_light{};
-    const bool dir_success = ogl_createProgram(
-      "../Resources/assets/rov/ogl/dir_light_ogl.glsl",
-      nullptr,
-      nullptr,
-      nullptr,
-      &dir_light.program
-    );
-    gl_data->rov_mesh_programs.emplace_back(dir_light);
-
-    LIB_ASSERT(fb_success && lit_success && dir_success);
+    LIB_ASSERT(fb_success && lit_success);
     
     for(rovGLMeshProgram &prog : gl_data->rov_mesh_programs)
     {
@@ -101,7 +91,7 @@ ogl_init(rovGLData *gl_data)
       nullptr,
       &line.program
     );
-
+    
     gl_data->rov_line_programs.emplace_back(line);
 
     // Get Uniforms //

@@ -1,11 +1,8 @@
 #include <game/static_objects.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/data/renderable.hpp>
-#include <nil/data/mesh.hpp>
-#include <nil/data/mesh_resource.hpp>
 #include <lib/logging.hpp>
 #include <math/general/general.hpp>
-#include <assets/cube_mesh.hpp>
 #include <data/data.hpp>
 #include <stdlib.h>
 
@@ -38,25 +35,17 @@ setup(Static_objects *obj)
   
   // Material
   {
-    Nil::Data::Renderable material{};
+    Nil::Data::Renderable renderable{};
     
-    const float color[] = {0.5f, 0.f, 0.5f, 1.f};
-    memcpy(material.color, color, sizeof(material.color));
+//    const float color[] = {0.5f, 0.f, 0.5f, 1.f};
+//    memcpy(material.color, color, sizeof(material.color));
     
     LOG_TODO_ONCE("Get rid of magic number");
     
-    material.shader = Nil::Data::Renderable::FULLBRIGHT;
+//    material.shader = Nil::Data::Renderable::FULLBRIGHT;
     
-    Nil::Data::set(obj->object, material);
-  }
-  
-  // Mesh Instance
-  {
-    Nil::Data::Mesh mesh{};
-    mesh.mesh_id = (uint32_t)Game_asset::CUBE;
-    
-    Nil::Data::set(obj->object, mesh);
-  }
+    Nil::Data::set(obj->object, renderable);
+  }  
 }
 
 
