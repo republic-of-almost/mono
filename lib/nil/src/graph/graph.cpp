@@ -8,7 +8,7 @@
 #include <lib/bits.hpp>
 #include <lib/key.hpp>
 #include <lib/entity.hpp>
-
+#include <lib/string.hpp>
 
 namespace Nil {
 namespace Graph {

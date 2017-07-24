@@ -51,7 +51,11 @@ load(const char *name, Mesh &in_out)
   
   if(check_key)
   {
-    LOG_WARNING("Mesh with this name already exists.");
+    char msg[2048]{};
+    strcat(msg, "Mesh with name '");
+    strcat(msg, name);
+    strcat(msg, "' already exists");
+    LOG_WARNING(msg);
     return false;
   }
   else

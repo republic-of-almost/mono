@@ -25,5 +25,9 @@ table.insert(
     inc_dirs = {
       make.get_proj_root() .. "../include/",
     },
+
+    link_dependencies_linux = {
+      "dl",
+    },
   }
 )

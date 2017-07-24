@@ -37,7 +37,10 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
   glfwSetErrorCallback([](int error, const char* description)
   {
-    LOG_ERROR("GLFW Error - Set break point for more info.");
+    char err_msg[2048]{};
+    strcat(err_msg, description);
+    //LOG_ERROR("GLFW Error - Set break point for more info.");
+    LOG_ERROR(err_msg);
   });
 }
 
@@ -141,7 +144,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         self->window_node = nodes[0];
 
 //        glfwSetErrorCallback(error_callback);
-//        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
@@ -164,23 +167,30 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         self->window = glfwCreateWindow(win_data.width, win_data.height, win_data.title, NULL, NULL);
         glfwSetWindowUserPointer(self->window, self);
 
+        LIB_ASSERT(self->window);
 
-        #ifndef __EMSCRIPTEN__
+        char gfx_init_msg[2048]{};
+
+        //#ifndef __EMSCRIPTEN__
 
         glfwMakeContextCurrent(self->window);
-        gl3wInit();
+        const int err = gl3wInit();
+        printf("GLFW k %d\n", err);
 
         win_data.type = Nil::Data::Window::OGL;
 
         glGetIntegerv(GL_MAJOR_VERSION, (GLint*)&win_data.major);
         glGetIntegerv(GL_MINOR_VERSION, (GLint*)&win_data.minor);
 
-        #else
+        //#else
 
-        gfx.major = 2.0;
-        gfx.minor = 1.0;
+        //win_data.major = 2.0;
+        //win_data.minor = 1.0;
 
-        #endif
+        //#endif
+
+        sprintf(gfx_init_msg, "Init GFX with version, %d, %d", win_data.major, win_data.minor);
+        LOG_INFO(gfx_init_msg);
 
         #ifndef NIMGUI
         ImGui_ImplGlfwGL3_Init(self->window, true);
@@ -188,7 +198,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         #endif
 
         Nil::Data::set(self->window_node, win_data);
-
+        
         // Resize
         glfwSetWindowSizeCallback(
           self->window,

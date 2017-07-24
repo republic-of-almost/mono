@@ -19,9 +19,9 @@ ROV_Internal::rovData rov_data;
 
 
 void
-rov_initialize()
+rov_initialize(const char *asset_prefix)
 {
-  ROV_Internal::ogl_init(&gl_data);
+  ROV_Internal::ogl_init(&gl_data, asset_prefix);
 }
 
 
@@ -228,7 +228,7 @@ rov_submitMeshTransform(const float world[16])
 
   const size_t mat_count = rov_data.rov_render_passes.back().materials.size();
   ROV_Internal::rovMaterial *mat = rov_data.rov_render_passes.back().materials.data();
-  
+
   for(size_t i = 0; i < mat_count; ++i)
   {
     // Found a same material

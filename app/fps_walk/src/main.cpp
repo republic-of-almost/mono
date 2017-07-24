@@ -17,46 +17,32 @@
 #include <game/environment.hpp>
 #include <game/actor.hpp>
 
-
-void
-app_tick()
-{
-  #ifdef __EMSCRIPTEN__
-  nil_engine.run();
-  #endif
-}
-
+#include <roa/roa.hpp>
 
 int
 main()
 {
   lib::logging::set_output(lib::logging::out::console);
-  
-  Nil::Engine nil_engine;
-  Nil_ext::load_aspects(nil_engine);
+
+  ROA::Application app;
 
   Game_data::setup();
 
   Game::Ground ground_entity;
   Game::setup(&ground_entity);
-  
+
   Game::Environment environment_entity;
   Game::setup(&environment_entity);
-  
+
   Game::Actor actor_entity;
   Game::setup(&actor_entity);
 
   /*
     Run Game
   */
-  #ifdef __EMSCRIPTEN__
-  emscripten_set_main_loop(app_tick, -1, 1);
-  #else
-  while(nil_engine.run())
-  {
-    app_tick();
-  }
-  #endif
+  app.run([](uintptr_t user_data){
+    // No custom tick
+  });
 
   return 0;
 }

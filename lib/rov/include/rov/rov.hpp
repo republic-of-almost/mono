@@ -42,7 +42,7 @@ struct rovLight
 // ------------------------------------------------------------- [ Lifetime ] --
 
 
-void        rov_initialize();
+void        rov_initialize(const char *asset_prefix);
 void        rov_destroy();
 void        rov_execute();
 
