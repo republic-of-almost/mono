@@ -1,8 +1,17 @@
 #include <common/common.hpp>
 #include <roa/object.hpp>
+#include <nil/nil.hpp>
 
 
 namespace ROA_detail {
+
+
+Nil::Engine&
+get_engine()
+{
+  static Nil::Engine engine;
+  return engine;
+}
 
 
 Nil::Node

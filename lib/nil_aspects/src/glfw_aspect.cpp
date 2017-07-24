@@ -174,6 +174,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         //#ifndef __EMSCRIPTEN__
 
         glfwMakeContextCurrent(self->window);
+        glfwSwapInterval(1);
         const int err = gl3wInit();
         printf("GLFW k %d\n", err);
 
@@ -198,7 +199,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         #endif
 
         Nil::Data::set(self->window_node, win_data);
-        
+
         // Resize
         glfwSetWindowSizeCallback(
           self->window,
@@ -231,7 +232,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         double x_pos, y_pos;
         glfwGetCursorPos(self->window, &x_pos, &y_pos);
         glfwSetInputMode(self->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        
+
         self->last_mouse[0] = (float)x_pos;
         self->last_mouse[1] = (float)y_pos;
 
@@ -285,7 +286,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
                 self->keys[nil_key] = input_action;
               }
             }
-            
+
             // IMGUI
             ImGuiIO& io = ImGui::GetIO();
             if (action == GLFW_PRESS)
@@ -320,15 +321,15 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       Nil::Data::set(nodes[i], data[i]);
     }
   }
-  
+
   // Modified Mice
   {
     size_t count = 0;
     Nil::Data::Mouse *data = nullptr;
     Nil::Node *nodes;
-    
+
     Nil::Data::events(Nil::Data::Event::UPDATED, &count, &data, &nodes);
-    
+
     for(size_t i = 0; i < count; ++i)
     {
       const int mode = data[i].capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;

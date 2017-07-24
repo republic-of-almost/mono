@@ -94,7 +94,7 @@ get_delta(const ::LIB_NS_NAME::milliseconds &start, const ::LIB_NS_NAME::millise
 
 float
 to_seconds(const ::LIB_NS_NAME::milliseconds &milli) {
-  return static_cast<float>(milli) / 1000.0f;
+  return static_cast<float>(milli) / 1000.f;
 }
 
 
