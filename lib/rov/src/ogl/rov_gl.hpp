@@ -51,7 +51,7 @@ struct rovGLMeshProgram
   GLint vs_in_uv;
 
   GLint uni_tex[rov_max_texture_maps];
-  
+
   GLint uni_buffer_01;
   GLint uni_light_count;
 
@@ -98,7 +98,7 @@ struct rovGLData
 // ---------------------------------------------------------- [ GL Lifetime ] --
 
 
-void        ogl_init(rovGLData *gl_data);
+void        ogl_init(rovGLData *gl_data, const char *asset_prefix);
 void        ogl_destroy(rovGLData *gl_data);
 
 
@@ -114,7 +114,7 @@ format_to_gl_internal(uint32_t format)
     case(rovPixel_RG8):   return GL_RG8;
     case(rovPixel_RGB8):  return GL_RGB8;
     case(rovPixel_RGBA8): return GL_RGBA8;
-    
+
     default:
       return GL_RGB8;
   }
@@ -129,7 +129,7 @@ format_to_gl_format(uint32_t format)
     case(rovPixel_RG8):   return GL_RG;
     case(rovPixel_RGB8):  return GL_RGB;
     case(rovPixel_RGBA8): return GL_RGBA;
-    
+
     default:
       return GL_RGB;
   }
@@ -145,7 +145,7 @@ format_to_gl_type(uint32_t format)
     case(rovPixel_RGB8):
     case(rovPixel_RGBA8):
       return GL_UNSIGNED_BYTE;
-    
+
     default:
       return GL_UNSIGNED_BYTE;
   }

@@ -34,7 +34,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->show_raw_graph        = false;
   self->show_node_events      = false;
   self->show_menu             = true;
-  
+
   self->show_data_overview    = false;
   self->show_data_audio       = false;
   self->show_data_bbox        = false;
@@ -50,7 +50,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->show_data_rigidbody   = false;
   self->show_data_transform   = false;
   self->show_data_window      = false;
-  
+
   self->show_rsrc_overview    = false;
   self->show_rsrc_materials   = false;
   self->show_rsrc_textures    = false;
@@ -87,15 +87,15 @@ inline void
 inspector_data(Nil::Node &node)
 {
   T data{};
-  
+
   if(Nil::Data::has(node, data))
   {
     const char *data_name = Nil::Data::get_type_name(data);
-  
+
     if(ImGui::CollapsingHeader(data_name))
     {
       Nil::Data::get(node, data);
-      
+
       if(Nil::ImGUI::render_data(&data))
       {
         Nil::Data::set(node, data);
@@ -166,9 +166,9 @@ render_data(bool *window)
     char name[1024]{};
     strcat(name, Nil::Data::get_type_name(T{}));
     strcat(name, " Data##DPool");
-  
+
     ImGui::Begin(name, window);
-    
+
     size_t count = 0;
     T *data = nullptr;
     Nil::Data::get(&count, &data);
@@ -177,7 +177,7 @@ render_data(bool *window)
     {
       Nil::ImGUI::render_data(data, count);
     }
-    
+
     ImGui::End();
   }
 }
@@ -192,15 +192,15 @@ render_rsrc(bool *window)
     char name[1024]{};
     strcat(name, Nil::Resource::get_type_name(T{}));
     strcat(name, " Resource##RPool");
-  
+
     ImGui::Begin(name, window);
-    
+
     size_t count = 0;
     T *rsrc;
     Nil::Resource::get(&count, &rsrc);
-    
+
     Nil::ImGUI::render_resource(rsrc, count);
-    
+
     ImGui::End();
   }
 }
@@ -214,7 +214,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-  
+
   BENCH_SCOPED_CPU(Logic_Think)
 
   Nil::Node root = Nil::Node(0, false);
@@ -224,7 +224,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
   // Overview
-  render_data<Nil::Data::Audio>(&self->show_data_audio);
+  // render_data<Nil::Data::Audio>(&self->show_data_audio);
 //  render_data<Nil::Data::Bounding_box>(&self->show_data_bbox);
   render_data<Nil::Data::Camera>(&self->show_data_camera);
   render_data<Nil::Data::Developer>(&self->show_data_developer);
@@ -236,16 +236,16 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   render_data<Nil::Data::Renderable>(&self->show_data_renderables);
 //  render_data<Nil::Data::Transform>(&self->show_data_transform);
   render_data<Nil::Data::Window>(&self->show_data_window);
-  
-  
+
+
   // ---------------------------------------------------------- [ Resources ] --
-  
+
 
   // Overview
   render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
   render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
   render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
-  
+
 
   // ---------------------------------------------------------- [ Raw Graph ] --
 
@@ -357,25 +357,25 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     size_t count = 0;
     Nil::Data::Camera *cam = 0;
     Nil::Data::get(&count, &cam);
-    
+
     ImGuiIO& io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-    
+
     Nil::Data::Transform trans{};
     Nil::Data::get(self->inspector_node, trans);
-    
+
     math::transform m_trans = math::transform_init(
       math::vec3_init(trans.position),
       math::vec3_init(trans.scale),
       math::quat_init(trans.rotation)
     );
-    
+
 //    math::mat4 view = math::mat4_lookat(
 //      m_trans.position,
 //      math::vec3_add(m_trans.position, math::transform_fwd(m_trans)),
 //      math::transform_up(m_trans)
 //    );
-    
+
     math::mat4 proj = math::mat4_projection(
       cam[0].width * io.DisplaySize.x,
       cam[0].height * io.DisplaySize.y,
@@ -383,12 +383,12 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       cam[0].far_plane,
       cam[0].fov
     );
-    
+
     math::mat4 world = math::transform_get_world_matrix(m_trans);
 //    math::mat4 world = math::mat4_id();
-    
+
     ImGuizmo::Enable(true);
-    
+
 //    ImGuizmo::DrawCube(cam[0].view_mat, proj.data, world.data);
     ImGuizmo::Manipulate(
       cam[0].view_mat,
@@ -397,25 +397,25 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       ImGuizmo::MODE::WORLD,
       world.data
     );
-    
+
     float rot[3];
     ImGuizmo::DecomposeMatrixToComponents(world.data, trans.position, rot, trans.scale);
-    
+
     Nil::Data::set(self->inspector_node, trans);
-    
+
     bool inspector_open = true;
     ImGui::Begin("Inspector", &inspector_open);
-    
+
     ImGui::Text("Node Information");
-    
+
     char name_buf[16]{0};
     strcat(name_buf, self->inspector_node.get_name());
-    
+
     if(ImGui::InputText("Name##Node", name_buf, 16))
     {
       self->inspector_node.set_name(name_buf);
     }
-    
+
     uint32_t node_id = self->inspector_node.get_id();
     ImGui::InputInt("ID", (int*)&node_id, 0, 0, ImGuiInputTextFlags_ReadOnly);
 
@@ -470,16 +470,16 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Text("Node Data");
-    
+
     // Default Data
     {
       inspector_data<Nil::Data::Transform>(self->inspector_node);
       inspector_data<Nil::Data::Bounding_box>(self->inspector_node);
     }
-    
+
     // Additional Data
     {
-      inspector_data<Nil::Data::Audio>(self->inspector_node);
+      // inspector_data<Nil::Data::Audio>(self->inspector_node);
       inspector_data<Nil::Data::Camera>(self->inspector_node);
       inspector_data<Nil::Data::Developer>(self->inspector_node);
       inspector_data<Nil::Data::Gamepad>(self->inspector_node);
@@ -501,7 +501,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
     const char *items[] {
       "Select Data",
-      "Audio",
+      // "Audio",
       "BoundingBox",
       "Camera",
       "Developer",
@@ -514,15 +514,15 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       "Transform",
       "Window",
     };
-    
+
     const size_t items_count = sizeof(items) / sizeof(decltype(items[0]));
-    
-    
+
+
     using adder_fn = void(*)(Nil::Node &node);
-    
+
     adder_fn adders[] {
       nullptr,
-      add_data<Nil::Data::Audio>,
+      // add_data<Nil::Data::Audio>,
       add_data<Nil::Data::Bounding_box>,
       add_data<Nil::Data::Camera>,
       add_data<Nil::Data::Developer>,
@@ -535,9 +535,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       add_data<Nil::Data::Transform>,
       add_data<Nil::Data::Window>,
     };
-    
+
     const size_t adders_count = sizeof(adders) / sizeof(decltype(adders[0]));
-    
+
     LIB_ASSERT(adders_count == items_count);
 
     int item = 0;
@@ -605,7 +605,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       ImGui::MenuItem("Graph", nullptr, &self->show_graph);
       ImGui::MenuItem("Graph-Raw", nullptr, &self->show_raw_graph);
-      
+
       if(ImGui::BeginMenu("Data##NilMenu"))
       {
         ImGui::MenuItem("Overview##NMenu",  nullptr, &self->show_data_overview);
@@ -624,22 +624,22 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         ImGui::MenuItem("Rigidbody##NMenu",   nullptr, &self->show_data_rigidbody);
         ImGui::MenuItem("Transform##NMenu",   nullptr, &self->show_data_transform);
         ImGui::MenuItem("Window##NMenu",      nullptr, &self->show_data_window);
-        
+
         ImGui::EndMenu();
       }
-      
+
       if(ImGui::BeginMenu("Resources##NilMenu"))
       {
         ImGui::MenuItem("Overview##NMenu",  nullptr, &self->show_rsrc_overview);
         ImGui::Separator();
-      
+
         ImGui::MenuItem("Materials##NMenu", nullptr, &self->show_rsrc_materials);
         ImGui::MenuItem("Textures##NMenu",  nullptr, &self->show_rsrc_textures);
         ImGui::MenuItem("Meshes##NMenu",    nullptr, &self->show_rsrc_meshes);
-        
+
         ImGui::EndMenu();
       }
-      
+
       ImGui::MenuItem("Node Events", nullptr, &self->show_node_events);
 
       ImGui::Separator();
@@ -651,20 +651,20 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
       ImGui::EndMenu();
     }
-    
+
     if(ImGui::BeginMenu("Lib"))
     {
       ImGui::MenuItem("Memory", nullptr, &self->show_lib_memory);
-      
+
       ImGui::EndMenu();
     }
-    
+
     {
       size_t count = 0;
       Nil::Data::Developer *dev = nullptr;
-      
+
       Nil::Data::get(&count, &dev);
-      
+
       for(size_t i = 0; i < count; ++i)
       {
         if(dev[i].type_id == 1 && dev[i].aux_01)
@@ -681,13 +681,13 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
   // --------------------------------------------------------- [ Other Menu ] --
 
-  
+
   {
     size_t count = 0;
     Nil::Data::Developer *dev = nullptr;
-    
+
     Nil::Data::get(&count, &dev);
-    
+
     for(size_t i = 0; i < count; ++i)
     {
       if(dev[i].type_id == 1 && dev[i].aux_03)
@@ -697,8 +697,8 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   }
-  
-  
+
+
   // ----------------------------------------------------------- [ Lib Menu ] --
 
   if(self->show_lib_memory)
@@ -708,7 +708,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       ImGui::Text("Bucket Capacity: %zu", lib::mem::bucket_capacity());
       ImGui::Text("Bucket Stride: %zu", lib::mem::bucket_stride());
       ImGui::Text("Buckets Used: %zu", lib::mem::buckets_in_use());
-      
+
       ImGui::End();
     }
   }

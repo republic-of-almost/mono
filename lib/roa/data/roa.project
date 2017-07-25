@@ -27,8 +27,10 @@ table.insert(
     },
 
     project_dependencies = {
+      "AspectsControllers",
       "Nil",
-      "AspectsControllers", -- Can we move into Nil?
+      "Lib",
+      "Math",
     },
   }
 )

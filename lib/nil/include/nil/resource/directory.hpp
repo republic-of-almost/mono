@@ -10,6 +10,10 @@ const char *
 directory(const char *file);
 
 
+const char *
+asset_path();
+
+
 } // ns
 } // ns
 

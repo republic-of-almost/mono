@@ -27,19 +27,19 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-  
+
   self->mesh_ids.emplace_back(uint32_t{0});
-  
+
   #ifndef NIMGUI
   Nil::Node render_node;
   self->renderer = static_cast<Nil::Node&&>(render_node);
   self->renderer.set_name("ROV");
-  
+
   Nil::Data::Developer dev{};
   dev.type_id = 1;
   dev.aux_01  = (uintptr_t)ui_menu;
   dev.aux_02 = (uintptr_t)self;
-  
+
   Nil::Data::set(self->renderer, dev);
   #endif
 }
@@ -67,14 +67,14 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       /* We operate on 1 window idea so grab the first */
       self->current_viewport[0] = win[0].width;
       self->current_viewport[1] = win[0].height;
-      
+
       if(!self->has_initialized)
       {
         if(win[0].type == Nil::Data::Window::OGL)
         {
           LOG_INFO("Initialize ROV")
 
-          rov_initialize();
+          rov_initialize(Nil::Resource::asset_path());
           self->has_initialized = true;
 
           self->light_pack = rov_createLights(nullptr, 0);
@@ -99,20 +99,20 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   }
-  
+
   /*
     Load textures
   */
   {
     size_t count = 0;
     Nil::Resource::Texture *textures = nullptr;
-    
+
     Nil::Resource::get(&count, &textures);
-    
+
     for(size_t i = 0; i < count; ++i)
     {
       Nil::Resource::Texture *tex = &textures[i];
-    
+
       if(tex->status == Nil::Resource::Texture::PENDING)
       {
         if(tex->data_type == Nil::Resource::Texture::FILENAME)
@@ -127,7 +127,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           img_data = stbi_load(path, &x, &y, &c, 0);
 
           const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
-  
+
           const uint32_t tex_id = rov_createTexture(
             img_data,
             x,
@@ -136,42 +136,42 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             format,
             &tex->platform_resource
           );
-          
+
           tex->id         = tex_id;
           tex->width      = x;
           tex->height     = y;
           tex->components = c;
-          
+
           if((tex->id) > self->texture_ids.size())
           {
             const size_t new_size = (tex->id + 1);
             self->texture_ids.resize(new_size);
           }
-          
+
           const size_t id = tex->id;
           self->texture_ids[id] = tex_id;
 
           stbi_image_free(img_data);
-          
+
           tex->status = Nil::Resource::Texture::LOADED;
         }
       }
     }
   } // Load Textures
-  
+
   /*
     Load Meshes
   */
   {
     size_t count = 0;
     Nil::Resource::Mesh *meshes = nullptr;
-    
+
     Nil::Resource::get(&count, &meshes);
-    
+
     for(size_t i = 0; i < count; ++i)
     {
       Nil::Resource::Mesh *mesh_resource = &meshes[i];
-    
+
       if(mesh_resource->status == Nil::Resource::Mesh::PENDING)
       {
         if(mesh_resource->count == 0)
@@ -179,7 +179,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           mesh_resource->status = Nil::Resource::Mesh::LOADED;
           continue;
         }
-        
+
         const uint32_t mesh = rov_createMesh
         (
           mesh_resource->position_vec3,
@@ -188,7 +188,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           mesh_resource->count,
           &mesh_resource->platform_resource
         );
-        
+
         self->mesh_ids.emplace_back(mesh);
 
         mesh_resource->status = Nil::Resource::Mesh::LOADED;
@@ -270,7 +270,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
     size_t cam_count = 0;
     Nil::Data::Camera *cameras;
     Nil::Data::get(&cam_count, &cameras);
-    
+
     size_t mat_count = 0;
     Nil::Resource::Material *mats;
     Nil::Resource::get(&mat_count, &mats);
@@ -317,13 +317,13 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       for(size_t i = 0; i < renderable_count; ++i)
       {
         Nil::Data::Renderable render = renderables[i];
-        
+
         const uint32_t mesh_count = self->mesh_ids.size();
-        
+
         if(mesh_count > render.mesh_id)
         {
           const Nil::Resource::Material mat = mats[render.material_id];
-          
+
           const float colorf[4]
           {
             lib::color::get_channel_1f(mat.color),
@@ -331,18 +331,18 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
             lib::color::get_channel_3f(mat.color),
             lib::color::get_channel_4f(mat.color),
           };
-          
+
           rov_setColor(colorf);
-          
+
           const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
           rov_setMesh(mesh_id);
-          
+
           const uint32_t texture_01 = mats[render.material_id].texture_01;
-          
+
           if(texture_01)
           {
             const uint32_t texture_count = self->texture_ids.size();
-          
+
             if(texture_count > texture_01)
             {
               const uint32_t texture_id = self->texture_ids[texture_01];
@@ -370,7 +370,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         for(size_t i = 0; i < lines; ++i)
         {
           const size_t index = i * 9;
-          
+
           rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
           rov_submitLine(&data[index + 0], &data[index + 3]);
         }
@@ -379,146 +379,146 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
         line_data.aux_02 = 0;
         Nil::Data::set(self->debug_lines, line_data);
       }
-      
+
       // Bounding boxes
       if(self->show_debug_bounding_boxes)
       {
         size_t count = 0;
         Nil::Data::Bounding_box *data = nullptr;
-        
+
         Nil::Data::get(&count, &data, true);
-        
+
         rov_setColor(0, 1, 0, 1);
-        
+
         float start[3];
         float end[3];
-        
+
         for(size_t i = 0; i < count; ++i)
         {
           // Y lines
-        
+
           start[0] = data[i].min[0];
           start[1] = data[i].min[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].min[0];
           end[1] = data[i].max[1];
           end[2] = data[i].min[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].max[0];
           start[1] = data[i].min[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].max[1];
           end[2] = data[i].min[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].min[1];
           start[2] = data[i].max[2];
-          
+
           end[0] = data[i].min[0];
           end[1] = data[i].max[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].max[0];
           start[1] = data[i].min[1];
           start[2] = data[i].max[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].max[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           // X Lines
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].min[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].min[1];
           end[2] = data[i].min[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].max[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].max[1];
           end[2] = data[i].min[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].min[1];
           start[2] = data[i].max[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].min[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].max[1];
           start[2] = data[i].max[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].max[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           // Z lines
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].min[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].min[0];
           end[1] = data[i].min[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].max[0];
           start[1] = data[i].min[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].min[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].min[0];
           start[1] = data[i].max[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].min[0];
           end[1] = data[i].max[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
-          
+
           start[0] = data[i].max[0];
           start[1] = data[i].max[1];
           start[2] = data[i].min[2];
-          
+
           end[0] = data[i].max[0];
           end[1] = data[i].max[1];
           end[2] = data[i].max[2];
-          
+
           rov_submitLine(start, end);
         }
       }
@@ -538,12 +538,12 @@ ui_menu(uintptr_t user_data)
   );
 
   LIB_ASSERT(self);
-  
+
   if(ImGui::BeginMenu("ROV"))
   {
     ImGui::MenuItem("Show Debug Lines", nullptr, &self->show_debug_lines);
     ImGui::MenuItem("Show Debug Bounding Boxes", nullptr, &self->show_debug_bounding_boxes);
-    
+
     ImGui::EndMenu();
   }
   #endif

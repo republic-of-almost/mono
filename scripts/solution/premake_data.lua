@@ -288,41 +288,12 @@ make.create_solution(solution_data, project_defaults, projects)
 
     buildoptions(proj.buildoptions)
 
-    -- Asset directories get copied to build --
-    if os.get() == "macosx" then
-
-      if proj.kind == "WindowedApp" and projects then
-        for j, asset_proj in ipairs(projects) do
-          if(asset_proj.assets) then
-            for k, asset_dir in ipairs(asset_proj.assets) do
-              if asset_dir then
-                postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
-              end
-            end
-          end
-        end
-      else if proj.kind == "ConsoleApp" and projects then
-          for j, asset_proj in ipairs(projects) do
-            if(asset_proj.assets) then
-              for k, asset_dir in ipairs(asset_proj.assets) do
-                if asset_dir then
-                  postbuildcommands("ditto ${SRCROOT}/".. asset_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
-                end
-              end
-            end
-          end
-        end
-      end
-
-    end
-
     -- Global build options --
     if proj.ignore_defaults ~= true then
       if project_defaults.buildoptions then buildoptions(project_defaults.buildoptions) end
 
       local plaform_project_default_buildopts = find_table_with_platform(project_defaults, "buildoptions")
       if plaform_project_default_buildopts then buildoptions(plaform_project_default_buildopts) end
-
     end
 
     local output = "../../output/"
@@ -366,6 +337,34 @@ make.create_solution(solution_data, project_defaults, projects)
 
       if exceptions ~= true then
         flags("NoExceptions") -- deprecated premake5
+      end
+
+      -- Asset directories get copied to build --
+      function
+      copy_files(dir)
+
+        if os.get() == "macosx" then
+          if proj.kind == "WindowedApp" then
+            postbuildcommands("${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+          elseif proj.kind == "ConsoleApp" then
+            postbuildcommands("${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+          end
+        elseif os.get() == "linux" then
+          if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
+            postbuildcommands("cp -rf " .. dir .. "* " .. "../../../output/" .. config.name .. "/assets/" .. " 2>/dev/null || :");
+          end
+        end
+
+      end
+
+      for j, asset_proj in ipairs(projects) do
+        if(asset_proj.assets) then
+          for k, asset_dir in ipairs(asset_proj.assets) do
+            if asset_dir then
+              copy_files(asset_dir)
+            end
+          end
+        end
       end
 
     end

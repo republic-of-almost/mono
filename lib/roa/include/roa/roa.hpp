@@ -24,6 +24,7 @@
 #include <roa/renderable.hpp>
 #include <roa/resource.hpp>
 #include <roa/scene.hpp>
+#include <roa/time.hpp>
 #include <roa/transform.hpp>
 #include <roa/vector3.hpp>
 

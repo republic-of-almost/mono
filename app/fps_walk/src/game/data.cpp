@@ -3,7 +3,7 @@
 #include <nil/data/mouse.hpp>
 #include <nil/data/keyboard.hpp>
 #include <math/vec/vec3.hpp>
-
+#include <lib/string.hpp>
 
 namespace Game_data {
 

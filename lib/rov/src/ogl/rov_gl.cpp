@@ -23,7 +23,7 @@ namespace ROV_Internal {
 
 
 void
-ogl_init(rovGLData *gl_data)
+ogl_init(rovGLData *gl_data, const char *asset_prefix)
 {
 //  rmt_BindOpenGL();
 
@@ -31,12 +31,16 @@ ogl_init(rovGLData *gl_data)
   glGenVertexArrays(1, &gl_data->vao);
   glBindVertexArray(gl_data->vao);
   #endif
-  
+
   // Mesh Shaders //
   {
+    char path[2048]{};
+    strcat(path, asset_prefix);
+    strcat(path, "rov/ogl/fullbright_ogl.glsl");
+
     rovGLMeshProgram fullbright{};
     const bool fb_success = ogl_createProgram(
-      "../Resources/assets/rov/ogl/fullbright_ogl.glsl",
+      path,
       nullptr,
       nullptr,
       nullptr,
@@ -44,18 +48,22 @@ ogl_init(rovGLData *gl_data)
     );
     gl_data->rov_mesh_programs.emplace_back(fullbright);
 
+    memset(path, 0, sizeof(path));
+    strcat(path, asset_prefix);
+    strcat(path, "rov/ogl/mesh_renderer.glsl");
+
     rovGLMeshProgram lit{};
     const bool lit_success = ogl_createProgram(
-      "../Resources/assets/rov/ogl/mesh_renderer.glsl",
+      path,
       nullptr,
       nullptr,
       nullptr,
       &lit.program
     );
     gl_data->rov_mesh_programs.emplace_back(lit);
-    
+
     LIB_ASSERT(fb_success && lit_success);
-    
+
     for(rovGLMeshProgram &prog : gl_data->rov_mesh_programs)
     {
       glUseProgram(prog.program);
@@ -67,7 +75,7 @@ ogl_init(rovGLData *gl_data)
       prog.uni_tex[0]      = glGetUniformLocation(prog.program, "uni_map_01");
       prog.uni_tex[1]      = glGetUniformLocation(prog.program, "uni_map_02");
       prog.uni_tex[2]      = glGetUniformLocation(prog.program, "uni_map_03");
-      
+
       prog.uni_buffer_01   = glGetUniformLocation(prog.program, "uni_light_array");
       prog.uni_light_count = glGetUniformLocation(prog.program, "uni_light_count");
 
@@ -83,15 +91,19 @@ ogl_init(rovGLData *gl_data)
   // Line Renderer //
   #ifdef GL_HAS_GEO_SHD
   {
+    char path[2048]{};
+    strcat(path, asset_prefix);
+    strcat(path, "rov/ogl/debug_line_ogl.glsl");
+
     rovGLLineProgram line;
     ogl_createProgram(
-      "../Resources/assets/rov/ogl/debug_line_ogl.glsl",
+      path,
       nullptr,
       nullptr,
       nullptr,
       &line.program
     );
-    
+
     gl_data->rov_line_programs.emplace_back(line);
 
     // Get Uniforms //
@@ -104,7 +116,7 @@ ogl_init(rovGLData *gl_data)
     glUseProgram(gl_data->rov_line_programs[0].program);
   }
   #endif
-  
+
   // Light Buffer //
   {
     rovLight light_data[] = {
@@ -114,7 +126,7 @@ ogl_init(rovGLData *gl_data)
         {0.01f, 0.14f, 0.07f, 0.f},
       }
     };
-    
+
     ogl_createLights(gl_data, light_data, 1);
   }
 }
