@@ -97,7 +97,7 @@ set(Node &node, const Transform &in)
     LOG_ERROR("Invalid Node");
   }
   
-  Graph::data_updated(Data::get_graph_data(), node.get_id(), get_trans_data().type_id, true);
+  Graph::data_updated(Data::get_graph_data(), node.get_id(), get_trans_data().type_id);
 }
 
 

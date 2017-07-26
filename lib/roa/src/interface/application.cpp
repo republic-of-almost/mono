@@ -29,7 +29,6 @@ Application::Application()
 
 Application::~Application()
 {
-  delete m_impl;
 }
 
 

@@ -262,21 +262,21 @@ think(ROA::Object node)
 
   // Ray Test
   {
-    ROA::Transform trans = actor->head.get_transform();
-    
-    const ROA::Vector3 origin = trans.get_world_position();
-    const ROA::Vector3 end = trans.get_world_position().add(trans.get_forward().scale(1000.f));
-    
-    ROA::Ray ray(origin, end);
-    
-    ROA::Collection collection = ROA::Query::bounding_boxes(ray, ROA::Ray_search::NEAREST);
-    
-    size_t size = collection.size();
-    
-    for(auto &col : collection)
-    {
-      int k = 0;
-    }
+//    ROA::Transform trans = actor->head.get_transform();
+//    
+//    const ROA::Vector3 origin = trans.get_world_position();
+//    const ROA::Vector3 end = trans.get_world_position().add(trans.get_forward().scale(1000.f));
+//    
+//    ROA::Ray ray(origin, end);
+//    
+//    ROA::Collection collection = ROA::Query::bounding_boxes(ray, ROA::Ray_search::NEAREST);
+//    
+//    size_t size = collection.size();
+//    
+//    for(auto &col : collection)
+//    {
+//      int k = 0;
+//    }
   }
 
 }

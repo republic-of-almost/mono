@@ -133,6 +133,8 @@ struct Bounding_box_data
           Nil::Data::Transform trans;
           Nil::Data::get(node, trans);
           
+          math::vec3 scale = math::vec3_init(trans.scale);
+          
           const math::vec3 corners[]
           {
             math::vec3_init(in.min),
@@ -201,6 +203,10 @@ struct Bounding_box_data
           memcpy(world_in.max, max, sizeof(world_in.max));
         
           data->world_bb[index] = world_in;
+        }
+        else
+        {
+          // This shouldn't happen.
         }
       },
       

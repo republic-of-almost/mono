@@ -49,7 +49,7 @@ data_unregister_type(
 
 
 void
-data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendent = false);
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id);
 
 
 // ---------------------------------------------------------------- [ Nodes ] --

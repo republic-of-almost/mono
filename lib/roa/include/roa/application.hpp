@@ -24,11 +24,6 @@ public:
   
   void            run(Custom_tick_fn tick = nullptr, uintptr_t user_data = 0);
   
-  
-private:
-
-  struct Impl;
-  Impl *m_impl;
 
 };
 

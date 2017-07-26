@@ -156,12 +156,15 @@ data_unregister_type(
 
 
 void
-data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, const bool decendents)
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id)
 {
   // -- Param Check -- //
   LIB_ASSERT(graph);
   
   const size_t type_count = graph->graph_type_data.size();
+  
+  lib::array<data_dependecy_alert_fn, stack_hint> updated_nodes;
+  lib::array<uintptr_t, stack_hint> updated_user_data;
   
   for(size_t i = 0; i < type_count; ++i)
   {
@@ -173,32 +176,47 @@ data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id, 
     
       if(alert_fn)
       {
-        uintptr_t user_data = graph->graph_type_data[i].user_data;
-      
-        alert_fn(node_id, user_data);
+        updated_nodes.emplace_back(alert_fn);
+        updated_user_data.emplace_back(graph->graph_type_data[i].user_data);
+//        uintptr_t user_data = graph->graph_type_data[i].user_data;
+//        alert_fn(node_id, user_data);
       }
     }
   }
+  
+  const size_t decendents_count = Graph::node_descendants_count(graph, node_id) + 1;
+  
+  size_t index = 0;
+  lib::key::linear_search(node_id, graph->node_id.data(), graph->node_id.size(), &index);
+  
+  for(size_t i = 0; i < decendents_count; ++i)
+  {
+    for(size_t j = 0; j < updated_nodes.size(); ++j)
+    {
+      updated_nodes[j](graph->node_id[index + i], updated_user_data[j]);
+    }
+  }
+  
   
   /*
     Call update on the children
     This is only really needed for inherited things like transforms
     and bounding boxes. Perhaps colliders as well.
   */
-  if(decendents)
-  {
-    const size_t decendents_count = Graph::node_descendants_count(graph, node_id);
-    
-    size_t index = 0;
-    
-    lib::key::linear_search(node_id, graph->node_id.data(), graph->node_id.size(), &index);
-    
-    for(uint32_t i = 0; i < decendents_count; ++i)
-    {
-      const uint32_t child_id = graph->node_id[index + i + 1];
-      data_updated(graph, child_id, type_id, false);
-    }
-  }
+//  if(decendents)
+//  {
+//    const size_t decendents_count = Graph::node_descendants_count(graph, node_id);
+//    
+//    size_t index = 0;
+//    
+//    lib::key::linear_search(node_id, graph->node_id.data(), graph->node_id.size(), &index);
+//    
+//    for(uint32_t i = 0; i < decendents_count; ++i)
+//    {
+//      const uint32_t child_id = graph->node_id[index + i + 1];
+//      data_updated(graph, child_id, type_id, false);
+//    }
+//  }
 
 }
 
