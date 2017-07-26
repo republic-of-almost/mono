@@ -110,7 +110,7 @@ struct Bounding_box_data
       {
         Bounding_box_data *data = reinterpret_cast<Bounding_box_data*>(user_data);
         LIB_ASSERT(data);
-      
+        
         size_t index = 0;
         const uint32_t *ids = data->keys.data();
         const size_t id_count = data->keys.size();
@@ -131,7 +131,7 @@ struct Bounding_box_data
           Nil::Data::Bounding_box in = data->local_bb[index];
           
           Nil::Data::Transform trans;
-          Nil::Data::get(node, trans);
+          Nil::Data::get(node, trans, true);
           
           math::vec3 scale = math::vec3_init(trans.scale);
           
@@ -203,10 +203,6 @@ struct Bounding_box_data
           memcpy(world_in.max, max, sizeof(world_in.max));
         
           data->world_bb[index] = world_in;
-        }
-        else
-        {
-          // This shouldn't happen.
         }
       },
       

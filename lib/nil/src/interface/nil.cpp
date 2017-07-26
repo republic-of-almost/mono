@@ -104,8 +104,6 @@ Engine::run()
     const lib::milliseconds curr_tick = lib::timer::get_current_time();
     const lib::milliseconds delta = lib::timer::get_delta(m_impl->last_tick, curr_tick);
 
-    printf("mil: %d\n", delta);
-
     m_impl->last_tick = curr_tick;
 
     m_impl->delta_time = lib::timer::to_seconds(delta);
