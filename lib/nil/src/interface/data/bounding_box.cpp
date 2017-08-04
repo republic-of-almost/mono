@@ -124,8 +124,6 @@ struct Bounding_box_data
         
         if(found)
         {
-//          data->actions[index] |= Nil::Data::Event::UPDATED;
-          
           Nil::Node node(id);
           
           Nil::Data::Bounding_box in = data->local_bb[index];
@@ -133,22 +131,28 @@ struct Bounding_box_data
           Nil::Data::Transform trans;
           Nil::Data::get(node, trans, true);
           
-          math::vec3 scale = math::vec3_scale(math::vec3_init(trans.scale), 1.f);
+          // -- Scale -- //
           
-          const math::vec3 corners[]
+          const math::vec3 scale = math::vec3_init(trans.scale);
+          constexpr size_t count = 8;
+          
+          const float *max = in.max;
+          const float *min = in.min;
+          
+          const math::vec3 corners[count]
           {
-math::vec3_multiply(scale, math::vec3_init(in.min)),
-math::vec3_multiply(scale, math::vec3_init(in.max[0], in.min[1], in.min[2])),
-math::vec3_multiply(scale, math::vec3_init(in.min[0], in.min[1], in.max[2])),
-math::vec3_multiply(scale, math::vec3_init(in.max[0], in.min[1], in.max[2])),
+            math::vec3_multiply(scale, math::vec3_init(min)),
+            math::vec3_multiply(scale, math::vec3_init(max[0], min[1], min[2])),
+            math::vec3_multiply(scale, math::vec3_init(min[0], min[1], max[2])),
+            math::vec3_multiply(scale, math::vec3_init(max[0], min[1], max[2])),
 
-math::vec3_multiply(scale, math::vec3_init(in.max)),
-math::vec3_multiply(scale, math::vec3_init(in.min[0], in.max[1], in.max[2])),
-math::vec3_multiply(scale, math::vec3_init(in.max[0], in.max[1], in.min[2])),
-math::vec3_multiply(scale, math::vec3_init(in.min[0], in.max[1], in.min[2])),
+            math::vec3_multiply(scale, math::vec3_init(max)),
+            math::vec3_multiply(scale, math::vec3_init(min[0], max[1], max[2])),
+            math::vec3_multiply(scale, math::vec3_init(max[0], max[1], min[2])),
+            math::vec3_multiply(scale, math::vec3_init(min[0], max[1], min[2])),
           };
           
-          constexpr size_t count = sizeof(corners) / sizeof(decltype(corners[0]));
+          // -- Rotate -- //
           
           const math::quat rot = math::quat_init(trans.rotation);
           
@@ -156,59 +160,35 @@ math::vec3_multiply(scale, math::vec3_init(in.min[0], in.max[1], in.min[2])),
           
           for(int i = 0; i < count; ++i)
           {
-//            rot_corners[i] = corners[i];
-            
-//            rot_corners[i] = math::quat_rotate_point(rot, math::vec3_multiply(scale, corners[i]));
-
             rot_corners[i] = math::quat_rotate_point(rot, corners[i]);
-//            rot_corners[i] = math::vec3_multiply(rot_corners[i], scale);
-
           }
           
           // -- Find new min max -- //
           
-          float min[3] {math::float_max(),math::float_max(),math::float_max()};
-          float max[3] {math::float_min(),math::float_min(),math::float_min()};
+          float new_min[3] {
+            math::float_max(),math::float_max(),math::float_max()
+          };
           
-//          for(int i = 0; i < count; ++i)
+          float new_max[3] {
+            math::float_min(),math::float_min(),math::float_min()
+          };
+          
           for(auto &rot_pt : rot_corners)
           {
-            max[0] = math::max(max[0], math::get_x(rot_pt));
-            max[1] = math::max(max[1], math::get_y(rot_pt));
-            max[2] = math::max(max[2], math::get_z(rot_pt));
-            
-            min[0] = math::min(min[0], math::get_x(rot_pt));
-            min[1] = math::min(min[1], math::get_y(rot_pt));
-            min[2] = math::min(min[2], math::get_z(rot_pt));
+            math::max(new_max, new_max, rot_pt.data, 3);
+            math::min(new_min, new_min, rot_pt.data, 3);
           }
           
+          // -- Translate -- //
           
-          
-          // -- Scale -- //
-          
-//          min[0] *= trans.scale[0];
-//          min[1] *= trans.scale[1];
-//          min[2] *= trans.scale[2];
-//          
-//          max[0] *= trans.scale[0];
-//          max[1] *= trans.scale[1];
-//          max[2] *= trans.scale[2];
-          
-          // -- Offset -- //
-          
-          min[0] += trans.position[0];
-          min[1] += trans.position[1];
-          min[2] += trans.position[2];
-          
-          max[0] += trans.position[0];
-          max[1] += trans.position[1];
-          max[2] += trans.position[2];
+          math::add(new_min, new_min, trans.position, 3);
+          math::add(new_max, new_max, trans.position, 3);
           
           // -- Save -- //
           
           Nil::Data::Bounding_box world_in = in;
-          memcpy(world_in.min, min, sizeof(world_in.min));
-          memcpy(world_in.max, max, sizeof(world_in.max));
+          memcpy(world_in.min, new_min, sizeof(world_in.min));
+          memcpy(world_in.max, new_max, sizeof(world_in.max));
         
           data->world_bb[index] = world_in;
         }
