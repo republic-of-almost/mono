@@ -133,19 +133,19 @@ struct Bounding_box_data
           Nil::Data::Transform trans;
           Nil::Data::get(node, trans, true);
           
-          math::vec3 scale = math::vec3_init(trans.scale);
+          math::vec3 scale = math::vec3_scale(math::vec3_init(trans.scale), 1.f);
           
           const math::vec3 corners[]
           {
-            math::vec3_init(in.min),
-            math::vec3_init(in.max[0], in.min[1], in.min[2]),
-            math::vec3_init(in.min[0], in.min[1], in.max[2]),
-            math::vec3_init(in.max[0], in.min[1], in.max[2]),
-            
-            math::vec3_init(in.max),
-            math::vec3_init(in.min[0], in.max[1], in.max[2]),
-            math::vec3_init(in.max[0], in.max[1], in.min[2]),
-            math::vec3_init(in.min[0], in.max[1], in.min[2]),
+math::vec3_multiply(scale, math::vec3_init(in.min)),
+math::vec3_multiply(scale, math::vec3_init(in.max[0], in.min[1], in.min[2])),
+math::vec3_multiply(scale, math::vec3_init(in.min[0], in.min[1], in.max[2])),
+math::vec3_multiply(scale, math::vec3_init(in.max[0], in.min[1], in.max[2])),
+
+math::vec3_multiply(scale, math::vec3_init(in.max)),
+math::vec3_multiply(scale, math::vec3_init(in.min[0], in.max[1], in.max[2])),
+math::vec3_multiply(scale, math::vec3_init(in.max[0], in.max[1], in.min[2])),
+math::vec3_multiply(scale, math::vec3_init(in.min[0], in.max[1], in.min[2])),
           };
           
           constexpr size_t count = sizeof(corners) / sizeof(decltype(corners[0]));
@@ -156,7 +156,13 @@ struct Bounding_box_data
           
           for(int i = 0; i < count; ++i)
           {
+//            rot_corners[i] = corners[i];
+            
+//            rot_corners[i] = math::quat_rotate_point(rot, math::vec3_multiply(scale, corners[i]));
+
             rot_corners[i] = math::quat_rotate_point(rot, corners[i]);
+//            rot_corners[i] = math::vec3_multiply(rot_corners[i], scale);
+
           }
           
           // -- Find new min max -- //
@@ -176,15 +182,17 @@ struct Bounding_box_data
             min[2] = math::min(min[2], math::get_z(rot_pt));
           }
           
+          
+          
           // -- Scale -- //
           
-          min[0] *= trans.scale[0];
-          min[1] *= trans.scale[1];
-          min[2] *= trans.scale[2];
-          
-          max[0] *= trans.scale[0];
-          max[1] *= trans.scale[1];
-          max[2] *= trans.scale[2];
+//          min[0] *= trans.scale[0];
+//          min[1] *= trans.scale[1];
+//          min[2] *= trans.scale[2];
+//          
+//          max[0] *= trans.scale[0];
+//          max[1] *= trans.scale[1];
+//          max[2] *= trans.scale[2];
           
           // -- Offset -- //
           
