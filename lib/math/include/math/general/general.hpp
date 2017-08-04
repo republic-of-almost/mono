@@ -88,6 +88,14 @@ MATH_GENR_INLINE float              floor(const float x);
 MATH_GENR_INLINE float              nearest_floor(const float x, const float increments);
 
 
+// ----------------------------------------------------------- [ Arithmetic ] --
+
+
+MATH_GENR_INLINE void               add(float *out, const float *a, const float *b, const size_t count);
+MATH_GENR_INLINE void               max(float *out, const float *a, const float *b, const size_t count);
+MATH_GENR_INLINE void               min(float *out, const float *a, const float *b, const size_t count);
+
+
 // ------------------------------------------------------------ [ Trig Impl ] --
 
 
@@ -409,6 +417,57 @@ nearest_floor(const float x, const float increments)
 {
   const float remainder = mod(x, increments);
   return x - remainder;
+}
+
+
+// ----------------------------------------------------------- [ Arithmetic ] --
+
+
+void
+add(float *out, const float *a, const float *b, const size_t count)
+{
+  // -- Param Check -- //
+  assert(out);
+  assert(a);
+  assert(b);
+
+  // -- Add Array together -- //
+  for(size_t i = 0; i < count; ++i)
+  {
+    out[i] = a[i] + b[i];
+  }
+}
+
+
+void
+max(float *out, const float *a, const float *b, const size_t count)
+{
+  // -- Param Check -- //
+  assert(out);
+  assert(a);
+  assert(b);
+
+  // -- Add Array together -- //
+  for(size_t i = 0; i < count; ++i)
+  {
+    out[i] = max(a[i], b[i]);
+  }
+}
+
+
+void
+min(float *out, const float *a, const float *b, const size_t count)
+{
+  // -- Param Check -- //
+  assert(out);
+  assert(a);
+  assert(b);
+
+  // -- Add Array together -- //
+  for(size_t i = 0; i < count; ++i)
+  {
+    out[i] = min(a[i], b[i]);
+  }
 }
 
 
