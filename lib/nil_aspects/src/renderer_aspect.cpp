@@ -385,141 +385,71 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         size_t count = 0;
         Nil::Data::Bounding_box *data = nullptr;
-
         Nil::Data::get(&count, &data, true);
 
         rov_setColor(0, 1, 0, 1);
 
-        float start[3];
-        float end[3];
-
         for(size_t i = 0; i < count; ++i)
         {
+          const float *min = data[i].min;
+          const float *max = data[i].max;
+        
           // Y lines
+          {
+            const float a[3] { min[0], min[1], min[2] };
+            const float b[3] { min[0], max[1], min[2] };
+            rov_submitLine(a, b);
+  
+            const float c[3] { max[0], min[1], min[2] };
+            const float d[3] { max[0], max[1], min[2] };
+            rov_submitLine(c, d);
 
-          start[0] = data[i].min[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].min[2];
+            const float e[3] { min[0], min[1], max[2] };
+            const float f[3] { min[0], max[1], max[2] };
+            rov_submitLine(e, f);
 
-          end[0] = data[i].min[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].min[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].max[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].min[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].min[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].min[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].max[2];
-
-          end[0] = data[i].min[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].max[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].max[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
+            const float g[3] { max[0], min[1], max[2] };
+            const float h[3] { max[0], max[1], max[2] };
+            rov_submitLine(g, h);
+          }
 
           // X Lines
+          {
+            const float a[3] { min[0], min[1], min[2] };
+            const float b[3] { max[0], min[1], min[2] };
+            rov_submitLine(a, b);
 
-          start[0] = data[i].min[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].min[2];
+            const float c[3] { min[0], max[1], min[2] };
+            const float d[3] { max[0], max[1], min[2] };
+            rov_submitLine(c, d);
 
-          end[0] = data[i].max[0];
-          end[1] = data[i].min[1];
-          end[2] = data[i].min[2];
+            const float e[3] { min[0], min[1], max[2] };
+            const float f[3] { max[0], min[1], max[2] };
+            rov_submitLine(e, f);
 
-          rov_submitLine(start, end);
-
-          start[0] = data[i].min[0];
-          start[1] = data[i].max[1];
-          start[2] = data[i].min[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].min[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].min[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].max[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].min[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].min[0];
-          start[1] = data[i].max[1];
-          start[2] = data[i].max[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
+            const float g[3] { min[0], max[1], max[2] };
+            const float h[3] { max[0], max[1], max[2] };
+            rov_submitLine(g, h);
+          }
 
           // Z lines
+          {
+            const float a[3] { min[0], min[1], min[2] };
+            const float b[3] { min[0], min[1], max[2] };
+            rov_submitLine(a, b);
 
-          start[0] = data[i].min[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].min[2];
+            const float c[3] { max[0], min[1], min[2] };
+            const float d[3] { max[0], min[1], max[2] };
+            rov_submitLine(c, d);
 
-          end[0] = data[i].min[0];
-          end[1] = data[i].min[1];
-          end[2] = data[i].max[2];
+            const float e[3] { min[0], max[1], min[2] };
+            const float f[3] { min[0], max[1], max[2] };
+            rov_submitLine(e, f);
 
-          rov_submitLine(start, end);
-
-          start[0] = data[i].max[0];
-          start[1] = data[i].min[1];
-          start[2] = data[i].min[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].min[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].min[0];
-          start[1] = data[i].max[1];
-          start[2] = data[i].min[2];
-
-          end[0] = data[i].min[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
-
-          start[0] = data[i].max[0];
-          start[1] = data[i].max[1];
-          start[2] = data[i].min[2];
-
-          end[0] = data[i].max[0];
-          end[1] = data[i].max[1];
-          end[2] = data[i].max[2];
-
-          rov_submitLine(start, end);
+            const float g[3] { max[0], max[1], min[2] };
+            const float h[3] { max[0], max[1], max[2] };
+            rov_submitLine(g, h);
+          }
         }
       }
     }

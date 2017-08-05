@@ -354,8 +354,6 @@ set(Node &node, const Bounding_box &in)
       memcpy(world_in.min, min.data, sizeof(world_in.min));
       memcpy(world_in.max, max.data, sizeof(world_in.max));
       
-      uint32_t *key_arr = get_bb_data().keys.data();
-      
       get_bb_data().local_bb.emplace_back(in);
       get_bb_data().world_bb.emplace_back(world_in);
       get_bb_data().keys.emplace_back(node_id);
