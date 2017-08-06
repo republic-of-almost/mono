@@ -1,8 +1,11 @@
 #!lua
 
 --[[
+
   Math Test Project Description
+
 ]]--
+
 
 table.insert(
   projects,
@@ -11,7 +14,6 @@ table.insert(
     kind     = "ConsoleApp",
     language = "C++",
     location = make.get_proj_root(),
-    type     = "UnitTest",
 
     lang_settings = {
       exceptions  = true,

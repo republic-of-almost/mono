@@ -1,35 +1,37 @@
--- #!lua
---
--- --[[
---   Nil Test Project Description
--- ]]--
---
--- table.insert(
---   projects,
---   {
---     name     = "NilTest",
---     kind     = "ConsoleApp",
---     language = "C++",
---     location = make.get_proj_root(),
---
---     lang_settings = {
---       exceptions  = true,
---       rtti        = true,
---     },
---
---     src_files = {
---       make.add_headers(make.get_proj_root() .. "../test/"),
---       make.add_src(make.get_proj_root() .. "../test/"),
---       make.add_doc(make.get_proj_root() .. "../test/"),
---     },
---
---     inc_dirs = {
---       make.get_proj_root() .. "./",
---     },
---
---     project_dependencies = {
---       "Nil",
---       "Catch",
---     },
---   }
--- )
+#!lua
+
+--[[
+
+  Nil Test Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "NilTest",
+    kind     = "ConsoleApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    lang_settings = {
+      exceptions  = true,
+      rtti        = true,
+    },
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../test/"),
+      make.add_src(make.get_proj_root() .. "../test/"),
+      make.add_doc(make.get_proj_root() .. "../test/"),
+    },
+
+    inc_dirs = {
+      make.get_proj_root() .. "./",
+    },
+
+    project_dependencies = {
+      "Nil",
+      "Catch",
+    },
+  }
+)

@@ -1,36 +1,41 @@
--- #!lua
---
--- --[[
---   ROA Test Project Description
--- ]]--
---
--- table.insert(
---   projects,
---   {
---     name     = "ROATest",
---     kind     = "ConsoleApp",
---     language = "C++",
---     location = make.get_proj_root(),
---
---     lang_settings = {
---       exceptions  = true,
---       rtti        = true,
---     },
---
---     src_files = {
---       make.add_headers(make.get_proj_root() .. "../test/"),
---       make.add_src(make.get_proj_root() .. "../test/"),
---       make.add_doc(make.get_proj_root() .. "../test/"),
---     },
---
---     inc_dirs = {
---       make.get_proj_root() .. "./",
---     },
---
---     project_dependencies = {
---       "NIL",
---       "AspectsControllers", -- Can we move into Nil?
---       "Catch",
---     },
---   }
--- )
+#!lua
+
+--[[
+
+  ROA Test Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "ROATest",
+    kind     = "ConsoleApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    lang_settings = {
+      exceptions  = true,
+      rtti        = true,
+    },
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../test/"),
+      make.add_src(make.get_proj_root() .. "../test/"),
+      make.add_doc(make.get_proj_root() .. "../test/"),
+    },
+
+    inc_dirs = {
+      make.get_proj_root() .. "./",
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+
+      "NIL",
+      "AspectsControllers", -- Can we move into Nil?
+      "Catch",
+    },
+  }
+)

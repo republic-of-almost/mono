@@ -1,7 +1,9 @@
 #!lua
 
 --[[
+
   Render O Vision Project Description
+
 ]]--
 
 table.insert(
@@ -37,9 +39,14 @@ table.insert(
     },
 
     project_dependencies = {
-      "External",
+
+      -- First Party --
+
       "Lib",
       "Math",
+
+      -- Third Party --
+
       "OpenGL",
       "Remotery",
     },

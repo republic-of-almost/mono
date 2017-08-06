@@ -273,7 +273,6 @@ make.create_solution(solution_data, project_defaults, projects)
               local platform_defines = find_table_with_platform(other_proj, "defines")
               if platform_defines then defines(platform_defines) end
 
-
               -- dependencies
               get_dependencies(other_proj, orig_proj, padding .. "  ")
             end
