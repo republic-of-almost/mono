@@ -372,3 +372,46 @@ make.create_solution(solution_data, project_defaults, projects)
   end
 
 end
+
+
+function
+make.find_missing_dependencies(all_deps, curr_projs)
+
+  deps = {}
+
+  for i, proj in ipairs(curr_projs) do
+    if proj.project_dependencies then
+
+      for j, dep in ipairs(proj.project_dependencies) do
+
+        exists = false
+
+        -- Check current dependencies.
+        for k, other_proj in ipairs(curr_projs) do
+          if dep.name == other_proj.name then
+            exists = true
+            break
+          end
+        end
+
+        -- Look at other deps
+        if exists == false then
+          for k, other_proj in ipairs(all_deps) do
+            if dep.name == other_proj.name then
+              print("Missing dep found.")
+              table.insert(deps, other_proj)
+              exists = true;
+              break
+            end
+          end
+
+          if(exists == false) then
+            print("Failed to resolve dep")
+          end
+        end
+
+      end
+    end
+  end
+
+end

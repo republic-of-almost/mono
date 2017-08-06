@@ -1,10 +1,3 @@
--- Solution data? Should this contain the the project names?
-solution_data = {
-
-  name = "RepublicOfAlmost",
-
-}
-
 -- Defaults will be based on platform in the future.
 -- Currently only supports buildoptions.
 project_defaults = {
@@ -38,3 +31,8 @@ project_defaults = {
 --   exceptions = false,
 --   rtti = false,
 }
+
+
+
+-- This is used by the individual projects, but it needs to be defined first.
+projects = {}

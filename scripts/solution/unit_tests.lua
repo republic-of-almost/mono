@@ -1,21 +1,38 @@
 #!lua
 
+--[[
+
+  Creates solution that only contains Unit Tests
+
+]]--
+
+
+-- Run dependencies --
 package.path = './?.lua;' .. package.path
 dofile("./premake_data.lua")
 dofile("./defaults.lua")
 
 
--- This is used by the individual projects, but it needs to be defined first.
-projects = {}
+-- Solution settings --
+solution_data = {
+  name = "UnitTests",
+}
 
-proj_matches = os.matchfiles("../../**.project")
-test_matches = os.matchfiles("../../**.test_project")
+-- Find the projects for the solution and add them --
 
-for i, proj in ipairs(test_matches) do
-  dofile(proj)
-end
+-- Dependencies --
+dofile("../../thirdparty/catch/data/catch.project")
+dofile("../../thirdparty/remotery/data/remotery.project")
 
--- Generates the premake code calls.
+-- Projects to test --
+dofile("../../lib/lib/data/lib.project")
+dofile("../../lib/lib/data/lib.test_project")
+
+dofile("../../lib/math/data/math.project")
+dofile("../../lib/math/data/math.test_project")
+
+
+-- Generates the premake api calls.
 make.create_solution(
   solution_data,
   project_defaults,
