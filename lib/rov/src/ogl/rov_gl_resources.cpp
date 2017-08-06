@@ -113,7 +113,7 @@ ogl_createMesh(
 
   const rovGLMesh rov_mesh{vbo, 8, count};
   gl_data->rov_meshes.emplace_back(rov_mesh);
-  
+
   if(out_resource_id)
   {
     *out_resource_id = vbo;
@@ -304,12 +304,6 @@ ogl_createProgram(
     return false;
   }
 
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
-
   #ifdef GL_HAS_GEO_SHD
   GLuint geo_shd = 0;
   if(strlen(geo_src))
@@ -382,12 +376,6 @@ ogl_createProgram(
 
     return false;
   }
-
-    {
-      auto err = glGetError();
-      if(err)
-      printf("ERR %d\n",err);
-    }
 
   // -- Return Values -- //
 

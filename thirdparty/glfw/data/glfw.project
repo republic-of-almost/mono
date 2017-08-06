@@ -64,6 +64,7 @@ table.insert(
       make.get_proj_root() .. "../src/x11_window.c",
       make.get_proj_root() .. "../src/linux_joystick.c",
       make.get_proj_root() .. "../src/posix_time.c",
+      make.get_proj_root() .. "../src/posix_thread.c",
       make.get_proj_root() .. "../src/glx_context.c",
       make.get_proj_root() .. "../src/xkb_unicode.c",
     },
