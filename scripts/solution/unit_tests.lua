@@ -18,6 +18,7 @@ solution_data = {
   name = "UnitTests",
 }
 
+
 -- Find the projects for the solution and add them --
 
 -- Dependencies --
