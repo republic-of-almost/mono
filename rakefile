@@ -1,0 +1,12 @@
+
+task :ci do |t, args|
+
+  Dir.chdir("scripts/solution/")
+  sh("premake4 --file=solution.lua gmake")
+  sh("make all CXX=g++-5")
+
+  Dir.chdir("../../output/Release")
+  sh("./LibTest")
+  sh("./NilTest")
+
+end
