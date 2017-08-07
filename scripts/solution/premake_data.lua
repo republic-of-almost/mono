@@ -74,7 +74,7 @@ code_configs = {
   -- Focus's on developer ease
   -- no errors on warnings etc.
   {
-    name = "Development",
+    name = "development",
     flags = {"Symbols", "Unicode"},
     defines = {"DEBUG", "NIL_DEVELOPMENT"},
   },
@@ -84,7 +84,7 @@ code_configs = {
   -- Errors on warnings are now on.
   -- Debug flags still enabled.
   {
-    name = "Staging",
+    name = "staging",
     flags = {"Optimize", "Symbols", "Unicode"},
     defines = {"DEBUG", "NIL_STAGE"},
   },
@@ -92,7 +92,7 @@ code_configs = {
   -- Release --
   -- Final build.
   {
-    name = "Release",
+    name = "release",
     flags = {"Optimize", "Unicode"},
     defines = {"NDEBUG", "NIL_RELEASE"},
   },
