@@ -4,7 +4,10 @@ project_defaults = {
 
   buildoptions_macosx = {
     "-std=c++14",
-    "-stdlib=libc++",
+  },
+
+  buildoptions_linux = {
+    "-std=c++14",
   },
 
   buildoptions_windows = {
