@@ -5,7 +5,7 @@ task :ci do |t, args|
   sh("premake4 --file=unit_tests.lua gmake")
   sh("make all config=Release CXX=g++-5")
 
-  Dir.chdir("../../output/Release")
+  Dir.chdir("../../output/release")
   sh("./LibTest")
   sh("./MathTest")
 
