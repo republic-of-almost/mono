@@ -427,9 +427,9 @@ void
 add(float *out, const float *a, const float *b, const size_t count)
 {
   // -- Param Check -- //
-  assert(out);
-  assert(a);
-  assert(b);
+  MATH_ASSERT(out);
+  MATH_ASSERT(a);
+  MATH_ASSERT(b);
 
   // -- Add Array together -- //
   for(size_t i = 0; i < count; ++i)
@@ -443,9 +443,9 @@ void
 max(float *out, const float *a, const float *b, const size_t count)
 {
   // -- Param Check -- //
-  assert(out);
-  assert(a);
-  assert(b);
+  MATH_ASSERT(out);
+  MATH_ASSERT(a);
+  MATH_ASSERT(b);
 
   // -- Add Array together -- //
   for(size_t i = 0; i < count; ++i)
@@ -459,9 +459,9 @@ void
 min(float *out, const float *a, const float *b, const size_t count)
 {
   // -- Param Check -- //
-  assert(out);
-  assert(a);
-  assert(b);
+  MATH_ASSERT(out);
+  MATH_ASSERT(a);
+  MATH_ASSERT(b);
 
   // -- Add Array together -- //
   for(size_t i = 0; i < count; ++i)
