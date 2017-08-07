@@ -344,9 +344,9 @@ make.create_solution(solution_data, project_defaults, projects)
 
         if os.get() == "macosx" then
           if proj.kind == "WindowedApp" then
-            postbuildcommands("${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+            postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
           elseif proj.kind == "ConsoleApp" then
-            postbuildcommands("${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+            postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
           end
         elseif os.get() == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then

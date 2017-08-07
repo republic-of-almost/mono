@@ -39,7 +39,7 @@ namespace helper {
 HELPER_INLINE bool
 on_stack(const void *ptr)
 {
-  const int i = 0;
+  int i = 0;
   return &i < ptr;
 }
 

@@ -159,7 +159,7 @@ namespace dir {
 const char *
 exe_path()
 {
-  static char buffer_exe_path[PROC_PIDPATHINFO_MAXSIZE] = "\0";
+  static char buffer_exe_path[PROC_PIDPATHINFO_MAXSIZE]{};
 
   if(strcmp(buffer_exe_path, "") == 0)
   {
