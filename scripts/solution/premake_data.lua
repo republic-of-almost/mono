@@ -350,7 +350,7 @@ make.create_solution(solution_data, project_defaults, projects)
           end
         elseif os.get() == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
-            postbuildcommands("cp -rf " .. dir .. "* " .. "../../../output/" .. config.name .. "/assets/" .. " 2>/dev/null || :");
+            postbuildcommands("cp -rf " .. dir .. "* " .. "../../output/" .. config.name .. "/assets/" .. " 2>/dev/null || :");
           end
         end
 

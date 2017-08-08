@@ -33,7 +33,7 @@ table.insert(
     },
 
     assets = {
-      "../../../lib/lib/assets",
+      "../assets",
     },
 
     project_dependencies = {
