@@ -342,17 +342,24 @@ make.create_solution(solution_data, project_defaults, projects)
       function
       copy_files(src_dir, dest_dir)
 
-        -- if os.get() == "macosx" then
-        --   if proj.kind == "WindowedApp" then
-        --     postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
-        --   elseif proj.kind == "ConsoleApp" then
-        --     postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
-        --   end
-        -- elseif os.get() == "linux" then
+        -- MacOSX Copy --
+        if os.get() == "macosx" then
+          if proj.kind == "WindowedApp" then
+            -- postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+            postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+          elseif proj.kind == "ConsoleApp" then
+            -- postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+            postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+          end
+        -- Linux Copy --
+        elseif os.get() == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
             postbuildcommands("cp -rf " .. src_dir .. "* " .. dest_dir .. config.name .. "/assets/" .. " 2>/dev/null || :");
           end
-        -- end
+        -- Windows Copy --
+        elseif os.get() == "windows" then
+          print("Not implimented")
+        end
 
       end
 
