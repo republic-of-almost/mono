@@ -31,7 +31,7 @@ table.insert(
     },
 
     assets = {
-      "../../../lib/rov/assets",
+      make.get_proj_root() .. "../assets/"
     },
 
     defines = {

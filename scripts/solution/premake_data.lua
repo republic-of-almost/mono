@@ -340,19 +340,19 @@ make.create_solution(solution_data, project_defaults, projects)
 
       -- Asset directories get copied to build --
       function
-      copy_files(dir)
+      copy_files(src_dir, dest_dir)
 
-        if os.get() == "macosx" then
-          if proj.kind == "WindowedApp" then
-            postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
-          elseif proj.kind == "ConsoleApp" then
-            postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
-          end
-        elseif os.get() == "linux" then
+        -- if os.get() == "macosx" then
+        --   if proj.kind == "WindowedApp" then
+        --     postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+        --   elseif proj.kind == "ConsoleApp" then
+        --     postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+        --   end
+        -- elseif os.get() == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
-            postbuildcommands("cp -rf " .. dir .. "* " .. "../../output/" .. config.name .. "/assets/" .. " 2>/dev/null || :");
+            postbuildcommands("cp -rf " .. src_dir .. "* " .. dest_dir .. config.name .. "/assets/" .. " 2>/dev/null || :");
           end
-        end
+        -- end
 
       end
 
@@ -360,7 +360,7 @@ make.create_solution(solution_data, project_defaults, projects)
         if(asset_proj.assets) then
           for k, asset_dir in ipairs(asset_proj.assets) do
             if asset_dir then
-              copy_files(asset_dir)
+              copy_files(asset_dir, make.get_proj_root() .. "../../output/")
             end
           end
         end

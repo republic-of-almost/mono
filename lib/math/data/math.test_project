@@ -26,8 +26,6 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../test/"),
     },
 
-
-
     inc_dirs = {
       make.get_proj_root() .. "./",
     },
