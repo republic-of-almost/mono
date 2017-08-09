@@ -9,8 +9,17 @@
 
 namespace {
 
-ROV_Internal::rovGLData gl_data;
-ROV_Internal::rovData rov_data;
+struct ROV_data {
+  ROV_Internal::rovGLData gl_data;
+  ROV_Internal::rovData rov_data;
+};
+
+ROV_data&
+get_rov_data()
+{
+  static ROV_data data;
+  return data;
+};
 
 } // anon ns
 
@@ -21,22 +30,22 @@ ROV_Internal::rovData rov_data;
 void
 rov_initialize(const char *asset_prefix)
 {
-  ROV_Internal::ogl_init(&gl_data, asset_prefix);
+  ROV_Internal::ogl_init(&get_rov_data().gl_data, asset_prefix);
 }
 
 
 void
 rov_destroy()
 {
-  ROV_Internal::ogl_destroy(&gl_data);
+  ROV_Internal::ogl_destroy(&get_rov_data().gl_data);
 }
 
 
 void
 rov_execute()
 {
-  ROV_Internal::ogl_exec(&gl_data, &rov_data);
-  rov_data.rov_render_passes.clear();
+  ROV_Internal::ogl_exec(&get_rov_data().gl_data, &get_rov_data().rov_data);
+  get_rov_data().rov_data.rov_render_passes.clear();
 }
 
 
@@ -53,7 +62,7 @@ rov_createTexture(
   uintptr_t *out_platform_resource)
 {
   return ROV_Internal::ogl_createTexture(
-    &gl_data,
+    &get_rov_data().gl_data,
     data,
     width,
     height,
@@ -72,7 +81,7 @@ rov_createMesh(
   uintptr_t *out_platform_resource)
 {
   return ROV_Internal::ogl_createMesh(
-    &gl_data,
+    &get_rov_data().gl_data,
     pos,
     normals,
     tex_coords,
@@ -87,7 +96,7 @@ rov_createLights(
   size_t count)
 {
   return ROV_Internal::ogl_createLights(
-    &gl_data,
+    &get_rov_data().gl_data,
     lights,
     count
   );
@@ -101,7 +110,7 @@ rov_updateLights(
   size_t count)
 {
   return ROV_Internal::ogl_updateLights(
-    &gl_data,
+    &get_rov_data().gl_data,
     id,
     lights,
     count
@@ -121,8 +130,8 @@ rov_startRenderPass(
   uint32_t clear_flags,
   uint32_t light_buffer)
 {
-  rov_data.rov_render_passes.emplace_back();
-  ROV_Internal::rovRenderPass *rp = &rov_data.rov_render_passes.back();
+  get_rov_data().rov_data.rov_render_passes.emplace_back();
+  ROV_Internal::rovRenderPass *rp = &get_rov_data().rov_data.rov_render_passes.back();
 
   rp->light_buffer = light_buffer;
 
@@ -131,10 +140,10 @@ rov_startRenderPass(
   memcpy(rp->viewport, viewport, sizeof(rovViewport));
   memcpy(rp->eye_position, eye_pos, sizeof(rovVec3));
 
-  rp->clear_color = lib::color::init(rov_data.curr_rov_color);
+  rp->clear_color = lib::color::init(get_rov_data().rov_data.curr_rov_color);
   rp->clear_flags = clear_flags;
 
-  rp->materials.emplace_back(rov_curr_material(&rov_data), size_t{0});
+  rp->materials.emplace_back(rov_curr_material(&get_rov_data().rov_data), size_t{0});
 }
 
 
@@ -151,20 +160,20 @@ rov_setColor(const float col[4])
 void
 rov_setColor(float r, float g, float b, float a)
 {
-  rov_data.curr_rov_color[0] = r;
-  rov_data.curr_rov_color[1] = g;
-  rov_data.curr_rov_color[2] = b;
-  rov_data.curr_rov_color[3] = a;
+  get_rov_data().rov_data.curr_rov_color[0] = r;
+  get_rov_data().rov_data.curr_rov_color[1] = g;
+  get_rov_data().rov_data.curr_rov_color[2] = b;
+  get_rov_data().rov_data.curr_rov_color[3] = a;
 }
 
 
 void
 rov_setColor(uint32_t col)
 {
-  rov_data.curr_rov_color[0] = lib::color::get_channel_1f(col);
-  rov_data.curr_rov_color[1] = lib::color::get_channel_2f(col);
-  rov_data.curr_rov_color[2] = lib::color::get_channel_3f(col);
-  rov_data.curr_rov_color[3] = lib::color::get_channel_4f(col);
+  get_rov_data().rov_data.curr_rov_color[0] = lib::color::get_channel_1f(col);
+  get_rov_data().rov_data.curr_rov_color[1] = lib::color::get_channel_2f(col);
+  get_rov_data().rov_data.curr_rov_color[2] = lib::color::get_channel_3f(col);
+  get_rov_data().rov_data.curr_rov_color[3] = lib::color::get_channel_4f(col);
 }
 
 
@@ -173,7 +182,7 @@ rov_setTexture(uint32_t texture_id, uint32_t texture_slot)
 {
   if(texture_slot < ROV_Internal::rov_max_textures)
   {
-    rov_data.curr_rov_textures[texture_slot] = texture_id;
+    get_rov_data().rov_data.curr_rov_textures[texture_slot] = texture_id;
   }
 }
 
@@ -181,7 +190,7 @@ rov_setTexture(uint32_t texture_id, uint32_t texture_slot)
 void
 rov_setMesh(uint32_t mesh_id)
 {
-  rov_data.curr_rov_mesh = mesh_id;
+  get_rov_data().rov_data.curr_rov_mesh = mesh_id;
 }
 
 
@@ -191,7 +200,7 @@ rov_setShader(uint32_t shader_type)
   // -- Param Check -- //
   LIB_ASSERT(shader_type < rovShader_Count);
 
-  rov_data.curr_rov_mesh_shader = shader_type;
+  get_rov_data().rov_data.curr_rov_mesh_shader = shader_type;
 }
 
 
@@ -204,9 +213,9 @@ rov_submitLine(const float start[3], const float end[3])
   ROV_Internal::rovLineDrawCall dc;
   memcpy(dc.start, start, sizeof(rovVec3));
   memcpy(dc.end, end, sizeof(rovVec3));
-  memcpy(dc.color, rov_data.curr_rov_color, sizeof(rovVec3));
+  memcpy(dc.color, get_rov_data().rov_data.curr_rov_color, sizeof(rovVec3));
 
-  rov_data.rov_render_passes.back().line_draw_calls.emplace_back(dc);
+  get_rov_data().rov_data.rov_render_passes.back().line_draw_calls.emplace_back(dc);
 }
 
 
@@ -217,17 +226,17 @@ void
 rov_submitMeshTransform(const float world[16])
 {
   ROV_Internal::rovDrawCall dc;
-  dc.mesh = rov_data.curr_rov_mesh;
+  dc.mesh = get_rov_data().rov_data.curr_rov_mesh;
   memcpy(dc.world, world, sizeof(float) * 16);
 
   size_t draw_calls = 0;
 
   ROV_Internal::rovMaterial new_mat{};
   new_mat.draw_calls = 1;
-  new_mat.material = rov_curr_material(&rov_data);
+  new_mat.material = rov_curr_material(&get_rov_data().rov_data);
 
-  const size_t mat_count = rov_data.rov_render_passes.back().materials.size();
-  ROV_Internal::rovMaterial *mat = rov_data.rov_render_passes.back().materials.data();
+  const size_t mat_count = get_rov_data().rov_data.rov_render_passes.back().materials.size();
+  ROV_Internal::rovMaterial *mat = get_rov_data().rov_data.rov_render_passes.back().materials.data();
 
   for(size_t i = 0; i < mat_count; ++i)
   {
@@ -235,15 +244,15 @@ rov_submitMeshTransform(const float world[16])
     if(mat[i].material == new_mat.material)
     {
       mat[i].draw_calls += 1;
-      rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
+      get_rov_data().rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
       break;
     }
 
     // Found insert point.
     if(mat[i].material > new_mat.material)
     {
-      rov_data.rov_render_passes.back().materials.insert(i, new_mat);
-      rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
+      get_rov_data().rov_data.rov_render_passes.back().materials.insert(i, new_mat);
+      get_rov_data().rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
       break;;
     }
 
@@ -251,9 +260,9 @@ rov_submitMeshTransform(const float world[16])
   }
 
   // Insert into the end if we must
-  if(rov_data.rov_render_passes.back().draw_calls.size() == draw_calls)
+  if(get_rov_data().rov_data.rov_render_passes.back().draw_calls.size() == draw_calls)
   {
-    rov_data.rov_render_passes.back().materials.emplace_back(new_mat);
-    rov_data.rov_render_passes.back().draw_calls.emplace_back(dc);
+    get_rov_data().rov_data.rov_render_passes.back().materials.emplace_back(new_mat);
+    get_rov_data().rov_data.rov_render_passes.back().draw_calls.emplace_back(dc);
   }
 }
