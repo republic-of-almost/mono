@@ -16,13 +16,5 @@ get_graph_data()
 }
 
 
-Node&
-get_root_node()
-{
-  static Node node(uint32_t{0});
-  return node;
-}
-
-
 } // ns
 } // ns

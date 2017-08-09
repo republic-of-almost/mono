@@ -8,8 +8,19 @@
 namespace {
 
 
-lib::array<uint32_t, 128> keys(uint32_t{0});
-lib::array<Nil::Resource::Material, 128> materials(Nil::Resource::Material{});
+struct Material_data
+{
+  lib::array<uint32_t, 128> keys{uint32_t{0}};
+  lib::array<Nil::Resource::Material, 128> materials{Nil::Resource::Material{}};
+};
+
+
+Material_data&
+get_mat_data()
+{
+  static Material_data data;
+  return data;
+}
 
 
 } // anon ns
@@ -27,11 +38,11 @@ find_by_name(const char *name, Material &out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
   
-  for(size_t i = 0; i < keys.size(); ++i)
+  for(size_t i = 0; i < get_mat_data().keys.size(); ++i)
   {
-    if(keys[i] == find_key)
+    if(get_mat_data().keys[i] == find_key)
     {
-      out = materials[i];
+      out = get_mat_data().materials[i];
       return true;
     }
   }
@@ -51,10 +62,10 @@ load(const char *name, Material &in_out)
   if(check_key)
   {
     size_t index = 0;
-    if(lib::key::linear_search(check_key, keys.data(), keys.size(), &index))
+    if(lib::key::linear_search(check_key, get_mat_data().keys.data(), get_mat_data().keys.size(), &index))
     {
-      in_out.id = materials[index].id;
-      materials[index] = in_out;
+      in_out.id = get_mat_data().materials[index].id;
+      get_mat_data().materials[index] = in_out;
       return true;
     }
     
@@ -64,10 +75,10 @@ load(const char *name, Material &in_out)
   {
     const uint32_t key = lib::string_pool::add(name);
     
-    in_out.id = keys.size();
+    in_out.id = get_mat_data().keys.size();
     
-    keys.emplace_back(key);
-    materials.emplace_back(in_out);
+    get_mat_data().keys.emplace_back(key);
+    get_mat_data().materials.emplace_back(in_out);
     
     return true;
   }
@@ -77,8 +88,8 @@ load(const char *name, Material &in_out)
 void
 get(size_t *count, Material **out)
 {
-  *count = keys.size();
-  *out = materials.data();
+  *count = get_mat_data().keys.size();
+  *out = get_mat_data().materials.data();
 }
 
 

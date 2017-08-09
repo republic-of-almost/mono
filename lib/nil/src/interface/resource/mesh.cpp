@@ -9,8 +9,18 @@
 namespace {
 
 
-lib::array<uint32_t, 128> keys(uint32_t{0});
-lib::array<Nil::Resource::Mesh, 128> meshes(Nil::Resource::Mesh{});
+struct Mesh_data {
+  lib::array<uint32_t, 128> keys{uint32_t{0}};
+  lib::array<Nil::Resource::Mesh, 128> meshes{Nil::Resource::Mesh{}};
+};
+
+
+Mesh_data&
+get_mesh_data()
+{
+  static Mesh_data data;
+  return data;
+}
 
 
 } // anon ns
@@ -28,13 +38,13 @@ find_by_name(const char *name, Mesh &out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
   
-  for(size_t i = 0; i < keys.size(); ++i)
+  for(size_t i = 0; i < get_mesh_data().keys.size(); ++i)
   {
-    const uint32_t key = keys[i];
+    const uint32_t key = get_mesh_data().keys[i];
   
     if(key == find_key)
     {
-      out = meshes[i];
+      out = get_mesh_data().meshes[i];
       return;
     }
   }
@@ -81,7 +91,7 @@ load(const char *name, Mesh &in_out)
     
     // Generate new id
     {
-      const uint32_t new_id = keys.size();
+      const uint32_t new_id = get_mesh_data().keys.size();
       in_out.id = new_id;
     }
   
@@ -131,8 +141,8 @@ load(const char *name, Mesh &in_out)
     }
     
     const uint32_t key = lib::string_pool::add(name);
-    keys.emplace_back(key);
-    meshes.emplace_back(cpy_in_out);
+    get_mesh_data().keys.emplace_back(key);
+    get_mesh_data().meshes.emplace_back(cpy_in_out);
     
     return true;
   }
@@ -142,8 +152,8 @@ load(const char *name, Mesh &in_out)
 void
 get(size_t *count, Mesh **out)
 {
-  *count = keys.size();
-  *out = meshes.begin();
+  *count = get_mesh_data().keys.size();
+  *out = get_mesh_data().meshes.begin();
 }
 
 
@@ -160,7 +170,7 @@ get_type_name(const Mesh &)
 size_t
 mesh_count()
 {
-  return keys.size() - 1; // We have an inital mesh for failures.
+  return get_mesh_data().keys.size() - 1; // We have an inital mesh for failures.
 }
 
 

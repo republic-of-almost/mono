@@ -88,7 +88,12 @@ get(const uint32_t id);
 namespace {
 
 
-lib::array<char*> str_pool;
+lib::array<char*>&
+get_str_pool()
+{
+  static lib::array<char*> pool;
+  return pool;
+}
 
 
 } // anon ns
@@ -102,28 +107,28 @@ namespace string_pool {
 void
 reset()
 {
-  for(size_t i = 0; i < str_pool.size(); ++i)
+  for(size_t i = 0; i < get_str_pool().size(); ++i)
   {
-    LIB_STRING_POOL_FREE(str_pool[i]);
+    LIB_STRING_POOL_FREE(get_str_pool()[i]);
   }
   
-  str_pool.clear();
+  get_str_pool().clear();
 }
 
 
 size_t
 size()
 {
-  return str_pool.size();
+  return get_str_pool().size();
 }
 
 
 uint32_t
 add(const char *name)
 {
-  for(size_t i = 0; i < str_pool.size(); ++i)
+  for(size_t i = 0; i < get_str_pool().size(); ++i)
   {
-    if(strcmp(str_pool[i], name) == 0)
+    if(strcmp(get_str_pool()[i], name) == 0)
     {
       return i + 1;
     }
@@ -134,17 +139,17 @@ add(const char *name)
   memset(new_str, 0, sizeof(char) * count);
   memcpy(new_str, name, count * sizeof(char));
   
-  str_pool.emplace_back(new_str);
-  return str_pool.size();
+  get_str_pool().emplace_back(new_str);
+  return get_str_pool().size();
 }
 
 
 uint32_t
 find(const char *name)
 {
-  for(size_t i = 0; i < str_pool.size(); ++i)
+  for(size_t i = 0; i < get_str_pool().size(); ++i)
   {
-    const char *search = str_pool[i];
+    const char *search = get_str_pool()[i];
   
     if(strcmp(name, search) == 0)
     {
@@ -159,9 +164,9 @@ find(const char *name)
 const char *
 get(const uint32_t id)
 {
-  if(id <= str_pool.size() && id > 0)
+  if(id <= get_str_pool().size() && id > 0)
   {
-    return str_pool[id - 1];
+    return get_str_pool()[id - 1];
   }
   
   return "";

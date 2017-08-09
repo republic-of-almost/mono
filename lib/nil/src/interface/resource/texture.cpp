@@ -10,8 +10,18 @@
 namespace {
 
 
-lib::array<uint32_t, 128> keys(uint32_t{0});
-lib::array<Nil::Resource::Texture, 128> textures(Nil::Resource::Texture{});
+struct Texture_data {
+  lib::array<uint32_t, 128> keys{uint32_t{0}};
+  lib::array<Nil::Resource::Texture, 128> textures{Nil::Resource::Texture{}};
+};
+
+
+Texture_data&
+get_tex_data()
+{
+  static Texture_data tex_data;
+  return tex_data;
+};
 
 
 } // anon ns
@@ -29,11 +39,11 @@ find_by_name(const char *name, Texture &out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
   
-  for(size_t i = 0; i < keys.size(); ++i)
+  for(size_t i = 0; i < get_tex_data().keys.size(); ++i)
   {
-    if(keys[i] == find_key)
+    if(get_tex_data().keys[i] == find_key)
     {
-      out = textures[i];
+      out = get_tex_data().textures[i];
       return true;
     }
   }
@@ -70,13 +80,13 @@ load(const char *name, Texture &in_out)
       cpy_in_out.data = (uintptr_t)cpy_data;
     }
     
-    const uint32_t new_id = keys.size();
+    const uint32_t new_id = get_tex_data().keys.size();
     
     in_out.id = new_id;
     cpy_in_out.id = new_id;
     
-    keys.emplace_back(key);
-    textures.emplace_back(in_out);
+    get_tex_data().keys.emplace_back(key);
+    get_tex_data().textures.emplace_back(in_out);
     
     return true;
   }
@@ -86,8 +96,8 @@ load(const char *name, Texture &in_out)
 void
 get(size_t *count, Texture **in_out)
 {
-  *count = keys.size();
-  *in_out = textures.data();
+  *count = get_tex_data().keys.size();
+  *in_out = get_tex_data().textures.data();
 }
 
 

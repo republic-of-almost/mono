@@ -15,10 +15,6 @@ Graph::Data*
 get_graph_data();
 
 
-Node&
-get_root_node();
-
-
 } // ns
 } // ns
 
