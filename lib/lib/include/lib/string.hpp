@@ -58,7 +58,7 @@ filename_from_path(const char *path,
     for(size_t c = path_length; c > 0; --c)
     {
       char i = path[c];
-    
+
       if(i == '.')
       {
         end = c;
@@ -87,7 +87,7 @@ get_dir_from_filepath(const std::string &filepath)
   {
     return filepath.substr(0, loc + 1);
   }
-  
+
 
   return ""; // Found no seperator
 }
@@ -145,12 +145,12 @@ get_text_between_tags(const char *start_tag,
                       const size_t sizeof_buffer)
 {
   const char *start = strstr(text, start_tag);
-  
+
   if(!start)
   {
     return false;
   }
-  
+
   const char *end = strstr(start+ strlen(start_tag), end_tag);
 
   size_t size_of_target = end - start;
@@ -159,7 +159,7 @@ get_text_between_tags(const char *start_tag,
   {
     memcpy(buffer, start, end - start);
   }
-  
+
   return true;
 }
 
@@ -218,6 +218,7 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 	return(s - src - 1);	/* count does not include NUL */
 }
+
 #endif
 
 

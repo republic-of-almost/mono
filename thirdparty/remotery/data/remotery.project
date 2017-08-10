@@ -1,16 +1,20 @@
 #!lua
 
+
 --[[
-  ImGUI Project Description
+
+  Remotery Project Description
+
 ]]--
+
 
 table.insert(
   projects,
   {
-    name     = "Remotery",
-    kind     = "StaticLib",
-    language = "C",
-    location = make.get_proj_root(),
+    name            = "Remotery",
+    kind            = "StaticLib",
+    language        = "C",
+    location        = make.get_proj_root(),
     ignore_defaults = true,
 
     src_files = {

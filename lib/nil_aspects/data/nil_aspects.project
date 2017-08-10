@@ -1,8 +1,11 @@
 #!lua
 
 --[[
+
   Aspect Project Description
+
 ]]--
+
 
 table.insert(
   projects,
@@ -33,6 +36,9 @@ table.insert(
     },
 
     project_dependencies = {
+
+      -- First Party --
+
       "Nil",
       "Lib",
       "External",

@@ -5,23 +5,12 @@ Mono-repo for all ROA code. Individual projects are in their own directories. `a
 
 ## Health Report
 
-### App Builds
-
-Project | Development | Staging | Release
---------|-------------|---------|--------
-Blank   | pending     | pending | pending
-FPS     | pending     | pending | pending
-TNP     | pending     | pending | pending
-
 
 ### Unit Tests
 
-Project | Development | Staging | Release
---------|-------------|---------|--------
-Lib     | pending     | pending | pending
-Math    | pending     | pending | pending
-Nil     | pending     | pending | pending
-ROV     | pending     | pending | pending
+CI | Status
+--------|--------
+Travis  | [![Build Status](https://travis-ci.org/republic-of-almost/mono.svg?branch=master)](https://travis-ci.org/republic-of-almost/mono)
 
 
 ## How To Build

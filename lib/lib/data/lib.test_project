@@ -1,17 +1,19 @@
 #!lua
 
 --[[
+
   Utilities Test Project Description
+
 ]]--
+
 
 table.insert(
   projects,
   {
-    name     = "LibTests",
+    name     = "LibTest",
     kind     = "ConsoleApp",
     language = "C++",
     location = make.get_proj_root(),
-    no_link  = true,
 
     lang_settings = {
       exceptions  = true,
@@ -22,7 +24,7 @@ table.insert(
       make.add_headers(make.get_proj_root() .. "../test/"),
       make.add_src(make.get_proj_root() .. "../test/"),
       make.add_doc(make.get_proj_root() .. "../test/"),
-
+      --
       make.get_proj_root() .. "../assets/**",
     },
 
@@ -31,7 +33,7 @@ table.insert(
     },
 
     assets = {
-      "../../../lib/lib/assets",
+      make.get_proj_root() .. "../assets/"
     },
 
     project_dependencies = {

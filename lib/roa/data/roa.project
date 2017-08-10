@@ -1,8 +1,11 @@
 #!lua
 
 --[[
+
   ROA Project Description
+
 ]]--
+
 
 table.insert(
   projects,
@@ -27,6 +30,9 @@ table.insert(
     },
 
     project_dependencies = {
+
+      -- First Party --
+
       "AspectsControllers",
       "Nil",
       "Lib",

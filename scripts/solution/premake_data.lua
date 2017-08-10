@@ -74,7 +74,7 @@ code_configs = {
   -- Focus's on developer ease
   -- no errors on warnings etc.
   {
-    name = "Development",
+    name = "development",
     flags = {"Symbols", "Unicode"},
     defines = {"DEBUG", "NIL_DEVELOPMENT"},
   },
@@ -84,7 +84,7 @@ code_configs = {
   -- Errors on warnings are now on.
   -- Debug flags still enabled.
   {
-    name = "Staging",
+    name = "staging",
     flags = {"Optimize", "Symbols", "Unicode"},
     defines = {"DEBUG", "NIL_STAGE"},
   },
@@ -92,7 +92,7 @@ code_configs = {
   -- Release --
   -- Final build.
   {
-    name = "Release",
+    name = "release",
     flags = {"Optimize", "Unicode"},
     defines = {"NDEBUG", "NIL_RELEASE"},
   },
@@ -273,7 +273,6 @@ make.create_solution(solution_data, project_defaults, projects)
               local platform_defines = find_table_with_platform(other_proj, "defines")
               if platform_defines then defines(platform_defines) end
 
-
               -- dependencies
               get_dependencies(other_proj, orig_proj, padding .. "  ")
             end
@@ -341,18 +340,25 @@ make.create_solution(solution_data, project_defaults, projects)
 
       -- Asset directories get copied to build --
       function
-      copy_files(dir)
+      copy_files(src_dir, dest_dir)
 
+        -- MacOSX Copy --
         if os.get() == "macosx" then
           if proj.kind == "WindowedApp" then
-            postbuildcommands("${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+            -- postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
+            postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
           elseif proj.kind == "ConsoleApp" then
-            postbuildcommands("${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+            -- postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
+            postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
           end
+        -- Linux Copy --
         elseif os.get() == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
-            postbuildcommands("cp -rf " .. dir .. "* " .. "../../../output/" .. config.name .. "/assets/" .. " 2>/dev/null || :");
+            postbuildcommands("cp -rf " .. src_dir .. "* " .. dest_dir .. config.name .. "/assets/" .. " 2>/dev/null || :");
           end
+        -- Windows Copy --
+        elseif os.get() == "windows" then
+          print("Not implimented")
         end
 
       end
@@ -361,7 +367,7 @@ make.create_solution(solution_data, project_defaults, projects)
         if(asset_proj.assets) then
           for k, asset_dir in ipairs(asset_proj.assets) do
             if asset_dir then
-              copy_files(asset_dir)
+              copy_files(asset_dir, make.get_proj_root() .. "../../output/")
             end
           end
         end
@@ -369,6 +375,49 @@ make.create_solution(solution_data, project_defaults, projects)
 
     end
 
+  end
+
+end
+
+
+function
+make.find_missing_dependencies(all_deps, curr_projs)
+
+  deps = {}
+
+  for i, proj in ipairs(curr_projs) do
+    if proj.project_dependencies then
+
+      for j, dep in ipairs(proj.project_dependencies) do
+
+        exists = false
+
+        -- Check current dependencies.
+        for k, other_proj in ipairs(curr_projs) do
+          if dep.name == other_proj.name then
+            exists = true
+            break
+          end
+        end
+
+        -- Look at other deps
+        if exists == false then
+          for k, other_proj in ipairs(all_deps) do
+            if dep.name == other_proj.name then
+              print("Missing dep found.")
+              table.insert(deps, other_proj)
+              exists = true;
+              break
+            end
+          end
+
+          if(exists == false) then
+            print("Failed to resolve dep")
+          end
+        end
+
+      end
+    end
   end
 
 end
