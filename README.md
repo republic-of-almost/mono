@@ -8,9 +8,9 @@ Mono-repo for all ROA code. Individual projects are in their own directories. `a
 
 ### Unit Tests
 
-Project | Release
+CI | Status
 --------|--------
-ROA     | [![Build Status](https://travis-ci.org/republic-of-almost/mono.png)](https://travis-ci.org/republic-of-almost/mono)
+Travis     | https://img.shields.io/travis/republic-of-almost/mono.svg
 
 
 ## How To Build
