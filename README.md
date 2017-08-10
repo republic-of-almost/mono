@@ -10,7 +10,7 @@ Mono-repo for all ROA code. Individual projects are in their own directories. `a
 
 CI | Status
 --------|--------
-Travis     | https://img.shields.io/travis/republic-of-almost/mono.svg
+Travis     | [![Build Status](https://img.shields.io/travis/republic-of-almost/mono.svg)
 
 
 ## How To Build
