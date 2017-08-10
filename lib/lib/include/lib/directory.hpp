@@ -111,6 +111,7 @@ exe_path()
 #include <unistd.h>
 #include <cstring>
 #include <libgen.h>
+#include "logging.hpp"
 
 
 namespace LIB_NS_NAME {
@@ -132,6 +133,10 @@ exe_path()
     {
       const char *path = dirname(buffer);
       strcpy(buffer_exe_path, path);
+    }
+    else
+    {
+      LOG_ERROR("Failed to get exe path");
     }
   }
 
