@@ -121,13 +121,12 @@ namespace dir {
 const char *
 exe_path()
 {
-  static char buffer_exe_path[1024] = "\0";
+  static char buffer_exe_path[1024]{};
 
   if(strcmp(buffer_exe_path, "") == 0)
   {
-    char buffer[1024];
-    memset(buffer_exe_path, 0, sizeof(buffer_exe_path));
-    unsigned int count = readlink("/prop/self/exe", buffer, 1024);
+    char buffer[1024]{};
+    const unsigned int count = readlink("/prop/self/exe", buffer, sizeof(buffer));
 
     if(count != -1)
     {
