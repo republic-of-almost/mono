@@ -1,53 +1,27 @@
 #!lua
 
+
+--[[
+
+  Creates a solution that contains every project and test project in the
+  mono repo.
+
+]]--
+
+
+-- Run dependencies --
 package.path = './?.lua;' .. package.path
 dofile("./premake_data.lua")
+dofile("./defaults.lua")
 
 
--- Solution data? Should this contain the the project names?
+-- Solution Settings --
 solution_data = {
-
   name = "RepublicOfAlmost",
-
 }
 
--- Defaults will be based on platform in the future.
--- Currently only supports buildoptions.
-project_defaults = {
 
-  buildoptions_macosx = {
-    "-std=c++14",
-    "-stdlib=libc++",
-  },
-
-  buildoptions_windows = {
-    "/IGNORE:C4577",
-  },
-
-  flags = {
-    "EnableSSE2",
-    "ExtraWarnings",
-    "FloatFast",
-    -- "NoExceptions", -- deprecated premake5
-    -- "NoRTTI", -- deprecated premake5
-  },
-
-  defines = {
-    "MATH_USE_SIMD",
-  },
-
-  defines_windows = {
-    "_HAS_EXCEPTIONS=0",
-    "_CRT_NO_WARNINGS",
-  },
-
---   exceptions = false,
---   rtti = false,
-}
-
--- This is used by the individual projects, but it needs to be defined first.
-projects = {}
-
+-- Find the projects for the solution and add them --
 proj_matches = os.matchfiles("../../**.project")
 test_matches = os.matchfiles("../../**.test_project")
 
@@ -59,7 +33,8 @@ for i, proj in ipairs(test_matches) do
   dofile(proj)
 end
 
--- Generates the premake code calls.
+
+-- Generates the premake api calls --
 make.create_solution(
   solution_data,
   project_defaults,

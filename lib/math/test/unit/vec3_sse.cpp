@@ -23,7 +23,7 @@ TEST_CASE("Vector 3 SIMD")
   REQUIRE(math::vec3_get_z(four) == 4.f);
 
   const std::array<float, 3> arr_data = {5.f, 6.f, 7.f};
-  const math::vec3 five_six_seven = math::vec3_init_with_array(&arr_data[0]);
+  const math::vec3 five_six_seven = math::vec3_init(&arr_data[0]);
   REQUIRE(math::vec3_get_x(five_six_seven) == 5.f);
   REQUIRE(math::vec3_get_y(five_six_seven) == 6.f);
   REQUIRE(math::vec3_get_z(five_six_seven) == 7.f);

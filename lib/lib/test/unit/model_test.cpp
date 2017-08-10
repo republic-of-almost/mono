@@ -34,7 +34,7 @@ TEST_CASE("Model Test")
 
   SECTION("Simple obj")
   {
-    char file[LIB_MAX_FILE_PATH_SIZE];
+    char file[LIB_MAX_FILE_PATH_SIZE]{};
     strcat(file, lib::dir::exe_path());
     strcat(file, "assets/lib/plane.obj");
   
@@ -80,7 +80,7 @@ TEST_CASE("Model Test")
   
   SECTION("Complex obj")
   {
-    char file[LIB_MAX_FILE_PATH_SIZE];
+    char file[LIB_MAX_FILE_PATH_SIZE]{};
     strcat(file, lib::dir::exe_path());
     strcat(file, "assets/lib/complex.obj");
   

@@ -63,5 +63,8 @@
 #define MATH_VEC4_INLINE MATH_INLINE
 #define MATH_QUAT_INLINE MATH_INLINE
 
+#include <assert.h>
+#define MATH_ASSERT(eval) assert(eval);
+
 
 #endif // include guard

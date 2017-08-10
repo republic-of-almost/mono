@@ -111,6 +111,9 @@ exe_path()
 #include <unistd.h>
 #include <cstring>
 #include <libgen.h>
+#include <stdio.h>
+#include "logging.hpp"
+#include "string.hpp"
 
 
 namespace LIB_NS_NAME {
@@ -120,18 +123,22 @@ namespace dir {
 const char *
 exe_path()
 {
-  static char buffer_exe_path[1024] = "\0";
+  static char buffer_exe_path[1024]{};
 
-  if(strcmp(buffer_exe_path, "") == 0)
+  if(strlen(buffer_exe_path) == 0)
   {
-    char buffer[1024];
-    memset(buffer_exe_path, 0, sizeof(buffer_exe_path));
-    unsigned int count = readlink("/prop/self/exe", buffer, 1024);
+    char buffer[1024]{};
+    const unsigned int count = readlink("/proc/self/exe", buffer, sizeof(buffer));
 
     if(count != -1)
     {
       const char *path = dirname(buffer);
       strcpy(buffer_exe_path, path);
+      strcat(buffer_exe_path, "/");
+    }
+    else
+    {
+      LOG_ERROR("Failed to get exe path");
     }
   }
 
@@ -159,7 +166,7 @@ namespace dir {
 const char *
 exe_path()
 {
-  static char buffer_exe_path[PROC_PIDPATHINFO_MAXSIZE] = "\0";
+  static char buffer_exe_path[PROC_PIDPATHINFO_MAXSIZE]{};
 
   if(strcmp(buffer_exe_path, "") == 0)
   {
