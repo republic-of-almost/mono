@@ -1,0 +1,17 @@
+# Example nyaml
+application:
+
+  window:
+    width: 800
+    height: 600
+    title: My App
+
+    graphic_settings:
+      aa: true
+      v_sync: false
+
+  # Nyaml doesn't support yaml's '-' array
+  arrays:
+    one: two
+    one: three
+    one: four
