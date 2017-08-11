@@ -654,7 +654,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
 
       if(ImGui::MenuItem("Quit"))
       {
-//        aspect.want_to_quit = true;
+        engine.send_quit_signal();
       }
 
       ImGui::EndMenu();

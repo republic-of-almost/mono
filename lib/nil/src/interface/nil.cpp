@@ -25,6 +25,8 @@ struct Engine::Impl
 
   lib::milliseconds last_tick;
   float delta_time;
+  
+  bool quit = false;
 };
 
 
@@ -224,14 +226,12 @@ Engine::run()
     Check to see if any aspects are ready to quit.
   */
   {
-    bool should_quit = false;
-
     for(Aspect &asp : m_impl->aspects)
     {
-      should_quit |= asp.want_to_quit;
+      m_impl->quit |= asp.want_to_quit;
     }
 
-    return !should_quit;
+    return !m_impl->quit;
   }
 }
 
@@ -262,6 +262,14 @@ Engine::get_state(Engine_state &out)
 {
 
 }
+
+
+void
+Engine::send_quit_signal()
+{
+  m_impl->quit = true;
+}
+
 
 
 // ------------------------------------------------------- [ Debugging Info ] --

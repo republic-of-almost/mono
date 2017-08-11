@@ -62,6 +62,10 @@ public:
 
   void
   get_state(Engine_state &out);
+  
+  
+  void
+  send_quit_signal();
 
 
   // ----------------------------------------------------- [ Debugging Info ] --
