@@ -7,6 +7,7 @@
 #include <rov/rov.hpp>
 #include <lib/utilities.hpp>
 #include <stb/stb_image.h>
+#include <math/math.hpp>
 
 #ifndef NIMGUI
 #include <imgui/imgui.h>
@@ -195,6 +196,9 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   } // Load Meshes
+  
+  Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, early_think);
+  Nil::Task::cpu_task(Nil::Task::CPU::THINK, (uintptr_t)self, think);
 }
 
 
@@ -202,9 +206,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+early_think(Nil::Engine &engine, uintptr_t user_data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
   BENCH_SCOPED_CPU(ROV_EarlyThink)
@@ -258,9 +263,10 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-think(Nil::Engine &engine, Nil::Aspect &aspect)
+//think(Nil::Engine &engine, Nil::Aspect &aspect)
+think(Nil::Engine &engine, uintptr_t user_data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
   BENCH_SCOPED_CPU(ROV_Think)

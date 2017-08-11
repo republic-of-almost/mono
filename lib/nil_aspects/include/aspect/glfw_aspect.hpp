@@ -5,6 +5,7 @@
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
 #include <nil/data/keyboard.hpp>
+#include <nil/task.hpp>
 
 
 // --------------------------------------------------- [ GLFW Aspect Config ] --
@@ -44,11 +45,13 @@ events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-early_think(Nil::Engine &engine, Nil::Aspect &aspect);
+//early_think(Nil::Engine &engine, Nil::Aspect &aspect);
+early_think(Nil::Engine &engine, uintptr_t user_data);
 
 
 void
-late_think(Nil::Engine &engine, Nil::Aspect &aspect);
+//late_think(Nil::Engine &engine, Nil::Aspect &aspect);
+late_think(Nil::Engine &engine, uintptr_t user_data);
 
 
 } // ns

@@ -90,6 +90,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   }
+  
+  Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, early_think);
 }
 
 
@@ -97,9 +99,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+early_think(Nil::Engine &engine, uintptr_t user_data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
   
   BENCH_SCOPED_CPU(Logic_EarktThink)
@@ -108,16 +111,6 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
   {
     self->update[i](self->logic_nodes[i].get_id(), self->user_data[i]);
   }
-}
-
-
-// ----------------------------------------- [ Logic Aspect Impl Late Think ] --
-
-
-void
-think(Nil::Engine &engine, Nil::Aspect &aspect)
-{
-
 }
 
 

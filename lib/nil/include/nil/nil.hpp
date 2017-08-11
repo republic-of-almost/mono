@@ -5,7 +5,7 @@
 #include <nil/fwd.hpp>
 #include <stdint.h>
 #include <stddef.h>
-#include <math/math.hpp> // temp
+#include <math/math.hpp>
 
 
 namespace Nil {

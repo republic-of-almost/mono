@@ -1,7 +1,9 @@
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
 #include <nil/aspect.hpp>
+#include <nil/task.hpp>
 #include <data/internal_data.hpp>
+#include <data/task_queue.hpp>
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
 #include <lib/array.hpp>
@@ -108,57 +110,159 @@ Engine::run()
 
     m_impl->delta_time = lib::timer::to_seconds(delta);
   }
-  // Distro Events
-  {
-    BENCH_SCOPED_CPU(DistroEvents)
-
-    for(Aspect &asp : m_impl->aspects)
-    {
-      if(asp.events_fn)
-      {
-        asp.events_fn(*this, asp);
-      }
-    }
-
-    Graph::think(Data::get_graph_data());
-  }
+  
+//  // Distro Events
+//  {
+//    BENCH_SCOPED_CPU(DistroEvents)
+//
+//    for(Aspect &asp : m_impl->aspects)
+//    {
+//      if(asp.events_fn)
+//      {
+//        asp.events_fn(*this, asp);
+//      }
+//    }
+//
+//    Graph::think(Data::get_graph_data());
+//  }
 
   // Thinking
   {
     BENCH_SCOPED_CPU(Thinking)
 
-
     for(Aspect &asp : m_impl->aspects)
     {
-      BENCH_SCOPED_CPU(AspectEarlyThink)
+      BENCH_SCOPED_CPU(AspectTick)
 
-      if(asp.early_think_fn)
+      if(asp.tick_fn)
       {
-        asp.early_think_fn(*this, asp);
+        asp.tick_fn(*this, asp);
       }
     }
 
-    // Think
-    for(Aspect &asp : m_impl->aspects)
+//    for(Aspect &asp : m_impl->aspects)
+//    {
+//      BENCH_SCOPED_CPU(AspectEarlyThink)
+//
+//      if(asp.early_think_fn)
+//      {
+//        asp.early_think_fn(*this, asp);
+//      }
+//    }
+//
+//    // Think
+//    for(Aspect &asp : m_impl->aspects)
+//    {
+//      BENCH_SCOPED_CPU(AspectThink)
+//
+//      if(asp.think_fn)
+//      {
+//        asp.think_fn(*this, asp);
+//      }
+//    }
+//
+//    // Late Think
+//    for(Aspect &asp : m_impl->aspects)
+//    {
+//      BENCH_SCOPED_CPU(AspectLateThink)
+//
+//      if(asp.late_think_fn)
+//      {
+//        asp.late_think_fn(*this, asp);
+//      }
+//    }
+    
+    
+    /*
+      TASKS
+    */
+    Nil::Data::Task_queues &tasks = Nil::Data::get_task_queues();
+    
+    for(auto &t : tasks.early_think)
     {
-      BENCH_SCOPED_CPU(AspectThink)
-
-      if(asp.think_fn)
+      if(t.func)
       {
-        asp.think_fn(*this, asp);
+        t.func(*this, t.user_data);
       }
     }
-
-    // Late Think
-    for(Aspect &asp : m_impl->aspects)
+    
+    tasks.early_think.clear();
+    
+    for(auto &t : tasks.pre_render)
     {
-      BENCH_SCOPED_CPU(AspectLateThink)
-
-      if(asp.late_think_fn)
+      if(t.func)
       {
-        asp.late_think_fn(*this, asp);
+        t.func(*this, t.user_data);
       }
     }
+    
+    tasks.pre_render.clear();
+    
+    // -- //
+    
+    for(auto &t : tasks.think)
+    {
+      if(t.func)
+      {
+        t.func(*this, t.user_data);
+      }
+    }
+    
+    tasks.think.clear();
+    
+    for(auto &t : tasks.pre_render)
+    {
+      if(t.func)
+      {
+        t.func(*this, t.user_data);
+      }
+    }
+    
+    tasks.pre_render.clear();
+    
+    // -- //
+    
+    for(auto &t : tasks.late_think)
+    {
+      if(t.func)
+      {
+        t.func(*this, t.user_data);
+      }
+    }
+    
+    tasks.late_think.clear();
+    
+    for(auto &t : tasks.pre_render)
+    {
+      if(t.func)
+      {
+        t.func(*this, t.user_data);
+      }
+    }
+    
+    tasks.pre_render.clear();
+    
+    // -- //
+    
+    for(auto &t : tasks.render)
+    {
+      if(t.func)
+      {
+        t.func(*this, t.user_data);
+      }
+    }
+    
+    tasks.render.clear();
+    
+    for(auto &t : tasks.post_render)
+    {
+      if(t.func)
+      {
+        t.func(*this, t.user_data);
+      }
+    }
+    
+    tasks.post_render.clear();
   }
 
   /*

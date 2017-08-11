@@ -4,6 +4,7 @@
 
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
+#include <nil/task.hpp>
 #include <nil/data/logic.hpp>
 #include <math/fwd.hpp>
 #include <vector>
@@ -42,11 +43,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-early_think(Nil::Engine &engine, Nil::Aspect &aspect);
-
-
-void
-think(Nil::Engine &engine, Nil::Aspect &aspect);
+//early_think(Nil::Engine &engine, Nil::Aspect &aspect);
+early_think(Nil::Engine &engine, uintptr_t user_data);
 
 
 } // ns

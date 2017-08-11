@@ -342,15 +342,29 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   {
     aspect.want_to_quit = glfwWindowShouldClose(self->window);
   }
+  
+  // Tasks
+  
+  Nil::Task::cpu_task(
+    Nil::Task::CPU::EARLY_THINK,
+    (uintptr_t)self,
+    early_think
+  );
+  
+  Nil::Task::cpu_task(
+    Nil::Task::CPU::LATE_THINK,
+    (uintptr_t)self,
+    late_think
+  );
 }
 
 
 void
-early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+early_think(Nil::Engine &engine, uintptr_t user_data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
-
 
   if(self->window)
   {
@@ -360,9 +374,10 @@ early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-late_think(Nil::Engine &engine, Nil::Aspect &aspect)
+//late_think(Nil::Engine &engine, Nil::Aspect &aspect)
+late_think(Nil::Engine &engine, uintptr_t user_data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
   if(self->window)

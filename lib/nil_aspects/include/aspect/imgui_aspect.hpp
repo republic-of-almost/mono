@@ -7,6 +7,7 @@
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
+#include <nil/task.hpp>
 #include <vector>
 
 namespace Nil_ext {
@@ -73,7 +74,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
 void
-think(Nil::Engine &engine, Nil::Aspect &aspect);
+//think(Nil::Engine &engine, Nil::Aspect &aspect);
+think(Nil::Engine &engine, uintptr_t user_data);
 
 
 } // ns

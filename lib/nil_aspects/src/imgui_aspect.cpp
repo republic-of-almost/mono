@@ -12,7 +12,7 @@
 #include <lib/utilities.hpp>
 #include "imgui/imgui_resource.hpp"
 #include "imgui/imgui_data.hpp"
-
+#include <math/math.hpp>
 #include <lib/bench.hpp>
 
 
@@ -68,7 +68,11 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 void
 events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
-
+  Nil::Task::cpu_task(
+    Nil::Task::CPU::THINK,
+    (uintptr_t)&aspect,
+    think
+  );
 }
 
 
@@ -210,9 +214,10 @@ render_rsrc(bool *window)
 
 
 void
-think(Nil::Engine &engine, Nil::Aspect &aspect)
+//think(Nil::Engine &engine, Nil::Aspect &aspect)
+think(Nil::Engine &engine, uintptr_t user_data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
   BENCH_SCOPED_CPU(Logic_Think)
@@ -646,7 +651,7 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
       if(ImGui::MenuItem("Quit"))
       {
-        aspect.want_to_quit = true;
+//        aspect.want_to_quit = true;
       }
 
       ImGui::EndMenu();
