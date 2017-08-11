@@ -9,7 +9,6 @@
 namespace ROA {
 
 
-
 Application::Application()
 {
   Nil_ext::load_aspects(ROA_detail::get_engine());
@@ -43,7 +42,6 @@ Application::run(Custom_tick_fn tick, uintptr_t user_data)
     }
   }
 }
-
 
 
 } // ns

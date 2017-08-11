@@ -23,15 +23,11 @@ namespace Nil_ext {
 void
 load_aspects(Nil::Engine &nil_engine)
 {
-  static Nil_ext::GLFW_Aspect::Data glfw;
   {
+    static Nil_ext::GLFW_Aspect::Data glfw;
     Nil::Aspect aspect{};
     aspect.start_up_fn    = Nil_ext::GLFW_Aspect::start_up;
     aspect.tick_fn        = Nil_ext::GLFW_Aspect::events;
-    
-//    aspect.events_fn      = Nil_ext::GLFW_Aspect::events;
-//    aspect.early_think_fn = Nil_ext::GLFW_Aspect::early_think;
-//    aspect.late_think_fn  = Nil_ext::GLFW_Aspect::late_think;
     aspect.user_data      = (uintptr_t)&glfw;
 
     nil_engine.add_aspect(aspect);
@@ -42,54 +38,45 @@ load_aspects(Nil::Engine &nil_engine)
     --
     Renderer
   */
-  static Nil_ext::ROV_Aspect::Data rov;
   {
-    Nil::Aspect rov_aspect{};
+    static Nil_ext::ROV_Aspect::Data rov;
+    Nil::Aspect aspect{};
+    aspect.start_up_fn    = Nil_ext::ROV_Aspect::start_up;
+    aspect.tick_fn        = Nil_ext::ROV_Aspect::events;
+    aspect.user_data      = (uintptr_t)&rov;
 
-    rov_aspect.start_up_fn    = Nil_ext::ROV_Aspect::start_up;
-    rov_aspect.tick_fn        = Nil_ext::ROV_Aspect::events;
-    
-//    rov_aspect.events_fn      = Nil_ext::ROV_Aspect::events;
-//    rov_aspect.early_think_fn = Nil_ext::ROV_Aspect::early_think;
-//    rov_aspect.think_fn       = Nil_ext::ROV_Aspect::think;
-    rov_aspect.user_data      = (uintptr_t)&rov;
-
-    nil_engine.add_aspect(rov_aspect);
+    nil_engine.add_aspect(aspect);
   }
 
   /*
     Logic Aspect
   */
-  static Nil_ext::Logic_aspect::Data logic;
   {
-    Nil::Aspect logic_aspect{};
+    static Nil_ext::Logic_aspect::Data logic;
+    Nil::Aspect aspect{};
 
-    logic_aspect.start_up_fn    = Nil_ext::Logic_aspect::start_up;
-    logic_aspect.tick_fn        = Nil_ext::Logic_aspect::events;
-    
-    logic_aspect.user_data      = (uintptr_t)&logic;
+    aspect.start_up_fn    = Nil_ext::Logic_aspect::start_up;
+    aspect.tick_fn        = Nil_ext::Logic_aspect::events;
+    aspect.user_data      = (uintptr_t)&logic;
 
-    nil_engine.add_aspect(logic_aspect);
+    nil_engine.add_aspect(aspect);
   }
-
+  
   /*
     ImGui Aspect
     --
     Debugging UI
   */
   #ifndef NIMGUI
-  static Nil_ext::ImGui_Aspect::Data imgui;
   {
-    Nil::Aspect imgui_aspect{};
+    static Nil_ext::ImGui_Aspect::Data imgui;
+    Nil::Aspect aspect{};
 
-    imgui_aspect.start_up_fn = Nil_ext::ImGui_Aspect::start_up;
-    imgui_aspect.tick_fn     = Nil_ext::ImGui_Aspect::events;
-    
-//    imgui_aspect.events_fn   = Nil_ext::ImGui_Aspect::events;
-//    imgui_aspect.think_fn    = Nil_ext::ImGui_Aspect::think;
-    imgui_aspect.user_data   = (uintptr_t)&imgui;
+    aspect.start_up_fn = Nil_ext::ImGui_Aspect::start_up;
+    aspect.tick_fn     = Nil_ext::ImGui_Aspect::events;
+    aspect.user_data   = (uintptr_t)&imgui;
 
-    nil_engine.add_aspect(imgui_aspect);
+    nil_engine.add_aspect(aspect);
   }
   #endif
 }

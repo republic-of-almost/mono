@@ -86,7 +86,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         size_t                count = 0;
         Nil::Data::Developer *data = nullptr;
-        Nil::Node             *node = nullptr;
+        Nil::Node            *node = nullptr;
 
         Nil::Data::events(Nil::Data::Event::ADDED, &count, &data, &node);
 

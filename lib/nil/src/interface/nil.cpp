@@ -104,28 +104,12 @@ Engine::run()
   // Delta Time
   {
     const lib::milliseconds curr_tick = lib::timer::get_current_time();
-    const lib::milliseconds delta = lib::timer::get_delta(m_impl->last_tick, curr_tick);
+    const lib::milliseconds delta     = lib::timer::get_delta(m_impl->last_tick, curr_tick);
 
-    m_impl->last_tick = curr_tick;
-
+    m_impl->last_tick  = curr_tick;
     m_impl->delta_time = lib::timer::to_seconds(delta);
   }
   
-//  // Distro Events
-//  {
-//    BENCH_SCOPED_CPU(DistroEvents)
-//
-//    for(Aspect &asp : m_impl->aspects)
-//    {
-//      if(asp.events_fn)
-//      {
-//        asp.events_fn(*this, asp);
-//      }
-//    }
-//
-//    Graph::think(Data::get_graph_data());
-//  }
-
   // Thinking
   {
     BENCH_SCOPED_CPU(Thinking)
@@ -139,42 +123,13 @@ Engine::run()
         asp.tick_fn(*this, asp);
       }
     }
-
-//    for(Aspect &asp : m_impl->aspects)
-//    {
-//      BENCH_SCOPED_CPU(AspectEarlyThink)
-//
-//      if(asp.early_think_fn)
-//      {
-//        asp.early_think_fn(*this, asp);
-//      }
-//    }
-//
-//    // Think
-//    for(Aspect &asp : m_impl->aspects)
-//    {
-//      BENCH_SCOPED_CPU(AspectThink)
-//
-//      if(asp.think_fn)
-//      {
-//        asp.think_fn(*this, asp);
-//      }
-//    }
-//
-//    // Late Think
-//    for(Aspect &asp : m_impl->aspects)
-//    {
-//      BENCH_SCOPED_CPU(AspectLateThink)
-//
-//      if(asp.late_think_fn)
-//      {
-//        asp.late_think_fn(*this, asp);
-//      }
-//    }
+    
+    Graph::think(Data::get_graph_data());
     
     
     /*
       TASKS
+      This is awful!
     */
     Nil::Data::Task_queues &tasks = Nil::Data::get_task_queues();
     

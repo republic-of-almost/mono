@@ -68,9 +68,12 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 void
 events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
+  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  LIB_ASSERT(self);
+
   Nil::Task::cpu_task(
     Nil::Task::CPU::THINK,
-    (uintptr_t)&aspect,
+    (uintptr_t)self,
     think
   );
 }

@@ -17,7 +17,7 @@
 int
 main()
 {
-  lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
+//  lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
 
   ROA::Application app;
 
