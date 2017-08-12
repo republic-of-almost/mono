@@ -40,6 +40,8 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   dev.type_id = 1;
   dev.aux_01  = (uintptr_t)ui_menu;
   dev.aux_02 = (uintptr_t)self;
+  dev.aux_03 = (uintptr_t)ui_window;
+  dev.aux_04 = (uintptr_t)self;
 
   Nil::Data::set(self->renderer, dev);
   #endif
@@ -197,64 +199,139 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
     }
   } // Load Meshes
   
-  Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, early_think);
-  Nil::Task::cpu_task(Nil::Task::CPU::THINK, (uintptr_t)self, think);
+  if(self->has_initialized)
+  {
+    Nil::Task::cpu_task(
+      Nil::Task::CPU::EARLY_THINK,
+      (uintptr_t)self,
+      early_think
+    );
+    
+    Nil::Task::cpu_task(
+      Nil::Task::CPU::THINK,
+      (uintptr_t)self,
+      think
+    );
+  }
+  
+  if(self->show_lookat_bounding_box)
+  {
+    Nil::Task::cpu_task(
+      Nil::Task::CPU::EARLY_THINK,
+      (uintptr_t)self,
+      find_lookat_bounding_box
+    );
+  }
 }
 
 
-// ------------------------------------- [ Renderer Aspect Impl Early Think ] --
+// ------------------------------------------------------- [ Renderer Tasks ] --
 
 
 void
-//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
+find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(ROV_FindLookAtBoundingBox)
+  
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+  
+  size_t cam_count = 0;
+  Nil::Data::Camera *cameras;
+  Nil::Data::get(&cam_count, &cameras);
+  
+  size_t bb_count = 0;
+  Nil::Data::Bounding_box *boxes = nullptr;
+  Nil::Data::get(&bb_count, &boxes, true);
+  
+  self->selected_bbs.clear();
+  
+  for(size_t i = 0; i < cam_count; i++)
+  {
+  
+    // Generate ray.
+    math::mat4 proj_mat = math::mat4_projection(
+      cameras[i].width * self->current_viewport[0],
+      cameras[i].height * self->current_viewport[1],
+      cameras[i].near_plane,
+      cameras[i].far_plane,
+      cameras[i].fov
+    );
+    
+    math::mat4 view_mat = math::mat4_init(cameras[i].view_mat);
+    
+    math::ray r = math::ray_from_perpective_viewport(
+      cameras[i].width * self->current_viewport[0],
+      cameras[i].height * self->current_viewport[1],
+      self->current_viewport[0] / 2,
+      self->current_viewport[1] / 2,
+      proj_mat,
+      view_mat,
+      math::vec3_init(cameras[i].position),
+      100000
+    );
+  
+    for(size_t j = 0; j < bb_count; j++)
+    {
+      math::aabb box = math::aabb_init(boxes[j].min, boxes[j].max);
+      
+      float distance = math::ray_test_aabb(r, box);
+    
+      if(distance > 0.f)
+      {
+        self->selected_bbs.emplace_back(boxes[j]);
+      }
+    }
+  }
+}
+
+
+void
 early_think(Nil::Engine &engine, uintptr_t user_data)
 {
+  BENCH_SCOPED_CPU(ROV_EarlyThink)
+
   Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
-  BENCH_SCOPED_CPU(ROV_EarlyThink)
-
-  if(self->has_initialized)
+  /*
+    ROV Lighting
+  */
   {
-    /*
-      ROV Lighting
-    */
+    size_t light_count = 0;
+    Nil::Data::Light *lights;
+
+    Nil::Data::get(&light_count, &lights);
+
+    lib::array<rovLight, 32> rov_lights;
+
+    rov_lights.clear();
+    rov_lights.resize(light_count);
+
+    for(size_t i = 0; i < light_count; ++i)
     {
-      size_t light_count = 0;
-      Nil::Data::Light *lights;
+      Nil::Data::Light *light = &lights[i];
 
-      Nil::Data::get(&light_count, &lights);
-
-      lib::array<rovLight, 32> rov_lights;
-
-      rov_lights.clear();
-      rov_lights.resize(light_count);
-
-      for(size_t i = 0; i < light_count; ++i)
+      if(lights[i].type == Nil::Data::Light::DIR)
       {
-        Nil::Data::Light *light = &lights[i];
-
-        if(lights[i].type == Nil::Data::Light::DIR)
-        {
-          memcpy(rov_lights[i].position, light->direction, sizeof(float) * 3);
-          rov_lights[i].position[3] = 1.f;
-        }
-        else
-        {
-          memcpy(rov_lights[i].position, light->position, sizeof(float) * 3);
-        }
-
-        rov_lights[i].color[0] = 1.f;
-        rov_lights[i].color[1] = 1.f;
-        rov_lights[i].color[2] = 1.f;
-
-        rov_lights[i].attenuation[0] = light->atten_const;
-        rov_lights[i].attenuation[1] = light->atten_linear;
-        rov_lights[i].attenuation[2] = light->atten_exponential;
+        memcpy(rov_lights[i].position, light->direction, sizeof(float) * 3);
+        rov_lights[i].position[3] = 1.f;
+      }
+      else
+      {
+        memcpy(rov_lights[i].position, light->position, sizeof(float) * 3);
       }
 
-      rov_updateLights(self->light_pack, rov_lights.data(), rov_lights.size());
+      rov_lights[i].color[0] = 1.f;
+      rov_lights[i].color[1] = 1.f;
+      rov_lights[i].color[2] = 1.f;
+
+      rov_lights[i].attenuation[0] = light->atten_const;
+      rov_lights[i].attenuation[1] = light->atten_linear;
+      rov_lights[i].attenuation[2] = light->atten_exponential;
     }
+
+    rov_updateLights(self->light_pack, rov_lights.data(), rov_lights.size());
   }
 }
 
@@ -263,206 +340,208 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-//think(Nil::Engine &engine, Nil::Aspect &aspect)
 think(Nil::Engine &engine, uintptr_t user_data)
 {
+  BENCH_SCOPED_CPU(ROV_Think)
+
   Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
-  BENCH_SCOPED_CPU(ROV_Think)
+  size_t cam_count = 0;
+  Nil::Data::Camera *cameras;
+  Nil::Data::get(&cam_count, &cameras);
 
-  if(self->has_initialized)
+  size_t mat_count = 0;
+  Nil::Resource::Material *mats;
+  Nil::Resource::get(&mat_count, &mats);
+
+  for(uint32_t j = 0; j < cam_count; ++j)
   {
-    size_t cam_count = 0;
-    Nil::Data::Camera *cameras;
-    Nil::Data::get(&cam_count, &cameras);
+    Nil::Data::Camera cam = cameras[j];
 
-    size_t mat_count = 0;
-    Nil::Resource::Material *mats;
-    Nil::Resource::get(&mat_count, &mats);
+    uint32_t clear_flags = 0;
+    if(cam.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
+    if(cam.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
 
-    for(uint32_t j = 0; j < cam_count; ++j)
+    const uint32_t viewport[4] {
+      0,
+      0,
+      self->current_viewport[0],
+      self->current_viewport[1]
+    };
+
+    const math::mat4 proj = math::mat4_projection(
+      cam.width * self->current_viewport[0],
+      cam.height * self->current_viewport[1],
+      cam.near_plane,
+      cam.far_plane,
+      cam.fov
+    );
+
+    rov_setColor(cam.clear_color);
+
+    rov_startRenderPass(
+      cam.view_mat,
+      math::mat4_get_data(proj),
+      cam.position,
+      viewport,
+      clear_flags,
+      self->light_pack
+    );
+
+    size_t renderable_count = 0;
+    Nil::Data::Renderable *renderables;
+
+    Nil::Data::get(&renderable_count, &renderables);
+
+    for(size_t i = 0; i < renderable_count; ++i)
     {
-      Nil::Data::Camera cam = cameras[j];
+      Nil::Data::Renderable render = renderables[i];
 
-      uint32_t clear_flags = 0;
-      if(cam.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
-      if(cam.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
+      const uint32_t mesh_count = self->mesh_ids.size();
 
-      const uint32_t viewport[4] {
-        0,
-        0,
-        self->current_viewport[0],
-        self->current_viewport[1]
-      };
-
-      const math::mat4 proj = math::mat4_projection(
-        cam.width * self->current_viewport[0],
-        cam.height * self->current_viewport[1],
-        cam.near_plane,
-        cam.far_plane,
-        cam.fov
-      );
-
-      rov_setColor(cam.clear_color);
-
-      rov_startRenderPass(
-        cam.view_mat,
-        math::mat4_get_data(proj),
-        cam.position,
-        viewport,
-        clear_flags,
-        self->light_pack
-      );
-
-      size_t renderable_count = 0;
-      Nil::Data::Renderable *renderables;
-
-      Nil::Data::get(&renderable_count, &renderables);
-
-      for(size_t i = 0; i < renderable_count; ++i)
+      if(mesh_count > render.mesh_id)
       {
-        Nil::Data::Renderable render = renderables[i];
+        const Nil::Resource::Material mat = mats[render.material_id];
 
-        const uint32_t mesh_count = self->mesh_ids.size();
-
-        if(mesh_count > render.mesh_id)
+        const float colorf[4]
         {
-          const Nil::Resource::Material mat = mats[render.material_id];
+          lib::color::get_channel_1f(mat.color),
+          lib::color::get_channel_2f(mat.color),
+          lib::color::get_channel_3f(mat.color),
+          lib::color::get_channel_4f(mat.color),
+        };
 
-          const float colorf[4]
+        rov_setColor(colorf);
+
+        const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
+        rov_setMesh(mesh_id);
+
+        const uint32_t texture_01 = mats[render.material_id].texture_01;
+
+        if(texture_01)
+        {
+          const uint32_t texture_count = self->texture_ids.size();
+
+          if(texture_count > texture_01)
           {
-            lib::color::get_channel_1f(mat.color),
-            lib::color::get_channel_2f(mat.color),
-            lib::color::get_channel_3f(mat.color),
-            lib::color::get_channel_4f(mat.color),
-          };
-
-          rov_setColor(colorf);
-
-          const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
-          rov_setMesh(mesh_id);
-
-          const uint32_t texture_01 = mats[render.material_id].texture_01;
-
-          if(texture_01)
-          {
-            const uint32_t texture_count = self->texture_ids.size();
-
-            if(texture_count > texture_01)
-            {
-              const uint32_t texture_id = self->texture_ids[texture_01];
-              rov_setTexture(texture_id, 0);
-            }
+            const uint32_t texture_id = self->texture_ids[texture_01];
+            rov_setTexture(texture_id, 0);
           }
-
-          rov_submitMeshTransform(render.world_mat);
-        }
-      }
-
-      // debug_lines
-      if(self->debug_lines && self->show_debug_lines)
-      {
-        Nil::Data::Developer line_data{};
-        Nil::Data::get(self->debug_lines, line_data);
-
-        const float *data = (float*)line_data.aux_01;
-        size_t count = (size_t)line_data.aux_02;
-
-        LIB_ASSERT(count % 9 == 0);
-
-        const size_t lines = count / 9;
-
-        for(size_t i = 0; i < lines; ++i)
-        {
-          const size_t index = i * 9;
-
-          rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
-          rov_submitLine(&data[index + 0], &data[index + 3]);
         }
 
-        // Signal to line renderer not reset the data buffer.
-        line_data.aux_02 = 0;
-        Nil::Data::set(self->debug_lines, line_data);
-      }
-
-      // Bounding boxes
-      if(self->show_debug_bounding_boxes)
-      {
-        size_t count = 0;
-        Nil::Data::Bounding_box *data = nullptr;
-        Nil::Data::get(&count, &data, true);
-
-        rov_setColor(0, 1, 0, 1);
-
-        for(size_t i = 0; i < count; ++i)
-        {
-          const float *min = data[i].min;
-          const float *max = data[i].max;
-        
-          // Y lines
-          {
-            const float a[3] { min[0], min[1], min[2] };
-            const float b[3] { min[0], max[1], min[2] };
-            rov_submitLine(a, b);
-  
-            const float c[3] { max[0], min[1], min[2] };
-            const float d[3] { max[0], max[1], min[2] };
-            rov_submitLine(c, d);
-
-            const float e[3] { min[0], min[1], max[2] };
-            const float f[3] { min[0], max[1], max[2] };
-            rov_submitLine(e, f);
-
-            const float g[3] { max[0], min[1], max[2] };
-            const float h[3] { max[0], max[1], max[2] };
-            rov_submitLine(g, h);
-          }
-
-          // X Lines
-          {
-            const float a[3] { min[0], min[1], min[2] };
-            const float b[3] { max[0], min[1], min[2] };
-            rov_submitLine(a, b);
-
-            const float c[3] { min[0], max[1], min[2] };
-            const float d[3] { max[0], max[1], min[2] };
-            rov_submitLine(c, d);
-
-            const float e[3] { min[0], min[1], max[2] };
-            const float f[3] { max[0], min[1], max[2] };
-            rov_submitLine(e, f);
-
-            const float g[3] { min[0], max[1], max[2] };
-            const float h[3] { max[0], max[1], max[2] };
-            rov_submitLine(g, h);
-          }
-
-          // Z lines
-          {
-            const float a[3] { min[0], min[1], min[2] };
-            const float b[3] { min[0], min[1], max[2] };
-            rov_submitLine(a, b);
-
-            const float c[3] { max[0], min[1], min[2] };
-            const float d[3] { max[0], min[1], max[2] };
-            rov_submitLine(c, d);
-
-            const float e[3] { min[0], max[1], min[2] };
-            const float f[3] { min[0], max[1], max[2] };
-            rov_submitLine(e, f);
-
-            const float g[3] { max[0], max[1], min[2] };
-            const float h[3] { max[0], max[1], max[2] };
-            rov_submitLine(g, h);
-          }
-        }
+        rov_submitMeshTransform(render.world_mat);
       }
     }
 
-    rov_execute();
+    // debug_lines
+    if(self->debug_lines && self->show_debug_lines)
+    {
+      Nil::Data::Developer line_data{};
+      Nil::Data::get(self->debug_lines, line_data);
+
+      const float *data = (float*)line_data.aux_01;
+      size_t count = (size_t)line_data.aux_02;
+
+      LIB_ASSERT(count % 9 == 0);
+
+      const size_t lines = count / 9;
+
+      for(size_t i = 0; i < lines; ++i)
+      {
+        const size_t index = i * 9;
+
+        rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
+        rov_submitLine(&data[index + 0], &data[index + 3]);
+      }
+
+      // Signal to line renderer not reset the data buffer.
+      line_data.aux_02 = 0;
+      Nil::Data::set(self->debug_lines, line_data);
+    }
+
+    // Bounding boxes
+    if(self->show_debug_bounding_boxes)
+    {
+//      size_t count = 0;
+//      Nil::Data::Bounding_box *data = nullptr;
+//      Nil::Data::get(&count, &data, true);
+
+      size_t count = self->selected_bbs.size();
+      Nil::Data::Bounding_box *data = self->selected_bbs.data();
+
+      rov_setColor(0, 1, 0, 1);
+
+      for(size_t i = 0; i < count; ++i)
+      {
+        const float *min = data[i].min;
+        const float *max = data[i].max;
+      
+        // Y lines
+        {
+          const float a[3] { min[0], min[1], min[2] };
+          const float b[3] { min[0], max[1], min[2] };
+          rov_submitLine(a, b);
+
+          const float c[3] { max[0], min[1], min[2] };
+          const float d[3] { max[0], max[1], min[2] };
+          rov_submitLine(c, d);
+
+          const float e[3] { min[0], min[1], max[2] };
+          const float f[3] { min[0], max[1], max[2] };
+          rov_submitLine(e, f);
+
+          const float g[3] { max[0], min[1], max[2] };
+          const float h[3] { max[0], max[1], max[2] };
+          rov_submitLine(g, h);
+        }
+
+        // X Lines
+        {
+          const float a[3] { min[0], min[1], min[2] };
+          const float b[3] { max[0], min[1], min[2] };
+          rov_submitLine(a, b);
+
+          const float c[3] { min[0], max[1], min[2] };
+          const float d[3] { max[0], max[1], min[2] };
+          rov_submitLine(c, d);
+
+          const float e[3] { min[0], min[1], max[2] };
+          const float f[3] { max[0], min[1], max[2] };
+          rov_submitLine(e, f);
+
+          const float g[3] { min[0], max[1], max[2] };
+          const float h[3] { max[0], max[1], max[2] };
+          rov_submitLine(g, h);
+        }
+
+        // Z lines
+        {
+          const float a[3] { min[0], min[1], min[2] };
+          const float b[3] { min[0], min[1], max[2] };
+          rov_submitLine(a, b);
+
+          const float c[3] { max[0], min[1], min[2] };
+          const float d[3] { max[0], min[1], max[2] };
+          rov_submitLine(c, d);
+
+          const float e[3] { min[0], max[1], min[2] };
+          const float f[3] { min[0], max[1], max[2] };
+          rov_submitLine(e, f);
+
+          const float g[3] { max[0], max[1], min[2] };
+          const float h[3] { max[0], max[1], max[2] };
+          rov_submitLine(g, h);
+        }
+      }
+    }
   }
+
+  rov_execute();
 }
+
+
+// ------------------------------------------------------------------- [ UI ] --
 
 
 void
@@ -477,13 +556,41 @@ ui_menu(uintptr_t user_data)
 
   if(ImGui::BeginMenu("ROV"))
   {
-    ImGui::MenuItem("Show Debug Lines", nullptr, &self->show_debug_lines);
-    ImGui::MenuItem("Show Debug Bounding Boxes", nullptr, &self->show_debug_bounding_boxes);
+    ImGui::MenuItem("Show Debug Options", nullptr, &self->show_debug_options);
 
     ImGui::EndMenu();
   }
   #endif
 }
+
+
+void
+ui_window(uintptr_t user_data)
+{
+  #ifndef NIMGUI
+  Nil_ext::ROV_Aspect::Data *self(
+    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
+  );
+
+  LIB_ASSERT(self);
+  
+  if(self->show_debug_options)
+  {
+    if(ImGui::Begin("Debug Options", &self->show_debug_options))
+    {
+      ImGui::Text("Debug Line Options");
+      ImGui::Checkbox("Enable Debug Lines", &self->show_debug_lines);
+      ImGui::Checkbox("Enable Debug Bounding Boxes", &self->show_debug_bounding_boxes);
+      ImGui::Checkbox("Enable Lookat Bounding Box", &self->show_lookat_bounding_box);
+      
+      ImGui::End();
+    }
+    
+  }
+
+  #endif
+}
+
 
 
 } // ns

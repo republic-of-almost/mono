@@ -31,7 +31,6 @@ logic_aspect_debug_window(uintptr_t user_data)
 #endif
 
 
-
 namespace Nil_ext {
 namespace Logic_aspect {
 
@@ -91,7 +90,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
     }
   }
   
-  Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, early_think);
+  Nil::Task::cpu_task(
+    Nil::Task::CPU::EARLY_THINK,
+    (uintptr_t)self,
+    early_think
+  );
 }
 
 
@@ -99,7 +102,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
 early_think(Nil::Engine &engine, uintptr_t user_data)
 {
   Data *self = reinterpret_cast<Data*>(user_data);

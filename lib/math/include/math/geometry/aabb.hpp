@@ -24,6 +24,7 @@ _MATH_NS_OPEN
 
 MATH_AABB_INLINE aabb         aabb_init();
 MATH_AABB_INLINE aabb         aabb_init(const vec3 min, const vec3 max);
+MATH_AABB_INLINE aabb         aabb_init(const float min[3], const float max[3]);
 MATH_AABB_INLINE aabb         aabb_init(const vec3 center, const float scale);
 MATH_AABB_INLINE aabb         aabb_init(const float vertex[], const size_t number_of_floats);
 
@@ -61,6 +62,13 @@ aabb_init(const vec3 min, const vec3 max)
   return_aabb.min = min;
   
   return return_aabb;
+}
+
+
+aabb
+aabb_init(const float min[3], const float max[3])
+{
+  return aabb_init(math::vec3_init(min), math::vec3_init(max));
 }
 
 

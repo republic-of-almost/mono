@@ -4,6 +4,8 @@
 
 #include "../detail/detail.hpp"
 #include "geometry_types.hpp"
+#include "../vec/vec.hpp"
+#include "../mat/mat.hpp"
 
 
 _MATH_NS_OPEN
@@ -21,6 +23,17 @@ inline float      ray_test_aabb(const ray &ray, const aabb &target);
 inline bool       ray_test_plane(const ray &ray, const plane &target, float *out_distance = nullptr);
 inline bool       ray_test_triangles(const ray &in_ray, const float tris[], const size_t tri_count, float *out_distance = nullptr);
 inline bool       ray_test_closest_edge(const float tris[], const size_t tri_count, const vec3 point, vec3 &seg_a, vec3 &seg_b);
+
+inline ray        ray_from_perpective_viewport(
+  const float vp_width,
+  const float vp_height,
+  const float vp_coord_x,
+  const float vp_coord_y,
+  const mat4 &proj_mat,
+  const mat4 &view_mat,
+  const vec3 ray_start,
+  const float distance);
+
 
 
 // ---------------------------------------------------------------- [ Impl ] --
@@ -266,6 +279,109 @@ ray_test_closest_edge(const float tris[], const size_t tri_count, const vec3 poi
   seg_b = curr_segment[1];
   
   return curr_closest < max_dist;
+}
+
+
+ray
+ray_from_perpective_viewport(
+  const float vp_width,
+  const float vp_height,
+  const float vp_coord_x,
+  const float vp_coord_y,
+  const mat4 &proj_mat,
+  const mat4 &view_mat,
+  const vec3 ray_start,
+  const float distance)
+{
+  // Some Mouse things
+//  const Axis viewport_size {
+//    math::to_float(camera.get_width()),
+//    math::to_float(camera.get_height())
+//  };
+  
+  const math::vec2 viewport_size = math::vec2_init(vp_width, vp_height);
+  
+//  const Axis clamped_viewport {
+//    math::clamp(viewport_coords.x, 0, viewport_size.x),
+//    math::clamp(viewport_coords.y, 0, viewport_size.y)
+//  };
+  
+  const math::vec2 clamped_viewport = math::vec2_init(
+    math::clamp(vp_coord_x, 0.f, math::get_x(viewport_size)),
+    math::clamp(vp_coord_y, 0.f, math::get_y(viewport_size))
+  );
+
+//  if(camera.get_type() == Core::Camera_type::perspective)
+//  {
+  const math::vec2 coords = math::vec2_init(
+    (((2.f * math::get_x(clamped_viewport)) / math::get_x(viewport_size)) - 1.f),
+    1.f - (2.f * math::get_y(clamped_viewport)) / math::get_y(viewport_size)
+  );
+
+  // --
+  
+  const math::vec3 ray_nds  = math::vec3_init(math::get_x(coords), math::get_y(coords), 1.f);
+  const math::vec4 ray_clip = math::vec4_init(math::get_x(ray_nds),
+                                              math::get_y(ray_nds),
+                                              1.f,
+                                              1.f);
+  
+  const math::mat4 proj_inv_mat = math::mat4_get_inverse(proj_mat);
+  
+  const math::vec4 ray_eye_get  = math::mat4_multiply(ray_clip, proj_inv_mat);
+  const math::vec4 ray_eye      = math::vec4_init(math::get_x(ray_eye_get),
+                                                  math::get_y(ray_eye_get),
+                                                  -1.f,
+                                                  0.f);
+  
+  // --
+  
+//  const math::mat4 view_mat     = Core::Camera_utils::get_view_matrix(camera);
+  const math::mat4 view_inv_mat = math::mat4_get_inverse(view_mat);
+  
+  const math::vec4 ray_wor_all = math::mat4_multiply(ray_eye, view_inv_mat);
+  const math::vec3 ray_wor     = math::vec3_normalize(math::vec3_init(math::get_x(ray_wor_all),
+                                                                      math::get_y(ray_wor_all),
+                                                                      math::get_z(ray_wor_all)));
+
+  // --
+
+//  const math::vec3 ray_start = camera.get_attached_entity().get_transform().get_position();
+  const math::vec3 ray_dir   = ray_wor;
+  
+//  return Core::Ray(ray_start, ray_dir);
+
+  math::vec3 ray_end = math::vec3_add(ray_start, math::vec3_scale(ray_dir, distance));
+  return math::ray_init(ray_start, ray_end);
+  
+//  }
+//  else if(camera.get_type() == Core::Camera_type::orthographic)
+//  {
+//    const Core::Axis coords {
+//      ((viewport_size.x * 0.5f) - clamped_viewport.x) * -1.f,
+//      (viewport_size.y * 0.5f) - clamped_viewport.y
+//    };
+//    
+//    const Core::Transform cam_tran = camera.get_attached_entity().get_transform();
+//    
+//    const math::vec3 left = math::vec3_scale(cam_tran.get_left(), coords.x);
+//    const math::vec3 up   = math::vec3_scale(cam_tran.get_up(), coords.y);
+//    
+//    const math::vec3 cam_pos = cam_tran.get_position();
+//    
+//    const math::vec3 ray_start = math::vec3_add(math::vec3_add(cam_pos, left), up);
+//    const math::vec3 ray_dir   = cam_tran.get_forward();
+//
+//    return Core::Ray(ray_start, ray_dir);
+//  }
+//  else
+//  {
+//    assert(false);
+//    LOG_FATAL("This is unreachable code");
+//    return Core::Ray(math::vec3_zero(), math::vec3_zero_zero_one());
+//  }
+  
+  // UNREACHABLE //
 }
 
 

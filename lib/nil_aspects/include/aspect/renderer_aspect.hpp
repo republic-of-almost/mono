@@ -5,6 +5,7 @@
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
 #include <nil/task.hpp>
+#include <nil/data/bounding_box.hpp>
 #include <lib/array.hpp>
 
 
@@ -33,15 +34,21 @@ struct Data
   #ifndef NIMGUI
   Nil::Node renderer{nullptr};
   
+  bool show_debug_options{false};
+  
   #ifdef NIL_DEVELOPMENT
   bool show_debug_lines{true};
   bool show_debug_bounding_boxes{true};
+  bool show_lookat_bounding_box{true};
   #else
   bool show_debug_lines{false};
   bool show_debug_bounding_boxes{false};
+  bool show_lookat_bounding_box{false};
   #endif
   
   #endif
+  
+  lib::array<Nil::Data::Bounding_box> selected_bbs;
 };
 
 
@@ -56,18 +63,31 @@ void
 events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
+// ------------------------------------------------------- [ Renderer Tasks ] --
+
+
 void
-//early_think(Nil::Engine &engine, Nil::Aspect &aspect);
+find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data);
+
+
+void
 early_think(Nil::Engine &engine, uintptr_t user_data);
 
 
 void
-//think(Nil::Engine &engine, Nil::Aspect &aspect);
 think(Nil::Engine &engine, uintptr_t user_data);
+
+
+// ------------------------------------------------------------------- [ UI ] --
 
 
 void
 ui_menu(uintptr_t user_data);
+
+
+void
+ui_window(uintptr_t user_data);
+
 
 
 } // ns
