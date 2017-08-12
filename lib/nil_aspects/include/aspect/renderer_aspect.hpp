@@ -46,9 +46,9 @@ struct Data
   bool show_lookat_bounding_box{false};
   #endif
   
-  #endif
-  
   lib::array<Nil::Data::Bounding_box> selected_bbs;
+  
+  #endif
 };
 
 

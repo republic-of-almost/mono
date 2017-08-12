@@ -28,6 +28,7 @@ in vec2 vs_in_texture_coords;
   Uniforms
 */
 uniform mat4 uni_world;
+uniform mat4 uni_view;
 uniform mat4 uni_wvp;
 uniform mat4 uni_normal;
 uniform mat4 uni_wv;
@@ -48,7 +49,17 @@ void
 main()
 {
   in_ps_texcoord  = vs_in_texture_coords;
-  in_ps_normal    = normalize(transpose(mat3(inverse(uni_world))) * vs_in_normal); // todo fix C++ mat4 inverse
+  
+  /*
+    I'm not doing something correct with normal matrix.
+  */
+  
+  in_ps_normal    = normalize(transpose(mat3(inverse(uni_world))) * vs_in_normal);
+//  in_ps_normal    = normalize(mat3(uni_normal) * vs_in_normal);
+
+//  mat4 nor_mat = transpose(inverse(uni_wv));
+//  in_ps_normal = normalize(nor_mat * vec4(vs_in_normal, 0.0)).xyz;
+
   in_ps_world_pos = vec3(uni_world * vec4(vs_in_position, 1.0)).xyz;
 
   gl_Position    = uni_wvp * vec4(vs_in_position, 1.0);

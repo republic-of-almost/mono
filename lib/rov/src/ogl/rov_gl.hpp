@@ -56,6 +56,7 @@ struct rovGLMeshProgram
   GLint uni_light_count;
 
   GLint uni_wvp;
+  GLint uni_view;
   GLint uni_world;
   GLint uni_eye;
   GLint uni_color;

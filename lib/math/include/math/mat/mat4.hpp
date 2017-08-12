@@ -422,15 +422,41 @@ mat4_get_inverse(const mat4 &to_inverse)
 {
   const detail::internal_mat4 *to_i = reinterpret_cast<const detail::internal_mat4*>(&to_inverse);
   
-  float inverse[16]
+  const float temp[16]
   {
+    // 0
     to_i->data[5]  * to_i->data[10] * to_i->data[15] -
     to_i->data[5]  * to_i->data[11] * to_i->data[14] -
     to_i->data[9]  * to_i->data[6]  * to_i->data[15] + 
     to_i->data[9]  * to_i->data[7]  * to_i->data[14] +
     to_i->data[13] * to_i->data[6]  * to_i->data[11] - 
     to_i->data[13] * to_i->data[7]  * to_i->data[10],
+  
+    // 1
+    -to_i->data[1]  * to_i->data[10] * to_i->data[15] +
+    to_i->data[1]  * to_i->data[11] * to_i->data[14] +
+    to_i->data[9]  * to_i->data[2] * to_i->data[15] - 
+    to_i->data[9]  * to_i->data[3] * to_i->data[14] - 
+    to_i->data[13] * to_i->data[2] * to_i->data[11] + 
+    to_i->data[13] * to_i->data[3] * to_i->data[10],
+  
+    // 2
+    to_i->data[1]  * to_i->data[6] * to_i->data[15] -
+    to_i->data[1]  * to_i->data[7] * to_i->data[14] -
+    to_i->data[5]  * to_i->data[2] * to_i->data[15] + 
+    to_i->data[5]  * to_i->data[3] * to_i->data[14] + 
+    to_i->data[13] * to_i->data[2] * to_i->data[7] - 
+    to_i->data[13] * to_i->data[3] * to_i->data[6],
 
+    // 3
+    -to_i->data[1] * to_i->data[6] * to_i->data[11] +
+    to_i->data[1] * to_i->data[7] * to_i->data[10] + 
+    to_i->data[5] * to_i->data[2] * to_i->data[11] - 
+    to_i->data[5] * to_i->data[3] * to_i->data[10] - 
+    to_i->data[9] * to_i->data[2] * to_i->data[7] + 
+    to_i->data[9] * to_i->data[3] * to_i->data[6],
+
+    // 4
     -to_i->data[4]  * to_i->data[10] * to_i->data[15] +
     to_i->data[4]  * to_i->data[11] * to_i->data[14] +
     to_i->data[8]  * to_i->data[6]  * to_i->data[15] - 
@@ -438,6 +464,31 @@ mat4_get_inverse(const mat4 &to_inverse)
     to_i->data[12] * to_i->data[6]  * to_i->data[11] + 
     to_i->data[12] * to_i->data[7]  * to_i->data[10],
 
+    // 5
+    to_i->data[0]  * to_i->data[10] * to_i->data[15] -
+    to_i->data[0]  * to_i->data[11] * to_i->data[14] - 
+    to_i->data[8]  * to_i->data[2] * to_i->data[15] + 
+    to_i->data[8]  * to_i->data[3] * to_i->data[14] + 
+    to_i->data[12] * to_i->data[2] * to_i->data[11] - 
+    to_i->data[12] * to_i->data[3] * to_i->data[10],
+
+    // 6
+    -to_i->data[0]  * to_i->data[6] * to_i->data[15] +
+    to_i->data[0]  * to_i->data[7] * to_i->data[14] + 
+    to_i->data[4]  * to_i->data[2] * to_i->data[15] - 
+    to_i->data[4]  * to_i->data[3] * to_i->data[14] - 
+    to_i->data[12] * to_i->data[2] * to_i->data[7] + 
+    to_i->data[12] * to_i->data[3] * to_i->data[6],
+
+    // 7
+    to_i->data[0] * to_i->data[6] * to_i->data[11] -
+    to_i->data[0] * to_i->data[7] * to_i->data[10] - 
+    to_i->data[4] * to_i->data[2] * to_i->data[11] + 
+    to_i->data[4] * to_i->data[3] * to_i->data[10] + 
+    to_i->data[8] * to_i->data[2] * to_i->data[7] - 
+    to_i->data[8] * to_i->data[3] * to_i->data[6],
+
+    // 8
     to_i->data[4]  * to_i->data[9] * to_i->data[15] -
     to_i->data[4]  * to_i->data[11] * to_i->data[13] -
     to_i->data[8]  * to_i->data[5] * to_i->data[15] + 
@@ -445,107 +496,74 @@ mat4_get_inverse(const mat4 &to_inverse)
     to_i->data[12] * to_i->data[5] * to_i->data[11] - 
     to_i->data[12] * to_i->data[7] * to_i->data[9],
 
+    // 9
+    -to_i->data[0]  * to_i->data[9] * to_i->data[15] +
+    to_i->data[0]  * to_i->data[11] * to_i->data[13] + 
+    to_i->data[8]  * to_i->data[1] * to_i->data[15] - 
+    to_i->data[8]  * to_i->data[3] * to_i->data[13] - 
+    to_i->data[12] * to_i->data[1] * to_i->data[11] + 
+    to_i->data[12] * to_i->data[3] * to_i->data[9],
+  
+    // 10
+    to_i->data[0]  * to_i->data[5] * to_i->data[15] -
+    to_i->data[0]  * to_i->data[7] * to_i->data[13] - 
+    to_i->data[4]  * to_i->data[1] * to_i->data[15] + 
+    to_i->data[4]  * to_i->data[3] * to_i->data[13] + 
+    to_i->data[12] * to_i->data[1] * to_i->data[7] - 
+    to_i->data[12] * to_i->data[3] * to_i->data[5],
+  
+    // 11
+    -to_i->data[0] * to_i->data[5] * to_i->data[11] +
+    to_i->data[0] * to_i->data[7] * to_i->data[9] + 
+    to_i->data[4] * to_i->data[1] * to_i->data[11] - 
+    to_i->data[4] * to_i->data[3] * to_i->data[9] - 
+    to_i->data[8] * to_i->data[1] * to_i->data[7] + 
+    to_i->data[8] * to_i->data[3] * to_i->data[5],
+
+    // 12
     -to_i->data[4]  * to_i->data[9] * to_i->data[14] +
     to_i->data[4]  * to_i->data[10] * to_i->data[13] +
     to_i->data[8]  * to_i->data[5] * to_i->data[14] - 
     to_i->data[8]  * to_i->data[6] * to_i->data[13] - 
     to_i->data[12] * to_i->data[5] * to_i->data[10] + 
     to_i->data[12] * to_i->data[6] * to_i->data[9],
-
-    -to_i->data[1]  * to_i->data[10] * to_i->data[15] +
-    to_i->data[1]  * to_i->data[11] * to_i->data[14] +
-    to_i->data[9]  * to_i->data[2] * to_i->data[15] - 
-    to_i->data[9]  * to_i->data[3] * to_i->data[14] - 
-    to_i->data[13] * to_i->data[2] * to_i->data[11] + 
-    to_i->data[13] * to_i->data[3] * to_i->data[10],
-
-    to_i->data[0]  * to_i->data[10] * to_i->data[15] - 
-    to_i->data[0]  * to_i->data[11] * to_i->data[14] - 
-    to_i->data[8]  * to_i->data[2] * to_i->data[15] + 
-    to_i->data[8]  * to_i->data[3] * to_i->data[14] + 
-    to_i->data[12] * to_i->data[2] * to_i->data[11] - 
-    to_i->data[12] * to_i->data[3] * to_i->data[10],
-
-    -to_i->data[0]  * to_i->data[9] * to_i->data[15] + 
-    to_i->data[0]  * to_i->data[11] * to_i->data[13] + 
-    to_i->data[8]  * to_i->data[1] * to_i->data[15] - 
-    to_i->data[8]  * to_i->data[3] * to_i->data[13] - 
-    to_i->data[12] * to_i->data[1] * to_i->data[11] + 
-    to_i->data[12] * to_i->data[3] * to_i->data[9],
-
-    to_i->data[0]  * to_i->data[9] * to_i->data[14] - 
+  
+    // 13
+    to_i->data[0]  * to_i->data[9] * to_i->data[14] -
     to_i->data[0]  * to_i->data[10] * to_i->data[13] - 
     to_i->data[8]  * to_i->data[1] * to_i->data[14] + 
     to_i->data[8]  * to_i->data[2] * to_i->data[13] + 
     to_i->data[12] * to_i->data[1] * to_i->data[10] - 
     to_i->data[12] * to_i->data[2] * to_i->data[9],
+    
+    // 14
+    -to_i->data[0]  * to_i->data[5] * to_i->data[14] +
+    to_i->data[0]  * to_i->data[6] * to_i->data[13] +
+    to_i->data[4]  * to_i->data[1] * to_i->data[14] -
+    to_i->data[4]  * to_i->data[2] * to_i->data[13] -
+    to_i->data[12] * to_i->data[1] * to_i->data[6] +
+    to_i->data[12] * to_i->data[2] * to_i->data[5],
 
-    to_i->data[1]  * to_i->data[6] * to_i->data[15] - 
-    to_i->data[1]  * to_i->data[7] * to_i->data[14] - 
-    to_i->data[5]  * to_i->data[2] * to_i->data[15] + 
-    to_i->data[5]  * to_i->data[3] * to_i->data[14] + 
-    to_i->data[13] * to_i->data[2] * to_i->data[7] - 
-    to_i->data[13] * to_i->data[3] * to_i->data[6],
-
-    -to_i->data[0]  * to_i->data[6] * to_i->data[15] + 
-    to_i->data[0]  * to_i->data[7] * to_i->data[14] + 
-    to_i->data[4]  * to_i->data[2] * to_i->data[15] - 
-    to_i->data[4]  * to_i->data[3] * to_i->data[14] - 
-    to_i->data[12] * to_i->data[2] * to_i->data[7] + 
-    to_i->data[12] * to_i->data[3] * to_i->data[6],
-
-    to_i->data[0]  * to_i->data[5] * to_i->data[15] - 
-    to_i->data[0]  * to_i->data[7] * to_i->data[13] - 
-    to_i->data[4]  * to_i->data[1] * to_i->data[15] + 
-    to_i->data[4]  * to_i->data[3] * to_i->data[13] + 
-    to_i->data[12] * to_i->data[1] * to_i->data[7] - 
-    to_i->data[12] * to_i->data[3] * to_i->data[5],
-
-    -to_i->data[0]  * to_i->data[5] * to_i->data[14] + 
-     to_i->data[0]  * to_i->data[6] * to_i->data[13] + 
-     to_i->data[4]  * to_i->data[1] * to_i->data[14] - 
-     to_i->data[4]  * to_i->data[2] * to_i->data[13] - 
-     to_i->data[12] * to_i->data[1] * to_i->data[6] + 
-     to_i->data[12] * to_i->data[2] * to_i->data[5],
-
-    -to_i->data[1] * to_i->data[6] * to_i->data[11] + 
-    to_i->data[1] * to_i->data[7] * to_i->data[10] + 
-    to_i->data[5] * to_i->data[2] * to_i->data[11] - 
-    to_i->data[5] * to_i->data[3] * to_i->data[10] - 
-    to_i->data[9] * to_i->data[2] * to_i->data[7] + 
-    to_i->data[9] * to_i->data[3] * to_i->data[6],
-
-    to_i->data[0] * to_i->data[6] * to_i->data[11] - 
-    to_i->data[0] * to_i->data[7] * to_i->data[10] - 
-    to_i->data[4] * to_i->data[2] * to_i->data[11] + 
-    to_i->data[4] * to_i->data[3] * to_i->data[10] + 
-    to_i->data[8] * to_i->data[2] * to_i->data[7] - 
-    to_i->data[8] * to_i->data[3] * to_i->data[6],
-
-    -to_i->data[0] * to_i->data[5] * to_i->data[11] + 
-     to_i->data[0] * to_i->data[7] * to_i->data[9] + 
-     to_i->data[4] * to_i->data[1] * to_i->data[11] - 
-     to_i->data[4] * to_i->data[3] * to_i->data[9] - 
-     to_i->data[8] * to_i->data[1] * to_i->data[7] + 
-     to_i->data[8] * to_i->data[3] * to_i->data[5],
-
-    to_i->data[0] * to_i->data[5] * to_i->data[10] - 
+    // 16
+    to_i->data[0] * to_i->data[5] * to_i->data[10] -
     to_i->data[0] * to_i->data[6] * to_i->data[9] - 
     to_i->data[4] * to_i->data[1] * to_i->data[10] + 
     to_i->data[4] * to_i->data[2] * to_i->data[9] + 
     to_i->data[8] * to_i->data[1] * to_i->data[6] - 
-    to_i->data[8] * to_i->data[2] * to_i->data[5],
+    to_i->data[8] * to_i->data[2] * to_i->data[5]
   };
   
-  const float determinant = to_i->data[0] * inverse[0] + to_i->data[1] * inverse[4] + to_i->data[2] * inverse[8] + to_i->data[3] * inverse[12];
+  const float determinant = to_i->data[0] * temp[0] + to_i->data[1] * temp[4] + to_i->data[2] * temp[8] + to_i->data[3] * temp[12];
 
   assert(determinant != 0);
   
   const float one_over_det = 1.f / determinant;
   
-  for (auto &i : inverse)
+  float inverse[16]{};
+  
+  for(size_t i = 0; i < 16; ++i)
   {
-    i = i * one_over_det;
+    inverse[i] = temp[i] * one_over_det;
   }
   
   return mat4_init(inverse);

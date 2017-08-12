@@ -1,4 +1,5 @@
 #include <aspect/renderer_aspect.hpp>
+#include <renderer/rov_extensions.hpp>
 #include <nil/nil.hpp>
 #include <nil/aspect.hpp>
 #include <nil/node.hpp>
@@ -248,7 +249,6 @@ find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
   
   for(size_t i = 0; i < cam_count; i++)
   {
-  
     // Generate ray.
     math::mat4 proj_mat = math::mat4_projection(
       cameras[i].width * self->current_viewport[0],
@@ -459,81 +459,28 @@ think(Nil::Engine &engine, uintptr_t user_data)
       line_data.aux_02 = 0;
       Nil::Data::set(self->debug_lines, line_data);
     }
+    
+    // Lookat boxes
+    if(self->show_lookat_bounding_box)
+    {
+      size_t count = self->selected_bbs.size();
+      Nil::Data::Bounding_box *data = self->selected_bbs.data();
+      
+      rov_setColor(1, 0, 1, 1);
+      
+      Nil_ext::rov_render_bounding_box(data, count);
+    }
 
     // Bounding boxes
     if(self->show_debug_bounding_boxes)
     {
-//      size_t count = 0;
-//      Nil::Data::Bounding_box *data = nullptr;
-//      Nil::Data::get(&count, &data, true);
-
-      size_t count = self->selected_bbs.size();
-      Nil::Data::Bounding_box *data = self->selected_bbs.data();
+      size_t count = 0;
+      Nil::Data::Bounding_box *data = nullptr;
+      Nil::Data::get(&count, &data, true);
 
       rov_setColor(0, 1, 0, 1);
-
-      for(size_t i = 0; i < count; ++i)
-      {
-        const float *min = data[i].min;
-        const float *max = data[i].max;
       
-        // Y lines
-        {
-          const float a[3] { min[0], min[1], min[2] };
-          const float b[3] { min[0], max[1], min[2] };
-          rov_submitLine(a, b);
-
-          const float c[3] { max[0], min[1], min[2] };
-          const float d[3] { max[0], max[1], min[2] };
-          rov_submitLine(c, d);
-
-          const float e[3] { min[0], min[1], max[2] };
-          const float f[3] { min[0], max[1], max[2] };
-          rov_submitLine(e, f);
-
-          const float g[3] { max[0], min[1], max[2] };
-          const float h[3] { max[0], max[1], max[2] };
-          rov_submitLine(g, h);
-        }
-
-        // X Lines
-        {
-          const float a[3] { min[0], min[1], min[2] };
-          const float b[3] { max[0], min[1], min[2] };
-          rov_submitLine(a, b);
-
-          const float c[3] { min[0], max[1], min[2] };
-          const float d[3] { max[0], max[1], min[2] };
-          rov_submitLine(c, d);
-
-          const float e[3] { min[0], min[1], max[2] };
-          const float f[3] { max[0], min[1], max[2] };
-          rov_submitLine(e, f);
-
-          const float g[3] { min[0], max[1], max[2] };
-          const float h[3] { max[0], max[1], max[2] };
-          rov_submitLine(g, h);
-        }
-
-        // Z lines
-        {
-          const float a[3] { min[0], min[1], min[2] };
-          const float b[3] { min[0], min[1], max[2] };
-          rov_submitLine(a, b);
-
-          const float c[3] { max[0], min[1], min[2] };
-          const float d[3] { max[0], min[1], max[2] };
-          rov_submitLine(c, d);
-
-          const float e[3] { min[0], max[1], min[2] };
-          const float f[3] { min[0], max[1], max[2] };
-          rov_submitLine(e, f);
-
-          const float g[3] { max[0], max[1], min[2] };
-          const float h[3] { max[0], max[1], max[2] };
-          rov_submitLine(g, h);
-        }
-      }
+      Nil_ext::rov_render_bounding_box(data, count);
     }
   }
 
