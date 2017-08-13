@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/utilities.hpp>
+#include <lib/buffer.hpp>
 
 
 TEST_CASE("Buffer")

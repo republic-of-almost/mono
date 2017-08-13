@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/utilities.hpp>
+#include <lib/string_pool.hpp>
 #include <stdint.h>
 #include <string.h>
 

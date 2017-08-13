@@ -1,5 +1,8 @@
 #include <catch/catch.hpp>
-#include <lib/utilities.hpp>
+#include <lib/model.hpp>
+#include <lib/logging.hpp>
+#include <lib/platform.hpp>
+#include <lib/directory.hpp>
 #include <math/general/general.hpp>
 #include <stdint.h>
 #include <string.h>
@@ -8,7 +11,11 @@
 /*
   Test for both memory corruptions and benchmarking
 */
+#ifndef NDEBUG
+#define FOR_MODEL_STRESS for(uint32_t i = 0; i < 10; ++i)
+#else
 #define FOR_MODEL_STRESS for(uint32_t i = 0; i < 10000; ++i)
+#endif
 
 
 TEST_CASE("Model Test")

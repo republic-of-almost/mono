@@ -18,7 +18,7 @@
 #include "file.hpp"
 
 
-// ------------------------------------------------------- [ String Config ] --
+// -------------------------------------------------------- [ String Config ] --
 
 
 #ifndef LIB_NS_NAME
@@ -26,7 +26,55 @@
 #endif
 
 
-// --------------------------------------------------------- [ String Impl ] --
+#ifndef LIB_STR_INLINE
+#define LIB_STR_INLINE inline
+#endif
+
+
+// -------------------------------------------------------- [ Str Interface ] --
+
+
+namespace LIB_NS_NAME {
+namespace str {
+
+
+LIB_STR_INLINE void
+append(char *dest, const char *src, const size_t sizeof_dest)
+{
+  strcat(dest, src);
+}
+
+
+LIB_STR_INLINE bool
+compare(const char *a, const char *b)
+{
+  return strcmp(a,b) == 0;
+}
+
+
+LIB_STR_INLINE size_t
+length(const char *str)
+{
+  return strlen(str);
+}
+
+
+LIB_STR_INLINE void
+copy(char *dest, const char *src, const size_t sizeof_dest)
+{
+  const size_t src_len = LIB_NS_NAME::str::length(src);
+  const size_t des_len = sizeof_dest - 1;
+  const size_t cpy_size = des_len < src_len ? des_len : src_len;
+  
+  memcpy(dest, src, cpy_size);
+}
+
+
+} // ns
+} // ns
+
+
+// ---------------------------------------------------------- [ String Impl ] --
 
 
 namespace LIB_NS_NAME {

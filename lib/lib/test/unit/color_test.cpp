@@ -1,6 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/utilities.hpp>
-#include <algorithm>
+#include <lib/color.hpp>
 #include <array>
 
 

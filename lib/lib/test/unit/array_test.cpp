@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/utilities.hpp>
+#include <lib/array.hpp>
 
 
 TEST_CASE("Array Test")

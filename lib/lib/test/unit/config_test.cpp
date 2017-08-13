@@ -1,6 +1,5 @@
 #include <catch/catch.hpp>
-#include <lib/utilities.hpp>
-#include <stdio.h>
+#include <lib/platform.hpp>
 
 TEST_CASE("Config")
 {
@@ -11,16 +10,27 @@ TEST_CASE("Config")
     if(lib::platform::is_mac_platform())
     {
       ++count;
-      REQUIRE(lib::platform::is_nix_platform());
+      REQUIRE(lib::platform::is_nix_platform() == true);
     }
 
     if(lib::platform::is_linux_platform())
     {
       ++count;
-      REQUIRE(lib::platform::is_nix_platform());
+      REQUIRE(lib::platform::is_nix_platform() == true);
+    }
+    
+    if(lib::platform::is_emscripten_platform())
+    {
+      ++count;
+      REQUIRE(lib::platform::is_nix_platform() == true);
+      REQUIRE(lib::platform::is_web_platform() == true);
     }
 
-    if(lib::platform::is_windows_platform()) { ++count; }
+    if(lib::platform::is_windows_platform())
+    {
+      ++count;
+      REQUIRE(lib::platform::is_nix_platform() == false);
+    }
 
     REQUIRE(count == 1);
   }
