@@ -67,9 +67,9 @@ load_assets()
       Nil::Data::set(child, trans);
       
       Nil::Data::Light light;
-      light.atten_const       = 0.1f;
-      light.atten_linear      = 0.14f;
-      light.atten_exponential = 0.07f;
+      light.atten_const       = 0.01f;
+      light.atten_linear      = 0.014f;
+      light.atten_exponential = 0.014f;
       
       Nil::Data::set(child, light);
     }

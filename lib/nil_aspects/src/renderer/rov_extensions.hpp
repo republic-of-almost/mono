@@ -4,9 +4,14 @@
 
 #include <nil/fwd.hpp>
 #include <stddef.h>
+#include <stdint.h>
 
 
 namespace Nil_ext {
+
+
+void
+rov_render_camera_cross(Nil::Data::Camera cam, uint32_t viewport[2]);
 
 
 void

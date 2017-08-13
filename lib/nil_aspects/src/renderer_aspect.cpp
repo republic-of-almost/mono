@@ -482,6 +482,11 @@ think(Nil::Engine &engine, uintptr_t user_data)
       
       Nil_ext::rov_render_bounding_box(data, count);
     }
+    
+    if(self->show_lookat_cross)
+    {
+      Nil_ext::rov_render_camera_cross(cam, self->current_viewport);
+    }
   }
 
   rov_execute();
@@ -529,6 +534,7 @@ ui_window(uintptr_t user_data)
       ImGui::Checkbox("Enable Debug Lines", &self->show_debug_lines);
       ImGui::Checkbox("Enable Debug Bounding Boxes", &self->show_debug_bounding_boxes);
       ImGui::Checkbox("Enable Lookat Bounding Box", &self->show_lookat_bounding_box);
+      ImGui::Checkbox("Enable Lookat Indicator", &self->show_lookat_cross);
       
       ImGui::End();
     }

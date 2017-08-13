@@ -40,10 +40,12 @@ struct Data
   bool show_debug_lines{true};
   bool show_debug_bounding_boxes{true};
   bool show_lookat_bounding_box{true};
+  bool show_lookat_cross{true};
   #else
   bool show_debug_lines{false};
   bool show_debug_bounding_boxes{false};
   bool show_lookat_bounding_box{false};
+  bool show_lookat_cross{false};
   #endif
   
   lib::array<Nil::Data::Bounding_box> selected_bbs;
