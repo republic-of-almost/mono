@@ -52,6 +52,7 @@ load_assets()
       asset,
       Nil::Resource::directory("mesh/dynamic.obj")
     );
+    
   }
   
   // Load lights

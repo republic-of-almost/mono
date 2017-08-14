@@ -106,7 +106,7 @@ think(ROA::Object node)
         
         for(auto &c : collection)
         {
-          if(strcmp(c.get_name(), "oi") == 0)
+          if(strcmp(c.get_name(), "Dyn_football") == 0)
           {
             ROA::Transform t = c.get_transform();
             
