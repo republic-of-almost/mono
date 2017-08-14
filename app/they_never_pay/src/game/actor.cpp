@@ -94,6 +94,26 @@ think(ROA::Object node)
         ROA::Mouse::set_captured(capture);
       }
       #endif
+      
+      // Create query
+      if(ROA::Keyboard::key_state(ROA::KeyCode::SPACE) == ROA::KeyState::UP_ON_FRAME)
+      {
+        ROA::Transform trans = actor->head.get_transform();
+      
+        ROA::Ray ray(trans.get_world_position(), trans.get_world_forward().scale(10000));
+      
+        ROA::Collection collection = ROA::Query::bounding_boxes(ray, ROA::Ray_search::NEAREST);
+        
+        for(auto &c : collection)
+        {
+          if(strcmp(c.get_name(), "oi") == 0)
+          {
+            ROA::Transform t = c.get_transform();
+            
+            t.set_position(t.get_position().add(ROA::Vector3(0,1,0)));
+          }
+        }
+      }
     }
     #endif
 
@@ -143,7 +163,7 @@ think(ROA::Object node)
     //constexpr size_t tri_count = sizeof(Actor::nav_mesh) / (sizeof(float)) / 9;
     
     float distance = 0.f;
-    if((math::ray_test_triangles(ray, actor->nav_mesh, actor->nav_mesh_count, &distance)) && (math::abs(distance) < 2.f))
+    if((math::ray_test_triangles(ray, actor->nav_mesh, actor->nav_mesh_count, &distance)) && (math::abs(distance) < 5.f))
     {
       math::vec3 scale = math::vec3_scale(math::ray_direction(ray), distance);
       math::vec3 hit = math::vec3_add(ray.start, scale);
@@ -259,26 +279,6 @@ think(ROA::Object node)
       math::vec3_init(1,0,0)
     );
   }
-
-  // Ray Test
-  {
-//    ROA::Transform trans = actor->head.get_transform();
-//    
-//    const ROA::Vector3 origin = trans.get_world_position();
-//    const ROA::Vector3 end = trans.get_world_position().add(trans.get_forward().scale(1000.f));
-//    
-//    ROA::Ray ray(origin, end);
-//    
-//    ROA::Collection collection = ROA::Query::bounding_boxes(ray, ROA::Ray_search::NEAREST);
-//    
-//    size_t size = collection.size();
-//    
-//    for(auto &col : collection)
-//    {
-//      int k = 0;
-//    }
-  }
-
 }
 
 
@@ -340,7 +340,7 @@ setup(Actor *actor)
     {
       ROA::Transform trans;
       
-      float pos[] = {0.f, math::g_ratio(), 0.f};
+      float pos[] = {0.f, math::g_ratio() * 2, 0.f};
       float scale[] = {1.f, 1.f, 1.f};
       float rot[] = {0.f, 0.f, 0.f, 1.f};
       

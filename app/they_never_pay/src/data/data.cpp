@@ -42,11 +42,24 @@ load_assets()
     );
   }
   
-  const lib::model lights = lib::model_import::load_obj_from_file(
-    Nil::Resource::directory("mesh/lights.obj")
-  );
-  
+  // Load dynamic assets
   {
+    Nil::Node asset;
+    asset.set_parent(assets);
+    asset.set_name("Dynamic");
+    
+    Nil::Resource::Scene::load(
+      asset,
+      Nil::Resource::directory("mesh/dynamic.obj")
+    );
+  }
+  
+  // Load lights
+  {
+    const lib::model lights = lib::model_import::load_obj_from_file(
+      Nil::Resource::directory("mesh/lights.obj")
+    );
+  
     Nil::Node asset;
     asset.set_parent(assets);
     asset.set_name("Lights");
