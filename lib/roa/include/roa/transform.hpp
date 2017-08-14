@@ -19,19 +19,26 @@ public:
                           const Quaternion &rotation);
   
   Vector3       get_position() const;
+  Vector3       get_world_position() const;
   void          set_position(const Vector3 &in);
   
-  Vector3       get_world_position() const;
   
   Vector3       get_scale() const;
+  Vector3       get_world_scale() const;
   void          set_scale(const Vector3 &in);
   
   Quaternion    get_rotation() const;
+  Quaternion    get_world_rotation() const;
   void          set_rotation(const Quaternion &in);
   
   Vector3       get_forward() const;
+  Vector3       get_world_forward() const;
+  
   Vector3       get_up() const;
+  Vector3       get_world_up() const;
+  
   Vector3       get_left() const;
+  Vector3       get_world_left() const;
 
 };
 

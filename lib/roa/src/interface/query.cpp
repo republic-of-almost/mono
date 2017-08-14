@@ -4,6 +4,8 @@
 #include <roa/ray.hpp>
 #include <nil/data/bounding_box.hpp>
 #include <math/math.hpp>
+#include <lib/assert.hpp>
+#include <lib/logging.hpp>
 #include <vector>
 
 
@@ -14,13 +16,24 @@ namespace Query {
 Collection
 bounding_boxes(const Ray &ray, Ray_search search)
 {
-  size_t count = 0;
+  // -- Param Check -- //
+  LOG_TODO_ONCE("Check ray is valid");
+
+  // -- Get Data -- //
+  size_t bb_count               = 0;
   Nil::Data::Bounding_box *data = nullptr;
-  uint32_t *node_ids = nullptr;
+  size_t node_id_count = 0;
+  uint32_t *node_ids   = nullptr;
+  {
+    Nil::Data::get(&bb_count, &data, true);
+    Nil::Data::get(&node_id_count, &node_ids);
+    
+    
+    LIB_ASSERT(node_id_count);
+    LIB_ASSERT(node_ids);
+  }
   
-  Nil::Data::get(&count, &data, true);
-  Nil::Data::get(&count, &node_ids);
-  
+  // -- Data for test -- //
   const math::ray r = math::ray_init(
     math::vec3_init(ray.get_start().get_data()),
     math::vec3_init(ray.get_end().get_data())
@@ -31,8 +44,12 @@ bounding_boxes(const Ray &ray, Ray_search search)
   
   std::vector<ROA::Object> objs;
   
-  for(size_t i = 0; i < count; ++i)
+  // -- Search For Ray Collisions -- //
+  for(size_t i = 0; i < bb_count; ++i)
   {
+    const uint32_t node_id = node_ids[i];
+    LIB_ASSERT(node_id != 0);
+  
     const math::aabb box = math::aabb_init(
       math::vec3_init(data[i].min),
       math::vec3_init(data[i].max)
@@ -40,11 +57,12 @@ bounding_boxes(const Ray &ray, Ray_search search)
     
     const float dist = math::ray_test_aabb(r, box);
     
-    if(dist != 0.f)
+    if(dist > 0.f)
     {
       if(dist < closest)
       {
-        closest_obj = ROA::Object(node_ids[i]);
+        const ROA::Object obj = ROA::Object(node_ids[i]);
+        closest_obj = obj;
       }
       
       objs.emplace_back(ROA::Object(node_ids[i]));
@@ -52,13 +70,16 @@ bounding_boxes(const Ray &ray, Ray_search search)
     }
   }
   
-  if(Ray_search::ALL == search)
+  // -- Results -- //
   {
-    return Collection(objs.data(), objs.size());
-  }
-  else if(Ray_search::NEAREST == search)
-  {
-    return Collection(&closest_obj, 1);
+    if(Ray_search::ALL == search)
+    {
+      return Collection(objs.data(), objs.size());
+    }
+    else if(Ray_search::NEAREST == search && closest_obj.is_valid())
+    {
+      return Collection(&closest_obj, 1);
+    }
   }
   
   return Collection(nullptr, 0);

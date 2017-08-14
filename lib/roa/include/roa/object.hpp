@@ -33,13 +33,13 @@ public:
   explicit              Object(const uint64_t data_bitfield);
   explicit              Object(const ROA_nullptr);
   
-                        Object(const Object &other);
-                        Object(Object &&other);
+                        Object(const Object &other) noexcept;
+                        Object(Object &&other) noexcept;
   
   virtual               ~Object();
   
-  Object&               operator=(const Object &other);
-  Object&               operator=(const Object &&other);
+  Object&               operator=(const Object &other) noexcept;
+  Object&               operator=(Object &&other) noexcept;
   
   void                  destroy();
   

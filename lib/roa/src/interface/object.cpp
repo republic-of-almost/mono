@@ -45,7 +45,7 @@ Object::Object()
 }
 
 
-Object::Object(const uint64_t data_bitfield)
+Object::Object(const uint64_t data_bitfield) noexcept
 : Object()
 {
   if(data_bitfield & Data::BOUNDING_BOX)
@@ -80,7 +80,7 @@ Object::Object(const ROA_nullptr)
 }
 
 
-Object::Object(const Object &other)
+Object::Object(const Object &other) noexcept
 {
   Nil::Node *other_node = reinterpret_cast<Nil::Node*>(&other.m_id);
 
@@ -89,7 +89,7 @@ Object::Object(const Object &other)
 }
 
 
-Object::Object(Object &&other)
+Object::Object(Object &&other) noexcept
 {
   Nil::Node *other_node = reinterpret_cast<Nil::Node*>(&other.m_id);
 
@@ -111,7 +111,7 @@ Object::~Object()
 
 
 Object&
-Object::operator=(const Object &other)
+Object::operator=(const Object &other) noexcept
 {
   Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
   Nil::Node *that_node = reinterpret_cast<Nil::Node*>(&other.m_id);
@@ -123,7 +123,7 @@ Object::operator=(const Object &other)
 
 
 Object&
-Object::operator=(const Object &&other)
+Object::operator=(Object &&other) noexcept
 {
   Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
   Nil::Node *that_node = reinterpret_cast<Nil::Node*>(&other.m_id);
