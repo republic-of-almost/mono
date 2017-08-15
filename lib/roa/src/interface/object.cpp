@@ -1,9 +1,4 @@
-#include <roa/object.hpp>
-#include <roa/bounding_box.hpp>
-#include <roa/transform.hpp>
-#include <roa/logic.hpp>
-#include <roa/camera.hpp>
-#include <roa/renderable.hpp>
+#include <roa/roa.hpp>
 #include <common/common.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
@@ -325,6 +320,36 @@ Object::set_camera(const Camera &in)
   if(in.get_instance_id() != get_instance_id())
   {
     Nil::Data::Camera data{};
+    
+    Nil::Node other_node = ROA_detail::get_node(in);
+    Nil::Node this_node = ROA_detail::get_node(*this);
+    
+    Nil::Data::get(other_node, data);
+    Nil::Data::set(this_node, data);
+  }
+}
+
+
+const Light
+Object::get_light() const
+{
+  return const_cast<Object*>(this)->get_light();
+}
+
+
+Light
+Object::get_light()
+{
+  return *reinterpret_cast<Light*>(this);
+}
+
+
+void
+Object::set_light(const Light &in)
+{
+  if(in.get_instance_id() != get_instance_id())
+  {
+    Nil::Data::Light data{};
     
     Nil::Node other_node = ROA_detail::get_node(in);
     Nil::Node this_node = ROA_detail::get_node(*this);

@@ -14,6 +14,7 @@
 #include <lib/model.hpp>
 #include <stb/stb_image.h>
 #include <math/geometry/misc.hpp>
+#include <roa/roa.hpp>
 
 
 namespace Game_data {
@@ -28,30 +29,27 @@ namespace
 void
 load_assets()
 {
-  Nil::Node assets = get_assets();
+  ROA::Object assets = get_assets();
+
+//  Nil::Node assets = get_assets();
 
   // Load static assets
   {
-    Nil::Node asset;
+    ROA::Object asset;
+  
     asset.set_parent(assets);
     asset.set_name("Static");
     
-    Nil::Resource::Scene::load(
-      asset,
-      Nil::Resource::directory("mesh/static.obj")
-    );
+    ROA::Scene::load(asset, "mesh/static.obj");
   }
   
   // Load dynamic assets
   {
-    Nil::Node asset;
+    ROA::Object asset;
     asset.set_parent(assets);
     asset.set_name("Dynamic");
     
-    Nil::Resource::Scene::load(
-      asset,
-      Nil::Resource::directory("mesh/dynamic.obj")
-    );
+    ROA::Scene::load(asset, "mesh/dynamic.obj");
     
   }
   
@@ -61,31 +59,47 @@ load_assets()
       Nil::Resource::directory("mesh/lights.obj")
     );
   
-    Nil::Node asset;
+    ROA::Object asset;
     asset.set_parent(assets);
     asset.set_name("Lights");
     
     for(uint32_t i = 0; i < lights.mesh_count; ++i)
     {
-      Nil::Node child;
+      ROA::Object child;
       child.set_parent(asset);
       child.set_name(lights.name[i]);
       
+      ROA::Transform trans = child.get_transform();
+      
       const math::vec3 origin = math::get_vec3_origin(lights.verts[i], lights.triangle_count[i]);
+      trans.set_position(ROA::Vector3(origin.data));
       
-      Nil::Data::Transform trans{};
-      Nil::Data::get(child, trans);
+      child.set_transform(trans);
       
-      memcpy(trans.position, origin.data, sizeof(trans.position));
+//      Nil::Data::Transform trans{};
+//      Nil::Data::get(child, trans);
       
-      Nil::Data::set(child, trans);
+//      memcpy(trans.position, origin.data, sizeof(trans.position));
       
-      Nil::Data::Light light;
-      light.atten_const       = 0.01f;
-      light.atten_linear      = 0.014f;
-      light.atten_exponential = 0.014f;
+//      Nil::Data::set(child, trans);
       
-      Nil::Data::set(child, light);
+//      Nil::Node nil_child(child.get_instance_id());
+
+      ROA::Light light;
+      light.set_type(ROA::Light_type::POINT);
+      light.set_constant_atten(0.01f);
+      light.set_linear_atten(0.014f);
+      light.set_exponential_atten(0.014f);
+      
+      child.set_light(light);
+      
+      
+//      Nil::Data::Light light;
+//      light.atten_const       = 0.01f;
+//      light.atten_linear      = 0.014f;
+//      light.atten_exponential = 0.014f;
+      
+//      Nil::Data::set(nil_child, light);
     }
   }
 }
@@ -144,7 +158,7 @@ setup()
   
   // Assets
   {
-    Nil::Node node = get_assets();
+    ROA::Object node = get_assets();
     node.set_name("Assets");
   }
 }
@@ -203,10 +217,10 @@ get_debug_lines()
 }
 
 
-Nil::Node
+ROA::Object
 get_assets()
 {
-  static Nil::Node node;
+  static ROA::Object node;
   return node;
 }
 

@@ -9,19 +9,26 @@
 namespace ROA {
 
 
-class Transform : public Object
+class Transform final : public Object
 {
 public:
+
+
+  // ----------------------------------------------------------- [ Lifetime ] --
+
 
   explicit      Transform();
   explicit      Transform(const Vector3 &pos,
                           const Vector3 &scale,
                           const Quaternion &rotation);
   
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  
+  
   Vector3       get_position() const;
   Vector3       get_world_position() const;
   void          set_position(const Vector3 &in);
-  
   
   Vector3       get_scale() const;
   Vector3       get_world_scale() const;

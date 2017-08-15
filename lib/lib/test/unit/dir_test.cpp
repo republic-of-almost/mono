@@ -5,5 +5,6 @@
 
 TEST_CASE("Dir Test")
 {
-   REQUIRE(strlen(lib::dir::exe_path()) > 0);
+  // Without binding this to a machine I don't know how I can test this.
+  REQUIRE(lib::str::length(lib::dir::exe_path()) > 0);
 }

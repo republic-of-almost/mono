@@ -11,6 +11,7 @@
 #include <roa/collection.hpp>
 #include <roa/color.hpp>
 #include <roa/keyboard.hpp>
+#include <roa/light.hpp>
 #include <roa/logic.hpp>
 #include <roa/material.hpp>
 #include <roa/mesh.hpp>

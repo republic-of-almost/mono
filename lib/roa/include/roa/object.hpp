@@ -82,6 +82,10 @@ public:
   Camera                get_camera();
   void                  set_camera(const Camera &in);
   
+  const Light           get_light() const;
+  Light                 get_light();
+  void                  set_light(const Light &in);
+  
   const Logic           get_logic() const;
   Logic                 get_logic();
   void                  set_logic(const Logic &in);

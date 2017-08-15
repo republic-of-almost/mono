@@ -29,6 +29,7 @@ class Bounding_box;
 class Camera;
 class Collection;
 class Color;
+class Light;
 class Logic;
 class Material;
 class Mesh;

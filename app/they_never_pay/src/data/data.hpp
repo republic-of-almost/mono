@@ -4,6 +4,7 @@
 
 #include <nil/node.hpp>
 #include <math/vec/vec_fwd.hpp>
+#include <roa/roa.hpp>
 
 
 enum class Game_asset {
@@ -55,7 +56,7 @@ Nil::Node
 get_debug_lines();
 
 
-Nil::Node
+ROA::Object
 get_assets();
 
 
