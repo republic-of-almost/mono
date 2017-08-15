@@ -31,8 +31,8 @@ public:
   // --------------------------------------------------------- [ Attributes ] --
 
   
-  Color           get_color() const;
-  void            set_color(const Color &color);
+//  Color           get_color() const;
+//  void            set_color(const Color &color);
   
   Light_type      get_type() const;
   void            set_type(const Light_type type);

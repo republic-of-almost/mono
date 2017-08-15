@@ -12,6 +12,14 @@ Light::Light()
 {
   Nil::Data::Light data{};
   
+  data.type = Nil::Data::Light::POINT;
+  data.atten_exponential = 0.014f;
+  data.atten_linear = 0.014f;
+  data.atten_const = 0.01f;
+  data.color[0] = 255;
+  data.color[1] = 255;
+  data.color[2] = 255;
+  
   Nil::Node node = ROA_detail::get_node(*this);
   Nil::Data::set(node, data);
 }
@@ -22,30 +30,30 @@ Light::~Light()
 }
 
 
-Color
-Light::get_color() const
-{
-  Nil::Data::Light data{};
-  Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data);
-  
-  return Color(data.color[0], data.color[1], data.color[2], 255);
-}
-
-
-void
-Light::set_color(const Color &color)
-{
-  Nil::Data::Light data{};
-  ROA_detail::get_nil_data(*this, data);
-  
-  lib::rgba col = lib::color::init(color.get_uint());
-  data.color[0] = lib::color::get_channel_1i(col);
-  data.color[1] = lib::color::get_channel_1i(col);
-  data.color[2] = lib::color::get_channel_1i(col);
-  
-  ROA_detail::set_nil_data(*this, data);
-}
+//Color
+//Light::get_color() const
+//{
+//  Nil::Data::Light data{};
+//  Nil::Node node = ROA_detail::get_node(*this);
+//  Nil::Data::get(node, data);
+//  
+//  return Color(data.color[0], data.color[1], data.color[2], 255);
+//}
+//
+//
+//void
+//Light::set_color(const Color &color)
+//{
+//  Nil::Data::Light data{};
+//  ROA_detail::get_nil_data(*this, data);
+//  
+//  lib::rgba col = lib::color::init(color.get_uint());
+//  data.color[0] = lib::color::get_channel_1i(col);
+//  data.color[1] = lib::color::get_channel_1i(col);
+//  data.color[2] = lib::color::get_channel_1i(col);
+//  
+//  ROA_detail::set_nil_data(*this, data);
+//}
 
 
 Light_type
