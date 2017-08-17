@@ -22,7 +22,7 @@ struct Data
   std::vector<Nil::Node> pending_removals;
   std::vector<Nil::Node> logic_nodes;
 
-  std::vector<Nil::generic_callback_fn> update;
+//  std::vector<Nil::generic_callback_fn> update;
   std::vector<uintptr_t> user_data;
 
   #ifdef IMGUI_DEVELOPER_SUPPORT

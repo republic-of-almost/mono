@@ -9,11 +9,11 @@
 #include <lib/array.hpp>
 
 
-// ------------------------------------------------- [ Renderer Aspect Data ] --
-
-
 namespace Nil_ext {
 namespace ROV_Aspect {
+
+
+// ------------------------------------------------- [ Renderer Aspect Data ] --
 
 
 struct Data

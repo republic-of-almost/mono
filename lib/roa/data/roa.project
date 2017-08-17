@@ -27,13 +27,14 @@ table.insert(
     inc_dirs = {
       make.get_proj_root() .. "../include/",
       make.get_proj_root() .. "../src/", -- this will come up in dependencies paths
+      make.get_proj_root() .. "../../nil_aspects/include",
     },
 
     project_dependencies = {
 
       -- First Party --
 
-      "AspectsControllers",
+      -- "AspectsControllers",
       "Nil",
       "Lib",
       "Math",

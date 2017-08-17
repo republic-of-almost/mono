@@ -260,8 +260,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             {
               if(mouse->id == 0)
               {
-                mouse[i].delta[0] = math::to_int(self->delta_mouse[0]);
-                mouse[i].delta[1] = math::to_int(self->delta_mouse[1]);
+                mouse[i].delta[0] = self->delta_mouse[0];
+                mouse[i].delta[1] = self->delta_mouse[1];
               }
             }
           }

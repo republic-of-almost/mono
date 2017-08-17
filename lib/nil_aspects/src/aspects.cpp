@@ -4,6 +4,7 @@
 #include <nil/nil.hpp>
 
 #include <aspect/glfw_aspect.hpp>
+#include <aspect/roa_aspect.hpp>
 
 
 #ifndef NIMGUI
@@ -52,11 +53,11 @@ load_aspects(Nil::Engine &nil_engine)
     Logic Aspect
   */
   {
-    static Nil_ext::Logic_aspect::Data logic;
+    static Nil_ext::ROA_Aspect::Data logic;
     Nil::Aspect aspect{};
 
-    aspect.start_up_fn    = Nil_ext::Logic_aspect::start_up;
-    aspect.tick_fn        = Nil_ext::Logic_aspect::events;
+    aspect.start_up_fn    = Nil_ext::ROA_Aspect::start_up;
+    aspect.tick_fn        = Nil_ext::ROA_Aspect::events;
     aspect.user_data      = (uintptr_t)&logic;
 
     nil_engine.add_aspect(aspect);

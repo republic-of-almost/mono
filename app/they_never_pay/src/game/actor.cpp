@@ -382,7 +382,6 @@ setup(Actor *actor)
   
   // Body
   {
-//    Nil::Node body;
     ROA::Object body;
     body.set_name("Body");
     body.set_parent(actor->entity);
@@ -405,7 +404,11 @@ setup(Actor *actor)
   // Callbacks
   {
     ROA::Logic logic;
-    logic.update_func(think);
+    actor->entity.set_logic(logic);
+    
+    logic = actor->entity.get_logic();
+    
+    logic.set_update_func(think);
     
     actor->entity.set_user_data((uintptr_t)actor);
     actor->entity.set_logic(logic);

@@ -10,7 +10,7 @@
 
 namespace Nil {
 
-using generic_callback_fn = void(*)(uint32_t node, uintptr_t user_data);
+//using generic_callback_fn = void(*)(uint32_t node, uintptr_t user_data);
 
 namespace Data {
 
@@ -25,12 +25,10 @@ struct Logic
   
   uintptr_t     user_data;
   
-  generic_callback_fn     startup;
-  generic_callback_fn     think_01;
-  generic_callback_fn     think_02;
-  generic_callback_fn     think_03;
-  generic_callback_fn     message;
-  generic_callback_fn     shutdown;
+  uintptr_t     update_func;
+  uintptr_t     message_func;
+  
+  
 };
 
 

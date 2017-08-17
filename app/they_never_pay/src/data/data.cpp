@@ -76,30 +76,13 @@ load_assets()
       
       child.set_transform(trans);
       
-//      Nil::Data::Transform trans{};
-//      Nil::Data::get(child, trans);
-      
-//      memcpy(trans.position, origin.data, sizeof(trans.position));
-      
-//      Nil::Data::set(child, trans);
-      
-//      Nil::Node nil_child(child.get_instance_id());
-
       ROA::Light light;
       light.set_type(ROA::Light_type::POINT);
       light.set_constant_atten(0.01f);
       light.set_linear_atten(0.014f);
       light.set_exponential_atten(0.014f);
       
-      child.set_light(light);
-      
-      
-//      Nil::Data::Light light;
-//      light.atten_const       = 0.01f;
-//      light.atten_linear      = 0.014f;
-//      light.atten_exponential = 0.014f;
-      
-//      Nil::Data::set(nil_child, light);
+      child.set_light(light);      
     }
   }
 }
