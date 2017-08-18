@@ -15,6 +15,7 @@
 #include <stb/stb_image.h>
 #include <math/geometry/misc.hpp>
 #include <roa/roa.hpp>
+#include <game/dynamic_object.hpp>
 
 
 namespace Game_data {
@@ -51,6 +52,26 @@ load_assets()
     
     ROA::Scene::load(asset, "mesh/dynamic.obj");
     
+    const size_t children = asset.get_child_count();
+    
+    for(size_t i = 0; i < children; ++i)
+    {
+      ROA::Object child = asset.get_child(i);
+    
+      Game::Dynamic_object *obj = Game::get_dyn_obj();
+      
+      if(obj)
+      {
+        asset.set_user_data((uintptr_t)obj);
+      
+        ROA::Logic log;
+        child.set_logic(log);
+        
+        log = child.get_logic();
+        log.set_update_func(Game::update);
+        log.set_message_func(Game::send_message);
+      }
+    }
   }
   
   // Load lights

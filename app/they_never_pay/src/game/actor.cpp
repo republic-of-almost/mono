@@ -108,9 +108,8 @@ think(ROA::Object node)
         {
           if(strcmp(c.get_name(), "Dyn_football") == 0)
           {
-            ROA::Transform t = c.get_transform();
-            
-            t.set_position(t.get_position().add(ROA::Vector3(0,1,0)));
+            ROA::Logic logic = c.get_logic();
+            logic.send_message(1, 1); 
           }
         }
       }

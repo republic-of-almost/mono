@@ -22,6 +22,28 @@ Logic::~Logic()
 }
 
 
+// ---------------------------------------------------------------- [ Event ] --
+
+
+void
+Logic::send_message(const uint32_t id, const uintptr_t msg_data)
+{
+  Nil::Data::Logic data{};
+  Nil::Node node = ROA_detail::get_node(*this);
+  
+  if(Nil::Data::has(node, data))
+  {
+    Nil::Data::get(node, data);
+    
+    if(data.message_func)
+    {
+      ((Logic_message_func)(data.message_func))(*this, id, msg_data);
+    }
+  }
+}
+
+
+
 // ----------------------------------------------------------- [ Attributes ] --
 
 

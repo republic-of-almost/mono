@@ -5,14 +5,11 @@
 
 #include <aspect/glfw_aspect.hpp>
 #include <aspect/roa_aspect.hpp>
-
+#include <aspect/renderer_aspect.hpp>
 
 #ifndef NIMGUI
 #include <aspect/imgui_aspect.hpp>
 #endif
-
-#include <aspect/renderer_aspect.hpp>
-#include <aspect/logic_aspect.hpp>
 
 #include <assert.h>
 #include <stddef.h>
