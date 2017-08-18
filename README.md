@@ -74,13 +74,13 @@ Project assets are not included in the repo as they are subject copyright.
 
 Project  | Website                           | License
 ---------|-----------------------------------|--------
-Catch    | http://github.com/no_internet_atm | MIT
-GLFW     | http://github.com/no_internet_atm | Permissive
-GL3W     | http://github.com/no_internet_atm | Public Domain
-Imgui    | http://github.com/no_internet_atm | MIT
-Imguizmo | http://github.com/no_internet_atm | MIT
-Remotery | http://github.com/no_internet_atm | Apache
-STB      | http://github.com/no_internet_atm | Public Domain
+Catch    | https://github.com/philsquared/Catch | MIT
+GLFW     | https://github.com/glfw/glfw | zlib
+GL3W     | https://github.com/skaslev/gl3w | Public Domain
+Imgui    | https://github.com/ocornut/imgui | MIT
+Imguizmo | https://github.com/CedricGuillemet/ImGuizmo | MIT
+Remotery | https://github.com/Celtoys/Remotery | Apache 2.0
+STB      | https://github.com/nothings/stb | Public Domain
 
 
 ## License
