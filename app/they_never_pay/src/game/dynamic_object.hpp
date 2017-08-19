@@ -6,10 +6,10 @@
 #include <lib/timer.hpp>
 
 
-namespace Game {
+namespace Dynamic_object {
 
 
-struct Dynamic_object
+struct Data
 {
   ROA::Object entity = ROA::Object(nullptr);
   
@@ -19,16 +19,16 @@ struct Dynamic_object
 };
 
 
-Dynamic_object *
+Data *
 get_dyn_obj();
 
 
 void
-setup(Dynamic_object *obj);
+setup(Data *obj);
 
 
 void
-send_message(ROA::Object obj, uint32_t id, uintptr_t data);
+message_handler(ROA::Object obj, uint32_t id, uintptr_t data);
 
 
 void

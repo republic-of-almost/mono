@@ -58,8 +58,8 @@ load_assets()
     {
       ROA::Object child = asset.get_child(i);
     
-      Game::Dynamic_object *obj = Game::get_dyn_obj();
-      Game::setup(obj);
+      Dynamic_object::Data *obj = Dynamic_object::get_dyn_obj();
+      Dynamic_object::setup(obj);
       
       if(obj)
       {
@@ -69,8 +69,8 @@ load_assets()
         child.set_logic(log);
         
         log = child.get_logic();
-        log.set_update_func(Game::update);
-        log.set_message_func(Game::send_message);
+        log.set_update_func(Dynamic_object::update);
+        log.set_message_func(Dynamic_object::message_handler);
       }
     }
   }

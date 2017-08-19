@@ -3,27 +3,20 @@
 
 
 
-namespace Game {
+namespace Dynamic_object {
 
 
 namespace {
 
 
-inline void
-think(ROA::Object node)
-{
-  
-}
-
-
-Dynamic_object objs[16];
+Data objs[16];
 size_t curr_obj = 0;
 
 
 } // ns
 
 
-Dynamic_object *
+Data *
 get_dyn_obj()
 {
   if(curr_obj < 16)
@@ -36,16 +29,16 @@ get_dyn_obj()
 
 
 void
-setup(Dynamic_object *obj)
+setup(Data *obj)
 {
   obj->entity = ROA::Object();
 }
 
 
 void
-send_message(ROA::Object obj, uint32_t id, uintptr_t data)
+message_handler(ROA::Object obj, uint32_t id, uintptr_t data)
 {
-  Dynamic_object *self = reinterpret_cast<Dynamic_object*>(obj.get_user_data());
+  Data *self = reinterpret_cast<Data*>(obj.get_user_data());
   LIB_ASSERT(self);
 
   self->start = lib::timer::get_current_time();
@@ -68,7 +61,7 @@ linear(const float time)
 void
 update(ROA::Object obj)
 {
-  Dynamic_object *self = reinterpret_cast<Dynamic_object*>(obj.get_user_data());
+  Data *self = reinterpret_cast<Data*>(obj.get_user_data());
   LIB_ASSERT(self);
   
   if(self->start)
