@@ -3,6 +3,7 @@
 
 
 #include <roa/roa.hpp>
+#include <lib/timer.hpp>
 
 
 namespace Game {
@@ -10,11 +11,11 @@ namespace Game {
 
 struct Dynamic_object
 {
-  ROA::Object entity;
+  ROA::Object entity = ROA::Object(nullptr);
   
-  float start = 0.f;
-  float end = 0.f;
-  float time = 0.f;
+  lib::milliseconds start = 0.f;
+  lib::milliseconds end = 0.f;
+  lib::milliseconds time = 0.f;
 };
 
 

@@ -59,10 +59,11 @@ load_assets()
       ROA::Object child = asset.get_child(i);
     
       Game::Dynamic_object *obj = Game::get_dyn_obj();
+      Game::setup(obj);
       
       if(obj)
       {
-        asset.set_user_data((uintptr_t)obj);
+        child.set_user_data((uintptr_t)obj);
       
         ROA::Logic log;
         child.set_logic(log);
