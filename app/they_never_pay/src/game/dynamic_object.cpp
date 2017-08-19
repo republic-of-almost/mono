@@ -70,10 +70,10 @@ update(ROA::Object obj)
     
     lib::milliseconds length = self->end - self->start;
     const float t = float(self->time - self->start) / float(length);
-    const float tt = 5.5f;//linear(t);
+    const float tt = linear(t);
     
     ROA::Transform trans = obj.get_transform();
-    trans.set_scale(ROA::Vector3(tt,tt,tt));
+    trans.set_position(ROA::Vector3(trans.get_position().get_x(), tt, trans.get_position().get_z()));
   }
 }
 
