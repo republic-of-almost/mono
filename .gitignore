@@ -69,3 +69,13 @@ xcuserdata/
 *.xcscmblueprint
 *.xcworkspace
 *.xcodeproj
+
+### Visual Studio
+
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.vs
+*.sln
+*.VC.VC.opendb
+*.VC.db
