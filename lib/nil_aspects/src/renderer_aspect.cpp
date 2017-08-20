@@ -110,16 +110,21 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   {
     size_t count = 0;
     Nil::Resource::Texture *textures = nullptr;
-
+    
     Nil::Resource::get(&count, &textures);
-
+    
     for(size_t i = 0; i < count; ++i)
     {
       Nil::Resource::Texture *tex = &textures[i];
 
-      if(tex->status == Nil::Resource::Texture::PENDING && tex->data)
+      const bool has_data   = tex && !!tex->data;
+      const bool is_pending = tex && tex->status == Nil::Resource::Texture::PENDING;
+
+      if(has_data && is_pending)
       {
-        if(tex->data_type == Nil::Resource::Texture::FILENAME)
+        const bool data_is_filename = tex->data_type == Nil::Resource::Texture::FILENAME;
+
+        if(data_is_filename)
         {
           int x = 0;
           int y = 0;
