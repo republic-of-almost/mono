@@ -180,7 +180,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
     for(size_t i = 0; i < count; ++i)
     {
       Nil::Resource::Mesh *mesh_resource = &meshes[i];
-
+      
       if(mesh_resource->status == Nil::Resource::Mesh::PENDING)
       {
         if(mesh_resource->count == 0)

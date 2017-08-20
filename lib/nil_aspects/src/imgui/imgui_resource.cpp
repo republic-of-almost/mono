@@ -150,8 +150,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
         for (int line = 0; line < data->count; line++)
         {
           int index = line * 3;
-          char pos[16];
-          memset(pos, 0, sizeof(pos));
+          char pos[64]{};
           sprintf(
             pos,
             "%.2f,%.2f,%.2f",
@@ -182,16 +181,15 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
         for (int line = 0; line < data->count; line++)
         {
           int index = line * 3;
-          char pos[16];
-          memset(pos, 0, sizeof(pos));
+          char norm[64]{};
           sprintf(
-            pos,
+            norm,
             "%.2f,%.2f,%.2f",
             data->normal_vec3[index + 0],
             data->normal_vec3[index + 1],
             data->normal_vec3[index + 2]
           );
-          ImGui::Text("%s", pos);
+          ImGui::Text("%s", norm);
         }
         
         ImGui::EndChild();
@@ -214,15 +212,14 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
         for (int line = 0; line < data->count; line++)
         {
           int index = line * 2;
-          char pos[16];
-          memset(pos, 0, sizeof(pos));
+          char uvs[64]{};
           sprintf(
-            pos,
+            uvs,
             "%.2f,%.2f",
             data->texture_coords_vec2[index + 0],
             data->texture_coords_vec2[index + 1]
           );
-          ImGui::Text("%s", pos);
+          ImGui::Text("%s", uvs);
         }
         
         ImGui::EndChild();
@@ -245,10 +242,9 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
         for(int line = 0; line < data->count; line++)
         {
           int index = line * 4;
-          char pos[16];
-          memset(pos, 0, sizeof(pos));
+          char col[64]{};
           sprintf(
-            pos,
+            col,
             "%.2f,%.2f,%.2f,%.2f",
             data->color_vec4[index + 0],
             data->color_vec4[index + 1],
@@ -256,7 +252,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
             data->color_vec4[index + 3]
           );
           
-          ImGui::Text("%s", pos);
+          ImGui::Text("%s", col);
         }
         
         ImGui::EndChild();
