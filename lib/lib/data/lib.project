@@ -31,5 +31,9 @@ table.insert(
     project_dependencies = {
       "Remotery",
     },
+
+    link_dependencies_windows = {
+      "Shlwapi.lib",
+    },
   }
 )

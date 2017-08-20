@@ -10,14 +10,14 @@ namespace Game {
 
 struct Actor
 {
-  ROA::Object entity;
-  ROA::Object head;
+  ROA::Object entity = ROA::Object(nullptr);
+  ROA::Object head = ROA::Object(nullptr);
   
-  float accum_pitch;
-  float accum_yaw;
-  float height;
-  float *nav_mesh;
-  uint32_t nav_mesh_count;
+  float accum_pitch = 0.f;
+  float accum_yaw = 0.f;
+  float height = 0.f;
+  float *nav_mesh = nullptr;
+  uint32_t nav_mesh_count = 0;
 };
 
 

@@ -2,6 +2,9 @@
 #define DETAIL_INCLUDED_738ADE13_1093_4593_AF81_2F9CB58DAE42
 
 
+#include <float.h>
+
+
 #ifndef MATH_NS_NAME
 #define MATH_NS_NAME math
 #endif

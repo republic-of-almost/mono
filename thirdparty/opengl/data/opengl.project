@@ -11,6 +11,7 @@ table.insert(
     kind     = "StaticLib",
     language = "C++",
     location = make.get_proj_root(),
+    ignore_defaults = true,
 
     src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),

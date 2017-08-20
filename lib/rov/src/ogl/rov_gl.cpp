@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <lib/utilities.hpp>
 #include <lib/array.hpp>
-#include <math/math.hpp>
 #include <lib/file.hpp>
 #include <lib/string.hpp>
 #include <lib/directory.hpp>

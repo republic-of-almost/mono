@@ -308,8 +308,11 @@ setup(Actor *actor)
   {
     lib::model model = lib::model_import::load_obj_from_file(Nil::Resource::directory("mesh/nav_mesh.obj"));
     
-    actor->nav_mesh = model.verts[0];
-    actor->nav_mesh_count = model.triangle_count[0];
+    if(model.mesh_count > 0) 
+    {
+      actor->nav_mesh = model.verts[0];
+      actor->nav_mesh_count = model.triangle_count[0];
+    }
   }
   
   // Main Entity

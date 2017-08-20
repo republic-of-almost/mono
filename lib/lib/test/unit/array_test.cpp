@@ -15,7 +15,7 @@ TEST_CASE("Array Test")
 
   SECTION("List Ctor")
   {
-    lib::array<int, 3> int_array({1,2,3});
+    lib::array<int, 3> int_array(1,2,3);
 
     REQUIRE(int_array.size() == 3);
     REQUIRE(int_array.empty() == false);
@@ -70,7 +70,7 @@ TEST_CASE("Array Test")
 
   SECTION("Resize")
   {
-    lib::array<int, 3> int_array({1,2,3});
+    lib::array<int, 3> int_array(1,2,3);
 
     int_array.resize(6);
 
@@ -261,7 +261,7 @@ TEST_CASE("Array Test")
 
   SECTION("For loops")
   {
-    const lib::array<int, 3> int_array({1,2,3});
+    const lib::array<int, 3> int_array(1,2,3);
 
     int counter = 0;
 

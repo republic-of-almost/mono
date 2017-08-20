@@ -190,6 +190,38 @@ is_msvs_compiler()
 } // ns
 
 
+// ---------------------------------------------- [ Compiler Options Macros ] --
+
+
+#ifdef LIB_COMPILER_MSVS
+#if _MSC_VER > 1910
+#define LIB_COMPILER_MULTILN_CONSTEXPR 1
+#else
+#define LIB_COMPILER_MULTILN_CONSTEXPR 0
+#endif
+#else
+#define LIB_COMPILER_MULTILN_CONSTEXPR 1
+#endif
+
+
+// ------------------------------------------- [ Compiler Options Functions ] --
+
+
+namespace LIB_NS_NAME {
+namespace platform {
+
+
+constexpr bool
+multiline_constexpr()
+{
+  return LIB_COMPILER_MULTILN_CONSTEXPR == 1;
+}
+
+
+}
+}
+
+
 // --------------------------------------------- [ Platform Constant Macros ] --
 
 

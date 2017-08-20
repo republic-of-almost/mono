@@ -40,7 +40,7 @@ Object::Object()
 }
 
 
-Object::Object(const uint64_t data_bitfield) noexcept
+Object::Object(const uint64_t data_bitfield)
 : Object()
 {
   if(data_bitfield & Data::BOUNDING_BOX)

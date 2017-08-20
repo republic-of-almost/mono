@@ -72,36 +72,28 @@ vec4_init_with_array(const float *arr)
 float
 vec4_get_x(const vec4 vec)
 {
-  ALIGN16 float vec_store[4];
-  _mm_store_ps(&vec_store[0], vec.simd_vec);
-  return vec_store[0];
+  return vec.data[0];
 }
 
 
 float
 vec4_get_y(const vec4 vec)
 {
-  ALIGN16 float vec_store[4];
-  _mm_store_ps(&vec_store[0], vec.simd_vec);
-  return vec_store[1];
+  return vec.data[1];
 }
 
 
 float
 vec4_get_z(const vec4 vec)
 {
-  ALIGN16 float vec_store[4];
-  _mm_store_ps(&vec_store[0], vec.simd_vec);
-  return vec_store[2];
+  return vec.data[2];
 }
 
 
 float
 vec4_get_w(const vec4 vec)
 {
-  ALIGN16 float vec_store[4];
-  _mm_store_ps(&vec_store[0], vec.simd_vec);
-  return vec_store[3];
+  return vec.data[3]
 }
 
 

@@ -9,6 +9,7 @@
 #define BITS_INCLUDED_CBA564C2_BA9A_4D4E_A0B8_BCAF9ECE089B
 
 
+#include "platform.hpp"
 #include <stdint.h>
 
 
@@ -16,7 +17,11 @@
 
 
 #ifndef LIB_BITS_INLINE
+#if LIB_COMPILER_MULTILN_CONSTEXPR == 1
 #define LIB_BITS_INLINE constexpr
+#else
+#define LIB_BITS_INLINE inline
+#endif
 #endif
 
 

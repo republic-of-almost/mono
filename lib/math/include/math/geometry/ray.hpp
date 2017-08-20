@@ -6,7 +6,7 @@
 #include "geometry_types.hpp"
 #include "../vec/vec.hpp"
 #include "../mat/mat.hpp"
-
+#include "../general/general.hpp"
 
 _MATH_NS_OPEN
 

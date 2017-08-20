@@ -9,6 +9,7 @@
 #define ALIGMENT_INCLUDED_8FD72235_331D_4FF9_98E0_031C879705D2
 
 
+#include "platform.hpp"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -17,7 +18,11 @@
 
 
 #ifndef ALIGN_INLINE
+#if LIB_COMPILER_MULTILN_CONSTEXPR == 1
 #define ALIGN_INLINE constexpr
+#else
+#define ALIGN_INLINE inline
+#endif
 #endif
 
 

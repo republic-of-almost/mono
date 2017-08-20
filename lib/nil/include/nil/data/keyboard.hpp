@@ -26,7 +26,7 @@ namespace Data {
 
 
 namespace KeyState {
-enum ENUM {
+enum ENUM : uint32_t {
 
   UP,
   UP_ON_FRAME,
@@ -38,7 +38,7 @@ enum ENUM {
 
 
 namespace KeyCode {
-enum ENUM {
+enum ENUM : uint32_t {
 
   // Alpha
   A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,

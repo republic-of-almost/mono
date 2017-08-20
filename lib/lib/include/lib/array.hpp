@@ -51,16 +51,16 @@ public:
 
 
   explicit array()
-  : m_stack_data()
-  , m_begin(m_stack_data)
-  , m_end(m_begin)
-  , m_capacity(m_begin + (_init_capacity ? _init_capacity : 1))
+  : m_stack_data{}
+  , m_begin{m_stack_data}
+  , m_end{m_begin}
+  , m_capacity{m_begin + (_init_capacity ? _init_capacity : 1)}
   {
     static_assert(__is_pod(T), "array is for POD types only");
   }
 
   explicit array(T *begin, T *end)
-  : array()
+  : array{}
   {
     const size_t cap = end - begin;
     resize(cap);
@@ -69,11 +69,11 @@ public:
   }
 
   template<typename ...Args>
-  array(const Args &...args)
+  array(const Args &...args) noexcept
   : m_stack_data{args...}
-  , m_begin(m_stack_data)
-  , m_end(m_begin + sizeof...(args))
-  , m_capacity(m_begin + (_init_capacity ? _init_capacity : 1))
+  , m_begin{m_stack_data}
+  , m_end{m_begin + sizeof...(args)}
+  , m_capacity{m_begin + (_init_capacity ? _init_capacity : 1)}
   {
     static_assert(__is_pod(T), "array is for POD types only");
   }
@@ -82,10 +82,10 @@ public:
 
 
   explicit array(const array &other)
-  : m_stack_data()
-  , m_begin(m_stack_data)
-  , m_end(m_begin)
-  , m_capacity(m_begin + (_init_capacity ? _init_capacity : 1))
+  : m_stack_data{}
+  , m_begin{m_stack_data}
+  , m_end{m_begin}
+  , m_capacity{m_begin + (_init_capacity ? _init_capacity : 1)}
   {
     _copy(other);
   }
@@ -99,13 +99,13 @@ public:
   }
   
   
-  explicit array(array &&other)
+  explicit array(array &&other) noexcept
   {
     _move(other);
   }
   
   array&
-  operator=(array &&other)
+  operator=(array &&other) noexcept
   {
     _move(other);
     return *this;
@@ -403,7 +403,7 @@ private:
     }
   }
   
-  void _move(array &other)
+  void _move(array &other) noexcept
   {
     if(other.size() <= capacity())
     {

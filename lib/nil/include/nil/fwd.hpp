@@ -2,6 +2,9 @@
 #define FWD_INCLUDED_22AF1857_0685_4D1B_849A_F3380F902EF1
 
 
+#include <stdint.h> // needed for uint32_t 
+
+
 namespace Nil {
 
 
@@ -43,7 +46,7 @@ struct Window;
 
 
 namespace Event {
-enum ENUM {
+enum ENUM : uint32_t {
 
   ADDED   = 1 << 0,
   UPDATED = 1 << 1,
@@ -52,9 +55,9 @@ enum ENUM {
 }
 
 namespace Status {
-enum ENUM {
+enum ENUM : uint32_t {
   PENDING     = 1 << 0,
-  ERROR       = 1 << 1,
+  ERR       = 1 << 1,
   OK          = 1 << 2,
   UNKNOWN     = 1 << 3,
   NOT_FOUND   = 1 << 4,

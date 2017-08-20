@@ -23,12 +23,18 @@ project_defaults = {
   },
 
   defines = {
-    "MATH_USE_SIMD",
+    --"MATH_USE_SIMD",
   },
 
   defines_windows = {
+    -- Crazy Window.h stuff
+    "WIN32_LEAN_AND_MEAN=1",
+    "NOMINMAX",
+
+    -- MSVS Tweaks
     "_HAS_EXCEPTIONS=0",
     "_CRT_NO_WARNINGS",
+    "_ITERATOR_DEBUG_LEVEL=0",
   },
 
 --   exceptions = false,

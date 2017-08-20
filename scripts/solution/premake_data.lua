@@ -302,15 +302,14 @@ make.create_solution(solution_data, project_defaults, projects)
     for j, config in ipairs(code_configs) do
 
       configuration(config.name)
-      defines(config.defines)
 
+      defines(config.defines)
+      flags(config.flags)
       targetdir(output .. config.name .. "/")
       objdir(output .. "objects/")
-      flags(config.flags)
-      flags("Unicode")
 
-      if proj.ignore_defaults == true then
-        if project_defaults.defines then defines(project_defaults.defines); end
+      if proj.ignore_defaults ~= true then
+        if project_defaults.defines then defines(project_defaults.defines) end
 
         local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
         if platform_project_default_defines then defines(platform_project_default_defines) end
@@ -358,7 +357,7 @@ make.create_solution(solution_data, project_defaults, projects)
           end
         -- Windows Copy --
         elseif os.get() == "windows" then
-          print("Not implimented")
+          print("Windows copy not implimented")
         end
 
       end

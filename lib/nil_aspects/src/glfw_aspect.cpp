@@ -1,18 +1,22 @@
+
+#include <GL/gl3w.h>
+#include <GLFW/glfw3.h>
+
 #include <aspect/glfw_aspect.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
 #include <math/math.hpp>
 #include <lib/utilities.hpp>
 #include <lib/bench.hpp>
-#include <GL/gl3w.h>
-#include <GLFW/glfw3.h>
-#include <stddef.h>
 
 #ifndef NIMGUI
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw_gl3.h>
 #include <imguizmo/ImGuizmo.h>
 #endif
+
+#include <stdio.h>
+#include <stddef.h>
 
 
 namespace Nil_ext {
@@ -340,7 +344,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   // Quit?
   if(self->window)
   {
-    aspect.want_to_quit = glfwWindowShouldClose(self->window);
+    aspect.want_to_quit = !!glfwWindowShouldClose(self->window);
   }
   
   // Tasks
