@@ -53,7 +53,7 @@ load_assets(Nil::Node node, const char *filename)
 
       texture.data_type = Nil::Resource::Texture::FILENAME;
       texture.data      = (uintptr_t)model.mesh_material[i].map_path[j];
-      texture.data_size = strlen(model.mesh_material[i].map_path[j]);
+      texture.data_size = strlen(model.mesh_material[i].map_path[j]) + 1;
 
       Nil::Resource::load(model.mesh_material[i].map_path[j], texture);
     }

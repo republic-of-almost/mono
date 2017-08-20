@@ -75,6 +75,8 @@ load(const char *name, Texture &in_out)
     {
       const size_t data_size = sizeof(char) * in_out.data_size;
       char* cpy_data = (char*)malloc(data_size);
+
+      memset(cpy_data, 0, sizeof(data_size));
       memcpy(cpy_data, (void*)in_out.data, data_size);
       
       cpy_in_out.data = (uintptr_t)cpy_data;
@@ -86,7 +88,7 @@ load(const char *name, Texture &in_out)
     cpy_in_out.id = new_id;
     
     get_tex_data().keys.emplace_back(key);
-    get_tex_data().textures.emplace_back(in_out);
+    get_tex_data().textures.emplace_back(cpy_in_out);
     
     return true;
   }
