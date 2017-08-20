@@ -130,8 +130,7 @@ render_node(const Nil::Node &node, Nil::Node &inspect)
 {
   if(node.is_valid())
   {
-    char name[16];
-    memset(name, 0, sizeof(name));
+    char name[16]{};
     sprintf(name, "%s##%d", node.get_name(), node.get_id());
 
     const bool show_tree = ImGui::TreeNode(name);
@@ -140,8 +139,7 @@ render_node(const Nil::Node &node, Nil::Node &inspect)
     ImGui::Spacing();
     ImGui::SameLine(0.f);
 
-    char insp_button[16];
-    memset(insp_button, 0, sizeof(insp_button));
+    char insp_button[16]{};
     sprintf(insp_button, "»##%d", node.get_id());
 
     const bool select_node = ImGui::SmallButton(insp_button);

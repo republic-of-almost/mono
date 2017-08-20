@@ -306,7 +306,9 @@ setup(Actor *actor)
   
   // Nav mesh
   {
-    lib::model model = lib::model_import::load_obj_from_file(Nil::Resource::directory("mesh/nav_mesh.obj"));
+    lib::model model = lib::model_import::load_obj_from_file(
+      Nil::Resource::directory("mesh/nav_mesh.obj")
+    );
     
     if(model.mesh_count > 0) 
     {

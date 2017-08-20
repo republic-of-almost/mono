@@ -10,8 +10,8 @@ namespace Game {
 
 struct Actor
 {
-  ROA::Object entity = ROA::Object(nullptr);
-  ROA::Object head = ROA::Object(nullptr);
+  ROA::Object entity;
+  ROA::Object head;
   
   float accum_pitch = 0.f;
   float accum_yaw = 0.f;

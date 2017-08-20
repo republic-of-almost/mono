@@ -117,7 +117,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
     {
       Nil::Resource::Texture *tex = &textures[i];
 
-      if(tex->status == Nil::Resource::Texture::PENDING)
+      if(tex->status == Nil::Resource::Texture::PENDING && tex->data)
       {
         if(tex->data_type == Nil::Resource::Texture::FILENAME)
         {

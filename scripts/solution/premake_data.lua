@@ -357,7 +357,19 @@ make.create_solution(solution_data, project_defaults, projects)
           end
         -- Windows Copy --
         elseif os.get() == "windows" then
-          print("Windows copy not implimented")
+          if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
+
+            win_src_dir = src_dir
+            win_dest_dir = dest_dir
+
+            if win_src_dir[-1] ~= "/" then win_src_dir = win_src_dir .. "/" end
+            if win_dest_dir[-1] ~= "/" then win_dest_dir = win_dest_dir .. "/" end
+
+            win_src_dir = string.gsub(src_dir, "/", "\\")
+            win_dest_dir = string.gsub(dest_dir, "/", "\\") .. config.name .. "\\"
+
+            postbuildcommands("xcopy /s/z/y \"" .. win_src_dir .. "*.*\" \"" .. win_dest_dir .. "*.*\"");
+          end
         end
 
       end
