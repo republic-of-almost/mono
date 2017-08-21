@@ -143,7 +143,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             strcat(err_msg, "Failed to load texture: ");
             
             LOG_ERROR(err_msg);
-            LIB_ASSERT(false);
+            //LIB_ASSERT(false);
             continue;
           }
 

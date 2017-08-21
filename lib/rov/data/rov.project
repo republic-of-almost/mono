@@ -31,6 +31,7 @@ table.insert(
     },
 
     assets = {
+      -- Shaders --
       make.get_proj_root() .. "../assets/"
     },
 

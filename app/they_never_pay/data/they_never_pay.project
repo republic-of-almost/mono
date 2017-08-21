@@ -23,8 +23,10 @@ table.insert(
     },
 
     assets = {
-      make.get_proj_root() .. "../../../assets/generic",
-      make.get_proj_root() .. "../../../assets/they_never_pay",
+      -- Generic Assets --
+      make.get_proj_root() .. "../../../assets/generic/",
+      -- Application Assets --
+      make.get_proj_root() .. "../../../assets/they_never_pay/",
     },
 
     project_dependencies = {

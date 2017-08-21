@@ -33,6 +33,7 @@ table.insert(
     },
 
     assets = {
+      -- Test Data --
       make.get_proj_root() .. "../assets/"
     },
 

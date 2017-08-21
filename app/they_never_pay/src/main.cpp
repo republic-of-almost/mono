@@ -11,7 +11,8 @@
 #include <nau/renderers/opengl3.h>
 
 #include <roa/roa.hpp>
-
+#include <tinydir/tinydir.h>
+#include <lib/directory.hpp>
 
 
 int

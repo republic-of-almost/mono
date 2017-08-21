@@ -366,7 +366,7 @@ make.create_solution(solution_data, project_defaults, projects)
             if win_dest_dir[-1] ~= "/" then win_dest_dir = win_dest_dir .. "/" end
 
             win_src_dir = string.gsub(src_dir, "/", "\\")
-            win_dest_dir = string.gsub(dest_dir, "/", "\\") .. config.name .. "\\"
+            win_dest_dir = string.gsub(dest_dir, "/", "\\") .. config.name .. "\\assets\\"
 
             postbuildcommands("xcopy /s/z/y \"" .. win_src_dir .. "*.*\" \"" .. win_dest_dir .. "*.*\"");
           end

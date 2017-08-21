@@ -23,7 +23,9 @@ table.insert(
     },
 
     assets = {
-      make.get_proj_root() .. "../../../assets/generic",
+      -- Generic Assets --
+      make.get_proj_root() .. "../../../assets/generic/textures",
+      make.get_proj_root() .. "../../../assets/generic/mesh",
     },
 
     project_dependencies = {

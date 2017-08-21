@@ -12,8 +12,9 @@
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
-#include <dirent.h>
 #include <tinydir/tinydir.h>
+#include <lib/platform.hpp>
+#include <lib/directory.hpp>
 
 
 namespace Nil {
@@ -53,17 +54,33 @@ Engine::Engine()
   {
     // Textures //
     {
+      char path[2048]{};
+      strcat(path, lib::dir::exe_path());
+      strcat(path, "assets/textures");
+
+      _tinydir_char_t wpath[2048]{};
+      mbstowcs(wpath, path, 2048);
+
+      _tinydir_char_t dir_path[2048]{};
+      _tinydir_strcat(dir_path, wpath);
+
+
       tinydir_dir dir;
-      tinydir_open(&dir, "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/texture");
+      tinydir_open(&dir, dir_path);
 
       while (dir.has_next)
       {
         tinydir_file file;
         tinydir_readfile(&dir, &file);
-        
+
         if (!file.is_dir)
         {
-          printf("%s\n", file.path);
+          //printf("%s\n", file.path);
+          _tinydir_char_t *name = file.name;
+          char c_name[2048];
+          wcstombs(c_name, file.name, _tinydir_strlen(file.name));
+
+          int i = 0;
         }
 
         tinydir_next(&dir);
@@ -71,6 +88,7 @@ Engine::Engine()
 
       tinydir_close(&dir);
     }
+
     
     // Meshes //
     {
