@@ -51,11 +51,16 @@ load_assets(Nil::Node node, const char *filename)
     {
       Nil::Resource::Texture texture{};
 
-      texture.data_type = Nil::Resource::Texture::FILENAME;
-      texture.data      = (uintptr_t)model.mesh_material[i].map_path[j];
-      texture.data_size = strlen(model.mesh_material[i].map_path[j]) + 1;
+      const char *path = Nil::Resource::directory(model.mesh_material[i].map_path[j]);
 
-      Nil::Resource::load(model.mesh_material[i].map_path[j], texture);
+      texture.data_type = Nil::Resource::Texture::FILENAME;
+      texture.data      = (uintptr_t)path;
+      texture.data_size = strlen(path) + 1;
+
+      Nil::Resource::load(
+        model.mesh_material[i].map_path[j],
+        texture
+      );
     }
   }
 

@@ -57,7 +57,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
-
+  
   /*
     Updated Window
   */
@@ -129,6 +129,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           int x = 0;
           int y = 0;
           int c = 0;
+
           stbi_uc *img_data = nullptr;
           const char *path = (const char*)tex->data;
 
@@ -154,7 +155,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           if((tex->id) > self->texture_ids.size())
           {
             const size_t new_size = (tex->id + 1);
-            self->texture_ids.resize(new_size);
+            self->texture_ids.emplace_back(tex->id);
           }
 
           const size_t id = tex->id;
