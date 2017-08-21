@@ -42,7 +42,7 @@ load_assets(Nil::Node node, const char *filename)
 
     Nil::Resource::load(model.name[i], mesh);
   }
-
+  
   // -- Load Textures -- //
 
   for(size_t i = 0; i < model.material_count; ++i)

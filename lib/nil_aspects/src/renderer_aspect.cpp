@@ -135,6 +135,17 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
           stbi_set_flip_vertically_on_load(true);
           img_data = stbi_load(path, &x, &y, &c, 0);
+          
+          // -- Did we Fail to load texture -- //
+          if(img_data == nullptr)
+          {
+            char err_msg[1024]{};
+            strcat(err_msg, "Failed to load texture: ");
+            
+            LOG_ERROR(err_msg);
+            LIB_ASSERT(false);
+            continue;
+          }
 
           const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
 

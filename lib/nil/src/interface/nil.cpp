@@ -12,6 +12,8 @@
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
+#include <dirent.h>
+#include <tinydir/tinydir.h>
 
 
 namespace Nil {
@@ -45,6 +47,36 @@ Engine::Engine()
 
   m_impl->last_tick = lib::timer::get_current_time();
   m_impl->delta_time = 0.f;
+  
+  // -- Scan Asset Directories -- //
+  // -- And Queue up asset loading -- //
+  {
+    // Textures //
+    {
+      tinydir_dir dir;
+      tinydir_open(&dir, "/Users/PhilCK/Desktop/rep_of_a/assets/they_never_pay/texture");
+
+      while (dir.has_next)
+      {
+        tinydir_file file;
+        tinydir_readfile(&dir, &file);
+        
+        if (!file.is_dir)
+        {
+          printf("%s\n", file.path);
+        }
+
+        tinydir_next(&dir);
+      }
+
+      tinydir_close(&dir);
+    }
+    
+    // Meshes //
+    {
+      int i = 0;
+    }
+  }
 }
 
 
