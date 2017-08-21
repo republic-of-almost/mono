@@ -62,6 +62,7 @@ load_assets(Nil::Node node, const char *filename)
         texture
       );
     }
+
   }
 
   // -- Load Materials -- //
@@ -74,7 +75,12 @@ load_assets(Nil::Node node, const char *filename)
     mat.color = 0xEEEEFF00;
 
     Nil::Resource::Texture tex{};
-    if(!Nil::Resource::find_by_name(mesh_mat->map_path[0], tex))
+
+    // -- Get Texture Name -- //
+    char name[2048]{};
+    lib::string::filename_from_path(mesh_mat->map_path[0], name, sizeof(name), true);
+
+    if(!Nil::Resource::find_by_name(name, tex))
     {
       mat.color = mat.color | 0x000000FF;
     }

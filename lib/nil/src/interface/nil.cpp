@@ -1,5 +1,6 @@
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
+#include <nil/resource/texture.hpp>
 #include <nil/aspect.hpp>
 #include <nil/task.hpp>
 #include <data/internal_data.hpp>
@@ -15,6 +16,7 @@
 #include <tinydir/tinydir.h>
 #include <lib/platform.hpp>
 #include <lib/directory.hpp>
+#include <lib/string.hpp>
 
 
 namespace Nil {
@@ -56,14 +58,13 @@ Engine::Engine()
     {
       char path[2048]{};
       strcat(path, lib::dir::exe_path());
-      strcat(path, "assets/textures");
+      strcat(path, "assets/texture");
 
       _tinydir_char_t wpath[2048]{};
       mbstowcs(wpath, path, 2048);
 
       _tinydir_char_t dir_path[2048]{};
       _tinydir_strcat(dir_path, wpath);
-
 
       tinydir_dir dir;
       tinydir_open(&dir, dir_path);
@@ -72,15 +73,30 @@ Engine::Engine()
       {
         tinydir_file file;
         tinydir_readfile(&dir, &file);
+        
+        // We only load up png's right now.
+        _tinydir_char_t *ext = TINYDIR_STRING("png");
 
         if (!file.is_dir)
         {
-          //printf("%s\n", file.path);
-          _tinydir_char_t *name = file.name;
-          char c_name[2048];
-          wcstombs(c_name, file.name, _tinydir_strlen(file.name));
+          if(_tinydir_strcmp(ext, file.extension) == 0)
+          {
+            //_tinydir_char_t *name = file.name;
+            char c_name[2048]{};
+            wcstombs(c_name, file.path, _tinydir_strlen(file.path));
+          
+            int i = 0;
 
-          int i = 0;
+            Nil::Resource::Texture tex{};
+            tex.data      = (uintptr_t)c_name;
+            tex.data_size = strlen(c_name) + 1;
+            tex.data_type = Nil::Resource::Texture::FILENAME;
+
+            char load_name[2048]{};
+            lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
+
+            Nil::Resource::load(load_name, tex);
+          }
         }
 
         tinydir_next(&dir);
