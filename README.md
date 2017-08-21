@@ -81,6 +81,7 @@ Imgui    | https://github.com/ocornut/imgui | MIT
 Imguizmo | https://github.com/CedricGuillemet/ImGuizmo | MIT
 Remotery | https://github.com/Celtoys/Remotery | Apache 2.0
 STB      | https://github.com/nothings/stb | Public Domain
+TinyDIR  | https://github.com/cxong/tinydir.git | Simplified BSD
 
 
 ## License
