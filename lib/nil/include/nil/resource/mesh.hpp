@@ -14,28 +14,40 @@ namespace Resource {
 // ------------------------------------------------------------- [ Resource ] --
 
 
+/*!
+  The calling code should set the attributes.
+  When you successfully load a mesh the id and bounding box will be set.
+  When the renderer loads the mesh the platform_resource and status will be set.
+*/
 struct Mesh
 {
-  float   *position_vec3;
-  float   *normal_vec3;
-  float   *texture_coords_vec2;
-  float   *color_vec4;
+  // -- Input -- //
+
+  const char  *name;                // Internally copied
+  float       *position_vec3;       // Internally copied
+  float       *normal_vec3;         // Internally copied
+  float       *texture_coords_vec2; // Internally copied
+  float       *color_vec4;          // Internally copied
   
-  size_t  count;
+  size_t      triangle_count;
   
   // -- Output -- //
   
-  enum { PENDING, LOADED, FAILED, } status;
   uint32_t id;
-  uintptr_t platform_resource;
-  
   Nil::Data::Bounding_box bounding_box;
+
+  enum { PENDING, LOADED, FAILED, } status;
+  uintptr_t platform_resource;
 };
 
 
 // ----------------------------------------------------------------- [ Find ] --
 
 
+/*!
+  Searches for a Mesh by name.
+  if found returns true else returns false.
+*/
 void
 find_by_name(const char *name, Mesh &out);
 
@@ -43,10 +55,22 @@ find_by_name(const char *name, Mesh &out);
 // ----------------------------------------------------------- [ Get / Load ] --
 
 
+/*!
+  Loads a new Mesh.
+  Does *not* update an existing mesh if name already exists.
+  If it fails to load it will return false.
+*/
 bool
-load(const char *name, Mesh &in);
+load(Mesh &in);
 
 
+/*!
+  Gets access to the underlying data.
+
+  size_t count = 0;
+  Mesh *data = nullptr;
+  get(&count, &data);
+*/
 void
 get(size_t *count, Mesh **out);
 
@@ -54,10 +78,17 @@ get(size_t *count, Mesh **out);
 // ----------------------------------------------------------------- [ Info ] --
 
 
+/*!
+  Convence method good for templates and UI.
+  returns the type name.
+*/
 const char *
 get_type_name(const Mesh &in);
 
 
+/*!
+  Returns the number of meshes in the system.
+*/
 size_t
 mesh_count();
 

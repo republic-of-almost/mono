@@ -13,36 +13,43 @@ namespace Resource {
 // ------------------------------------------------------------- [ Resource ] --
 
 
+/*!
+  The calling code should set the attributes.
+  When you load a texture the id will be set.
+  When the renderer loads the texture from file, the dimentions will be set.
+  When the renderer loads the texture, the status will be set.
+*/
 struct Texture
-{
-  enum { POINT, LINEAR, ANISO_X2, ANISO_X4, ANISO_X8, ANISO_X16 } filter;
+{  
+  // -- Input --//
+
+  char                      *name;      // Internally copied
+  enum { FILENAME, DATA, }  data_type;
+  uintptr_t                 data;       // Internally copied
+  size_t                    data_size;
   
-  // ** Input ** //
+  // -- Input / Output -- //
   
-  enum { FILENAME } data_type;
+  uint32_t width;       // If data_type == DATA then this is input.
+  uint32_t height;      // If data_type == DATA then this is input.
+  uint32_t depth;       // If data_type == DATA then this is input.
+  uint32_t components;  // If data_type == DATA then this is input.
   
-  uintptr_t data;
-  size_t data_size;
-  
-  // ** Input / Output ** //
-  
-  uint32_t width;
-  uint32_t height;
-  uint32_t depth;
-  uint32_t components;
-  
-  // ** Output ** //
+  // -- Output -- //
   
   enum { PENDING, LOADED, FAILED, } status;
-  uintptr_t platform_resource;
-  
-  uint32_t id;
+  uintptr_t                         platform_resource;
+  uint32_t                          id;
 };
 
 
 // ----------------------------------------------------------------- [ Find ] --
 
 
+/*!
+  Searches for a Texture by name.
+  if found returns true else returns false.
+*/
 bool
 find_by_name(const char *name, Texture &out);
 
@@ -50,10 +57,22 @@ find_by_name(const char *name, Texture &out);
 // ----------------------------------------------------------- [ Get / Load ] --
 
 
+/*!
+  Loads a new Texture.
+  Does *not* update an existing texture if name already exists.
+  If it fails to load it will return false.
+*/
 bool
-load(const char *name, Texture &in);
+load(Texture &in);
 
 
+/*!
+  Gets access to the underlying data.
+
+  size_t count = 0;
+  Texture *data = nullptr;
+  get(&count, &data);
+*/
 void
 get(size_t *count, Texture **in_out);
 
@@ -61,6 +80,10 @@ get(size_t *count, Texture **in_out);
 // ----------------------------------------------------------------- [ Info ] --
 
 
+/*!
+  Convence method good for templates and UI.
+  returns the type name.
+*/
 const char *
 get_type_name(const Texture &in);
 

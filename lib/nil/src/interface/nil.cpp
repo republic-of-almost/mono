@@ -87,15 +87,16 @@ Engine::Engine()
           
             int i = 0;
 
+            char load_name[2048]{};
+            lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
+
             Nil::Resource::Texture tex{};
+            tex.name      = load_name;
             tex.data      = (uintptr_t)c_name;
             tex.data_size = strlen(c_name) + 1;
             tex.data_type = Nil::Resource::Texture::FILENAME;
 
-            char load_name[2048]{};
-            lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
-
-            Nil::Resource::load(load_name, tex);
+            Nil::Resource::load(tex);
           }
         }
 

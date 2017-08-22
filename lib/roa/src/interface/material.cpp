@@ -39,8 +39,9 @@ Material::Material(
   if(strlen(name) > 0)
   {
     Nil::Resource::Material mat{};
+    mat.name = name;
     mat.color = color.get_uint();
-    Nil::Resource::load(name, mat);
+    Nil::Resource::load(mat);
     
     m_id = mat.id;
   }

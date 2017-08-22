@@ -195,7 +195,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       
       if(mesh_resource->status == Nil::Resource::Mesh::PENDING)
       {
-        if(mesh_resource->count == 0)
+        if(mesh_resource->triangle_count == 0)
         {
           mesh_resource->status = Nil::Resource::Mesh::LOADED;
           continue;
@@ -206,7 +206,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           mesh_resource->position_vec3,
           mesh_resource->normal_vec3,
           mesh_resource->texture_coords_vec2,
-          mesh_resource->count,
+          mesh_resource->triangle_count,
           &mesh_resource->platform_resource
         );
 

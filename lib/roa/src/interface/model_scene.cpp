@@ -34,13 +34,13 @@ load_assets(Nil::Node node, const char *filename)
   for(size_t i = 0; i < model.mesh_count; ++i)
   {
     Nil::Resource::Mesh mesh{};
-
+    mesh.name                = model.name[i];
     mesh.position_vec3       = model.verts[i];
     mesh.normal_vec3         = model.normals[i];
     mesh.texture_coords_vec2 = model.uvs[i];
-    mesh.count               = model.vertex_count[i];
+    mesh.triangle_count      = model.vertex_count[i];
 
-    Nil::Resource::load(model.name[i], mesh);
+    Nil::Resource::load(mesh);
   }
   
   // -- Load Textures -- //
@@ -52,13 +52,13 @@ load_assets(Nil::Node node, const char *filename)
       Nil::Resource::Texture texture{};
 
       const char *path = Nil::Resource::directory(model.mesh_material[i].map_path[j]);
-
+       
+      texture.name      = model.mesh_material[i].map_path[j];
       texture.data_type = Nil::Resource::Texture::FILENAME;
       texture.data      = (uintptr_t)path;
       texture.data_size = strlen(path) + 1;
 
       Nil::Resource::load(
-        model.mesh_material[i].map_path[j],
         texture
       );
     }
@@ -72,6 +72,7 @@ load_assets(Nil::Node node, const char *filename)
     lib::material *mesh_mat = &model.mesh_material[i];
 
     Nil::Resource::Material mat{};
+    mat.name = model.mesh_material[i].name;
     mat.color = 0xEEEEFF00;
 
     Nil::Resource::Texture tex{};
@@ -87,7 +88,7 @@ load_assets(Nil::Node node, const char *filename)
 
     mat.texture_01 = tex.id;
 
-    Nil::Resource::load(model.mesh_material[i].name, mat);
+    Nil::Resource::load(mat);
   }
 
   // -- Create Nodes and Renderables -- //

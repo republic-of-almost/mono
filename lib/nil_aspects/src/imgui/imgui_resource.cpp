@@ -44,7 +44,8 @@ render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
     if(ImGui::IsItemHovered())
     {
       ImGui::SetTooltip(
-        "ID: %d\nDimentions: %d x %d\nChannels: %d\nResource ID: %p",
+        "Name: %s\nID: %d\nDimentions: %d x %d\nChannels: %d\nResource ID: %p",
+        tex.name,
         tex.id,
         tex.width,
         tex.height,
@@ -119,13 +120,13 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
 
   for(size_t i = 0; i < count; ++i)
   {
-    char name[16]{};
-    sprintf(name, "Mesh#%zu", i + 1);
+    const Nil::Resource::Mesh *data = &rsrc[i];
+
+    char name[1024]{};
+    sprintf(name, "Mesh - %s##%z", data->name, i + 1);
   
     if(ImGui::CollapsingHeader(name))
     {
-      const Nil::Resource::Mesh *data = &rsrc[i];
-
       float columns = 3; // put position as default.
 
       if(data->normal_vec3)         { columns += 3.f; }
@@ -134,7 +135,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
 
       float col_ratio = (1.f / columns) * 0.9f;
 
-      ImGui::Text("Vertex Count: %zu", data->count);
+      ImGui::Text("Vertex Count: %zu", data->triangle_count);
 
       // Positions
       if(data->position_vec3)
@@ -147,7 +148,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           true
         );
         
-        for (int line = 0; line < data->count; line++)
+        for (int line = 0; line < data->triangle_count; line++)
         {
           int index = line * 3;
           char pos[64]{};
@@ -178,7 +179,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           true
         );
         
-        for (int line = 0; line < data->count; line++)
+        for (int line = 0; line < data->triangle_count; line++)
         {
           int index = line * 3;
           char norm[64]{};
@@ -209,7 +210,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           true
         );
         
-        for (int line = 0; line < data->count; line++)
+        for (int line = 0; line < data->triangle_count; line++)
         {
           int index = line * 2;
           char uvs[64]{};
@@ -239,7 +240,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           true
         );
         
-        for(int line = 0; line < data->count; line++)
+        for(int line = 0; line < data->triangle_count; line++)
         {
           int index = line * 4;
           char col[64]{};

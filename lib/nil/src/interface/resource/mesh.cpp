@@ -1,9 +1,11 @@
 #include <nil/resource/mesh.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
+#include <lib/string.hpp>
 #include <lib/logging.hpp>
+#include <lib/assert.hpp>
+#include <lib/key.hpp>
 #include <math/geometry/aabb.hpp>
-#include <stdio.h>
 
 
 namespace {
@@ -55,97 +57,248 @@ find_by_name(const char *name, Mesh &out)
 
 
 bool
-load(const char *name, Mesh &in_out)
+load(Mesh &in_out)
 {
-  const uint32_t check_key = lib::string_pool::find(name);
-  
+  // -- Param Check -- //
+  {
+    // Must have valid name
+    {
+      const bool has_name   = !!in_out.name;
+      const bool has_length = strlen(in_out.name);
+
+      LIB_ASSERT(has_name);
+      LIB_ASSERT(has_length);
+
+      if (!has_name || !has_length)
+      {
+        char msg[2048]{};
+        sprintf(msg, "Loading a Mesh - must have a name.", in_out.name);
+
+        LOG_ERROR(msg);
+
+        return false;
+      }
+    }
+
+    // Must have valid mesh data
+    {
+      const bool has_position = !!in_out.position_vec3;
+      const bool has_color    = !!in_out.color_vec4;
+      const bool has_normal   = !!in_out.normal_vec3;
+      const bool has_texc     = !!in_out.texture_coords_vec2;
+
+      const bool has_something = has_position | has_color | has_normal | has_texc;
+      const bool has_verts     = !!in_out.triangle_count;
+
+      LIB_ASSERT(has_something);
+      LIB_ASSERT(has_verts);
+
+      if (!has_something || !has_verts)
+      {
+        char msg[2048]{};
+        sprintf(msg, "Loading a Mesh - must have vertex data.", in_out.name);
+
+        LOG_ERROR(msg);
+        return false;
+      }
+    }
+
+  }
+
+  // -- Check and return if exists, no support for updating atm -- //
+  const uint32_t check_key = lib::string_pool::find(in_out.name);
+
   if(check_key)
   {
-    char msg[2048]{};
-    strcat(msg, "Mesh with name '");
-    strcat(msg, name);
-    strcat(msg, "' already exists");
-    LOG_WARNING(msg);
-    return false;
+    size_t index = 0;
+    if (lib::key::linear_search(check_key, get_mesh_data().keys.data(), get_mesh_data().keys.size(), &index))
+    {
+      char msg[2048]{};
+      sprintf(msg, "Mesh with name %s already exists", in_out.name);
+
+      LOG_WARNING(msg);
+      LIB_ASSERT(false);
+      return false;
+    }
   }
-  else
-  {
-    // Generate bounding box
-    {
-      const math::aabb box(
-        math::aabb_init(in_out.position_vec3, in_out.count * 3)
-      );
-      
-      memcpy(
-        in_out.bounding_box.min,
-        box.min.data,
-        sizeof(in_out.bounding_box.min)
-      );
-      
-      memcpy(
-        in_out.bounding_box.max,
-        box.max.data,
-        sizeof(in_out.bounding_box.max)
-      );
-    }
-    
-    // Generate new id
-    {
-      const uint32_t new_id = get_mesh_data().keys.size();
-      in_out.id = new_id;
-    }
   
-    Mesh cpy_in_out = in_out;
-    
-//    if(in_out.status == 0)
-//    if(false)
+  // -- Load new Mesh -- //
+  Mesh cpy = in_out;
+  {
+    // Transfer ownership //
+    /*
+      Do this first because if it fails we would need to unset output data.
+    */
     {
-      // Copy all the mesh data.
+      bool failed = false;
+ 
+      // Copy the name //
+      char *cpy_name = nullptr;
+
+      if(!failed)
       {
-        if(in_out.position_vec3)
+        const size_t cpy_name_size = sizeof(decltype(*in_out.name)) * (strlen(in_out.name) + 1);
+        cpy_name = (char*)malloc(cpy_name_size);
+
+        if (cpy_name)
         {
-          const size_t data_size = sizeof(float) * in_out.count * 3;
-          float *cpy_data = (float*)malloc(data_size);
-          memcpy(cpy_data, in_out.position_vec3, data_size);
-          
-          cpy_in_out.position_vec3 = cpy_data;
+          memset(cpy_name, 0, cpy_name_size);
+          memcpy(cpy_name, in_out.name, cpy_name_size);
         }
-        
-        if(in_out.normal_vec3)
+        else
         {
-          const size_t data_size = sizeof(float) * in_out.count * 3;
-          float *cpy_data = (float*)malloc(data_size);
-          memcpy(cpy_data, in_out.normal_vec3, data_size);
-          
-          cpy_in_out.normal_vec3 = cpy_data;
+          failed = true;
         }
-        
-        if(in_out.texture_coords_vec2)
+      }
+
+      // Copy all the mesh data //
+      float *pos_data   = nullptr;
+      float *norm_data  = nullptr;
+      float *texc_data  = nullptr;
+      float *color_data = nullptr;
+
+      if(!failed)
+      {
+        if (in_out.position_vec3 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.count * 2;
-          float *cpy_data = (float*)malloc(data_size);
-          memcpy(cpy_data, in_out.texture_coords_vec2, data_size);
+          const size_t data_size = sizeof(float) * in_out.triangle_count * 3;
+          pos_data = (float*)malloc(data_size);
           
-          cpy_in_out.texture_coords_vec2 = cpy_data;
-        };
-        
-        if(in_out.color_vec4)
+          if (pos_data)
+          {
+            memset(pos_data, 0, data_size);
+            memcpy(pos_data, in_out.position_vec3, data_size);
+          }
+          else
+          {
+            failed = true;
+          }
+        }
+
+        if (in_out.normal_vec3 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.count * 4;
-          float *cpy_data = (float*)malloc(data_size);
-          memcpy(cpy_data, in_out.color_vec4, data_size);
-          
-          cpy_in_out.color_vec4 = cpy_data;
+          const size_t data_size = sizeof(float) * in_out.triangle_count * 3;
+          norm_data = (float*)malloc(data_size);
+
+          if (norm_data)
+          {
+            memset(norm_data, 0, data_size);
+            memcpy(norm_data, in_out.normal_vec3, data_size);
+          }
+          else
+          {
+            failed = true;
+          }
+        }
+
+        if (in_out.texture_coords_vec2 && !failed)
+        {
+          const size_t data_size = sizeof(float) * in_out.triangle_count * 2;
+          texc_data = (float*)malloc(data_size);
+
+          if (texc_data)
+          {
+            memset(texc_data, 0, data_size);
+            memcpy(texc_data, in_out.texture_coords_vec2, data_size);
+          }
+          else
+          {
+            failed = true;
+          }
         };
+
+        if (in_out.color_vec4 && !failed)
+        {
+          const size_t data_size = sizeof(float) * in_out.triangle_count * 4;
+          color_data = (float*)malloc(data_size);
+
+          if (color_data)
+          {
+            memset(color_data, 0, data_size);
+            memcpy(color_data, in_out.color_vec4, data_size);
+          }
+          else
+          {
+            failed = true;
+          }
+        }
+      }
+
+      // If not failed add the new data, else delete and return.
+      if (!failed)
+      {
+        cpy.name                = cpy_name;
+        cpy.position_vec3       = pos_data;
+        cpy.normal_vec3         = norm_data;
+        cpy.color_vec4          = color_data;
+        cpy.texture_coords_vec2 = texc_data;
+      }
+      else
+      {
+        if(cpy_name)    { free(cpy_name);   }
+        if(pos_data)    { free(pos_data);   }
+        if(norm_data)   { free(norm_data);  }
+        if(color_data)  { free(color_data); }
+        if(texc_data)   { free(texc_data);  }
+
+        char msg[2048]{};
+        sprintf(msg, "Failed to add Mesh %s", in_out.name);
+
+        LOG_ERROR(msg);
+        LIB_ASSERT(false);
+        return false;
+      }
+    }
+
+    // Set Outputs //
+    {
+      // Generate bounding box //
+      {
+        const math::aabb box(
+          math::aabb_init(in_out.position_vec3, in_out.triangle_count * 3)
+        );
+      
+        memcpy(
+          in_out.bounding_box.min,
+          box.min.data,
+          sizeof(in_out.bounding_box.min)
+        );
+      
+        memcpy(
+          in_out.bounding_box.max,
+          box.max.data,
+          sizeof(in_out.bounding_box.max)
+        );
+
+        cpy.bounding_box = in_out.bounding_box;
+      }
+    
+      // Generate new id //
+      {
+        const uint32_t new_id = get_mesh_data().keys.size();
+        in_out.id = new_id;
+        cpy.id = in_out.id;
+      }
+
+      // Normalize other outputs //
+      {
+        in_out.status = Mesh::PENDING;
+        cpy.status = in_out.status;
+
+        in_out.platform_resource = 0;
+        cpy.platform_resource = in_out.platform_resource;
       }
     }
     
-    const uint32_t key = lib::string_pool::add(name);
-    get_mesh_data().keys.emplace_back(key);
-    get_mesh_data().meshes.emplace_back(cpy_in_out);
-    
-    return true;
+    // -- Save new Mesh Copy -- //
+    {
+      const uint32_t key = lib::string_pool::add(cpy.name);
+      get_mesh_data().keys.emplace_back(key);
+      get_mesh_data().meshes.emplace_back(cpy);
+    }    
   }
+
+  return true;
 }
 
 
@@ -153,7 +306,7 @@ void
 get(size_t *count, Mesh **out)
 {
   *count = get_mesh_data().keys.size();
-  *out = get_mesh_data().meshes.begin();
+  *out   = get_mesh_data().meshes.begin();
 }
 
 
@@ -170,7 +323,7 @@ get_type_name(const Mesh &)
 size_t
 mesh_count()
 {
-  return get_mesh_data().keys.size() - 1; // We have an inital mesh for failures.
+  return get_mesh_data().keys.size();
 }
 
 
