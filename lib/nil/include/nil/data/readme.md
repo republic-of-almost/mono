@@ -2,10 +2,14 @@
 
 These types of data can be attached to nodes.
 
-## POD Types
+## Desgin Goals
 
-All data types are pod types. So be sure to construct with uniform init if you are not setting all the data.
+- Resources should be POD types.
+- Pointers are owned by the origin of the data.
+  - ie. Resource ptrs created by calling code is owned by calling code.
+  - ie. Resource ptrs fetched by a find method is owned by Nil.
+- The data is owned by the node, if the node is destroyed the data is as well.
 
-## Ownership Semantics
-
-Unless stated any data passed into the engine will be copied out and owned. Thus calling data can be delete after its been passed into the engine.
+## TODO
+- Be able to delete data without destroing the node.
+- Remove global initialization, initialize data at Nil::Engine CTOR time.

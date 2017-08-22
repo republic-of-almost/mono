@@ -62,3 +62,8 @@ strcat(name, "foo");
 Nil::Resources::Material mat{};
 mat.name = name; // this will be copied internally, name is free to go out of scope.
 ```
+
+## TODO
+- Add to unit test CI.
+- More Node tests for life time.
+- More Node Data/Resource tests for life time.

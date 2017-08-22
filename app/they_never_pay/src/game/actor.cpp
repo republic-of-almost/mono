@@ -310,6 +310,9 @@ setup(Actor *actor)
       Nil::Resource::directory("mesh/nav_mesh.obj")
     );
     
+    float foo[32]{};
+    memcpy(foo, model.verts[0], sizeof(foo));
+
     if(model.mesh_count > 0) 
     {
       actor->nav_mesh = model.verts[0];

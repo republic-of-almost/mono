@@ -127,7 +127,7 @@ load_obj_from_file(
   LIB_NS_NAME::model model{};
 
   // Load file
-  FILE *obj_file = fopen(filename, "r");
+  FILE *obj_file = fopen(filename, "rb");
   FILE *mat_file = nullptr;
 
   /*
