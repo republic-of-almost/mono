@@ -1,7 +1,7 @@
 # Nil Interface
 
 Nil is not meant to be a fancy API, it should be considered just the data layer for which
-first and third parties can tap into, prototype on etc.
+first and third parties can tap into, prototype on, and if an API on top.
 
 ## Design Goals
 
@@ -9,6 +9,7 @@ first and third parties can tap into, prototype on etc.
 - Low level access to data types `cameras[]`, `materials[]` etc.
 - Look after data dependencies.
 - POD data only (for data and resources).
+- Flexibily and Speed over safty.
 
 ## Node
 
