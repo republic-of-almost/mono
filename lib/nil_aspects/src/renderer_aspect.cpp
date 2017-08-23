@@ -140,6 +140,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           // -- Did we Fail to load texture -- //
           if(img_data == nullptr)
           {
+            tex->status = Nil::Resource::Texture::FAILED;
+
             char err_msg[1024]{};
             strcat(err_msg, "Failed to load texture: ");
             

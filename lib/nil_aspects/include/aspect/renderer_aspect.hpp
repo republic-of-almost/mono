@@ -27,9 +27,9 @@ struct Data
   
   uint32_t light_pack{0};
   
-  #ifndef NDEBUG
+  //#ifndef NDEBUG
   Nil::Node debug_lines{nullptr};
-  #endif
+  //#endif
   
   #ifndef NIMGUI
   Nil::Node renderer{nullptr};
