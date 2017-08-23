@@ -31,6 +31,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   LIB_ASSERT(self);
 
   self->mesh_ids.emplace_back(uint32_t{0});
+  //self->texture_ids.emplace_back(uint32_t{0});
 
   #ifndef NIMGUI
   Nil::Node render_node;
@@ -158,15 +159,15 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             &tex->platform_resource
           );
 
-          tex->id         = tex_id;
+          //tex->id         = tex_id;
           tex->width      = x;
           tex->height     = y;
           tex->components = c;
 
-          if((tex->id) > self->texture_ids.size())
+          if((tex->id) >= self->texture_ids.size())
           {
             const size_t new_size = (tex->id + 1);
-            self->texture_ids.emplace_back(tex->id);
+            self->texture_ids.resize(new_size);
           }
 
           const size_t id = tex->id;
@@ -417,7 +418,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
 
       const uint32_t mesh_count = self->mesh_ids.size();
 
-      if(mesh_count > render.mesh_id)
+      if(render.mesh_id && mesh_count > render.mesh_id)
       {
         const Nil::Resource::Material mat = mats[render.material_id];
 
@@ -443,7 +444,11 @@ think(Nil::Engine &engine, uintptr_t user_data)
           if(texture_count > texture_01)
           {
             const uint32_t texture_id = self->texture_ids[texture_01];
-            rov_setTexture(texture_id, 0);
+            rov_setTexture(7, 0);
+          }
+          else
+          {
+            LOG_WARNING_ONCE("Failed to find texture");
           }
         }
 

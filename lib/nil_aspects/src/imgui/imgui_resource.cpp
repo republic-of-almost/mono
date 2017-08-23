@@ -71,8 +71,8 @@ render_resource(const Nil::Resource::Material *rsrc, const size_t count)
   {
     const Nil::Resource::Material *data = &rsrc[i];
   
-    char name[16]{};
-    sprintf(name, "Material#%zu", i + 1);
+    char name[1024]{};
+    sprintf(name, "Material - %s ##%zu", data->name, i + 1);
     
     if(ImGui::CollapsingHeader(name))
     {

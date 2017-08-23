@@ -130,7 +130,7 @@ render_node(const Nil::Node &node, Nil::Node &inspect)
 {
   if(node.is_valid())
   {
-    char name[16]{};
+    char name[128]{};
     sprintf(name, "%s##%d", node.get_name(), node.get_id());
 
     const bool show_tree = ImGui::TreeNode(name);

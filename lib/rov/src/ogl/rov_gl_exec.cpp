@@ -138,7 +138,7 @@ ogl_exec(
             
 //            if(texture_index < rov_gl_data->rov_textures.size())
             {
-              const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
+              const rovGLTexture tex = rov_gl_data->rov_textures[texture_index - 1];
               
               glActiveTexture(GL_TEXTURE0 + texture_slots);
               glBindTexture(GL_TEXTURE_2D, tex.gl_id);
