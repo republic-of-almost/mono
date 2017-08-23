@@ -124,21 +124,11 @@ ogl_exec(
         {
           if(texture_maps[t] && shd.uni_tex[t] != -1)
           {
-            const size_t texture_index = texture_maps[t];
-//            
-//            #ifndef NDEBUG
-//            const size_t texture_count = rov_gl_data->rov_textures.size();
-////            LIB_ASSERT(texture_index < texture_count);
-//            if(!texture_index)
-//            {
-//              // Temp fix while removeing texture resource
-//              break;
-//            }
-//            #endif
-            
-//            if(texture_index < rov_gl_data->rov_textures.size())
+            const size_t texture_index = texture_maps[t]  - 1;
+
+            if(texture_index < rov_gl_data->rov_textures.size())
             {
-              const rovGLTexture tex = rov_gl_data->rov_textures[texture_index - 1];
+              const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
               
               glActiveTexture(GL_TEXTURE0 + texture_slots);
               glBindTexture(GL_TEXTURE_2D, tex.gl_id);
