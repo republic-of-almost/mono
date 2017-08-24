@@ -31,16 +31,18 @@ struct Data
   Nil::Node debug_lines{nullptr};
   //#endif
   
-  #ifndef NIMGUI
   Nil::Node renderer{nullptr};
   
+  #ifndef NIMGUI
   bool show_debug_options{false};
+  #endif
   
-  #ifdef NIL_DEVELOPMENT
+  #ifndef NIL_RELEASE
   bool show_debug_lines{true};
   bool show_debug_bounding_boxes{true};
   bool show_lookat_bounding_box{true};
   bool show_lookat_cross{true};
+
   #else
   bool show_debug_lines{false};
   bool show_debug_bounding_boxes{false};
@@ -49,8 +51,6 @@ struct Data
   #endif
   
   lib::array<Nil::Data::Bounding_box> selected_bbs;
-  
-  #endif
 };
 
 

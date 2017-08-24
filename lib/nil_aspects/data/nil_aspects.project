@@ -31,8 +31,9 @@ table.insert(
     },
 
     defines = {
-      "IMGUI_DEVELOPER_SUPPORT",
-      "IMGIZMO_DEVELOPER_SUPPORT",
+      "NIMGUI",
+      -- "IMGUI_DEVELOPER_SUPPORT",
+      -- "IMGIZMO_DEVELOPER_SUPPORT",
     },
 
     project_dependencies = {

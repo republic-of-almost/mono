@@ -291,7 +291,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
               }
             }
 
-            // IMGUI
+            // IMGUI //
+            #ifndef NIMGUI
             ImGuiIO& io = ImGui::GetIO();
             if (action == GLFW_PRESS)
                 io.KeysDown[key] = true;
@@ -303,6 +304,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
             io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
             io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
+            #endif
           }
         );
       }

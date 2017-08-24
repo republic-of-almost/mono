@@ -58,10 +58,20 @@ Engine::Engine()
     {
       char path[2048]{};
       strcat(path, lib::dir::exe_path());
+      
+      #ifndef LIB_PLATFORM_MAC
       strcat(path, "assets/texture");
+      #else
+      strcat(path, "../Resources/assets/texture");
+      #endif
 
       _tinydir_char_t wpath[2048]{};
+      
+      #ifdef LIB_PLATFORM_WINDOWS
       mbstowcs(wpath, path, 2048);
+      #else
+      memcpy(wpath, path, sizeof(path));
+      #endif
 
       _tinydir_char_t dir_path[2048]{};
       _tinydir_strcat(dir_path, wpath);
@@ -83,7 +93,12 @@ Engine::Engine()
           {
             //_tinydir_char_t *name = file.name;
             char c_name[2048]{};
+            
+            #ifdef LIB_PLATFORM_WINDOWS
             wcstombs(c_name, file.path, _tinydir_strlen(file.path));
+            #else
+            memcpy(c_name, file.path, _tinydir_strlen(file.path));
+            #endif
           
             int i = 0;
 

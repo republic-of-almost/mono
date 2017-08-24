@@ -25,7 +25,7 @@ get_tex_data()
   static Texture_data tex_data;
   return tex_data;
 };
-
+	
 
 } // anon ns
 
