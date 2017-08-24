@@ -132,6 +132,23 @@ Engine::Engine()
 
 Engine::~Engine()
 {
+  LIB_ASSERT(m_impl);
+  
+  // -- Destroy Aspects -- //
+  {
+    BENCH_SCOPED_CPU(DestroyAspecrts)
+
+    for(Aspect &asp : m_impl->aspects)
+    {
+      BENCH_SCOPED_CPU(AspectDestroy)
+
+      if(asp.shutdown_fn)
+      {
+        asp.shutdown_fn(*this, asp);
+      }
+    }
+  }
+
   delete m_impl;
   m_impl = nullptr;
 }
