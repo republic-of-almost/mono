@@ -251,6 +251,7 @@ rov_submitMeshTransform(const float world[16])
     // Found insert point.
     if(mat[i].material > new_mat.material)
     {
+       
       get_rov_data().rov_data.rov_render_passes.back().materials.insert(i, new_mat);
       get_rov_data().rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
       break;;

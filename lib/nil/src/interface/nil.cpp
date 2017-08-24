@@ -67,7 +67,7 @@ Engine::Engine()
 
       _tinydir_char_t wpath[2048]{};
       
-      #ifdef LIB_PLATFORM_WINDOWS
+      #ifdef LIB_PLATFORM_WIN
       mbstowcs(wpath, path, 2048);
       #else
       memcpy(wpath, path, sizeof(path));
@@ -91,10 +91,9 @@ Engine::Engine()
         {
           if(_tinydir_strcmp(ext, file.extension) == 0)
           {
-            //_tinydir_char_t *name = file.name;
             char c_name[2048]{};
             
-            #ifdef LIB_PLATFORM_WINDOWS
+            #ifdef LIB_PLATFORM_WIN
             wcstombs(c_name, file.path, _tinydir_strlen(file.path));
             #else
             memcpy(c_name, file.path, _tinydir_strlen(file.path));

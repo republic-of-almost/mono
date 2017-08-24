@@ -464,7 +464,6 @@ think(Nil::Engine &engine, uintptr_t user_data)
     }
 
     // debug_lines
-    if(self->debug_lines && self->show_debug_lines)
     {
       Nil::Data::Developer line_data{};
       Nil::Data::get(self->debug_lines, line_data);
@@ -472,16 +471,19 @@ think(Nil::Engine &engine, uintptr_t user_data)
       const float *data = (float*)line_data.aux_01;
       size_t count = (size_t)line_data.aux_02;
 
-      LIB_ASSERT(count % 9 == 0);
-
-      const size_t lines = count / 9;
-
-      for(size_t i = 0; i < lines; ++i)
+      if (self->debug_lines && self->show_debug_lines)
       {
-        const size_t index = i * 9;
+        LIB_ASSERT(count % 9 == 0);
 
-        rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
-        rov_submitLine(&data[index + 0], &data[index + 3]);
+        const size_t lines = count / 9;
+
+        for(size_t i = 0; i < lines; ++i)
+        {
+          const size_t index = i * 9;
+
+          rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
+          rov_submitLine(&data[index + 0], &data[index + 3]);
+        }
       }
 
       // Signal to line renderer not reset the data buffer.
