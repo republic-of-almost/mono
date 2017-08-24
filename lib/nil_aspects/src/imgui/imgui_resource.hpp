@@ -14,6 +14,14 @@ namespace ImGUI {
 
 
 void
+render_overview(
+  const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
+  const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
+  const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count
+ );
+
+
+void
 render_resource(const Nil::Resource::Texture *rsrc, const size_t count);
 
 

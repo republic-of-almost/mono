@@ -13,6 +13,58 @@ namespace ImGUI {
 // --------------------------------------------------- [ Nil Resource Types ] --
 
 
+void render_overview(
+    const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
+    const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
+    const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count)
+{
+  // -- Texture Resource Overview -- //
+  if (ImGui::CollapsingHeader("Textures##rsrc_over_t"))
+  {
+    size_t load_status[Nil::Resource::Texture::STATUS_COUNT]{};
+
+    // Gather stats //
+    for (size_t i = 0; i < tex_count; ++i)
+    {
+      const Nil::Resource::Texture *data = &tex_rsrc[i];
+      load_status[data->status] += 1;
+    }
+
+    // Render stats //
+    ImGui::LabelText("Count##rover_tex", "%zu", tex_count);
+    ImGui::LabelText("Pending##rover_tex", "%zu", load_status[Nil::Resource::Texture::PENDING]);
+    ImGui::LabelText("Loaded##rover_tex", "%zu", load_status[Nil::Resource::Texture::LOADED]);
+    ImGui::LabelText("Failed##rover_tex", "%zu", load_status[Nil::Resource::Texture::FAILED]);
+  }
+
+  // -- Mesh Resource Overview -- //
+  if (ImGui::CollapsingHeader("Meshes##rsrc_over"))
+  {
+    size_t load_status[Nil::Resource::Mesh::STATUS_COUNT]{};
+
+    // Gather stats //
+    for (size_t i = 0; i < mesh_count; ++i)
+    {
+      const Nil::Resource::Mesh *data = &mesh_rsrc[i];
+      load_status[data->status] += 1;
+    }
+
+    // Render stats //
+    ImGui::LabelText("Count##rover_mesh", "%zu", mesh_count);
+    ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::PENDING]);
+    ImGui::LabelText("Loaded##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::LOADED]);
+    ImGui::LabelText("Failed##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::FAILED]);
+  }
+
+  // -- Material Resource Overview -- //
+  if (ImGui::CollapsingHeader("Materials##rsrc_over"))
+  {
+    ImGui::LabelText("Count##rover_mat", "%zu", mat_count);
+  }
+  
+}
+
+
 void
 render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
 {

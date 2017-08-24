@@ -37,7 +37,7 @@ struct Texture
   
   // -- Output -- //
   
-  enum { PENDING, LOADED, FAILED, } status;
+  enum { PENDING, LOADED, FAILED, STATUS_COUNT, } status;
   uintptr_t                         platform_resource;
   uint32_t                          id;
 };

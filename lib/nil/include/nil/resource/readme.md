@@ -14,3 +14,4 @@ Resources unlike data are not attached to nodes. Typically these represent asses
 - Last used on resources.
 - Remove global initialization, initialize resources at Nil::Engine CTOR time.
 - Hash names for lookup, string lookup bad!
+- Be able to move resources in without copying them.

@@ -161,7 +161,6 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
             &tex->platform_resource
           );
 
-          //tex->id         = tex_id;
           tex->width      = x;
           tex->height     = y;
           tex->components = c;
@@ -179,6 +178,12 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
           tex->status = Nil::Resource::Texture::LOADED;
         }
+      }
+      else if (!has_data)
+      {
+        //LIB_ASSERT(false);
+        LOG_ERROR("Tried to load a texture with no data");
+        tex->status = Nil::Resource::Texture::FAILED;
       }
     }
   } // Load Textures

@@ -36,7 +36,7 @@ struct Mesh
   uint32_t id;
   Nil::Data::Bounding_box bounding_box;
 
-  enum { PENDING, LOADED, FAILED, } status;
+  enum { PENDING, LOADED, FAILED, STATUS_COUNT } status;
   uintptr_t platform_resource;
 };
 

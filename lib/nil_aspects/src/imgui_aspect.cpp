@@ -247,7 +247,34 @@ think(Nil::Engine &engine, uintptr_t user_data)
   // ---------------------------------------------------------- [ Resources ] --
 
 
-  // Overview
+  // -- Resource Overview -- //
+  if(self->show_rsrc_overview)
+  {
+    const char *rsrc_overview = "Resource Overview##rsrc_over";
+    ImGui::Begin(rsrc_overview, &self->show_rsrc_overview);
+
+    size_t tex_count = 0;
+    Nil::Resource::Texture *tex = nullptr;
+    Nil::Resource::get(&tex_count, &tex);
+
+    size_t mesh_count = 0;
+    Nil::Resource::Mesh *mesh = nullptr;
+    Nil::Resource::get(&mesh_count, &mesh);
+
+    size_t mat_count = 0;
+    Nil::Resource::Material *mats = nullptr;
+    Nil::Resource::get(&mat_count, &mats);
+
+    Nil::ImGUI::render_overview(
+      tex, tex_count,  // textures
+      mats, mat_count, // materials 
+      mesh, mesh_count // meshes
+    );
+
+    ImGui::End();
+  }
+
+  // Individual Resources //
   render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
   render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
   render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
