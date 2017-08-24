@@ -215,7 +215,9 @@ rov_submitLine(const float start[3], const float end[3])
   memcpy(dc.end, end, sizeof(rovVec3));
   memcpy(dc.color, get_rov_data().rov_data.curr_rov_color, sizeof(rovVec3));
 
-  get_rov_data().rov_data.rov_render_passes.back().line_draw_calls.emplace_back(dc);
+  ROV_Internal::rovRenderPass &rp = get_rov_data().rov_data.rov_render_passes.back();
+
+  rp.line_draw_calls.emplace_back(dc);
 }
 
 
@@ -235,8 +237,10 @@ rov_submitMeshTransform(const float world[16])
   new_mat.draw_calls = 1;
   new_mat.material = rov_curr_material(&get_rov_data().rov_data);
 
-  const size_t mat_count = get_rov_data().rov_data.rov_render_passes.back().materials.size();
-  ROV_Internal::rovMaterial *mat = get_rov_data().rov_data.rov_render_passes.back().materials.data();
+  ROV_Internal::rovRenderPass &rp = get_rov_data().rov_data.rov_render_passes.back();
+
+  const size_t mat_count = rp.materials.size();
+  ROV_Internal::rovMaterial *mat = rp.materials.data();
 
   for(size_t i = 0; i < mat_count; ++i)
   {
@@ -244,16 +248,19 @@ rov_submitMeshTransform(const float world[16])
     if(mat[i].material == new_mat.material)
     {
       mat[i].draw_calls += 1;
-      get_rov_data().rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
+
+      ROV_Internal::rovRenderPass &rp = get_rov_data().rov_data.rov_render_passes.back();
+      rp.draw_calls.insert(draw_calls, dc);
       break;
     }
 
     // Found insert point.
     if(mat[i].material > new_mat.material)
     {
-       
-      get_rov_data().rov_data.rov_render_passes.back().materials.insert(i, new_mat);
-      get_rov_data().rov_data.rov_render_passes.back().draw_calls.insert(draw_calls, dc);
+      ROV_Internal::rovRenderPass &rp = get_rov_data().rov_data.rov_render_passes.back();
+
+      rp.materials.insert(i, new_mat);
+      rp.draw_calls.insert(draw_calls, dc);
       break;;
     }
 
@@ -263,7 +270,9 @@ rov_submitMeshTransform(const float world[16])
   // Insert into the end if we must
   if(get_rov_data().rov_data.rov_render_passes.back().draw_calls.size() == draw_calls)
   {
-    get_rov_data().rov_data.rov_render_passes.back().materials.emplace_back(new_mat);
-    get_rov_data().rov_data.rov_render_passes.back().draw_calls.emplace_back(dc);
+    ROV_Internal::rovRenderPass &rp = get_rov_data().rov_data.rov_render_passes.back();
+
+    rp.materials.emplace_back(new_mat);
+    rp.draw_calls.emplace_back(dc);
   }
 }
