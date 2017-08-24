@@ -229,7 +229,80 @@ think(Nil::Engine &engine, uintptr_t user_data)
   // --------------------------------------------------------------- [ Data ] --
 
 
-  // Overview
+  if(self->show_data_overview)
+  {
+    // Get data //
+    size_t audio_count = 0;
+    Nil::Data::Audio *audio_data = nullptr;
+    Nil::Data::get(&audio_count, &audio_data);
+
+    size_t bb_count = 0;
+    Nil::Data::Bounding_box *bb_data = nullptr;
+    Nil::Data::get(&bb_count, &bb_data);
+
+    size_t camera_count = 0;
+    Nil::Data::Camera *camera_data = nullptr;
+    Nil::Data::get(&camera_count, &camera_data);
+
+    size_t dev_count = 0;
+    Nil::Data::Developer *dev_data = nullptr;
+    Nil::Data::get(&dev_count, &dev_data);
+
+    size_t gp_count = 0;
+    Nil::Data::Gamepad *gp_data = nullptr;
+    Nil::Data::get(&gp_count, &gp_data);
+
+    size_t kb_count = 0;
+    Nil::Data::Keyboard *kb_data = nullptr;
+    Nil::Data::get(&kb_count, &kb_data);
+
+    size_t light_count = 0;
+    Nil::Data::Light *light_data = nullptr;
+    Nil::Data::get(&light_count, &light_data);
+
+    size_t logic_count = 0;
+    Nil::Data::Logic *logic_data = nullptr;
+    Nil::Data::get(&logic_count, &logic_data);
+
+    size_t ms_count = 0;
+    Nil::Data::Mouse *ms_data = nullptr;
+    Nil::Data::get(&ms_count, &ms_data);
+
+    size_t rd_count = 0;
+    Nil::Data::Renderable *rd_data = nullptr;
+    Nil::Data::get(&rd_count, &rd_data);
+
+//    size_t tr_count = 0;
+//    Nil::Data::Transform *tr_data = nullptr;
+//    Nil::Data::get(&tr_count, &tr_data, false);
+
+    size_t win_count = 0;
+    Nil::Data::Window *win_data = nullptr;
+    Nil::Data::get(&win_count, &win_data);
+    
+    // Create Window and show data //
+    const char *data_overview = "Data Overview##data_over";
+    ImGui::Begin(data_overview, &self->show_data_overview);
+    
+    Nil::ImGUI::render_data_overview(
+      audio_data, audio_count,
+      bb_data, bb_count,
+      camera_data, camera_count,
+      dev_data, dev_count,
+      gp_data, gp_count,
+      kb_data, kb_count,
+      light_data, light_count,
+      logic_data, logic_count,
+      ms_data, ms_count,
+      rd_data, rd_count,
+//      tr_data, tr_count,
+      nullptr, 0, // transform
+      win_data, win_count
+    );
+    
+    ImGui::End();
+  }
+  
   // render_data<Nil::Data::Audio>(&self->show_data_audio);
 //  render_data<Nil::Data::Bounding_box>(&self->show_data_bbox);
   render_data<Nil::Data::Camera>(&self->show_data_camera);
@@ -250,9 +323,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
   // -- Resource Overview -- //
   if(self->show_rsrc_overview)
   {
-    const char *rsrc_overview = "Resource Overview##rsrc_over";
-    ImGui::Begin(rsrc_overview, &self->show_rsrc_overview);
-
+    // Get data //
     size_t tex_count = 0;
     Nil::Resource::Texture *tex = nullptr;
     Nil::Resource::get(&tex_count, &tex);
@@ -264,8 +335,12 @@ think(Nil::Engine &engine, uintptr_t user_data)
     size_t mat_count = 0;
     Nil::Resource::Material *mats = nullptr;
     Nil::Resource::get(&mat_count, &mats);
+    
+    // Create window and show data //
+    const char *rsrc_overview = "Resource Overview##rsrc_over";
+    ImGui::Begin(rsrc_overview, &self->show_rsrc_overview);
 
-    Nil::ImGUI::render_overview(
+    Nil::ImGUI::render_resource_overview(
       tex, tex_count,  // textures
       mats, mat_count, // materials 
       mesh, mesh_count // meshes

@@ -26,6 +26,180 @@ update(bool updated, bool *out_updated)
 } // anon ns
 
 
+void
+render_data_overview(
+  Nil::Data::Audio *audio_data, const size_t audio_count,
+  Nil::Data::Bounding_box *bb_data, const size_t bb_count,
+  Nil::Data::Camera *cam_data, const size_t cam_count,
+  Nil::Data::Developer *dev_data, const size_t dev_count,
+  Nil::Data::Gamepad *gp_data, const size_t gp_count,
+  Nil::Data::Keyboard *kb_data, const size_t kb_count,
+  Nil::Data::Light *light_data, const size_t light_count,
+  Nil::Data::Logic *logic_data, const size_t logic_count,
+  Nil::Data::Mouse *ms_data, const size_t ms_count,
+  Nil::Data::Renderable *rd_data, const size_t rd_count,
+  Nil::Data::Transform *tr_data, const size_t tr_count,
+  Nil::Data::Window *wi_data, const size_t wi_count
+)
+{
+  // -- Audio Data Overview -- //
+  if(ImGui::CollapsingHeader("Audio##data_over"))
+  {
+    if(audio_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", audio_count);
+    }
+    else
+    {
+      ImGui::Text("No Audio data provided");
+    }
+  }
+  
+  // -- Bounding Box Data Overview -- //
+  if(ImGui::CollapsingHeader("Bounding Box##data_over"))
+  {
+    if(bb_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", bb_count);
+    }
+    else
+    {
+      ImGui::Text("No Bounding Box data provided");
+    }
+  }
+  
+  // -- Camera Data Overview -- //
+  if(ImGui::CollapsingHeader("Camera##data_over"))
+  {
+    if(cam_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", cam_count);
+    }
+    else
+    {
+      ImGui::Text("No Camera data provided");
+    }
+  }
+  
+  // -- Developer Data Overview -- //
+  if(ImGui::CollapsingHeader("Developer##data_over"))
+  {
+    if(dev_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", dev_count);
+    }
+    else
+    {
+      ImGui::Text("No Developer data provided");
+    }
+  }
+  
+  // -- Gamepad Data Overview -- //
+  if(ImGui::CollapsingHeader("Gamepad##data_over"))
+  {
+    if(gp_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", gp_count);
+    }
+    else
+    {
+      ImGui::Text("No Gamepad data provided");
+    }
+  }
+  
+  // -- Keyboard Data Overview -- //
+  if(ImGui::CollapsingHeader("Keyboard##data_over"))
+  {
+    if(kb_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", kb_count);
+    }
+    else
+    {
+      ImGui::Text("No Keyboard data provided");
+    }
+  }
+  
+  // -- Light Data Overview -- //
+  if(ImGui::CollapsingHeader("Light##data_over"))
+  {
+    if(light_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", light_count);
+    }
+    else
+    {
+      ImGui::Text("No Light data provided");
+    }
+  }
+  
+  // -- Logic Data Overview -- //
+  if(ImGui::CollapsingHeader("Logic##data_over"))
+  {
+    if(logic_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", logic_count);
+    }
+    else
+    {
+      ImGui::Text("No Logic data provided");
+    }
+  }
+  
+  // -- Mouse Data Overview -- //
+  if(ImGui::CollapsingHeader("Mouse##data_over"))
+  {
+    if(ms_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", ms_count);
+    }
+    else
+    {
+      ImGui::Text("No Mouse data provided");
+    }
+  }
+  
+  // -- Renderable Data Overview -- //
+  if(ImGui::CollapsingHeader("Renderable##data_over"))
+  {
+    if(rd_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", rd_count);
+    }
+    else
+    {
+      ImGui::Text("No Renderable data provided");
+    }
+  }
+  
+  // -- Transform Data Overview -- //
+  if(ImGui::CollapsingHeader("Transform##data_over"))
+  {
+    if(tr_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", tr_count);
+    }
+    else
+    {
+      ImGui::Text("No Transform data provided");
+    }
+  }
+  
+  // -- Window Data Overview -- //
+  if(ImGui::CollapsingHeader("Window##data_over"))
+  {
+    if(wi_data != nullptr)
+    {
+      ImGui::LabelText("Count##rover_tex", "%zu", wi_count);
+    }
+    else
+    {
+      ImGui::Text("No Window data provided");
+    }
+  }
+}
+
+
 bool
 render_data(Nil::Data::Audio *data)
 {

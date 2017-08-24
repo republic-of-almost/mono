@@ -13,7 +13,7 @@ namespace ImGUI {
 // --------------------------------------------------- [ Nil Resource Types ] --
 
 
-void render_overview(
+void render_resource_overview(
     const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
     const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
     const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count)
@@ -21,45 +21,66 @@ void render_overview(
   // -- Texture Resource Overview -- //
   if (ImGui::CollapsingHeader("Textures##rsrc_over_t"))
   {
-    size_t load_status[Nil::Resource::Texture::STATUS_COUNT]{};
-
-    // Gather stats //
-    for (size_t i = 0; i < tex_count; ++i)
+    if(tex_rsrc != nullptr)
     {
-      const Nil::Resource::Texture *data = &tex_rsrc[i];
-      load_status[data->status] += 1;
-    }
+      size_t load_status[Nil::Resource::Texture::STATUS_COUNT]{};
 
-    // Render stats //
-    ImGui::LabelText("Count##rover_tex", "%zu", tex_count);
-    ImGui::LabelText("Pending##rover_tex", "%zu", load_status[Nil::Resource::Texture::PENDING]);
-    ImGui::LabelText("Loaded##rover_tex", "%zu", load_status[Nil::Resource::Texture::LOADED]);
-    ImGui::LabelText("Failed##rover_tex", "%zu", load_status[Nil::Resource::Texture::FAILED]);
+      // Gather stats //
+      for (size_t i = 0; i < tex_count; ++i)
+      {
+        const Nil::Resource::Texture *data = &tex_rsrc[i];
+        load_status[data->status] += 1;
+      }
+
+      // Render stats //
+      ImGui::LabelText("Count##rover_tex", "%zu", tex_count);
+      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[Nil::Resource::Texture::PENDING]);
+      ImGui::LabelText("Loaded##rover_tex", "%zu", load_status[Nil::Resource::Texture::LOADED]);
+      ImGui::LabelText("Failed##rover_tex", "%zu", load_status[Nil::Resource::Texture::FAILED]);
+    }
+    else
+    {
+      ImGui::Text("No Texture data provided");
+    }
   }
 
   // -- Mesh Resource Overview -- //
   if (ImGui::CollapsingHeader("Meshes##rsrc_over"))
   {
-    size_t load_status[Nil::Resource::Mesh::STATUS_COUNT]{};
-
-    // Gather stats //
-    for (size_t i = 0; i < mesh_count; ++i)
+    if(mesh_rsrc != nullptr)
     {
-      const Nil::Resource::Mesh *data = &mesh_rsrc[i];
-      load_status[data->status] += 1;
-    }
+      size_t load_status[Nil::Resource::Mesh::STATUS_COUNT]{};
 
-    // Render stats //
-    ImGui::LabelText("Count##rover_mesh", "%zu", mesh_count);
-    ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::PENDING]);
-    ImGui::LabelText("Loaded##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::LOADED]);
-    ImGui::LabelText("Failed##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::FAILED]);
+      // Gather stats //
+      for (size_t i = 0; i < mesh_count; ++i)
+      {
+        const Nil::Resource::Mesh *data = &mesh_rsrc[i];
+        load_status[data->status] += 1;
+      }
+
+      // Render stats //
+      ImGui::LabelText("Count##rover_mesh", "%zu", mesh_count);
+      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::PENDING]);
+      ImGui::LabelText("Loaded##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::LOADED]);
+      ImGui::LabelText("Failed##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::FAILED]);
+    }
+    else
+    {
+      ImGui::Text("No Mesh data provided");
+    }
   }
 
   // -- Material Resource Overview -- //
   if (ImGui::CollapsingHeader("Materials##rsrc_over"))
   {
-    ImGui::LabelText("Count##rover_mat", "%zu", mat_count);
+    if(mat_rsrc != nullptr)
+    {
+      ImGui::LabelText("Count##rover_mat", "%zu", mat_count);
+    }
+    else
+    {
+      ImGui::Text("No Material data provided");
+    }
   }
   
 }
