@@ -31,7 +31,7 @@ table.insert(
     },
 
     defines = {
-      -- "NIMGUI", -- Comment out to disable ImGui
+      "NIMGUI", -- Comment out to disable ImGui
     },
 
     project_dependencies = {

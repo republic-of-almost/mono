@@ -1,3 +1,5 @@
+#ifndef NIMGUI
+
 #include <imgui/imgui_resource.hpp>
 #include <nil/resource/resource.hpp>
 #include <math/general/general.hpp>
@@ -342,3 +344,6 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
 
 } // ns
 } // ns
+
+
+#endif // build guard

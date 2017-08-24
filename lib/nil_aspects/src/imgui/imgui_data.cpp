@@ -1,3 +1,5 @@
+#ifndef NIMGUI
+
 #include "imgui_data.hpp"
 #include <nil/data/data.hpp>
 #include <stdio.h>
@@ -497,3 +499,5 @@ render_data(Nil::Data::Window *data)
 
 } // ns
 } // ns
+
+#endif // build guard

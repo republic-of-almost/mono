@@ -1,3 +1,5 @@
+#ifndef NIMGUI
+
 #ifndef IMGUI_DATA_INCLUDED_42CB464A_F95B_4BB7_A948_183F342A2F3C
 #define IMGUI_DATA_INCLUDED_42CB464A_F95B_4BB7_A948_183F342A2F3C
 
@@ -96,3 +98,5 @@ render_data(T *data, const size_t count)
 
 
 #endif // inc guard
+
+#endif // build guard
