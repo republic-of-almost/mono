@@ -18,39 +18,37 @@ namespace ROV_Aspect {
 
 struct Data
 {
+  Nil::Node renderer{ nullptr };
   bool has_initialized = false;
 
   uint32_t current_viewport[2]{800, 480};
 
+  // ROV Resource IDS //
   lib::array<uint32_t, 128> mesh_ids{};
   lib::array<uint32_t>      texture_ids{};
-  
   uint32_t light_pack{0};
-  
-  //#ifndef NDEBUG
-  Nil::Node debug_lines{nullptr};
-  //#endif
-  
-  Nil::Node renderer{nullptr};
   
   #ifndef NIMGUI
   bool show_debug_options{false};
   #endif
   
+  #ifndef NDEBUGLINES
+
   #ifndef NIL_RELEASE
   bool show_debug_lines{true};
   bool show_debug_bounding_boxes{true};
   bool show_lookat_bounding_box{true};
   bool show_lookat_cross{true};
-
   #else
   bool show_debug_lines{false};
   bool show_debug_bounding_boxes{false};
   bool show_lookat_bounding_box{false};
   bool show_lookat_cross{false};
   #endif
-  
+
+  Nil::Node debug_lines{ nullptr };
   lib::array<Nil::Data::Bounding_box> selected_bbs;
+  #endif
 };
 
 
@@ -80,8 +78,10 @@ void
 unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data);
 
 
+#ifndef NDEBUGLINES
 void
 find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data);
+#endif
 
 
 void

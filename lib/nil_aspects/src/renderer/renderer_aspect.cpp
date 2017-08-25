@@ -84,6 +84,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       }
 
       // Added Debug Lines
+      #ifndef NDEBUGLINES
       {
         size_t                count = 0;
         Nil::Data::Developer *data = nullptr;
@@ -99,6 +100,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           }
         }
       }
+      #endif
     }
   }
 
@@ -124,6 +126,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
     );
   }
   
+  #ifndef NDEBUGLINES
   if(self->show_lookat_bounding_box)
   {
     Nil::Task::cpu_task(
@@ -132,6 +135,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       find_lookat_bounding_box
     );
   }
+  #endif
 }
 
 
@@ -303,6 +307,7 @@ unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 }
 
 
+#ifndef NDEBUGLINES
 void
 find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
 {
@@ -358,6 +363,7 @@ find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
     }
   }
 }
+#endif
 
 
 void
@@ -513,6 +519,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
     }
 
     // debug_lines
+    #ifndef NDEBUGLINES
     {
       Nil::Data::Developer line_data{};
       Nil::Data::get(self->debug_lines, line_data);
@@ -563,10 +570,12 @@ think(Nil::Engine &engine, uintptr_t user_data)
       Nil_ext::rov_render_bounding_box(data, count);
     }
     
+    // Look at marker
     if(self->show_lookat_cross)
     {
       Nil_ext::rov_render_camera_cross(cam, self->current_viewport);
     }
+    #endif
   }
 
   rov_execute();
@@ -610,11 +619,15 @@ ui_window(uintptr_t user_data)
   {
     if(ImGui::Begin("Debug Options", &self->show_debug_options))
     {
+      #ifndef NDEBUGLINES
       ImGui::Text("Debug Line Options");
       ImGui::Checkbox("Enable Debug Lines", &self->show_debug_lines);
       ImGui::Checkbox("Enable Debug Bounding Boxes", &self->show_debug_bounding_boxes);
       ImGui::Checkbox("Enable Lookat Bounding Box", &self->show_lookat_bounding_box);
       ImGui::Checkbox("Enable Lookat Indicator", &self->show_lookat_cross);
+      #else
+      ImGui::Text("No debug line support, rebuild without NDEBUGLINES enabled");
+      #endif
       
       ImGui::End();
     }

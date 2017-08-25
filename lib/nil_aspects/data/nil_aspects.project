@@ -30,8 +30,8 @@ table.insert(
     },
 
     defines = {
-      "NIMGUI", -- Comment out to disable ImGui
-      "NDEBUGLINES", -- Comment out to disable debug lines
+      -- "NIMGUI",       -- Comment out to disable ImGui
+      -- "NDEBUGLINES",  -- Comment out to disable debug lines
     },
 
     project_dependencies = {
