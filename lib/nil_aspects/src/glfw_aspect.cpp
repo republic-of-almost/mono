@@ -173,27 +173,22 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
         LIB_ASSERT(self->window);
 
-        char gfx_init_msg[2048]{};
-
-        //#ifndef __EMSCRIPTEN__
-
         glfwMakeContextCurrent(self->window);
         glfwSwapInterval(1);
         const int err = gl3wInit();
-        printf("GLFW k %d\n", err);
+  
+        if(err)
+        {
+          LOG_ERROR("Failed to init GL3W");
+        }
 
         win_data.type = Nil::Data::Window::OGL;
 
         glGetIntegerv(GL_MAJOR_VERSION, (GLint*)&win_data.major);
         glGetIntegerv(GL_MINOR_VERSION, (GLint*)&win_data.minor);
 
-        //#else
 
-        //win_data.major = 2.0;
-        //win_data.minor = 1.0;
-
-        //#endif
-
+        char gfx_init_msg[2048]{};
         sprintf(gfx_init_msg, "Init GFX with version, %d, %d", win_data.major, win_data.minor);
         LOG_INFO(gfx_init_msg);
 

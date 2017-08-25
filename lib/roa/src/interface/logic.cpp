@@ -14,6 +14,10 @@ namespace ROA {
 
 Logic::Logic()
 {
+  Nil::Data::Logic data{};
+  
+  Nil::Node node = ROA_detail::get_node(*this);
+  Nil::Data::set(node, data);
 }
 
 

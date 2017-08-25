@@ -41,18 +41,6 @@ get_world_fwd();
 
 
 Nil::Node
-get_app();
-
-
-Nil::Node
-get_mouse();
-
-
-Nil::Node
-get_keyboard();
-
-
-Nil::Node
 get_debug_lines();
 
 

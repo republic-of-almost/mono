@@ -9,10 +9,6 @@
 namespace Game_data {
 
 
-void
-setup();
-
-
 math::vec3
 get_world_up();
 
@@ -23,19 +19,6 @@ get_world_left();
 
 math::vec3
 get_world_fwd();
-
-
-Nil::Node
-get_app();
-
-
-Nil::Node
-get_mouse();
-
-
-Nil::Node
-get_keyboard();
-
 
 
 

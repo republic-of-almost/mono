@@ -113,18 +113,6 @@ load_assets()
 void
 setup()
 {
-  // Window
-  {
-    Nil::Node node = get_app();
-    node.set_name("App");
-    
-    Nil::Data::Window win{};
-    constexpr char title[] = "App";
-    strcat(win.title, title);
-    
-    Nil::Data::set(node, win);
-  }
-
   // Debug Lines
   {
     Nil::Node node = get_debug_lines();
@@ -138,29 +126,7 @@ setup()
     
     Nil::Data::set(node, line_data);
   }
-
-  // Mouse
-  {
-    Nil::Node node = get_mouse();
-    node.set_name("Mouse1");
-    
-    Nil::Data::Mouse ms{};
-    ms.id = 0;
-    
-    Nil::Data::set(node, ms);
-  }
-  
-  // Keyboard
-  {
-    Nil::Node node = get_keyboard();
-    node.set_name("KB1");
-    
-    Nil::Data::Keyboard kb{};
-    kb.id = 0;
-    
-    Nil::Data::set(node, kb);
-  }
-  
+ 
   // Assets
   {
     ROA::Object node = get_assets();

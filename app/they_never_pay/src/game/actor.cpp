@@ -293,17 +293,6 @@ setup(Actor *actor)
   
   actor->entity.set_name("Actor");
   
-  // Mouse Capture
-  {
-    Nil::Node mouse_node = Game_data::get_mouse();
-  
-    Nil::Data::Mouse ms{};
-    Nil::Data::get(mouse_node, ms);
-    
-    ms.capture = true;
-    Nil::Data::set(mouse_node, ms);
-  }
-  
   // Nav mesh
   {
     lib::model model = lib::model_import::load_obj_from_file(

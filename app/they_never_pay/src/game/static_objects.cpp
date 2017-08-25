@@ -40,8 +40,6 @@ setup(Static_objects *obj)
 //    const float color[] = {0.5f, 0.f, 0.5f, 1.f};
 //    memcpy(material.color, color, sizeof(material.color));
     
-    LOG_TODO_ONCE("Get rid of magic number");
-    
 //    material.shader = Nil::Data::Renderable::FULLBRIGHT;
     
     Nil::Data::set(obj->object, renderable);

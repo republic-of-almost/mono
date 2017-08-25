@@ -14,8 +14,8 @@ namespace {
 
 
 struct Texture_data {
-  lib::array<uint32_t, 128> keys{uint32_t{0}};
-  lib::array<Nil::Resource::Texture, 128> textures{Nil::Resource::Texture{}};
+  lib::array<uint32_t, 128> keys{};
+  lib::array<Nil::Resource::Texture, 128> textures{};
 };
 
 
@@ -72,7 +72,7 @@ load(Texture &in_out)
     if (!has_name || !has_length)
     {
       char msg[2048]{};
-      sprintf(msg, "Loading a Texture - must have a name.", in_out.name);
+      sprintf(msg, "Loading a Texture - must have a name.");
 
       LOG_ERROR(msg);
 
@@ -123,7 +123,7 @@ load(Texture &in_out)
       }
 
       // Copy the data //
-       uintptr_t cpy_data;
+      uintptr_t cpy_data;
 
       if(!failed)
       {

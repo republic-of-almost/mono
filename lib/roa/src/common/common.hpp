@@ -7,6 +7,7 @@
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
 #include <lib/logging.hpp>
+#include <lib/assert.hpp>
 
 
 namespace ROA_detail {
@@ -36,6 +37,7 @@ get_nil_data(ROA::Object obj, T &out_data)
   }
   else
   {
+    LIB_ASSERT(false);
     LOG_ERROR("Failed to find data");
   }
 }
@@ -53,6 +55,7 @@ set_nil_data(ROA::Object obj, T &in_data)
   }
   else
   {
+    LIB_ASSERT(false);
     LOG_ERROR("Failed to find data");
   }
 }

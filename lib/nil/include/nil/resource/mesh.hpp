@@ -24,6 +24,8 @@ struct Mesh
   // -- Input -- //
 
   const char  *name;                // Internally copied
+  
+  
   float       *position_vec3;       // Internally copied
   float       *normal_vec3;         // Internally copied
   float       *texture_coords_vec2; // Internally copied
@@ -48,7 +50,7 @@ struct Mesh
   Searches for a Mesh by name.
   if found returns true else returns false.
 */
-void
+bool
 find_by_name(const char *name, Mesh &out);
 
 

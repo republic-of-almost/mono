@@ -31,7 +31,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   LIB_ASSERT(self);
 
   self->mesh_ids.emplace_back(uint32_t{0});
-  //self->texture_ids.emplace_back(uint32_t{0});
+  self->texture_ids.emplace_back(uint32_t{0});
 
   #ifndef NIMGUI
   Nil::Node render_node;
@@ -208,7 +208,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
             strcat(err_msg, "Failed to load texture: ");
 
             LOG_ERROR(err_msg);
-            //LIB_ASSERT(false);
+            LIB_ASSERT(false);
             continue;
           }
 
@@ -243,7 +243,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
       }
       else if (!has_data)
       {
-        //LIB_ASSERT(false);
+        LIB_ASSERT(false);
         LOG_ERROR("Tried to load a texture with no data");
         tex->status = Nil::Resource::Texture::FAILED;
       }
@@ -506,7 +506,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
           if(texture_count > texture_01)
           {
             const uint32_t texture_id = self->texture_ids[texture_01];
-            rov_setTexture(7, 0);
+            rov_setTexture(texture_id, 0);
           }
           else
           {
@@ -522,29 +522,33 @@ think(Nil::Engine &engine, uintptr_t user_data)
     #ifndef NDEBUGLINES
     {
       Nil::Data::Developer line_data{};
-      Nil::Data::get(self->debug_lines, line_data);
-
-      const float *data = (float*)line_data.aux_01;
-      size_t count = (size_t)line_data.aux_02;
-
-      if (self->debug_lines && self->show_debug_lines)
+      
+      if(Nil::Data::has(self->debug_lines, line_data))
       {
-        LIB_ASSERT(count % 9 == 0);
+        Nil::Data::get(self->debug_lines, line_data);
 
-        const size_t lines = count / 9;
+        const float *data = (float*)line_data.aux_01;
+        size_t count = (size_t)line_data.aux_02;
 
-        for(size_t i = 0; i < lines; ++i)
+        if (self->debug_lines && self->show_debug_lines)
         {
-          const size_t index = i * 9;
+          LIB_ASSERT(count % 9 == 0);
 
-          rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
-          rov_submitLine(&data[index + 0], &data[index + 3]);
+          const size_t lines = count / 9;
+
+          for(size_t i = 0; i < lines; ++i)
+          {
+            const size_t index = i * 9;
+
+            rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
+            rov_submitLine(&data[index + 0], &data[index + 3]);
+          }
         }
-      }
 
-      // Signal to line renderer not reset the data buffer.
-      line_data.aux_02 = 0;
-      Nil::Data::set(self->debug_lines, line_data);
+        // Signal to line renderer not reset the data buffer.
+        line_data.aux_02 = 0;
+        Nil::Data::set(self->debug_lines, line_data);
+      }
     }
     
     // Lookat boxes

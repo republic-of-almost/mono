@@ -360,6 +360,7 @@ struct Generic_data
       
       [](const uint32_t node_id, T &out, uintptr_t user_data)
       {
+        LIB_ASSERT(false);
         LOG_ERROR("Failed to find");
       }
     );
@@ -432,6 +433,7 @@ struct Generic_data
       // Not found
       [](const uint32_t node_id, uintptr_t user_data)
       {
+        LIB_ASSERT(false);
         LOG_ERROR("Node not found")
       }
     );

@@ -2,17 +2,20 @@
 
 ## Preprocessor Flags
 
-**NIL_DEVELOPMENT (Development)**
-When the development configuration is active.
-Symbols are on, Optimisations are off.
-Global set in premake_data.lua
+**NIL_DEVELOPMENT (Development Config)**
+**NIL_STAGE (Staging Config)**
+**NIL_RELEASE (Release Config)**
+These are set in premake data, each defines the IDE/Makefile config.
+Development = symbols, no optimisations.
+Staging = symbols, optimisations.
+Release = no symbols, optimisations.
 
-**NIL_STAGE (Staging)**
-When the staging configuration is active
-Symbols are on, Optimisations are on.
-Global set in premake_data.lua
+**NIL_MEMORY_FIXED**
+**NIL_MEMORY_SCALE**
+**NIL_MEMORY_AUTO**
+Build with one these to define the memory characteristics. Fixed is preferable,
+and a requirement on some platforms.
 
-**NIL_RELEASE (Release)**
-When the release configuration is active.
-Symbols are on, Optimisations are on.
-Global set in premake_data.lua
+**NIL_MEMORY_HINT**
+Define (in megabytes) a memory capacity hint, on Fixed platforms this hint will
+not be broken.

@@ -35,7 +35,7 @@ namespace Resource {
 // ----------------------------------------------------------------- [ Find ] --
 
 
-void
+bool
 find_by_name(const char *name, Mesh &out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
@@ -47,9 +47,11 @@ find_by_name(const char *name, Mesh &out)
     if(key == find_key)
     {
       out = get_mesh_data().meshes[i];
-      return;
+      return true;
     }
   }
+  
+  return false;
 }
 
 
