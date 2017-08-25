@@ -129,11 +129,13 @@ ogl_destroy(rovGLData *gl_data)
   #ifdef GL_HAS_VAO
   glBindVertexArray(gl_data->vao);
   #endif
-
+  
   ogl_destroyLights(gl_data);
   ogl_destroyTextures(gl_data);
   ogl_destroyMeshes(gl_data);
   ogl_destroyPrograms(gl_data);
+
+  glDeleteVertexArrays(1, &gl_data->vao);
 }
 
 
