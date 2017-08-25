@@ -40,9 +40,6 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
     rovGLMeshProgram fullbright{};
     const bool fb_success = ogl_createProgram(
       path,
-      nullptr,
-      nullptr,
-      nullptr,
       &fullbright.program
     );
     gl_data->rov_mesh_programs.emplace_back(fullbright);
@@ -54,9 +51,6 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
     rovGLMeshProgram lit{};
     const bool lit_success = ogl_createProgram(
       path,
-      nullptr,
-      nullptr,
-      nullptr,
       &lit.program
     );
     gl_data->rov_mesh_programs.emplace_back(lit);
@@ -98,9 +92,6 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
     rovGLLineProgram line;
     ogl_createProgram(
       path,
-      nullptr,
-      nullptr,
-      nullptr,
       &line.program
     );
 
@@ -135,7 +126,14 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
 void
 ogl_destroy(rovGLData *gl_data)
 {
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
 
+  ogl_destroyLights(gl_data);
+  ogl_destroyTextures(gl_data);
+  ogl_destroyMeshes(gl_data);
+  ogl_destroyPrograms(gl_data);
 }
 
 

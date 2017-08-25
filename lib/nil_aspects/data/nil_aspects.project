@@ -21,8 +21,7 @@ table.insert(
       --
       make.add_src(make.get_proj_root() .. "../src/"),
       --
-      make.add_doc(make.get_proj_root() .. "../include/"),
-      make.add_doc(make.get_proj_root() .. "../src/"),
+      make.add_doc(make.get_proj_root() .. "../"),
     },
 
     inc_dirs = {
@@ -32,6 +31,7 @@ table.insert(
 
     defines = {
       "NIMGUI", -- Comment out to disable ImGui
+      "NDEBUGLINES", -- Comment out to disable debug lines
     },
 
     project_dependencies = {

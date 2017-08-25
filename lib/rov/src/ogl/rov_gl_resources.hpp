@@ -11,7 +11,6 @@
 namespace ROV_Internal {
 
 
-
 // -------------------------------------------------------------- [ Texture ] --
 
 
@@ -24,6 +23,8 @@ uint32_t    ogl_createTexture(
               uint32_t format,
               uintptr_t *out_resource_id = nullptr);
 
+void        ogl_destroyTextures(rovGLData *gl_data);
+
 
 // ----------------------------------------------------------------- [ Mesh ] --
 
@@ -35,6 +36,9 @@ uint32_t    ogl_createMesh(
               const float *tex_coords,
               size_t count,
               uintptr_t *out_resource_id = nullptr);
+
+
+void        ogl_destroyMeshes(rovGLData *gl_data);
 
 
 // ------------------------------------------------------------- [ Lighting ] --
@@ -54,16 +58,17 @@ bool        ogl_updateLights(
               size_t count);
 
 
+void        ogl_destroyLights(rovGLData *gl_data);
+
 
 // ------------------------------------------------------------- [ Programs ] --
 
 
 bool        ogl_createProgram(
               const char *filename,
-              GLuint *out_vs,
-              GLuint *out_gs,
-              GLuint *out_fs,
               GLuint *out_program);
+
+void        ogl_destroyPrograms(rovGLData *gl_data);
 
 
 } // ns

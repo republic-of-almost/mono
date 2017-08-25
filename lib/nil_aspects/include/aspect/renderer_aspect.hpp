@@ -54,7 +54,7 @@ struct Data
 };
 
 
-// -------------------------------------------- [ Renderer Aspect Interface ] --
+// ---------------------------------------------------- [ Renderer Lifetime ] --
 
 
 void
@@ -65,7 +65,19 @@ void
 events(Nil::Engine &engine, Nil::Aspect &aspect);
 
 
+void
+shut_down(Nil::Engine &engine, Nil::Aspect &aspect);
+
+
 // ------------------------------------------------------- [ Renderer Tasks ] --
+
+
+void
+load_gpu_resources(Nil::Engine &engine, uintptr_t user_data);
+
+
+void
+unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data);
 
 
 void

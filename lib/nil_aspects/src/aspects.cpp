@@ -41,6 +41,7 @@ load_aspects(Nil::Engine &nil_engine)
     Nil::Aspect aspect{};
     aspect.start_up_fn    = Nil_ext::ROV_Aspect::start_up;
     aspect.tick_fn        = Nil_ext::ROV_Aspect::events;
+    aspect.shutdown_fn    = Nil_ext::ROV_Aspect::shut_down;
     aspect.user_data      = (uintptr_t)&rov;
 
     nil_engine.add_aspect(aspect);

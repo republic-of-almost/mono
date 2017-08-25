@@ -145,6 +145,19 @@ Engine::~Engine()
       {
         asp.shutdown_fn(*this, asp);
       }
+
+      /*
+        We need to run GPU Tasks after each shutdown call as that has a thread
+        context issue.
+      */
+      Nil::Data::Task_queues &tasks = Nil::Data::get_task_queues();
+      for (auto &t : tasks.pre_render)
+      {
+        if (t.func)
+        {
+          t.func(*this, t.user_data);
+        }
+      }
     }
   }
 

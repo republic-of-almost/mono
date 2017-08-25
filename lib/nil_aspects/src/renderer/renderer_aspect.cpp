@@ -19,7 +19,7 @@ namespace Nil_ext {
 namespace ROV_Aspect {
 
 
-// ----------------------------------------- [ Renderer Aspect Impl Startup ] --
+// ---------------------------------------------------- [ Renderer Lifetime ] --
 
 
 void
@@ -48,9 +48,6 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   Nil::Data::set(self->renderer, dev);
   #endif
 }
-
-
-// ------------------------------------------ [ Renderer Aspect Impl Events ] --
 
 
 void
@@ -105,128 +102,15 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
     }
   }
 
-  /*
-    Load textures
-  */
-  {
-    size_t count = 0;
-    Nil::Resource::Texture *textures = nullptr;
-    
-    Nil::Resource::get(&count, &textures);
-    
-    for(size_t i = 0; i < count; ++i)
-    {
-      Nil::Resource::Texture *tex = &textures[i];
-
-      const bool has_data   = tex && !!tex->data;
-      const bool is_pending = tex && tex->status == Nil::Resource::Texture::PENDING;
-
-      if(has_data && is_pending)
-      {
-        const bool data_is_filename = tex->data_type == Nil::Resource::Texture::FILENAME;
-
-        if(data_is_filename)
-        {
-          int x = 0;
-          int y = 0;
-          int c = 0;
-
-          stbi_uc *img_data = nullptr;
-          const char *path = (const char*)tex->data;
-
-          stbi_set_flip_vertically_on_load(true);
-          img_data = stbi_load(path, &x, &y, &c, 0);
-          
-          // -- Did we Fail to load texture -- //
-          if(img_data == nullptr)
-          {
-            tex->status = Nil::Resource::Texture::FAILED;
-
-            char err_msg[1024]{};
-            strcat(err_msg, "Failed to load texture: ");
-            
-            LOG_ERROR(err_msg);
-            //LIB_ASSERT(false);
-            continue;
-          }
-
-          const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
-
-          const uint32_t tex_id = rov_createTexture(
-            img_data,
-            x,
-            y,
-            x * y * c,
-            format,
-            &tex->platform_resource
-          );
-
-          tex->width      = x;
-          tex->height     = y;
-          tex->components = c;
-
-          if((tex->id) >= self->texture_ids.size())
-          {
-            const size_t new_size = (tex->id + 1);
-            self->texture_ids.resize(new_size);
-          }
-
-          const size_t id = tex->id;
-          self->texture_ids[id] = tex_id;
-
-          stbi_image_free(img_data);
-
-          tex->status = Nil::Resource::Texture::LOADED;
-        }
-      }
-      else if (!has_data)
-      {
-        //LIB_ASSERT(false);
-        LOG_ERROR("Tried to load a texture with no data");
-        tex->status = Nil::Resource::Texture::FAILED;
-      }
-    }
-  } // Load Textures
-
-  /*
-    Load Meshes
-  */
-  {
-    size_t count = 0;
-    Nil::Resource::Mesh *meshes = nullptr;
-
-    Nil::Resource::get(&count, &meshes);
-
-    for(size_t i = 0; i < count; ++i)
-    {
-      Nil::Resource::Mesh *mesh_resource = &meshes[i];
-      
-      if(mesh_resource->status == Nil::Resource::Mesh::PENDING)
-      {
-        if(mesh_resource->triangle_count == 0)
-        {
-          mesh_resource->status = Nil::Resource::Mesh::LOADED;
-          continue;
-        }
-
-        const uint32_t mesh = rov_createMesh
-        (
-          mesh_resource->position_vec3,
-          mesh_resource->normal_vec3,
-          mesh_resource->texture_coords_vec2,
-          mesh_resource->triangle_count,
-          &mesh_resource->platform_resource
-        );
-
-        self->mesh_ids.emplace_back(mesh);
-
-        mesh_resource->status = Nil::Resource::Mesh::LOADED;
-      }
-    }
-  } // Load Meshes
   
   if(self->has_initialized)
   {
+    Nil::Task::gpu_task(
+      Nil::Task::GPU::PRE_RENDER,
+      (uintptr_t)self,
+      load_gpu_resources
+    );
+
     Nil::Task::cpu_task(
       Nil::Task::CPU::EARLY_THINK,
       (uintptr_t)self,
@@ -251,7 +135,172 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 }
 
 
+void
+shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
+{
+  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  LIB_ASSERT(self);
+
+  if(self->has_initialized)
+  {
+    Nil::Task::gpu_task(
+      Nil::Task::GPU::PRE_RENDER,
+      (uintptr_t)self,
+      unload_gpu_resources
+    );
+  }
+}
+
+
 // ------------------------------------------------------- [ Renderer Tasks ] --
+
+
+void
+load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(ROV_LoadGPUResources)
+
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+
+  /*
+  Load textures
+  */
+  {
+    size_t count = 0;
+    Nil::Resource::Texture *textures = nullptr;
+
+    Nil::Resource::get(&count, &textures);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+      Nil::Resource::Texture *tex = &textures[i];
+
+      const bool has_data = tex && !!tex->data;
+      const bool is_pending = tex && tex->status == Nil::Resource::Texture::PENDING;
+
+      if (has_data && is_pending)
+      {
+        const bool data_is_filename = tex->data_type == Nil::Resource::Texture::FILENAME;
+
+        if (data_is_filename)
+        {
+          int x = 0;
+          int y = 0;
+          int c = 0;
+
+          stbi_uc *img_data = nullptr;
+          const char *path = (const char*)tex->data;
+
+          stbi_set_flip_vertically_on_load(true);
+          img_data = stbi_load(path, &x, &y, &c, 0);
+
+          // -- Did we Fail to load texture -- //
+          if (img_data == nullptr)
+          {
+            tex->status = Nil::Resource::Texture::FAILED;
+
+            char err_msg[1024]{};
+            strcat(err_msg, "Failed to load texture: ");
+
+            LOG_ERROR(err_msg);
+            //LIB_ASSERT(false);
+            continue;
+          }
+
+          const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
+
+          const uint32_t tex_id = rov_createTexture(
+            img_data,
+            x,
+            y,
+            x * y * c,
+            format,
+            &tex->platform_resource
+          );
+
+          tex->width = x;
+          tex->height = y;
+          tex->components = c;
+
+          if ((tex->id) >= self->texture_ids.size())
+          {
+            const size_t new_size = (tex->id + 1);
+            self->texture_ids.resize(new_size);
+          }
+
+          const size_t id = tex->id;
+          self->texture_ids[id] = tex_id;
+
+          stbi_image_free(img_data);
+
+          tex->status = Nil::Resource::Texture::LOADED;
+        }
+      }
+      else if (!has_data)
+      {
+        //LIB_ASSERT(false);
+        LOG_ERROR("Tried to load a texture with no data");
+        tex->status = Nil::Resource::Texture::FAILED;
+      }
+    }
+  } // Load Textures
+
+  /*
+  Load Meshes
+  */
+  {
+    size_t count = 0;
+    Nil::Resource::Mesh *meshes = nullptr;
+
+    Nil::Resource::get(&count, &meshes);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+      Nil::Resource::Mesh *mesh_resource = &meshes[i];
+
+      if (mesh_resource->status == Nil::Resource::Mesh::PENDING)
+      {
+        if (mesh_resource->triangle_count == 0)
+        {
+          mesh_resource->status = Nil::Resource::Mesh::LOADED;
+          continue;
+        }
+
+        const uint32_t mesh = rov_createMesh
+        (
+          mesh_resource->position_vec3,
+          mesh_resource->normal_vec3,
+          mesh_resource->texture_coords_vec2,
+          mesh_resource->triangle_count,
+          &mesh_resource->platform_resource
+        );
+
+        self->mesh_ids.emplace_back(mesh);
+
+        mesh_resource->status = Nil::Resource::Mesh::LOADED;
+      }
+    }
+  } // Load Meshes
+}
+
+
+void
+unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(ROV_UnloadResources);
+  
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+
+  rov_destroy();
+
+  /*
+    This invalidates all the resources we have so clear them.
+  */
+  self->texture_ids.clear();
+  self->mesh_ids.clear();
+}
 
 
 void

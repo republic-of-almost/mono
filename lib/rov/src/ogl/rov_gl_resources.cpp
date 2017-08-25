@@ -64,6 +64,24 @@ ogl_createTexture(
 }
 
 
+void
+ogl_destroyTextures(rovGLData *gl_data)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+
+  lib::array<GLuint, 64> textures_to_destroy;
+
+  for (ROV_Internal::rovGLTexture tex : gl_data->rov_textures)
+  {
+    textures_to_destroy.emplace_back(tex.gl_id);
+  }
+
+  glDeleteTextures(textures_to_destroy.size(), textures_to_destroy.data());
+}
+
+
 // ----------------------------------------------------------------- [ Mesh ] --
 
 
@@ -120,6 +138,24 @@ ogl_createMesh(
   }
 
   return (uint32_t)gl_data->rov_meshes.size();
+}
+
+
+void
+ogl_destroyMeshes(rovGLData *gl_data)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+
+  lib::array<GLuint, 64> vbos_to_destroy;
+
+  for (ROV_Internal::rovGLMesh mesh : gl_data->rov_meshes)
+  {
+    vbos_to_destroy.emplace_back(mesh.gl_id);
+  }
+
+  glDeleteVertexArrays(vbos_to_destroy.size(), vbos_to_destroy.data());
 }
 
 
@@ -206,15 +242,30 @@ ogl_updateLights(
 }
 
 
+void
+ogl_destroyLights(rovGLData *gl_data)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+
+  lib::array<GLuint, 64> buffer_to_destroy;
+
+  for (ROV_Internal::rovGLLightPack buf : gl_data->light_buffers)
+  {
+    buffer_to_destroy.emplace_back(buf.gl_id);
+  }
+
+  glDeleteTextures(buffer_to_destroy.size(), buffer_to_destroy.data());
+}
+
+
 // ------------------------------------------------------------- [ Programs ] --
 
 
 bool
 ogl_createProgram(
   const char *filename,
-  GLuint *out_vs,
-  GLuint *out_gs,
-  GLuint *out_fs,
   GLuint *out_program)
 {
   auto shd_compiled = [](const GLuint shd_id, const char *name) -> bool
@@ -377,15 +428,60 @@ ogl_createProgram(
     return false;
   }
 
+  // -- Detach and Delete Shaders -- 
+  
+  if (vert_shd) { glDetachShader(prog, vert_shd); }
+  if (geo_shd)  { glDetachShader(prog, geo_shd);  }
+  if (frag_shd) { glDetachShader(prog, frag_shd); }
+
+  if (vert_shd) { glDeleteShader(vert_shd); }
+  if (geo_shd) { glDeleteShader(geo_shd); }
+  if (frag_shd) { glDeleteShader(frag_shd); }
+
   // -- Return Values -- //
 
-  if(out_vs)      { *out_vs = vert_shd;  }
-  if(out_gs)      { *out_gs = geo_shd;   }
-  if(out_fs)      { *out_fs = frag_shd;  }
   if(out_program) { *out_program = prog; }
 
   return true;
 }
 
+
+void
+ogl_destroyPrograms(rovGLData *gl_data)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+
+  glUseProgram(0);
+
+  for (ROV_Internal::rovGLMeshProgram &prog : gl_data->rov_mesh_programs)
+  {
+    GLsizei count = 0;
+    GLuint shaders[3]{};
+    glGetAttachedShaders(prog.program, 3, &count, shaders);
+
+    for (GLuint sh : shaders)
+    {
+      LIB_ASSERT(sh == 0);
+    }
+
+    glDeleteProgram(prog.program);
+  }
+
+  for (ROV_Internal::rovGLLineProgram &prog : gl_data->rov_line_programs)
+  {
+    GLsizei count = 0;
+    GLuint shaders[3]{};
+    glGetAttachedShaders(prog.program, 3, &count, shaders);
+
+    for (GLuint sh : shaders)
+    {
+      LIB_ASSERT(sh == 0);
+    }
+
+    glDeleteProgram(prog.program);
+  }
+}
 
 } // ns

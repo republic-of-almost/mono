@@ -29,7 +29,7 @@ constexpr uint32_t rov_max_texture_maps = 3;
 
 struct rovGLTexture
 {
-  GLint gl_id;
+  GLuint gl_id;
   uint32_t width;
   uint32_t height;
 };
