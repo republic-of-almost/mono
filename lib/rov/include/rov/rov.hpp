@@ -77,6 +77,15 @@ bool        rov_updateLights(
               rovLight *lights,
               size_t count);
 
+
+bool        rov_createRenderTarget(
+              uint32_t width,
+              uint32_t height,
+              uint32_t format,
+              uintptr_t *out_platform_resource = nullptr
+            );
+
+
 // ----------------------------------------------------------- [ Renderpass ] --
 
 
@@ -86,7 +95,8 @@ void        rov_startRenderPass(
               const rovVec3 eye_pos,
               const rovViewport viewport,
               uint32_t clear_flags,
-              uint32_t light_buffer = 0);
+              uint32_t light_buffer = 0,
+              uint32_t render_target = 0);
 
 
 // ----------------------------------------------------- [ General Settings ] --
@@ -96,7 +106,6 @@ void        rov_setColor(const float col[4]);
 void        rov_setColor(float r, float g, float b, float a);
 void        rov_setColor(uint32_t color);
 
-void        rov_setCamera(const float view[16], const float proj[16]);
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);
 void        rov_setShader(uint32_t shader_id);

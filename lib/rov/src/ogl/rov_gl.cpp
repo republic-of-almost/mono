@@ -135,6 +135,8 @@ ogl_destroy(rovGLData *gl_data)
   ogl_destroyMeshes(gl_data);
   ogl_destroyPrograms(gl_data);
 
+  LOG_TODO("Remove Framebuffers");
+
   glDeleteVertexArrays(1, &gl_data->vao);
 }
 

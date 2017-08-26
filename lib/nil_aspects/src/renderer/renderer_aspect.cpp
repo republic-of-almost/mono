@@ -14,6 +14,10 @@
 #include <imgui/imgui.h>
 #endif
 
+#ifndef NVRSUPPORT
+#include <openvr.h>
+#endif
+
 
 namespace Nil_ext {
 namespace ROV_Aspect {
@@ -72,15 +76,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
       if(!self->has_initialized)
       {
-        if(win[0].type == Nil::Data::Window::OGL)
-        {
-          LOG_INFO("Initialize ROV")
-
-          rov_initialize(Nil::Resource::asset_path());
-          self->has_initialized = true;
-
-          self->light_pack = rov_createLights(nullptr, 0);
-        }
+        Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, initialize_rov);
       }
 
       // Added Debug Lines
@@ -160,6 +156,110 @@ shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
+initialize_rov(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(ROV_InitializeROV)
+
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+
+
+  size_t count = 0;
+  Nil::Data::Window *win = nullptr;
+  Nil::Data::get(&count, &win);
+
+  if (count)
+  {
+    /* We operate on 1 window idea so grab the first */
+    self->current_viewport[0] = win[0].width;
+    self->current_viewport[1] = win[0].height;
+
+    if (win[0].type == Nil::Data::Window::OGL)
+    {
+      // -- ROV -- //
+
+      LOG_INFO("Initialize ROV")
+
+      rov_initialize(Nil::Resource::asset_path());
+
+      self->has_initialized = true;
+      self->light_pack = rov_createLights(nullptr, 0);
+
+      // -- Init the VR Device -- //
+
+      #ifndef NVRSUPPORT
+      vr::EVRInitError vr_error = vr::VRInitError_None;
+      self->vr_device = vr::VR_Init(&vr_error, vr::VRApplication_Scene);
+
+      if(vr_error != vr::VRInitError_None)
+      {
+        char buf[1024]{};
+        sprintf(buf, "Unable to init VR runtime: %s", vr::VR_GetVRInitErrorAsEnglishDescription(vr_error));
+
+        LOG_ERROR(buf);
+      }
+
+      if (self->vr_device)
+      {
+        char t_system[2048]{};
+        uint32_t length = self->vr_device->GetStringTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String, nullptr, 0, nullptr);
+        self->vr_device->GetStringTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String, t_system, 2048, nullptr);
+
+        LOG_INFO(t_system);
+
+        if (!vr::VRCompositor())
+        {
+          assert(false);
+        }
+
+        // Load up VR GPU resources.
+        Nil::Task::gpu_task(Nil::Task::GPU::PRE_RENDER, (uintptr_t)self, load_gpu_vr_resources);
+      }
+      #endif
+    }
+  }
+}
+
+
+#ifndef NVRSUPPORT
+void
+load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(ROV_LoadVRGPUResources)
+
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+
+  const bool has_left_fbo = self->eye_render_targets[0] > 0;
+  const bool has_right_fbo = self->eye_render_targets[1] > 0;
+
+  LIB_ASSERT(has_left_fbo == has_right_fbo);
+
+  if (has_left_fbo && has_right_fbo)
+  {
+    LIB_ASSERT(self->vr_device);
+
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    self->vr_device->GetRecommendedRenderTargetSize(&width, &height);
+
+    LIB_ASSERT(width);
+    LIB_ASSERT(height);
+
+    if(width && height)
+    {
+      uintptr_t eye_fbo[2]{};
+
+      self->eye_render_targets[0] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_fbo[0]);
+      self->eye_render_targets[1] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_fbo[1]);
+    }
+  }
+}
+#endif
+
+
+void
 load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 {
   BENCH_SCOPED_CPU(ROV_LoadGPUResources)
@@ -168,7 +268,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
   LIB_ASSERT(self);
 
   /*
-  Load textures
+    Load textures
   */
   {
     size_t count = 0;
@@ -416,9 +516,6 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
 }
 
 
-// -------------------------------------- [ Renderer Aspect Impl Late Think ] --
-
-
 void
 think(Nil::Engine &engine, uintptr_t user_data)
 {
@@ -443,141 +540,156 @@ think(Nil::Engine &engine, uintptr_t user_data)
     if(cam.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
     if(cam.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
 
-    const uint32_t viewport[4] {
+    // Rendertargets //
+    #ifndef NVRSUPPORT
+    const uint32_t targets[]{
       0,
-      0,
-      self->current_viewport[0],
-      self->current_viewport[1]
-    };
+      self->eye_render_targets[0],
+      self->eye_render_targets[1],
+     };
+    #else
+    const uint32_t targets[] {0};
+    #endif
 
-    const math::mat4 proj = math::mat4_projection(
-      cam.width * self->current_viewport[0],
-      cam.height * self->current_viewport[1],
-      cam.near_plane,
-      cam.far_plane,
-      cam.fov
-    );
-
-    rov_setColor(cam.clear_color);
-
-    rov_startRenderPass(
-      cam.view_mat,
-      math::mat4_get_data(proj),
-      cam.position,
-      viewport,
-      clear_flags,
-      self->light_pack
-    );
-
-    size_t renderable_count = 0;
-    Nil::Data::Renderable *renderables;
-
-    Nil::Data::get(&renderable_count, &renderables);
-
-    for(size_t i = 0; i < renderable_count; ++i)
+    for(const uint32_t rt_id : targets)
     {
-      Nil::Data::Renderable render = renderables[i];
+      const uint32_t viewport[4] {
+        0,
+        0,
+        self->current_viewport[0],
+        self->current_viewport[1]
+      };
 
-      const uint32_t mesh_count = self->mesh_ids.size();
+      const math::mat4 proj = math::mat4_projection(
+        cam.width * self->current_viewport[0],
+        cam.height * self->current_viewport[1],
+        cam.near_plane,
+        cam.far_plane,
+        cam.fov
+      );
 
-      if(render.mesh_id && mesh_count > render.mesh_id)
+      rov_setColor(cam.clear_color);
+
+      rov_startRenderPass(
+        cam.view_mat,
+        math::mat4_get_data(proj),
+        cam.position,
+        viewport,
+        clear_flags,
+        self->light_pack,
+        rt_id
+      );
+
+      size_t renderable_count = 0;
+      Nil::Data::Renderable *renderables;
+
+      Nil::Data::get(&renderable_count, &renderables);
+
+      for(size_t i = 0; i < renderable_count; ++i)
       {
-        const Nil::Resource::Material mat = mats[render.material_id];
+        Nil::Data::Renderable render = renderables[i];
 
-        const float colorf[4]
+        const uint32_t mesh_count = self->mesh_ids.size();
+
+        if(render.mesh_id && mesh_count > render.mesh_id)
         {
-          lib::color::get_channel_1f(mat.color),
-          lib::color::get_channel_2f(mat.color),
-          lib::color::get_channel_3f(mat.color),
-          lib::color::get_channel_4f(mat.color),
-        };
+          const Nil::Resource::Material mat = mats[render.material_id];
 
-        rov_setColor(colorf);
-
-        const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
-        rov_setMesh(mesh_id);
-
-        const uint32_t texture_01 = mats[render.material_id].texture_01;
-
-        if(texture_01)
-        {
-          const uint32_t texture_count = self->texture_ids.size();
-
-          if(texture_count > texture_01)
+          const float colorf[4]
           {
-            const uint32_t texture_id = self->texture_ids[texture_01];
-            rov_setTexture(texture_id, 0);
-          }
-          else
+            lib::color::get_channel_1f(mat.color),
+            lib::color::get_channel_2f(mat.color),
+            lib::color::get_channel_3f(mat.color),
+            lib::color::get_channel_4f(mat.color),
+          };
+
+          rov_setColor(colorf);
+
+          const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
+          rov_setMesh(mesh_id);
+
+          const uint32_t texture_01 = mats[render.material_id].texture_01;
+
+          if(texture_01)
           {
-            LOG_WARNING_ONCE("Failed to find texture");
+            const uint32_t texture_count = self->texture_ids.size();
+
+            if(texture_count > texture_01)
+            {
+              const uint32_t texture_id = self->texture_ids[texture_01];
+              rov_setTexture(texture_id, 0);
+            }
+            else
+            {
+              LOG_WARNING_ONCE("Failed to find texture");
+            }
           }
+
+          rov_submitMeshTransform(render.world_mat);
         }
-
-        rov_submitMeshTransform(render.world_mat);
       }
-    }
 
-    // debug_lines
-    #ifndef NDEBUGLINES
-    {
-      Nil::Data::Developer line_data{};
-      
-      if(Nil::Data::has(self->debug_lines, line_data))
+      // debug_lines
+      #ifndef NDEBUGLINES
       {
-        Nil::Data::get(self->debug_lines, line_data);
-
-        const float *data = (float*)line_data.aux_01;
-        size_t count = (size_t)line_data.aux_02;
-
-        if (self->debug_lines && self->show_debug_lines)
+        Nil::Data::Developer line_data{};
+      
+        if(Nil::Data::has(self->debug_lines, line_data))
         {
-          LIB_ASSERT(count % 9 == 0);
+          Nil::Data::get(self->debug_lines, line_data);
 
-          const size_t lines = count / 9;
+          const float *data = (float*)line_data.aux_01;
+          size_t count = (size_t)line_data.aux_02;
 
-          for(size_t i = 0; i < lines; ++i)
+          if (self->debug_lines && self->show_debug_lines)
           {
-            const size_t index = i * 9;
+            LIB_ASSERT(count % 9 == 0);
 
-            rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
-            rov_submitLine(&data[index + 0], &data[index + 3]);
+            const size_t lines = count / 9;
+
+            for(size_t i = 0; i < lines; ++i)
+            {
+              const size_t index = i * 9;
+
+              rov_setColor(data[index + 6], data[index + 7], data[index + 8], 1.f);
+              rov_submitLine(&data[index + 0], &data[index + 3]);
+            }
           }
+
+          // Signal to line renderer not reset the data buffer.
+          line_data.aux_02 = 0;
+          Nil::Data::set(self->debug_lines, line_data);
         }
-
-        // Signal to line renderer not reset the data buffer.
-        line_data.aux_02 = 0;
-        Nil::Data::set(self->debug_lines, line_data);
       }
-    }
     
-    // Lookat boxes
-    if(self->show_lookat_bounding_box)
-    {
-      size_t count = self->selected_bbs.size();
-      Nil::Data::Bounding_box *data = self->selected_bbs.data();
+      // Lookat boxes
+      if(self->show_lookat_bounding_box)
+      {
+        size_t count = self->selected_bbs.size();
+        Nil::Data::Bounding_box *data = self->selected_bbs.data();
       
-      rov_setColor(1, 0, 1, 1);
+        rov_setColor(1, 0, 1, 1);
       
-      Nil_ext::rov_render_bounding_box(data, count);
-    }
+        Nil_ext::rov_render_bounding_box(data, count);
+      }
 
-    // Bounding boxes
-    if(self->show_debug_bounding_boxes)
-    {
-      size_t count = 0;
-      Nil::Data::Bounding_box *data = nullptr;
-      Nil::Data::get(&count, &data, true);
+      // Bounding boxes
+      if(self->show_debug_bounding_boxes)
+      {
+        size_t count = 0;
+        Nil::Data::Bounding_box *data = nullptr;
+        Nil::Data::get(&count, &data, true);
 
-      rov_setColor(0, 1, 0, 1);
+        rov_setColor(0, 1, 0, 1);
       
-      Nil_ext::rov_render_bounding_box(data, count);
-    }
+        Nil_ext::rov_render_bounding_box(data, count);
+      }
     
-    // Look at marker
-    if(self->show_lookat_cross)
-    {
-      Nil_ext::rov_render_camera_cross(cam, self->current_viewport);
+      // Look at marker
+      if(self->show_lookat_cross)
+      {
+        Nil_ext::rov_render_camera_cross(cam, self->current_viewport);
+      }
     }
     #endif
   }

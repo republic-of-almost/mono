@@ -10,17 +10,12 @@
 namespace ROV_Internal {
 
 
-struct Camera
-{
-  rovMat4 view;
-  rovMat4 proj;
-};
-
 struct rovMaterial
 {
   uint64_t material;
   size_t draw_calls;
 };
+
 
 struct rovDrawCall
 {
@@ -28,12 +23,14 @@ struct rovDrawCall
   rovMat4 world;
 };
 
+
 struct rovLineDrawCall
 {
   rovVec3 start;
   rovVec3 end;
   rovVec3 color;
 };
+
 
 struct rovRenderPass
 {
@@ -46,6 +43,8 @@ struct rovRenderPass
   uint32_t clear_flags;
   uint32_t clear_color;
 
+  uint32_t render_target;
+
   lib::array<rovMaterial> materials;
   lib::array<rovDrawCall> draw_calls;
   
@@ -55,6 +54,7 @@ struct rovRenderPass
 
 constexpr uint32_t rov_max_textures = 3;
 
+
 struct rovData
 {
   rovVec4     curr_rov_clear_color;
@@ -62,8 +62,8 @@ struct rovData
   uint8_t     curr_rov_textures[rov_max_textures]{0};
   uint32_t    curr_rov_mesh = curr_rov_mesh;
   uint8_t     curr_rov_mesh_shader = rovShader_Fullbright;
+  uint32_t    curr_rov_framebuffer;
 
-  lib::array<ROV_Internal::Camera>  rov_cameras;
   std::vector<ROV_Internal::rovRenderPass> rov_render_passes;
 };
 

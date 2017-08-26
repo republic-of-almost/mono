@@ -8,6 +8,9 @@
 #include <nil/data/bounding_box.hpp>
 #include <lib/array.hpp>
 
+#ifndef NVRSUPPORT
+#include <openvr.h>
+#endif
 
 namespace Nil_ext {
 namespace ROV_Aspect {
@@ -49,6 +52,12 @@ struct Data
   Nil::Node debug_lines{ nullptr };
   lib::array<Nil::Data::Bounding_box> selected_bbs;
   #endif
+
+  // VR Stuff
+  #ifndef NVRSUPPORT
+  vr::IVRSystem *vr_device = nullptr;
+  uint32_t eye_render_targets[2]; // 0 left - 1 right
+  #endif
 };
 
 
@@ -69,6 +78,15 @@ shut_down(Nil::Engine &engine, Nil::Aspect &aspect);
 
 // ------------------------------------------------------- [ Renderer Tasks ] --
 
+
+void
+initialize_rov(Nil::Engine &engine, uintptr_t user_data);
+
+
+#ifndef NVRSUPPORT
+void
+load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data);
+#endif
 
 void
 load_gpu_resources(Nil::Engine &engine, uintptr_t user_data);

@@ -61,6 +61,17 @@ bool        ogl_updateLights(
 void        ogl_destroyLights(rovGLData *gl_data);
 
 
+// ------------------------------------------------------------- [ Lighting ] --
+
+
+uint32_t    ogl_createFramebuffer(
+              rovGLData *gl_data,
+              uint32_t width,
+              uint32_t height,
+              uint32_t format,
+              uintptr_t *out_platform_resource);
+
+
 // ------------------------------------------------------------- [ Programs ] --
 
 

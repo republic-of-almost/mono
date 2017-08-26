@@ -126,7 +126,7 @@ load_assets()
           memcpy(c_name, file.path, _tinydir_strlen(file.path));
           #endif
         
-          lib::model m = lib::model_import::load_obj_from_file(file.path);
+          lib::model m = lib::model_import::load_obj_from_file(c_name);
           
           for(size_t i = 0; i < m.mesh_count; ++i)
           {

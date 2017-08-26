@@ -18,8 +18,9 @@ TEST_CASE("Resource - Mesh")
   SECTION("Load Pass")
   {
     Nil::Resource::Mesh mesh{};
+    mesh.name = "mesh_to_pass";
     
-    const bool loaded = Nil::Resource::load("mesh_to_pass", mesh);
+    const bool loaded = Nil::Resource::load(mesh);
     
     REQUIRE(loaded == true);
     REQUIRE(Nil::Resource::mesh_count() == 1);
@@ -28,9 +29,10 @@ TEST_CASE("Resource - Mesh")
   SECTION("Load Fail")
   {
     Nil::Resource::Mesh mesh{};
+    mesh.name = "mesh_to_fail";
     
-    const bool should_pass = Nil::Resource::load("mesh_to_fail", mesh);
-    const bool should_fail = Nil::Resource::load("mesh_to_fail", mesh);
+    const bool should_pass = Nil::Resource::load(mesh);
+    const bool should_fail = Nil::Resource::load(mesh);
     
     REQUIRE(should_pass == true);
     REQUIRE(should_fail == false);

@@ -260,6 +260,74 @@ ogl_destroyLights(rovGLData *gl_data)
 }
 
 
+// ------------------------------------------------------------- [ Lighting ] --
+
+
+uint32_t
+ogl_createFramebuffer(
+  rovGLData *gl_data,
+  uint32_t width,
+  uint32_t height,
+  uint32_t format,
+  uintptr_t *out_platform_resource)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+
+  GLuint fbo;
+
+  glGenFramebuffers(1, &fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+  GLuint depth;
+  
+  glGenRenderbuffers(1, &depth);
+  glBindRenderbuffer(GL_RENDERBUFFER, depth);
+  glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, width, height);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+
+  GLuint tex;
+
+  glGenTextures(1, &tex);
+  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+  glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, true);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, fbo, 0);
+
+  GLuint resolve_fbo;
+
+  glGenFramebuffers(1, &resolve_fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, resolve_fbo);
+
+  glGenTextures(1, &resolve_fbo);
+  glBindTexture(GL_TEXTURE_2D, resolve_fbo);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, resolve_fbo, 0);
+
+  // check FBO status
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (status != GL_FRAMEBUFFER_COMPLETE)
+  {
+    LOG_ERROR("Failed to create FBO");
+    return 0;
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  rovGLFramebuffer rov_fbo { fbo, depth, tex, resolve_fbo };
+  gl_data->rov_frame_buffers.emplace_back(rov_fbo);
+
+  if (out_platform_resource)
+  {
+    *out_platform_resource = resolve_fbo;
+  }
+
+  return gl_data->rov_frame_buffers.size();
+}
+
+
 // ------------------------------------------------------------- [ Programs ] --
 
 

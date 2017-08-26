@@ -14,7 +14,6 @@
 #include <tinydir/tinydir.h>
 #include <lib/directory.hpp>
 
-
 int
 main()
 {
@@ -35,11 +34,20 @@ main()
 //  nau_gl3_init();
   
   /*
+    Some ticks to make sure GL is init.
+  */
+
+  // Loading the SteamVR Runtime
+
+
+  int i = 0;
+  /*
     Run Game
   */
   app.run([](uintptr_t user_data)
     // Nau Test
     {
+
 //      nau_new_frame();
 //      static float flt = 1.f;
 //

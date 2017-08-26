@@ -35,7 +35,11 @@ table.insert(
     },
 
     defines = {
+      
+      -- See build.md for build flags doc
+
       "ROV_GL4",
+      "ROV_GL4_VR_PROTO",
     },
 
     project_dependencies = {

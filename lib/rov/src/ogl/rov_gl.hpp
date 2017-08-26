@@ -27,6 +27,15 @@ namespace ROV_Internal {
 constexpr uint32_t rov_max_texture_maps = 3;
 
 
+struct rovGLFramebuffer
+{
+  GLuint fbo;
+  GLuint depth;
+  GLuint tex;
+  GLuint resolve_fbo;
+};
+
+
 struct rovGLTexture
 {
   GLuint gl_id;
@@ -90,10 +99,11 @@ struct rovGLData
   GLuint vao;
 
   lib::array<rovGLTexture>      rov_textures;
-  lib::array<rovGLMesh, 128>         rov_meshes;
+  lib::array<rovGLMesh>         rov_meshes;
   lib::array<rovGLLightPack>    light_buffers;
   lib::array<rovGLMeshProgram>  rov_mesh_programs;
   lib::array<rovGLLineProgram>  rov_line_programs;
+  lib::array<rovGLFramebuffer>  rov_frame_buffers;
 };
 
 

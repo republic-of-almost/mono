@@ -118,6 +118,24 @@ rov_updateLights(
 }
 
 
+bool
+rov_createRenderTarget(
+  uint32_t width,
+  uint32_t height,
+  uint32_t format,
+  uintptr_t *out_platform_resource
+)
+{
+  return ROV_Internal::ogl_createFramebuffer(
+    &get_rov_data().gl_data,
+    width,
+    height, 
+    format,
+    out_platform_resource
+  );
+}
+
+
 // ----------------------------------------------------------- [ Renderpass ] --
 
 
@@ -128,7 +146,8 @@ rov_startRenderPass(
   const rovVec3 eye_pos,
   const rovViewport viewport,
   uint32_t clear_flags,
-  uint32_t light_buffer)
+  uint32_t light_buffer,
+  uint32_t render_target)
 {
   get_rov_data().rov_data.rov_render_passes.emplace_back();
   ROV_Internal::rovRenderPass *rp = &get_rov_data().rov_data.rov_render_passes.back();
@@ -148,6 +167,13 @@ rov_startRenderPass(
 
 
 // ----------------------------------------------------- [ General Settings ] --
+
+
+void
+rov_setRenderTarget(const uint32_t render_target)
+{
+  get_rov_data().rov_data.curr_rov_framebuffer = render_target;
+}
 
 
 void
