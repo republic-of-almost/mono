@@ -118,7 +118,7 @@ rov_updateLights(
 }
 
 
-bool
+uint32_t
 rov_createRenderTarget(
   uint32_t width,
   uint32_t height,
@@ -149,10 +149,17 @@ rov_startRenderPass(
   uint32_t light_buffer,
   uint32_t render_target)
 {
-  get_rov_data().rov_data.rov_render_passes.emplace_back();
-  ROV_Internal::rovRenderPass *rp = &get_rov_data().rov_data.rov_render_passes.back();
+  ROV_data &data = get_rov_data();
+
+  std::vector<ROV_Internal::rovRenderPass> &rps{
+    data.rov_data.rov_render_passes
+  };
+
+  rps.emplace_back();
+  ROV_Internal::rovRenderPass *rp = &rps.back();
 
   rp->light_buffer = light_buffer;
+  rp->render_target = render_target;
 
   memcpy(rp->view, view, sizeof(rovMat4));
   memcpy(rp->proj, proj, sizeof(rovMat4));
@@ -287,7 +294,7 @@ rov_submitMeshTransform(const float world[16])
 
       rp.materials.insert(i, new_mat);
       rp.draw_calls.insert(draw_calls, dc);
-      break;;
+      break;
     }
 
     draw_calls += mat[i].draw_calls;

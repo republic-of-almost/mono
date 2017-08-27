@@ -100,6 +100,7 @@ public:
   
   
   explicit array(array &&other) noexcept
+  : array()
   {
     _move(other);
   }
@@ -405,17 +406,20 @@ private:
   
   void _move(array &other) noexcept
   {
-    if(other.size() <= capacity())
+    const size_t _other_size = other.size();
+    const size_t _this_cap = capacity();
+
+    if(_other_size <= _this_cap)
     {
       memcpy(m_stack_data, other.m_begin, sizeof(T) * other.size());
     }
     else
     {
-      m_begin = other.m_begin;
-      m_end = other.m_end;
-      
-      other.m_begin = other.m_stack_data;
-      other.m_end = other.m_begin;
+      // Hack for the moment.
+      for (auto &a : other)
+      {
+        emplace_back(a);
+      }
     }
   }
 

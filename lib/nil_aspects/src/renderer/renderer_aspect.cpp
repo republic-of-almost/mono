@@ -230,16 +230,16 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
   Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
 
-  const bool has_left_fbo = self->eye_render_targets[0] > 0;
+  const bool has_left_fbo  = self->eye_render_targets[0] > 0;
   const bool has_right_fbo = self->eye_render_targets[1] > 0;
 
   LIB_ASSERT(has_left_fbo == has_right_fbo);
 
-  if (has_left_fbo && has_right_fbo)
+  if (!has_left_fbo && !has_right_fbo)
   {
     LIB_ASSERT(self->vr_device);
 
-    uint32_t width = 0;
+    uint32_t width  = 0;
     uint32_t height = 0;
 
     self->vr_device->GetRecommendedRenderTargetSize(&width, &height);
@@ -249,10 +249,33 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
 
     if(width && height)
     {
-      uintptr_t eye_fbo[2]{};
+      struct Eye_fbo
+      {
+        uintptr_t fbo_id;
+        const char *name;
+      };
 
-      self->eye_render_targets[0] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_fbo[0]);
-      self->eye_render_targets[1] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_fbo[1]);
+      Eye_fbo eye_data[]
+      {
+        {0, "VR Left Eye"},
+        {0, "VR Right Eye"},
+      };
+
+      self->eye_render_targets[0] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_data[0].fbo_id);
+      self->eye_render_targets[1] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_data[1].fbo_id);
+
+      for(auto &e : eye_data)
+      {
+        Nil::Resource::Texture tex{};
+        tex.name              = e.name;
+        tex.width             = width;
+        tex.height            = height;
+        tex.platform_resource = e.fbo_id;
+        tex.data_type         = Nil::Resource::Texture::LOCAL;
+        tex.status            = Nil::Resource::Texture::LOADED;
+
+        Nil::Resource::load(tex);
+      }
     }
   }
 }

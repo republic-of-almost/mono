@@ -78,7 +78,7 @@ bool        rov_updateLights(
               size_t count);
 
 
-bool        rov_createRenderTarget(
+uint32_t    rov_createRenderTarget(
               uint32_t width,
               uint32_t height,
               uint32_t format,

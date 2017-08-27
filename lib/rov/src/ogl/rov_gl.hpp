@@ -33,6 +33,10 @@ struct rovGLFramebuffer
   GLuint depth;
   GLuint tex;
   GLuint resolve_fbo;
+  GLuint resolve_tex;
+
+  uint32_t width;
+  uint32_t height;
 };
 
 

@@ -110,7 +110,7 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
 
   // Light Buffer //
   {
-    rovLight light_data[] = {
+    rovLight light_data[] {
       {
         {0.f,5.f,0.f,0.f},
         {1.f, 1.f, 1.f, 1.f},

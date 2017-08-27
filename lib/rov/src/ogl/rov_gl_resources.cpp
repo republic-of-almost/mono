@@ -292,19 +292,21 @@ ogl_createFramebuffer(
   glGenTextures(1, &tex);
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
   glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, true);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, fbo, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tex, 0);
 
   GLuint resolve_fbo;
 
   glGenFramebuffers(1, &resolve_fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, resolve_fbo);
 
-  glGenTextures(1, &resolve_fbo);
-  glBindTexture(GL_TEXTURE_2D, resolve_fbo);
+  GLuint resolve_tex;
+
+  glGenTextures(1, &resolve_tex);
+  glBindTexture(GL_TEXTURE_2D, resolve_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, resolve_fbo, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, resolve_tex, 0);
 
   // check FBO status
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -316,15 +318,17 @@ ogl_createFramebuffer(
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  rovGLFramebuffer rov_fbo { fbo, depth, tex, resolve_fbo };
+  rovGLFramebuffer rov_fbo { fbo, depth, tex, resolve_fbo, resolve_tex, width, height };
   gl_data->rov_frame_buffers.emplace_back(rov_fbo);
 
   if (out_platform_resource)
   {
-    *out_platform_resource = resolve_fbo;
+    *out_platform_resource = resolve_tex;
   }
 
-  return gl_data->rov_frame_buffers.size();
+  const uint32_t id = (uint32_t)gl_data->rov_frame_buffers.size();
+
+  return id;
 }
 
 

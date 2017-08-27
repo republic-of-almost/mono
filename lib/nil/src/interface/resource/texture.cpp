@@ -169,10 +169,13 @@ load(Texture &in_out)
 
       // Normalize other outputs //
       {
-        in_out.status = Texture::PENDING;
+        if(in_out.data_type != Texture::LOCAL)
+        {
+          in_out.status = Texture::PENDING;
+          in_out.platform_resource = 0;
+        }
         cpy.status = in_out.status;
 
-        in_out.platform_resource = 0;
         cpy.platform_resource = in_out.platform_resource;
       }
     }

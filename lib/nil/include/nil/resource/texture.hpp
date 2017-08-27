@@ -23,8 +23,8 @@ struct Texture
 {  
   // -- Input --//
 
-  char                      *name;      // Internally copied
-  enum { FILENAME, DATA, }  data_type;
+  const char                      *name;      // Internally copied
+  enum { FILENAME, DATA, LOCAL }  data_type;
   uintptr_t                 data;       // Internally copied
   size_t                    data_size;
   
