@@ -1,3 +1,9 @@
+// For now this will live here, it could be its own aspect like GLFW is
+#ifndef NVRSUPPORT
+#include <GL/gl3w.h>
+#include <openvr.h>
+#endif
+
 #include <aspect/renderer_aspect.hpp>
 #include <renderer/rov_extensions.hpp>
 #include <nil/nil.hpp>
@@ -12,10 +18,6 @@
 
 #ifndef NIMGUI
 #include <imgui/imgui.h>
-#endif
-
-#ifndef NVRSUPPORT
-#include <openvr.h>
 #endif
 
 
@@ -120,6 +122,17 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       (uintptr_t)self,
       think
     );
+
+    #ifndef NVRSUPPORT
+    if(self->vr_device)
+    {
+      Nil::Task::cpu_task(
+        Nil::Task::CPU::EARLY_THINK,
+        (uintptr_t)self,
+        update_vr
+      );
+    }
+    #endif
   }
   
   #ifndef NDEBUGLINES
@@ -209,11 +222,15 @@ initialize_rov(Nil::Engine &engine, uintptr_t user_data)
 
         if (!vr::VRCompositor())
         {
-          assert(false);
+          LIB_ASSERT(false);
         }
 
         // Load up VR GPU resources.
-        Nil::Task::gpu_task(Nil::Task::GPU::PRE_RENDER, (uintptr_t)self, load_gpu_vr_resources);
+        Nil::Task::gpu_task(
+          Nil::Task::GPU::PRE_RENDER,
+          (uintptr_t)self,
+          load_gpu_vr_resources
+        );
       }
       #endif
     }
@@ -276,6 +293,100 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
 
         Nil::Resource::load(tex);
       }
+    }
+  }
+}
+
+void
+update_vr(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(ROV_VRUpdate)
+
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+  LIB_ASSERT(self->vr_device);
+
+  // -- Vr Events -- //
+  {
+    vr::VREvent_t event;
+    while (self->vr_device->PollNextEvent(&event, sizeof(event)))
+    {
+      switch (event.eventType)
+      {
+      case vr::VREvent_TrackedDeviceActivated:
+      {
+        //SetupRenderModelForTrackedDevice(event.trackedDeviceIndex);
+        printf("Device %u attached. Setting up render model.\n", event.trackedDeviceIndex);
+      }
+      break;
+      case vr::VREvent_TrackedDeviceDeactivated:
+      {
+        printf("Device %u detached.\n", event.trackedDeviceIndex);
+      }
+      break;
+      case vr::VREvent_TrackedDeviceUpdated:
+      {
+        printf("Device %u updated.\n", event.trackedDeviceIndex);
+      }
+      break;
+      }
+    }
+
+    // Process SteamVR controller state
+    for (vr::TrackedDeviceIndex_t unDevice = 0; unDevice < vr::k_unMaxTrackedDeviceCount; unDevice++)
+    {
+      vr::VRControllerState_t state;
+      if (self->vr_device->GetControllerState(unDevice, &state, sizeof(state)))
+      {
+        //m_rbShowTrackedDevice[unDevice] = state.ulButtonPressed == 0;
+      }
+    }
+  }
+
+  // -- Vr Update -- //
+  {
+    vr::VRCompositor()->WaitGetPoses(self->tracked_device_pose, vr::k_unMaxTrackedDeviceCount, NULL, 0);
+
+    self->valid_pose_count = 0;
+    self->pose_classes.clear();
+
+    for (int nDevice = 0; nDevice < vr::k_unMaxTrackedDeviceCount; ++nDevice)
+    {
+      if (self->tracked_device_pose[nDevice].bPoseIsValid)
+      {
+        self->valid_pose_count++;
+
+        auto m = self->tracked_device_pose[nDevice].mDeviceToAbsoluteTracking;
+        const float mat[]
+        {
+          m.m[0][0], m.m[1][0], m.m[2][0], 0.0,
+          m.m[0][1], m.m[1][1], m.m[2][1], 0.0,
+          m.m[0][2], m.m[1][2], m.m[2][2], 0.0,
+          m.m[0][3], m.m[1][3], m.m[2][3], 1.0f
+        };
+          
+        self->device_pose[nDevice] = math::mat4_init(mat);
+
+        if (self->device_char[nDevice] == 0)
+        {
+          switch (self->vr_device->GetTrackedDeviceClass(nDevice))
+          {
+          case vr::TrackedDeviceClass_Controller:        self->device_char[nDevice] = 'C'; break;
+          case vr::TrackedDeviceClass_HMD:               self->device_char[nDevice] = 'H'; break;
+          case vr::TrackedDeviceClass_Invalid:           self->device_char[nDevice] = 'I'; break;
+          case vr::TrackedDeviceClass_GenericTracker:    self->device_char[nDevice] = 'G'; break;
+          case vr::TrackedDeviceClass_TrackingReference: self->device_char[nDevice] = 'T'; break;
+          default:                                       self->device_char[nDevice] = '?'; break;
+          }
+        }
+        self->pose_classes.emplace_back(self->device_char[nDevice]);
+      }
+    }
+
+    if (self->tracked_device_pose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid)
+    {
+      self->vr_view = self->device_pose[vr::k_unTrackedDeviceIndex_Hmd];
+      self->vr_view = math::mat4_get_inverse(self->vr_view);
     }
   }
 }
@@ -718,6 +829,19 @@ think(Nil::Engine &engine, uintptr_t user_data)
   }
 
   rov_execute();
+
+  #ifndef NVRSUPPORT
+  if(self->vr_device)
+  {
+    vr::Texture_t leftEyeTexture = { (void*)(uintptr_t)self->eye_render_targets[0], vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+    vr::VRCompositor()->Submit(vr::Eye_Left, &leftEyeTexture);
+
+    vr::Texture_t rightEyeTexture = { (void*)(uintptr_t)self->eye_render_targets[1], vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+    vr::VRCompositor()->Submit(vr::Eye_Right, &rightEyeTexture);
+
+    glFinish();
+  }
+  #endif
 }
 
 
