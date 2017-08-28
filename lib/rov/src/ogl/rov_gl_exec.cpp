@@ -11,6 +11,12 @@
 namespace ROV_Internal {
 
 
+/*
+  OpenGL Exec
+  --
+  This function takes ROV Data and transforms it to OpenGL calls.
+  OpenGL resouces should be created by this point.
+*/
 void
 ogl_exec(
   rovGLData *rov_gl_data,
@@ -19,9 +25,11 @@ ogl_exec(
   BENCH_SCOPED_CPU(OglExec);
 
   #ifdef GL_HAS_VAO
+  // We only deal with one VAO unless we can definitivly say its worth it. //
   glBindVertexArray(rov_gl_data->vao);
   #endif
 
+  // This should move in to rasterizer settings etc in ROV Data. //
   glUseProgram(0);
   glDisable(GL_BLEND);
   glEnable(GL_CULL_FACE);
@@ -60,6 +68,8 @@ ogl_exec(
     {
       rovGLFramebuffer fb = rov_gl_data->rov_frame_buffers[rp.render_target - 1];
 
+      cl_flags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+
       glEnable(GL_MULTISAMPLE);
       glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
       glViewport(0, 0, fb.width, fb.height);
@@ -69,6 +79,7 @@ ogl_exec(
     glClear(cl_flags);
     glEnable(GL_DEPTH_TEST);
 
+    // Should this live in in ROV Data layer?
     const math::mat4 proj = math::mat4_init(rp.proj);
     const math::mat4 view = math::mat4_init(rp.view);
     const math::mat4 view_proj = math::mat4_multiply(view, proj);
@@ -106,7 +117,7 @@ ogl_exec(
 
       const uint32_t details = lib::bits::lower32(mat.material);
 
-      const uint8_t shader = rovShader_Lit;//lib::bits::first8(details);
+      const uint8_t shader     = rovShader_Lit; /* We now use the lit for everything */ //lib::bits::first8(details);
       const uint8_t texture_01 = lib::bits::second8(details);
       const uint8_t texture_02 = lib::bits::third8(details);
       const uint8_t texture_03 = lib::bits::forth8(details);
@@ -336,9 +347,14 @@ ogl_exec(
       glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.resolve_fbo);
 
-      glBlitFramebuffer(0, 0, fb.width, fb.height, 0, 0, fb.width, fb.height,
+      glBlitFramebuffer(
+        0, 0,
+        fb.width, fb.height,
+        0, 0,
+        fb.width, fb.height,
         GL_COLOR_BUFFER_BIT,
-        GL_LINEAR);
+        GL_LINEAR
+      );
 
       glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

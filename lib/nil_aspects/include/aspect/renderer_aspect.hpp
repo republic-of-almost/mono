@@ -70,7 +70,8 @@ struct Data
   */
   #ifndef NVRSUPPORT
   vr::IVRSystem *vr_device = nullptr;
-  uint32_t eye_render_targets[2]; // 0 left - 1 right
+  uint32_t eye_render_targets[2]; // 0 left - 1 right, these are rov resources.
+  uintptr_t eye_platform_ids[2]; // 0 left - 1 right, these are the graphic api resources.
 
   vr::TrackedDevicePose_t tracked_device_pose[vr::k_unMaxTrackedDeviceCount]{};
   math::mat4 device_pose[vr::k_unMaxTrackedDeviceCount]{};

@@ -47,11 +47,15 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   Nil::Data::Developer dev{};
   dev.type_id = 1;
   dev.aux_01  = (uintptr_t)ui_menu;
-  dev.aux_02 = (uintptr_t)self;
-  dev.aux_03 = (uintptr_t)ui_window;
-  dev.aux_04 = (uintptr_t)self;
+  dev.aux_02  = (uintptr_t)self;
+  dev.aux_03  = (uintptr_t)ui_window;
+  dev.aux_04  = (uintptr_t)self;
 
   Nil::Data::set(self->renderer, dev);
+  #endif
+
+  #ifndef NVRSUPPORT
+  self->vr_view = math::mat4_id();
   #endif
 }
 
@@ -162,6 +166,13 @@ shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
       unload_gpu_resources
     );
   }
+
+  #ifndef NVRSUPPORT
+  if(self->vr_device)
+  {
+    vr::VR_Shutdown();
+  }
+  #endif
 }
 
 
@@ -246,7 +257,11 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
 
   Data *self = reinterpret_cast<Data*>(user_data);
   LIB_ASSERT(self);
+  LIB_ASSERT(self->vr_device);
 
+  /*
+    Create FBOs for the players eyeballs.
+  */
   const bool has_left_fbo  = self->eye_render_targets[0] > 0;
   const bool has_right_fbo = self->eye_render_targets[1] > 0;
 
@@ -254,8 +269,6 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
 
   if (!has_left_fbo && !has_right_fbo)
   {
-    LIB_ASSERT(self->vr_device);
-
     uint32_t width  = 0;
     uint32_t height = 0;
 
@@ -278,22 +291,45 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
         {0, "VR Right Eye"},
       };
 
-      self->eye_render_targets[0] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_data[0].fbo_id);
-      self->eye_render_targets[1] = rov_createRenderTarget(width, height, rovPixel_RGBA8, &eye_data[1].fbo_id);
+      constexpr uint32_t format = rovPixel_RGBA8;
 
-      for(auto &e : eye_data)
+      self->eye_render_targets[0] = rov_createRenderTarget(width, height, format, &eye_data[0].fbo_id);
+      self->eye_render_targets[1] = rov_createRenderTarget(width, height, format, &eye_data[1].fbo_id);
+
+      self->eye_platform_ids[0] = eye_data[0].fbo_id;
+      self->eye_platform_ids[1] = eye_data[1].fbo_id;
+
+      LIB_ASSERT(self->eye_render_targets[0]);
+      LIB_ASSERT(self->eye_render_targets[1]);
+
+      if(self->eye_render_targets[0] && self->eye_render_targets)
       {
-        Nil::Resource::Texture tex{};
-        tex.name              = e.name;
-        tex.width             = width;
-        tex.height            = height;
-        tex.platform_resource = e.fbo_id;
-        tex.data_type         = Nil::Resource::Texture::LOCAL;
-        tex.status            = Nil::Resource::Texture::LOADED;
+        for(auto &e : eye_data)
+        {
+          Nil::Resource::Texture tex{};
+          tex.name              = e.name;
+          tex.width             = width;
+          tex.height            = height;
+          tex.platform_resource = e.fbo_id;
+          tex.data_type         = Nil::Resource::Texture::LOCAL;
+          tex.status            = Nil::Resource::Texture::LOADED;
 
-        Nil::Resource::load(tex);
+          Nil::Resource::load(tex);
+        }
+      }
+      else
+      {
+        LOG_FATAL("VR Resources failed to instatiate");
       }
     }
+    else
+    {
+      LOG_ERROR("VR Render targets are invalid")
+    }
+  }
+  else
+  {
+    LOG_FATAL("VR Resources not setup correctly")
   }
 }
 
@@ -389,6 +425,18 @@ update_vr(Nil::Engine &engine, uintptr_t user_data)
       self->vr_view = math::mat4_get_inverse(self->vr_view);
     }
   }
+
+  //vr::HmdMatrix34_t matEyeRight = self->vr_device->GetEyeToHeadTransform(vr::Eye_Left);
+  //
+  //const float data[]{
+  //  matEyeRight.m[0][0], matEyeRight.m[1][0], matEyeRight.m[2][0], 0.0,
+  //  matEyeRight.m[0][1], matEyeRight.m[1][1], matEyeRight.m[2][1], 0.0,
+  //  matEyeRight.m[0][2], matEyeRight.m[1][2], matEyeRight.m[2][2], 0.0,
+  //  matEyeRight.m[0][3], matEyeRight.m[1][3], matEyeRight.m[2][3], 1.0f
+  //};
+
+  //self->vr_view = math::mat4_init(data);
+  //self->vr_view = math::mat4_get_inverse(self->vr_view);
 }
 #endif
 
@@ -650,6 +698,9 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
 }
 
 
+/*
+  Convert Nil Data into ROV Data
+*/
 void
 think(Nil::Engine &engine, uintptr_t user_data)
 {
@@ -674,18 +725,77 @@ think(Nil::Engine &engine, uintptr_t user_data)
     if(cam.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
     if(cam.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
 
+    const math::mat4 cam_proj = math::mat4_projection(
+      cam.width * self->current_viewport[0],
+      cam.height * self->current_viewport[1],
+      cam.near_plane,
+      cam.far_plane,
+      cam.fov
+    );
+
     // Rendertargets //
+    struct Render_target_settings
+    {
+      uint32_t render_target;
+      float view[16];
+      float proj[16];
+    };
+
     #ifndef NVRSUPPORT
-    const uint32_t targets[]{
-      0,
-      self->eye_render_targets[0],
-      self->eye_render_targets[1],
+    Render_target_settings targets[]{
+      {0, {}, {}},
+      {self->eye_render_targets[0], {}, {}},
+      {self->eye_render_targets[1], {}, {}},
      };
+
+     // Normal View
+     memcpy(targets[0].view, cam.view_mat, sizeof(Render_target_settings::view));
+     memcpy(targets[0].proj, cam_proj.data, sizeof(Render_target_settings::proj));
+
+     math::mat4 cam_view = math::mat4_init(targets[0].view);
+
+     // Left Eye
+     {
+       math::mat4 final_view = math::mat4_multiply(cam_view, self->vr_view);
+
+       memcpy(targets[1].view, final_view.data, sizeof(Render_target_settings::view));
+       const vr::HmdMatrix44_t left_proj = self->vr_device->GetProjectionMatrix(vr::Eye_Left, 0.1f, 300.f);
+
+       const float left_proj_mat[] {
+         left_proj.m[0][0], left_proj.m[1][0], left_proj.m[2][0], left_proj.m[3][0],
+         left_proj.m[0][1], left_proj.m[1][1], left_proj.m[2][1], left_proj.m[3][1],
+         left_proj.m[0][2], left_proj.m[1][2], left_proj.m[2][2], left_proj.m[3][2],
+         left_proj.m[0][3], left_proj.m[1][3], left_proj.m[2][3], left_proj.m[3][3]
+       };
+
+       memcpy(targets[1].proj, left_proj_mat, sizeof(Render_target_settings::proj));
+     }
+
+     // Right Eye
+     {
+       math::mat4 final_view = math::mat4_multiply(cam_view, self->vr_view);
+
+       memcpy(targets[2].view, final_view.data, sizeof(Render_target_settings::view));
+       const vr::HmdMatrix44_t right_proj = self->vr_device->GetProjectionMatrix(vr::Eye_Right, 0.1f, 300.f);
+
+       const float right_proj_mat[]{
+         right_proj.m[0][0], right_proj.m[1][0], right_proj.m[2][0], right_proj.m[3][0],
+         right_proj.m[0][1], right_proj.m[1][1], right_proj.m[2][1], right_proj.m[3][1],
+         right_proj.m[0][2], right_proj.m[1][2], right_proj.m[2][2], right_proj.m[3][2],
+         right_proj.m[0][3], right_proj.m[1][3], right_proj.m[2][3], right_proj.m[3][3]
+       };
+     
+       memcpy(targets[2].proj, right_proj_mat, sizeof(Render_target_settings::proj));
+     }
+
     #else
-    const uint32_t targets[] {0};
+    const Render_target_settings targets[] {
+      {0, {}},
+    };
+    LIB_ASSERT(false); // Need to update this to reflect new functionality.
     #endif
 
-    for(const uint32_t rt_id : targets)
+    for(const Render_target_settings &rt : targets)
     {
       const uint32_t viewport[4] {
         0,
@@ -694,24 +804,16 @@ think(Nil::Engine &engine, uintptr_t user_data)
         self->current_viewport[1]
       };
 
-      const math::mat4 proj = math::mat4_projection(
-        cam.width * self->current_viewport[0],
-        cam.height * self->current_viewport[1],
-        cam.near_plane,
-        cam.far_plane,
-        cam.fov
-      );
-
       rov_setColor(cam.clear_color);
 
       rov_startRenderPass(
-        cam.view_mat,
-        math::mat4_get_data(proj),
+        rt.view,
+        rt.proj,
         cam.position,
         viewport,
         clear_flags,
         self->light_pack,
-        rt_id
+        rt.render_target
       );
 
       size_t renderable_count = 0;
@@ -828,20 +930,38 @@ think(Nil::Engine &engine, uintptr_t user_data)
     #endif
   }
 
+  // Get ROV To Render
+  // Move this to a GPU Task called render.
   rov_execute();
 
   #ifndef NVRSUPPORT
-  if(self->vr_device)
+  /*
+    Need to pass the FBO's to the VR headset.
+  */
+  if (self->vr_device)
   {
-    vr::Texture_t leftEyeTexture = { (void*)(uintptr_t)self->eye_render_targets[0], vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
-    vr::VRCompositor()->Submit(vr::Eye_Left, &leftEyeTexture);
+    // left
+    vr::Texture_t left_eye{
+      (void*)(uintptr_t)self->eye_platform_ids[0],
+      vr::TextureType_OpenGL,
+      vr::ColorSpace_Gamma
+    };
 
-    vr::Texture_t rightEyeTexture = { (void*)(uintptr_t)self->eye_render_targets[1], vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
-    vr::VRCompositor()->Submit(vr::Eye_Right, &rightEyeTexture);
+    vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye);
 
-    glFinish();
+    // right
+    vr::Texture_t right_eye{
+      (void*)(uintptr_t)self->eye_platform_ids[1],
+      vr::TextureType_OpenGL,
+      vr::ColorSpace_Gamma
+    };
+
+    vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye);
   }
-  #endif
+
+  glFlush();
+  glFinish();
+  #endif 
 }
 
 
