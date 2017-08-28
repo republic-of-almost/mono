@@ -1,16 +1,13 @@
 #!lua
 
 --[[
-
-  Nil Project Description
-
+  Json Project Description
 ]]--
-
 
 table.insert(
   projects,
   {
-    name     = "Nil",
+    name     = "Json",
     kind     = "StaticLib",
     language = "C++",
     location = make.get_proj_root(),
@@ -21,26 +18,18 @@ table.insert(
       --
       make.add_src(make.get_proj_root() .. "../src/"),
       --
-      make.add_doc(make.get_proj_root() .. "../"),
+      make.add_doc(make.get_proj_root() .. "../include/"),
+      make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
     inc_dirs = {
+
+      -- Public Headers --
       make.get_proj_root() .. "../include/",
-      make.get_proj_root() .. "../src/", -- this will come up in dependencies paths
-    },
 
-    project_dependencies = {
+      -- Private Header --
+      make.get_proj_root() .. "../include/json",
 
-      -- First Party --
-
-      "Lib",
-      "Math",
-
-      -- Third Party --
-
-      "GLFW",
-      "TinyDIR",
-      "Json",
     },
   }
 )

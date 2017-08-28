@@ -7,6 +7,8 @@
 #include <lib/model.hpp>
 #include <lib/directory.hpp>
 #include <lib/string.hpp>
+#include <lib/array.hpp>
+#include <json/json.h>
 
 
 namespace Nil {
@@ -16,6 +18,47 @@ namespace Data {
 void
 load_assets()
 {
+  // Test GLTF //
+  /*
+    This is experimental
+  */
+  {
+    char path[2048]{};
+    strcat(path, lib::dir::exe_path());
+
+    #ifndef LIB_PLATFORM_MAC
+    strcat(path, "assets/mesh/");
+    #else
+    strcat(path, "../Resources/assets/mesh/");
+    #endif
+
+    strcat(path, "test_level.gltf");
+
+    const size_t count = lib::file::bytes(path);
+    char *buffer = (char*)malloc(count); 
+    memset(buffer, 0, sizeof(count));
+    
+
+    lib::file::get_contents(path, buffer, count);
+
+    constexpr uint32_t flags(
+      json_parse_flags_default |
+      json_parse_flags_allow_simplified_json |
+      json_parse_flags_allow_trailing_comma
+    );
+
+    json_value_s *gltf = json_parse_ex(buffer, count, flags, 0, 0, 0);
+
+    json_object_s *obj = (json_object_s*)gltf->payload;
+
+
+
+
+    
+    int foo = 0;
+  }
+
+
   // Textures //
   {
     char path[2048]{};

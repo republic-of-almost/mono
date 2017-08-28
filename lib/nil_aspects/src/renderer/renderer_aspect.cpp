@@ -1,7 +1,7 @@
 // For now this will live here, it could be its own aspect like GLFW is
 #ifndef NVRSUPPORT
 #include <GL/gl3w.h>
-#include <openvr.h>
+#include <openvr/openvr.h>
 #endif
 
 #include <aspect/renderer_aspect.hpp>
@@ -789,10 +789,15 @@ think(Nil::Engine &engine, uintptr_t user_data)
      }
 
     #else
-    const Render_target_settings targets[] {
+    Render_target_settings targets[] {
       {0, {}},
     };
-    LIB_ASSERT(false); // Need to update this to reflect new functionality.
+
+    // Normal View
+    memcpy(targets[0].view, cam.view_mat, sizeof(Render_target_settings::view));
+    memcpy(targets[0].proj, cam_proj.data, sizeof(Render_target_settings::proj));
+
+    math::mat4 cam_view = math::mat4_init(targets[0].view);
     #endif
 
     for(const Render_target_settings &rt : targets)
