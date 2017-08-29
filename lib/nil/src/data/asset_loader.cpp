@@ -50,7 +50,7 @@ load_assets()
       int32_t size;
       float min[4];
       float max[4];
-      enum {SCALAR, VEC2, VEC3, VEC4, } type;
+      enum { SCALAR, VEC2, VEC3, VEC4, } type;
       int32_t count;
     };
 
@@ -87,12 +87,28 @@ load_assets()
       float rotation[4];
     };
     
+    struct gltf_mesh
+    {
+      char name[64];
+      uint64_t primitive; // unsure about this atm.
+    };
+    
+    
+    struct gltf_scene
+    {
+      char name[64];
+      uint32_t *nodes;
+      size_t node_count;
+    };
+    
     
     lib::array<gltf_asset> assets;
     lib::array<gltf_buffer_view> buffer_views;
     lib::array<gltf_buffer> buffers;
     lib::array<gltf_accessor> accessors;
     lib::array<gltf_node> nodes;
+    lib::array<gltf_mesh> meshes;
+    lib::array<gltf_scene> scenes;
 
     // --
 
@@ -358,7 +374,7 @@ load_assets()
         {
           LIB_ASSERT(json_mesh);
         
-//          gltf_buffer_view buffer_view{};
+          gltf_mesh mesh{};
           
           const json_value_s *json_val                = json_mesh->value;
           const json_object_s *json_field_obj         = (json_object_s*)json_val->payload;
@@ -368,16 +384,27 @@ load_assets()
           {
             LIB_ASSERT(json_field_ele);
           
-            const json_string_s *acc_name = json_field_ele->name;
-            const json_value_s *acc_value = json_field_ele->value;
+            const json_string_s *json_field_name = json_field_ele->name;
+            const json_value_s *json_field_value = json_field_ele->value;
             
-            if(strcmp(acc_name->string, "buffer") == 0)
+            if(strcmp(json_field_name->string, "name") == 0)
             {
-              LIB_ASSERT(acc_value->type == json_type_number);
-              
+              LIB_ASSERT(json_field_value->type == json_type_string);
+              LOG_TODO_ONCE("Copy Mesh Name");
+            }
+            else if(strcmp(json_field_name->string, "primitives") == 0)
+            {
+              LIB_ASSERT(json_field_value->type == json_type_array);
+              LOG_TODO_ONCE("Get Primitive settings");
+            }
+            else
+            {
+              // Missing something.
+              LIB_ASSERT(false);
             }
 
             // Next Element
+            meshes.emplace_back(mesh);
             json_field_ele = json_field_ele->next;
           }
           
@@ -432,14 +459,22 @@ load_assets()
             else if(strcmp(json_field_name->string, "rotation") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
+              LOG_TODO_ONCE("Get node rot");
             }
             else if(strcmp(json_field_name->string, "translation") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
+              LOG_TODO_ONCE("Get node tran");
             }
             else if(strcmp(json_field_name->string, "scale") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
+              LOG_TODO_ONCE("Get node scale");
+            }
+            else
+            {
+              // Missing somethign
+              LIB_ASSERT(false);
             }
             
             // Next Element
@@ -474,7 +509,7 @@ load_assets()
         {
           LIB_ASSERT(json_scene);
         
-//          gltf_buffer_view buffer_view{};
+          gltf_scene scene{};
           
           const json_value_s *json_value              = json_scene->value;
           const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
@@ -485,10 +520,18 @@ load_assets()
             const json_string_s *json_field_name = json_field_ele->name;
             const json_value_s *json_field_value = json_field_ele->value;
             
-            if(strcmp(json_field_name->string, "buffer") == 0)
+            if(strcmp(json_field_name->string, "name") == 0)
             {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-              
+              LIB_ASSERT(json_field_value->type == json_type_string);
+            }
+            else if(strcmp(json_field_name->string, "nodes") == 0)
+            {
+              LIB_ASSERT(json_field_value->type == json_type_array);
+            }
+            else
+            {
+              // Missing something.
+              LIB_ASSERT(false);
             }
             
             // Next Element
@@ -496,7 +539,7 @@ load_assets()
           }
           
           // Next Field
-          //            buffer_views.emplace_back(buffer_view);
+          scenes.emplace_back(scene);
           json_scene = json_scene->next;
         }
       }
@@ -508,6 +551,8 @@ load_assets()
     const size_t asset_count = assets.size();
     const size_t buffer_view_count = buffer_views.size();
     const size_t node_size = nodes.size();
+    const size_t meshes_size = meshes.size();
+    const size_t scene_size = scenes.size();
 
 
     free(json_root);
