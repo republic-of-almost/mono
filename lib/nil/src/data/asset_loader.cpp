@@ -43,15 +43,37 @@ load_assets()
 
     // GLTF info
 
-    struct gltfBuffer
+    struct gltf_accessor
     {
-      uint32_t view;
-      uint32_t component_type;
-      uint32_t size;
-      uint32_t type;
+      int32_t buffer_view;
+      int32_t component_type;
+      int32_t size;
+      float min[4];
+      float max[4];
+      enum {SCALAR, VEC2, VEC3, VEC4, } type;
+      int32_t count;
     };
 
-    lib::array<int> buffers;
+    lib::array<gltf_accessor> accessors;
+    
+    struct gltf_asset
+    {
+      char copyright[64];
+      char generator[64];
+      char version[64];
+    };
+    
+    lib::array<gltf_asset> assets;
+    
+    struct gltf_buffer_view
+    {
+      int32_t buffer;
+      int32_t buffer_length;
+      int32_t byte_offset;
+      int32_t target;
+    };
+    
+    lib::array<gltf_buffer_view> buffer_views;
 
     // --
 
@@ -61,39 +83,327 @@ load_assets()
       json_parse_flags_allow_trailing_comma
     );
 
-    json_value_s *gltf_root = json_parse_ex(buffer, count, flags, 0, 0, 0);
-    json_object_s *gltf_root_obj = (json_object_s*)gltf_root->payload;
+    json_value_s *json_root = json_parse_ex(buffer, count, flags, 0, 0, 0);
+    json_object_s *json_root_obj = (json_object_s*)json_root->payload;
 
-    json_object_element_s *gltf_ele = gltf_root_obj->start;
+    json_object_element_s *json_gltf_element = json_root_obj->start;
 
-    json_string_s *gltf_ele_name = gltf_ele->name;
-    json_value_s *gltf_ele_value = gltf_ele->value;
-
-    json_array_s *accessors = (json_array_s*)gltf_ele_value->payload;
-    json_array_element_s *gltf_buf = accessors->start;
-
-    for(size_t i = 0; i < accessors->length; ++i)
+    json_string_s *json_element_name = json_gltf_element->name;
+    json_value_s *json_element_value = json_gltf_element->value;
+    
+    
+    while(json_gltf_element != nullptr)
     {
-       json_value_s *val = gltf_buf->value;
+      /*
+        Parse Accessors
+      */
+      if(strcmp(json_element_name->string, "accessors") == 0)
+      {
+        json_array_s *gltf_accessors = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_accessors->start;
+        
+        for(size_t i = 0; i < gltf_accessors->length; ++i)
+        {
+          gltf_accessor accessor{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "bufferView") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              json_number_s *buffer_view_val = (json_number_s*)acc_value->payload;
+              accessor.buffer_view = atoi(buffer_view_val->number);
+            }
+            
+            else if(strcmp(acc_name->string, "componentType") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+            
+              json_number_s *buffer_view_val = (json_number_s*)acc_value->payload;
+              accessor.component_type = atoi(buffer_view_val->number);
+            }
+            
+            else if(strcmp(acc_name->string, "count") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              json_number_s *buffer_view_val = (json_number_s*)acc_value->payload;
+              accessor.count = atoi(buffer_view_val->number);
+            }
+            
+            else if(strcmp(acc_name->string, "min") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_array);
+            }
+            
+            else if(strcmp(acc_name->string, "max") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_array);
+            }
+            
+            else if(strcmp(acc_name->string, "type") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_string);
+              
+              json_string_s *buffer_view_val = (json_string_s*)acc_value->payload;
+              if(strcmp(buffer_view_val->string, "SCALAR") == 0)
+              {
+                accessor.type = gltf_accessor::SCALAR;
+              }
+              else if(strcmp(buffer_view_val->string, "VEC2") == 0)
+              {
+                accessor.type = gltf_accessor::VEC2;
+              }
+              else if(strcmp(buffer_view_val->string, "VEC3") == 0)
+              {
+                accessor.type = gltf_accessor::VEC3;
+              }
+              else if(strcmp(buffer_view_val->string, "VEC4") == 0)
+              {
+                accessor.type = gltf_accessor::VEC4;
+              }
+              else
+              {
+                // Something in this implimentation is missnig from the spec.
+                LIB_ASSERT(false);
+              }
+            }
+            
+            // Next
+            acc_ele = acc_ele->next;
+          }
+          
+          accessors.emplace_back(accessor);
+          gltf_buf = gltf_buf->next;
+        }
+      } // if accessors
+      
+      /*
+        Parse Buffer Views
+      */
+      else if(strcmp(json_element_name->string, "bufferViews"))
+      {
+        json_array_s *gltf_buffer_views = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_buffer_views->start;
+        
+        for(size_t i = 0; i < gltf_buffer_views->length; ++i)
+        {
+          gltf_buffer_view buffer_view{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "buffer") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              
+            }
 
-       json_string_s *str = (json_string_s*)val->payload;
+          
+            buffer_views.emplace_back(buffer_view);
+            gltf_buf = gltf_buf->next;
+          }
+        }
+      }
+      
+      /*
+        Parse Buffers
+      */
+      else if(strcmp(json_element_name->string, "buffers"))
+      {
+        json_array_s *gltf_buffer_views = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_buffer_views->start;
+        
+        for(size_t i = 0; i < gltf_buffer_views->length; ++i)
+        {
+//          gltf_buffer_view buffer_view{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "buffer") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              
+            }
 
-       int j = 0;
-       
-       gltf_buf->next;
-    }
+          
+//            buffer_views.emplace_back(buffer_view);
+            gltf_buf = gltf_buf->next;
+          }
+        }
+      }
+      
+      /*
+        Parse Meshes
+      */
+      else if(strcmp(json_element_name->string, "meshes"))
+      {
+        json_array_s *gltf_buffer_views = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_buffer_views->start;
+        
+        for(size_t i = 0; i < gltf_buffer_views->length; ++i)
+        {
+//          gltf_buffer_view buffer_view{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "buffer") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              
+            }
 
-    json_object_s *obj2 = (json_object_s*)gltf_ele_value->payload;
+          
+//            buffer_views.emplace_back(buffer_view);
+            gltf_buf = gltf_buf->next;
+          }
+        }
+      }
+      
+      /*
+        Parse Nodes
+      */
+      else if(strcmp(json_element_name->string, "nodes"))
+      {
+        json_array_s *gltf_buffer_views = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_buffer_views->start;
+        
+        for(size_t i = 0; i < gltf_buffer_views->length; ++i)
+        {
+//          gltf_buffer_view buffer_view{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "buffer") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              
+            }
 
-    json_object_element_s *ele2 = obj2->start;
+          
+//            buffer_views.emplace_back(buffer_view);
+            gltf_buf = gltf_buf->next;
+          }
+        }
+      }
+      
+      /*
+        Parse Scene
+      */
+      else if(strcmp(json_element_name->string, "scene"))
+      {
+        json_array_s *gltf_buffer_views = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_buffer_views->start;
+        
+        for(size_t i = 0; i < gltf_buffer_views->length; ++i)
+        {
+//          gltf_buffer_view buffer_view{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "buffer") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              
+            }
 
-    json_string_s *n2 = ele2->name;
-    json_value_s *v2 = ele2->value;
+          
+//            buffer_views.emplace_back(buffer_view);
+            gltf_buf = gltf_buf->next;
+          }
+        }
+      }
+      
+      /*
+        Parse Scenes
+      */
+      else if(strcmp(json_element_name->string, "scenes"))
+      {
+        json_array_s *gltf_buffer_views = (json_array_s*)json_element_value->payload;
+        json_array_element_s *gltf_buf = gltf_buffer_views->start;
+        
+        for(size_t i = 0; i < gltf_buffer_views->length; ++i)
+        {
+//          gltf_buffer_view buffer_view{};
+          
+          json_value_s *val = gltf_buf->value;
+          json_object_s *acc_obj = (json_object_s*)val->payload;
+          json_object_element_s *acc_ele = acc_obj->start;
+          
+          while(acc_ele != nullptr)
+          {
+            json_string_s *acc_name = acc_ele->name;
+            json_value_s *acc_value = acc_ele->value;
+            
+            if(strcmp(acc_name->string, "buffer") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              
+            }
+
+          
+//            buffer_views.emplace_back(buffer_view);
+            gltf_buf = gltf_buf->next;
+          }
+        }
+      }
+      
+      
+    } // while json_element_value
+
+  
+    const size_t accessor_count = accessors.size();
 
 
-    int foo = 0;
-
-    free(gltf_root);
+    free(json_root);
   }
 
 

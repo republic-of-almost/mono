@@ -10,6 +10,7 @@ table.insert(
     name     = "Json",
     kind     = "StaticLib",
     language = "C++",
+    ignore_defaults = true,
     location = make.get_proj_root(),
 
     src_files = {
