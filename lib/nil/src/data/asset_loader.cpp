@@ -68,7 +68,7 @@ load_assets()
     struct gltf_buffer_view
     {
       int32_t buffer;
-      int32_t buffer_length;
+      int32_t byte_length;
       int32_t byte_offset;
       int32_t target;
     };
@@ -119,24 +119,24 @@ load_assets()
             {
               LIB_ASSERT(acc_value->type == json_type_number);
               
-              json_number_s *buffer_view_val = (json_number_s*)acc_value->payload;
-              accessor.buffer_view = atoi(buffer_view_val->number);
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              accessor.buffer_view = atoi(val->number);
             }
             
             else if(strcmp(acc_name->string, "componentType") == 0)
             {
               LIB_ASSERT(acc_value->type == json_type_number);
             
-              json_number_s *buffer_view_val = (json_number_s*)acc_value->payload;
-              accessor.component_type = atoi(buffer_view_val->number);
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              accessor.component_type = atoi(val->number);
             }
             
             else if(strcmp(acc_name->string, "count") == 0)
             {
               LIB_ASSERT(acc_value->type == json_type_number);
               
-              json_number_s *buffer_view_val = (json_number_s*)acc_value->payload;
-              accessor.count = atoi(buffer_view_val->number);
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              accessor.count = atoi(val->number);
             }
             
             else if(strcmp(acc_name->string, "min") == 0)
@@ -153,28 +153,33 @@ load_assets()
             {
               LIB_ASSERT(acc_value->type == json_type_string);
               
-              json_string_s *buffer_view_val = (json_string_s*)acc_value->payload;
-              if(strcmp(buffer_view_val->string, "SCALAR") == 0)
+              json_string_s *val = (json_string_s*)acc_value->payload;
+              if(strcmp(val->string, "SCALAR") == 0)
               {
                 accessor.type = gltf_accessor::SCALAR;
               }
-              else if(strcmp(buffer_view_val->string, "VEC2") == 0)
+              else if(strcmp(val->string, "VEC2") == 0)
               {
                 accessor.type = gltf_accessor::VEC2;
               }
-              else if(strcmp(buffer_view_val->string, "VEC3") == 0)
+              else if(strcmp(val->string, "VEC3") == 0)
               {
                 accessor.type = gltf_accessor::VEC3;
               }
-              else if(strcmp(buffer_view_val->string, "VEC4") == 0)
+              else if(strcmp(val->string, "VEC4") == 0)
               {
                 accessor.type = gltf_accessor::VEC4;
               }
               else
               {
-                // Something in this implimentation is missnig from the spec.
+                // Missing something in this impl.
                 LIB_ASSERT(false);
               }
+            }
+            else
+            {
+              // Missing something in this impl.
+              LIB_ASSERT(false);
             }
             
             // Next
@@ -211,10 +216,36 @@ load_assets()
             {
               LIB_ASSERT(acc_value->type == json_type_number);
               
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              buffer_view.buffer = atoi(val->number);
+            }
+            else if(strcmp(acc_name->string, "byteLength") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
               
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              buffer_view.byte_length = atoi(val->number);
+            }
+            else if(strcmp(acc_name->string, "byteOffset") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              buffer_view.byte_offset = atoi(val->number);
+            }
+            else if(strcmp(acc_name->string, "target") == 0)
+            {
+              LIB_ASSERT(acc_value->type == json_type_number);
+              
+              json_number_s *val = (json_number_s*)acc_value->payload;
+              buffer_view.target = atoi(val->number);
+            }
+            else
+            {
+              // Missing something in this impl.
+              LIB_ASSERT(false);
             }
 
-          
             buffer_views.emplace_back(buffer_view);
             gltf_buf = gltf_buf->next;
           }
