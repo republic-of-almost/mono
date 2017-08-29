@@ -41,21 +41,59 @@ load_assets()
 
     lib::file::get_contents(path, buffer, count);
 
+    // GLTF info
+
+    struct gltfBuffer
+    {
+      uint32_t view;
+      uint32_t component_type;
+      uint32_t size;
+      uint32_t type;
+    };
+
+    lib::array<int> buffers;
+
+    // --
+
     constexpr uint32_t flags(
       json_parse_flags_default |
       json_parse_flags_allow_simplified_json |
       json_parse_flags_allow_trailing_comma
     );
 
-    json_value_s *gltf = json_parse_ex(buffer, count, flags, 0, 0, 0);
+    json_value_s *gltf_root = json_parse_ex(buffer, count, flags, 0, 0, 0);
+    json_object_s *gltf_root_obj = (json_object_s*)gltf_root->payload;
 
-    json_object_s *obj = (json_object_s*)gltf->payload;
+    json_object_element_s *gltf_ele = gltf_root_obj->start;
+
+    json_string_s *gltf_ele_name = gltf_ele->name;
+    json_value_s *gltf_ele_value = gltf_ele->value;
+
+    json_array_s *accessors = (json_array_s*)gltf_ele_value->payload;
+    json_array_element_s *gltf_buf = accessors->start;
+
+    for(size_t i = 0; i < accessors->length; ++i)
+    {
+       json_value_s *val = gltf_buf->value;
+
+       json_string_s *str = (json_string_s*)val->payload;
+
+       int j = 0;
+       
+       gltf_buf->next;
+    }
+
+    json_object_s *obj2 = (json_object_s*)gltf_ele_value->payload;
+
+    json_object_element_s *ele2 = obj2->start;
+
+    json_string_s *n2 = ele2->name;
+    json_value_s *v2 = ele2->value;
 
 
-
-
-    
     int foo = 0;
+
+    free(gltf_root);
   }
 
 
