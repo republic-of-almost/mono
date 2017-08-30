@@ -133,6 +133,7 @@ ogl_destroy(rovGLData *gl_data)
   ogl_destroyLights(gl_data);
   ogl_destroyTextures(gl_data);
   ogl_destroyMeshes(gl_data);
+  ogl_destroyIndexes(gl_data);
   ogl_destroyPrograms(gl_data);
 
   LOG_TODO("Remove Framebuffers");

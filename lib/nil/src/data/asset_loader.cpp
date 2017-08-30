@@ -247,8 +247,8 @@ load_assets()
               mesh.texture_coords_vec2 = m.uvs[i];
               mesh.triangle_count      = m.triangle_count[i];
 
-              const bool loaded = Nil::Resource::load(mesh);
-              LIB_ASSERT(loaded);
+//              const bool loaded = Nil::Resource::load(mesh);
+//              LIB_ASSERT(loaded);
             }
           }
         }
@@ -699,9 +699,84 @@ load_assets()
               {
                 LIB_ASSERT(json_prim_ele);
                 
-                const json_value_s *json_prim = json_prim_ele->value;
-                const json_object_s *json_prim_obj = (json_object_s*)json_prim->payload;
+                const json_value_s *json_prim_val  = json_prim_ele->value;
+                const json_object_s *json_prim_obj = (json_object_s*)json_prim_val->payload;
+                const json_object_element_s *json_prim = json_prim_obj->start;
                 
+                while(json_prim != nullptr)
+                {
+                  LIB_ASSERT(json_prim);
+                
+                  const json_string_s *json_prim_name = json_prim->name;
+                  const json_value_s *json_prim_value = json_prim->value;
+
+                  if(strcmp(json_prim_name->string, "attributes") == 0)
+                  {
+                    LIB_ASSERT(json_prim_value->type == json_type_object);
+                    
+                    const json_object_s *attr_obj = (json_object_s*)json_prim_value->payload;
+                    const json_object_element_s *attr_ele = attr_obj->start;
+                    
+                    while(attr_ele != nullptr)
+                    {
+                      const json_value_s *attr_val = attr_ele->value;
+                      const json_string_s *attr_name = attr_ele->name;
+                      
+                      if(strcmp(attr_name->string, "POSITION") == 0)
+                      {
+                        LIB_ASSERT(attr_val->type == json_type_number);
+                        
+                        const json_number_s *val = (json_number_s*)attr_val->payload;
+                        mesh.primitives.attr_position = atoi(val->number);
+                      }
+                      else if(strcmp(attr_name->string, "NORMAL") == 0)
+                      {
+                        LIB_ASSERT(attr_val->type == json_type_number);
+                      
+                        const json_number_s *val = (json_number_s*)attr_val->payload;
+                        mesh.primitives.attr_normal = atoi(val->number);
+                      }
+                      else if(strcmp(attr_name->string, "TANGENT") == 0)
+                      {
+                        LIB_ASSERT(attr_val->type == json_type_number);
+                        
+                        const json_number_s *val = (json_number_s*)attr_val->payload;
+                        mesh.primitives.attr_tangent = atoi(val->number);
+                      }
+                      else if(strcmp(attr_name->string, "TEXCOORD_0") == 0)
+                      {
+                        LIB_ASSERT(attr_val->type == json_type_number);
+                        
+                        const json_number_s *val = (json_number_s*)attr_val->payload;
+                        mesh.primitives.attr_texcoord_0 = atoi(val->number);
+                      }
+                      
+                      attr_ele = attr_ele->next;
+                    }
+                  }
+                  else if(strcmp(json_prim_name->string, "indices") == 0)
+                  {
+                    LIB_ASSERT(json_prim_value->type == json_type_number);
+                    
+                    const json_number_s *val = (json_number_s*)json_prim_value->payload;
+                    mesh.primitives.indices = atoi(val->number);
+
+                  }
+                  else if(strcmp(json_prim_name->string, "material") == 0)
+                  {
+                    LIB_ASSERT(json_prim_value->type == json_type_number);
+                    
+                    const json_number_s *val = (json_number_s*)json_prim_value->payload;
+                    mesh.primitives.material = atoi(val->number);
+                  }
+                  else
+                  {
+                    // Missing something.
+                    LIB_ASSERT(false);
+                  }
+                  
+                  json_prim = json_prim->next;
+                }
               
                 json_prim_ele = json_prim_ele->next;
               }
@@ -713,12 +788,11 @@ load_assets()
             }
 
             // Next Element
-            meshes.emplace_back(mesh);
             json_field_ele = json_field_ele->next;
           }
           
           // Next Field
-          //            buffer_views.emplace_back(buffer_view);
+          meshes.emplace_back(mesh);
           json_mesh = json_mesh->next;
         }
       }
@@ -989,16 +1063,40 @@ load_assets()
       {
         data.name = mesh.name;
         
-        data.position_vec3 = (float*)&buffers[buffer_views[mesh.primitives.attr_position].buffer].buffer[buffer_views[mesh.primitives.attr_position].byte_offset];
+        // Position
+        {
+          const size_t buffer = buffer_views[mesh.primitives.attr_position].buffer;
+          const size_t offset = buffer_views[mesh.primitives.attr_position].byte_offset;
+          
+          data.position_vec3 = (float*)&buffers[buffer].buffer[offset];
+        }
         
-        data.normal_vec3 = (float*)&buffers[buffer_views[mesh.primitives.attr_normal].buffer].buffer[buffer_views[mesh.primitives.attr_normal].byte_offset];
+        // Normal
+        {
+          const size_t buffer = buffer_views[mesh.primitives.attr_normal].buffer;
+          const size_t offset = buffer_views[mesh.primitives.attr_normal].byte_offset;
+          
+          data.normal_vec3 = (float*)&buffers[buffer].buffer[offset];
+        }
         
-        data.texture_coords_vec2 = (float*)&buffers[buffer_views[mesh.primitives.attr_texcoord_0].buffer].buffer[buffer_views[mesh.primitives.attr_texcoord_0].byte_offset];
+        // Texture Coords
+        {
+          const size_t buffer = buffer_views[mesh.primitives.attr_texcoord_0].buffer;
+          const size_t offset = buffer_views[mesh.primitives.attr_texcoord_0].byte_offset;
         
-        data.index = (uint32_t*)&buffers[buffer_views[mesh.primitives.indices].buffer].buffer[buffer_views[mesh.primitives.indices].byte_offset];
-        data.index_count = accessors[mesh.primitives.indices].count;
+          data.texture_coords_vec2 = (float*)&buffers[buffer].buffer[offset];
+        }
         
-        data.triangle_count = data.index_count / 3;
+        // Index
+        {
+          const size_t buffer = buffer_views[mesh.primitives.indices].buffer;
+          const size_t offset = buffer_views[mesh.primitives.indices].byte_offset;
+          
+          data.index = (uint32_t*)&buffers[buffer].buffer[offset];
+          data.index_count = accessors[mesh.primitives.indices].count;
+        }
+        
+        data.triangle_count = accessors[mesh.primitives.attr_position].count;
         
         Nil::Resource::load(data);
       }

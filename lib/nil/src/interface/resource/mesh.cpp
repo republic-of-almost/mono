@@ -176,6 +176,7 @@ load(Mesh &in_out)
       float *norm_data  = nullptr;
       float *texc_data  = nullptr;
       float *color_data = nullptr;
+      uint32_t *index_data = nullptr;
 
       if(!failed)
       {
@@ -242,6 +243,22 @@ load(Mesh &in_out)
             failed = true;
           }
         }
+        
+        if (in_out.index && !failed)
+        {
+          const size_t data_size = sizeof(uint32_t) * in_out.index_count;
+          index_data = (uint32_t*)malloc(data_size);
+          
+          if (index_data)
+          {
+            memset(index_data, 0, data_size);
+            memcpy(index_data, in_out.index, data_size);
+          }
+          else
+          {
+            failed = true;
+          }
+        }
       }
 
       // If not failed add the new data, else delete and return.
@@ -252,6 +269,7 @@ load(Mesh &in_out)
         cpy.normal_vec3         = norm_data;
         cpy.color_vec4          = color_data;
         cpy.texture_coords_vec2 = texc_data;
+        cpy.index               = index_data;
       }
       else
       {
@@ -260,6 +278,7 @@ load(Mesh &in_out)
         if(norm_data)   { free(norm_data);  }
         if(color_data)  { free(color_data); }
         if(texc_data)   { free(texc_data);  }
+        if(index_data)  { free(index_data); }
 
         char msg[2048]{};
         sprintf(msg, "Failed to add Mesh %s", in_out.name);

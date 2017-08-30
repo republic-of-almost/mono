@@ -114,6 +114,7 @@ void        rov_setColor(uint32_t color);
 
 void        rov_setTexture(uint32_t texture_id, uint32_t texture_slot);
 void        rov_setMesh(uint32_t mesh_id);
+void        rov_setIndex(uint32_t index_id);
 void        rov_setShader(uint32_t shader_id);
 
 

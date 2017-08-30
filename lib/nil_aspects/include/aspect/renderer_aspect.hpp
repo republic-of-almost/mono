@@ -32,6 +32,7 @@ struct Data
 
   // ROV Resource IDS //
   lib::array<uint32_t, 128> mesh_ids{};
+  lib::array<uint32_t, 128> index_ids{};
   lib::array<uint32_t, 128> texture_ids{};
   uint32_t light_pack{0};
   

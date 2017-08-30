@@ -56,6 +56,13 @@ struct rovGLMesh
 };
 
 
+struct rovGLIndex
+{
+  GLuint gl_id;
+  size_t count;
+};
+
+
 struct rovGLMeshProgram
 {
   GLuint program;
@@ -104,6 +111,7 @@ struct rovGLData
 
   lib::array<rovGLTexture>      rov_textures;
   lib::array<rovGLMesh>         rov_meshes;
+  lib::array<rovGLIndex>        rov_indexes;
   lib::array<rovGLLightPack>    light_buffers;
   lib::array<rovGLMeshProgram>  rov_mesh_programs;
   lib::array<rovGLLineProgram>  rov_line_programs;

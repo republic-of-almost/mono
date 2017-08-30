@@ -191,23 +191,33 @@ ogl_exec(
       */
       for(uint32_t i = 0; i < mat.draw_calls; ++i)
       {
-        auto &dc = rp.draw_calls[dc_index++];
+        const rovDrawCall &dc = rp.draw_calls[dc_index++];
 
-        rovGLMesh vbo;
+        rovGLMesh vbo{};
         
         if(dc.mesh > 0 && dc.mesh < rov_gl_data->rov_meshes.size())
         {
           vbo = rov_gl_data->rov_meshes[dc.mesh - 1];
           glBindBuffer(GL_ARRAY_BUFFER, vbo.gl_id);
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
         else
         {
-          vbo = rovGLMesh{};
           glBindBuffer(GL_ARRAY_BUFFER, 0);
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
           
+          LOG_ERROR_ONCE("Nothing to render");
           continue;
+        }
+        
+        rovGLIndex ibo{};
+        
+        if(dc.index > 0)
+        {
+          ibo = rov_gl_data->rov_indexes[dc.index - 1];
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo.gl_id);
+        }
+        else
+        {
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
         
         /*
@@ -283,7 +293,14 @@ ogl_exec(
         /*
           Draw
         */
-        glDrawArrays(GL_TRIANGLES, 0, vbo.vertex_count);
+        if(ibo.gl_id == 0)
+        {
+          glDrawArrays(GL_TRIANGLES, 0, vbo.vertex_count);
+        }
+        else
+        {
+          glDrawElements(GL_TRIANGLES, ibo.count, GL_UNSIGNED_INT, 0);
+        }
         
         /*
           Error Check

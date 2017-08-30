@@ -561,7 +561,15 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
           mesh_resource->triangle_count,
           &mesh_resource->platform_resource
         );
-
+        
+        // Index is optional
+        uint32_t index = 0;
+        if(mesh_resource->index_count)
+        {
+          index = rov_createIndex(mesh_resource->index, mesh_resource->index_count);
+        }
+        
+        self->index_ids.emplace_back(index);
         self->mesh_ids.emplace_back(mesh);
 
         mesh_resource->status = Nil::Resource::Mesh::LOADED;
@@ -586,6 +594,7 @@ unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
   */
   self->texture_ids.clear();
   self->mesh_ids.clear();
+  self->index_ids.clear();
 }
 
 
@@ -848,6 +857,9 @@ think(Nil::Engine &engine, uintptr_t user_data)
 
           const uint32_t mesh_id = self->mesh_ids[render.mesh_id];
           rov_setMesh(mesh_id);
+          
+          const uint32_t index_id = self->index_ids[render.mesh_id];
+          rov_setIndex(index_id);
 
           const uint32_t texture_01 = mats[render.material_id].texture_01;
 

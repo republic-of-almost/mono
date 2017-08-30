@@ -159,6 +159,59 @@ ogl_destroyMeshes(rovGLData *gl_data)
 }
 
 
+// ---------------------------------------------------------------- [ Index ] --
+
+
+uint32_t
+ogl_createIndex(
+  rovGLData *gl_data,
+  const uint32_t *index,
+  const size_t count,
+  uintptr_t *out_resource_id)
+{
+  #ifndef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+  
+  GLuint ibo;
+  glGenBuffers(1, &ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+  glBufferData(
+    GL_ELEMENT_ARRAY_BUFFER,
+    sizeof(GLuint) * count,
+    index,
+    GL_STATIC_DRAW
+  );
+  
+  const rovGLIndex rov_index{ibo, count};
+  gl_data->rov_indexes.emplace_back(rov_index);
+  
+  if(out_resource_id)
+  {
+    *out_resource_id = ibo;
+  }
+  
+  return (uint32_t)gl_data->rov_indexes.size();
+}
+
+void
+ogl_destroyIndexes(rovGLData *gl_data)
+{
+  #ifdef GL_HAS_VAO
+  glBindVertexArray(gl_data->vao);
+  #endif
+
+  lib::array<GLuint, 64> ibos_to_destroy;
+
+  for (ROV_Internal::rovGLIndex index : gl_data->rov_indexes)
+  {
+    ibos_to_destroy.emplace_back(index.gl_id);
+  }
+
+  glDeleteVertexArrays(ibos_to_destroy.size(), ibos_to_destroy.data());
+}
+
+
 // ------------------------------------------------------------- [ Lighting ] --
 
 

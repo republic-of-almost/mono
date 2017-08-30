@@ -41,6 +41,18 @@ uint32_t    ogl_createMesh(
 void        ogl_destroyMeshes(rovGLData *gl_data);
 
 
+// ---------------------------------------------------------------- [ Index ] --
+
+
+uint32_t    ogl_createIndex(
+              rovGLData *gl_data,
+              const uint32_t *index,
+              const size_t count,
+              uintptr_t *out_resource_id = nullptr);
+
+void        ogl_destroyIndexes(rovGLData *gl_data);
+
+
 // ------------------------------------------------------------- [ Lighting ] --
 
 

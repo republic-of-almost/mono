@@ -72,6 +72,7 @@ rov_createTexture(
   );
 }
 
+
 uint32_t
 rov_createMesh(
   const float *pos,
@@ -89,6 +90,21 @@ rov_createMesh(
     out_platform_resource
   );
 }
+
+uint32_t
+rov_createIndex(
+  const uint32_t *index,
+  size_t index_count,
+  uintptr_t *out_platform_resource)
+{
+  return ROV_Internal::ogl_createIndex(
+    &get_rov_data().gl_data,
+    index,
+    index_count,
+    out_platform_resource
+  );
+}
+
 
 uint32_t
 rov_createLights(
@@ -228,6 +244,13 @@ rov_setMesh(uint32_t mesh_id)
 
 
 void
+rov_setIndex(uint32_t index_id)
+{
+  get_rov_data().rov_data.curr_rov_index = index_id;
+}
+
+
+void
 rov_setShader(uint32_t shader_type)
 {
   // -- Param Check -- //
@@ -262,6 +285,7 @@ rov_submitMeshTransform(const float world[16])
 {
   ROV_Internal::rovDrawCall dc;
   dc.mesh = get_rov_data().rov_data.curr_rov_mesh;
+  dc.index = get_rov_data().rov_data.curr_rov_index;
   memcpy(dc.world, world, sizeof(float) * 16);
 
   size_t draw_calls = 0;
