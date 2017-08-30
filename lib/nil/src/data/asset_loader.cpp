@@ -12,6 +12,106 @@
 #include <json/json.h>
 
 
+
+namespace {
+
+
+static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+                                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+                                'w', 'x', 'y', 'z', '0', '1', '2', '3',
+                                '4', '5', '6', '7', '8', '9', '+', '/'};
+static char *decoding_table = NULL;
+static int mod_table[] = {0, 2, 1};
+
+
+void build_decoding_table() {
+
+    decoding_table = (char*)malloc(256);
+
+    for (int i = 0; i < 64; i++)
+        decoding_table[(unsigned char) encoding_table[i]] = i;
+}
+
+
+char *base64_encode(const unsigned char *data,
+                    size_t input_length,
+                    size_t *output_length) {
+
+    *output_length = 4 * ((input_length + 2) / 3);
+
+    char *encoded_data = (char*)malloc(*output_length);
+    if (encoded_data == NULL) return NULL;
+
+    for (int i = 0, j = 0; i < input_length;) {
+
+        uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
+        uint32_t octet_b = i < input_length ? (unsigned char)data[i++] : 0;
+        uint32_t octet_c = i < input_length ? (unsigned char)data[i++] : 0;
+
+        uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
+
+        encoded_data[j++] = encoding_table[(triple >> 3 * 6) & 0x3F];
+        encoded_data[j++] = encoding_table[(triple >> 2 * 6) & 0x3F];
+        encoded_data[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
+        encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
+    }
+
+    for (int i = 0; i < mod_table[input_length % 3]; i++)
+        encoded_data[*output_length - 1 - i] = '=';
+
+    return encoded_data;
+}
+
+
+unsigned char *base64_decode(const char *data,
+                             size_t input_length,
+                             size_t *output_length) {
+
+    if (decoding_table == NULL) { build_decoding_table(); }
+
+    if (input_length % 4 != 0) return NULL;
+
+    *output_length = input_length / 4 * 3;
+    if (data[input_length - 1] == '=') (*output_length)--;
+    if (data[input_length - 2] == '=') (*output_length)--;
+
+    unsigned char *decoded_data = (unsigned char*)malloc(*output_length);
+    if (decoded_data == NULL) return NULL;
+
+    for (int i = 0, j = 0; i < input_length;) {
+
+        uint32_t sextet_a = data[i] == '=' ? 0 & i++ : decoding_table[(int)data[i++]];
+        uint32_t sextet_b = data[i] == '=' ? 0 & i++ : decoding_table[(int)data[i++]];
+        uint32_t sextet_c = data[i] == '=' ? 0 & i++ : decoding_table[(int)data[i++]];
+        uint32_t sextet_d = data[i] == '=' ? 0 & i++ : decoding_table[(int)data[i++]];
+
+        uint32_t triple = (sextet_a << 3 * 6)
+        + (sextet_b << 2 * 6)
+        + (sextet_c << 1 * 6)
+        + (sextet_d << 0 * 6);
+
+        if (j < *output_length) decoded_data[j++] = (triple >> 2 * 8) & 0xFF;
+        if (j < *output_length) decoded_data[j++] = (triple >> 1 * 8) & 0xFF;
+        if (j < *output_length) decoded_data[j++] = (triple >> 0 * 8) & 0xFF;
+    }
+
+    return decoded_data;
+}
+
+
+
+void base64_cleanup() {
+    free(decoding_table);
+}
+
+
+} // anon ns
+
+
 namespace Nil {
 namespace Data {
 
@@ -19,6 +119,148 @@ namespace Data {
 void
 load_assets()
 {
+  // Textures //
+  {
+    char path[2048]{};
+    strcat(path, lib::dir::exe_path());
+    
+    #ifndef LIB_PLATFORM_MAC
+    strcat(path, "assets/texture");
+    #else
+    strcat(path, "../Resources/assets/texture");
+    #endif
+
+    _tinydir_char_t wpath[2048]{};
+    
+    #ifdef LIB_PLATFORM_WIN
+    mbstowcs(wpath, path, 2048);
+    #else
+    memcpy(wpath, path, sizeof(path));
+    #endif
+
+    _tinydir_char_t dir_path[2048]{};
+    _tinydir_strcat(dir_path, wpath);
+
+    tinydir_dir dir;
+    tinydir_open(&dir, dir_path);
+
+    while (dir.has_next)
+    {
+      tinydir_file file;
+      tinydir_readfile(&dir, &file);
+      
+      // We only load up png's right now.
+      _tinydir_char_t *ext = TINYDIR_STRING("png");
+
+      if (!file.is_dir)
+      {
+        if(_tinydir_strcmp(ext, file.extension) == 0)
+        {
+          char c_name[2048]{};
+          
+          #ifdef LIB_PLATFORM_WIN
+          wcstombs(c_name, file.path, _tinydir_strlen(file.path));
+          #else
+          memcpy(c_name, file.path, _tinydir_strlen(file.path));
+          #endif
+        
+          char load_name[2048]{};
+          lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
+
+          Nil::Resource::Texture tex{};
+          tex.name      = load_name;
+          tex.data      = (uintptr_t)c_name;
+          tex.data_size = strlen(c_name) + 1;
+          tex.data_type = Nil::Resource::Texture::FILENAME;
+
+          Nil::Resource::load(tex);
+        }
+      }
+
+      tinydir_next(&dir);
+    }
+
+    tinydir_close(&dir);
+  }
+
+  
+  // Meshes //
+  {
+    char path[2048]{};
+    strcat(path, lib::dir::exe_path());
+    
+    #ifndef LIB_PLATFORM_MAC
+    strcat(path, "assets/texture");
+    #else
+    strcat(path, "../Resources/assets/mesh");
+    #endif
+
+    _tinydir_char_t wpath[2048]{};
+    
+    #ifdef LIB_PLATFORM_WIN
+    mbstowcs(wpath, path, 2048);
+    #else
+    memcpy(wpath, path, sizeof(path));
+    #endif
+
+    _tinydir_char_t dir_path[2048]{};
+    _tinydir_strcat(dir_path, wpath);
+
+    tinydir_dir dir;
+    tinydir_open(&dir, dir_path);
+
+    while (dir.has_next)
+    {
+      tinydir_file file;
+      tinydir_readfile(&dir, &file);
+      
+      // We only load up png's right now.
+      _tinydir_char_t *ext = TINYDIR_STRING("obj");
+
+      if (!file.is_dir)
+      {
+        if(_tinydir_strcmp(ext, file.extension) == 0)
+        {
+          char c_name[2048]{};
+          
+          #ifdef LIB_PLATFORM_WIN
+          wcstombs(c_name, file.path, _tinydir_strlen(file.path));
+          #else
+          memcpy(c_name, file.path, _tinydir_strlen(file.path));
+          #endif
+        
+          lib::model m = lib::model_import::load_obj_from_file(c_name);
+          
+          for(size_t i = 0; i < m.mesh_count; ++i)
+          {
+            char load_name[2048]{};
+            lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
+            
+            Nil::Resource::Mesh mesh{};
+            
+            if(!Nil::Resource::find_by_name(load_name, mesh))
+            {
+              mesh.name                = load_name;
+              mesh.position_vec3       = m.verts[i];
+              mesh.normal_vec3         = m.normals[i];
+              mesh.color_vec4          = nullptr;
+              mesh.texture_coords_vec2 = m.uvs[i];
+              mesh.triangle_count      = m.triangle_count[i];
+
+              const bool loaded = Nil::Resource::load(mesh);
+              LIB_ASSERT(loaded);
+            }
+          }
+        }
+      }
+
+      tinydir_next(&dir);
+    }
+
+    tinydir_close(&dir);
+  }
+  
+  
   // Test GLTF //
   /*
     This is experimental
@@ -111,14 +353,32 @@ load_assets()
       size_t node_count;
     };
     
+    struct gltf_image
+    {
+      uint8_t *uri;
+    };
     
-    lib::array<gltf_asset> assets;
-    lib::array<gltf_buffer_view> buffer_views;
-    lib::array<gltf_buffer> buffers;
-    lib::array<gltf_accessor> accessors;
-    lib::array<gltf_node> nodes;
-    lib::array<gltf_mesh> meshes;
-    lib::array<gltf_scene> scenes;
+    struct gltf_sampler
+    {
+    };
+    
+    struct gltf_texture
+    {
+      uint32_t sampler;
+      uint32_t source;
+    };
+    
+    
+    lib::array<gltf_asset>        assets;
+    lib::array<gltf_buffer_view>  buffer_views;
+    lib::array<gltf_buffer>       buffers;
+    lib::array<gltf_accessor>     accessors;
+    lib::array<gltf_node>         nodes;
+    lib::array<gltf_mesh>         meshes;
+    lib::array<gltf_scene>        scenes;
+    lib::array<gltf_image>        images;
+    lib::array<gltf_sampler>      samplers;
+    lib::array<gltf_texture>      textures;
 
     // --
 
@@ -351,7 +611,14 @@ load_assets()
               LIB_ASSERT(json_field_value->type == json_type_string);
               
               const json_string_s *val = (json_string_s*)json_field_value->payload;
-            
+              
+              const char *starts_with = "data:application/octet-stream;base64,";
+              const char *ends_width = ".bin"; // impl
+              
+              size_t length;
+              buffer.buffer = (uint8_t*)base64_decode(&val->string[strlen(starts_with)], val->string_size - strlen(starts_with), &length);
+              
+              
               LOG_TODO_ONCE("Need to get GLTF URI");
             }
             else
@@ -368,6 +635,22 @@ load_assets()
           buffers.emplace_back(buffer);
           json_buffer = json_buffer->next;
         }
+      }
+      
+      /*
+        Parse Images
+      */
+      else if(strcmp(json_element_name->string, "images") == 0)
+      {
+        LOG_TODO_ONCE("Add image parsing support");
+      }
+      
+      /*
+        Parse Textures
+      */
+      else if(strcmp(json_element_name->string, "textures") == 0)
+      {
+        LOG_TODO_ONCE("Add texture parsing support");
       }
       
       /*
@@ -695,151 +978,33 @@ load_assets()
     const size_t node_size = nodes.size();
     const size_t meshes_size = meshes.size();
     const size_t scene_size = scenes.size();
+    const size_t buffer_size = buffers.size();
 
+    // Load up Nil Resources //
+    for(auto &mesh : meshes)
+    {
+      Nil::Resource::Mesh data{};
+      
+      if(!Nil::Resource::find_by_name(mesh.name, data))
+      {
+        data.name = mesh.name;
+        
+        data.position_vec3 = (float*)&buffers[buffer_views[mesh.primitives.attr_position].buffer].buffer[buffer_views[mesh.primitives.attr_position].byte_offset];
+        
+        data.normal_vec3 = (float*)&buffers[buffer_views[mesh.primitives.attr_normal].buffer].buffer[buffer_views[mesh.primitives.attr_normal].byte_offset];
+        
+        data.texture_coords_vec2 = (float*)&buffers[buffer_views[mesh.primitives.attr_texcoord_0].buffer].buffer[buffer_views[mesh.primitives.attr_texcoord_0].byte_offset];
+        
+        data.index = (uint32_t*)&buffers[buffer_views[mesh.primitives.indices].buffer].buffer[buffer_views[mesh.primitives.indices].byte_offset];
+        data.index_count = accessors[mesh.primitives.indices].count;
+        
+        data.triangle_count = data.index_count / 3;
+        
+        Nil::Resource::load(data);
+      }
+    }
 
     free(json_root);
-  }
-
-
-  // Textures //
-  {
-    char path[2048]{};
-    strcat(path, lib::dir::exe_path());
-    
-    #ifndef LIB_PLATFORM_MAC
-    strcat(path, "assets/texture");
-    #else
-    strcat(path, "../Resources/assets/texture");
-    #endif
-
-    _tinydir_char_t wpath[2048]{};
-    
-    #ifdef LIB_PLATFORM_WIN
-    mbstowcs(wpath, path, 2048);
-    #else
-    memcpy(wpath, path, sizeof(path));
-    #endif
-
-    _tinydir_char_t dir_path[2048]{};
-    _tinydir_strcat(dir_path, wpath);
-
-    tinydir_dir dir;
-    tinydir_open(&dir, dir_path);
-
-    while (dir.has_next)
-    {
-      tinydir_file file;
-      tinydir_readfile(&dir, &file);
-      
-      // We only load up png's right now.
-      _tinydir_char_t *ext = TINYDIR_STRING("png");
-
-      if (!file.is_dir)
-      {
-        if(_tinydir_strcmp(ext, file.extension) == 0)
-        {
-          char c_name[2048]{};
-          
-          #ifdef LIB_PLATFORM_WIN
-          wcstombs(c_name, file.path, _tinydir_strlen(file.path));
-          #else
-          memcpy(c_name, file.path, _tinydir_strlen(file.path));
-          #endif
-        
-          char load_name[2048]{};
-          lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
-
-          Nil::Resource::Texture tex{};
-          tex.name      = load_name;
-          tex.data      = (uintptr_t)c_name;
-          tex.data_size = strlen(c_name) + 1;
-          tex.data_type = Nil::Resource::Texture::FILENAME;
-
-          Nil::Resource::load(tex);
-        }
-      }
-
-      tinydir_next(&dir);
-    }
-
-    tinydir_close(&dir);
-  }
-
-  
-  // Meshes //
-  {
-    char path[2048]{};
-    strcat(path, lib::dir::exe_path());
-    
-    #ifndef LIB_PLATFORM_MAC
-    strcat(path, "assets/texture");
-    #else
-    strcat(path, "../Resources/assets/mesh");
-    #endif
-
-    _tinydir_char_t wpath[2048]{};
-    
-    #ifdef LIB_PLATFORM_WIN
-    mbstowcs(wpath, path, 2048);
-    #else
-    memcpy(wpath, path, sizeof(path));
-    #endif
-
-    _tinydir_char_t dir_path[2048]{};
-    _tinydir_strcat(dir_path, wpath);
-
-    tinydir_dir dir;
-    tinydir_open(&dir, dir_path);
-
-    while (dir.has_next)
-    {
-      tinydir_file file;
-      tinydir_readfile(&dir, &file);
-      
-      // We only load up png's right now.
-      _tinydir_char_t *ext = TINYDIR_STRING("obj");
-
-      if (!file.is_dir)
-      {
-        if(_tinydir_strcmp(ext, file.extension) == 0)
-        {
-          char c_name[2048]{};
-          
-          #ifdef LIB_PLATFORM_WIN
-          wcstombs(c_name, file.path, _tinydir_strlen(file.path));
-          #else
-          memcpy(c_name, file.path, _tinydir_strlen(file.path));
-          #endif
-        
-          lib::model m = lib::model_import::load_obj_from_file(c_name);
-          
-          for(size_t i = 0; i < m.mesh_count; ++i)
-          {
-            char load_name[2048]{};
-            lib::string::filename_from_path(c_name, load_name, sizeof(load_name), true);
-            
-            Nil::Resource::Mesh mesh{};
-            
-            if(!Nil::Resource::find_by_name(load_name, mesh))
-            {
-              mesh.name                = load_name;
-              mesh.position_vec3       = m.verts[i];
-              mesh.normal_vec3         = m.normals[i];
-              mesh.color_vec4          = nullptr;
-              mesh.texture_coords_vec2 = m.uvs[i];
-              mesh.triangle_count      = m.triangle_count[i];
-
-              const bool loaded = Nil::Resource::load(mesh);
-              LIB_ASSERT(loaded);
-            }
-          }
-        }
-      }
-
-      tinydir_next(&dir);
-    }
-
-    tinydir_close(&dir);
   }
 }
 

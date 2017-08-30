@@ -67,6 +67,12 @@ uint32_t    rov_createMesh(
               uintptr_t *out_platform_resource = nullptr);
 
 
+uint32_t    rov_createIndex(
+              const uint32_t *index,
+              size_t index_count,
+              uintptr_t *out_platform_resource = nullptr);
+
+
 uint32_t    rov_createLights(
               rovLight *lights,
               size_t count);

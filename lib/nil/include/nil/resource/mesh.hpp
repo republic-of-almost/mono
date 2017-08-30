@@ -31,6 +31,9 @@ struct Mesh
   float       *texture_coords_vec2; // Internally copied
   float       *color_vec4;          // Internally copied
   
+  uint32_t    *index;               // Internally copied
+  size_t      index_count;
+  
   size_t      triangle_count;
   
   // -- Output -- //

@@ -38,20 +38,38 @@ namespace Resource {
 bool
 find_by_name(const char *name, Mesh &out)
 {
-  const uint32_t find_key = lib::string_pool::find(name);
-  
-  for(size_t i = 0; i < get_mesh_data().keys.size(); ++i)
+  /*
+    TODO: Key hashing needs sorting!
+  */
+
+  for(auto &m : get_mesh_data().meshes)
   {
-    const uint32_t key = get_mesh_data().keys[i];
-  
-    if(key == find_key)
+    if(m.name)
     {
-      out = get_mesh_data().meshes[i];
-      return true;
+      if(strcmp(m.name, name) == 0)
+      {
+        out = m;
+        return true;
+      }
     }
   }
   
   return false;
+
+//  const uint32_t find_key = lib::string_pool::find(name);
+//  
+//  for(size_t i = 0; i < get_mesh_data().keys.size(); ++i)
+//  {
+//    const uint32_t key = get_mesh_data().keys[i];
+//  
+//    if(key == find_key)
+//    {
+//      out = get_mesh_data().meshes[i];
+//      return true;
+//    }
+//  }
+//  
+//  return false;
 }
 
 
