@@ -87,10 +87,20 @@ load_assets()
       float rotation[4];
     };
     
+    struct gltf_primitives
+    {
+      int32_t attr_normal;
+      int32_t attr_position;
+      int32_t attr_tangent;
+      int32_t attr_texcoord_0;
+      int32_t indices;
+      int32_t material;
+    };
+    
     struct gltf_mesh
     {
       char name[64];
-      uint64_t primitive; // unsure about this atm.
+      gltf_primitives primitives;
     };
     
     
@@ -390,12 +400,28 @@ load_assets()
             if(strcmp(json_field_name->string, "name") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_string);
-              LOG_TODO_ONCE("Copy Mesh Name");
+              
+              const json_string_s *val = (json_string_s*)json_field_value->payload;
+              const size_t len = val->string_size > 64 ? 63 : val->string_size;
+              memcpy(mesh.name, val->string, len);
             }
             else if(strcmp(json_field_name->string, "primitives") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
-              LOG_TODO_ONCE("Get Primitive settings");
+              
+              const json_array_s *json_prim_array       = (json_array_s*)json_field_value->payload;
+              const json_array_element_s *json_prim_ele = json_prim_array->start;
+              
+              while(json_prim_ele != nullptr)
+              {
+                LIB_ASSERT(json_prim_ele);
+                
+                const json_value_s *json_prim = json_prim_ele->value;
+                const json_object_s *json_prim_obj = (json_object_s*)json_prim->payload;
+                
+              
+                json_prim_ele = json_prim_ele->next;
+              }
             }
             else
             {
@@ -429,6 +455,8 @@ load_assets()
           LIB_ASSERT(json_node);
         
           gltf_node node{};
+          node.scale[0] = 1.f; node.scale[1] = 1.f; node.scale[2] = 1.f;
+          node.rotation[0] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 1.f;
           
           const json_value_s *json_value              = json_node->value;
           const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
@@ -459,17 +487,127 @@ load_assets()
             else if(strcmp(json_field_name->string, "rotation") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
-              LOG_TODO_ONCE("Get node rot");
+              
+              const json_array_s *json_arr_rot = (json_array_s*)json_field_value->payload;
+              const json_array_element_s *json_arr_rot_ele = json_arr_rot->start;
+              
+              if(json_arr_rot_ele)
+              {
+                const json_value_s *json_rot_value = json_arr_rot_ele->value;
+                LIB_ASSERT(json_rot_value->type == json_type_number);
+                
+                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
+                node.rotation[0] = atof(json_rot->number);
+              }
+              
+              json_arr_rot_ele = json_arr_rot_ele->next;
+
+              if(json_arr_rot_ele)
+              {
+                const json_value_s *json_rot_value = json_arr_rot_ele->value;
+                LIB_ASSERT(json_rot_value->type == json_type_number);
+                
+                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
+                node.rotation[1] = atof(json_rot->number);
+              }
+
+              json_arr_rot_ele = json_arr_rot_ele->next;
+
+              if(json_arr_rot_ele)
+              {
+                const json_value_s *json_rot_value = json_arr_rot_ele->value;
+                LIB_ASSERT(json_rot_value->type == json_type_number);
+                
+                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
+                node.rotation[2] = atof(json_rot->number);
+              }
+              
+              json_arr_rot_ele = json_arr_rot_ele->next;
+
+              if(json_arr_rot_ele)
+              {
+                const json_value_s *json_rot_value = json_arr_rot_ele->value;
+                LIB_ASSERT(json_rot_value->type == json_type_number);
+                
+                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
+                node.rotation[3] = atof(json_rot->number);
+              }
             }
             else if(strcmp(json_field_name->string, "translation") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
-              LOG_TODO_ONCE("Get node tran");
+              
+              const json_array_s *json_arr_tran = (json_array_s*)json_field_value->payload;
+              const json_array_element_s *json_arr_tran_ele = json_arr_tran->start;
+              
+              if(json_arr_tran_ele)
+              {
+                const json_value_s *json_tran_value = json_arr_tran_ele->value;
+                LIB_ASSERT(json_tran_value->type == json_type_number);
+                
+                const json_number_s *json_tran = (json_number_s*)json_tran_value->payload;
+                node.translation[0] = atof(json_tran->number);
+              }
+              
+              json_arr_tran_ele = json_arr_tran_ele->next;
+
+              if(json_arr_tran_ele)
+              {
+                const json_value_s *json_tran_value = json_arr_tran_ele->value;
+                LIB_ASSERT(json_tran_value->type == json_type_number);
+                
+                const json_number_s *json_tran = (json_number_s*)json_tran_value->payload;
+                node.translation[1] = atof(json_tran->number);
+              }
+
+              json_arr_tran_ele = json_arr_tran_ele->next;
+
+              if(json_arr_tran_ele)
+              {
+                const json_value_s *json_tran_value = json_arr_tran_ele->value;
+                LIB_ASSERT(json_tran_value->type == json_type_number);
+                
+                const json_number_s *json_tran = (json_number_s*)json_tran_value->payload;
+                node.translation[2] = atof(json_tran->number);
+              }
             }
             else if(strcmp(json_field_name->string, "scale") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
-              LOG_TODO_ONCE("Get node scale");
+              
+              const json_array_s *json_arr_scale = (json_array_s*)json_field_value->payload;
+              const json_array_element_s *json_arr_scale_ele = json_arr_scale->start;
+              
+              if(json_arr_scale_ele)
+              {
+                const json_value_s *json_scale_value = json_arr_scale_ele->value;
+                LIB_ASSERT(json_scale_value->type == json_type_number);
+                
+                const json_number_s *json_scale = (json_number_s*)json_scale_value->payload;
+                node.scale[0] = atof(json_scale->number);
+              }
+              
+              json_arr_scale_ele = json_arr_scale_ele->next;
+
+              if(json_arr_scale_ele)
+              {
+                const json_value_s *json_scale_value = json_arr_scale_ele->value;
+                LIB_ASSERT(json_scale_value->type == json_type_number);
+                
+                const json_number_s *json_scale = (json_number_s*)json_scale_value->payload;
+                node.scale[1] = atof(json_scale->number);
+              }
+
+              json_arr_scale_ele = json_arr_scale_ele->next;
+
+              if(json_arr_scale_ele)
+              {
+                const json_value_s *json_scale_value = json_arr_scale_ele->value;
+                LIB_ASSERT(json_scale_value->type == json_type_number);
+                
+                const json_number_s *json_scale = (json_number_s*)json_scale_value->payload;
+                node.scale[2] = atof(json_scale->number);
+              }
             }
             else
             {
@@ -527,6 +665,10 @@ load_assets()
             else if(strcmp(json_field_name->string, "nodes") == 0)
             {
               LIB_ASSERT(json_field_value->type == json_type_array);
+            }
+            else if(strcmp(json_field_name->string, "extensions") == 0)
+            {
+              LOG_TODO_ONCE("Support scene extensions");
             }
             else
             {
