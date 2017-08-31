@@ -1101,8 +1101,8 @@ load_assets()
           // Currently only support uint32_t index.
           LIB_ASSERT(accessors[mesh.primitives.indices].component_type == 5125);
           
-          //data.index       = (uint32_t*)&buffers[buffer].buffer[offset];
-          //data.index_count = count;
+          data.index       = (uint32_t*)&buffers[buffer].buffer[offset];
+          data.index_count = count;
         }
         
         data.triangle_count = accessors[mesh.primitives.attr_position].count;
