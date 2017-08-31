@@ -29,8 +29,8 @@ think(ROA::Object node)
     const float head_speed = 0.05f;
     const float final_speed = delta_time * head_speed;
     
-    actor->accum_pitch += ms_delta.y * final_speed;
-    actor->accum_yaw   -= ms_delta.x * final_speed;
+    actor->accum_pitch -= ms_delta.y * final_speed;
+    actor->accum_yaw   += ms_delta.x * final_speed;
     
     actor->accum_pitch = math::clamp(
       actor->accum_pitch,
