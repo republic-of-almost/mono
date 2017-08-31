@@ -30,9 +30,8 @@ namespace
 void
 load_assets()
 {
-  ROA::Object assets = get_assets();
-
-//  Nil::Node assets = get_assets();
+  ROA::Object assets; // temp for testing auto loading.
+//  ROA::Object assets = get_assets();
 
   // Load static assets
   {

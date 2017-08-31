@@ -318,7 +318,7 @@ load_assets()
     struct gltf_buffer
     {
       size_t  byte_length;
-      uint8_t *buffer;
+      uint8_t *uri;
     };
     
     struct gltf_node
@@ -361,8 +361,16 @@ load_assets()
       uint8_t *uri;
     };
     
+    struct gltf_material
+    {
+      char name[64];
+      uint32_t base_color_texture;
+      uint32_t normal_texture;
+    };
+    
     struct gltf_sampler
     {
+      
     };
     
     struct gltf_texture
@@ -619,7 +627,7 @@ load_assets()
               const char *ends_width = ".bin"; // impl
               
               size_t length;
-              buffer.buffer = (uint8_t*)base64_decode(&val->string[strlen(starts_with)], val->string_size - strlen(starts_with), &length);
+              buffer.uri = (uint8_t*)base64_decode(&val->string[strlen(starts_with)], val->string_size - strlen(starts_with), &length);
               
               
               LOG_TODO_ONCE("Need to get GLTF URI");
@@ -1073,7 +1081,7 @@ load_assets()
           const size_t buffer = buffer_views[mesh.primitives.attr_position].buffer;
           const size_t offset = buffer_views[mesh.primitives.attr_position].byte_offset;
           
-          data.position_vec3 = (float*)&buffers[buffer].buffer[offset];
+          data.position_vec3 = (float*)&buffers[buffer].uri[offset];
         }
         
         // Normal
@@ -1081,7 +1089,7 @@ load_assets()
           const size_t buffer = buffer_views[mesh.primitives.attr_normal].buffer;
           const size_t offset = buffer_views[mesh.primitives.attr_normal].byte_offset;
           
-          data.normal_vec3 = (float*)&buffers[buffer].buffer[offset];
+          data.normal_vec3 = (float*)&buffers[buffer].uri[offset];
         }
         
         // Texture Coords
@@ -1089,7 +1097,7 @@ load_assets()
           const size_t buffer = buffer_views[mesh.primitives.attr_texcoord_0].buffer;
           const size_t offset = buffer_views[mesh.primitives.attr_texcoord_0].byte_offset;
         
-          data.texture_coords_vec2 = (float*)&buffers[buffer].buffer[offset];
+          data.texture_coords_vec2 = (float*)&buffers[buffer].uri[offset];
         }
         
         // Index
@@ -1101,7 +1109,7 @@ load_assets()
           // Currently only support uint32_t index.
           LIB_ASSERT(accessors[mesh.primitives.indices].component_type == 5125);
           
-          data.index       = (uint32_t*)&buffers[buffer].buffer[offset];
+          data.index       = (uint32_t*)&buffers[buffer].uri[offset];
           data.index_count = count;
         }
         
