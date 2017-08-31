@@ -1118,6 +1118,7 @@ load_assets()
     for(auto &n : nodes)
     {
       Nil::Node node;
+      node.set_name(n.name);
       
       Nil::Data::Transform trans;
       memcpy(trans.position, n.translation, sizeof(trans.position));

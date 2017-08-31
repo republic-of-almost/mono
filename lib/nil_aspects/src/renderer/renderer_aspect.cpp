@@ -37,6 +37,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   LIB_ASSERT(self);
 
   self->mesh_ids.emplace_back(uint32_t{0});
+  self->index_ids.emplace_back(uint32_t{0});
   self->texture_ids.emplace_back(uint32_t{0});
 
   #ifndef NIMGUI
