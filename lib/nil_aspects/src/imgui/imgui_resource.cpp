@@ -326,7 +326,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           sprintf(
             col,
             "%d) %.2f,%.2f,%.2f,%.2f",
-            line,	
+            line,
             data->color_vec4[index + 0],
             data->color_vec4[index + 1],
             data->color_vec4[index + 2],

@@ -1096,9 +1096,13 @@ load_assets()
         {
           const size_t buffer = buffer_views[mesh.primitives.indices].buffer;
           const size_t offset = buffer_views[mesh.primitives.indices].byte_offset;
-                    
-          data.index = (uint32_t*)&buffers[buffer].buffer[offset];
-          data.index_count = accessors[mesh.primitives.indices].count;
+          const size_t count  = accessors[mesh.primitives.indices].count;
+          
+          // Currently only support uint32_t index.
+          LIB_ASSERT(accessors[mesh.primitives.indices].component_type == 5125);
+          
+          //data.index       = (uint32_t*)&buffers[buffer].buffer[offset];
+          //data.index_count = count;
         }
         
         data.triangle_count = accessors[mesh.primitives.attr_position].count;
