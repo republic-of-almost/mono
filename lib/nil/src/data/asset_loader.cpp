@@ -1156,6 +1156,7 @@ load_assets()
     const size_t buffer_size = buffers.size();
 
     lib::array<uint32_t> internal_mesh_ids;
+    lib::array<uint32_t> internal_texture_ids;
 
     for(auto &tex : textures)
     {
@@ -1166,6 +1167,8 @@ load_assets()
       data.name = "foo";
       
       Nil::Resource::load(data);
+      
+      internal_texture_ids.emplace_back(data.id);
     }
 
     // Load up Nil Resources //
