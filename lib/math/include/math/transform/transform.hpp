@@ -103,7 +103,7 @@ transform_inherited(const transform &parent, const transform &child)
   transform inherited;
 
   inherited.scale    = MATH_NS_NAME::vec3_multiply(parent.scale, child.scale);
-  inherited.rotation = MATH_NS_NAME::quat_multiply(child.rotation, parent.rotation);
+  inherited.rotation = MATH_NS_NAME::quat_multiply(parent.rotation, child.rotation);
   
   inherited.position = MATH_NS_NAME::vec3_add(
     parent.position,

@@ -246,15 +246,15 @@ quat_get_rotation_matrix(const quat to_mat3)
   float mat_data[9]
 	{
 		1 - 2 * y_sq - 2 * z_sq,
-    2 * (quat_x * quat_y) - 2 * (quat_z * quat_w),
-		2 * (quat_x * quat_z) + 2 * (quat_y * quat_w),
-        
-		2 * (quat_x * quat_y) + 2 * (quat_z * quat_w),
-		1 - 2 * x_sq - 2 * z_sq,
-		2 * (quat_y * quat_z) - 2 * (quat_x * quat_w),
-        
+    2 * (quat_x * quat_y) + 2 * (quat_z * quat_w),
 		2 * (quat_x * quat_z) - 2 * (quat_y * quat_w),
+        
+		2 * (quat_x * quat_y) - 2 * (quat_z * quat_w),
+		1 - 2 * x_sq - 2 * z_sq,
 		2 * (quat_y * quat_z) + 2 * (quat_x * quat_w),
+        
+		2 * (quat_x * quat_z) + 2 * (quat_y * quat_w),
+		2 * (quat_y * quat_z) - 2 * (quat_x * quat_w),
 		1 - 2 * x_sq - 2 * y_sq,
 	};
 
