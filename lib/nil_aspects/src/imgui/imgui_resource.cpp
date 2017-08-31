@@ -353,7 +353,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
         
         for (int line = 0; line < data->index_count / 3; line++)
         {
-          int index = line * 2;
+          int index = line * 3;
           char uvs[64]{};
           sprintf(
             uvs,
