@@ -1,6 +1,9 @@
 #include <data/asset_loader.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/mesh.hpp>
+#include <nil/data/transform.hpp>
+#include <nil/data/renderable.hpp>
+#include <nil/node.hpp>
 #include <tinydir/tinydir.h>
 #include <lib/platform.hpp>
 #include <lib/assert.hpp>
@@ -1054,6 +1057,8 @@ load_assets()
     const size_t scene_size = scenes.size();
     const size_t buffer_size = buffers.size();
 
+    lib::array<uint32_t> internal_mesh_ids;
+
     // Load up Nil Resources //
     for(auto &mesh : meshes)
     {
@@ -1091,7 +1096,7 @@ load_assets()
         {
           const size_t buffer = buffer_views[mesh.primitives.indices].buffer;
           const size_t offset = buffer_views[mesh.primitives.indices].byte_offset;
-          
+                    
           data.index = (uint32_t*)&buffers[buffer].buffer[offset];
           data.index_count = accessors[mesh.primitives.indices].count;
         }
@@ -1099,7 +1104,31 @@ load_assets()
         data.triangle_count = accessors[mesh.primitives.attr_position].count;
         
         Nil::Resource::load(data);
+        
+        internal_mesh_ids.emplace_back(data.id);
       }
+    }
+    
+    static Nil::Node root_node;
+    
+    for(auto &n : nodes)
+    {
+      Nil::Node node;
+      
+      Nil::Data::Transform trans;
+      memcpy(trans.position, n.translation, sizeof(trans.position));
+      memcpy(trans.rotation, n.rotation, sizeof(trans.rotation));
+      memcpy(trans.scale, n.scale, sizeof(trans.scale));
+      
+      Nil::Data::set(node, trans);
+      
+      Nil::Data::Renderable renderable;
+      renderable.mesh_id = internal_mesh_ids[n.mesh];
+      renderable.material_id = 1;
+      
+      Nil::Data::set(node, renderable);
+      
+      node.set_parent(root_node);
     }
 
     free(json_root);
