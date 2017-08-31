@@ -198,7 +198,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
     const Nil::Resource::Mesh *data = &rsrc[i];
 
     char name[1024]{};
-    sprintf(name, "Mesh - %s##%z", data->name, i + 1);
+    sprintf(name, "Mesh - %s##%zu", data->name, i + 1);
   
     if(ImGui::CollapsingHeader(name))
     {
@@ -207,6 +207,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
       if(data->normal_vec3)         { columns += 3.f; }
       if(data->texture_coords_vec2) { columns += 2.f; }
       if(data->color_vec4)          { columns += 4.f; }
+      if(data->index)               { columns += 2.f; }
 
       float col_ratio = (1.f / columns) * 0.9f;
 
@@ -229,7 +230,8 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           char pos[64]{};
           sprintf(
             pos,
-            "%.2f,%.2f,%.2f",
+            "%d) %.2f,%.2f,%.2f",
+            line,
             data->position_vec3[index + 0],
             data->position_vec3[index + 1],
             data->position_vec3[index + 2]
@@ -260,7 +262,8 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           char norm[64]{};
           sprintf(
             norm,
-            "%.2f,%.2f,%.2f",
+            "%d) %.2f,%.2f,%.2f",
+            line,
             data->normal_vec3[index + 0],
             data->normal_vec3[index + 1],
             data->normal_vec3[index + 2]
@@ -291,7 +294,8 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           char uvs[64]{};
           sprintf(
             uvs,
-            "%.2f,%.2f",
+            "%d) %.2f,%.2f",
+            line,
             data->texture_coords_vec2[index + 0],
             data->texture_coords_vec2[index + 1]
           );
@@ -321,7 +325,8 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
           char col[64]{};
           sprintf(
             col,
-            "%.2f,%.2f,%.2f,%.2f",
+            "%d) %.2f,%.2f,%.2f,%.2f",
+            line,	
             data->color_vec4[index + 0],
             data->color_vec4[index + 1],
             data->color_vec4[index + 2],
@@ -333,6 +338,37 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
         
         ImGui::EndChild();
         ImGui::EndGroup();
+      }
+      
+      // Index
+      if(data->index)
+      {
+        ImGui::BeginGroup();
+        ImGui::Text("Index - (Count: %zu)", data->index_count);
+        ImGui::BeginChild(
+          ImGui::GetID((void*)data->index),
+          ImVec2(ImGui::GetWindowWidth() * col_ratio * 2, 200.0f),
+          true
+        );
+        
+        for (int line = 0; line < data->index_count / 3; line++)
+        {
+          int index = line * 2;
+          char uvs[64]{};
+          sprintf(
+            uvs,
+            "%d %d %d",
+            data->index[index + 0],
+            data->index[index + 1],
+            data->index[index + 2]
+          );
+          ImGui::Text("%s", uvs);
+        }
+        
+        ImGui::EndChild();
+        ImGui::EndGroup();
+        
+        ImGui::SameLine();
       }
       
       ImGui::Spacing();
