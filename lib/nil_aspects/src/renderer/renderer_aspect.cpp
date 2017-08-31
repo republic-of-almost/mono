@@ -314,7 +314,7 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
           tex.platform_resource = e.fbo_id;
           tex.data_type         = Nil::Resource::Texture::LOCAL;
           tex.status            = Nil::Resource::Texture::LOADED;
-
+          
           Nil::Resource::load(tex);
         }
       }
@@ -469,60 +469,76 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
       if (has_data && is_pending)
       {
         const bool data_is_filename = tex->data_type == Nil::Resource::Texture::FILENAME;
+        const bool data_is_array    = tex->data_type == Nil::Resource::Texture::DATA;
+
+        // -- //
+        
+        int x = 0;
+        int y = 0;
+        int c = 0;
+        stbi_uc *img_data = nullptr;
 
         if (data_is_filename)
         {
-          int x = 0;
-          int y = 0;
-          int c = 0;
-
-          stbi_uc *img_data = nullptr;
           const char *path = (const char*)tex->data;
 
           stbi_set_flip_vertically_on_load(true);
           img_data = stbi_load(path, &x, &y, &c, 0);
 
-          // -- Did we Fail to load texture -- //
-          if (img_data == nullptr)
-          {
-            tex->status = Nil::Resource::Texture::FAILED;
-
-            char err_msg[1024]{};
-            strcat(err_msg, "Failed to load texture: ");
-
-            LOG_ERROR(err_msg);
-            LIB_ASSERT(false);
-            continue;
-          }
-
-          const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
-
-          const uint32_t tex_id = rov_createTexture(
-            img_data,
-            x,
-            y,
-            x * y * c,
-            format,
-            &tex->platform_resource
-          );
-
-          tex->width = x;
-          tex->height = y;
-          tex->components = c;
-
-          if ((tex->id) >= self->texture_ids.size())
-          {
-            const size_t new_size = (tex->id + 1);
-            self->texture_ids.resize(new_size);
-          }
-
-          const size_t id = tex->id;
-          self->texture_ids[id] = tex_id;
-
-          stbi_image_free(img_data);
-
-          tex->status = Nil::Resource::Texture::LOADED;
         }
+        else if(data_is_array)
+        {
+          stbi_set_flip_vertically_on_load(true);
+          img_data = stbi_load_from_memory((stbi_uc*)tex->data, tex->data_size, &x, &y, &c, 0);
+        }
+        else
+        {
+          LIB_ASSERT(false);
+          LOG_ERROR("Unknown data type to load texture");
+          tex->status = Nil::Resource::Texture::FAILED;
+          continue;
+        }
+        
+        // -- Did we Fail to load texture -- //
+        if (img_data == nullptr)
+        {
+          tex->status = Nil::Resource::Texture::FAILED;
+
+          char err_msg[1024]{};
+          strcat(err_msg, "Failed to load texture: ");
+
+          LOG_ERROR(err_msg);
+          LIB_ASSERT(false);
+          continue;
+        }
+
+        const uint32_t format = c == 3 ? rovPixel_RGB8 : rovPixel_RGBA8;
+
+        const uint32_t tex_id = rov_createTexture(
+          img_data,
+          x,
+          y,
+          x * y * c,
+          format,
+          &tex->platform_resource
+        );
+
+        tex->width = x;
+        tex->height = y;
+        tex->components = c;
+
+        if ((tex->id) >= self->texture_ids.size())
+        {
+          const size_t new_size = (tex->id + 1);
+          self->texture_ids.resize(new_size);
+        }
+
+        const size_t id = tex->id;
+        self->texture_ids[id] = tex_id;
+
+        stbi_image_free(img_data);
+
+        tex->status = Nil::Resource::Texture::LOADED;
       }
       else if (!has_data)
       {

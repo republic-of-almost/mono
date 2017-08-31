@@ -358,6 +358,7 @@ load_assets()
     
     struct gltf_image
     {
+      size_t size;
       uint8_t *uri;
     };
     
@@ -653,7 +654,52 @@ load_assets()
       */
       else if(strcmp(json_element_name->string, "images") == 0)
       {
-        LOG_TODO_ONCE("Add image parsing support");
+        LIB_ASSERT(json_element_value->type == json_type_array);
+        
+        const json_array_s *json_images = (json_array_s*)json_element_value->payload;
+        const json_array_element_s *json_image = json_images->start;
+        
+        while(json_image != nullptr)
+        {
+          gltf_image img{};
+          
+          LIB_ASSERT(json_image);
+        
+          const json_value_s *json_value              = json_image->value;
+          const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
+          const json_object_element_s *json_field_ele = json_field_obj->start;
+          
+          while(json_field_ele != nullptr)
+          {
+            const json_string_s *json_field_name = json_field_ele->name;
+            const json_value_s *json_field_value = json_field_ele->value;
+
+            if(strcmp(json_field_name->string, "uri") == 0)
+            {
+              LIB_ASSERT(json_field_value->type == json_type_string);
+              
+              const json_string_s *val = (json_string_s*)json_field_value->payload;
+              
+              const char *starts_with = "data:image/png;base64,";
+              const char *ends_width  = ".bin"; // impl
+              
+              size_t length;
+              img.uri = (uint8_t*)base64_decode(&val->string[strlen(starts_with)], val->string_size - strlen(starts_with), &length);
+              img.size = length;
+            }
+            else
+            {
+              // Missing something from spec.
+              LIB_ASSERT(false);
+            }
+            
+            json_field_ele = json_field_ele->next;
+          }
+          
+          
+          images.emplace_back(img);
+          json_image = json_image->next;
+        }
       }
       
       /*
@@ -661,7 +707,51 @@ load_assets()
       */
       else if(strcmp(json_element_name->string, "textures") == 0)
       {
-        LOG_TODO_ONCE("Add texture parsing support");
+        LIB_ASSERT(json_element_value->type == json_type_array);
+        
+        const json_array_s *json_textures = (json_array_s*)json_element_value->payload;
+        const json_array_element_s *json_texture = json_textures->start;
+        
+        while(json_texture != nullptr)
+        {
+          gltf_texture texture{};
+          
+          const json_value_s *json_val                = json_texture->value;
+          const json_object_s *json_field_obj         = (json_object_s*)json_val->payload;
+          const json_object_element_s *json_field_ele = json_field_obj->start;
+          
+          while(json_field_ele != nullptr)
+          {
+            LIB_ASSERT(json_field_ele);
+            
+            const json_string_s *json_field_name = json_field_ele->name;
+            const json_value_s *json_field_value = json_field_ele->value;
+            
+            if(strcmp(json_field_name->string, "sampler") == 0)
+            {
+              LIB_ASSERT(json_field_value->type == json_type_number);
+              
+              const json_number_s *val = (json_number_s*)json_field_value->payload;
+
+              const uint32_t sampler = atoi(val->number);
+              texture.sampler = sampler;
+            }
+            else if(strcmp(json_field_name->string, "source") == 0)
+            {
+              LIB_ASSERT(json_field_value->type == json_type_number);
+              
+              const json_number_s *val = (json_number_s*)json_field_value->payload;
+
+              const uint32_t source = atoi(val->number);
+              texture.source = source;
+            }
+            
+            json_field_ele = json_field_ele->next;
+          }
+
+          textures.emplace_back(texture);        
+          json_texture = json_texture->next;
+        }
       }
       
       /*
@@ -1066,6 +1156,17 @@ load_assets()
     const size_t buffer_size = buffers.size();
 
     lib::array<uint32_t> internal_mesh_ids;
+
+    for(auto &tex : textures)
+    {
+      Nil::Resource::Texture data{};
+      data.data_type = Nil::Resource::Texture::DATA;
+      data.data = (uintptr_t)images[tex.source].uri;
+      data.data_size = images[tex.source].size;
+      data.name = "foo";
+      
+      Nil::Resource::load(data);
+    }
 
     // Load up Nil Resources //
     for(auto &mesh : meshes)
