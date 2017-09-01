@@ -1,6 +1,7 @@
 #include <data/asset_loader.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/mesh.hpp>
+#include <nil/resource/material.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/data/renderable.hpp>
 #include <nil/node.hpp>
@@ -362,11 +363,16 @@ load_assets()
       uint8_t *uri;
     };
     
+    // Are there more maps?
+    struct gltf_base_color_texture
+    {
+      uint32_t index;
+    };
+    
     struct gltf_material
     {
       char name[64];
-      uint32_t base_color_texture;
-      uint32_t normal_texture;
+      gltf_base_color_texture base_color_texture;
     };
     
     struct gltf_sampler
@@ -391,6 +397,7 @@ load_assets()
     lib::array<gltf_image>        images;
     lib::array<gltf_sampler>      samplers;
     lib::array<gltf_texture>      textures;
+    lib::array<gltf_material>     materials;
 
     // --
 
@@ -751,6 +758,91 @@ load_assets()
 
           textures.emplace_back(texture);        
           json_texture = json_texture->next;
+        }
+      }
+      
+      /*
+        Parse Materials
+      */
+      else if(strcmp(json_element_name->string, "materials") == 0)
+      {
+        LIB_ASSERT(json_element_value->type == json_type_array);
+        
+        const json_array_s *json_mats = (json_array_s*)json_element_value->payload;
+        const json_array_element_s *json_mat = json_mats->start;
+        
+        while(json_mat != nullptr)
+        {
+          LIB_ASSERT(json_mat);
+          
+          gltf_material mat{};
+          
+          const json_value_s *json_val = json_mat->value;
+          const json_object_s *json_field_obj = (json_object_s*)json_val->payload;
+          const json_object_element_s *json_field_ele = json_field_obj->start;
+          
+          while(json_field_ele != nullptr)
+          {
+            LIB_ASSERT(json_field_ele);
+          
+            const json_string_s *json_field_name = json_field_ele->name;
+            const json_value_s *json_field_value = json_field_ele->value;
+            
+            if(strcmp(json_field_name->string, "name") == 0)
+            {
+              LIB_ASSERT(json_field_value->type == json_type_string);
+              
+              const json_string_s *val = (json_string_s*)json_field_value->payload;
+              const size_t len = val->string_size > 64 ? 63 : val->string_size;
+              memcpy(mat.name, val->string, len);
+            }
+            else if(strcmp(json_field_name->string, "pbrMetallicRoughness"))
+            {
+              LOG_TODO_ONCE("pbrMetallicRoughness not supported in material");
+            }
+            else if(strcmp(json_field_name->string, "metallicFactor"))
+            {
+              LOG_TODO_ONCE("metallicFactor not supported in material");
+            }
+            else if(strcmp(json_field_name->string, "baseColorTexture"))
+            {
+              LIB_ASSERT(json_field_value->type == json_type_object);
+              
+              const json_object_s *attr_obj = (json_object_s*)json_field_value->payload;
+              const json_object_element_s *attr_ele = attr_obj->start;
+              
+              while(attr_ele != nullptr)
+              {
+                const json_value_s *attr_val = attr_ele->value;
+                const json_string_s *attr_name = attr_ele->name;
+                
+                if(strcmp(attr_name->string, "index") == 0)
+                {
+                  LIB_ASSERT(attr_val->type == json_type_number);
+                  
+                  const json_number_s *val = (json_number_s*)attr_val->payload;
+                  mat.base_color_texture.index = atoi(val->number);
+                }
+                else
+                {
+                  LIB_ASSERT(false); // missing something from the parser.
+                }
+                
+                attr_ele = attr_ele->next;
+              }
+            }
+            else
+            {
+              // Something missing from the parser
+              LIB_ASSERT(false);
+            }
+          
+            json_field_ele = json_field_ele->next;
+          }
+          
+          materials.emplace_back(mat);
+          
+          json_mat = json_mat->next;
         }
       }
       
@@ -1157,6 +1249,7 @@ load_assets()
 
     lib::array<uint32_t> internal_mesh_ids;
     lib::array<uint32_t> internal_texture_ids;
+    lib::array<uint32_t> internal_material_ids;
 
     for(auto &tex : textures)
     {
@@ -1164,11 +1257,30 @@ load_assets()
       data.data_type = Nil::Resource::Texture::DATA;
       data.data = (uintptr_t)images[tex.source].uri;
       data.data_size = images[tex.source].size;
-      data.name = "foo";
+      
+      static int i = 0;
+      ++i;
+      
+      char import_name[128]{};
+      sprintf(import_name, "GLTF Tex %d", i);
+      
+      data.name = import_name;
       
       Nil::Resource::load(data);
       
       internal_texture_ids.emplace_back(data.id);
+    }
+    
+    for(auto &mat : materials)
+    {
+      Nil::Resource::Material data{};
+      
+      data.name = mat.name;
+      data.texture_01 = internal_mesh_ids[mat.base_color_texture.index];
+      
+      Nil::Resource::load(data);
+      
+      internal_material_ids.emplace_back(data.id);
     }
 
     // Load up Nil Resources //
@@ -1241,7 +1353,7 @@ load_assets()
       
       Nil::Data::Renderable renderable;
       renderable.mesh_id = internal_mesh_ids[n.mesh];
-      renderable.material_id = 1;
+      renderable.material_id = internal_material_ids[meshes[n.mesh].primitives.material];
       
       Nil::Data::set(node, renderable);
       
