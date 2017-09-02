@@ -363,17 +363,21 @@ load_assets()
       uint8_t *uri;
     };
     
-    // Are there more maps?
-    struct gltf_base_color_texture
+    struct gltf_KHR_materials_cmnBlinnPhong
     {
-      uint32_t index;
+      float diffuse_factor[4];
+      uint32_t diffuse_texture;
+      float shininess_factor;
+      float specular_factor[3];
     };
     
     struct gltf_material
     {
       char name[64];
-      gltf_base_color_texture base_color_texture;
+      float emissive_factor[3];
+      gltf_KHR_materials_cmnBlinnPhong blinn_extension;
     };
+  
     
     struct gltf_sampler
     {
@@ -408,93 +412,104 @@ load_assets()
     );
 
     json_value_s *json_root                        = json_parse_ex(buffer, count, flags, 0, 0, 0);
-    const json_object_s *json_root_obj             = (json_object_s*)json_root->payload;
-    const json_object_element_s *json_gltf_element = json_root_obj->start;
+    
+    
+    auto json_obj_element = [](const json_value_s *obj)
+    {
+      return ((const json_object_s*)obj->payload)->start;
+    };
+    
+    auto json_obj_name = [](const json_object_element_s *ele, const char *name)
+    {
+      return (strcmp(ele->name->string, name) == 0);
+    };
+    
+    auto json_arr_element = [](const json_object_element_s *ele)
+    {
+      return ((const json_array_s*)ele->value->payload)->start;
+    };
+    
+    auto json_to_int = [](const json_object_element_s *ele)
+    {
+      return atoi(((const json_number_s*)ele->value->payload)->number);
+    };
 
+    auto json_to_float = [](const json_value_s *val)
+    {
+      return atof(((const json_number_s*)val->payload)->number);
+    };
+    
+    auto json_to_string = [](const json_object_element_s *ele, size_t *data_length = nullptr)
+    {
+      if(data_length)
+      {
+        *data_length = ((const json_string_s*)ele->value->payload)->string_size;
+      }
+    
+      return ((json_string_s*)ele->value->payload)->string;
+    };
+    
+    // -- //
+    
+    const json_object_element_s *json_gltf_element = json_obj_element(json_root);
+    
     while(json_gltf_element != nullptr)
     {
-      const json_string_s *json_element_name = json_gltf_element->name;
-      const json_value_s *json_element_value = json_gltf_element->value;
-    
       /*
         Parse Accessors
       */
-      if(strcmp(json_element_name->string, "accessors") == 0)
+      if(json_obj_name(json_gltf_element, "accessors"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-      
-        const json_array_s *json_accessors        = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_accessor = json_accessors->start;
+        const json_array_element_s *json_accessor = json_arr_element(json_gltf_element);
         
         while(json_accessor != nullptr)
         {
-          LIB_ASSERT(json_accessor);
-        
           gltf_accessor accessor{};
           
-          const json_value_s *json_value              = json_accessor->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_accessor_attr = json_obj_element(json_accessor->value);
           
-          while(json_field_ele != nullptr)
+          while(json_accessor_attr != nullptr)
           {
-            LIB_ASSERT(json_field_ele);
-          
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-            
-            if(strcmp(json_field_name->string, "bufferView") == 0)
+            if(json_obj_name(json_accessor_attr, "bufferView"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_number);
+              accessor.buffer_view = json_to_int(json_accessor_attr);
+            }
+            
+            else if(json_obj_name(json_accessor_attr, "componentType"))
+            {
+              accessor.component_type = json_to_int(json_accessor_attr);
+            }
+            
+            else if(json_obj_name(json_accessor_attr, "count"))
+            {
+              accessor.count = json_to_int(json_accessor_attr);
+            }
+            
+            else if(json_obj_name(json_accessor_attr, "min"))
+            {
+            }
+            
+            else if(json_obj_name(json_accessor_attr, "max"))
+            {
+            }
+            
+            else if(json_obj_name(json_accessor_attr, "type"))
+            {
+              const char *name = json_to_string(json_accessor_attr);
               
-              const json_number_s *val = (json_number_s*)json_field_value->payload;
-              accessor.buffer_view     = atoi(val->number);
-            }
-            
-            else if(strcmp(json_field_name->string, "componentType") == 0)
-            {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-            
-              const json_number_s *val = (json_number_s*)json_field_value->payload;
-              accessor.component_type  = atoi(val->number);
-            }
-            
-            else if(strcmp(json_field_name->string, "count") == 0)
-            {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-              
-              const json_number_s *val = (json_number_s*)json_field_value->payload;
-              accessor.count           = atoi(val->number);
-            }
-            
-            else if(strcmp(json_field_name->string, "min") == 0)
-            {
-              LIB_ASSERT(json_field_value->type == json_type_array);
-            }
-            
-            else if(strcmp(json_field_name->string, "max") == 0)
-            {
-              LIB_ASSERT(json_field_value->type == json_type_array);
-            }
-            
-            else if(strcmp(json_field_name->string, "type") == 0)
-            {
-              LIB_ASSERT(json_field_value->type == json_type_string);
-              
-              const json_string_s *val = (json_string_s*)json_field_value->payload;
-              if(strcmp(val->string, "SCALAR") == 0)
+              if(strcmp(name, "SCALAR") == 0)
               {
                 accessor.type = gltf_accessor::SCALAR;
               }
-              else if(strcmp(val->string, "VEC2") == 0)
+              else if(strcmp(name, "VEC2") == 0)
               {
                 accessor.type = gltf_accessor::VEC2;
               }
-              else if(strcmp(val->string, "VEC3") == 0)
+              else if(strcmp(name, "VEC3") == 0)
               {
                 accessor.type = gltf_accessor::VEC3;
               }
-              else if(strcmp(val->string, "VEC4") == 0)
+              else if(strcmp(name, "VEC4") == 0)
               {
                 accessor.type = gltf_accessor::VEC4;
               }
@@ -511,7 +526,7 @@ load_assets()
             }
             
             // Next element
-            json_field_ele = json_field_ele->next;
+            json_accessor_attr = json_accessor_attr->next;
           }
           
           // Next field
@@ -523,12 +538,9 @@ load_assets()
       /*
         Parse Buffer Views
       */
-      else if(strcmp(json_element_name->string, "bufferViews") == 0)
+      else if(json_obj_name(json_gltf_element, "bufferViews"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-      
-        const json_array_s *json_buffer_views        = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_buffer_view = json_buffer_views->start;
+        const json_array_element_s *json_buffer_view = json_arr_element(json_gltf_element);
         
         while(json_buffer_view != nullptr)
         {
@@ -594,51 +606,32 @@ load_assets()
       /*
         Parse Buffers
       */
-      else if(strcmp(json_element_name->string, "buffers") == 0)
+      else if(json_obj_name(json_gltf_element, "buffers"))
       {
-        LIB_ASSERT(json_element_value);
-      
-        const json_array_s *json_buffers        = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_buffer = json_buffers->start;
+        const json_array_element_s *json_buffer = json_arr_element(json_gltf_element);
         
         while(json_buffer != nullptr)
         {
-          LIB_ASSERT(json_buffer);
-        
           gltf_buffer buffer{};
 
-          const json_value_s *json_value              = json_buffer->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_buffer_attr = json_obj_element(json_buffer->value);
           
-          while(json_field_ele != nullptr)
+          while(json_buffer_attr != nullptr)
           {
-            LIB_ASSERT(json_field_ele);
-          
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-            
-            if(strcmp(json_field_name->string, "byteLength") == 0)
+            if(json_obj_name(json_buffer_attr, "byteLength"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-              
-              const json_number_s *val = (json_number_s*)json_field_value->payload;
-              buffer.byte_length = atoi(val->number);
+              buffer.byte_length = json_to_int(json_buffer_attr);
             }
-            else if(strcmp(json_field_name->string, "uri") == 0)
+            else if(json_obj_name(json_buffer_attr, "uri"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_string);
-              
-              const json_string_s *val = (json_string_s*)json_field_value->payload;
+              size_t data_length = 0;
+              const char *data = json_to_string(json_buffer_attr, &data_length);
               
               const char *starts_with = "data:application/octet-stream;base64,";
               const char *ends_width = ".bin"; // impl
               
               size_t length;
-              buffer.uri = (uint8_t*)base64_decode(&val->string[strlen(starts_with)], val->string_size - strlen(starts_with), &length);
-              
-              
-              LOG_TODO_ONCE("Need to get GLTF URI");
+              buffer.uri = (uint8_t*)base64_decode(&data[strlen(starts_with)], data_length - strlen(starts_with), &length);
             }
             else
             {
@@ -647,7 +640,7 @@ load_assets()
             }
 
             // Next element
-            json_field_ele = json_field_ele->next;
+            json_buffer_attr = json_buffer_attr->next;
           }
           
           // Next Field
@@ -659,39 +652,28 @@ load_assets()
       /*
         Parse Images
       */
-      else if(strcmp(json_element_name->string, "images") == 0)
+      else if(json_obj_name(json_gltf_element, "images"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-        
-        const json_array_s *json_images = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_image = json_images->start;
+        const json_array_element_s *json_image = json_arr_element(json_gltf_element);
         
         while(json_image != nullptr)
         {
           gltf_image img{};
           
-          LIB_ASSERT(json_image);
-        
-          const json_value_s *json_value              = json_image->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_image_attr = json_obj_element(json_image->value);
           
-          while(json_field_ele != nullptr)
+          while(json_image_attr != nullptr)
           {
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-
-            if(strcmp(json_field_name->string, "uri") == 0)
+            if(json_obj_name(json_image_attr, "uri"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_string);
-              
-              const json_string_s *val = (json_string_s*)json_field_value->payload;
+              size_t data_length = 0;
+              const char *data = json_to_string(json_image_attr, &data_length);
               
               const char *starts_with = "data:image/png;base64,";
               const char *ends_width  = ".bin"; // impl
               
               size_t length;
-              img.uri = (uint8_t*)base64_decode(&val->string[strlen(starts_with)], val->string_size - strlen(starts_with), &length);
+              img.uri = (uint8_t*)base64_decode(&data[strlen(starts_with)], data_length - strlen(starts_with), &length);
               img.size = length;
             }
             else
@@ -700,9 +682,8 @@ load_assets()
               LIB_ASSERT(false);
             }
             
-            json_field_ele = json_field_ele->next;
+            json_image_attr = json_image_attr->next;
           }
-          
           
           images.emplace_back(img);
           json_image = json_image->next;
@@ -712,48 +693,28 @@ load_assets()
       /*
         Parse Textures
       */
-      else if(strcmp(json_element_name->string, "textures") == 0)
+      else if(json_obj_name(json_gltf_element, "textures"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-        
-        const json_array_s *json_textures = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_texture = json_textures->start;
+        const json_array_element_s *json_texture = json_arr_element(json_gltf_element);
         
         while(json_texture != nullptr)
         {
           gltf_texture texture{};
           
-          const json_value_s *json_val                = json_texture->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_val->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_texture_attr = json_obj_element(json_texture->value);
           
-          while(json_field_ele != nullptr)
+          while(json_texture_attr != nullptr)
           {
-            LIB_ASSERT(json_field_ele);
-            
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-            
-            if(strcmp(json_field_name->string, "sampler") == 0)
+            if(json_obj_name(json_texture_attr, "sampler"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-              
-              const json_number_s *val = (json_number_s*)json_field_value->payload;
-
-              const uint32_t sampler = atoi(val->number);
-              texture.sampler = sampler;
+              texture.sampler = json_to_int(json_texture_attr);
             }
-            else if(strcmp(json_field_name->string, "source") == 0)
+            else if(json_obj_name(json_texture_attr, "source"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-              
-              const json_number_s *val = (json_number_s*)json_field_value->payload;
-
-              const uint32_t source = atoi(val->number);
-              texture.source = source;
+              texture.source = json_to_int(json_texture_attr);
             }
             
-            json_field_ele = json_field_ele->next;
+            json_texture_attr = json_texture_attr->next;
           }
 
           textures.emplace_back(texture);        
@@ -764,72 +725,42 @@ load_assets()
       /*
         Parse Materials
       */
-      else if(strcmp(json_element_name->string, "materials") == 0)
+      else if(json_obj_name(json_gltf_element, "materials"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
+        const json_array_element_s *json_material = json_arr_element(json_gltf_element);
         
-        const json_array_s *json_mats = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_mat = json_mats->start;
-        
-        while(json_mat != nullptr)
+        while(json_material != nullptr)
         {
-          LIB_ASSERT(json_mat);
-          
           gltf_material mat{};
           
-          const json_value_s *json_val = json_mat->value;
-          const json_object_s *json_field_obj = (json_object_s*)json_val->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_material_attr = json_obj_element(json_material->value);
           
-          while(json_field_ele != nullptr)
+          while(json_material_attr != nullptr)
           {
-            LIB_ASSERT(json_field_ele);
-          
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-            
-            if(strcmp(json_field_name->string, "name") == 0)
+            if(json_obj_name(json_material_attr, "name"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_string);
+              size_t data_length = 0;
+              const char *data = json_to_string(json_material_attr, &data_length);
               
-              const json_string_s *val = (json_string_s*)json_field_value->payload;
-              const size_t len = val->string_size > 64 ? 63 : val->string_size;
-              memcpy(mat.name, val->string, len);
+              const size_t len = data_length > 64 ? 63 : data_length;
+              memcpy(mat.name, data, len);
             }
-            else if(strcmp(json_field_name->string, "pbrMetallicRoughness"))
+            else if(json_obj_name(json_material_attr, "emissiveFactor"))
+            {
+              LOG_TODO_ONCE("emissiveFactor not supported in material");
+            }
+            else if(json_obj_name(json_material_attr, "pbrMetallicRoughness"))
             {
               LOG_TODO_ONCE("pbrMetallicRoughness not supported in material");
             }
-            else if(strcmp(json_field_name->string, "metallicFactor"))
+            else if(json_obj_name(json_material_attr, "metallicFactor"))
             {
               LOG_TODO_ONCE("metallicFactor not supported in material");
             }
-            else if(strcmp(json_field_name->string, "baseColorTexture"))
+            else if(json_obj_name(json_material_attr, "extensions"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_object);
-              
-              const json_object_s *attr_obj = (json_object_s*)json_field_value->payload;
-              const json_object_element_s *attr_ele = attr_obj->start;
-              
-              while(attr_ele != nullptr)
-              {
-                const json_value_s *attr_val = attr_ele->value;
-                const json_string_s *attr_name = attr_ele->name;
-                
-                if(strcmp(attr_name->string, "index") == 0)
-                {
-                  LIB_ASSERT(attr_val->type == json_type_number);
-                  
-                  const json_number_s *val = (json_number_s*)attr_val->payload;
-                  mat.base_color_texture.index = atoi(val->number);
-                }
-                else
-                {
-                  LIB_ASSERT(false); // missing something from the parser.
-                }
-                
-                attr_ele = attr_ele->next;
-              }
+
+              //"KHR_materials_cmnBlinnPhong"
             }
             else
             {
@@ -837,130 +768,81 @@ load_assets()
               LIB_ASSERT(false);
             }
           
-            json_field_ele = json_field_ele->next;
+            json_material_attr = json_material_attr->next;
           }
           
           materials.emplace_back(mat);
-          
-          json_mat = json_mat->next;
+          json_material = json_material->next;
         }
       }
       
       /*
         Parse Meshes
       */
-      else if(strcmp(json_element_name->string, "meshes") == 0)
+      else if(json_obj_name(json_gltf_element, "meshes"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-      
-        const json_array_s *json_meshes       = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_mesh = json_meshes->start;
+        const json_array_element_s *json_mesh = json_arr_element(json_gltf_element);
         
         while(json_mesh != nullptr)
         {
-          LIB_ASSERT(json_mesh);
-        
           gltf_mesh mesh{};
           
-          const json_value_s *json_val                = json_mesh->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_val->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_mesh_attr = json_obj_element(json_mesh->value);
           
-          while(json_field_ele != nullptr)
+          while(json_mesh_attr != nullptr)
           {
-            LIB_ASSERT(json_field_ele);
-          
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
+            if(json_obj_name(json_mesh_attr, "name"))
+            {
+              size_t data_length = 0;
+              const char *data = json_to_string(json_mesh_attr, &data_length);
             
-            if(strcmp(json_field_name->string, "name") == 0)
-            {
-              LIB_ASSERT(json_field_value->type == json_type_string);
-              
-              const json_string_s *val = (json_string_s*)json_field_value->payload;
-              const size_t len = val->string_size > 64 ? 63 : val->string_size;
-              memcpy(mesh.name, val->string, len);
+              const size_t len = data_length > 64 ? 63 : data_length;
+              memcpy(mesh.name, data, len);
             }
-            else if(strcmp(json_field_name->string, "primitives") == 0)
+            else if(json_obj_name(json_mesh_attr, "primitives"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_array);
-              
-              const json_array_s *json_prim_array       = (json_array_s*)json_field_value->payload;
-              const json_array_element_s *json_prim_ele = json_prim_array->start;
+              const json_array_element_s *json_prim_ele = json_arr_element(json_mesh_attr);
               
               while(json_prim_ele != nullptr)
               {
-                LIB_ASSERT(json_prim_ele);
+                const json_object_element_s *json_prim_attr = json_obj_element(json_prim_ele->value);
                 
-                const json_value_s *json_prim_val  = json_prim_ele->value;
-                const json_object_s *json_prim_obj = (json_object_s*)json_prim_val->payload;
-                const json_object_element_s *json_prim = json_prim_obj->start;
-                
-                while(json_prim != nullptr)
+                while(json_prim_attr != nullptr)
                 {
-                  LIB_ASSERT(json_prim);
-                
-                  const json_string_s *json_prim_name = json_prim->name;
-                  const json_value_s *json_prim_value = json_prim->value;
-
-                  if(strcmp(json_prim_name->string, "attributes") == 0)
+                  if(json_obj_name(json_prim_attr, "attributes"))
                   {
-                    LIB_ASSERT(json_prim_value->type == json_type_object);
+                    const json_object_element_s *atrib_attr = json_obj_element(json_prim_attr->value);
                     
-                    const json_object_s *attr_obj = (json_object_s*)json_prim_value->payload;
-                    const json_object_element_s *attr_ele = attr_obj->start;
-                    
-                    while(attr_ele != nullptr)
+                    while(atrib_attr != nullptr)
                     {
-                      const json_value_s *attr_val = attr_ele->value;
-                      const json_string_s *attr_name = attr_ele->name;
-                      
-                      if(strcmp(attr_name->string, "POSITION") == 0)
+                      if(json_obj_name(atrib_attr, "POSITION"))
                       {
-                        LIB_ASSERT(attr_val->type == json_type_number);
-                        
-                        const json_number_s *val = (json_number_s*)attr_val->payload;
-                        mesh.primitives.attr_position = atoi(val->number);
+                        mesh.primitives.attr_position = json_to_int(atrib_attr);
                       }
-                      else if(strcmp(attr_name->string, "NORMAL") == 0)
+                      else if(json_obj_name(atrib_attr, "NORMAL"))
                       {
-                        LIB_ASSERT(attr_val->type == json_type_number);
-                      
-                        const json_number_s *val = (json_number_s*)attr_val->payload;
-                        mesh.primitives.attr_normal = atoi(val->number);
+                        mesh.primitives.attr_normal = json_to_int(atrib_attr);
                       }
-                      else if(strcmp(attr_name->string, "TANGENT") == 0)
+                      else if(json_obj_name(atrib_attr, "TANGENT"))
                       {
-                        LIB_ASSERT(attr_val->type == json_type_number);
-                        
-                        const json_number_s *val = (json_number_s*)attr_val->payload;
-                        mesh.primitives.attr_tangent = atoi(val->number);
+                        mesh.primitives.attr_tangent = json_to_int(atrib_attr);
                       }
-                      else if(strcmp(attr_name->string, "TEXCOORD_0") == 0)
+                      else if(json_obj_name(atrib_attr, "TEXCOORD_0"))
                       {
-                        LIB_ASSERT(attr_val->type == json_type_number);
-                        
-                        const json_number_s *val = (json_number_s*)attr_val->payload;
-                        mesh.primitives.attr_texcoord_0 = atoi(val->number);
+                        mesh.primitives.attr_texcoord_0 = json_to_int(atrib_attr);
                       }
                       
-                      attr_ele = attr_ele->next;
+                      atrib_attr = atrib_attr->next;
                     }
                   }
-                  else if(strcmp(json_prim_name->string, "indices") == 0)
+                  else if(json_obj_name(json_prim_attr, "indices"))
                   {
-                    LIB_ASSERT(json_prim_value->type == json_type_number);
-                    
-                    const json_number_s *val = (json_number_s*)json_prim_value->payload;
-                    mesh.primitives.indices = atoi(val->number);
+                    mesh.primitives.indices = json_to_int(json_prim_attr);
 
                   }
-                  else if(strcmp(json_prim_name->string, "material") == 0)
+                  else if(json_obj_name(json_prim_attr, "material"))
                   {
-                    LIB_ASSERT(json_prim_value->type == json_type_number);
-                    
-                    const json_number_s *val = (json_number_s*)json_prim_value->payload;
-                    mesh.primitives.material = atoi(val->number);
+                    mesh.primitives.material = json_to_int(json_prim_attr);
                   }
                   else
                   {
@@ -968,7 +850,7 @@ load_assets()
                     LIB_ASSERT(false);
                   }
                   
-                  json_prim = json_prim->next;
+                  json_prim_attr = json_prim_attr->next;
                 }
               
                 json_prim_ele = json_prim_ele->next;
@@ -981,7 +863,7 @@ load_assets()
             }
 
             // Next Element
-            json_field_ele = json_field_ele->next;
+            json_mesh_attr = json_mesh_attr->next;
           }
           
           // Next Field
@@ -993,170 +875,106 @@ load_assets()
       /*
         Parse Nodes
       */
-      else if(strcmp(json_element_name->string, "nodes") == 0)
+      else if(json_obj_name(json_gltf_element, "nodes"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-      
-        const json_array_s *json_nodes = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_node = json_nodes->start;
+        const json_array_element_s *json_node = json_arr_element(json_gltf_element);
         
         while(json_node != nullptr)
         {
-          LIB_ASSERT(json_node);
-        
           gltf_node node{};
           node.scale[0] = 1.f; node.scale[1] = 1.f; node.scale[2] = 1.f;
           node.rotation[0] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 1.f;
           
-          const json_value_s *json_value              = json_node->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
+          const json_object_element_s *json_node_attr = json_obj_element(json_node->value);
           
-          while(json_field_ele != nullptr)
+          while(json_node_attr != nullptr)
           {
-            LIB_ASSERT(json_field_ele);
-          
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-            
-            if(strcmp(json_field_name->string, "mesh") == 0)
+            if(json_obj_name(json_node_attr, "mesh"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_number);
-              
-              json_number_s *val = (json_number_s*)json_field_value->payload;
-              node.mesh = atoi(val->number);
+              node.mesh = json_to_int(json_node_attr);
             }
-            else if(strcmp(json_field_name->string, "name") == 0)
+            else if(json_obj_name(json_node_attr, "name"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_string);
+              size_t data_length = 0;
+              const char *data = json_to_string(json_node_attr, &data_length);
               
-              json_string_s *val = (json_string_s*)json_field_value->payload;
-              const size_t len = val->string_size > 63 ? 63 : val->string_size;
-              memcpy(node.name, val->string, len);
+              const size_t len = data_length > 63 ? 63 : data_length;
+              memcpy(node.name, data, len);
             }
-            else if(strcmp(json_field_name->string, "rotation") == 0)
+            else if(json_obj_name(json_node_attr, "rotation"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_array);
-              
-              const json_array_s *json_arr_rot = (json_array_s*)json_field_value->payload;
-              const json_array_element_s *json_arr_rot_ele = json_arr_rot->start;
+              const json_array_element_s *json_arr_rot_ele = json_arr_element(json_node_attr);
               
               if(json_arr_rot_ele)
               {
-                const json_value_s *json_rot_value = json_arr_rot_ele->value;
-                LIB_ASSERT(json_rot_value->type == json_type_number);
-                
-                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
-                node.rotation[0] = atof(json_rot->number);
+                node.rotation[0] = json_to_float(json_arr_rot_ele->value);
               }
               
               json_arr_rot_ele = json_arr_rot_ele->next;
 
               if(json_arr_rot_ele)
               {
-                const json_value_s *json_rot_value = json_arr_rot_ele->value;
-                LIB_ASSERT(json_rot_value->type == json_type_number);
-                
-                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
-                node.rotation[1] = atof(json_rot->number);
+                node.rotation[1] = json_to_float(json_arr_rot_ele->value);
               }
 
               json_arr_rot_ele = json_arr_rot_ele->next;
 
               if(json_arr_rot_ele)
               {
-                const json_value_s *json_rot_value = json_arr_rot_ele->value;
-                LIB_ASSERT(json_rot_value->type == json_type_number);
-                
-                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
-                node.rotation[2] = atof(json_rot->number);
+                node.rotation[2] = json_to_float(json_arr_rot_ele->value);
               }
               
               json_arr_rot_ele = json_arr_rot_ele->next;
 
               if(json_arr_rot_ele)
               {
-                const json_value_s *json_rot_value = json_arr_rot_ele->value;
-                LIB_ASSERT(json_rot_value->type == json_type_number);
-                
-                const json_number_s *json_rot = (json_number_s*)json_rot_value->payload;
-                node.rotation[3] = atof(json_rot->number);
+                node.rotation[3] = json_to_float(json_arr_rot_ele->value);
               }
             }
-            else if(strcmp(json_field_name->string, "translation") == 0)
+            else if(json_obj_name(json_node_attr, "translation"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_array);
-              
-              const json_array_s *json_arr_tran = (json_array_s*)json_field_value->payload;
-              const json_array_element_s *json_arr_tran_ele = json_arr_tran->start;
+              const json_array_element_s *json_arr_tran_ele = json_arr_element(json_node_attr);
               
               if(json_arr_tran_ele)
               {
-                const json_value_s *json_tran_value = json_arr_tran_ele->value;
-                LIB_ASSERT(json_tran_value->type == json_type_number);
-                
-                const json_number_s *json_tran = (json_number_s*)json_tran_value->payload;
-                node.translation[0] = atof(json_tran->number);
+                node.translation[0] = json_to_float(json_arr_tran_ele->value);
               }
               
               json_arr_tran_ele = json_arr_tran_ele->next;
 
               if(json_arr_tran_ele)
               {
-                const json_value_s *json_tran_value = json_arr_tran_ele->value;
-                LIB_ASSERT(json_tran_value->type == json_type_number);
-                
-                const json_number_s *json_tran = (json_number_s*)json_tran_value->payload;
-                node.translation[1] = atof(json_tran->number);
+                node.translation[1] = json_to_float(json_arr_tran_ele->value);
               }
 
               json_arr_tran_ele = json_arr_tran_ele->next;
 
               if(json_arr_tran_ele)
               {
-                const json_value_s *json_tran_value = json_arr_tran_ele->value;
-                LIB_ASSERT(json_tran_value->type == json_type_number);
-                
-                const json_number_s *json_tran = (json_number_s*)json_tran_value->payload;
-                node.translation[2] = atof(json_tran->number);
+                node.translation[2] = json_to_float(json_arr_tran_ele->value);
               }
             }
-            else if(strcmp(json_field_name->string, "scale") == 0)
+            else if(json_obj_name(json_node_attr, "scale"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_array);
-              
-              const json_array_s *json_arr_scale = (json_array_s*)json_field_value->payload;
-              const json_array_element_s *json_arr_scale_ele = json_arr_scale->start;
+              const json_array_element_s *json_arr_scale_ele = json_arr_element(json_node_attr);
               
               if(json_arr_scale_ele)
               {
-                const json_value_s *json_scale_value = json_arr_scale_ele->value;
-                LIB_ASSERT(json_scale_value->type == json_type_number);
-                
-                const json_number_s *json_scale = (json_number_s*)json_scale_value->payload;
-                node.scale[0] = atof(json_scale->number);
+                node.scale[0] = json_to_float(json_arr_scale_ele->value);
               }
               
               json_arr_scale_ele = json_arr_scale_ele->next;
 
               if(json_arr_scale_ele)
               {
-                const json_value_s *json_scale_value = json_arr_scale_ele->value;
-                LIB_ASSERT(json_scale_value->type == json_type_number);
-                
-                const json_number_s *json_scale = (json_number_s*)json_scale_value->payload;
-                node.scale[1] = atof(json_scale->number);
+                node.scale[1] = json_to_float(json_arr_scale_ele->value);
               }
 
               json_arr_scale_ele = json_arr_scale_ele->next;
 
               if(json_arr_scale_ele)
               {
-                const json_value_s *json_scale_value = json_arr_scale_ele->value;
-                LIB_ASSERT(json_scale_value->type == json_type_number);
-                
-                const json_number_s *json_scale = (json_number_s*)json_scale_value->payload;
-                node.scale[2] = atof(json_scale->number);
+                node.scale[2] = json_to_float(json_arr_scale_ele->value);
               }
             }
             else
@@ -1166,7 +984,7 @@ load_assets()
             }
             
             // Next Element
-            json_field_ele = json_field_ele->next;
+            json_node_attr = json_node_attr->next;
           }
           
           // Next Field
@@ -1178,7 +996,7 @@ load_assets()
       /*
         Parse Scene
       */
-      else if(strcmp(json_element_name->string, "scene") == 0)
+      else if(json_obj_name(json_gltf_element, "scene"))
       {
         // Just one scene it seems.
       }
@@ -1186,37 +1004,25 @@ load_assets()
       /*
         Parse Scenes
       */
-      else if(strcmp(json_element_name->string, "scenes") == 0)
+      else if(json_obj_name(json_gltf_element, "scenes"))
       {
-        LIB_ASSERT(json_element_value->type == json_type_array);
-      
-        const json_array_s *json_scenes        = (json_array_s*)json_element_value->payload;
-        const json_array_element_s *json_scene = json_scenes->start;
+        const json_array_element_s *json_scene = json_arr_element(json_gltf_element);
         
         while(json_scene != nullptr)
         {
-          LIB_ASSERT(json_scene);
-        
           gltf_scene scene{};
+
+          const json_object_element_s *json_scene_attr = json_obj_element(json_scene->value);
           
-          const json_value_s *json_value              = json_scene->value;
-          const json_object_s *json_field_obj         = (json_object_s*)json_value->payload;
-          const json_object_element_s *json_field_ele = json_field_obj->start;
-          
-          while(json_field_ele != nullptr)
+          while(json_scene_attr != nullptr)
           {
-            const json_string_s *json_field_name = json_field_ele->name;
-            const json_value_s *json_field_value = json_field_ele->value;
-            
-            if(strcmp(json_field_name->string, "name") == 0)
+            if(json_obj_name(json_scene_attr, "name"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_string);
             }
-            else if(strcmp(json_field_name->string, "nodes") == 0)
+            else if(json_obj_name(json_scene_attr, "nodes"))
             {
-              LIB_ASSERT(json_field_value->type == json_type_array);
             }
-            else if(strcmp(json_field_name->string, "extensions") == 0)
+            else if(json_obj_name(json_scene_attr, "extensions"))
             {
               LOG_TODO_ONCE("Support scene extensions");
             }
@@ -1227,7 +1033,7 @@ load_assets()
             }
             
             // Next Element
-            json_field_ele = json_field_ele->next;
+            json_scene_attr = json_scene_attr->next;
           }
           
           // Next Field
@@ -1276,7 +1082,8 @@ load_assets()
       Nil::Resource::Material data{};
       
       data.name = mat.name;
-      data.texture_01 = internal_mesh_ids[mat.base_color_texture.index];
+      
+      data.texture_01 = 1;
       
       Nil::Resource::load(data);
       
