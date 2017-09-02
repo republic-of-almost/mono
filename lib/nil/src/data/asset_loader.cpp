@@ -113,6 +113,52 @@ void base64_cleanup() {
 }
 
 
+/*
+  Json Helpers
+*/
+inline const json_object_element_s*
+json_obj_element(const json_value_s *obj)
+{
+  return ((const json_object_s*)obj->payload)->start;
+}
+
+inline bool
+json_obj_name(const json_object_element_s *ele, const char *name)
+{
+  return (strcmp(ele->name->string, name) == 0);
+}
+
+inline json_array_element_s*
+json_arr_element(const json_object_element_s *ele)
+{
+  return ((const json_array_s*)ele->value->payload)->start;
+}
+
+inline int32_t
+json_to_int(const json_value_s *val)
+{
+  LIB_ASSERT(val->type == json_type_number);
+  return (int32_t)atoi(((const json_number_s*)val->payload)->number);
+}
+
+inline float
+json_to_float(const json_value_s *val)
+{
+  return atof(((const json_number_s*)val->payload)->number);
+}
+
+inline const char *
+json_to_string(const json_value_s *val, size_t *data_length = nullptr)
+{
+  if(data_length)
+  {
+    *data_length = ((const json_string_s*)val->payload)->string_size;
+  }
+
+  return ((json_string_s*)val->payload)->string;
+}
+
+
 } // anon ns
 
 
@@ -366,7 +412,7 @@ load_assets()
     struct gltf_KHR_materials_cmnBlinnPhong
     {
       float diffuse_factor[4];
-      uint32_t diffuse_texture;
+      int32_t diffuse_texture;
       float shininess_factor;
       float specular_factor[3];
     };
@@ -375,7 +421,7 @@ load_assets()
     {
       char name[64];
       float emissive_factor[3];
-      gltf_KHR_materials_cmnBlinnPhong blinn_extension;
+      gltf_KHR_materials_cmnBlinnPhong ext_blinn_phong;
     };
   
     
@@ -412,42 +458,7 @@ load_assets()
     );
 
     json_value_s *json_root                        = json_parse_ex(buffer, count, flags, 0, 0, 0);
-    
-    
-    auto json_obj_element = [](const json_value_s *obj)
-    {
-      return ((const json_object_s*)obj->payload)->start;
-    };
-    
-    auto json_obj_name = [](const json_object_element_s *ele, const char *name)
-    {
-      return (strcmp(ele->name->string, name) == 0);
-    };
-    
-    auto json_arr_element = [](const json_object_element_s *ele)
-    {
-      return ((const json_array_s*)ele->value->payload)->start;
-    };
-    
-    auto json_to_int = [](const json_object_element_s *ele)
-    {
-      return atoi(((const json_number_s*)ele->value->payload)->number);
-    };
 
-    auto json_to_float = [](const json_value_s *val)
-    {
-      return atof(((const json_number_s*)val->payload)->number);
-    };
-    
-    auto json_to_string = [](const json_object_element_s *ele, size_t *data_length = nullptr)
-    {
-      if(data_length)
-      {
-        *data_length = ((const json_string_s*)ele->value->payload)->string_size;
-      }
-    
-      return ((json_string_s*)ele->value->payload)->string;
-    };
     
     // -- //
     
@@ -472,17 +483,17 @@ load_assets()
           {
             if(json_obj_name(json_accessor_attr, "bufferView"))
             {
-              accessor.buffer_view = json_to_int(json_accessor_attr);
+              accessor.buffer_view = json_to_int(json_accessor_attr->value);
             }
             
             else if(json_obj_name(json_accessor_attr, "componentType"))
             {
-              accessor.component_type = json_to_int(json_accessor_attr);
+              accessor.component_type = json_to_int(json_accessor_attr->value);
             }
             
             else if(json_obj_name(json_accessor_attr, "count"))
             {
-              accessor.count = json_to_int(json_accessor_attr);
+              accessor.count = json_to_int(json_accessor_attr->value);
             }
             
             else if(json_obj_name(json_accessor_attr, "min"))
@@ -495,7 +506,7 @@ load_assets()
             
             else if(json_obj_name(json_accessor_attr, "type"))
             {
-              const char *name = json_to_string(json_accessor_attr);
+              const char *name = json_to_string(json_accessor_attr->value);
               
               if(strcmp(name, "SCALAR") == 0)
               {
@@ -620,12 +631,12 @@ load_assets()
           {
             if(json_obj_name(json_buffer_attr, "byteLength"))
             {
-              buffer.byte_length = json_to_int(json_buffer_attr);
+              buffer.byte_length = json_to_int(json_buffer_attr->value);
             }
             else if(json_obj_name(json_buffer_attr, "uri"))
             {
               size_t data_length = 0;
-              const char *data = json_to_string(json_buffer_attr, &data_length);
+              const char *data = json_to_string(json_buffer_attr->value, &data_length);
               
               const char *starts_with = "data:application/octet-stream;base64,";
               const char *ends_width = ".bin"; // impl
@@ -667,7 +678,7 @@ load_assets()
             if(json_obj_name(json_image_attr, "uri"))
             {
               size_t data_length = 0;
-              const char *data = json_to_string(json_image_attr, &data_length);
+              const char *data = json_to_string(json_image_attr->value, &data_length);
               
               const char *starts_with = "data:image/png;base64,";
               const char *ends_width  = ".bin"; // impl
@@ -707,11 +718,11 @@ load_assets()
           {
             if(json_obj_name(json_texture_attr, "sampler"))
             {
-              texture.sampler = json_to_int(json_texture_attr);
+              texture.sampler = json_to_int(json_texture_attr->value);
             }
             else if(json_obj_name(json_texture_attr, "source"))
             {
-              texture.source = json_to_int(json_texture_attr);
+              texture.source = json_to_int(json_texture_attr->value);
             }
             
             json_texture_attr = json_texture_attr->next;
@@ -732,6 +743,7 @@ load_assets()
         while(json_material != nullptr)
         {
           gltf_material mat{};
+          mat.ext_blinn_phong.diffuse_texture = -1;
           
           const json_object_element_s *json_material_attr = json_obj_element(json_material->value);
           
@@ -740,7 +752,7 @@ load_assets()
             if(json_obj_name(json_material_attr, "name"))
             {
               size_t data_length = 0;
-              const char *data = json_to_string(json_material_attr, &data_length);
+              const char *data = json_to_string(json_material_attr->value, &data_length);
               
               const size_t len = data_length > 64 ? 63 : data_length;
               memcpy(mat.name, data, len);
@@ -759,7 +771,78 @@ load_assets()
             }
             else if(json_obj_name(json_material_attr, "extensions"))
             {
+              const json_object_element_s *json_material_ext_attr = json_obj_element(json_material_attr->value);
+              
+              if(json_obj_name(json_material_ext_attr, "KHR_materials_cmnBlinnPhong"))
+              {
+                const json_object_element_s *blinn_phong_attr = json_obj_element(json_material_ext_attr->value);
+                
+                while(blinn_phong_attr != nullptr)
+                {
+                  if(json_obj_name(blinn_phong_attr, "diffuseFactor"))
+                  {
+                    const json_array_element_s *factor_arr = json_arr_element(blinn_phong_attr);
+                    
+                    size_t index = 0;
+                    
+                    while(factor_arr != nullptr)
+                    {
+                      LIB_ASSERT(index < 4);
+                      mat.ext_blinn_phong.diffuse_factor[index++] = json_to_float(factor_arr->value);
+                    
+                      factor_arr = factor_arr->next;
+                    }
+                  }
+                  
+                  else if(json_obj_name(blinn_phong_attr, "diffuseTexture"))
+                  {
+                    const json_object_element_s *diff_tex_attr = json_obj_element(blinn_phong_attr->value);
+                    
+                    while(diff_tex_attr != nullptr)
+                    {
+                      if(json_obj_name(diff_tex_attr, "index"))
+                      {
+                        mat.ext_blinn_phong.diffuse_texture = json_to_int(diff_tex_attr->value);
+                      }
+                      else
+                      {
+                        LIB_ASSERT("Unknown ");
+                      }
+                      
+                      diff_tex_attr = diff_tex_attr->next;
+                    }
+                  }
+                  
+                  else if(json_obj_name(blinn_phong_attr, "shininessFactor"))
+                  {
+                    mat.ext_blinn_phong.shininess_factor = json_to_float(blinn_phong_attr->value);
+                  }
+                  
+                  else if(json_obj_name(blinn_phong_attr, "specularFactor"))
+                  {
+                    const json_array_element_s *spec_arr = json_arr_element(blinn_phong_attr);
+                    
+                    size_t index = 0;
+                    
+                    while(spec_arr != nullptr)
+                    {
+                      LIB_ASSERT(index < 3);
+                      mat.ext_blinn_phong.specular_factor[index++] = json_to_float(spec_arr->value);
+                    
+                      spec_arr = spec_arr->next;
+                    }
+                  }
+                 
+                  blinn_phong_attr = blinn_phong_attr->next;
+                }
 
+              }
+              else
+              {
+                // Missing something.
+                LIB_ASSERT(false);
+              }
+              
               //"KHR_materials_cmnBlinnPhong"
             }
             else
@@ -794,7 +877,7 @@ load_assets()
             if(json_obj_name(json_mesh_attr, "name"))
             {
               size_t data_length = 0;
-              const char *data = json_to_string(json_mesh_attr, &data_length);
+              const char *data = json_to_string(json_mesh_attr->value, &data_length);
             
               const size_t len = data_length > 64 ? 63 : data_length;
               memcpy(mesh.name, data, len);
@@ -817,19 +900,19 @@ load_assets()
                     {
                       if(json_obj_name(atrib_attr, "POSITION"))
                       {
-                        mesh.primitives.attr_position = json_to_int(atrib_attr);
+                        mesh.primitives.attr_position = json_to_int(atrib_attr->value);
                       }
                       else if(json_obj_name(atrib_attr, "NORMAL"))
                       {
-                        mesh.primitives.attr_normal = json_to_int(atrib_attr);
+                        mesh.primitives.attr_normal = json_to_int(atrib_attr->value);
                       }
                       else if(json_obj_name(atrib_attr, "TANGENT"))
                       {
-                        mesh.primitives.attr_tangent = json_to_int(atrib_attr);
+                        mesh.primitives.attr_tangent = json_to_int(atrib_attr->value);
                       }
                       else if(json_obj_name(atrib_attr, "TEXCOORD_0"))
                       {
-                        mesh.primitives.attr_texcoord_0 = json_to_int(atrib_attr);
+                        mesh.primitives.attr_texcoord_0 = json_to_int(atrib_attr->value);
                       }
                       
                       atrib_attr = atrib_attr->next;
@@ -837,12 +920,12 @@ load_assets()
                   }
                   else if(json_obj_name(json_prim_attr, "indices"))
                   {
-                    mesh.primitives.indices = json_to_int(json_prim_attr);
+                    mesh.primitives.indices = json_to_int(json_prim_attr->value);
 
                   }
                   else if(json_obj_name(json_prim_attr, "material"))
                   {
-                    mesh.primitives.material = json_to_int(json_prim_attr);
+                    mesh.primitives.material = json_to_int(json_prim_attr->value);
                   }
                   else
                   {
@@ -891,12 +974,12 @@ load_assets()
           {
             if(json_obj_name(json_node_attr, "mesh"))
             {
-              node.mesh = json_to_int(json_node_attr);
+              node.mesh = json_to_int(json_node_attr->value);
             }
             else if(json_obj_name(json_node_attr, "name"))
             {
               size_t data_length = 0;
-              const char *data = json_to_string(json_node_attr, &data_length);
+              const char *data = json_to_string(json_node_attr->value, &data_length);
               
               const size_t len = data_length > 63 ? 63 : data_length;
               memcpy(node.name, data, len);
@@ -905,76 +988,42 @@ load_assets()
             {
               const json_array_element_s *json_arr_rot_ele = json_arr_element(json_node_attr);
               
-              if(json_arr_rot_ele)
-              {
-                node.rotation[0] = json_to_float(json_arr_rot_ele->value);
-              }
+              size_t index = 0;
               
-              json_arr_rot_ele = json_arr_rot_ele->next;
-
-              if(json_arr_rot_ele)
+              while(json_arr_rot_ele != nullptr)
               {
-                node.rotation[1] = json_to_float(json_arr_rot_ele->value);
-              }
-
-              json_arr_rot_ele = json_arr_rot_ele->next;
-
-              if(json_arr_rot_ele)
-              {
-                node.rotation[2] = json_to_float(json_arr_rot_ele->value);
-              }
+                LIB_ASSERT(index < 4);
+                node.rotation[index++] = json_to_float(json_arr_rot_ele->value);
               
-              json_arr_rot_ele = json_arr_rot_ele->next;
-
-              if(json_arr_rot_ele)
-              {
-                node.rotation[3] = json_to_float(json_arr_rot_ele->value);
+                json_arr_rot_ele = json_arr_rot_ele->next;
               }
             }
             else if(json_obj_name(json_node_attr, "translation"))
             {
               const json_array_element_s *json_arr_tran_ele = json_arr_element(json_node_attr);
               
-              if(json_arr_tran_ele)
-              {
-                node.translation[0] = json_to_float(json_arr_tran_ele->value);
-              }
+              size_t index = 0;
               
-              json_arr_tran_ele = json_arr_tran_ele->next;
-
-              if(json_arr_tran_ele)
+              while(json_arr_tran_ele != nullptr)
               {
-                node.translation[1] = json_to_float(json_arr_tran_ele->value);
-              }
-
-              json_arr_tran_ele = json_arr_tran_ele->next;
-
-              if(json_arr_tran_ele)
-              {
-                node.translation[2] = json_to_float(json_arr_tran_ele->value);
+                LIB_ASSERT(index < 3);
+                node.translation[index++] = json_to_float(json_arr_tran_ele->value);
+                
+                json_arr_tran_ele = json_arr_tran_ele->next;
               }
             }
             else if(json_obj_name(json_node_attr, "scale"))
             {
               const json_array_element_s *json_arr_scale_ele = json_arr_element(json_node_attr);
               
-              if(json_arr_scale_ele)
-              {
-                node.scale[0] = json_to_float(json_arr_scale_ele->value);
-              }
+              size_t index = 0;
               
-              json_arr_scale_ele = json_arr_scale_ele->next;
-
-              if(json_arr_scale_ele)
+              while(json_arr_scale_ele != nullptr)
               {
-                node.scale[1] = json_to_float(json_arr_scale_ele->value);
-              }
-
-              json_arr_scale_ele = json_arr_scale_ele->next;
-
-              if(json_arr_scale_ele)
-              {
-                node.scale[2] = json_to_float(json_arr_scale_ele->value);
+                LIB_ASSERT(index < 3);
+                node.scale[index++] = json_to_float(json_arr_scale_ele->value);
+                
+                json_arr_scale_ele = json_arr_scale_ele->next;
               }
             }
             else
@@ -1083,7 +1132,10 @@ load_assets()
       
       data.name = mat.name;
       
-      data.texture_01 = 1;
+      if(mat.ext_blinn_phong.diffuse_texture >= 0)
+      {
+        data.texture_01 = internal_texture_ids[mat.ext_blinn_phong.diffuse_texture];
+      }
       
       Nil::Resource::load(data);
       

@@ -482,13 +482,13 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
         {
           const char *path = (const char*)tex->data;
 
-          stbi_set_flip_vertically_on_load(true);
+//          stbi_set_flip_vertically_on_load(true);
           img_data = stbi_load(path, &x, &y, &c, 0);
 
         }
         else if(data_is_array)
         {
-          stbi_set_flip_vertically_on_load(true);
+//          stbi_set_flip_vertically_on_load(true);
           img_data = stbi_load_from_memory((stbi_uc*)tex->data, tex->data_size, &x, &y, &c, 0);
         }
         else
