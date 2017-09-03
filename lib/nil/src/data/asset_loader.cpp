@@ -1043,6 +1043,48 @@ load_assets()
       }
       
       /*
+        Extensions
+      */
+      else if(json_obj_name(json_gltf_element, "extensions"))
+      {
+        const json_object_element_s *json_ext_attr = json_obj_element(json_gltf_element->value);
+        
+        if(json_obj_name(json_ext_attr, "KHR_lights"))
+        {
+          const json_object_element_s *json_ext_lights_attr = json_obj_element(json_ext_attr->value);
+          
+          while(json_ext_lights_attr != nullptr)
+          {
+            if(json_obj_name(json_ext_lights_attr, "lights"))
+            {
+              const json_array_element_s *json_light_ele = json_arr_element(json_ext_lights_attr);
+             
+              while(json_light_ele != nullptr)
+              {
+                const json_object_element_s *json_ext_light_attr = json_obj_element(json_light_ele->value);
+                
+                if(json_obj_name(json_ext_light_attr, "color"))
+                {
+                  
+                }
+                else if(json_obj_name(json_ext_lights_attr, "name"))
+                {
+                }
+                else if(json_obj_name(json_ext_lights_attr, "type"))
+                {
+                }
+              
+                json_light_ele = json_light_ele->next;
+              }
+              
+            }
+            
+            json_ext_lights_attr = json_ext_lights_attr->next;
+          }
+        }
+      }
+      
+      /*
         Parse Scene
       */
       else if(json_obj_name(json_gltf_element, "scene"))
