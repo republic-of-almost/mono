@@ -9,6 +9,7 @@
 #include <roa/bounding_box.hpp>
 #include <roa/camera.hpp>
 #include <roa/collection.hpp>
+#include <roa/component.hpp>
 #include <roa/color.hpp>
 #include <roa/keyboard.hpp>
 #include <roa/light.hpp>

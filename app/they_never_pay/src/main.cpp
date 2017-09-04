@@ -11,13 +11,21 @@
 #include <nau/renderers/opengl3.h>
 
 #include <roa/roa.hpp>
-#include <tinydir/tinydir.h>
-#include <lib/directory.hpp>
+
+
+
+struct TestScript : public ROA::Component
+{
+  static constexpr uint32_t get_rtti() { return 123; }
+};
+
 
 int
 main()
 {
 //  lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
+
+  lib::logging::set_output(lib::logging::out::file | lib::logging::out::console);
 
   ROA::Application app;
 
@@ -41,6 +49,13 @@ main()
 
 
   int i = 0;
+  
+
+  ROA::Object obj;
+  
+  obj.add_component<TestScript>();
+  
+  
   /*
     Run Game
   */

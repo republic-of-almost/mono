@@ -3,6 +3,7 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/detail/component_interface.hpp>
 
 
 namespace ROA {
@@ -69,6 +70,53 @@ public:
   
   uintptr_t             get_user_data() const;
   void                  set_user_data(uintptr_t user_data);
+  
+  
+  // --------------------------------------------------------- [ Components ] --
+  
+  
+  template<typename T>
+  bool
+  add_component()
+  {
+    static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
+  
+    if(!has_component<T>())
+    {
+      T *obj = new T{};
+      const uint32_t instance_id = this->get_instance_id();
+      
+      return ROA_detail::add_component(instance_id, obj);
+    }
+    
+    return false;
+  }
+  
+  
+  template<typename T>
+  bool
+  has_component()
+  {
+    static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
+    
+    const uint32_t rtti = T::get_rtti();
+    const uint32_t instance_id = this->get_instance_id();
+    
+    return ROA_detail::has_component(instance_id, rtti);
+  }
+  
+  
+  template<typename T>
+  T*
+  get_component()
+  {
+    static_assert(T::get_rtti_id() != 0, "Is this a ROA::Component");
+    
+    const uint32_t rtti = T::get_rtti();
+    const uint32_t instance_id = this->get_instance_id();
+  
+    return static_cast<T*>(ROA_detail::get_component(instance_id, rtti));
+  }
   
   
   // ---------------------------------------------------- [ Data Components ] --

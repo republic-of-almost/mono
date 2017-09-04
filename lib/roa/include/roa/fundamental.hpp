@@ -1,5 +1,6 @@
 /*
   Includes everything needed for the ROA interfaces and nothing else.
+  Other than some standard includes don't include anything else here.
 */
 #ifndef FUNDAMENTAL_INCLUDED_A0D602DD_313D_4456_93A0_10E453F3A2BA
 #define FUNDAMENTAL_INCLUDED_A0D602DD_313D_4456_93A0_10E453F3A2BA
@@ -28,6 +29,7 @@ class Application;
 class Bounding_box;
 class Camera;
 class Collection;
+class Component;
 class Color;
 class Light;
 class Logic;

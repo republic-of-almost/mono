@@ -31,6 +31,7 @@ public:
   Vector3       get_max() const;
   void          set_max(const Vector3 &in);
 
+
 };
 
 

@@ -9,7 +9,14 @@
 namespace ROA {
 
 
+struct Application::Impl
+{
+  
+};
+
+
 Application::Application()
+: m_impl{new Impl}
 {
   Nil_ext::load_aspects(ROA_detail::get_engine());
 
@@ -28,6 +35,12 @@ Application::Application()
 
 Application::~Application()
 {
+  LIB_ASSERT(m_impl);
+  
+  if(m_impl)
+  {
+    delete m_impl;
+  }
 }
 
 
@@ -36,6 +49,23 @@ Application::run(Custom_tick_fn tick, uintptr_t user_data)
 {
   while(ROA_detail::get_engine().run())
   {
+    /*
+      Components
+      --
+      Components live in ROA rather than Nil.
+      So updates and so forth will need to be called now.
+      Components are single threaded right now.
+    */
+    {
+      
+    }
+    
+    
+    /*
+      Custom Callback
+      --
+      The user may specifiy a callback we do it before we start another frame.
+    */
     if(tick)
     {
       tick(user_data);
