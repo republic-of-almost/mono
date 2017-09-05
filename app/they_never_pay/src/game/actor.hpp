@@ -8,8 +8,21 @@
 namespace Game {
 
 
-struct Actor
+struct Actor : ROA::Component
 {
+  static constexpr uint32_t get_rtti() { return 234; }
+  
+  
+  // -------------------------------------------------------------- [ Hooks ] --
+  
+  
+  void on_start() override;
+  void on_think() override;
+  
+  
+  // ------------------------------------------------------------ [ Members ] --
+  
+  
   ROA::Object entity;
   ROA::Object head;
   
@@ -19,10 +32,6 @@ struct Actor
   float *nav_mesh = nullptr;
   uint32_t nav_mesh_count = 0;
 };
-
-
-void
-setup(Actor *actor);
 
 
 } // ns

@@ -4,6 +4,7 @@
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
 #include <aspect/aspects.hpp>
+#include <component/component_engine.hpp>
 
 
 namespace ROA {
@@ -57,7 +58,9 @@ Application::run(Custom_tick_fn tick, uintptr_t user_data)
       Components are single threaded right now.
     */
     {
-      
+      ROA_detail::components_early_think_hooks();
+      ROA_detail::components_think_hooks();
+      ROA_detail::components_late_think_hooks();
     }
     
     

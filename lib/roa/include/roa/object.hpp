@@ -80,8 +80,9 @@ public:
   add_component()
   {
     static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
+    const bool has_comp = has_component<T>();
   
-    if(!has_component<T>())
+    if(!has_comp)
     {
       T *obj = new T{};
       const uint32_t instance_id = this->get_instance_id();

@@ -5,7 +5,17 @@
 namespace ROA_detail {
 
 
+// ------------------------------------------------------ [ Component Hooks ] --
 
+
+void
+components_early_think_hooks();
+
+void
+components_think_hooks();
+
+void
+components_late_think_hooks();
 
 
 } // ns

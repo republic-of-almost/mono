@@ -11,14 +11,16 @@
 namespace Game {
 
 
-namespace {
+//namespace {
 
 
-inline void
-think(ROA::Object node)
+//inline void
+//think(ROA::Object node)
+void
+Actor::on_think()
 {
-  Actor *actor = reinterpret_cast<Actor*>(node.get_user_data());
-  LIB_ASSERT(actor);
+//  Actor *actor = reinterpret_cast<Actor*>(node.get_user_data());
+//  LIB_ASSERT(actor);
   
   const float delta_time = 0.16f;
   
@@ -29,11 +31,11 @@ think(ROA::Object node)
     const float head_speed = 0.05f;
     const float final_speed = delta_time * head_speed;
     
-    actor->accum_pitch -= ms_delta.y * final_speed;
-    actor->accum_yaw   += ms_delta.x * final_speed;
+    this->accum_pitch -= ms_delta.y * final_speed;
+    this->accum_yaw   += ms_delta.x * final_speed;
     
-    actor->accum_pitch = math::clamp(
-      actor->accum_pitch,
+    this->accum_pitch = math::clamp(
+      this->accum_pitch,
       -math::quart_tau(),
       +math::quart_tau()
     );
@@ -43,10 +45,10 @@ think(ROA::Object node)
   {
     const math::quat yaw = math::quat_init_with_axis_angle(
       Game_data::get_world_up(),
-      actor->accum_yaw
+      this->accum_yaw
     );
 
-    ROA::Transform trans = node.get_transform();
+    ROA::Transform trans = entity.get_transform();
     trans.set_rotation(ROA::Quaternion(yaw.data));
   }
   
@@ -54,10 +56,10 @@ think(ROA::Object node)
   {
     const math::quat pitch = math::quat_init_with_axis_angle(
       Game_data::get_world_left(),
-      actor->accum_pitch
+      this->accum_pitch
     );
 
-    ROA::Transform trans = actor->head.get_transform();
+    ROA::Transform trans = this->head.get_transform();
     trans.set_rotation(ROA::Quaternion(pitch.data));
   }
   
@@ -98,7 +100,7 @@ think(ROA::Object node)
       // Create query
       if(ROA::Keyboard::key_state(ROA::KeyCode::SPACE) == ROA::KeyState::UP_ON_FRAME)
       {
-        ROA::Transform trans = actor->head.get_transform();
+        ROA::Transform trans = this->head.get_transform();
       
         ROA::Ray ray(trans.get_world_position(), trans.get_world_forward().scale(10000));
       
@@ -118,8 +120,8 @@ think(ROA::Object node)
 
     const float move_speed = 0.5f * delta_time;
 
-    ROA::Transform trans = node.get_transform();
-    ROA::Transform head_trans = actor->head.get_transform();
+    ROA::Transform trans = entity.get_transform();
+    ROA::Transform head_trans = this->head.get_transform();
     
     math::vec3 height = math::vec3_init(head_trans.get_position().get_data());
     math::vec3 pos = math::vec3_init(trans.get_position().get_data());
@@ -162,7 +164,7 @@ think(ROA::Object node)
     //constexpr size_t tri_count = sizeof(Actor::nav_mesh) / (sizeof(float)) / 9;
     
     float distance = 0.f;
-    if((math::ray_test_triangles(ray, actor->nav_mesh, actor->nav_mesh_count, &distance)) && (math::abs(distance) < 5.f))
+    if((math::ray_test_triangles(ray, this->nav_mesh, this->nav_mesh_count, &distance)) && (math::abs(distance) < 5.f))
     {
       math::vec3 scale = math::vec3_scale(math::ray_direction(ray), distance);
       math::vec3 hit = math::vec3_add(ray.start, scale);
@@ -180,8 +182,8 @@ think(ROA::Object node)
       math::vec3 curr_step_edge[2];
       
       math::ray_test_closest_edge(
-        actor->nav_mesh,
-        actor->nav_mesh_count,
+        this->nav_mesh,
+        this->nav_mesh_count,
         curr_step,
         curr_step_edge[0],
         curr_step_edge[1]
@@ -202,7 +204,7 @@ think(ROA::Object node)
       const math::ray side_step_ray      = math::ray_init(side_step, side_step_ray_end);
       
       distance = 0.f;
-      if(math::ray_test_triangles(side_step_ray, actor->nav_mesh, actor->nav_mesh_count, &distance))
+      if(math::ray_test_triangles(side_step_ray, this->nav_mesh, this->nav_mesh_count, &distance))
       {
         const math::vec3 ray_dir = math::ray_direction(side_step_ray);
         const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
@@ -216,8 +218,8 @@ think(ROA::Object node)
         math::vec3 next_step_edge[2];
       
         math::ray_test_closest_edge(
-          actor->nav_mesh,
-          actor->nav_mesh_count,
+          this->nav_mesh,
+          this->nav_mesh_count,
           next_step,
           next_step_edge[0],
           next_step_edge[1]
@@ -238,7 +240,7 @@ think(ROA::Object node)
         const math::ray side_step_ray      = math::ray_init(side_step, side_step_ray_end);
         
         distance = 0.f;
-        if(math::ray_test_triangles(side_step_ray, actor->nav_mesh, actor->nav_mesh_count, &distance))
+        if(math::ray_test_triangles(side_step_ray, this->nav_mesh, this->nav_mesh_count, &distance))
         {
           const math::vec3 ray_dir = math::ray_direction(side_step_ray);
           const math::vec3 scale   = math::vec3_scale(ray_dir, distance);
@@ -253,45 +255,45 @@ think(ROA::Object node)
   
 //  constexpr size_t tri_count = sizeof(Actor::nav_mesh) / (sizeof(float)) / 9;
   
-  for(uint32_t i = 0; i < actor->nav_mesh_count; ++i)
+  for(uint32_t i = 0; i < this->nav_mesh_count; ++i)
   {
     const size_t index = i * 9;
   
     Game_data::debug_line
     (
-      math::vec3_init(&actor->nav_mesh[index + 0]),
-      math::vec3_init(&actor->nav_mesh[index + 3]),
+      math::vec3_init(&this->nav_mesh[index + 0]),
+      math::vec3_init(&this->nav_mesh[index + 3]),
       math::vec3_init(1,0,0)
     );
 
     Game_data::debug_line
     (
-      math::vec3_init(&actor->nav_mesh[index + 3]),
-      math::vec3_init(&actor->nav_mesh[index + 6]),
+      math::vec3_init(&this->nav_mesh[index + 3]),
+      math::vec3_init(&this->nav_mesh[index + 6]),
       math::vec3_init(1,0,0)
     );
 
     Game_data::debug_line
     (
-      math::vec3_init(&actor->nav_mesh[index + 6]),
-      math::vec3_init(&actor->nav_mesh[index + 0]),
+      math::vec3_init(&this->nav_mesh[index + 6]),
+      math::vec3_init(&this->nav_mesh[index + 0]),
       math::vec3_init(1,0,0)
     );
   }
 }
 
 
-} // anon ns
+//} // anon ns
 
 
 void
-setup(Actor *actor)
+Actor::on_start()
 {
-  LIB_ASSERT(actor);
+//  LIB_ASSERT(actor);
   
-  actor->height = 2.f;
+  this->height = 2.f;
   
-  actor->entity.set_name("Actor");
+  this->entity.set_name("Actor");
   
   // Nav mesh
   {
@@ -304,8 +306,8 @@ setup(Actor *actor)
 
     if(model.mesh_count > 0) 
     {
-      actor->nav_mesh = model.verts[0];
-      actor->nav_mesh_count = model.triangle_count[0];
+      this->nav_mesh = model.verts[0];
+      this->nav_mesh_count = model.triangle_count[0];
     }
   }
   
@@ -321,16 +323,16 @@ setup(Actor *actor)
     trans.set_scale(ROA::Vector3(scale));
     trans.set_rotation(ROA::Quaternion(rot));
     
-    actor->entity.set_transform(trans);
+    this->entity.set_transform(trans);
   }
   
   // Head
   {
     ROA::Object head;
     head.set_name("Head");
-    head.set_parent(actor->entity);
+    head.set_parent(this->entity);
     
-    actor->head = head;
+    this->head = head;
     
     // Head Trans
     {
@@ -344,7 +346,7 @@ setup(Actor *actor)
       trans.set_scale(ROA::Vector3(scale));
       trans.set_rotation(ROA::Quaternion(rot));
       
-      actor->head.set_transform(trans);
+      this->head.set_transform(trans);
     }
     
     // Camera
@@ -380,7 +382,7 @@ setup(Actor *actor)
   {
     ROA::Object body;
     body.set_name("Body");
-    body.set_parent(actor->entity);
+    body.set_parent(this->entity);
     
     // Body Transform
     {
@@ -399,20 +401,20 @@ setup(Actor *actor)
   
   // Callbacks
   {
-    ROA::Logic logic;
-    actor->entity.set_logic(logic);
+//    ROA::Logic logic;
+//    this->entity.set_logic(logic);
     
-    logic = actor->entity.get_logic();
+//    logic = this->entity.get_logic();
     
-    logic.set_update_func(think);
+//    logic.set_update_func(think);
     
-    actor->entity.set_user_data((uintptr_t)actor);
-    actor->entity.set_logic(logic);
+//    this->entity.set_user_data((uintptr_t)actor);
+//    this->entity.set_logic(logic);
   }
   
   // Do one think to get actor into the right place
   {
-    think(actor->entity);
+//    think(this->entity);
   }
 }
 
