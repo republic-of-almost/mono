@@ -8,6 +8,7 @@ namespace {
 
 lib::array<uint64_t> keys;
 lib::array<ROA::Component*> components;
+lib::array<ROA::Component*> start;
 
 
 } // anon ns
@@ -20,6 +21,18 @@ namespace ROA_detail {
 
 
 void
+components_start_hooks()
+{
+  for(auto &comp : start)
+  {
+    //comp->on_start();
+  }
+  
+  start.clear();
+}
+
+
+void
 components_early_think_hooks()
 {
   for(auto &comp : components)
@@ -27,6 +40,7 @@ components_early_think_hooks()
     comp->on_early_think();
   }
 }
+
 
 void
 components_think_hooks()
@@ -55,6 +69,7 @@ bool
 add_component(const uint32_t object_id, ROA::Component *comp)
 {
   components.emplace_back(comp);
+  start.emplace_back(comp);
   comp->on_start();
   
   return true;

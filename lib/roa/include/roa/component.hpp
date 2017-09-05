@@ -25,6 +25,7 @@ public:
   
 //  virtual uint32_t      get_rtti() const;
   virtual const char *  get_name() const;
+  Object                get_object() const;
   
   
   // ---------------------------------------------------- [ Interface Hooks ] --
@@ -37,6 +38,7 @@ public:
   virtual void          on_early_think();
   virtual void          on_think();
   virtual void          on_late_think();
+  virtual void          on_destroy();
   
 
 };

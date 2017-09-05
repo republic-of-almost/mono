@@ -9,10 +9,16 @@ namespace ROA_detail {
 
 
 void
+components_start_hooks();
+
+
+void
 components_early_think_hooks();
+
 
 void
 components_think_hooks();
+
 
 void
 components_late_think_hooks();

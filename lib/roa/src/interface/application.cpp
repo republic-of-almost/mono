@@ -58,6 +58,7 @@ Application::run(Custom_tick_fn tick, uintptr_t user_data)
       Components are single threaded right now.
     */
     {
+      ROA_detail::components_start_hooks();
       ROA_detail::components_early_think_hooks();
       ROA_detail::components_think_hooks();
       ROA_detail::components_late_think_hooks();

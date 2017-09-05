@@ -1,3 +1,8 @@
+/*
+  Actor
+  --
+  This is the player object.
+*/
 #ifndef ACTOR_INCLUDED_2F369057_567B_46D2_8C7F_3D3EC28523A9
 #define ACTOR_INCLUDED_2F369057_567B_46D2_8C7F_3D3EC28523A9
 

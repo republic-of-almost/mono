@@ -2,7 +2,7 @@
 
 #include <game/static_objects.hpp>
 #include <game/actor.hpp>
-
+#include <game/game.hpp>
 #include <data/data.hpp>
 
 #include <lib/memory.hpp>
@@ -50,8 +50,11 @@ main()
   Game_data::setup();
   Game_data::load_assets();
 
-  ROA::Object actor;
-  actor.add_component<Game::Actor>();
+  ROA::Object game;
+  game.add_component<Game::Game_manager>();
+
+//  ROA::Object actor;
+//  actor.add_component<Game::Actor>();
 
 //  Game::Actor actor;
 //  Game::setup(&actor);
