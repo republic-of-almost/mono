@@ -30,7 +30,6 @@ struct Game_manager : ROA::Component
   // ------------------------------------------------------------ [ Members ] --
   
   
-  ROA::Object this_obj{nullptr}; // temp until components have an object.
   ROA::Object scene{nullptr};
   ROA::Object actor{nullptr};
   

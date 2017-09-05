@@ -10,7 +10,7 @@ Game_manager::on_start()
 {
   // -- Create this -- //
   {
-    this_obj = ROA::Object{};
+    ROA::Object this_obj = get_object();
     this_obj.set_name("Game Manager");
   }
   
