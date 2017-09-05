@@ -1,29 +1,10 @@
+#include <roa/roa.hpp>
+
 #include <lib/logging.hpp>
-
-#include <game/static_objects.hpp>
-#include <game/actor.hpp>
-#include <game/game.hpp>
-#include <data/data.hpp>
-
 #include <lib/memory.hpp>
 
-#include <nau/nau.h>
-#include <nau/renderers/opengl3.h>
-
-#include <roa/roa.hpp>
-#include <stdio.h>
-
-
-
-struct TestScript : public ROA::Component
-{
-  static constexpr uint32_t get_rtti() { return 123; }
-  
-  void on_think() override
-  {
-    
-  }
-};
+#include <game/game_manager.hpp>
+#include <data/data.hpp>
 
 
 /*
@@ -53,12 +34,6 @@ main()
   ROA::Object game;
   game.add_component<Game::Game_manager>();
 
-//  ROA::Object actor;
-//  actor.add_component<Game::Actor>();
-
-//  Game::Actor actor;
-//  Game::setup(&actor);
-  
   /*
     Run Game
   */

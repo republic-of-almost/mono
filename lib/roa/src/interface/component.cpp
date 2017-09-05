@@ -35,24 +35,20 @@ Component::~Component()
 
 
 
-const char *
-Component::get_name() const
-{
-  // Component should override this method.
-  LIB_ASSERT(false);
-  
-  return "Unknown Component";
-}
+//const char *
+//Component::get_name() const
+//{
+//  // Component should override this method.
+//  LIB_ASSERT(false);
+//  
+//  return "Unknown Component";
+//}
 
 
 Object
 Component::get_object() const
 {
-  // Not yet implimented
-  // Should return the object that this component is attached to.
-  LIB_ASSERT(false);
-  
-  return ROA::Object{};
+  return m_obj;
 }
 
 

@@ -84,10 +84,11 @@ public:
   
     if(!has_comp)
     {
-      T *obj = new T{};
+      T *comp = new T{};
+      comp->m_obj = *this;
       const uint32_t instance_id = this->get_instance_id();
       
-      return ROA_detail::add_component(instance_id, obj);
+      return ROA_detail::add_component(instance_id, comp);
     }
     
     return false;

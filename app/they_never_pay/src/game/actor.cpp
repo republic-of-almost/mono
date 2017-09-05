@@ -24,6 +24,8 @@ Actor::on_think()
   
   const float delta_time = 0.16f;
   
+  ROA::Object entity = get_object();
+  
   if(ROA::Mouse::is_captured())
   {
     ROA::Point ms_delta = ROA::Mouse::get_delta();
@@ -293,7 +295,7 @@ Actor::on_start()
   
   this->height = 2.f;
   
-  this->entity.set_name("Actor");
+  ROA::Object entity = get_object();
   
   // Nav mesh
   {
@@ -323,14 +325,14 @@ Actor::on_start()
     trans.set_scale(ROA::Vector3(scale));
     trans.set_rotation(ROA::Quaternion(rot));
     
-    this->entity.set_transform(trans);
+    entity.set_transform(trans);
   }
   
   // Head
   {
     ROA::Object head;
     head.set_name("Head");
-    head.set_parent(this->entity);
+    head.set_parent(entity);
     
     this->head = head;
     
@@ -382,7 +384,7 @@ Actor::on_start()
   {
     ROA::Object body;
     body.set_name("Body");
-    body.set_parent(this->entity);
+    body.set_parent(entity);
     
     // Body Transform
     {

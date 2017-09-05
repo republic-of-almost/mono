@@ -15,7 +15,7 @@ namespace Game {
 
 struct Actor : ROA::Component
 {
-  static constexpr uint32_t get_rtti() { return 234; }
+  ROA_COMPONENT_RTTI(Actor);
   
   
   // -------------------------------------------------------------- [ Hooks ] --
@@ -28,7 +28,6 @@ struct Actor : ROA::Component
   // ------------------------------------------------------------ [ Members ] --
   
   
-  ROA::Object entity;
   ROA::Object head;
   
   float accum_pitch = 0.f;

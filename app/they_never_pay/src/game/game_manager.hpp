@@ -17,7 +17,7 @@ namespace Game {
 
 struct Game_manager : ROA::Component
 {
-  static constexpr uint32_t get_rtti() { return 235; }
+  ROA_COMPONENT_RTTI(Game_manager);
   
   
   // -------------------------------------------------------------- [ Hooks ] --

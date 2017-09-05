@@ -1,4 +1,4 @@
-#include <game/game.hpp>
+#include <game/game_manager.hpp>
 #include <game/actor.hpp>
 
 

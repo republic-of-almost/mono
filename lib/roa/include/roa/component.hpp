@@ -3,13 +3,24 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/object.hpp>
+
+
+#define ROA_COMPONENT_RTTI(name) \
+static constexpr uint32_t get_rtti() { return __COUNTER__ + 1; } \
+static const char* get_name() { return #name; }
 
 
 namespace ROA {
 
 
+
 class Component
 {
+
+
+  friend class ROA::Object;
+
 public:
 
 
@@ -24,7 +35,7 @@ public:
   
   
 //  virtual uint32_t      get_rtti() const;
-  virtual const char *  get_name() const;
+//  virtual const char *  get_name() const;
   Object                get_object() const;
   
   
@@ -40,6 +51,10 @@ public:
   virtual void          on_late_think();
   virtual void          on_destroy();
   
+  
+private:
+
+  ROA::Object m_obj{nullptr};
 
 };
 
