@@ -11,17 +11,9 @@
 namespace Game {
 
 
-//namespace {
-
-
-//inline void
-//think(ROA::Object node)
 void
 Actor::on_think()
 {
-//  Actor *actor = reinterpret_cast<Actor*>(node.get_user_data());
-//  LIB_ASSERT(actor);
-  
   const float delta_time = 0.16f;
   
   ROA::Object entity = get_object();
@@ -291,8 +283,6 @@ Actor::on_think()
 void
 Actor::on_start()
 {
-//  LIB_ASSERT(actor);
-  
   this->height = 2.f;
   
   ROA::Object entity = get_object();
@@ -399,24 +389,6 @@ Actor::on_start()
       
       body.set_transform(trans);
     }
-  }
-  
-  // Callbacks
-  {
-//    ROA::Logic logic;
-//    this->entity.set_logic(logic);
-    
-//    logic = this->entity.get_logic();
-    
-//    logic.set_update_func(think);
-    
-//    this->entity.set_user_data((uintptr_t)actor);
-//    this->entity.set_logic(logic);
-  }
-  
-  // Do one think to get actor into the right place
-  {
-//    think(this->entity);
   }
 }
 
