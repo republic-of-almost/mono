@@ -13,7 +13,6 @@
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
-#include <data/asset_loader.hpp>
 
 
 namespace Nil {
@@ -47,9 +46,6 @@ Engine::Engine()
 
   m_impl->last_tick = lib::timer::get_current_time();
   m_impl->delta_time = 0.f;
-  
-  // Auto load up assets
-//  Nil::Data::load_assets();
 }
 
 
