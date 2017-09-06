@@ -55,9 +55,9 @@ Game_manager::on_start()
           
           LIB_ASSERT(nav_index / 3 < index_count);
           
-          nav_mesh[nav_index + 0] = verts[vert_index + 0] * 22.f;
-          nav_mesh[nav_index + 1] = verts[vert_index + 1] * 20.f;
-          nav_mesh[nav_index + 2] = verts[vert_index + 2] * 34.f;
+          nav_mesh[nav_index + 0] = verts[vert_index + 0] * 5.f;
+          nav_mesh[nav_index + 1] = verts[vert_index + 1] * 5.f;
+          nav_mesh[nav_index + 2] = verts[vert_index + 2] * 5.f;
         }
         
         actor_comp->nav_mesh = nav_mesh;
