@@ -112,7 +112,7 @@ public:
   T*
   get_component()
   {
-    static_assert(T::get_rtti_id() != 0, "Is this a ROA::Component");
+    static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
     
     const uint32_t rtti = T::get_rtti();
     const uint32_t instance_id = this->get_instance_id();

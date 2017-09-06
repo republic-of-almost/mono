@@ -86,7 +86,15 @@ has_component(const uint32_t object_id, const uint32_t rtti_id)
 ROA::Component*
 get_component(const uint32_t object_id, const uint32_t rtti_id)
 {
-  return components.front();
+  for(ROA::Component *comp : components)
+  {
+    if(comp->get_object().get_instance_id() == object_id)
+    {
+      return comp;
+    }
+  }
+  
+  return nullptr;
 }
 
 

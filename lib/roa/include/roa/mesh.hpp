@@ -27,6 +27,15 @@ public:
   
   Bounding_box      get_bounding_box() const;
   
+  float *           get_positions_vec3() const;
+  float *           get_normals_vec3() const;
+  float *           get_texture_coords_vec2() const;
+  size_t            get_vertex_count() const;
+  size_t            get_triangle_count() const;
+  
+  uint32_t *        get_index() const;
+  size_t            get_index_count() const;
+  
   
 private:
   

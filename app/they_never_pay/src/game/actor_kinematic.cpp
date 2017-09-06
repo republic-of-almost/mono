@@ -287,21 +287,21 @@ Actor_kinematic::on_start()
   
   ROA::Object entity = get_object();
   
-  // Nav mesh
-  {
-    lib::model model = lib::model_import::load_obj_from_file(
-      Nil::Resource::directory("mesh/nav_mesh.obj")
-    );
-    
-    float foo[32]{};
-    memcpy(foo, model.verts[0], sizeof(foo));
-
-    if(model.mesh_count > 0) 
-    {
-      this->nav_mesh = model.verts[0];
-      this->nav_mesh_count = model.triangle_count[0];
-    }
-  }
+//  // Nav mesh
+//  {
+//    lib::model model = lib::model_import::load_obj_from_file(
+//      Nil::Resource::directory("mesh/nav_mesh.obj")
+//    );
+//    
+//    float foo[32]{};
+//    memcpy(foo, model.verts[0], sizeof(foo));
+//
+//    if(model.mesh_count > 0) 
+//    {
+//      this->nav_mesh = model.verts[0];
+//      this->nav_mesh_count = model.triangle_count[0];
+//    }
+//  }
   
   // Main Entity
   {
