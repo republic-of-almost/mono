@@ -49,7 +49,7 @@ Engine::Engine()
   m_impl->delta_time = 0.f;
   
   // Auto load up assets
-  Nil::Data::load_assets();
+//  Nil::Data::load_assets();
 }
 
 

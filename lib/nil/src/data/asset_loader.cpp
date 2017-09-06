@@ -16,7 +16,6 @@
 #include <json/json.h>
 
 
-
 namespace {
 
 

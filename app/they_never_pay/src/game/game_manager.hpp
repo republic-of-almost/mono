@@ -1,10 +1,3 @@
-/*!
-
-  Game
-  --
-  Monitors the game state. Decides when the game should start/end etc.
-
-*/
 #ifndef GAME_INCLUDED_9185C149_04BE_4EA3_9241_D1705052C374
 #define GAME_INCLUDED_9185C149_04BE_4EA3_9241_D1705052C374
 
@@ -15,7 +8,14 @@
 namespace Game {
 
 
-struct Game_manager : ROA::Component
+/*!
+
+  Game Manager
+  --
+  Monitors the game state. Decides when the game should start/end etc.
+
+*/
+struct Game_manager : public ROA::Component
 {
   ROA_COMPONENT_RTTI(Game_manager);
   
@@ -23,15 +23,15 @@ struct Game_manager : ROA::Component
   // -------------------------------------------------------------- [ Hooks ] --
   
   
-  void on_start() override;
-  void on_think() override;
+  void            on_start() override;
+  void            on_think() override;
   
   
   // ------------------------------------------------------------ [ Members ] --
   
   
-  ROA::Object scene{nullptr};
-  ROA::Object actor{nullptr};
+  ROA::Object     scene{nullptr};
+  ROA::Object     actor{nullptr};
   
 };
 

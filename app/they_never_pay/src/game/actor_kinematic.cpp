@@ -1,4 +1,4 @@
-#include <game/actor.hpp>
+#include <game/actor_kinematic.hpp>
 #include <data/data.hpp>
 #include <nil/data/data.hpp>
 #include <nil/resource/directory.hpp>
@@ -12,7 +12,7 @@ namespace Game {
 
 
 void
-Actor::on_think()
+Actor_kinematic::on_think()
 {
   const float delta_time = 0.16f;
   
@@ -281,7 +281,7 @@ Actor::on_think()
 
 
 void
-Actor::on_start()
+Actor_kinematic::on_start()
 {
   this->height = 2.f;
   
@@ -320,19 +320,18 @@ Actor::on_start()
   
   // Head
   {
-    ROA::Object head;
+    this->head = ROA::Object{};
     head.set_name("Head");
     head.set_parent(entity);
     
-    this->head = head;
     
     // Head Trans
     {
       ROA::Transform trans;
       
-      float pos[] = {0.f, math::g_ratio() * 2, 0.f};
+      float pos[]   = {0.f, math::g_ratio() * 2, 0.f};
       float scale[] = {1.f, 1.f, 1.f};
-      float rot[] = {0.f, 0.f, 0.f, 1.f};
+      float rot[]   = {0.f, 0.f, 0.f, 1.f};
       
       trans.set_position(ROA::Vector3(pos));
       trans.set_scale(ROA::Vector3(scale));
@@ -372,7 +371,7 @@ Actor::on_start()
   
   // Body
   {
-    ROA::Object body;
+    this->body = ROA::Object{};
     body.set_name("Body");
     body.set_parent(entity);
     

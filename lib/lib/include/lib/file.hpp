@@ -35,6 +35,13 @@ exists(const char *filename);
 
 
 /*!
+  Checks if the filename has the given extension
+*/
+bool
+has_extension(const char *filename, const char *extension);
+
+
+/*!
   Returns the size of the file.
 */
 size_t
@@ -99,6 +106,24 @@ exists(const char *filename)
 	#else
   return PathFileExistsA(filename);
 	#endif
+}
+
+
+// ------------------------------------------------------- [ File extension ] --
+
+
+bool
+has_extension(const char *filename, const char *extension)
+{
+  size_t ext_len = strlen(extension);
+  size_t filen_len = strlen(filename);
+  
+  if(filen_len > ext_len)
+  {
+    return strcmp(&filename[filen_len - ext_len], extension) == 0;
+  }
+  
+  return false;
 }
 
 

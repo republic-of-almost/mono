@@ -195,9 +195,14 @@ ogl_exec(
 
         rovGLMesh vbo{};
         
-        if(dc.mesh > 0 && dc.mesh < rov_gl_data->rov_meshes.size())
+        const size_t internal_mesh_count = rov_gl_data->rov_meshes.size();
+        const size_t mesh_id = dc.mesh;
+        
+        if(mesh_id > 0 && mesh_id <= internal_mesh_count)
         {
-          vbo = rov_gl_data->rov_meshes[dc.mesh - 1];
+          const size_t mesh_index = mesh_id - 1;
+          
+          vbo = rov_gl_data->rov_meshes[mesh_index];
           glBindBuffer(GL_ARRAY_BUFFER, vbo.gl_id);
         }
         else
@@ -205,6 +210,7 @@ ogl_exec(
           glBindBuffer(GL_ARRAY_BUFFER, 0);
           
           LOG_ERROR_ONCE("Nothing to render");
+          LIB_ASSERT(false);
           continue;
         }
         

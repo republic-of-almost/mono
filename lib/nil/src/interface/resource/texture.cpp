@@ -162,7 +162,7 @@ load(Texture &in_out)
     {
       // Generate new id //
       {
-        const uint32_t new_id = get_tex_data().keys.size();
+        const uint32_t new_id = get_tex_data().keys.size() + 1;
         in_out.id = new_id;
         cpy.id = in_out.id;
       }

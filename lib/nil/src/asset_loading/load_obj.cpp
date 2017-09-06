@@ -1,37 +1,30 @@
-#include <roa/model.hpp>
-#include <roa/object.hpp>
-#include <common/common.hpp>
-#include <nil/node.hpp>
-#include <nil/resource/resource.hpp>
-#include <nil/data/data.hpp>
-#include <lib/utilities.hpp>
-#include <string.h>
-#include <nil/resource/scene.hpp>
-#include <nil/resource/model.hpp>
+#include <asset_loading/asset_loading.hpp>
+#include <nil/resource/mesh.hpp>
+#include <nil/resource/texture.hpp>
+#include <nil/resource/directory.hpp>
+#include <nil/resource/material.hpp>
+#include <nil/data/renderable.hpp>
+#include <lib/string.hpp>
+#include <lib/file.hpp>
+#include <lib/logging.hpp>
+#include <lib/model.hpp>
 
 
-namespace {
+namespace Nil {
+namespace Assets {
 
-/*
-  Loading scene and model is the same with the exception that nodes are
-  created for scene, so we funnel both through here.
-*/
-inline bool
-load_assets(Nil::Node node, const char *filename)
+
+bool
+load_obj(Nil::Node node, const char *filename)
 {
-  // -- Param Check -- //
-
+  // -- File Check -- //
+  
   if(!lib::file::exists(filename))
   {
     LOG_ERROR("Can't find file to load");
     return false;
   }
   
-  
-
-  
-  
-
   // -- Load Model -- //
 
   const lib::model model = lib::model_import::load_obj_from_file(filename);
@@ -136,41 +129,7 @@ load_assets(Nil::Node node, const char *filename)
   }
 
   return true;
-}
-
-
-} // anon ns
-
-
-
-namespace ROA {
-namespace Model {
-
-
-bool
-load(const char *filename)
-{
-  Nil::Node node(nullptr);
-//  return load_assets(node, Nil::Resource::directory(filename));
-  return Nil::Resource::Model::load(filename);
-}
-
-
-} // ns
-
-
-namespace Scene {
-
-
-bool
-load(ROA::Object obj, const char *filename)
-{
-  Nil::Node node = ROA_detail::get_node(obj);
-//  return load_assets(node, Nil::Resource::directory(filename));
-
-  const char *path = Nil::Resource::directory(filename);
-  return Nil::Resource::Scene::load(node, path);
-}
+};
 
 
 } // ns

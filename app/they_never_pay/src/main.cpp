@@ -29,7 +29,7 @@ main()
   ROA::Application app;
   
   Game_data::setup();
-  Game_data::load_assets();
+//  Game_data::load_assets();
 
   ROA::Object game;
   game.add_component<Game::Game_manager>();
