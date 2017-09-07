@@ -227,6 +227,9 @@ load_gltf(Nil::Node root_node, const char *path)
     float translation[3];
     float scale[3];
     float rotation[4];
+    
+    uint32_t children[128];
+    uint32_t child_size;
   };
   
   struct gltf_primitives
@@ -876,6 +879,29 @@ load_gltf(Nil::Node root_node, const char *path)
               json_arr_scale_ele = json_arr_scale_ele->next;
             }
           }
+          else if(json_obj_name(json_node_attr, "children"))
+          {
+            const json_array_element_s *json_child_ele = json_arr_element(json_node_attr);
+            
+            while(json_child_ele != nullptr)
+            {
+              LIB_ASSERT(node.child_size < 128);
+              node.children[node.child_size++] = json_to_int(json_child_ele->value);
+              
+              json_child_ele = json_child_ele->next;
+            }
+          }
+          else if(json_obj_name(json_node_attr, "extras"))
+          {
+            const json_array_element_s *json_extra_ele = json_arr_element(json_node_attr);
+            
+            while(json_extra_ele != nullptr)
+            {
+              // TODO: Do something about extras
+              
+              json_extra_ele = json_extra_ele->next;
+            }
+          }
           else
           {
             // Missing somethign
@@ -966,6 +992,10 @@ load_gltf(Nil::Node root_node, const char *path)
           else if(json_obj_name(json_scene_attr, "extensions"))
           {
             LOG_TODO_ONCE("Support scene extensions");
+          }
+          else if(json_obj_name(json_scene_attr, "extras"))
+          {
+            LOG_TODO_ONCE("Support scene extras");
           }
           else
           {
@@ -1090,28 +1120,43 @@ load_gltf(Nil::Node root_node, const char *path)
   }
   
   // -- Load scene if we have a node -- //
-  
+ 
   if(root_node)
   {
-    for(auto &n : nodes)
+    std::vector<Nil::Node> nil_nodes;
+    nil_nodes.resize(nodes.size());
+
+    for(auto &n : nil_nodes)
     {
-      Nil::Node node;
-      node.set_name(n.name);
+      n.set_parent(root_node);
+    }
+  
+    for(uint32_t i = 0; i < nil_nodes.size(); ++i)
+    {
+      Nil::Node &node = nil_nodes[i];
+      node.set_name(nodes[i].name);
       
       Nil::Data::Transform trans;
-      memcpy(trans.position, n.translation, sizeof(trans.position));
-      memcpy(trans.rotation, n.rotation, sizeof(trans.rotation));
-      memcpy(trans.scale, n.scale, sizeof(trans.scale));
+      memcpy(trans.position, nodes[i].translation, sizeof(trans.position));
+      memcpy(trans.rotation, nodes[i].rotation, sizeof(trans.rotation));
+      memcpy(trans.scale, nodes[i].scale, sizeof(trans.scale));
       
       Nil::Data::set(node, trans);
       
       Nil::Data::Renderable renderable;
-      renderable.mesh_id = internal_mesh_ids[n.mesh];
-      renderable.material_id = internal_material_ids[meshes[n.mesh].primitives.material];
+      renderable.mesh_id = internal_mesh_ids[nodes[i].mesh];
+      renderable.material_id = internal_material_ids[meshes[nodes[i].mesh].primitives.material];
       
       Nil::Data::set(node, renderable);
       
-      node.set_parent(root_node);
+      if(nodes[i].child_size > 0)
+      {
+        for(uint32_t c = 0; c < nodes[i].child_size; ++c)
+        {
+          const size_t index = nodes[i].children[c];
+          nil_nodes[index].set_parent(node);
+        }
+      }
     }
   }
 
