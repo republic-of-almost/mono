@@ -16,7 +16,7 @@ namespace Data {
 
 struct Light
 {
-  enum { POINT, DIR } type;
+  enum { POINT, DIR, SPOT } type;
   uint8_t color[3];
   
   float atten_const;

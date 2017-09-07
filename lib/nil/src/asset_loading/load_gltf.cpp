@@ -5,11 +5,13 @@
 #include <nil/resource/material.hpp>
 #include <nil/data/renderable.hpp>
 #include <nil/data/transform.hpp>
+#include <nil/data/light.hpp>
 #include <lib/string.hpp>
 #include <lib/file.hpp>
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/array.hpp>
+#include <lib/color.hpp>
 #include <json/json.h>
 
 
@@ -220,7 +222,8 @@ load_gltf(Nil::Node root_node, const char *path)
   
   struct gltf_node
   {
-    uint32_t mesh;
+    int32_t mesh;
+    int32_t light;
     
     char name[64];
     
@@ -289,6 +292,8 @@ load_gltf(Nil::Node root_node, const char *path)
     uint32_t source;
   };
   
+  // -- Extensions -- //
+  
   
   lib::array<gltf_asset>        assets;
   lib::array<gltf_buffer_view>  buffer_views;
@@ -301,6 +306,8 @@ load_gltf(Nil::Node root_node, const char *path)
   lib::array<gltf_sampler>      samplers;
   lib::array<gltf_texture>      textures;
   lib::array<gltf_material>     materials;
+  
+  lib::array<Nil::Data::Light>  lights;
 
   // --
 
@@ -818,6 +825,8 @@ load_gltf(Nil::Node root_node, const char *path)
       while(json_node != nullptr)
       {
         gltf_node node{};
+        node.mesh = -1;
+        node.light = -1;
         node.scale[0] = 1.f; node.scale[1] = 1.f; node.scale[2] = 1.f;
         node.rotation[0] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 1.f;
         
@@ -902,6 +911,35 @@ load_gltf(Nil::Node root_node, const char *path)
               json_extra_ele = json_extra_ele->next;
             }
           }
+          else if(json_obj_name(json_node_attr, "extensions"))
+          {
+            const json_object_element_s *json_ext_attr = json_obj_element(json_node_attr->value);
+            
+            while(json_ext_attr != nullptr)
+            {
+              if(json_obj_name(json_ext_attr, "KHR_lights_cmn"))
+              {
+                const json_object_element_s *json_lights_ext = json_obj_element(json_ext_attr->value);
+                
+                while(json_lights_ext != nullptr)
+                {
+                  if(json_obj_name(json_lights_ext, "light"))
+                  {
+                    node.light = json_to_int(json_lights_ext->value);
+                  }
+                  else
+                  {
+                    // missing something.
+                    LIB_ASSERT(false);
+                  }
+                
+                  json_lights_ext = json_lights_ext->next;
+                }
+              }
+            
+              json_ext_attr = json_ext_attr->next;
+            }
+          }
           else
           {
             // Missing somethign
@@ -925,7 +963,7 @@ load_gltf(Nil::Node root_node, const char *path)
     {
       const json_object_element_s *json_ext_attr = json_obj_element(json_gltf_element->value);
       
-      if(json_obj_name(json_ext_attr, "KHR_lights"))
+      if(json_obj_name(json_ext_attr, "KHR_lights_cmn"))
       {
         const json_object_element_s *json_ext_lights_attr = json_obj_element(json_ext_attr->value);
         
@@ -933,23 +971,92 @@ load_gltf(Nil::Node root_node, const char *path)
         {
           if(json_obj_name(json_ext_lights_attr, "lights"))
           {
+            Nil::Data::Light data{};
+          
             const json_array_element_s *json_light_ele = json_arr_element(json_ext_lights_attr);
            
             while(json_light_ele != nullptr)
             {
               const json_object_element_s *json_ext_light_attr = json_obj_element(json_light_ele->value);
               
-              if(json_obj_name(json_ext_light_attr, "color"))
+              while(json_ext_light_attr != nullptr)
               {
+                if(json_obj_name(json_ext_light_attr, "color"))
+                {
+                  const json_array_element_s *json_arr_color = json_arr_element(json_ext_light_attr);
+              
+                  size_t index = 0;
+                  float color[4]{1,1,1,1};
+                  
+                  while(json_arr_color != nullptr)
+                  {
+                    LIB_ASSERT(index < 3);
+                    color[index++] = json_to_float(json_arr_color->value);
+                    
+                    json_arr_color = json_arr_color->next;
+                  }
+                  
+                  lib::rgba rgba = lib::color::init(color);
+                  
+                  data.color[0] = lib::color::get_channel_1i(rgba);
+                  data.color[1] = lib::color::get_channel_1i(rgba);
+                  data.color[2] = lib::color::get_channel_1i(rgba);
+                }
+                else if(json_obj_name(json_ext_light_attr, "name"))
+                {
+                }
+                else if(json_obj_name(json_ext_light_attr, "positional"))
+                {
+                  const json_object_element_s *json_pos_attr = json_obj_element(json_ext_light_attr->value);
+                  
+                  while(json_pos_attr != nullptr)
+                  {
+                    if(json_obj_name(json_pos_attr, "constantAttenuation"))
+                    {
+                      data.atten_const = json_to_float(json_pos_attr->value);
+                    }
+                    else if(json_obj_name(json_pos_attr, "linearAttenuation"))
+                    {
+                      data.atten_linear = json_to_float(json_pos_attr->value);
+                    }
+                    else if(json_obj_name(json_pos_attr, "quadraticAttenuation"))
+                    {
+                      data.atten_exponential = json_to_float(json_pos_attr->value);
+                    }
+                  
+                    json_pos_attr = json_pos_attr->next;
+                  }
+                }
+                else if(json_obj_name(json_ext_light_attr, "type"))
+                {
+                  const char *type = json_to_string(json_ext_light_attr->value);
+                  
+                  if(strcmp("point", type) == 0)
+                  {
+                    data.type = Nil::Data::Light::POINT;
+                  }
+                  else if(strcmp("directional", type) == 0)
+                  {
+                    data.type = Nil::Data::Light::DIR;
+                  }
+                  else if(strcmp("spot", type) == 0)
+                  {
+                    data.type = Nil::Data::Light::SPOT;
+                  }
+                }
+                else if(json_obj_name(json_ext_light_attr, "profile"))
+                {
                 
+                }
+                else
+                {
+                  LIB_ASSERT(false); // missing something.
+                }
+                
+                json_ext_light_attr = json_ext_light_attr->next;
               }
-              else if(json_obj_name(json_ext_lights_attr, "name"))
-              {
-              }
-              else if(json_obj_name(json_ext_lights_attr, "type"))
-              {
-              }
-            
+              
+              lights.emplace_back(data);
               json_light_ele = json_light_ele->next;
             }
             
@@ -1143,11 +1250,22 @@ load_gltf(Nil::Node root_node, const char *path)
       
       Nil::Data::set(node, trans);
       
-      Nil::Data::Renderable renderable;
-      renderable.mesh_id = internal_mesh_ids[nodes[i].mesh];
-      renderable.material_id = internal_material_ids[meshes[nodes[i].mesh].primitives.material];
+      if(nodes[i].mesh != -1)
+      {
+        Nil::Data::Renderable renderable;
+        renderable.mesh_id = internal_mesh_ids[nodes[i].mesh];
+        renderable.material_id = internal_material_ids[meshes[nodes[i].mesh].primitives.material];
+        
+        Nil::Data::set(node, renderable);
+      }
       
-      Nil::Data::set(node, renderable);
+      if(nodes[i].light != -1)
+      {
+        const size_t light_index = nodes[i].light;
+        const Nil::Data::Light light_data = lights[light_index];
+      
+        Nil::Data::set(node, light_data);
+      }
       
       if(nodes[i].child_size > 0)
       {
