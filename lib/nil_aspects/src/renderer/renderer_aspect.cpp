@@ -708,9 +708,9 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
         memcpy(rov_lights[i].position, light->position, sizeof(float) * 3);
       }
 
-      rov_lights[i].color[0] = 1.f;
-      rov_lights[i].color[1] = 1.f;
-      rov_lights[i].color[2] = 1.f;
+      rov_lights[i].color[0] = (float)light->color[0] / 255.f;
+      rov_lights[i].color[1] = (float)light->color[1] / 255.f;;
+      rov_lights[i].color[2] = (float)light->color[2] / 255.f;;
 
       rov_lights[i].attenuation[0] = light->atten_const;
       rov_lights[i].attenuation[1] = light->atten_linear;

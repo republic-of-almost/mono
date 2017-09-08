@@ -999,8 +999,8 @@ load_gltf(Nil::Node root_node, const char *path)
                   lib::rgba rgba = lib::color::init(color);
                   
                   data.color[0] = lib::color::get_channel_1i(rgba);
-                  data.color[1] = lib::color::get_channel_1i(rgba);
-                  data.color[2] = lib::color::get_channel_1i(rgba);
+                  data.color[1] = lib::color::get_channel_2i(rgba);
+                  data.color[2] = lib::color::get_channel_3i(rgba);
                 }
                 else if(json_obj_name(json_ext_light_attr, "name"))
                 {

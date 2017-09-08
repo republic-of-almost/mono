@@ -144,8 +144,10 @@ struct Light
 	vec3 La;          // Ambient intensity
 	vec3 Ld;          // Diffuse intensity
 	vec3 Ls;          // Specular intensity
+  vec3 color;       // Light color
 };
- 
+
+
 struct Material
 {
 	vec3 Ka;          // Ambient reflect
@@ -153,6 +155,7 @@ struct Material
 	vec3 Ks;          // Specular reflect
 	float shininess;	// Specular shininess factor
 };
+
 
 vec3
 calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
@@ -178,7 +181,8 @@ calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
   vec3 specular = mat.Ks * light.Ls * specular_factor;
   
   // Combine //
-  return amb + diffuse + specular;
+  // Is this the correct way to add color?
+  return (amb + diffuse + specular) * light.color;
 }
 
 
@@ -223,6 +227,7 @@ main()
       light.La = color_data.rgb;
       light.Ld = color_data.rgb;
       light.Ls = color_data.rgb;
+      light.color = color_data.rgb;
 
       vec3 L = normalize(light.position - in_ps_world_pos);
       vec3 V = normalize(uni_eye - in_ps_world_pos);
