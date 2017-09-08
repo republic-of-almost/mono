@@ -1131,7 +1131,7 @@ load_gltf(Nil::Node root_node, const char *path)
   const size_t scene_size = scenes.size();
   const size_t buffer_size = buffers.size();
 
-  lib::array<uint32_t> internal_mesh_ids;
+  lib::array<Nil::Resource::Mesh> internal_mesh_ids;
   lib::array<uint32_t> internal_texture_ids;
   lib::array<uint32_t> internal_material_ids;
 
@@ -1222,7 +1222,7 @@ load_gltf(Nil::Node root_node, const char *path)
       
       Nil::Resource::load(data);
       
-      internal_mesh_ids.emplace_back(data.id);
+      internal_mesh_ids.emplace_back(data);
     }
   }
   
@@ -1253,10 +1253,11 @@ load_gltf(Nil::Node root_node, const char *path)
       if(nodes[i].mesh != -1)
       {
         Nil::Data::Renderable renderable;
-        renderable.mesh_id = internal_mesh_ids[nodes[i].mesh];
+        renderable.mesh_id = internal_mesh_ids[nodes[i].mesh].id;
         renderable.material_id = internal_material_ids[meshes[nodes[i].mesh].primitives.material];
         
         Nil::Data::set(node, renderable);
+        Nil::Data::set(node, internal_mesh_ids[nodes[i].mesh].bounding_box);
       }
       
       if(nodes[i].light != -1)

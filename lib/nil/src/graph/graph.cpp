@@ -258,6 +258,7 @@ node_create(Data *graph)
   graph->data.emplace_back(
     uintptr_t{0},
     uint64_t{0},
+    uint64_t{0},
     default_name
   );
 
@@ -875,6 +876,34 @@ node_set_tags(
   const uint32_t node_id,
   const uint64_t tags)
 {
+  // -- Param Check -- //
+  #ifdef NIL_PEDANTIC
+  {
+    LIB_ASSERT(graph);
+    LIB_ASSERT(node_id);
+    LIB_ASSERT(tags != nullptr);
+    
+    if(!graph || !node_id || !tags)
+    {
+      LOG_ERROR("Invalid paramaters");
+      return false;
+    }
+  }
+  #endif
+  
+  // -- Get the Current Tags -- //
+  {
+    size_t index = 0;
+    
+    if(node_exists(graph, node_id, &index))
+    {
+      graph->data[index].tags = tags;
+      return true;
+    }
+  }
+  
+  LOG_ERROR("Failed to find node");
+  return false;
 }
 
 

@@ -149,6 +149,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
 //        glfwSetErrorCallback(error_callback);
         glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 

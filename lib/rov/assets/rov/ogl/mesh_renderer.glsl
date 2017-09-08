@@ -76,8 +76,8 @@ main()
 /*
   Defines
 */
-#define CONST_AMB 0.05
-#define CONST_SHININESS 16
+#define CONST_AMB 0.01
+#define CONST_SHININESS 0
 
 /*
   Inputs
@@ -192,6 +192,9 @@ calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
 void
 main()
 {
+  /*
+    If we have lights calculate color with them.
+  */
   if(uni_light_count > 0)
   {
     vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
@@ -202,8 +205,8 @@ main()
     Material mat;
     mat.Ka = vec3(0.0);
     mat.Kd = diffuse_color.rgb;
-    mat.Ks = vec3(0.2,0.2,0.2);//specular_map.rgb;
-    mat.shininess = CONST_SHININESS;
+    mat.Ks = vec3(0.5);//vec3(0.2,0.2,0.2);//specular_map.rgb;
+    mat.shininess = 12;//CONST_SHININESS;
 
     vec3 accum_color = vec3(0,0,0);
 
@@ -260,9 +263,16 @@ main()
     }
 
     // Output Result //
-    vec3 const_amb = vec3(CONST_AMB);
-    out_ps_color = vec4((const_amb + accum_color), 1.0);
+//    vec3 const_amb = vec3(CONST_AMB);
+//    vec3 color = vec3(max(CONST_AMB + accum_color.r, accum_color.r), max(CONST_AMB + accum_color.g, accum_color.g), max(CONST_AMB + accum_color.b, accum_color.b));
+    
+//    accum_color.g += 0.02f;
+    out_ps_color = vec4(accum_color.rgb, 1.0);
   }
+  
+  /*
+    Fullbright
+  */
   else
   {
     vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);

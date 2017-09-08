@@ -304,7 +304,7 @@ Node::get_descendant_count() const
 }
 
 
-// --------------------------------------------------------- [ Names / Tags ] --
+// ---------------------------------------------------------- [ Name / Tags ] --
 
 
 const char*
@@ -371,7 +371,9 @@ Node::add_tag(const char *tag)
   }
   #endif
   
-  // -- Find Tag ID and Set -- //
+  uint64_t tag_id = 0;
+  
+  // -- Find Tag ID -- //
   {
     size_t tag_id = 0;
     
@@ -382,31 +384,124 @@ Node::add_tag(const char *tag)
         tag_id = 1 << i;
       }
     }
-    
-    if(tag_id)
+  }
+  
+  // -- Insert New Tag -- //
+  if(!tag_id)
+  {
+    if(node_tag_curr_count < node_tag_max_length)
     {
+      tag_id = 1 << node_tag_curr_count;
       
+      size_t tag_len = math::min((uint32_t)strlen(tag), (uint32_t)node_tag_max_length);
+      
+      memcpy(&node_tag_buffer[node_tag_curr_count * node_tag_max_length], tag, tag_len);
+      node_tag_curr_count += 1;
+    }
+    else
+    {
+      LOG_WARNING("Can't add tag, we have reached tag limit at 64");
+      return false;
     }
   }
   
-  // -- Insert New Tag and Set -- //
+  // -- Set Tag ID -- //
+  if(tag_id)
   {
+    const uint32_t instance_id = lib_ent::instance(m_node_id);
+    
+    if(instance_id)
+    {
+      uint64_t tags = 0;
+      Graph::node_get_tags(Data::get_graph_data(), instance_id, &tags);
+      
+      tags |= tag_id;
+      Graph::node_set_tags(Data::get_graph_data(), instance_id, tags);
+    }
   }
   
   return true;
 }
 
 
-void
+bool
 Node::has_tag(const char *tag) const
 {
+  // -- Param Checks -- //
+  #ifdef NIL_PEDANTIC
+  {
+    const bool tag_not_null = tag != nullptr;
+    const bool tag_has_length = strlen(tag);
+    
+    LIB_ASSERT(tag_not_null);
+    LIB_ASSERT(tag_has_length);
+    
+    if(!tag_not_null || !tag_has_length)
+    {
+      LOG_ERROR("Invalid tag");
+      return false;
+    }
+  }
+
+  {
+    if(strlen(tag) > node_tag_max_length)
+    {
+      LOG_WARNING("Tag will be truncated");
+    }
+  }
+  #endif
+
+  // -- Check we have this tag -- //
+  uint64_t this_tag = 0;
+  {
+    for(size_t i = 0; i < node_tag_curr_count; ++i)
+    {
+      if(strcmp(tag, &node_tag_buffer[i * node_tag_max_length]) == 0)
+      {
+        this_tag = 1 << i;
+        break;
+      }
+    }
+  }
+
+  // -- Check against node tags -- //
+  if(this_tag)
+  {
+    const uint32_t instance_id = lib_ent::instance(m_node_id);
+
+    if(instance_id)
+    {
+      uint64_t tags = 0;
+      Graph::node_get_tags(Data::get_graph_data(), instance_id, &tags);
+      
+      return !(tags & this_tag);
+    }
+  }
+  
+  return false;
 }
 
 
 void
 Node::remove_tag(const char *tag)
 {
+
 }
+
+
+void
+Node::get_tag(const size_t i) const
+{
+  
+}
+
+
+size_t
+Node::get_tag_count() const
+{
+  return 0;
+}
+
 
 
 void

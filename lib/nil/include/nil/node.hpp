@@ -161,7 +161,7 @@ public:
   get_descendant_count() const;
   
   
-  // ------------------------------------------------------- [ Names / Tags ] --
+  // -------------------------------------------------------- [ Name / Tags ] --
   
   
   /*!
@@ -188,7 +188,7 @@ public:
   /*!
     Has a tag.
   */
-  void
+  bool
   has_tag(const char *tag) const;
   
   
