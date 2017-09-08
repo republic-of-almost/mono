@@ -23,6 +23,7 @@ struct node_data
 {
   uintptr_t user_data;
   uint64_t node_type_id;
+  uint64_t tags;
   short_string name;
 };
 

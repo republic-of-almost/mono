@@ -833,6 +833,52 @@ node_set_name(
 
 
 bool
+node_get_tags(
+  const Data *graph,
+  const uint32_t node_id,
+  uint64_t *tags)
+{
+  // -- Param Check -- //
+  #ifdef NIL_PEDANTIC
+  {
+    LIB_ASSERT(graph);
+    LIB_ASSERT(node_id);
+    LIB_ASSERT(tags != nullptr);
+    
+    if(!graph || !node_id || !tags)
+    {
+      LOG_ERROR("Invalid paramaters");
+      return false;
+    }
+  }
+  #endif
+  
+  // -- Get the Current Tags -- //
+  {
+    size_t index = 0;
+    
+    if(node_exists(graph, node_id, &index))
+    {
+      *tags = graph->data[index].tags;
+      return true;
+    }
+  }
+  
+  LOG_ERROR("Failed to find node");
+  return false;
+}
+  
+  
+bool
+node_set_tags(
+  Data *graph,
+  const uint32_t node_id,
+  const uint64_t tags)
+{
+}
+
+
+bool
 node_get_transform(
   const Data *data,
   const uint32_t node_id,

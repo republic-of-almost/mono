@@ -15,6 +15,12 @@ constexpr uint32_t node_ref_id = 0;
 constexpr char node_msg_trying_to_destroy_null_node[] = "Trying to destroy null node";
 constexpr char node_msg_invalid_node[] = "Node is invalid";
 
+const size_t node_tag_max_length = 65;
+const size_t node_tag_max_count = 64;
+size_t node_tag_curr_count = 0;
+char node_tag_buffer[node_tag_max_count * node_tag_max_length]{};
+
+
 } // anon ns
 
 
@@ -298,7 +304,7 @@ Node::get_descendant_count() const
 }
 
 
-// ----------------------------------------------------------------- [ Misc ] --
+// --------------------------------------------------------- [ Names / Tags ] --
 
 
 const char*
@@ -335,6 +341,81 @@ Node::set_name(const char *name)
   
   LOG_ERROR(node_msg_invalid_node);
 }
+
+
+bool
+Node::add_tag(const char *tag)
+{
+  // -- Param Checks -- //
+  {
+    const bool tag_not_null = tag != nullptr;
+    const bool tag_has_length = strlen(tag);
+    
+    LIB_ASSERT(tag_not_null);
+    LIB_ASSERT(tag_has_length);
+    
+    if(!tag_not_null || !tag_has_length)
+    {
+      LOG_ERROR("Invalid tag cannot be added");
+      return false;
+    }
+  }
+
+  // -- Pedantic Checks -- //
+  #ifdef NIL_PEDANTIC
+  {
+    if(strlen(tag) > node_tag_max_length)
+    {
+      LOG_WARNING("Tag will be truncated");
+    }
+  }
+  #endif
+  
+  // -- Find Tag ID and Set -- //
+  {
+    size_t tag_id = 0;
+    
+    for(size_t i = 0; i < node_tag_max_count; ++i)
+    {
+      if(strcmp(&node_tag_buffer[i * node_tag_max_length], tag) == 0)
+      {
+        tag_id = 1 << i;
+      }
+    }
+    
+    if(tag_id)
+    {
+      
+    }
+  }
+  
+  // -- Insert New Tag and Set -- //
+  {
+  }
+  
+  return true;
+}
+
+
+void
+Node::has_tag(const char *tag) const
+{
+}
+
+
+void
+Node::remove_tag(const char *tag)
+{
+}
+
+
+void
+Node::clear_tags()
+{
+}
+
+
+// ----------------------------------------------------------------- [ Misc ] --
 
 
 uintptr_t

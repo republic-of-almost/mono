@@ -1232,7 +1232,7 @@ load_gltf(Nil::Node root_node, const char *path)
   {
     std::vector<Nil::Node> nil_nodes;
     nil_nodes.resize(nodes.size());
-
+    
     for(auto &n : nil_nodes)
     {
       n.set_parent(root_node);

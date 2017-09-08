@@ -131,6 +131,20 @@ node_set_name(
 
 
 bool
+node_get_tags(
+  const Data *graph,
+  const uint32_t node_id,
+  uint64_t *tags);
+  
+  
+bool
+node_set_tags(
+  Data *graph,
+  const uint32_t node_id,
+  const uint64_t tags);
+
+
+bool
 node_get_transform(
   const Data *data,
   const uint32_t node_id,

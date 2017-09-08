@@ -161,7 +161,7 @@ public:
   get_descendant_count() const;
   
   
-  // --------------------------------------------------------------- [ Misc ] --
+  // ------------------------------------------------------- [ Names / Tags ] --
   
   
   /*!
@@ -175,7 +175,51 @@ public:
     Sets the name of the node.
   */
   void
-  set_name(const char *);
+  set_name(const char *name);
+  
+  
+  /*!
+    Add a tag, must 64 or less characters.
+  */
+  bool
+  add_tag(const char *tag);
+  
+  
+  /*!
+    Has a tag.
+  */
+  void
+  has_tag(const char *tag) const;
+  
+  
+  /*!
+    Remove a tag
+  */
+  void
+  remove_tag(const char *tag);
+  
+  
+  /*!
+    Find a tag
+  */
+  void
+  get_tag(const size_t i) const;
+  
+  /*!
+    Get the number of tags
+  */
+  size_t
+  get_tag_count() const;
+  
+  
+  /*!
+    Clear tags
+  */
+  void
+  clear_tags();
+  
+  
+  // --------------------------------------------------------------- [ Misc ] --
   
   
   /*!

@@ -76,7 +76,7 @@ code_configs = {
   {
     name = "development",
     flags = {"Symbols", "Unicode"},
-    defines = {"DEBUG", "NIL_DEVELOPMENT"},
+    defines = {"DEBUG", "NIL_DEVELOPMENT", "NIL_PEDANTIC"},
   },
 
   -- Stage --
@@ -86,7 +86,7 @@ code_configs = {
   {
     name = "staging",
     flags = {"Optimize", "Symbols", "Unicode"},
-    defines = {"DEBUG", "NIL_STAGE"},
+    defines = {"DEBUG", "NIL_STAGE", "NIL_PEDANTIC"},
   },
 
   -- Release --
