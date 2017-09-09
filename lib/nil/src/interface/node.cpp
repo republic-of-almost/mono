@@ -17,20 +17,31 @@
 namespace {
 
 
+// ---------------------------------------------------------- [ Identifiers ] --
+
+
 constexpr uint32_t node_owned_id = 1;
 constexpr uint32_t node_ref_id = 0;
-
-constexpr char node_msg_trying_to_destroy_null_node[] = "Trying to destroy null node";
-constexpr char node_msg_invalid_node[] = "Node is invalid";
+constexpr char node_no_name[] = "Unknown";
 
 
-// -- Tags -- //
+// ----------------------------------------------------------------- [ Tags ] --
+
 
 // dont exceed this is a hard limit, uint64_t
 constexpr size_t node_tag_max_count = 64;
 constexpr size_t node_tag_max_length = NIL_MAX_TAG_NAME_LENGTH + 1;
 size_t node_tag_curr_count = 0;
 char node_tag_buffer[node_tag_max_count * node_tag_max_length]{};
+
+
+// ------------------------------------------------------------- [ Messages ] --
+
+
+constexpr char msg_node_invalid[]     = "Node is invalid";
+constexpr char msg_node_tag_limit[]   = "Can't add tag, we have reached tag limit at 64";
+constexpr char msg_node_tag_trunc[]   = "Tag will be truncated";
+constexpr char msg_node_tag_invalid[] = "Tag must be a valid string";
 
 
 } // anon ns
@@ -181,7 +192,7 @@ Node::destroy()
     return Graph::node_remove(Data::get_graph_data(), instance_id);
   }
   
-  LOG_WARNING(node_msg_trying_to_destroy_null_node);
+  LOG_WARNING(msg_node_invalid);
   
   return false;
 }
@@ -209,7 +220,7 @@ Node::is_top_level() const
     return !!Graph::node_get_parent(Data::get_graph_data(), instance_id);
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
   return false;
 }
@@ -225,10 +236,11 @@ Node::is_valid() const
     Graph::Data *graph = Data::get_graph_data();
     
     const bool is_valid = Graph::node_exists(graph, instance_id);
-//    const bool is_pending = Graph::node_pending(graph, instance_id);
     
-    return is_valid;// || is_pending;
+    return is_valid;
   }
+  
+  LOG_ERROR(msg_node_invalid);
   
   return false;
 }
@@ -250,7 +262,7 @@ Node::set_parent(const Node &other)
     return Graph::node_set_parent(Data::get_graph_data(), other.get_id(), instance_id);
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
   return false;
 }
@@ -266,7 +278,7 @@ Node::get_parent() const
     return Node(Graph::node_get_parent(Data::get_graph_data(), instance_id));
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
   return Node(uint32_t{0});
 }
@@ -282,7 +294,7 @@ Node::get_child_count() const
     return Graph::node_child_count(Data::get_graph_data(), instance_id);
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
   return 0;
 }
@@ -293,15 +305,15 @@ Node::get_child(const size_t i) const
 {
   const uint32_t instance_id = lib_ent::instance(m_node_id);
   
-//  if(instance_id)
+  if(instance_id)
   {
     return Node(Graph::node_get_child(Data::get_graph_data(), instance_id, i), false);
   }
   
   LIB_ASSERT(false);
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
-  return Node(nullptr);
+  return Node{nullptr};
 }
 
 
@@ -315,7 +327,7 @@ Node::get_descendant_count() const
     return Graph::node_descendants_count(Data::get_graph_data(), instance_id);
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
   return 0;
 }
@@ -337,9 +349,9 @@ Node::get_name() const
     return name;
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
 
-  return "Unknown";
+  return node_no_name;
 }
   
   
@@ -356,7 +368,7 @@ Node::set_name(const char *name)
     }
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
 }
 
 
@@ -373,7 +385,7 @@ Node::add_tag(const char *tag)
     
     if(!tag_not_null || !tag_has_length)
     {
-      LOG_ERROR("Invalid tag cannot be added");
+      LOG_ERROR(msg_node_tag_invalid);
       return false;
     }
   }
@@ -383,7 +395,7 @@ Node::add_tag(const char *tag)
   {
     if(strlen(tag) > node_tag_max_length)
     {
-      LOG_WARNING("Tag will be truncated");
+      LOG_WARNING(msg_node_tag_trunc);
     }
   }
   #endif
@@ -417,7 +429,7 @@ Node::add_tag(const char *tag)
     }
     else
     {
-      LOG_WARNING("Can't add tag, we have reached tag limit at 64");
+      LOG_WARNING(msg_node_tag_limit);
       return false;
     }
   }
@@ -455,7 +467,7 @@ Node::has_tag(const char *tag) const
     
     if(!tag_not_null || !tag_has_length)
     {
-      LOG_ERROR("Invalid tag");
+      LOG_ERROR(msg_node_tag_invalid);
       return false;
     }
   }
@@ -463,7 +475,7 @@ Node::has_tag(const char *tag) const
   {
     if(strlen(tag) > node_tag_max_length)
     {
-      LOG_WARNING("Tag will be truncated");
+      LOG_WARNING(msg_node_tag_trunc);
     }
   }
   #endif
@@ -548,7 +560,7 @@ Node::get_user_data() const
     }
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   return 0;
 }
   
@@ -571,7 +583,7 @@ Node::set_user_data(const uintptr_t user_data)
     }
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
 }
 
 
@@ -595,7 +607,7 @@ Node::get_data_type_id() const
     return type_id;
   }
   
-  LOG_ERROR(node_msg_invalid_node);
+  LOG_ERROR(msg_node_invalid);
   
   return 0;
 }
