@@ -189,9 +189,10 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         glGetIntegerv(GL_MINOR_VERSION, (GLint*)&win_data.minor);
 
 
-        char gfx_init_msg[2048]{};
-        sprintf(gfx_init_msg, "Init GFX with version, %d, %d", win_data.major, win_data.minor);
-        LOG_INFO(gfx_init_msg);
+//        char gfx_init_msg[2048]{};
+//        sprintf(gfx_init_msg, "Init GFX with version, %d, %d", win_data.major, win_data.minor);
+//        LOG_INFO(gfx_init_msg);
+        LOG_INFO("Init GFX with Version %d.%d", win_data.major, win_data.minor);
 
         #ifndef NIMGUI
         ImGui_ImplGlfwGL3_Init(self->window, true);

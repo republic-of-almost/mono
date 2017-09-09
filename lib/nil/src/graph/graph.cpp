@@ -23,55 +23,61 @@ namespace Nil {
 namespace Graph {
 
 
-namespace
+namespace {
+
+
+constexpr size_t stack_hint = NIL_GRAPH_TRANSFORM_STACK_HINT;
+
+
+// ------------------------------------------------------- [ Error Messages ] --
+
+
+constexpr char msg_failed_to_find_node[] = "Failed to find node_id %d";
+constexpr char msg_invalid_params[]      = "Invalid paramaters";
+
+
+// --------------------------------------------------------- [ Misc Helpers ] --
+
+
+void
+graph_size_check(const Nil::Graph::Data *graph)
 {
+  #ifndef NDEBUG
+  LIB_ASSERT(graph);
 
-  // Used to stack alloc transform stack //
-  constexpr size_t stack_hint = NIL_GRAPH_TRANSFORM_STACK_HINT;
+  LIB_ASSERT(graph->node_id.size() == graph->parent_depth_data.size());
+  LIB_ASSERT(graph->node_id.size() == graph->local_transform.size());
+  LIB_ASSERT(graph->node_id.size() == graph->world_transform.size());
+  LIB_ASSERT(graph->node_id.size() == graph->data.size());
   
-  
-  // ------------------------------------------------------- [ Misc Helpers ] --
-  
-
-  void
-  graph_size_check(const Nil::Graph::Data *graph)
-  {
-    #ifndef NDEBUG
-    LIB_ASSERT(graph);
-
-    LIB_ASSERT(graph->node_id.size() == graph->parent_depth_data.size());
-    LIB_ASSERT(graph->node_id.size() == graph->local_transform.size());
-    LIB_ASSERT(graph->node_id.size() == graph->world_transform.size());
-    LIB_ASSERT(graph->node_id.size() == graph->data.size());
-    
-    #else
-      return;
-    #endif
-  }
+  #else
+    return;
+  #endif
+}
 
 
-  // -------------------------------------------------- [ Node Data Helpers ] --
+// ---------------------------------------------------- [ Node Data Helpers ] --
 
 
-  inline uint32_t
-  get_parent_id(const uint64_t data)
-  {
-    return lib::bits::upper32(data);
-  }
+inline uint32_t
+get_parent_id(const uint64_t data)
+{
+  return lib::bits::upper32(data);
+}
 
 
-  inline uint32_t
-  get_depth(const uint64_t data)
-  {
-    return lib::bits::lower32(data);
-  }
+inline uint32_t
+get_depth(const uint64_t data)
+{
+  return lib::bits::lower32(data);
+}
 
 
-  inline uint64_t
-  set_data(const uint32_t parent, const uint32_t depth)
-  {
-    return lib::bits::pack3232(depth, parent);
-  }
+inline uint64_t
+set_data(const uint32_t parent, const uint32_t depth)
+{
+  return lib::bits::pack3232(depth, parent);
+}
 
 } // anon ns
 
@@ -861,7 +867,7 @@ node_get_tags(
     
     if(!graph || !node_id || !tags)
     {
-      LOG_ERROR("Invalid paramaters");
+      LOG_ERROR(msg_invalid_params);
       return false;
     }
   }
@@ -878,7 +884,7 @@ node_get_tags(
     }
   }
   
-  LOG_ERROR("Failed to find node");
+  LOG_ERROR(msg_failed_to_find_node);
   return false;
 }
   
@@ -894,17 +900,16 @@ node_set_tags(
   {
     LIB_ASSERT(graph);
     LIB_ASSERT(node_id);
-    LIB_ASSERT(tags != nullptr);
     
     if(!graph || !node_id || !tags)
     {
-      LOG_ERROR("Invalid paramaters");
+      LOG_ERROR(msg_invalid_params);
       return false;
     }
   }
   #endif
   
-  // -- Get the Current Tags -- //
+  // -- Set the Current Tags -- //
   {
     size_t index = 0;
     
@@ -915,7 +920,7 @@ node_set_tags(
     }
   }
   
-  LOG_ERROR("Failed to find node");
+  LOG_ERROR(msg_failed_to_find_node);
   return false;
 }
 

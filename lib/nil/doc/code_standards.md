@@ -1,25 +1,33 @@
 # Nil Code Standards
 
-General coding guidelines for Nil
+
+General coding guidelines for Nil.
+
+Nothing is sacrosanct!
+
 
 ## Main Public Engine/Graph Class Types
 
 Follow RIIA, for data cleanup.
+
 
 ## Resources and Data Types
 
 These types must be POD types. All pointers should be considered owned by the code that alloced the data.
 So any pointers loaded into a Resource or Data type will be internally copied.
 
+
 ## Folder Structure
 
 - Use them!
-- /include/Nil for public interface
-- /src/interface for public interface src
+- `/include/Nil` for public interface
+- `/src/interface` for public interface src
+
 
 ## Allocation
 
 You allocate you destroy it. You didn't allocate don't destroy it.
+
 
 ## General
 
@@ -27,7 +35,7 @@ You allocate you destroy it. You didn't allocate don't destroy it.
 - Fixed integer only (unless dealing with 3rdparty)
 - No doubles (unless dealing with 3rdparty)
 - Use fwd dec files
-- Leave a file in better shape than you found it
+- Leave a file/function in better shape than you found it
 - Follow a files style or refresh it to a new style, no half style
 - Branches must have braces, no restriction on where branch braces go
 - Favour branch on new line, smaller can be inline
@@ -36,6 +44,9 @@ You allocate you destroy it. You didn't allocate don't destroy it.
 - No RTTI
 - No Exceptions
 - No Inheritance
+- Templates should be used sparingly.
+- Undef MACROS's
+
 
 ## Files
 

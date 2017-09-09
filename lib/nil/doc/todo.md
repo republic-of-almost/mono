@@ -1,9 +1,14 @@
-# Nil TODO
+# Nil Todo's
 
 
 ### Delete Data
 
 You should be able to delete data without having to destroy the node.
+
+### Memory
+
+Nil should be able to hand out memory both CPU and GPU, GPU is complicated but
+I think this meakes better sense.
 
 
 ### Delete Resources
@@ -38,3 +43,12 @@ The string lookup for names and stuff is bad and should be removed.
 ### Move A Resource
 
 We should be able to avoid excessive copying of textures like we do.
+
+
+### Data to Resources
+
+Somethings in Data should be resources, gamepad/keyboard etc.
+
+### Move Tags out of Node
+
+Doing this will allow us to be able to query globally the tags used.

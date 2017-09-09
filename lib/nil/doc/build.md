@@ -18,9 +18,9 @@ Release     | no symbols, optimisations, ~~warnings as errors~~ (in future)
 
 ---
 
-- **NIL_MEMORY_FIXED**
-- **NIL_MEMORY_SCALE**
-- **NIL_MEMORY_AUTO**
+- **NIL_CPU_MEMORY_FIXED**
+- **NIL_CPU_MEMORY_SCALE**
+- **NIL_CPU_MEMORY_AUTO**
 
 _Currently Unused - Need this for Emscripten_
 
@@ -28,12 +28,36 @@ Defines allocation statagy, Emscripten really needs fixed.
 
 ---
 
-- **NIL_MEMORY_HINT**
+- **NIL_CPU_MEMORY_HINT=\<megabytes\>**
 
 _Currently Unused - Helps define requirements and for Emscripten_
 
 Define (in megabytes) a memory capacity hint, on Fixed platforms this hint will
 not be broken.
+
+---
+
+- **NIL_CPU_TASK_COUNT=\<count\>**
+
+_Currently Unused_
+
+Some platforms have restrictions, web must have only one thread.
+0 is Auto. Auto is defined as `n = (cores - 1)`
+
+Platform                 | Settings
+-------------------------|---------
+Windows/Linux/Mac        | 0
+Web                      | 1
+
+---
+
+- **NIL_GPU_TASK_MULTI_THREADED=\<0 or 1\>**
+
+_Currently Unused_
+
+If enabled one thread will be dedicated to the GPU tasks, else GPU tasks will
+happen on any thread.
+
 
 ---
 
@@ -58,8 +82,8 @@ _Place these in the `nil.project defines { ... }` to alter the defaults._
 
 Things that can be
 
-Preprocessor Flag              | Default | Description
--------------------------------|---------|------------
-NIL_MAX_TAG_NAME_LENGTH        | 64      | Max `char` length of a tag
-NIL_MAX_NODE_NAME_LENGTH       | 32      | Max `char` length of a node name
-NIL_GRAPH_TRANSFORM_STACK_HINT | 32      | Number of transforms to stack alloc on updates.
+Preprocessor Flag                        | Default | Description
+-----------------------------------------|---------|------------
+NIL_MAX_TAG_NAME_LENGTH=\<count\>        | 64      | Max `char` length of a tag
+NIL_MAX_NODE_NAME_LENGTH=\<count\>       | 32      | Max `char` length of a node name
+NIL_GRAPH_TRANSFORM_STACK_HINT=\<count\> | 32      | Number of transforms to stack alloc on updates.
