@@ -11,6 +11,8 @@
 
 #include <stdint.h>
 #include <cstring> // needed for 'LOGGING_FILE_NAME' macro
+#include <stdarg.h>
+
 
 // ------------------------------------------------------- [ Logging Config ] --
 
@@ -39,52 +41,63 @@
   #define LOGGING_FUNC_STR __FUNCTION__
 #endif
 
+
+#define LOG_NONE(prefix)
+#define LOG_ONE(prefix, msg) LIB_NS_NAME::logging::log(prefix, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__, msg)
+#define LOG_V(prefix, msg, ...) LIB_NS_NAME::logging::log(prefix, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__, msg, __VA_ARGS__)
+
+#define LOG_GET(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg12, arg13, arg14, arg15, arg16, ...) arg16
+
+#define LOG_ARGS(...) LOG_GET(__VA_ARGS__, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_V, LOG_ONE, LOG_NONE, )
+#define LOGGER(...) LOG_ARGS(__VA_ARGS__)(__VA_ARGS__)
+
+
 #ifndef LOG_NO_TODO
-#define LOG_TODO(msg) LIB_NS_NAME::logging::log("[todo]", msg, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__);
-#define LOG_TODO_ONCE(msg) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_TODO(msg); } };
+#define LOG_TODO(...)      LOGGER("[todo]", __VA_ARGS__);
+#define LOG_TODO_ONCE(...) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_TODO(__VA_ARGS__); } };
 #else
-#define LOG_TODO(msg)
-#define LOG_TODO_ONCE(msg)
+#define LOG_TODO(...)
+#define LOG_TODO_ONCE(...)
 #endif
 
 #ifndef LOG_NO_INFO
-#define LOG_INFO(msg) LIB_NS_NAME::logging::log("[info]", msg, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__);
-#define LOG_INFO_ONCE(msg) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_INFO(msg); } };
+#define LOG_INFO(...)      LOGGER("[info]", __VA_ARGS__);
+#define LOG_INFO_ONCE(...) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_INFO(__VA_ARGS__); } };
 #else
-#define LOG_INFO(msg)
-#define LOG_INFO_ONCE(msg)
+#define LOG_INFO(...)
+#define LOG_INFO_ONCE(...)
 #endif
 
 #ifndef LOG_NO_WARNING
-#define LOG_WARNING(msg) LIB_NS_NAME::logging::log("[warn]", msg, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__);
-#define LOG_WARNING_ONCE(msg) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_WARNING(msg); } };
+#define LOG_WARNING(...)      LOGGER("[warn]", __VA_ARGS__);
+#define LOG_WARNING_ONCE(...) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_WARNING(__VA_ARGS__); } };
 #else
-#define LOG_WARNING(msg)
-#define LOG_WARNING_ONCE(msg)
+#define LOG_WARNING(...)
+#define LOG_WARNING_ONCE(...)
 #endif
 
 #ifndef LOG_NO_ERROR
-#define LOG_ERROR(msg) LIB_NS_NAME::logging::log("[err]", msg, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__);
-#define LOG_ERROR_ONCE(msg) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_ERROR(msg); } };
+#define LOG_ERROR(...)      LOGGER("[err]", __VA_ARGS__);
+#define LOG_ERROR_ONCE(...) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_ERROR(__VA_ARGS__); } };
 #else
-#define LOG_ERROR(msg)
-#define LOG_ERROR_ONCE(msg)
+#define LOG_ERROR(...)
+#define LOG_ERROR_ONCE(...)
 #endif
 
 #ifndef LOG_NO_FATAL
-#define LOG_FATAL(msg) LIB_NS_NAME::logging::log("[fatal]", msg, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__);
-#define LOG_FATAL_ONCE(msg) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_FATAL(msg); } };
+#define LOG_FATAL(...)      LOGGER("[fatal]", __VA_ARGS__);
+#define LOG_FATAL_ONCE(...) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_FATAL(__VA_ARGS__); } };
 #else
-#define LOG_FATAL(msg)
-#define LOG_FATAL_ONCE(msg)
+#define LOG_FATAL(...)
+#define LOG_FATAL_ONCE(...)
 #endif
 
 #ifndef LOG_NO_DEPRECATED
-#define LOG_DEPRECATED(msg) LIB_NS_NAME::logging::log("[dep]", msg, LOGGING_FILE_NAME, LOGGING_FUNC_STR, __LINE__);
-#define LOG_DEPRECATED_ONCE(msg) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_DEPRECATED(msg); } };
+#define LOG_DEPRECATED(...)      LOGGER("[depr]", __VA_ARGS__);
+#define LOG_DEPRECATED_ONCE(...) { static int err_once = 0; if(!err_once) { err_once = 1; LOG_DEPRECATED(__VA_ARGS__); } };
 #else
-#define LOG_DEPRECATED
-#define LOG_DEPRECATED_ONCE
+#define LOG_DEPRECATED(...)
+#define LOG_DEPRECATED_ONCE(...)
 #endif
 
 
@@ -112,10 +125,21 @@ get_output();
 
 void
 log(const char *prefix,
-    const char *msg,
     const char *file,
     const char *func,
-    const uint32_t line);
+    const uint32_t line,
+    const char *msg,
+    ...);
+
+
+
+void
+log_v(const char *prefix,
+    const char *file,
+    const char *func,
+    const uint32_t line,
+    const char *msg,
+    va_list args);
 
 
 } // ns
@@ -185,10 +209,26 @@ set_output(const uint32_t output)
 
 void
 log(const char *prefix,
-    const char *msg,
     const char *file,
     const char *func,
-    const uint32_t line)
+    const uint32_t line,
+    const char *msg,
+    ...)
+{
+  va_list args;
+  va_start(args, msg);
+  log_v(prefix, file, func, line, msg, args);
+  va_end(args);
+}
+
+
+void
+log_v(const char *prefix,
+    const char *file,
+    const char *func,
+    const uint32_t line,
+    const char *msg,
+    va_list args)
 {
   if(logging_outputs & LIB_NS_NAME::logging::out::console)
   {
@@ -202,7 +242,7 @@ log(const char *prefix,
       printf("\n");
     }
 
-    if(msg) { printf("%s", msg); }
+    if(msg) { vprintf(msg, args); }
 
     if(prefix || (file && line) || msg)
     {
