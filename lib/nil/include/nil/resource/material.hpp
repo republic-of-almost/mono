@@ -2,8 +2,7 @@
 #define MATERIAL_INCLUDED_F58F218E_C94E_49D4_9CA3_34CBD7A35E26
 
 
-#include <stdint.h>
-#include <stddef.h>
+#include <nil/fwd.hpp>
 
 
 namespace Nil {

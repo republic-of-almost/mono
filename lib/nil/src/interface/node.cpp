@@ -6,6 +6,14 @@
 #include <lib/logging.hpp>
 
 
+// -------------------------------------------------------- [ Config / Data ] --
+
+
+#ifndef NIL_MAX_TAG_NAME_LENGTH
+#define NIL_MAX_TAG_NAME_LENGTH 64
+#endif
+
+
 namespace {
 
 
@@ -15,8 +23,12 @@ constexpr uint32_t node_ref_id = 0;
 constexpr char node_msg_trying_to_destroy_null_node[] = "Trying to destroy null node";
 constexpr char node_msg_invalid_node[] = "Node is invalid";
 
-const size_t node_tag_max_length = 65;
-const size_t node_tag_max_count = 64;
+
+// -- Tags -- //
+
+// dont exceed this is a hard limit, uint64_t
+constexpr size_t node_tag_max_count = 64;
+constexpr size_t node_tag_max_length = NIL_MAX_TAG_NAME_LENGTH + 1;
 size_t node_tag_curr_count = 0;
 char node_tag_buffer[node_tag_max_count * node_tag_max_length]{};
 
@@ -26,11 +38,20 @@ char node_tag_buffer[node_tag_max_count * node_tag_max_length]{};
 
 namespace Nil {
 
+
 namespace lib_ent = lib::entity;
 
 
+// ------------------------------------------------------------- [ Lifetime ] --
+
+
 Node::Node()
-: m_node_id(lib_ent::create(node_owned_id, Graph::node_create(Data::get_graph_data())))
+: m_node_id(
+  lib_ent::create(
+    node_owned_id,
+    Graph::node_create(Data::get_graph_data())
+  )
+)
 {
 }
 
@@ -59,38 +80,12 @@ Node::~Node()
 }
 
 
-// ------------------------------------------------------------ [ Operators ] --
-  
-  
-bool
-Node::operator==(const Node &other) const
-{
-  return get_id() == other.get_id();
-}
-
-
-bool
-Node::operator!=(const Node &other) const
-{
-  return get_id() != other.get_id();
-}
-
-
-Node::operator bool() const
-{
-  return is_valid();
-}
-
-
-// ---------------------------------------------------------- [ Copy / Move ] --
-
-
 Node::Node(const Node &other)
 : m_node_id(other.get_id() ? lib_ent::create(node_ref_id, other.get_id()) : 0)
 {
 }
 
-  
+
 Node&
 Node::operator=(const Node &other)
 {
@@ -149,6 +144,28 @@ Node::operator=(Node &&other) noexcept
   return *this;
 }
 
+
+// ------------------------------------------------------------ [ Operators ] --
+  
+  
+bool
+Node::operator==(const Node &other) const
+{
+  return get_id() == other.get_id();
+}
+
+
+bool
+Node::operator!=(const Node &other) const
+{
+  return get_id() != other.get_id();
+}
+
+
+Node::operator bool() const
+{
+  return is_valid();
+}
 
 
 // ---------------------------------------------------------------- [ State ] --
@@ -585,3 +602,9 @@ Node::get_data_type_id() const
 
 
 } // ns
+
+
+// --------------------------------------------------------------- [ Config ] --
+
+
+#undef NIL_MAX_TAG_NAME_LENGTH

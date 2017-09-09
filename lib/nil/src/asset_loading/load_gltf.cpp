@@ -1123,17 +1123,9 @@ load_gltf(Nil::Node root_node, const char *path)
     json_gltf_element = json_gltf_element->next;
   } // while json_element_value
 
-  const size_t accessor_count = accessors.size();
-  const size_t asset_count = assets.size();
-  const size_t buffer_view_count = buffer_views.size();
-  const size_t node_size = nodes.size();
-  const size_t meshes_size = meshes.size();
-  const size_t scene_size = scenes.size();
-  const size_t buffer_size = buffers.size();
-
-  lib::array<Nil::Resource::Mesh> internal_mesh_ids;
-  lib::array<uint32_t> internal_texture_ids;
-  lib::array<uint32_t> internal_material_ids;
+  lib::array<Nil::Resource::Mesh> internal_meshes;
+  lib::array<Nil::Resource::Texture> internal_textures;
+  lib::array<Nil::Resource::Material> internal_materials;
 
   for(auto &tex : textures)
   {
@@ -1152,7 +1144,7 @@ load_gltf(Nil::Node root_node, const char *path)
     
     Nil::Resource::load(data);
     
-    internal_texture_ids.emplace_back(data.id);
+    internal_textures.emplace_back(data);
   }
   
   for(auto &mat : materials)
@@ -1163,12 +1155,12 @@ load_gltf(Nil::Node root_node, const char *path)
     
     if(mat.ext_blinn_phong.diffuse_texture >= 0)
     {
-      data.texture_01 = internal_texture_ids[mat.ext_blinn_phong.diffuse_texture];
+      data.texture_01 = internal_textures[mat.ext_blinn_phong.diffuse_texture].id;
     }
     
     Nil::Resource::load(data);
     
-    internal_material_ids.emplace_back(data.id);
+    internal_materials.emplace_back(data);
   }
 
   // Load up Nil Resources //
@@ -1222,7 +1214,7 @@ load_gltf(Nil::Node root_node, const char *path)
       
       Nil::Resource::load(data);
       
-      internal_mesh_ids.emplace_back(data);
+      internal_meshes.emplace_back(data);
     }
   }
   
@@ -1253,11 +1245,11 @@ load_gltf(Nil::Node root_node, const char *path)
       if(nodes[i].mesh != -1)
       {
         Nil::Data::Renderable renderable;
-        renderable.mesh_id = internal_mesh_ids[nodes[i].mesh].id;
-        renderable.material_id = internal_material_ids[meshes[nodes[i].mesh].primitives.material];
+        renderable.mesh_id = internal_meshes[nodes[i].mesh].id;
+        renderable.material_id = internal_materials[meshes[nodes[i].mesh].primitives.material].id;
         
         Nil::Data::set(node, renderable);
-        Nil::Data::set(node, internal_mesh_ids[nodes[i].mesh].bounding_box);
+        Nil::Data::set(node, internal_meshes[nodes[i].mesh].bounding_box);
       }
       
       if(nodes[i].light != -1)

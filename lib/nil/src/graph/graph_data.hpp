@@ -9,13 +9,22 @@
 #include <stdint.h>
 
 
+// -------------------------------------------------------- [ Config / Data ] --
+
+
+#ifndef NIL_MAX_NODE_NAME_LENGTH
+#define NIL_MAX_NODE_NAME_LENGTH 32
+#endif
+
+
+
 namespace Nil {
 namespace Graph {
 
 
 struct short_string
 {
-  char data[16];
+  char data[NIL_MAX_NODE_NAME_LENGTH];
 };
 
 
@@ -78,9 +87,14 @@ struct Data
 };
 
 
+} // ns
+} // ns
 
-} // ns
-} // ns
+
+// --------------------------------------------------------------- [ Config ] --
+
+
+#undef NIL_MAX_NODE_NAME_LENGTH
 
 
 #endif // inc guard

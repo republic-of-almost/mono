@@ -2,8 +2,7 @@
 #define MESH_INCLUDED_B8540088_3107_4C5A_A8B8_36D182202C3E
 
 
-#include <stdint.h>
-#include <stddef.h>
+#include <nil/fwd.hpp>
 #include <nil/data/bounding_box.hpp>
 
 

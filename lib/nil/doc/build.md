@@ -47,3 +47,18 @@ Config        | Enabled
 Development   | TRUE
 Staging       | TRUE
 Release       | FALSE
+
+
+---
+
+**General Settings**
+
+_Place these in the `nil.project defines { ... }` to alter the defaults._
+
+Things that can be
+
+Preprocessor Flag              | Default | Description
+-------------------------------|---------|------------
+NIL_MAX_TAG_NAME_LENGTH        | 64      | Max `char` length of a tag
+NIL_MAX_NODE_NAME_LENGTH       | 32      | Max `char` length of a node name
+NIL_GRAPH_TRANSFORM_STACK_HINT | 32      | Number of transforms to stack alloc on updates.

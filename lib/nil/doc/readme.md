@@ -1,18 +1,20 @@
-# Nil
+# Nil Readme
 
 Nil is a combination of the data that represents the application and a scene graph.
 
 
-## Design Goal
+## Design Goals
 
 The goal of Nil is to provide a graph which data can be attached, and a mechanism to allow other libraries to deal with resources and object lifetime.
 
 Other than controlling callbacks and the graph. Nil doesn't actually do any work.
 
+Nil is _meant_ to be low level / low user protection interface this is not designed to be a public facing interface. The one exception is Nil::Node nodes have complex lifetimes so Node is designed to be safe for public use.
+
 
 ## Data and Resources
 
-Most data has to be attached to a node for it to exist. The exceptions are Transforms that are added by default. This data is special cased because both are quite often used anyway and have inherited properties.
+Most data has to be attached to a node for it to exist. The exceptions are Transforms that are added by default. This data is special cased because it is very common and has inherited properties.
 
 Nil also has the concept of resources which are assets, data's who's lifetime is not attached to the lifetime of a node.
 

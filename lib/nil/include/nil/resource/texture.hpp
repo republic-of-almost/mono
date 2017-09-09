@@ -2,8 +2,7 @@
 #define TEXTURE_INCLUDED_56366719_6675_4A06_AEA8_5615D7AA8B07
 
 
-#include <stdint.h>
-#include <stddef.h>
+#include <nil/fwd.hpp>
 
 
 namespace Nil {

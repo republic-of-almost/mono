@@ -10,14 +10,24 @@
 #include <lib/entity.hpp>
 #include <lib/string.hpp>
 
+
+// -------------------------------------------------------- [ Config / Data ] --
+
+
+#ifndef NIL_GRAPH_TRANSFORM_STACK_HINT
+#define NIL_GRAPH_TRANSFORM_STACK_HINT 32
+#endif
+
+
 namespace Nil {
 namespace Graph {
 
 
 namespace
 {
+
   // Used to stack alloc transform stack //
-  constexpr size_t stack_hint = 32;
+  constexpr size_t stack_hint = NIL_GRAPH_TRANSFORM_STACK_HINT;
   
   
   // ------------------------------------------------------- [ Misc Helpers ] --
@@ -820,8 +830,11 @@ node_set_name(
   size_t index = 0;
   
   const size_t str_len = strlen(name) + 1;
-  char clipped[16]{0};
-  strlcpy(clipped, name, str_len > 16 ? 16 : str_len);
+  
+  constexpr size_t name_size = sizeof(Graph::short_string::data) / sizeof(char);
+  
+  char clipped[name_size]{0};
+  strlcpy(clipped, name, str_len > name_size ? name_size : str_len);
   
   if(node_exists(data, node_id, &index))
   {
@@ -1050,3 +1063,9 @@ node_set_user_data(
 
 } // ns
 } // ns
+
+
+// --------------------------------------------------------------- [ Config ] --
+
+
+#undef NIL_GRAPH_TRANSFORM_STACK_HINT

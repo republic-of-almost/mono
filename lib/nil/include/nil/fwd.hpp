@@ -2,7 +2,8 @@
 #define FWD_INCLUDED_22AF1857_0685_4D1B_849A_F3380F902EF1
 
 
-#include <stdint.h> // needed for uint32_t 
+#include <stdint.h>
+#include <stddef.h>
 
 
 namespace Nil {

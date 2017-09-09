@@ -3,8 +3,6 @@
 
 
 #include <nil/fwd.hpp>
-#include <stddef.h>
-#include <stdint.h>
 
 
 namespace Nil {

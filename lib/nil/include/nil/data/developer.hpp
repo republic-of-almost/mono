@@ -9,8 +9,6 @@
 
 
 #include <nil/fwd.hpp>
-#include <stdint.h>
-#include <stddef.h>
 
 
 namespace Nil {

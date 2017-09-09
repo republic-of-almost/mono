@@ -29,6 +29,13 @@ table.insert(
       make.get_proj_root() .. "../src/", -- this will come up in dependencies paths
     },
 
+
+    defines = {
+
+      -- See build.md for build flags doc
+
+    },
+
     project_dependencies = {
 
       -- First Party --
