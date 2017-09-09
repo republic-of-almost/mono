@@ -12,7 +12,7 @@ TEST_CASE("Resource - Mesh")
   
   SECTION("Initial")
   {
-    REQUIRE(Nil::Resource::mesh_count() == 0);
+    REQUIRE(Nil::Resource::mesh_count() == 1);
   }
   
   SECTION("Load Pass")
@@ -20,16 +20,24 @@ TEST_CASE("Resource - Mesh")
     Nil::Resource::Mesh mesh{};
     mesh.name = "mesh_to_pass";
     
+    float some_data[] = {1,2,3};
+    mesh.position_vec3 = some_data;
+    mesh.triangle_count = 1;
+    
     const bool loaded = Nil::Resource::load(mesh);
     
     REQUIRE(loaded == true);
-    REQUIRE(Nil::Resource::mesh_count() == 1);
+    REQUIRE(Nil::Resource::mesh_count() == 2);
   }
   
   SECTION("Load Fail")
   {
     Nil::Resource::Mesh mesh{};
     mesh.name = "mesh_to_fail";
+    
+    float some_data[] = {1,2,3};
+    mesh.position_vec3 = some_data;
+    mesh.triangle_count = 1;
     
     const bool should_pass = Nil::Resource::load(mesh);
     const bool should_fail = Nil::Resource::load(mesh);

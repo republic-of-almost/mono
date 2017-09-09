@@ -189,4 +189,39 @@ TEST_CASE("Graph Nodes")
     REQUIRE(child.is_valid() == true);
     REQUIRE(child.is_ref() == false); 
   }
+  
+  SECTION("Add Tags")
+  {
+    Nil::Node node;
+    
+    REQUIRE(node.get_tag_count() == 0);
+    REQUIRE(node.add_tag("FOO"));
+    REQUIRE(node.get_tag_count() == 1);
+    REQUIRE(node.add_tag("BAR"));
+    REQUIRE(node.get_tag_count() == 2);
+    
+    node.clear_tags();
+    
+    REQUIRE(node.get_tag_count() == 0);
+  }
+  
+  SECTION("Has Tag")
+  {
+    Nil::Node node;
+    
+    REQUIRE(node.add_tag("FOO"));
+    REQUIRE(node.has_tag("FOO") == true);
+    REQUIRE(node.has_tag("ZIP") == false);
+  }
+  
+  SECTION("Get Tag")
+  {
+    Nil::Node node;
+    
+    node.add_tag("FOO");
+    node.add_tag("BAR");
+    
+    REQUIRE(strcmp(node.get_tag(0), "FOO") == 0);
+    REQUIRE(strcmp(node.get_tag(1), "BAR") == 0);
+  }
 }

@@ -49,6 +49,15 @@ We should be able to avoid excessive copying of textures like we do.
 
 Somethings in Data should be resources, gamepad/keyboard etc.
 
+
 ### Move Tags out of Node
 
 Doing this will allow us to be able to query globally the tags used.
+
+
+### Some default Resources and Data
+
+Would be handy to have a 'No Texture' texture so when something goes wrong we
+can see a texture that says 'No Texture' on it.
+
+Replicating this across other resources would be good. A cross mesh etc.

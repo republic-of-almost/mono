@@ -901,7 +901,7 @@ node_set_tags(
     LIB_ASSERT(graph);
     LIB_ASSERT(node_id);
     
-    if(!graph || !node_id || !tags)
+    if(!graph || !node_id)
     {
       LOG_ERROR(msg_invalid_params);
       return false;

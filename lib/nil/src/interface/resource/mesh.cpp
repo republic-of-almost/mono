@@ -137,7 +137,6 @@ load(Mesh &in_out)
       sprintf(msg, "Mesh with name %s already exists", in_out.name);
 
       LOG_WARNING(msg);
-      LIB_ASSERT(false);
       return false;
     }
   }

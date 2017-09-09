@@ -99,7 +99,7 @@ public:
   bool              add_tag(const char *tag);
   bool              has_tag(const char *tag) const;
   void              remove_tag(const char *tag);
-  void              get_tag(const size_t i) const;
+  const char*       get_tag(const size_t i) const;
   size_t            get_tag_count() const;
   void              clear_tags();
   

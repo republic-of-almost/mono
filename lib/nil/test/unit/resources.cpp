@@ -13,8 +13,9 @@ TEST_CASE("Resources")
     {
       Nil::Resource::Material mat{};
       mat.color = 0xFF0000FF;
+      mat.name = "Foo";
       
-      Nil::Resource::load("Foo", mat);
+      Nil::Resource::load(mat);
       
       REQUIRE(mat.id > 0);
       REQUIRE(mat.color == 0xFF0000FF);

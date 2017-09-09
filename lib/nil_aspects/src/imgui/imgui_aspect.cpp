@@ -437,7 +437,9 @@ think(Nil::Engine &engine, uintptr_t user_data)
   {
     ImGui::Begin("Graph", &self->show_graph);
 
-    for(size_t i = 0; i < root.get_child_count(); ++i)
+    const size_t child_count = root.get_child_count();
+    
+    for(size_t i = 0; i < child_count; ++i)
     {
       render_node(root.get_child(i), self->inspector_node);
     }

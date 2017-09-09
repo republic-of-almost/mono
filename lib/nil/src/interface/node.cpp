@@ -21,17 +21,19 @@ namespace {
 
 
 constexpr uint32_t node_owned_id = 1;
-constexpr uint32_t node_ref_id = 0;
-constexpr char node_no_name[] = "Unknown";
+constexpr uint32_t node_ref_id   = 0;
+constexpr char node_no_name[]    = "Unknown";
+constexpr char node_no_tag[]     = "";
 
 
 // ----------------------------------------------------------------- [ Tags ] --
 
 
 // dont exceed this is a hard limit, uint64_t
-constexpr size_t node_tag_max_count = 64;
+constexpr size_t node_tag_max_count  = 64;
 constexpr size_t node_tag_max_length = NIL_MAX_TAG_NAME_LENGTH + 1;
-size_t node_tag_curr_count = 0;
+size_t           node_tag_curr_count = 0;
+
 char node_tag_buffer[node_tag_max_count * node_tag_max_length]{};
 
 
@@ -39,7 +41,7 @@ char node_tag_buffer[node_tag_max_count * node_tag_max_length]{};
 
 
 constexpr char msg_node_invalid[]     = "Node is invalid";
-constexpr char msg_node_tag_limit[]   = "Can't add tag, we have reached tag limit at 64";
+constexpr char msg_node_tag_limit[]   = "Exceeds tag limit of 64";
 constexpr char msg_node_tag_trunc[]   = "Tag will be truncated";
 constexpr char msg_node_tag_invalid[] = "Tag must be a valid string";
 
@@ -220,8 +222,6 @@ Node::is_top_level() const
     return !!Graph::node_get_parent(Data::get_graph_data(), instance_id);
   }
   
-  LOG_ERROR(msg_node_invalid);
-  
   return false;
 }
 
@@ -239,8 +239,6 @@ Node::is_valid() const
     
     return is_valid;
   }
-  
-  LOG_ERROR(msg_node_invalid);
   
   return false;
 }
@@ -289,14 +287,7 @@ Node::get_child_count() const
 {
   const uint32_t instance_id = lib_ent::instance(m_node_id);
   
-//  if(instance_id)
-  {
-    return Graph::node_child_count(Data::get_graph_data(), instance_id);
-  }
-  
-  LOG_ERROR(msg_node_invalid);
-  
-  return 0;
+  return Graph::node_child_count(Data::get_graph_data(), instance_id);
 }
 
 
@@ -305,15 +296,7 @@ Node::get_child(const size_t i) const
 {
   const uint32_t instance_id = lib_ent::instance(m_node_id);
   
-  if(instance_id)
-  {
-    return Node(Graph::node_get_child(Data::get_graph_data(), instance_id, i), false);
-  }
-  
-  LIB_ASSERT(false);
-  LOG_ERROR(msg_node_invalid);
-  
-  return Node{nullptr};
+  return Node(Graph::node_get_child(Data::get_graph_data(), instance_id, i), false);
 }
 
 
@@ -322,14 +305,7 @@ Node::get_descendant_count() const
 {
   const uint32_t instance_id = lib_ent::instance(m_node_id);
   
-  if(instance_id)
-  {
-    return Graph::node_descendants_count(Data::get_graph_data(), instance_id);
-  }
-  
-  LOG_ERROR(msg_node_invalid);
-  
-  return 0;
+  return Graph::node_descendants_count(Data::get_graph_data(), instance_id);
 }
 
 
@@ -518,24 +494,113 @@ Node::remove_tag(const char *tag)
 }
 
 
-void
-Node::get_tag(const size_t i) const
+const char*
+Node::get_tag(const size_t tag_index) const
 {
+  // -- Param Checks -- //
+  {
+    const bool over_max_tags = tag_index >= node_tag_max_count;
   
+    LIB_ASSERT(over_max_tags == false);
+    
+    if(over_max_tags)
+    {
+      LOG_WARNING(msg_node_tag_limit);
+      return "";
+    }
+    
+  }
+
+  // -- Get Tags -- //
+  uint64_t tags = 0;
+  {
+    const uint32_t instance_id = lib_ent::instance(m_node_id);
+
+    if(instance_id)
+    {
+      Graph::node_get_tags(Data::get_graph_data(), instance_id, &tags);
+    }
+  }
+
+  // -- Count Bits -- //
+  uint64_t tag_bit = 0;
+  size_t bit_counter = 0;
+  {
+    for(uint64_t b = 0; b < node_tag_max_count; ++b)
+    {
+      const uint64_t this_bit = 1 << b;
+      
+      if(this_bit & tags)
+      {
+        if(bit_counter == tag_index)
+        {
+          tag_bit = this_bit;
+          
+          break;
+        }
+        
+        bit_counter += 1;
+      }
+    }
+  }
+  
+  // -- Find Tag -- //
+  {
+    if(tag_bit)
+    {
+      LIB_ASSERT(bit_counter < node_tag_max_count);
+      
+      const char *tag = &node_tag_buffer[bit_counter * node_tag_max_length];
+      return tag;
+    }
+  }
+  
+  return node_no_tag;
 }
 
 
 size_t
 Node::get_tag_count() const
 {
-  return 0;
-}
+  // -- Get Tags -- //
+  uint64_t tags = 0;
+  {
+    const uint32_t instance_id = lib_ent::instance(m_node_id);
 
+    if(instance_id)
+    {
+      Graph::node_get_tags(Data::get_graph_data(), instance_id, &tags);
+    }
+  }
+
+  // -- Count Bits -- //
+  size_t bit_counter = 0;
+  {
+    for(uint64_t b = 0; b < node_tag_max_count; ++b)
+    {
+      const uint64_t this_bit = uint64_t{1} << b;
+      
+      if(this_bit & tags)
+      {
+        bit_counter += 1;
+      }
+    }
+  }
+  
+  return bit_counter;
+}
 
 
 void
 Node::clear_tags()
 {
+  const uint32_t instance_id = lib_ent::instance(m_node_id);
+
+  if(instance_id)
+  {
+    constexpr uint64_t tags = 0;
+    Graph::node_set_tags(Data::get_graph_data(), instance_id, tags);
+  }
 }
 
 
