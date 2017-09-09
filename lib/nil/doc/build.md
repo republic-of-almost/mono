@@ -9,6 +9,7 @@ Details relating to building Nil.
 - **NIL_RELEASE (Release Config)**
 
 _Set in build configs in premake.lua_
+
 Config      | Settings
 ------------|---------
 Development | symbols, no optimisations

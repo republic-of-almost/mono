@@ -1,15 +1,20 @@
 # Nil Readme
 
-Nil is a combination of the data that represents the application and a scene graph.
+Nil is not meant to be a fancy API, it should be considered just the data layer for which
+first and third parties can tap into, prototype on, and have an API on top.
+
+Nil is a scene graph. Checkout Nil::Node for full details.
+You can attach one of any supporting Nil::Data to a node. a node can children, you can walk
+the node. Transforms are nested.
 
 
 ## Design Goals
 
-The goal of Nil is to provide a graph which data can be attached, and a mechanism to allow other libraries to deal with resources and object lifetime.
-
-Other than controlling callbacks and the graph. Nil doesn't actually do any work.
-
-Nil is _meant_ to be low level / low user protection interface this is not designed to be a public facing interface. The one exception is Nil::Node nodes have complex lifetimes so Node is designed to be safe for public use.
+- Should provide a robust scene graph.
+- Low level access to data types `cameras[]`, `materials[]` etc.
+- Look after data dependencies.
+- POD data only (for data and resources).
+- Flexibily and Speed over safty.
 
 
 ## Data and Resources
@@ -17,11 +22,6 @@ Nil is _meant_ to be low level / low user protection interface this is not desig
 Most data has to be attached to a node for it to exist. The exceptions are Transforms that are added by default. This data is special cased because it is very common and has inherited properties.
 
 Nil also has the concept of resources which are assets, data's who's lifetime is not attached to the lifetime of a node.
-
-
-## Future Things and TODO
-
-  - Nice to move out transforms from the graph, and have graph just nodes, and transforms as data like the rest of them.
 
 
 ## Examples
