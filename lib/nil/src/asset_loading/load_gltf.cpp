@@ -294,7 +294,6 @@ load_gltf(Nil::Node root_node, const char *path)
   
   // -- Extensions -- //
   
-  
   lib::array<gltf_asset>        assets;
   lib::array<gltf_buffer_view>  buffer_views;
   lib::array<gltf_buffer>       buffers;
@@ -729,6 +728,7 @@ load_gltf(Nil::Node root_node, const char *path)
       while(json_mesh != nullptr)
       {
         gltf_mesh mesh{};
+        memset(&mesh.primitives, -1, sizeof(mesh.primitives));
         
         const json_object_element_s *json_mesh_attr = json_obj_element(json_mesh->value);
         
@@ -902,13 +902,16 @@ load_gltf(Nil::Node root_node, const char *path)
           }
           else if(json_obj_name(json_node_attr, "extras"))
           {
-            const json_array_element_s *json_extra_ele = json_arr_element(json_node_attr);
+            const json_object_element_s *json_extras_attr = json_obj_element(json_node_attr->value);
             
-            while(json_extra_ele != nullptr)
+            while(json_extras_attr != nullptr)
             {
-              // TODO: Do something about extras
+              if(json_obj_name(json_extras_attr, "tags"))
+              {
+                
+              }
               
-              json_extra_ele = json_extra_ele->next;
+              json_extras_attr = json_extras_attr->next;
             }
           }
           else if(json_obj_name(json_node_attr, "extensions"))
@@ -1175,26 +1178,41 @@ load_gltf(Nil::Node root_node, const char *path)
       
       // Position
       {
-        const size_t buffer = buffer_views[mesh.primitives.attr_position].buffer;
-        const size_t offset = buffer_views[mesh.primitives.attr_position].byte_offset;
-        
-        data.position_vec3 = (float*)&buffers[buffer].uri[offset];
+        const size_t index = mesh.primitives.attr_position;
+      
+        if(index != -1)
+        {
+          const size_t buffer = buffer_views[index].buffer;
+          const size_t offset = buffer_views[index].byte_offset;
+          
+          data.position_vec3 = (float*)&buffers[buffer].uri[offset];
+        }
       }
       
       // Normal
       {
-        const size_t buffer = buffer_views[mesh.primitives.attr_normal].buffer;
-        const size_t offset = buffer_views[mesh.primitives.attr_normal].byte_offset;
+        const size_t index = mesh.primitives.attr_normal;
         
-        data.normal_vec3 = (float*)&buffers[buffer].uri[offset];
+        if(index != -1)
+        {
+          const size_t buffer = buffer_views[index].buffer;
+          const size_t offset = buffer_views[index].byte_offset;
+          
+          data.normal_vec3 = (float*)&buffers[buffer].uri[offset];
+        }
       }
       
       // Texture Coords
       {
-        const size_t buffer = buffer_views[mesh.primitives.attr_texcoord_0].buffer;
-        const size_t offset = buffer_views[mesh.primitives.attr_texcoord_0].byte_offset;
+        const size_t index = mesh.primitives.attr_texcoord_0;
       
-        data.texture_coords_vec2 = (float*)&buffers[buffer].uri[offset];
+        if(index != -1)
+        {
+          const size_t buffer = buffer_views[index].buffer;
+          const size_t offset = buffer_views[index].byte_offset;
+        
+          data.texture_coords_vec2 = (float*)&buffers[buffer].uri[offset];
+        }
       }
       
       // Index
@@ -1242,11 +1260,20 @@ load_gltf(Nil::Node root_node, const char *path)
       
       Nil::Data::set(node, trans);
       
-      if(nodes[i].mesh != -1)
+      const size_t mesh_index = nodes[i].mesh;
+      
+      if(mesh_index != -1)
       {
-        Nil::Data::Renderable renderable;
-        renderable.mesh_id = internal_meshes[nodes[i].mesh].id;
-        renderable.material_id = internal_materials[meshes[nodes[i].mesh].primitives.material].id;
+        Nil::Data::Renderable renderable{};
+        
+        renderable.mesh_id = internal_meshes[mesh_index].id;
+        
+        const size_t mat_id = meshes[mesh_index].primitives.material;
+        
+        if(mat_id != -1)
+        {
+          renderable.material_id = internal_materials[mat_id].id;
+        }
         
         Nil::Data::set(node, renderable);
         Nil::Data::set(node, internal_meshes[nodes[i].mesh].bounding_box);

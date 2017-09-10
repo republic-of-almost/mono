@@ -10,6 +10,9 @@
 namespace {
 
 
+// ------------------------------------------------------------- [ Resource ] --
+
+
 struct Material_data
 {
   lib::array<uint32_t, 128> keys{uint32_t{0}};
@@ -23,6 +26,19 @@ get_mat_data()
   static Material_data data;
   return data;
 }
+
+
+// ------------------------------------------------------------- [ Messages ] --
+
+
+constexpr char msg_material_must_have_name[] = "Loading/Updating a Material - must have a name.";
+constexpr char msg_material_failed_to_add[]  = "Failed to add Material %s";
+
+
+// ---------------------------------------------------------- [ Identifiers ] --
+
+
+constexpr char material_type_name[] = "Material";
 
 
 } // anon ns
@@ -69,11 +85,7 @@ load(Material &in_out)
 
     if (!has_name || !has_length)
     {
-      char msg[2048]{};
-      sprintf(msg, "Loading/Updating a Material - must have a name.", in_out.name);
-
-      LOG_ERROR(msg);
-
+      LOG_ERROR(msg_material_must_have_name);
       return false;
     }
   }
@@ -112,12 +124,9 @@ load(Material &in_out)
 
       if (!cpy_name)
       {
-        char msg[2048]{};
-        sprintf(msg, "Failed to add Material %s", in_out.name);
-
-        LOG_ERROR(msg);
-
         LIB_ASSERT(false);
+        LOG_ERROR(msg_material_failed_to_add, in_out.name);
+        
         return false;
       }
 
@@ -160,7 +169,7 @@ get(size_t *count, Material **out)
 const char *
 get_type_name(const Material &)
 {
-  return "Material";
+  return material_type_name;
 }
 
 

@@ -37,6 +37,8 @@ Object::Object()
   static_assert(sizeof(Nil::Node) <= sizeof(m_id), "Not enough storeage");
   
   new(&m_id) Nil::Node();
+  
+  Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
 }
 
 

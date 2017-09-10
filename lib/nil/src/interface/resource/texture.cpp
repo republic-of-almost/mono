@@ -7,15 +7,16 @@
 #include <lib/string.hpp>
 
 
-// ------------------------------------------------------------- [ Resource ] --
-
 
 namespace {
 
 
+// ------------------------------------------------------------- [ Resource ] --
+
+
 struct Texture_data {
-  lib::array<uint32_t, 128> keys{};
-  lib::array<Nil::Resource::Texture, 128> textures{};
+  lib::array<uint32_t, 128> keys{uint32_t{0}};
+  lib::array<Nil::Resource::Texture, 128> textures{Nil::Resource::Texture{}};
 };
 
 
@@ -25,6 +26,20 @@ get_tex_data()
   static Texture_data tex_data;
   return tex_data;
 };
+
+
+// ------------------------------------------------------------- [ Messages ] --
+
+
+constexpr char msg_texture_no_name[]     = "Loading a Texture - must have a name.";
+constexpr char msg_texture_name_exists[] = "Texture with name %s already exists";
+constexpr char msg_texture_failed[]      = "Failed to add Texture %s";
+
+
+// ---------------------------------------------------------- [ Identifiers ] --
+
+
+constexpr char texture_type_name[] = "Texture";
 	
 
 } // anon ns
@@ -71,10 +86,7 @@ load(Texture &in_out)
 
     if (!has_name || !has_length)
     {
-      char msg[2048]{};
-      sprintf(msg, "Loading a Texture - must have a name.");
-
-      LOG_ERROR(msg);
+      LOG_ERROR(msg_texture_no_name);
 
       return false;
     }
@@ -85,10 +97,8 @@ load(Texture &in_out)
 
   if(check_key)
   {
-    char msg[2048]{};
-    sprintf(msg, "Texture with name %s already exists", in_out.name);
 
-    LOG_WARNING(msg);
+    LOG_WARNING(msg_texture_name_exists, in_out.name);
     LIB_ASSERT(false);
     return false;
   }
@@ -148,10 +158,7 @@ load(Texture &in_out)
         if(cpy_data) { free((void*)cpy_data); }
         if(cpy_name) { free(cpy_name);        }
 
-        char msg[2048]{};
-        sprintf(msg, "Failed to add Texture %s", in_out.name);
-
-        LOG_ERROR(msg);
+        LOG_ERROR(msg_texture_failed, in_out.name);
 
         LIB_ASSERT(false);
         return false;
@@ -162,7 +169,7 @@ load(Texture &in_out)
     {
       // Generate new id //
       {
-        const uint32_t new_id = get_tex_data().keys.size() + 1;
+        const uint32_t new_id = get_tex_data().keys.size();
         in_out.id = new_id;
         cpy.id = in_out.id;
       }
@@ -206,7 +213,7 @@ get(size_t *count, Texture **in_out)
 const char *
 get_type_name(const Texture &)
 {
-  return "Texture";
+  return texture_type_name;
 }
 
 

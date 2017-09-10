@@ -43,8 +43,7 @@ public:
                     ~Node();
   bool              destroy();
 
-  
-  
+ 
   // ---------------------------------------------------------- [ Operators ] --
   /*
     Equality operators test if the node id's are equal.
@@ -60,7 +59,7 @@ public:
 
   // -------------------------------------------------------------- [ State ] --
   /*
-    Various State checkers
+    Various state checks.
   */
 
 
@@ -79,6 +78,7 @@ public:
   
   bool              set_parent(const Node &other);
   Node              get_parent() const;
+  
   size_t            get_child_count() const;
   Node              get_child(const size_t i) const;
   size_t            get_descendant_count() const;

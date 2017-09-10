@@ -110,16 +110,16 @@ ogl_createMesh(
   {
     const size_t index = stride * i;
 
-    vertices[index + 0] = positions[(i * 3) + 0];
-    vertices[index + 1] = positions[(i * 3) + 1];
-    vertices[index + 2] = positions[(i * 3) + 2];
+    vertices[index + 0] = positions ? positions[(i * 3) + 0] : 0.f;
+    vertices[index + 1] = positions ? positions[(i * 3) + 1] : 0.f;
+    vertices[index + 2] = positions ? positions[(i * 3) + 2] : 0.f;
 
-    vertices[index + 3] = normals[(i * 3) + 0];
-    vertices[index + 4] = normals[(i * 3) + 1];
-    vertices[index + 5] = normals[(i * 3) + 2];
+    vertices[index + 3] = normals ? normals[(i * 3) + 0] : 0.f;
+    vertices[index + 4] = normals ? normals[(i * 3) + 1] : 0.f;
+    vertices[index + 5] = normals ? normals[(i * 3) + 2] : 0.f;
 
-    vertices[index + 6] = tex_coords[(i * 2) + 0];
-    vertices[index + 7] = tex_coords[(i * 2) + 1];
+    vertices[index + 6] = tex_coords ? tex_coords[(i * 2) + 0] : 0.f;
+    vertices[index + 7] = tex_coords  ?tex_coords[(i * 2) + 1] : 0.f;
   }
 
   GLuint vbo;

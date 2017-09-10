@@ -44,9 +44,7 @@ class Resource;
 class Transform;
 class Vector3;
 
-
 enum class Ray_search;
-
 
 } // ns
 

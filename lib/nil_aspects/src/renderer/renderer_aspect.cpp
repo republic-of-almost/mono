@@ -538,7 +538,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
         tex->status = Nil::Resource::Texture::LOADED;
       }
-      else if (!has_data)
+      else if (!has_data && i > 0)
       {
         LIB_ASSERT(false);
         LOG_ERROR("Tried to load a texture with no data");
@@ -857,9 +857,9 @@ think(Nil::Engine &engine, uintptr_t user_data)
         const uint32_t mesh_count = self->mesh_ids.size();
 
         if(render.mesh_id && mesh_count > render.mesh_id)
-        {
+        {        
           const Nil::Resource::Material mat = mats[render.material_id];
-
+          
           const float colorf[4]
           {
             lib::color::get_channel_1f(mat.color),
@@ -887,10 +887,10 @@ think(Nil::Engine &engine, uintptr_t user_data)
               const uint32_t texture_id = self->texture_ids[texture_01];
               rov_setTexture(texture_id, 0);
             }
-            else
-            {
-              LOG_WARNING_ONCE("Failed to find texture");
-            }
+          }
+          else
+          {
+            rov_setTexture(0, 0);
           }
 
           rov_submitMeshTransform(render.world_mat);

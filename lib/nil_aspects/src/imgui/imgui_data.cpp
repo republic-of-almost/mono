@@ -2,6 +2,7 @@
 
 #include "imgui_data.hpp"
 #include <nil/data/data.hpp>
+#include <lib/color.hpp>
 #include <stdio.h>
 
 
@@ -375,6 +376,23 @@ render_data(Nil::Data::Light *data)
   update(ImGui::DragFloat("Atten Const",  &data->atten_const),       &updated);
   update(ImGui::DragFloat("Atten Linear", &data->atten_linear),      &updated);
   update(ImGui::DragFloat("Atten Expon",  &data->atten_exponential), &updated);
+  
+  lib::rgba col = lib::color::init(data->color[0], data->color[1], data->color[2], 255);
+  
+  float color[] {
+    lib::color::get_channel_1f(col),
+    lib::color::get_channel_2f(col),
+    lib::color::get_channel_3f(col),
+  };
+  
+  if(ImGui::DragFloat3("Light Color", color))
+  {
+    data->color[0] = color[0] * 255;
+    data->color[1] = color[1] * 255;
+    data->color[2] = color[2] * 255;
+    
+    updated = true;
+  }
   
   // -- Readonly -- //
   

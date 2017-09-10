@@ -32,7 +32,7 @@ table.insert(
 
     defines = {
 
-      -- See build.md for build flags doc
+      -- See nil's build.md for build flags doc
 
     },
 

@@ -24,27 +24,6 @@ Component::~Component()
 // ----------------------------------------------------------- [ Attributes ] --
 
 
-//uint32_t
-//Component::get_rtti() const
-//{
-//  // Component should override this method.
-//  LIB_ASSERT(false);
-//  
-//  return 0;
-//}
-
-
-
-//const char *
-//Component::get_name() const
-//{
-//  // Component should override this method.
-//  LIB_ASSERT(false);
-//  
-//  return "Unknown Component";
-//}
-
-
 Object
 Component::get_object() const
 {

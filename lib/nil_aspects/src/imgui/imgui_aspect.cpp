@@ -572,6 +572,20 @@ think(Nil::Engine &engine, uintptr_t user_data)
           }
         }
       }
+      
+      const size_t tag_count = self->inspector_node.get_tag_count();
+      
+      if(tag_count)
+      {
+        ImGui::Text("Tags:");
+        
+        for(size_t i = 0; i < tag_count; ++i)
+        {
+          ImGui::SameLine();
+          
+          ImGui::SmallButton(self->inspector_node.get_tag(i));
+        }
+      }
     }
 
 

@@ -29,6 +29,12 @@ table.insert(
       make.get_proj_root() .. "./",
     },
 
+    defines = {
+
+      -- See roa's build.md for build flags doc
+
+    },
+
     project_dependencies = {
 
       -- First Party --

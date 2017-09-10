@@ -6,6 +6,9 @@
 #include <roa/object.hpp>
 
 
+/*
+  Helper for defining component RTTI
+*/
 #define ROA_COMPONENT_RTTI(name) \
 static constexpr uint32_t get_rtti() { return __COUNTER__ + 1; } \
 static const char* get_name() { return #name; }

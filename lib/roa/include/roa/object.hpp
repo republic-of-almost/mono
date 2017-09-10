@@ -27,6 +27,10 @@ public:
 
 
   // ----------------------------------------------------------- [ Lifetime ] --
+  /*
+    Methods that relate to an objects lifetime.
+    To create invalid objects call Object{nullptr}.
+  */
   
 
   explicit              Object();
@@ -43,12 +47,21 @@ public:
   Object&               operator=(Object &&other) noexcept;
   
   void                  destroy();
-  
+
+
+  // -------------------------------------------------------------- [ State ] --
+  /*
+    Various state checks.
+  */
+
   bool                  is_valid() const;
   bool                  is_ref() const;
   
   
   // ------------------------------------------------------ [ Relationships ] --
+  /*
+    An object can have many children and one parent.
+  */
   
   
   Object                get_parent() const;
@@ -58,11 +71,18 @@ public:
   size_t                get_child_count() const;
   
   
-  // --------------------------------------------------------- [ Attributes ] --
-  
-  
+  // -------------------------------------------------------- [ Name / Tags ] --
+  /*
+    You can tag and name nodes.
+  */
   const char*           get_name() const;
   void                  set_name(const char *name);
+  
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  /*
+    Various attributes of an object
+  */
   
   virtual const char*   get_type_name() const;
   virtual uint32_t      get_type_id() const;
@@ -73,6 +93,10 @@ public:
   
   
   // --------------------------------------------------------- [ Components ] --
+  /*
+    Components are custom bits of logic that can be added to a node.
+    You can add as many components to node as you wish.
+  */
   
   
   template<typename T>
@@ -84,8 +108,8 @@ public:
   
     if(!has_comp)
     {
-      T *comp = new T{};
-      comp->m_obj = *this;
+      T *comp                    = new T{};
+      comp->m_obj                = *this;
       const uint32_t instance_id = this->get_instance_id();
       
       return ROA_detail::add_component(instance_id, comp);
@@ -101,7 +125,7 @@ public:
   {
     static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
     
-    const uint32_t rtti = T::get_rtti();
+    const uint32_t rtti        = T::get_rtti();
     const uint32_t instance_id = this->get_instance_id();
     
     return ROA_detail::has_component(instance_id, rtti);
@@ -114,7 +138,7 @@ public:
   {
     static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
     
-    const uint32_t rtti = T::get_rtti();
+    const uint32_t rtti        = T::get_rtti();
     const uint32_t instance_id = this->get_instance_id();
   
     return static_cast<T*>(ROA_detail::get_component(instance_id, rtti));
@@ -122,6 +146,10 @@ public:
   
   
   // ---------------------------------------------------- [ Data Components ] --
+  /*
+    Data can be added to a node, you need to first call set before get returns
+    valid data.
+  */
   
   
   const Bounding_box    get_bounding_box() const;
@@ -150,7 +178,6 @@ public:
   
   
 private:
-
 
   mutable uint64_t      m_id;
   

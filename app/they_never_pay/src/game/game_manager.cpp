@@ -1,6 +1,7 @@
 #include <game/game_manager.hpp>
 #include <game/actor_kinematic.hpp>
 #include <lib/assert.hpp>
+#include <string.h>
 
 
 namespace Game {
@@ -24,6 +25,38 @@ Game_manager::on_start()
     ROA::Transform trans = scene.get_transform();
     trans.set_scale(ROA::Vector3(5.f, 5.f, 5.f));
   }
+  
+  // -- Find Spawn Point -- //
+  /*
+    This currently fails, for a bunch of reasons see todo's.
+  */
+//  ROA::Object spawn_point;
+//  {
+//    const size_t children = scene.get_child_count();
+//    
+//    for(size_t i = 0; i < children; ++i)
+//    {
+//      ROA::Object child = scene.get_child(i);
+//      const char *child_name = child.get_name();
+//      
+//      if(strcmp(child_name, "Warehouse") == 0)
+//      {
+//        const size_t gran_children = child.get_child_count();
+//        
+//        for(size_t j = 0; j < gran_children; ++j)
+//        {
+//          ROA::Object gran_child = child.get_child(j);
+//          const char *gran_child_name = gran_child.get_name();
+//        
+//          if(strcmp(gran_child_name, "SpawnPoint") == 0)
+//          {
+//            spawn_point = gran_child;
+//            break;
+//          }
+//        }
+//      }
+//    }
+//  }
 
   // -- Create the Actor -- //
   {

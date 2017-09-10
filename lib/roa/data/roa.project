@@ -34,7 +34,6 @@ table.insert(
 
       -- First Party --
 
-      -- "AspectsControllers",
       "Nil",
       "Lib",
       "Math",

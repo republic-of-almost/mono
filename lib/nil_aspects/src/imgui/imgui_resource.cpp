@@ -88,6 +88,38 @@ void render_resource_overview(
 }
 
 
+namespace {
+
+
+void
+helper_render_texture(
+  const Nil::Resource::Texture *tex,
+  const uint32_t width,
+  const uint32_t height)
+{
+  ImGui::Image(
+    (ImTextureID)tex->platform_resource,
+    ImVec2(width, height)
+  );
+
+  if(ImGui::IsItemHovered())
+  {
+    ImGui::SetTooltip(
+      "Name: %s\nID: %d\nDimentions: %d x %d\nChannels: %d\nResource ID: %p",
+      tex->name,
+      tex->id,
+      tex->width,
+      tex->height,
+      tex->components,
+      (void*)tex->platform_resource
+    );
+  }
+}
+
+
+} // anon ns
+
+
 void
 render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
 {
@@ -109,25 +141,8 @@ render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
   
   for(size_t i = 0; i < count; ++i)
   {
-    Nil::Resource::Texture tex = rsrc[i];
-  
-    ImGui::Image(
-      (ImTextureID)tex.platform_resource,
-      ImVec2(tex_size, tex_size)
-    );
-  
-    if(ImGui::IsItemHovered())
-    {
-      ImGui::SetTooltip(
-        "Name: %s\nID: %d\nDimentions: %d x %d\nChannels: %d\nResource ID: %p",
-        tex.name,
-        tex.id,
-        tex.width,
-        tex.height,
-        tex.components,
-        (void*)tex.platform_resource
-      );
-    }
+    const Nil::Resource::Texture *tex = &rsrc[i];
+    helper_render_texture(tex, tex_size, tex_size);
     
     if((i + 1) % (cols ))
     {
@@ -155,24 +170,15 @@ render_resource(const Nil::Resource::Material *rsrc, const size_t count)
       Nil::Resource::Texture *textures;
       Nil::Resource::get(&tex_count, &textures);
       
-      ImGui::Image(
-        (void*)textures[data->texture_01].platform_resource,
-        ImVec2(64, 64)
-      );
+      helper_render_texture(&textures[data->texture_01], 64, 64);
       
       ImGui::SameLine();
       
-      ImGui::Image(
-        (void*)textures[data->texture_02].platform_resource,
-        ImVec2(64, 64)
-      );
+      helper_render_texture(&textures[data->texture_02], 64, 64);
       
       ImGui::SameLine();
       
-      ImGui::Image(
-        (void*)textures[data->texture_03].platform_resource,
-        ImVec2(64, 64)
-      );
+      helper_render_texture(&textures[data->texture_03], 64, 64);
     
       float color[4]
       {

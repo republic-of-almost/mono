@@ -8,6 +8,9 @@
 namespace ROA_detail {
 
 
+// ----------------------------------------- [ Internal component interface ] --
+
+
 bool
 add_component(const uint32_t object_id, ROA::Component *comp);
 

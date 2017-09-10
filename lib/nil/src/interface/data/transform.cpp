@@ -2,14 +2,16 @@
 #include <nil/node.hpp>
 #include <data/internal_data.hpp>
 #include <graph/graph.hpp>
+#include <math/transform/transform.hpp>
+#include <lib/assert.hpp>
+#include <lib/logging.hpp>
 #include <string.h>
-#include "common.hpp"
-
-
-// ----------------------------------------------------------------- [ Data ] --
 
 
 namespace {
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 
 struct Transform_data
@@ -39,6 +41,19 @@ get_trans_data()
 }
 
 
+// ---------------------------------------------------------- [ Identifiers ] --
+
+
+constexpr char transform_name[] = "Transform";
+
+
+// ------------------------------------------------------------- [ Messages ] --
+
+
+constexpr char msg_transform_failed_to_find[] = "Failed to located transform";
+constexpr char msg_transform_no_node[]        = "Transform with ID: %d is invalid";
+
+
 } // ns
 
 
@@ -64,13 +79,13 @@ get(const Node &node, Transform &out, const bool inherited)
     else
     {
       LIB_ASSERT(false);
-      LOG_ERROR("Something went wrong getting transform");
+      LOG_ERROR(msg_transform_failed_to_find);
     }
   }
   else
   {
     LIB_ASSERT(false);
-    LOG_ERROR("Invalid Node");
+    LOG_ERROR(msg_transform_no_node, node.get_id());
   }
 }
 
@@ -88,13 +103,13 @@ set(Node &node, const Transform &in)
     if(!Graph::node_set_transform(Data::get_graph_data(), node.get_id(), &internal))
     {
       LIB_ASSERT(false);
-      LOG_ERROR("Something went wrong setting transform");
+      LOG_ERROR(msg_transform_failed_to_find);
     }
   }
   else
   {
     LIB_ASSERT(false);
-    LOG_ERROR("Invalid Node");
+    LOG_ERROR(msg_transform_no_node, node.get_id());
   }
   
   Graph::data_updated(Data::get_graph_data(), node.get_id(), get_trans_data().type_id);
@@ -128,7 +143,7 @@ get_type_id(const Transform &)
 const char*
 get_type_name(const Transform &in)
 {
-  return "Transform";
+  return transform_name;
 }
 
 
