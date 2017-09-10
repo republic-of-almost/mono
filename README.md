@@ -70,6 +70,12 @@ Project assets are not included in the repo as they are subject copyright.
 
 ## Credits
 
+### People
+
+Name                  | Links
+----------------------|----------------------------
+Phil Cooper-King      | [www](https://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
+
 ### Third Party
 
 Project  | Website                                       | License
@@ -79,11 +85,11 @@ GLFW     | https://github.com/glfw/glfw                  | zlib
 GL3W     | https://github.com/skaslev/gl3w               | Public Domain
 Imgui    | https://github.com/ocornut/imgui              | MIT
 Imguizmo | https://github.com/CedricGuillemet/ImGuizmo   | MIT
+Json     | https://github.com/sheredom/json.h            | Public Domain
 Remotery | https://github.com/Celtoys/Remotery           | Apache 2.0
+SoLoud   | https://github.com/jarikomppa/soloud          | Zlib/LibPng
 STB      | https://github.com/nothings/stb               | Public Domain
 TinyDIR  | https://github.com/cxong/tinydir.git          | Simplified BSD
-Json     | https://github.com/sheredom/json.h            | Public Domain
-SoLoud   | https://github.com/jarikomppa/soloud          | Zlib/LibPng
 
 
 ## License
