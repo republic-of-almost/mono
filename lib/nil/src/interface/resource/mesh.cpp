@@ -31,10 +31,10 @@ get_mesh_data()
 // ------------------------------------------------------------- [ Messages ] --
 
 
-constexpr char msg_mesh_no_name[] = "Loading a Mesh - must have a name";
+constexpr char msg_mesh_no_name[]       = "Loading a Mesh - must have a name";
 constexpr char msg_mesh_has_no_vertex[] = "Mesh %s has no vertex data";
-constexpr char msg_mesh_name_exists[] = "Mesh with name %s already exists";
-constexpr char msg_mesh_failed[] = "Failed to add Mesh %s";
+constexpr char msg_mesh_name_exists[]   = "Mesh with name %s already exists";
+constexpr char msg_mesh_failed[]        = "Failed to add Mesh %s";
 
 
 // ---------------------------------------------------------- [ Identifiers ] --
@@ -121,22 +121,21 @@ load(Mesh &in_out)
       const bool has_color    = !!in_out.color_vec4;
       const bool has_normal   = !!in_out.normal_vec3;
       const bool has_texc     = !!in_out.texture_coords_vec2;
-
+      
       const bool has_something = has_position | has_color | has_normal | has_texc;
       const bool has_verts     = !!in_out.triangle_count;
-
+      
       LIB_ASSERT(has_something);
       LIB_ASSERT(has_verts);
-
+      
       if (!has_something || !has_verts)
       {
         LOG_ERROR(msg_mesh_has_no_vertex, in_out.name);
         return false;
       }
     }
-
   }
-
+  
   // -- Check and return if exists, no support for updating atm -- //
   const uint32_t check_key = lib::string_pool::find(in_out.name);
 
