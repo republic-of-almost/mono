@@ -385,7 +385,7 @@ render_data(Nil::Data::Light *data)
     lib::color::get_channel_3f(col),
   };
   
-  if(ImGui::DragFloat3("Light Color", color))
+  if(ImGui::ColorEdit3("Light Color", color))
   {
     data->color[0] = color[0] * 255;
     data->color[1] = color[1] * 255;

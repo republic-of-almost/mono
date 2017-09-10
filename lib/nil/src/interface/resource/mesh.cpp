@@ -11,6 +11,9 @@
 namespace {
 
 
+// ------------------------------------------------------------- [ Resource ] --
+
+
 struct Mesh_data {
   lib::array<uint32_t, 128> keys{uint32_t{0}};
   lib::array<Nil::Resource::Mesh, 128> meshes{Nil::Resource::Mesh{}};
@@ -23,6 +26,21 @@ get_mesh_data()
   static Mesh_data data;
   return data;
 }
+
+
+// ------------------------------------------------------------- [ Messages ] --
+
+
+constexpr char msg_mesh_no_name[] = "Loading a Mesh - must have a name";
+constexpr char msg_mesh_has_no_vertex[] = "Mesh %s has no vertex data";
+constexpr char msg_mesh_name_exists[] = "Mesh with name %s already exists";
+constexpr char msg_mesh_failed[] = "Failed to add Mesh %s";
+
+
+// ---------------------------------------------------------- [ Identifiers ] --
+
+
+constexpr char mesh_type_name[] = "Mesh";
 
 
 } // anon ns
@@ -91,10 +109,7 @@ load(Mesh &in_out)
 
       if (!has_name || !has_length)
       {
-        char msg[2048]{};
-        sprintf(msg, "Loading a Mesh - must have a name.", in_out.name);
-
-        LOG_ERROR(msg);
+        LOG_ERROR(msg_mesh_no_name);
 
         return false;
       }
@@ -115,10 +130,7 @@ load(Mesh &in_out)
 
       if (!has_something || !has_verts)
       {
-        char msg[2048]{};
-        sprintf(msg, "Loading a Mesh - must have vertex data.", in_out.name);
-
-        LOG_ERROR(msg);
+        LOG_ERROR(msg_mesh_has_no_vertex, in_out.name);
         return false;
       }
     }
@@ -133,10 +145,7 @@ load(Mesh &in_out)
     size_t index = 0;
     if (lib::key::linear_search(check_key, get_mesh_data().keys.data(), get_mesh_data().keys.size(), &index))
     {
-      char msg[2048]{};
-      sprintf(msg, "Mesh with name %s already exists", in_out.name);
-
-      LOG_WARNING(msg);
+      LOG_WARNING(msg_mesh_name_exists, in_out.name);
       return false;
     }
   }
@@ -279,10 +288,7 @@ load(Mesh &in_out)
         if(texc_data)   { free(texc_data);  }
         if(index_data)  { free(index_data); }
 
-        char msg[2048]{};
-        sprintf(msg, "Failed to add Mesh %s", in_out.name);
-
-        LOG_ERROR(msg);
+        LOG_ERROR(msg_mesh_failed, in_out.name);
         LIB_ASSERT(false);
         return false;
       }
@@ -354,7 +360,7 @@ get(size_t *count, Mesh **out)
 const char *
 get_type_name(const Mesh &)
 {
-  return "Mesh";
+  return mesh_type_name;
 }
 
 
