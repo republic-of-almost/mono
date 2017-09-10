@@ -11,6 +11,8 @@
 #include <aspect/imgui_aspect.hpp>
 #endif
 
+#include <aspect/so_loud.hpp>
+
 #include <assert.h>
 #include <stddef.h>
 
@@ -58,6 +60,20 @@ load_aspects(Nil::Engine &nil_engine)
     aspect.tick_fn        = Nil_ext::ROA_Aspect::events;
     aspect.user_data      = (uintptr_t)&logic;
 
+    nil_engine.add_aspect(aspect);
+  }
+  
+  /*
+    Audio
+  */
+  {
+    static Nil_ext::SoLoud_Aspect::Data soloud;
+    Nil::Aspect aspect{};
+    
+    aspect.start_up_fn = Nil_ext::SoLoud_Aspect::start_up;
+    aspect.tick_fn = Nil_ext::SoLoud_Aspect::think;
+    aspect.user_data = (uintptr_t)&soloud;
+    
     nil_engine.add_aspect(aspect);
   }
   

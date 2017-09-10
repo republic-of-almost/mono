@@ -57,6 +57,7 @@ table.insert(
       "OpenGL",
       "Remotery",
       "OpenVR",
+      "SoLoud",
     },
   }
 )
