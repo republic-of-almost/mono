@@ -94,7 +94,7 @@ code_configs = {
   {
     name = "release",
     flags = {"Optimize", "Unicode"},
-    defines = {"NDEBUG", "NIL_RELEASE"},
+    defines = {"NDEBUG", "NIL_RELEASE", "NIMGUI", "NDEBUGLINES"},
   },
 }
 
