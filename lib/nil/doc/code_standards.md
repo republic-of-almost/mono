@@ -8,7 +8,7 @@ Nothing is sacrosanct!
 
 ## Main Public Engine/Graph Class Types
 
-Follow RIIA, for data cleanup.
+Follow RIIA for data cleanup.
 
 
 ## Resources and Data Types
@@ -27,25 +27,6 @@ So any pointers loaded into a Resource or Data type will be internally copied.
 ## Allocation
 
 You allocate you destroy it. You didn't allocate don't destroy it.
-
-
-## General
-
-- No STL in public interface / can be used as required in src files
-- Fixed integer only (unless dealing with 3rdparty)
-- No doubles (unless dealing with 3rdparty)
-- Use fwd dec files
-- Leave a file/function in better shape than you found it
-- Follow a files style or refresh it to a new style, no half style
-- Branches must have braces, no restriction on where branch braces go
-- Favour branch on new line, smaller can be inline
-- Favour 80 character width limit
-- favour int comparisons over string ones hash if it helps
-- No RTTI
-- No Exceptions
-- No Inheritance
-- Templates should be used sparingly.
-- Undef MACROS's
 
 
 ## Files

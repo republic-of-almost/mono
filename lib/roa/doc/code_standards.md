@@ -1,35 +1,38 @@
 # ROA Code Standards
 
-The design goal of ROA is to provide an clean interface for the engine.
+General coding guidelines for ROA.
 
-## Code Standards
+Nothing is sacrosanct!
 
-- Favor OO for node data.
-- Favor namespaced functions for global resources.
-- Favor using final on objects.
-- Classes that inherit from Object should have no member variables.
+## General
 
+- Strong OO, scoped semantics etc.
 
-## Code Style
+## Classes that inherit from Object
 
-### Header files
+- Shall have no members
+- Shall do no data transforms
 
-```cpp
+## Complex Classes
 
-namespace ROA { // inline ns
+- Shall have no visible members other than pimpl.
+- Follow RIIA for data cleanup.
 
+## Folder Structure
 
-class Someclass final
-{
-  void        inlined_method_names();
-  void        for_each_method();
-};
+- Use them!
+- `/include/Nil` for public interface
+- `/src/interface` for public interface src
 
+## Allocation
 
-void      also_inline_functions();
-void      in_namespace();
+You allocate you destroy it. You didn't allocate don't destroy it.
 
+## Files
 
-};
-
-```
+- All doc should be markdown .md
+- All C++ headers should be .hpp
+- All C++ src files should be .cpp
+- All filse lowercase with unserscore for spaces
+- Namespace and Types start with Caps and underscore for spaces
+- Functions / methods lower case with underscore for spaces

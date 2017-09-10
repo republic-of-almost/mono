@@ -16,6 +16,18 @@ I think this meakes better sense.
 We should be able to delte a resource.
 
 
+### C linkage interface
+
+Consider would `transform_set(node, transoform)` be better than\
+`set(node, transform)`?
+
+
+### Nil::Node / ROA::Object
+
+These two objects are the same, can we have nil expose a lower level graph node?
+Internally Nil doesn't use Nil::Nodes so could we just have a POD type entity?
+
+
 ### Resource Lifetime
 
 We need to be sure this is working.
