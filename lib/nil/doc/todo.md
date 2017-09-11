@@ -1,6 +1,12 @@
 # Nil Todo's
 
 
+### Data Events
+
+Aspects should not be forced to loop through all the resources to find
+things to load.
+
+
 ### Delete Data
 
 You should be able to delete data without having to destroy the node.

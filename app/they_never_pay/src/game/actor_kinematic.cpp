@@ -302,6 +302,11 @@ Actor_kinematic::on_start()
 //      this->nav_mesh_count = model.triangle_count[0];
 //    }
 //  }
+
+  // Audio Test
+  {
+    ROA::Audio audio("/Users/PhilCK/Desktop/test.ogg");
+  }
   
   // Main Entity
   {
