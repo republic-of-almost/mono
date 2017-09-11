@@ -73,7 +73,7 @@ load(Texture &in);
   get(&count, &data);
 */
 void
-get(size_t *count, Texture **in_out);
+get(size_t *count, Texture **out);
 
 
 // ----------------------------------------------------------------- [ Info ] --

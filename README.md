@@ -74,7 +74,7 @@ Project assets are not included in the repo as they are subject copyright.
 
 Name                  | Links
 ----------------------|----------------------------
-Phil Cooper-King      | [www](https://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
+Phil Cooper-King      | [www](http://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
 
 ### Third Party
 

@@ -7,7 +7,6 @@
 #include <lib/string.hpp>
 
 
-
 namespace {
 
 
@@ -97,7 +96,6 @@ load(Texture &in_out)
 
   if(check_key)
   {
-
     LOG_WARNING(msg_texture_name_exists, in_out.name);
     LIB_ASSERT(false);
     return false;

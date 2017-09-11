@@ -11,8 +11,6 @@ namespace Resource {
 
 
 // ------------------------------------------------------------- [ Resource ] --
-
-
 /*!
   The calling code should set the attributes.
   When you successfully load a mesh the id and bounding box will be set.
