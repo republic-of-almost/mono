@@ -26,6 +26,7 @@ namespace ROA {
 
 
 class Application;
+class Audio;
 class Bounding_box;
 class Camera;
 class Collection;

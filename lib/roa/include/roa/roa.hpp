@@ -6,6 +6,7 @@
 
 
 #include <roa/application.hpp>
+#include <roa/audio.hpp>
 #include <roa/bounding_box.hpp>
 #include <roa/camera.hpp>
 #include <roa/collection.hpp>
