@@ -13,7 +13,8 @@ namespace {
 // ------------------------------------------------------------- [ Resource ] --
 
 
-struct Texture_data {
+struct Texture_data
+{
   lib::array<uint32_t, 128> keys{uint32_t{0}};
   lib::array<Nil::Resource::Texture, 128> textures{Nil::Resource::Texture{}};
 };
@@ -92,13 +93,14 @@ load(Texture &in_out)
   }
 
   // -- Check and return if exists, no support for updating atm -- //
-  const uint32_t check_key = lib::string_pool::find(in_out.name);
-
-  if(check_key)
   {
-    LOG_WARNING(msg_texture_name_exists, in_out.name);
-    LIB_ASSERT(false);
-    return false;
+    const uint32_t check_key = lib::string_pool::find(in_out.name);
+
+    if(check_key)
+    {
+      LOG_WARNING(msg_texture_name_exists, in_out.name);
+      return false;
+    }
   }
 
   // -- Load new Texture -- //
@@ -212,6 +214,13 @@ const char *
 get_type_name(const Texture &)
 {
   return texture_type_name;
+}
+
+
+size_t
+texture_count()
+{
+  return get_tex_data().keys.size();
 }
 
 

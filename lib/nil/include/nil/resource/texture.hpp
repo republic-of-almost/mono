@@ -77,14 +77,17 @@ get(size_t *count, Texture **out);
 
 
 // ----------------------------------------------------------------- [ Info ] --
-
-
-/*!
-  Convence method good for templates and UI.
-  returns the type name.
+/*
+  Get general information of textures.
 */
+
+
 const char *
 get_type_name(const Texture &in);
+
+
+size_t
+texture_count();
 
 
 } // ns

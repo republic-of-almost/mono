@@ -6,6 +6,7 @@
 #include <lib/assert.hpp>
 #include <lib/key.hpp>
 #include <math/geometry/aabb.hpp>
+#include <common/common.hpp>
 
 
 namespace {
@@ -137,15 +138,17 @@ load(Mesh &in_out)
   }
   
   // -- Check and return if exists, no support for updating atm -- //
-  const uint32_t check_key = lib::string_pool::find(in_out.name);
-
-  if(check_key)
   {
-    size_t index = 0;
-    if (lib::key::linear_search(check_key, get_mesh_data().keys.data(), get_mesh_data().keys.size(), &index))
+    const uint32_t check_key = lib::string_pool::find(in_out.name);
+
+    if(check_key)
     {
-      LOG_WARNING(msg_mesh_name_exists, in_out.name);
-      return false;
+      size_t index = 0;
+      if (lib::key::linear_search(check_key, get_mesh_data().keys.data(), get_mesh_data().keys.size(), &index))
+      {
+        LOG_WARNING(msg_mesh_name_exists, in_out.name);
+        return false;
+      }
     }
   }
   
@@ -154,7 +157,7 @@ load(Mesh &in_out)
   {
     // Transfer ownership //
     /*
-      Do this first because if it fails we would need to unset output data.
+      Do this first incase it fails we can cleanup.
     */
     {
       bool failed = false;
@@ -164,18 +167,7 @@ load(Mesh &in_out)
 
       if(!failed)
       {
-        const size_t cpy_name_size = sizeof(decltype(*in_out.name)) * (strlen(in_out.name) + 1);
-        cpy_name = (char*)malloc(cpy_name_size);
-
-        if (cpy_name)
-        {
-          memset(cpy_name, 0, cpy_name_size);
-          memcpy(cpy_name, in_out.name, cpy_name_size);
-        }
-        else
-        {
-          failed = true;
-        }
+        failed = !Nil_detail::copy_data_name(&cpy_name, in_out.name, malloc);
       }
 
       // Copy all the mesh data //
@@ -190,81 +182,31 @@ load(Mesh &in_out)
         if (in_out.position_vec3 && !failed)
         {
           const size_t data_size = sizeof(float) * in_out.triangle_count * 3;
-          pos_data = (float*)malloc(data_size);
-          
-          if (pos_data)
-          {
-            memset(pos_data, 0, data_size);
-            memcpy(pos_data, in_out.position_vec3, data_size);
-          }
-          else
-          {
-            failed = true;
-          }
+          failed = !Nil_detail::copy_data((void**)&pos_data, (void*)in_out.position_vec3, data_size, malloc);
         }
 
         if (in_out.normal_vec3 && !failed)
         {
           const size_t data_size = sizeof(float) * in_out.triangle_count * 3;
-          norm_data = (float*)malloc(data_size);
-
-          if (norm_data)
-          {
-            memset(norm_data, 0, data_size);
-            memcpy(norm_data, in_out.normal_vec3, data_size);
-          }
-          else
-          {
-            failed = true;
-          }
+          failed = !Nil_detail::copy_data((void**)&norm_data, (void*)in_out.normal_vec3, data_size, malloc);
         }
 
         if (in_out.texture_coords_vec2 && !failed)
         {
           const size_t data_size = sizeof(float) * in_out.triangle_count * 2;
-          texc_data = (float*)malloc(data_size);
-
-          if (texc_data)
-          {
-            memset(texc_data, 0, data_size);
-            memcpy(texc_data, in_out.texture_coords_vec2, data_size);
-          }
-          else
-          {
-            failed = true;
-          }
+          failed = !Nil_detail::copy_data((void**)&texc_data, (void*)in_out.texture_coords_vec2, data_size, malloc);
         };
 
         if (in_out.color_vec4 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.triangle_count * 4;
-          color_data = (float*)malloc(data_size);
-
-          if (color_data)
-          {
-            memset(color_data, 0, data_size);
-            memcpy(color_data, in_out.color_vec4, data_size);
-          }
-          else
-          {
-            failed = true;
-          }
+          const size_t data_size = sizeof(float) * in_out.triangle_count * 2;
+          failed = !Nil_detail::copy_data((void**)&color_data, (void*)in_out.color_vec4, data_size, malloc);
         }
         
         if (in_out.index && !failed)
         {
           const size_t data_size = sizeof(uint32_t) * in_out.index_count;
-          index_data = (uint32_t*)malloc(data_size);
-          
-          if (index_data)
-          {
-            memset(index_data, 0, data_size);
-            memcpy(index_data, in_out.index, data_size);
-          }
-          else
-          {
-            failed = true;
-          }
+          failed = !Nil_detail::copy_data((void**)&index_data, (void*)in_out.index, data_size, malloc);
         }
       }
 

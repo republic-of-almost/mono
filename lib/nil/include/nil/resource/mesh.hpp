@@ -78,19 +78,15 @@ get(size_t *count, Mesh **out);
 
 
 // ----------------------------------------------------------------- [ Info ] --
-
-
-/*!
-  Convence method good for templates and UI.
-  returns the type name.
+/*
+  Various information about Mesh data.
 */
+
+
 const char *
 get_type_name(const Mesh &in);
 
 
-/*!
-  Returns the number of meshes in the system.
-*/
 size_t
 mesh_count();
 

@@ -1,5 +1,6 @@
 #include <nil/resource/audio.hpp>
 #include <lib/array.hpp>
+#include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/key.hpp>
@@ -14,8 +15,8 @@ namespace {
 
 
 struct Audio_data {
-  lib::array<uint32_t, 128>             keys{};
-  lib::array<Nil::Resource::Audio, 128> audio{};
+  lib::array<uint32_t, 128>             keys{uint32_t{}};
+  lib::array<Nil::Resource::Audio, 128> audio{Nil::Resource::Audio{}};
 };
 
 
@@ -84,7 +85,18 @@ load(Audio &in_out)
   
   // -- Check if file is loaded -- //
   {
-    LOG_TODO_ONCE("Audio needs to hash names for lookup");
+    const uint32_t check_key = lib::string_pool::find(in_out.name);
+
+    if(check_key)
+    {
+      size_t index = 0;
+    
+      if (lib::key::linear_search(check_key, get_audio_data().keys.data(), get_audio_data().keys.size(), &index))
+      {
+        LOG_WARNING(msg_audio_name_exists, in_out.name);
+        return false;
+      }
+    }
   }
   
   // -- Load Audio -- //
@@ -92,7 +104,7 @@ load(Audio &in_out)
   {
     // Transfer Ownership //
     /*
-     
+      Do this first incase it fails we can cleanup.
     */
     {
       bool failed = false;
@@ -102,7 +114,7 @@ load(Audio &in_out)
       {
         if(!failed)
         {
-          failed = !Nil_detail::copy_data_name(cpy_name, in_out.name, malloc);
+          failed = !Nil_detail::copy_data_name(&cpy_name, in_out.name, malloc);
         }
       }
       
@@ -111,7 +123,7 @@ load(Audio &in_out)
       {
         if(!failed)
         {
-          failed = !Nil_detail::copy_data(cpy_data, (void*)in_out.data, in_out.data_size, malloc);
+          failed = !Nil_detail::copy_data(&cpy_data, (void*)in_out.data, in_out.data_size, malloc);
         }
       }
     
@@ -133,17 +145,22 @@ load(Audio &in_out)
           return false;
         }
       }
-    
-      // Set Outputs //
-      {
-        // Generate New ID
-        {
-        
-        }
-      }
     }
   }
   
+  // Generate new id //
+  {
+    const uint32_t new_id = get_audio_data().keys.size();
+    in_out.id = new_id;
+    cpy.id = in_out.id;
+  }
+  
+  // -- Save new Mesh -- //
+  {
+    const uint32_t key = lib::string_pool::add(cpy.name);
+    get_audio_data().keys.emplace_back(key);
+    get_audio_data().audio.emplace_back(cpy);
+  }
   
   return true;
 }
@@ -156,6 +173,13 @@ const char *
 get_type_name(const Audio &)
 {
   return audio_type_name;
+}
+
+
+size_t
+audio_count()
+{
+  return get_audio_data().keys.size();
 }
 
 

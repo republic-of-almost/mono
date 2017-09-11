@@ -9,21 +9,24 @@ namespace Nil_detail {
 
 
 // ------------------------------------------------------------ [ Copy Data ] --
-
+/*
+  We do alot of copying in data and resources, these help reduce some of the
+  duplicated code.
+*/
 
 using data_cpy_allocator = void*(*)(size_t length);
 
 
 bool
 copy_data_name(
-  char *dest,
+  char **dest,
   const char *src,
   data_cpy_allocator alloc);
 
 
 bool
 copy_data(
-  void *dest,
+  void **dest,
   void *src,
   size_t data_size,
   data_cpy_allocator alloc);

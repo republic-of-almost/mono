@@ -1,7 +1,7 @@
 #include <catch/catch.hpp>
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
-#include <nil/resource/resource.hpp>
+#include <nil/resource/mesh.hpp>
 #include <lib/logging.hpp>
 
 
@@ -28,6 +28,7 @@ TEST_CASE("Resource - Mesh")
     
     REQUIRE(loaded == true);
     REQUIRE(Nil::Resource::mesh_count() == 2);
+    REQUIRE(mesh.id > 0);
   }
   
   SECTION("Load Fail")

@@ -47,10 +47,17 @@ load(Audio &in);
 
 
 // ----------------------------------------------------------------- [ Info ] --
+/*
+  Various information about Audio data.
+*/
 
 
 const char *
 get_type_name(const Audio &in);
+
+
+size_t
+audio_count();
 
 
 
