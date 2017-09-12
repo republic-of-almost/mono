@@ -2,7 +2,6 @@
 
 
 General coding guidelines for Nil.
-
 Nothing is sacrosanct!
 
 

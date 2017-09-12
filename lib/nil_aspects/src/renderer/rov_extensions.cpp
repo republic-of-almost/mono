@@ -16,7 +16,7 @@ rov_render_camera_cross(Nil::Data::Camera cam, uint32_t viewport[2])
   */
   
   // Generate ray.
-  math::mat4 proj_mat = math::mat4_projection(
+  math::mat4 proj_mat = math::mat4_perspective(
     cam.width * viewport[0],
     cam.height * viewport[1],
     cam.near_plane,

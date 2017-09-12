@@ -29,36 +29,37 @@ _MATH_NS_OPEN
 // ------------------------------------------------------------ [ Constants ] --
 
 
-MATH_MAT4_INLINE mat4                       mat4_id();
-MATH_MAT4_INLINE mat4                       mat4_zero();
+MATH_MAT4_INLINE mat4       mat4_id();
+MATH_MAT4_INLINE mat4       mat4_zero();
 
 
 // ----------------------------------------------------------- [ Initialize ] --
 
 
-MATH_MAT4_INLINE mat4                       mat4_init(); // will return an id array
-MATH_MAT4_INLINE mat4                       mat4_init(const float x);
-MATH_MAT4_INLINE mat4                       mat4_init(const mat3 sub_matrix);
-MATH_MAT4_INLINE mat4                       mat4_init(const float arr[]);
+MATH_MAT4_INLINE mat4       mat4_init(); // will return an id array
+MATH_MAT4_INLINE mat4       mat4_init(const float x);
+MATH_MAT4_INLINE mat4       mat4_init(const mat3 sub_matrix);
+MATH_MAT4_INLINE mat4       mat4_init(const float arr[]);
 
 
 // ---------------------------------------------------- [ View / Projection ] --
 
 
-MATH_MAT4_INLINE mat4                       mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up);
-MATH_MAT4_INLINE mat4                       mat4_projection(const float width, const float height, const float near_plane, const float far_plane, const float fov);
-MATH_MAT4_INLINE mat4                       mat4_orthographic(const float width, const float height, const float near_plane,  const float far_plane);
+MATH_MAT4_INLINE mat4       mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up);
+MATH_MAT4_INLINE mat4       mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov);
+MATH_MAT4_INLINE mat4       mat4_orthographic(const float width, const float height, const float near_plane,  const float far_plane);
 
 
 // ----------------------------------------------------------- [ Operations ] --
 
 
-MATH_MAT4_INLINE mat4                       mat4_add(const mat4 &lhs, const mat4 &rhs);
-MATH_MAT4_INLINE mat4                       mat4_subtract(const mat4 &lhs, const mat4 &rhs);
-MATH_MAT4_INLINE mat4                       mat4_multiply(const float val, const mat4 &b);
-MATH_MAT4_INLINE vec4                       mat4_multiply(const vec4 vec, const mat4 &b);
-MATH_MAT4_INLINE mat4                       mat4_multiply(const mat4 &lhs, const mat4 &rhs);
-MATH_MAT4_INLINE mat4                       mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three); //!< Handy for WVP type multiplications.
+MATH_MAT4_INLINE mat4       mat4_add(const mat4 &lhs, const mat4 &rhs);
+MATH_MAT4_INLINE mat4       mat4_subtract(const mat4 &lhs, const mat4 &rhs);
+
+MATH_MAT4_INLINE mat4       mat4_multiply(const float val, const mat4 &b);
+MATH_MAT4_INLINE vec4       mat4_multiply(const vec4 vec, const mat4 &b);
+MATH_MAT4_INLINE mat4       mat4_multiply(const mat4 &lhs, const mat4 &rhs);
+MATH_MAT4_INLINE mat4       mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three);
 
 // Transform matrices into other forms
 MATH_MAT4_INLINE mat4                       mat4_get_transpose(const mat4 &a);
@@ -79,9 +80,11 @@ MATH_MAT4_INLINE mat4                       mat4_scale(const vec3 scale);
 MATH_MAT4_INLINE mat4                       mat4_scale(const float x, const float y, const float z);
 MATH_MAT4_INLINE mat4                       mat4_translate(const vec3 move);
 MATH_MAT4_INLINE mat4                       mat4_translate(const float x, const float y, const float z);
-MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);;
+MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);
 
 MATH_MAT4_INLINE void                       mat4_to_array(const mat4 &m, float *array);
+
+MATH_MAT4_INLINE bool                       mat4_is_near(const mat4 &a, const mat4 &b, const float error = MATH_NS_NAME::epsilon());
 
 
 // ------------------------------------------------------- [ Constants Impl ] --
@@ -204,7 +207,7 @@ mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up)
 
 
 mat4
-mat4_projection(const float width, const float height, const float near_plane, const float far_plane, const float fov)
+mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov)
 {
   const float aspect_ratio = width / height;
   const float one_over_tan_half_fov = 1.f / MATH_NS_NAME::tan(fov * 0.5f);
@@ -335,7 +338,12 @@ mat4_multiply(const float lhs, const mat4 &rhs)
 {
   mat4 multiply_mat = mat4_init(lhs);
   
-  return mat4_multiply(multiply_mat, rhs);
+  for(uint32_t i = 0; i < 16; ++i)
+  {
+    multiply_mat.data[i] = rhs.data[i] * lhs;
+  }
+  
+  return multiply_mat;
 }
 
 
@@ -746,6 +754,23 @@ mat4_get_sub_mat3(const mat4 &m)
   };
   
   return mat3_init(mat_data);
+}
+
+
+bool
+mat4_is_near(const mat4 &a, const mat4 &b, const float error)
+{
+  for(uint32_t i = 0; i < 16; ++i)
+  {
+    const float diff = b.data[i] - a.data[i];
+  
+    if(MATH_NS_NAME::abs(diff) > error)
+    {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 

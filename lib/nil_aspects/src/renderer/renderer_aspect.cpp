@@ -635,7 +635,7 @@ find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
   for(size_t i = 0; i < cam_count; i++)
   {
     // Generate ray.
-    math::mat4 proj_mat = math::mat4_projection(
+    math::mat4 proj_mat = math::mat4_perspective(
       cameras[i].width * self->current_viewport[0],
       cameras[i].height * self->current_viewport[1],
       cameras[i].near_plane,
@@ -749,7 +749,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
     if(cam.clear_color_buffer) { clear_flags |= rovClearFlag_Color; }
     if(cam.clear_depth_buffer) { clear_flags |= rovClearFlag_Depth; }
 
-    const math::mat4 cam_proj = math::mat4_projection(
+    const math::mat4 cam_proj = math::mat4_perspective(
       cam.width * self->current_viewport[0],
       cam.height * self->current_viewport[1],
       cam.near_plane,

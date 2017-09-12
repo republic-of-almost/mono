@@ -100,7 +100,7 @@ mat4_lookat_from_nil_transform(const Nil::Data::Transform &trans)
 
 
 inline math::mat4
-mat4_projection_from_nil_camera(
+mat4_perspective_from_nil_camera(
   const Nil::Data::Camera &cam,
   const uint32_t viewport[2])
 {
@@ -109,7 +109,7 @@ mat4_projection_from_nil_camera(
 
   if(cam.type == Nil::Data::Camera::PERSPECTIVE)
   {
-    return math::mat4_projection(
+    return math::mat4_perspective(
       width,
       height,
       cam.near_plane,

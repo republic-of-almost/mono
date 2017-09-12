@@ -486,7 +486,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
 //      math::transform_up(m_trans)
 //    );
 
-    math::mat4 proj = math::mat4_projection(
+    math::mat4 proj = math::mat4_perspective(
       cam[0].width * io.DisplaySize.x,
       cam[0].height * io.DisplaySize.y,
       cam[0].near_plane,

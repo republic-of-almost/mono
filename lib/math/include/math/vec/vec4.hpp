@@ -9,6 +9,7 @@
 
 
 #include "vec_types.hpp"
+#include "../general/constants.hpp"
 #include "../detail/detail.hpp"
 
 
@@ -56,8 +57,8 @@ MATH_VEC4_INLINE float                  vec4_dot(const vec4 a, const vec4 b);
 // Equality
 MATH_VEC4_INLINE bool                   vec4_is_equal(const vec4 a, const vec4 b);
 MATH_VEC4_INLINE bool                   vec4_is_not_equal(const vec4 a, const vec4 b);
-MATH_VEC4_INLINE bool                   vec4_is_near(const vec4 a, const vec4 b, const float error);
-MATH_VEC4_INLINE bool                   vec4_is_not_near(const vec4 a, const vec4 b, const float error);
+MATH_VEC4_INLINE bool                   vec4_is_near(const vec4 a, const vec4 b, const float error = MATH_NS_NAME::epsilon());
+MATH_VEC4_INLINE bool                   vec4_is_not_near(const vec4 a, const vec4 b, const float error = MATH_NS_NAME::epsilon());
 
 
 // Alias getters
