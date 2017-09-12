@@ -256,8 +256,8 @@ mat3_rotation_pitch_from_euler(const float rad)
   const float array[9]
   {
     1.f, 0.f, 0.f,
-    0.f, MATH_NS_NAME::cos(rad), -sin(rad),
-    0.f, MATH_NS_NAME::sin(rad), cos(rad),
+    0.f, MATH_NS_NAME::cos(rad), MATH_NS_NAME::sin(rad),
+    0.f, -MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad),
   };
 
   return mat3_init(array);
@@ -269,9 +269,9 @@ mat3_rotation_yaw_from_euler(const float rad)
 {
   const float array[9]
   {
-    MATH_NS_NAME::cos(rad), 0.f, MATH_NS_NAME::sin(rad),
+    MATH_NS_NAME::cos(rad), 0.f, -MATH_NS_NAME::sin(rad),
     0.f, 1.f, 0.f,
-    -MATH_NS_NAME::sin(rad), 0.f, MATH_NS_NAME::cos(rad),
+    MATH_NS_NAME::sin(rad), 0.f, MATH_NS_NAME::cos(rad),
   };
 
   return mat3_init(array);
@@ -283,8 +283,8 @@ mat3_rotation_roll_from_euler(const float rad)
 {
   const float array[9]
   {
-    MATH_NS_NAME::cos(rad), -MATH_NS_NAME::sin(rad), 0.f,
-    MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad), 0.f,
+    MATH_NS_NAME::cos(rad), MATH_NS_NAME::sin(rad), 0.f,
+    -MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad), 0.f,
     0.f, 0.f, 1.f,
   };
 
