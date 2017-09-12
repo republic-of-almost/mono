@@ -20,8 +20,8 @@ env:
   matrix:
     - EXE=LibTest
     - EXE=MathTest
-    - EXE=NilTest
-    - EXE=ROATest#
+    #- EXE=NilTest
+    #- EXE=ROATest
 
 addons:
     apt:

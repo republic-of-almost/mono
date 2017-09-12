@@ -66,6 +66,7 @@ Actor_kinematic::on_think()
     {
       if(ROA::Keyboard::key_state(ROA::KeyCode::W) == ROA::KeyState::DOWN)
       {
+        player.play();
         z_move += 1.f;
       }
       if(ROA::Keyboard::key_state(ROA::KeyCode::S) == ROA::KeyState::DOWN)
@@ -305,7 +306,11 @@ Actor_kinematic::on_start()
 
   // Audio Test
   {
-    ROA::Audio audio("/Users/PhilCK/Desktop/test.ogg");
+    ROA::Audio_source audio_src("/Users/PhilCK/Desktop/test.ogg");
+    
+    player.set_source(audio_src);
+    
+    entity.set_audio_player(player);
   }
   
   // Main Entity

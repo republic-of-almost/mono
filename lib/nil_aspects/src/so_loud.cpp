@@ -1,5 +1,6 @@
 #include <aspect/so_loud.hpp>
 #include <nil/resource/audio.hpp>
+#include <nil/data/audio.hpp>
 #include <nil/aspect.hpp>
 #include <lib/assert.hpp>
 
@@ -28,13 +29,13 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   LIB_ASSERT(data);
   
   // If new Audio Files then load
+      Nil::Resource::Audio *audio_data  = nullptr;
+    size_t audio_data_count = 0;
+
   {
-    Nil::Resource::Audio *audio_data  = nullptr;
-    size_t count = 0;
+    Nil::Resource::get(&audio_data_count, &audio_data);
     
-    Nil::Resource::get(&count, &audio_data);
-    
-    for(size_t i = 0; i < count; ++i)
+    for(size_t i = 0; i < audio_data_count; ++i)
     {
       Nil::Resource::Audio *audio = &audio_data[i];
     
@@ -51,10 +52,6 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
             sample->load(filename);
             audio->status = Nil::Resource::Audio::LOADED;
             audio->platform_resource = (uintptr_t)sample;
-            
-            
-            auto han = data->soloud.play(*sample);
-            data->soloud.setVolume(han, 1.f);
           }
           else
           {
@@ -67,6 +64,26 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   
   // If new Audio players then play
   {
+    Nil::Data::Audio *audio_players = nullptr;
+    size_t count = 0;
+    
+    Nil::Data::get(&count, &audio_players);
+    
+    for(size_t i = 0; i < count; ++i)
+    {
+      Nil::Data::Audio *audio = &audio_players[i];
+      
+      if(audio->request_state == Nil::Data::Audio::PLAY)
+      {
+        SoLoud::Wav *sample = (SoLoud::Wav*)audio_data[audio->audio_id].platform_resource;
+        
+        auto han = data->soloud.play(*sample);
+        data->soloud.setVolume(han, 1.f);
+        
+        audio->current_state = Nil::Data::Audio::PLAYING;
+        audio->request_state = Nil::Data::Audio::NO_REQ_STATE;
+      }
+    }
   }
 }
 

@@ -451,4 +451,34 @@ Object::set_renderable(const Renderable &in)
 }
 
 
+const Audio_player
+Object::get_audio_player() const
+{
+  return const_cast<Object*>(this)->get_audio_player();
+}
+
+
+Audio_player
+Object::get_audio_player()
+{
+  return *reinterpret_cast<Audio_player*>(this);
+}
+
+
+void
+Object::set_audio_player(const Audio_player &in)
+{
+  if(in.get_instance_id() != get_instance_id())
+  {
+    Nil::Data::Audio data{};
+    
+    Nil::Node other_node = ROA_detail::get_node(in);
+    Nil::Node this_node = ROA_detail::get_node(*this);
+    
+    Nil::Data::get(other_node, data);
+    Nil::Data::set(this_node, data);
+  }
+}
+
+
 } // ns

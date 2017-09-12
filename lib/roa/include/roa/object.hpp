@@ -176,6 +176,10 @@ public:
   Renderable            get_renderable();
   void                  set_renderable(const Renderable &in);
   
+  const Audio_player    get_audio_player() const;
+  Audio_player          get_audio_player();
+  void                  set_audio_player(const Audio_player &in);
+  
   
 private:
 

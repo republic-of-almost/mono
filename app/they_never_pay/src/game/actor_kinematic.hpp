@@ -32,6 +32,8 @@ struct Actor_kinematic : public ROA::Component
   ROA::Object     body{nullptr};
   ROA::Object     head{nullptr};
   
+  ROA::Audio_player player;
+  
   float           accum_pitch{0.f};
   float           accum_yaw{0.f};
   float           height{0.f};
