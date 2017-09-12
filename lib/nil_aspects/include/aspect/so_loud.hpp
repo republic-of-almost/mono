@@ -21,7 +21,8 @@ struct Data
   // platform id.
 };
 
-// ----------------------------------------------------- [ Aspect Interface ] --
+
+// ------------------------------------------------------ [ SoLoud Lifetime ] --
 
 
 void
@@ -30,6 +31,17 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect);
 
 void
 think(Nil::Engine &engine, Nil::Aspect &aspect);
+
+
+// --------------------------------------------------------- [ SoLoud Tasks ] --
+
+
+void
+resource_update(Nil::Engine &engine, uintptr_t user_data);
+
+
+void
+player_update(Nil::Engine &engine, uintptr_t user_data);
 
 
 } // ns

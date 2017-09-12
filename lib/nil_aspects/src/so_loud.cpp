@@ -1,6 +1,7 @@
 #include <aspect/so_loud.hpp>
 #include <nil/resource/audio.hpp>
 #include <nil/data/audio.hpp>
+#include <nil/task.hpp>
 #include <nil/aspect.hpp>
 #include <lib/assert.hpp>
 
@@ -8,6 +9,8 @@
 namespace Nil_ext {
 namespace SoLoud_Aspect {
 
+
+// ------------------------------------------------------ [ SoLoud Lifetime ] --
 
 
 void
@@ -28,9 +31,46 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
   Data *data = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(data);
   
+  // -- Update Resources -- //
+  {
+    /*
+      TODO: This task should only be fired if we know there are
+      resources to update.
+    */
+    Nil::Task::cpu_task(
+      Nil::Task::CPU::EARLY_THINK,
+      aspect.user_data,
+      resource_update
+    );
+  }
+  
+  // -- Update Players -- //
+  {
+    /*
+      TODO: This task should only be fired if we know there are
+      players to update.
+    */
+    Nil::Task::cpu_task(
+      Nil::Task::CPU::THINK,
+      aspect.user_data,
+      player_update
+    );
+  }
+}
+
+
+// -------------------------------------------------------- [ So Loud Tasks ] --
+
+
+void
+resource_update(Nil::Engine &engine, uintptr_t user_data)
+{
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+
   // If new Audio Files then load
-      Nil::Resource::Audio *audio_data  = nullptr;
-    size_t audio_data_count = 0;
+  Nil::Resource::Audio *audio_data  = nullptr;
+  size_t audio_data_count = 0;
 
   {
     Nil::Resource::get(&audio_data_count, &audio_data);
@@ -61,6 +101,20 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       }
     }
   }
+
+}
+
+
+void
+player_update(Nil::Engine &engine, uintptr_t user_data)
+{
+  Data *self = reinterpret_cast<Data*>(user_data);
+  LIB_ASSERT(self);
+
+  Nil::Resource::Audio *audio_data  = nullptr;
+  size_t audio_data_count = 0;
+  
+  Nil::Resource::get(&audio_data_count, &audio_data);
   
   // If new Audio players then play
   {
@@ -77,14 +131,15 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       {
         SoLoud::Wav *sample = (SoLoud::Wav*)audio_data[audio->audio_id].platform_resource;
         
-        auto han = data->soloud.play(*sample);
-        data->soloud.setVolume(han, 1.f);
+        auto han = self->soloud.play(*sample);
+        self->soloud.setVolume(han, 1.f);
         
         audio->current_state = Nil::Data::Audio::PLAYING;
         audio->request_state = Nil::Data::Audio::NO_REQ_STATE;
       }
     }
   }
+
 }
 
 
