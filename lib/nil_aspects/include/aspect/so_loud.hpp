@@ -14,8 +14,11 @@ namespace SoLoud_Aspect {
 struct Data
 {
   SoLoud::Soloud soloud; // Engine core
-  SoLoud::Wav sample;    // One sample
   SoLoud::handle audio;
+  
+  // SoLoud needs Move/Copy to be container friendly.
+  // Until then we are just heap alloc'ing them and adding them to the
+  // platform id.
 };
 
 // ----------------------------------------------------- [ Aspect Interface ] --

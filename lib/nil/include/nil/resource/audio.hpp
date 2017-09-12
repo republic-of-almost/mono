@@ -20,6 +20,8 @@ struct Audio
   uintptr_t         data;
   size_t            data_size;
   
+  enum { SAMPLE, SONG } audio_type;
+  
   // -- Output -- //
   
   enum { PENDING, LOADED, FAILED, STATUS_COUNT } status;

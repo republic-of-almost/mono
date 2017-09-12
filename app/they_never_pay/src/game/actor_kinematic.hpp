@@ -15,7 +15,7 @@ namespace Game {
   This should split out the controller logic if we ever want AI actors.
 */
 struct Actor_kinematic : public ROA::Component
-{
+{	
   ROA_COMPONENT_RTTI(Actor_kinematic);
   
   

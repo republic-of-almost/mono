@@ -50,7 +50,15 @@ namespace Nil {
 namespace Resource {
 
 
-// -- [ Get Data ] --
+// ------------------------------------------------------------- [ Get Data ] --
+
+
+void
+get(size_t *count, Audio **out)
+{
+  *count = get_audio_data().audio.size();
+  *out = get_audio_data().audio.data();
+}
 
 
 // ----------------------------------------------------------------- [ Load ] --
