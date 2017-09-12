@@ -26,7 +26,8 @@ namespace ROA {
 
 
 class Application;
-class Audio;
+class Audio_player;
+class Audio_source;
 class Bounding_box;
 class Camera;
 class Collection;

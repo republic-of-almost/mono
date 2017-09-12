@@ -9,7 +9,7 @@
 namespace ROA {
 
 
-class Audio final : public Resource
+class Audio_source final : public Resource
 {
 public:
 
@@ -17,9 +17,9 @@ public:
   // ----------------------------------------------------------- [ Lifetime ] --
   
   
-  explicit          Audio();
-  explicit          Audio(const uint32_t id);
-  explicit          Audio(const char *filename);
+  explicit          Audio_source();
+  explicit          Audio_source(const uint32_t id);
+  explicit          Audio_source(const char *filename);
   
 
 };

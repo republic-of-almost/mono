@@ -1,4 +1,4 @@
-#include <roa/audio.hpp>
+#include <roa/audio_source.hpp>
 #include <nil/resource/audio.hpp>
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
@@ -20,19 +20,19 @@ namespace ROA {
 // ------------------------------------------------------------- [ Lifetime ] --
 
 
-Audio::Audio()
-: Audio("")
+Audio_source::Audio_source()
+: Audio_source("")
 {
 }
 
 
-Audio::Audio(const uint32_t id)
+Audio_source::Audio_source(const uint32_t id)
 : Resource(id)
 {
 }
 
 
-Audio::Audio(const char *filename)
+Audio_source::Audio_source(const char *filename)
 : Resource()
 {
   // -- Param Check -- //

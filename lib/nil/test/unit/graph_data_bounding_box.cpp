@@ -1,7 +1,7 @@
 #include <catch/catch.hpp>
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
-#include <nil/data/data.hpp>
+#include <nil/data/bounding_box.hpp>
 
 
 TEST_CASE("Data - Bounding box")
