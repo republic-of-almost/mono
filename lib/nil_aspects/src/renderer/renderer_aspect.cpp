@@ -1036,13 +1036,19 @@ ui_window(uintptr_t user_data)
     {
       #ifndef NDEBUGLINES
       ImGui::Text("Debug Line Options");
-      ImGui::Checkbox("Enable Debug Lines", &self->show_debug_lines);
-      ImGui::Checkbox("Enable Debug Bounding Boxes", &self->show_debug_bounding_boxes);
-      ImGui::Checkbox("Enable Lookat Bounding Box", &self->show_lookat_bounding_box);
-      ImGui::Checkbox("Enable Lookat Indicator", &self->show_lookat_cross);
+      ImGui::Checkbox("Enable Debug Lines",           &self->show_debug_lines);
+      ImGui::Checkbox("Enable Debug Bounding Boxes",  &self->show_debug_bounding_boxes);
+      ImGui::Checkbox("Enable Lookat Bounding Box",   &self->show_lookat_bounding_box);
+      ImGui::Checkbox("Enable Lookat Indicator",      &self->show_lookat_cross);
       #else
-      ImGui::Text("No debug line support, rebuild without NDEBUGLINES enabled");
+      bool no_debug_line = false;
+      ImGui::Text("Some options disabled - Require debug lines to be enabled");
+      ImGui::Checkbox("Enable Debug Lines",           &no_debug_line);
+      ImGui::Checkbox("Enable Debug Bounding Boxes",  &no_debug_line);
+      ImGui::Checkbox("Enable Lookat Bounding Box",   &no_debug_line);
+      ImGui::Checkbox("Enable Lookat Indicator",      &no_debug_line);
       #endif
+      ImGui::Checkbox("Enable Wireframe Mode",        &self->show_wireframe_mode);
       
       ImGui::End();
     }

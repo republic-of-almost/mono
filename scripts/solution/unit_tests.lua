@@ -32,11 +32,11 @@ dofile("../../lib/lib/data/lib.test_project")
 dofile("../../lib/math/data/math.project")
 dofile("../../lib/math/data/math.test_project")
 
-dofile("../../lib/nil/data/nil.project")
-dofile("../../lib/nil/data/nil.test_project")
-
-dofile("../../lib/roa/data/roa.project")
-dofile("../../lib/roa/data/roa.test_project")
+-- dofile("../../lib/nil/data/nil.project")
+-- dofile("../../lib/nil/data/nil.test_project")
+--
+-- dofile("../../lib/roa/data/roa.project")
+-- dofile("../../lib/roa/data/roa.test_project")
 
 
 -- Generates the premake api calls.

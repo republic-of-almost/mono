@@ -60,10 +60,12 @@ struct Data
   bool show_lookat_bounding_box{false};
   bool show_lookat_cross{false};
   #endif
-
+  
   Nil::Node debug_lines{ nullptr };
   lib::array<Nil::Data::Bounding_box> selected_bbs;
   #endif
+  
+  bool show_wireframe_mode{false};
 
   /*
     VR Support (Optional)

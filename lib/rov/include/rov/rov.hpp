@@ -38,6 +38,11 @@ struct rovLight
   rovVec4 attenuation;  // const, linear, expo, extra
 };
 
+struct rovRasterizer
+{
+  bool wire_frame;
+};
+
 
 // ------------------------------------------------------------- [ Lifetime ] --
 
@@ -108,6 +113,7 @@ void        rov_startRenderPass(
 // ----------------------------------------------------- [ General Settings ] --
 
 
+void        rov_setRasterizer(rovRasterizer rasterizer);
 void        rov_setColor(const float col[4]);
 void        rov_setColor(float r, float g, float b, float a);
 void        rov_setColor(uint32_t color);
