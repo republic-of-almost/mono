@@ -21,7 +21,7 @@ env:
     - EXE=LibTest
     - EXE=MathTest
     - EXE=NilTest
-    - EXE=ROATest
+    - EXE=ROATest#
 
 addons:
     apt:

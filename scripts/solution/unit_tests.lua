@@ -32,6 +32,12 @@ dofile("../../lib/lib/data/lib.test_project")
 dofile("../../lib/math/data/math.project")
 dofile("../../lib/math/data/math.test_project")
 
+dofile("../../lib/math/data/nil.project")
+dofile("../../lib/math/data/nil.test_project")
+
+dofile("../../lib/math/data/roa.project")
+dofile("../../lib/math/data/roa.test_project")
+
 
 -- Generates the premake api calls.
 make.create_solution(
