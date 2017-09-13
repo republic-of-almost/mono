@@ -3,6 +3,7 @@
 
 
 #include <nil/nil.hpp>
+#include <nil/node.hpp>
 #include <soloud/soloud.h>
 #include <soloud/soloud_wav.h>
 
@@ -15,6 +16,12 @@ struct Data
 {
   SoLoud::Soloud soloud; // Engine core
   SoLoud::handle audio;
+  
+  #ifndef NIMGUI
+  Nil::Node audio_ui{nullptr};
+  
+  bool show_info{false};
+  #endif
   
   // SoLoud needs Move/Copy to be container friendly.
   // Until then we are just heap alloc'ing them and adding them to the
@@ -44,8 +51,20 @@ void
 player_update(Nil::Engine &engine, uintptr_t user_data);
 
 
-} // ns
-} // ns
+// ---------------------------------------------------------- [ Renderer UI ] --
 
+
+#ifndef NIMGUI
+void
+ui_menu(uintptr_t user_data);
+
+
+void
+ui_window(uintptr_t user_data);
+#endif
+
+
+} // ns
+} // ns
 
 #endif // inc guard

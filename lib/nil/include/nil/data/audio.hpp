@@ -23,6 +23,10 @@ struct Audio
   bool loop;
   
   float volume;
+  
+  // -- Output -- //
+  
+  uintptr_t user_data;
 };
 
 
