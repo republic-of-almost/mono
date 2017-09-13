@@ -843,6 +843,8 @@ think(Nil::Engine &engine, uintptr_t user_data)
       {
         rov_setRasterizer(rovRasterizer{false});
       }
+      
+      rov_setColor(0x999999FF);
 
       rov_startRenderPass(
         rt.view,

@@ -398,7 +398,12 @@ ogl_exec(
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
   }
-
+  
+  // If we had wireframe mode on turn it off
+  // Or other things will render in wireframe.
+  // For instances UI.
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  
   #ifdef GL_HAS_VAO
   glBindVertexArray(0);
   #endif
