@@ -108,7 +108,40 @@ TEST_CASE("Matrix 4x4")
     REQUIRE(math::mat4_is_near(mat_a, mat_b) != true);
   }
   
-  // -------------------------------------------------- [ View / Projection ] --
+  
+  // ----------------------------------------------- [ Initialize With Data ] --
+  
+  
+  SECTION("Scale Mat")
+  {
+    const float expected_mat_data[] {
+      1.f, 0.f, 0.f, 0.f,
+      0.f, 2.f, 0.f, 0.f,
+      0.f, 0.f, 3.f, 0.f,
+      0.f, 0.f, 0.f, 1.f,
+    };
+    
+    const math::mat4 mat_expected = math::mat4_init(expected_mat_data);
+    const math::mat4 mat_scale = math::mat4_scale(1.f, 2.f, 3.f);
+    
+    REQUIRE(math::mat4_is_near(mat_expected, mat_scale));
+  }
+  
+  SECTION("Translate Mat")
+  {
+    const float expected_mat_data[] {
+      1.f, 0.f, 0.f, 0.f,
+      0.f, 1.f, 0.f, 0.f,
+      0.f, 0.f, 1.f, 0.f,
+      1.f, 2.f, 3.f, 1.f,
+    };
+    
+    const math::mat4 mat_expected = math::mat4_init(expected_mat_data);
+    const math::mat4 mat_translate = math::mat4_translate(1.f, 2.f, 3.f);
+    
+    REQUIRE(math::mat4_is_near(mat_expected, mat_translate));
+  }
+
   
   SECTION("Look at matrix")
   {
@@ -379,35 +412,9 @@ TEST_CASE("Matrix 4x4")
 //    REQUIRE(math::is_near(determinant, -3.f));
   }
   
-  SECTION("Scale Mat")
-  {
-    const float expected_mat_data[] {
-      1.f, 0.f, 0.f, 0.f,
-      0.f, 2.f, 0.f, 0.f,
-      0.f, 0.f, 3.f, 0.f,
-      0.f, 0.f, 0.f, 1.f,
-    };
-    
-    const math::mat4 mat_expected = math::mat4_init(expected_mat_data);
-    const math::mat4 mat_scale = math::mat4_scale(1.f, 2.f, 3.f);
-    
-    REQUIRE(math::mat4_is_near(mat_expected, mat_scale));
-  }
   
-  SECTION("Translate Mat")
-  {
-    const float expected_mat_data[] {
-      1.f, 0.f, 0.f, 0.f,
-      0.f, 1.f, 0.f, 0.f,
-      0.f, 0.f, 1.f, 0.f,
-      1.f, 2.f, 3.f, 1.f,
-    };
-    
-    const math::mat4 mat_expected = math::mat4_init(expected_mat_data);
-    const math::mat4 mat_translate = math::mat4_translate(1.f, 2.f, 3.f);
-    
-    REQUIRE(math::mat4_is_near(mat_expected, mat_translate));
-  }
+  // --------------------------------------------------------------- [ Data ] --
+  
   
   SECTION("Data")
   {

@@ -28,42 +28,51 @@ _MATH_NS_OPEN
 // ------------------------------------------------------------ [ Constants ] --
 
 
-MATH_MAT4_INLINE mat4       mat4_id();
-MATH_MAT4_INLINE mat4       mat4_zero();
+MATH_MAT4_INLINE mat4         mat4_id();
+MATH_MAT4_INLINE mat4         mat4_zero();
 
 
 // ----------------------------------------------------------- [ Initialize ] --
 
 
-MATH_MAT4_INLINE mat4       mat4_init(); // will return an id array
-MATH_MAT4_INLINE mat4       mat4_init(const float x);
-MATH_MAT4_INLINE mat4       mat4_init(const mat3 sub_matrix);
-MATH_MAT4_INLINE mat4       mat4_init(const float arr[]);
+MATH_MAT4_INLINE mat4         mat4_init(); // will return an id array
+MATH_MAT4_INLINE mat4         mat4_init(const float x);
+MATH_MAT4_INLINE mat4         mat4_init(const mat3 sub_matrix);
+MATH_MAT4_INLINE mat4         mat4_init(const float arr[]);
 
 
-// ---------------------------------------------------- [ View / Projection ] --
+// ------------------------------------------------- [ Initialize With Data ] --
 
 
-MATH_MAT4_INLINE mat4       mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up);
-MATH_MAT4_INLINE mat4       mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov);
-MATH_MAT4_INLINE mat4       mat4_orthographic(const float width, const float height, const float near_plane,  const float far_plane);
+MATH_MAT4_INLINE mat4         mat4_scale(const vec3 scale);
+MATH_MAT4_INLINE mat4         mat4_scale(const float x, const float y, const float z);
+MATH_MAT4_INLINE mat4         mat4_translate(const vec3 move);
+MATH_MAT4_INLINE mat4         mat4_translate(const float x, const float y, const float z);
+MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);
+
+MATH_MAT4_INLINE mat4         mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up);
+MATH_MAT4_INLINE mat4         mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov);
+MATH_MAT4_INLINE mat4         mat4_orthographic(const float width, const float height, const float near_plane,  const float far_plane);
 
 
 // ----------------------------------------------------------- [ Operations ] --
 
 
-MATH_MAT4_INLINE mat4       mat4_add(const mat4 &lhs, const mat4 &rhs);
-MATH_MAT4_INLINE mat4       mat4_subtract(const mat4 &lhs, const mat4 &rhs);
+MATH_MAT4_INLINE mat4         mat4_add(const mat4 &lhs, const mat4 &rhs);
+MATH_MAT4_INLINE mat4         mat4_subtract(const mat4 &lhs, const mat4 &rhs);
 
-MATH_MAT4_INLINE mat4       mat4_multiply(const float val, const mat4 &b);
-MATH_MAT4_INLINE vec4       mat4_multiply(const vec4 vec, const mat4 &b);
-MATH_MAT4_INLINE mat4       mat4_multiply(const mat4 &lhs, const mat4 &rhs);
-MATH_MAT4_INLINE mat4       mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three);
+MATH_MAT4_INLINE mat4         mat4_multiply(const float val, const mat4 &b);
+MATH_MAT4_INLINE vec4         mat4_multiply(const vec4 vec, const mat4 &b);
+MATH_MAT4_INLINE mat4         mat4_multiply(const mat4 &lhs, const mat4 &rhs);
+MATH_MAT4_INLINE mat4         mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three);
 
 // Transform matrices into other forms
-MATH_MAT4_INLINE mat4       mat4_transpose(const mat4 &a);
-MATH_MAT4_INLINE mat4       mat4_inverse(const mat4 &a);
+MATH_MAT4_INLINE mat4         mat4_transpose(const mat4 &a);
+MATH_MAT4_INLINE mat4         mat4_inverse(const mat4 &a);
 MATH_MAT4_INLINE float                      mat4_get_determinant(const mat4 &a);
+
+
+// ----------------------------------------------------------------- [ Data ] --
 
 // Get/Set information
 MATH_MAT4_INLINE float                      mat4_get(const mat4 &mat, const uint32_t row, const uint32_t col);
@@ -74,14 +83,19 @@ MATH_MAT4_INLINE vec3                       mat4_get_position(const mat4 &a);
 MATH_MAT4_INLINE vec3                       mat4_get_scale(const mat4 &a);
 MATH_MAT4_INLINE const float* mat4_data(const mat4 &mat);
 
-MATH_MAT4_INLINE mat4         mat4_scale(const vec3 scale);
-MATH_MAT4_INLINE mat4         mat4_scale(const float x, const float y, const float z);
-MATH_MAT4_INLINE mat4         mat4_translate(const vec3 move);
-MATH_MAT4_INLINE mat4         mat4_translate(const float x, const float y, const float z);
-MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);
-
 MATH_MAT4_INLINE void         mat4_to_array(const mat4 &m, float *array);
+
+
+// ------------------------------------------------------------- [ Equality ] --
+
+
 MATH_MAT4_INLINE bool         mat4_is_near(const mat4 &a, const mat4 &b, const float error = MATH_NS_NAME::epsilon());
+
+
+// --------------------------------------------------------------- [ Config ] --
+
+
+#undef MATH_MAT4_INLINE
 
 
 // ------------------------------------------------------- [ Constants Impl ] --
