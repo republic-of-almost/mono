@@ -834,6 +834,15 @@ think(Nil::Engine &engine, uintptr_t user_data)
       };
 
       rov_setColor(cam.clear_color);
+      
+      if(self->show_wireframe_mode)
+      {
+        rov_setRasterizer(rovRasterizer{true});
+      }
+      else
+      {
+        rov_setRasterizer(rovRasterizer{false});
+      }
 
       rov_startRenderPass(
         rt.view,
@@ -1010,7 +1019,7 @@ ui_menu(uintptr_t user_data)
 
   LIB_ASSERT(self);
 
-  if(ImGui::BeginMenu("ROV"))
+  if(ImGui::BeginMenu("Renderer"))
   {
     ImGui::MenuItem("Show Debug Options", nullptr, &self->show_debug_options);
 

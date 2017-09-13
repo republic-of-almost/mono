@@ -35,7 +35,7 @@ ogl_exec(
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glEnable(GL_DEPTH_TEST);
-  
+    
   /*
     For each renderpass.
   */
@@ -45,7 +45,22 @@ ogl_exec(
   for(size_t p = 0; p < pass_count; ++p)
   {
     const rovRenderPass &rp = passes[p];
+    
+    /*
+      Rasterizer setup.
+    */
+    if(rp.rasterizer.wire_frame)
+    {
+      glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    }
+    else
+    {
+      glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    }
   
+    /*
+      Clear buffers
+    */
     GLbitfield cl_flags = 0;
     if(rp.clear_flags & rovClearFlag_Color) { cl_flags |= GL_COLOR_BUFFER_BIT; }
     if(rp.clear_flags & rovClearFlag_Depth) { cl_flags |= GL_DEPTH_BUFFER_BIT; }

@@ -184,12 +184,21 @@ rov_startRenderPass(
 
   rp->clear_color = lib::color::init(get_rov_data().rov_data.curr_rov_color);
   rp->clear_flags = clear_flags;
+  
+  rp->rasterizer = data.rov_data.curr_rov_rasterizer;
 
   rp->materials.emplace_back(rov_curr_material(&get_rov_data().rov_data), size_t{0});
 }
 
 
 // ----------------------------------------------------- [ General Settings ] --
+
+
+void
+rov_setRasterizer(rovRasterizer rasterizer)
+{
+  get_rov_data().rov_data.curr_rov_rasterizer = rasterizer;
+}
 
 
 void

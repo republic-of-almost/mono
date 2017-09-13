@@ -50,6 +50,8 @@ struct rovRenderPass
   lib::array<rovDrawCall> draw_calls;
   
   lib::array<rovLineDrawCall> line_draw_calls;
+  
+  rovRasterizer rasterizer;
 };
 
 
@@ -59,13 +61,14 @@ constexpr uint32_t rov_max_textures = 3;
 
 struct rovData
 {
-  rovVec4     curr_rov_clear_color;
-  rovVec4     curr_rov_color;
-  uint8_t     curr_rov_textures[rov_max_textures]{0};
-  uint32_t    curr_rov_mesh;
-  uint32_t    curr_rov_index;
-  uint8_t     curr_rov_mesh_shader = rovShader_Fullbright;
-  uint32_t    curr_rov_framebuffer;
+  rovRasterizer   curr_rov_rasterizer;
+  rovVec4         curr_rov_clear_color;
+  rovVec4         curr_rov_color;
+  uint8_t         curr_rov_textures[rov_max_textures]{0};
+  uint32_t        curr_rov_mesh;
+  uint32_t        curr_rov_index;
+  uint8_t         curr_rov_mesh_shader = rovShader_Fullbright;
+  uint32_t        curr_rov_framebuffer;
 
   std::vector<ROV_Internal::rovRenderPass> rov_render_passes;
 };
