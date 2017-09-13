@@ -44,7 +44,7 @@ get_mat_data()
 
       memcpy(
         data->data[index].world_mat,
-        math::mat4_get_data(mat),
+        math::mat4_data(mat),
         sizeof(data->data[index].world_mat)
       );
     }
@@ -96,7 +96,7 @@ set(Node &node, const Renderable &in)
 
   memcpy(
     cpy.world_mat,
-    math::mat4_get_data(mat),
+    math::mat4_data(mat),
     sizeof(cpy.world_mat)
   );
 

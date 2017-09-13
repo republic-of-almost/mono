@@ -423,7 +423,7 @@ update_vr(Nil::Engine &engine, uintptr_t user_data)
     if (self->tracked_device_pose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid)
     {
       self->vr_view = self->device_pose[vr::k_unTrackedDeviceIndex_Hmd];
-      self->vr_view = math::mat4_get_inverse(self->vr_view);
+      self->vr_view = math::mat4_inverse(self->vr_view);
     }
   }
 
@@ -437,7 +437,7 @@ update_vr(Nil::Engine &engine, uintptr_t user_data)
   //};
 
   //self->vr_view = math::mat4_init(data);
-  //self->vr_view = math::mat4_get_inverse(self->vr_view);
+  //self->vr_view = math::mat4_inverse(self->vr_view);
 }
 #endif
 

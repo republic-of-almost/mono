@@ -298,15 +298,15 @@ ogl_exec(
           const math::mat4 world = math::mat4_init(dc.world);
 
           const math::mat4 wvp_mat  = math::mat4_multiply(world, view, proj);
-//          const math::vec4 pos      = math::mat4_multiply(math::vec4_init(0,0,0,1), math::mat4_get_inverse(view));
+//          const math::vec4 pos      = math::mat4_multiply(math::vec4_init(0,0,0,1), math::mat4_inverse(view));
           const math::mat4 mv_mat   = math::mat4_multiply(world, view);
-          const math::mat4 norm_mat = math::mat4_get_transpose(math::mat4_get_inverse(mv_mat));
+          const math::mat4 norm_mat = math::mat4_transpose(math::mat4_inverse(mv_mat));
   
-          glUniformMatrix4fv(shd.uni_wvp,     1, GL_FALSE, math::mat4_get_data(wvp_mat));
-          glUniformMatrix4fv(shd.uni_view,    1, GL_FALSE, math::mat4_get_data(view));
-          glUniformMatrix4fv(shd.uni_world,   1, GL_FALSE, math::mat4_get_data(world));
-          glUniformMatrix4fv(shd.uni_normal,  1, GL_FALSE, math::mat4_get_data(norm_mat));
-          glUniformMatrix4fv(shd.uni_wv,      1, GL_FALSE, math::mat4_get_data(mv_mat));
+          glUniformMatrix4fv(shd.uni_wvp,     1, GL_FALSE, math::mat4_data(wvp_mat));
+          glUniformMatrix4fv(shd.uni_view,    1, GL_FALSE, math::mat4_data(view));
+          glUniformMatrix4fv(shd.uni_world,   1, GL_FALSE, math::mat4_data(world));
+          glUniformMatrix4fv(shd.uni_normal,  1, GL_FALSE, math::mat4_data(norm_mat));
+          glUniformMatrix4fv(shd.uni_wv,      1, GL_FALSE, math::mat4_data(mv_mat));
           glUniform3fv(shd.uni_eye,           1, rp.eye_position);
           glUniform4fv(shd.uni_color,         1, colorf);
         }
@@ -355,7 +355,7 @@ ogl_exec(
           rov_gl_data->rov_line_programs[0].uni_wvp,
           1,
           GL_FALSE,
-          math::mat4_get_data(view_proj)
+          math::mat4_data(view_proj)
         );
 
         const size_t count(

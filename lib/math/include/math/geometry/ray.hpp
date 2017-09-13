@@ -326,7 +326,7 @@ ray_from_perpective_viewport(
                                               1.f,
                                               1.f);
   
-  const math::mat4 proj_inv_mat = math::mat4_get_inverse(proj_mat);
+  const math::mat4 proj_inv_mat = math::mat4_inverse(proj_mat);
   
   const math::vec4 ray_eye_get  = math::mat4_multiply(ray_clip, proj_inv_mat);
   const math::vec4 ray_eye      = math::vec4_init(math::get_x(ray_eye_get),
@@ -337,7 +337,7 @@ ray_from_perpective_viewport(
   // --
   
 //  const math::mat4 view_mat     = Core::Camera_utils::get_view_matrix(camera);
-  const math::mat4 view_inv_mat = math::mat4_get_inverse(view_mat);
+  const math::mat4 view_inv_mat = math::mat4_inverse(view_mat);
   
   const math::vec4 ray_wor_all = math::mat4_multiply(ray_eye, view_inv_mat);
   const math::vec3 ray_wor     = math::vec3_normalize(math::vec3_init(math::get_x(ray_wor_all),

@@ -5,7 +5,7 @@
 
 TEST_CASE("Matrix 4x4")
 {
-  
+
   // ---------------------------------------------------------- [ Constants ] --
 
   SECTION("ID Mat")
@@ -314,5 +314,137 @@ TEST_CASE("Matrix 4x4")
     const math::mat4 mat_final = math::mat4_multiply(mat_a, mat_b, mat_c);
     
     REQUIRE(math::mat4_is_near(mat_expected, mat_final));
+  }
+  
+  SECTION("Transpose")
+  {
+    const float mat_data[] {
+      1.f, 2.f, 3.f, 4.f,
+      1.f, 2.f, 3.f, 4.f,
+      1.f, 2.f, 3.f, 4.f,
+      1.f, 2.f, 3.f, 4.f,
+    };
+    
+    const math::mat4 mat_a = math::mat4_init(mat_data);
+    const math::mat4 transpose = math::mat4_transpose(mat_a);
+    
+    const float mat_expected_data[] {
+      1.f, 1.f, 1.f, 1.f,
+      2.f, 2.f, 2.f, 2.f,
+      3.f, 3.f, 3.f, 3.f,
+      4.f, 4.f, 4.f, 4.f,
+    };
+    
+    const math::mat4 mat_expected = math::mat4_init(mat_expected_data);
+    
+    REQUIRE(math::mat4_is_near(transpose, mat_expected));
+  }
+  
+  SECTION("Inverse")
+  {
+    const float mat_data[] {
+      1.f, 2.f, 3.f, 0.f,
+      0.f, 5.f, 6.f, 0.f,
+      0.f, 8.f, 9.f, 0.f,
+      10.f, 11.f, 12.f, 1.f,
+    };
+    
+    const math::mat4 mat_a = math::mat4_init(mat_data);
+    const math::mat4 inverse = math::mat4_inverse(mat_a);
+    
+    const float mat_expected_data[] {
+      1.f, -2.f, 1.f, 0.f,
+      0.f, -3.f, 2.f, 0.f,
+      0.f, 8.f / 3.f, -5.f / 3.f, 0.f,
+      -10.f, 63.f / 3.f, -12.f, 1.f,
+    };
+    
+    const math::mat4 mat_expected = math::mat4_init(mat_expected_data);
+    
+    REQUIRE(math::mat4_is_near(inverse, mat_expected, 0.00001f));
+  }
+  
+  SECTION("Determinant")
+  {
+//    const float mat_data[] {
+//      1.f, 2.f, 3.f, 0.f,
+//      0.f, 5.f, 6.f, 0.f,
+//      0.f, 8.f, 9.f, 0.f,
+//      10.f, 11.f, 12.f, 1.f,
+//    };
+//    
+//    const math::mat4 mat_a = math::mat4_init(mat_data);
+//    const float determinant = math::mat4_get_determinant(mat_a);
+//    
+//    REQUIRE(math::is_near(determinant, -3.f));
+  }
+  
+  SECTION("Scale Mat")
+  {
+    const float expected_mat_data[] {
+      1.f, 0.f, 0.f, 0.f,
+      0.f, 2.f, 0.f, 0.f,
+      0.f, 0.f, 3.f, 0.f,
+      0.f, 0.f, 0.f, 1.f,
+    };
+    
+    const math::mat4 mat_expected = math::mat4_init(expected_mat_data);
+    const math::mat4 mat_scale = math::mat4_scale(1.f, 2.f, 3.f);
+    
+    REQUIRE(math::mat4_is_near(mat_expected, mat_scale));
+  }
+  
+  SECTION("Translate Mat")
+  {
+    const float expected_mat_data[] {
+      1.f, 0.f, 0.f, 0.f,
+      0.f, 1.f, 0.f, 0.f,
+      0.f, 0.f, 1.f, 0.f,
+      1.f, 2.f, 3.f, 1.f,
+    };
+    
+    const math::mat4 mat_expected = math::mat4_init(expected_mat_data);
+    const math::mat4 mat_translate = math::mat4_translate(1.f, 2.f, 3.f);
+    
+    REQUIRE(math::mat4_is_near(mat_expected, mat_translate));
+  }
+  
+  SECTION("Data")
+  {
+    const float expected_mat_data[] {
+      0.f, 1.f, 2.f, 3.f,
+      4.f, 5.f, 6.f, 7.f,
+      8.f, 9.f, 10.f, 11.f,
+      12.f, 13.f, 14.f, 15.f,
+    };
+    
+    const math::mat4 mat_a = math::mat4_init(expected_mat_data);
+    
+    const float *mat_data = math::mat4_data(mat_a);
+    
+    for(uint32_t i = 0; i < 16; ++i)
+    {
+      REQUIRE(expected_mat_data[i] == mat_data[i]);
+    }
+  }
+  
+  SECTION("To Array")
+  {
+    const float expected_mat_data[] {
+      0.f, 1.f, 2.f, 3.f,
+      4.f, 5.f, 6.f, 7.f,
+      8.f, 9.f, 10.f, 11.f,
+      12.f, 13.f, 14.f, 15.f,
+    };
+    
+    const math::mat4 mat_a = math::mat4_init(expected_mat_data);
+    
+    float export_mat[16]{};
+    math::mat4_to_array(mat_a, export_mat);
+    
+    for(uint32_t i = 0; i < 16; ++i)
+    {
+      REQUIRE(expected_mat_data[i] == export_mat[i]);
+    }
   }
 }

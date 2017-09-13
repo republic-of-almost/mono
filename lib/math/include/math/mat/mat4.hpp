@@ -14,7 +14,6 @@
 #include "mat3.hpp"
 #include "../vec/vec4.hpp"
 #include <string.h>
-//#include <assert.h>
 
 
 // --------------------------------------------------------------- [ Config ] --
@@ -62,10 +61,9 @@ MATH_MAT4_INLINE mat4       mat4_multiply(const mat4 &lhs, const mat4 &rhs);
 MATH_MAT4_INLINE mat4       mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three);
 
 // Transform matrices into other forms
-MATH_MAT4_INLINE mat4                       mat4_get_transpose(const mat4 &a);
-MATH_MAT4_INLINE mat4                       mat4_get_inverse(const mat4 &a);
+MATH_MAT4_INLINE mat4       mat4_transpose(const mat4 &a);
+MATH_MAT4_INLINE mat4       mat4_inverse(const mat4 &a);
 MATH_MAT4_INLINE float                      mat4_get_determinant(const mat4 &a);
-MATH_MAT4_INLINE mat4                       mat4_get_scale(const mat4 &a, const vec3 scale);
 
 // Get/Set information
 MATH_MAT4_INLINE float                      mat4_get(const mat4 &mat, const uint32_t row, const uint32_t col);
@@ -74,17 +72,16 @@ MATH_MAT4_INLINE void                       mat4_set(mat4 &mat, const uint32_t r
 MATH_MAT4_INLINE mat3                       mat4_get_sub_mat3(const mat4 &a);
 MATH_MAT4_INLINE vec3                       mat4_get_position(const mat4 &a);
 MATH_MAT4_INLINE vec3                       mat4_get_scale(const mat4 &a);
-MATH_MAT4_INLINE const float*               mat4_get_data(const mat4 &mat);
+MATH_MAT4_INLINE const float* mat4_data(const mat4 &mat);
 
-MATH_MAT4_INLINE mat4                       mat4_scale(const vec3 scale);
-MATH_MAT4_INLINE mat4                       mat4_scale(const float x, const float y, const float z);
-MATH_MAT4_INLINE mat4                       mat4_translate(const vec3 move);
-MATH_MAT4_INLINE mat4                       mat4_translate(const float x, const float y, const float z);
+MATH_MAT4_INLINE mat4         mat4_scale(const vec3 scale);
+MATH_MAT4_INLINE mat4         mat4_scale(const float x, const float y, const float z);
+MATH_MAT4_INLINE mat4         mat4_translate(const vec3 move);
+MATH_MAT4_INLINE mat4         mat4_translate(const float x, const float y, const float z);
 MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);
 
-MATH_MAT4_INLINE void                       mat4_to_array(const mat4 &m, float *array);
-
-MATH_MAT4_INLINE bool                       mat4_is_near(const mat4 &a, const mat4 &b, const float error = MATH_NS_NAME::epsilon());
+MATH_MAT4_INLINE void         mat4_to_array(const mat4 &m, float *array);
+MATH_MAT4_INLINE bool         mat4_is_near(const mat4 &a, const mat4 &b, const float error = MATH_NS_NAME::epsilon());
 
 
 // ------------------------------------------------------- [ Constants Impl ] --
@@ -409,7 +406,7 @@ mat4_multiply(const mat4 &lhs, const mat4 &rhs)
 
 
 mat4
-mat4_get_transpose(const mat4 &to_transpose)
+mat4_transpose(const mat4 &to_transpose)
 {
   const detail::internal_mat4 *transpose_data = reinterpret_cast<const detail::internal_mat4*>(&to_transpose);
   
@@ -426,7 +423,7 @@ mat4_get_transpose(const mat4 &to_transpose)
 
 
 mat4
-mat4_get_inverse(const mat4 &to_inverse)
+mat4_inverse(const mat4 &to_inverse)
 {
   const detail::internal_mat4 *to_i = reinterpret_cast<const detail::internal_mat4*>(&to_inverse);
   
@@ -608,7 +605,7 @@ mat4_get_determinant(const mat4 &det)
   };
   
   const mat3 det_b_mat = mat3_init(det_b_data);
-  const float det_b = mat->data[1] * mat3_determinant(det_b_mat);
+  const float det_b = -mat->data[1] * mat3_determinant(det_b_mat);
   
   const float det_c_data[9]
   {
@@ -628,9 +625,9 @@ mat4_get_determinant(const mat4 &det)
   };
 
   const mat3 det_d_mat = mat3_init(det_d_data);
-  const float det_d = mat->data[3] * mat3_determinant(det_d_mat);
+  const float det_d = -mat->data[3] * mat3_determinant(det_d_mat);
 
-  return det_a - det_b + det_c - det_d;
+  return det_a + det_b + det_c + det_d;
 }
 
 
@@ -725,7 +722,7 @@ mat4_get(const mat4 &mat, const uint32_t index)
 
   
 const float*
-mat4_get_data(const mat4 &mat)
+mat4_data(const mat4 &mat)
 {
   const detail::internal_mat4 *internal_mat = reinterpret_cast<const detail::internal_mat4*>(&mat);
   return &(internal_mat->data[0]);

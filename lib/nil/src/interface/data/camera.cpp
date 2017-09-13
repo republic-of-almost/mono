@@ -38,7 +38,7 @@ get_camera_data()
 
       memcpy(
         data->data[index].view_mat,
-        math::mat4_get_data(view),
+        math::mat4_data(view),
         sizeof(data->data[index].view_mat)
       );
       
@@ -97,7 +97,7 @@ set(Node &node, const Camera &in)
 
   memcpy(
     cpy.view_mat,
-    math::mat4_get_data(view),
+    math::mat4_data(view),
     sizeof(cpy.view_mat)
   );
 
