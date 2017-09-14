@@ -76,7 +76,7 @@ main()
 /*
   Defines
 */
-#define CONST_AMB 0.01
+#define CONST_AMB 0.0
 #define CONST_SHININESS 0
 
 /*
@@ -127,8 +127,8 @@ calculate_attenuation(
   Attenuation atten)
 {
   float distance        = length(light_pos - frag_pos);
-  float atten_lin_dist  = atten.linear * distance;
-  float atten_exp_dist  = atten.exponential * (distance * distance);
+  float atten_lin_dist  = 1.0 + atten.linear * distance;
+  float atten_exp_dist  = 1.0 + atten.exponential * (distance * distance);
   float attenuation     = 1.0 / (atten.constant + atten_lin_dist + atten_exp_dist);
 
   return attenuation;
@@ -182,7 +182,9 @@ calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
   
   // Combine //
   // Is this the correct way to add color?
-  return (amb + diffuse + specular) * light.color;
+//  return (amb + diffuse + specular) * light.color;
+  return amb + (n_dot_l * diffuse) + specular;
+//  return specular * light.color;
 }
 
 
@@ -263,11 +265,15 @@ main()
     }
 
     // Output Result //
-//    vec3 const_amb = vec3(CONST_AMB);
+    vec3 const_amb = vec3(CONST_AMB);
 //    vec3 color = vec3(max(CONST_AMB + accum_color.r, accum_color.r), max(CONST_AMB + accum_color.g, accum_color.g), max(CONST_AMB + accum_color.b, accum_color.b));
     
-//    accum_color.g += 0.02f;
-    out_ps_color = vec4(accum_color.rgb, 1.0);
+    vec3 color = const_amb + (mat.Kd * accum_color);
+    
+    vec3 gamma = vec3(1.0/2.2);
+    vec3 final_color = pow(color, gamma);
+
+    out_ps_color = vec4(final_color.rgb, 1.0);
   }
   
   /*
