@@ -131,6 +131,8 @@ calculate_attenuation(
   float atten_exp_dist  = 1.0 + atten.exponential * (distance * distance);
   float attenuation     = 1.0 / (atten.constant + atten_lin_dist + atten_exp_dist);
 
+//  float attenuation = 1.0 / (1.0 + atten.linear * pow(distance, 2));
+
   return attenuation;
 }
 
@@ -208,7 +210,7 @@ main()
     mat.Ka = vec3(0.0);
     mat.Kd = diffuse_color.rgb;
     mat.Ks = vec3(0.5);//vec3(0.2,0.2,0.2);//specular_map.rgb;
-    mat.shininess = 12;//CONST_SHININESS;
+    mat.shininess = 256;//CONST_SHININESS;
 
     vec3 accum_color = vec3(0,0,0);
 
@@ -265,11 +267,12 @@ main()
     }
 
     // Output Result //
-    vec3 const_amb = vec3(CONST_AMB);
+//    vec3 const_amb = vec3(CONST_AMB);
 //    vec3 color = vec3(max(CONST_AMB + accum_color.r, accum_color.r), max(CONST_AMB + accum_color.g, accum_color.g), max(CONST_AMB + accum_color.b, accum_color.b));
     
-    vec3 color = const_amb + (mat.Kd * accum_color);
+    vec3 color = (mat.Kd * accum_color);
     
+    // Gamma correction.
     vec3 gamma = vec3(1.0/2.2);
     vec3 final_color = pow(color, gamma);
 
