@@ -1,13 +1,13 @@
 #!lua
 
 --[[
-  They Never Pay Project Description
+  Stardust Project Description
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "TheyNeverPay",
+    name     = "Stardust",
     kind     = "WindowedApp",
     language = "C++",
     location = make.get_proj_root(),

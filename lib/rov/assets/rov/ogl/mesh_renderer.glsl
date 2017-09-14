@@ -185,7 +185,8 @@ calculate_light(Light light, Material mat, vec3 L, vec3 V, vec3 N)
   // Combine //
   // Is this the correct way to add color?
 //  return (amb + diffuse + specular) * light.color;
-  return amb + (n_dot_l * diffuse) + specular;
+  return (
+  amb + (n_dot_l * diffuse) + specular) * light.color;
 //  return specular * light.color;
 }
 
@@ -202,15 +203,15 @@ main()
   if(uni_light_count > 0)
   {
     vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
-    vec4 diffuse_color = mix(diffuse_map, uni_color, uni_color.a);
+    vec4 diffuse_color = mix(uni_color, diffuse_map, diffuse_map.a);
     
     vec4 specular_map = texture(uni_map_03, in_ps_texcoord);
 
     Material mat;
     mat.Ka = vec3(0.0);
     mat.Kd = diffuse_color.rgb;
-    mat.Ks = vec3(0.5);//vec3(0.2,0.2,0.2);//specular_map.rgb;
-    mat.shininess = 256;//CONST_SHININESS;
+    mat.Ks = vec3(0.0);//vec3(0.2,0.2,0.2);//specular_map.rgb;
+    mat.shininess = 0;//CONST_SHININESS;
 
     vec3 accum_color = vec3(0,0,0);
 
