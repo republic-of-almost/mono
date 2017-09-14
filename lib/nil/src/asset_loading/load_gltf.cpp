@@ -1161,6 +1161,8 @@ load_gltf(Nil::Node root_node, const char *path)
       data.texture_01 = internal_textures[mat.ext_blinn_phong.diffuse_texture].id;
     }
     
+    data.color = lib::color::init(mat.ext_blinn_phong.diffuse_factor);
+    
     Nil::Resource::load(data);
     
     internal_materials.emplace_back(data);
