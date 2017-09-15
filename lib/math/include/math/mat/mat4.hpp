@@ -2,13 +2,6 @@
 #define MATRIX44_INCLUDED_45952EA8_98A0_40E4_8677_AE79A577E975
 
 
-/*
-  Matrix 44
-  Through out this library we consider a 4x4 matrix as a 
-  world matrix.
-*/
-
-
 #include "../detail/detail.hpp"
 #include "mat_types.hpp"
 #include "mat3.hpp"
@@ -17,6 +10,9 @@
 
 
 // --------------------------------------------------------------- [ Config ] --
+/*
+  The inline for matrix functions
+*/
 
 
 #define MATH_MAT4_INLINE inline
@@ -26,6 +22,9 @@ _MATH_NS_OPEN
 
 
 // ------------------------------------------------------------ [ Constants ] --
+/*
+  Common matrix constants.
+*/
 
 
 MATH_MAT4_INLINE mat4         mat4_id();
@@ -33,15 +32,23 @@ MATH_MAT4_INLINE mat4         mat4_zero();
 
 
 // ----------------------------------------------------------- [ Initialize ] --
+/*
+  Initialize a mat4, an mat4_init() will return an identity matrix. Init with a
+  mat3 will have the last component as 1.f. Perhaps these are the wrong
+  defaults, but need some data to show that.
+*/
 
 
-MATH_MAT4_INLINE mat4         mat4_init(); // will return an id array
+MATH_MAT4_INLINE mat4         mat4_init();
 MATH_MAT4_INLINE mat4         mat4_init(const float x);
 MATH_MAT4_INLINE mat4         mat4_init(const mat3 sub_matrix);
 MATH_MAT4_INLINE mat4         mat4_init(const float arr[]);
 
 
-// ------------------------------------------------- [ Initialize With Data ] --
+// ----------------------------------------------- [ Special Init With Data ] --
+/*
+  These return some specific to 3D rendering mats. Scale Rotate and Translate.
+*/
 
 
 MATH_MAT4_INLINE mat4         mat4_scale(const vec3 scale);
@@ -50,12 +57,23 @@ MATH_MAT4_INLINE mat4         mat4_translate(const vec3 move);
 MATH_MAT4_INLINE mat4         mat4_translate(const float x, const float y, const float z);
 MATH_MAT4_INLINE mat4                       mat4_rotate_around_axis(const vec3 axis, const float radians);
 
+
+// ---------------------------------------------------------- [ Camera Mats ] --
+/*
+  Common camera matrices, where lookat is the inverse camera's world mat.
+  and perspective and orthographics are projection mats.
+*/
+
+
 MATH_MAT4_INLINE mat4         mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up);
 MATH_MAT4_INLINE mat4         mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov);
 MATH_MAT4_INLINE mat4         mat4_orthographic(const float width, const float height, const float near_plane,  const float far_plane);
 
 
 // ----------------------------------------------------------- [ Operations ] --
+/*
+  General mat math.
+*/
 
 
 MATH_MAT4_INLINE mat4         mat4_add(const mat4 &lhs, const mat4 &rhs);
@@ -66,29 +84,29 @@ MATH_MAT4_INLINE vec4         mat4_multiply(const vec4 vec, const mat4 &b);
 MATH_MAT4_INLINE mat4         mat4_multiply(const mat4 &lhs, const mat4 &rhs);
 MATH_MAT4_INLINE mat4         mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three);
 
-// Transform matrices into other forms
 MATH_MAT4_INLINE mat4         mat4_transpose(const mat4 &a);
 MATH_MAT4_INLINE mat4         mat4_inverse(const mat4 &a);
-MATH_MAT4_INLINE float                      mat4_get_determinant(const mat4 &a);
+MATH_MAT4_INLINE float        mat4_get_determinant(const mat4 &a);
 
 
 // ----------------------------------------------------------------- [ Data ] --
+/*
+  Utility methods, for getting and setting data.
+*/
 
-// Get/Set information
-MATH_MAT4_INLINE float                      mat4_get(const mat4 &mat, const uint32_t row, const uint32_t col);
-MATH_MAT4_INLINE float                      mat4_get(const mat4 &mat, const uint32_t i);
-MATH_MAT4_INLINE void                       mat4_set(mat4 &mat, const uint32_t row, const uint32_t col, const float set);
-MATH_MAT4_INLINE mat3                       mat4_get_sub_mat3(const mat4 &a);
-MATH_MAT4_INLINE vec3                       mat4_get_position(const mat4 &a);
-MATH_MAT4_INLINE vec3                       mat4_get_scale(const mat4 &a);
+
+MATH_MAT4_INLINE mat3         mat4_get_sub_mat3(const mat4 &a);
 MATH_MAT4_INLINE const float* mat4_data(const mat4 &mat);
-
 MATH_MAT4_INLINE void         mat4_to_array(const mat4 &m, float *array);
 
 
 // ------------------------------------------------------------- [ Equality ] --
+/*
+  Mat operators.
+*/
 
 
+MATH_MAT4_INLINE bool         mat4_is_not_near(const mat4 &a, const mat4 &b, const float error = MATH_NS_NAME::epsilon());
 MATH_MAT4_INLINE bool         mat4_is_near(const mat4 &a, const mat4 &b, const float error = MATH_NS_NAME::epsilon());
 
 
@@ -98,7 +116,7 @@ MATH_MAT4_INLINE bool         mat4_is_near(const mat4 &a, const mat4 &b, const f
 #undef MATH_MAT4_INLINE
 
 
-// ------------------------------------------------------- [ Constants Impl ] --
+// ----------------------------------------------------------------- [ Impl ] --
 
 
 namespace detail
@@ -109,6 +127,9 @@ namespace detail
   };
 
 }
+
+
+// ------------------------------------------------------------ [ Constants ] --
 
 
 mat4
@@ -139,6 +160,9 @@ mat4_zero()
 }
 
 
+// ----------------------------------------------------------- [ Initialize ] --
+
+
 mat4
 mat4_init()
 {
@@ -150,7 +174,11 @@ mat4
 mat4_init(const float x)
 {
   float array[16];
-  std::fill_n(array, 16, x);
+
+  for(float &i : array)
+  {
+    i = x;
+  }
 
   return mat4_init(array);
 }
@@ -166,7 +194,7 @@ mat4_init(const mat3 sub_matrix)
     mat3_get(sub_matrix, 6), mat3_get(sub_matrix, 7), mat3_get(sub_matrix, 8), 0.f,
     0.f, 0.f, 0.f, 0.f,
   };
-  
+
   return mat4_init(mat_data);
 }
 
@@ -178,149 +206,12 @@ mat4_init(const float array[])
   detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
 
   memcpy(internal_mat->data, array, sizeof(internal_mat->data));
-  
-  return return_mat;
-}
-
-
-mat4
-mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up)
-{
-  const vec3 z_axis = vec3_normalize(vec3_subtract(look_at_position, eye_position));
-  const vec3 x_axis = vec3_normalize(vec3_cross(z_axis, up));
-  const vec3 y_axis = vec3_cross(x_axis, z_axis);
-
-  const float array_mat[16] =
-  {
-    vec3_get_x(x_axis),
-    vec3_get_x(y_axis),
-    -vec3_get_x(z_axis),
-    0.f,
-
-    vec3_get_y(x_axis),
-    vec3_get_y(y_axis),
-    -vec3_get_y(z_axis),
-    0.f,
-
-    vec3_get_z(x_axis),
-    vec3_get_z(y_axis),
-    -vec3_get_z(z_axis),
-    0.f,
-
-    -(vec3_dot(x_axis, eye_position)),
-    -(vec3_dot(y_axis, eye_position)),
-    +(vec3_dot(z_axis, eye_position)),
-    1.f,
-  };
-
-  return mat4_init(array_mat);
-}
-
-
-mat4
-mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov)
-{
-  const float aspect_ratio = width / height;
-  const float one_over_tan_half_fov = 1.f / MATH_NS_NAME::tan(fov * 0.5f);
-  const float plane_diff = far_plane - near_plane;
-
-  //mat4 return_mat = mat4_zero();
-  const float proj_mat[16] =
-  {
-    one_over_tan_half_fov / aspect_ratio,
-    0.f,
-    0.f,
-    0.f,
-
-    0.f,
-    one_over_tan_half_fov,
-    0.f,
-    0.f, 
-
-    0.f,
-    0.f,
-    -(far_plane + near_plane) / plane_diff,
-    -1.f,
-
-    0.f,
-    0.f,
-    -(2.f * far_plane * near_plane) / plane_diff,
-    0.f,
-
- };
-
- return mat4_init(proj_mat);
-}
-
-
-mat4
-mat4_orthographic(const float width, const float height, const float near_plane, const float far_plane)
-{
-  const float depth = far_plane - near_plane;
-  assert(depth > 0);
-
-  const float ortho_mat[16] = 
-  {
-    2.f / width,
-    0.f,
-    0.f,
-    0.f,
-
-    0.f,
-    2.f / height,
-    0.f,
-    0.f,
-    
-    0.f,
-    0.f,
-    2.f / depth,
-    0.f,//-near_plane / depth,
- 
-    0.f,
-    0.f,
-    0.f,
-    1.f,
-  };
-
-  return mat4_init(ortho_mat);
-}
-
-
-// Operations
-mat4
-mat4_add(const mat4 &lhs, const mat4 &rhs)
-{
-  const detail::internal_mat4 *left = reinterpret_cast<const detail::internal_mat4*>(&lhs);
-  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
-
-  mat4 return_mat; 
-  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
-
-  for(int i = 0; i < 16; ++i)
-  {
-    internal_mat->data[i] = left->data[0] + right->data[0];
-  }
 
   return return_mat;
 }
 
 
-mat4
-mat4_subtract(const mat4 &lhs, const mat4 &rhs)
-{
-  const detail::internal_mat4 *left = reinterpret_cast<const detail::internal_mat4*>(&lhs);
-  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
-
-  mat4 return_mat; 
-  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
-
-  for(uint32_t i = 0; i < 16; ++i)
-  {
-    internal_mat->data[i] = left->data[0] - right->data[0];
-  }
-
-  return return_mat;
-}
+// ----------------------------------------------- [ Special Init With Data ] --
 
 
 mat4
@@ -335,313 +226,12 @@ mat4_scale(const float x, const float y, const float z)
 {
   mat4 return_mat = mat4_id();
   detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
-  
+
   internal_mat->data[0]  = x;
   internal_mat->data[5]  = y;
   internal_mat->data[10] = z;
-  
-  return return_mat;
-}
-
-
-mat4
-mat4_multiply(const float lhs, const mat4 &rhs)
-{
-  mat4 multiply_mat = mat4_init(lhs);
-  
-  for(uint32_t i = 0; i < 16; ++i)
-  {
-    multiply_mat.data[i] = rhs.data[i] * lhs;
-  }
-  
-  return multiply_mat;
-}
-
-
-vec4
-mat4_multiply(const vec4 lhs, const mat4 &rhs)
-{
-  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
-  float result[4];
-
-  for(uint32_t i = 0; i < 4; ++i)
-  {
-    const vec4 dot_vec = vec4_init(right->data[i + 0],
-                                   right->data[i + 4],
-                                   right->data[i + 8],
-                                   right->data[i + 12]);
-
-    result[i] = vec4_dot(lhs, dot_vec);
-  }
-
-  return vec4_init_with_array(result);
-}
-
-
-mat4
-mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three)
-{
-  return mat4_multiply(mat4_multiply(one, two), three);
-}
-
-
-mat4
-mat4_multiply(const mat4 &lhs, const mat4 &rhs)
-{
-  const detail::internal_mat4 *left  = reinterpret_cast<const detail::internal_mat4*>(&lhs);
-  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
-
-  mat4 return_mat = mat4_id();
-  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
-
-  for(uint32_t i = 0; i < 16; ++i)
-  {
-    // Starting index for data.
-    const uint32_t row = (i / 4) * 4;
-    const uint32_t col = (i % 4);
-
-    const vec4 row_vec = vec4_init(left->data[row + 0],
-                                   left->data[row + 1],
-                                   left->data[row + 2],
-                                   left->data[row + 3]);
-
-    const vec4 col_vec = vec4_init(right->data[col + 0],
-                                   right->data[col + 4],
-                                   right->data[col + 8],
-                                   right->data[col + 12]);
-
-    const float dot = vec4_dot(row_vec, col_vec);
-    
-    internal_mat->data[i] = dot;
-  }
 
   return return_mat;
-}
-
-
-mat4
-mat4_transpose(const mat4 &to_transpose)
-{
-  const detail::internal_mat4 *transpose_data = reinterpret_cast<const detail::internal_mat4*>(&to_transpose);
-  
-  const float mat_transpose[16]
-  {
-    transpose_data->data[0],  transpose_data->data[4],  transpose_data->data[8],  transpose_data->data[12],
-    transpose_data->data[1],  transpose_data->data[5],  transpose_data->data[9],  transpose_data->data[13],
-    transpose_data->data[2],  transpose_data->data[6],  transpose_data->data[10], transpose_data->data[14],
-    transpose_data->data[3],  transpose_data->data[7],  transpose_data->data[11], transpose_data->data[15],
-  };
-  
-  return mat4_init(mat_transpose);
-}
-
-
-mat4
-mat4_inverse(const mat4 &to_inverse)
-{
-  const detail::internal_mat4 *to_i = reinterpret_cast<const detail::internal_mat4*>(&to_inverse);
-  
-  const float temp[16]
-  {
-    // 0
-    to_i->data[5]  * to_i->data[10] * to_i->data[15] -
-    to_i->data[5]  * to_i->data[11] * to_i->data[14] -
-    to_i->data[9]  * to_i->data[6]  * to_i->data[15] + 
-    to_i->data[9]  * to_i->data[7]  * to_i->data[14] +
-    to_i->data[13] * to_i->data[6]  * to_i->data[11] - 
-    to_i->data[13] * to_i->data[7]  * to_i->data[10],
-  
-    // 1
-    -to_i->data[1]  * to_i->data[10] * to_i->data[15] +
-    to_i->data[1]  * to_i->data[11] * to_i->data[14] +
-    to_i->data[9]  * to_i->data[2] * to_i->data[15] - 
-    to_i->data[9]  * to_i->data[3] * to_i->data[14] - 
-    to_i->data[13] * to_i->data[2] * to_i->data[11] + 
-    to_i->data[13] * to_i->data[3] * to_i->data[10],
-  
-    // 2
-    to_i->data[1]  * to_i->data[6] * to_i->data[15] -
-    to_i->data[1]  * to_i->data[7] * to_i->data[14] -
-    to_i->data[5]  * to_i->data[2] * to_i->data[15] + 
-    to_i->data[5]  * to_i->data[3] * to_i->data[14] + 
-    to_i->data[13] * to_i->data[2] * to_i->data[7] - 
-    to_i->data[13] * to_i->data[3] * to_i->data[6],
-
-    // 3
-    -to_i->data[1] * to_i->data[6] * to_i->data[11] +
-    to_i->data[1] * to_i->data[7] * to_i->data[10] + 
-    to_i->data[5] * to_i->data[2] * to_i->data[11] - 
-    to_i->data[5] * to_i->data[3] * to_i->data[10] - 
-    to_i->data[9] * to_i->data[2] * to_i->data[7] + 
-    to_i->data[9] * to_i->data[3] * to_i->data[6],
-
-    // 4
-    -to_i->data[4]  * to_i->data[10] * to_i->data[15] +
-    to_i->data[4]  * to_i->data[11] * to_i->data[14] +
-    to_i->data[8]  * to_i->data[6]  * to_i->data[15] - 
-    to_i->data[8]  * to_i->data[7]  * to_i->data[14] - 
-    to_i->data[12] * to_i->data[6]  * to_i->data[11] + 
-    to_i->data[12] * to_i->data[7]  * to_i->data[10],
-
-    // 5
-    to_i->data[0]  * to_i->data[10] * to_i->data[15] -
-    to_i->data[0]  * to_i->data[11] * to_i->data[14] - 
-    to_i->data[8]  * to_i->data[2] * to_i->data[15] + 
-    to_i->data[8]  * to_i->data[3] * to_i->data[14] + 
-    to_i->data[12] * to_i->data[2] * to_i->data[11] - 
-    to_i->data[12] * to_i->data[3] * to_i->data[10],
-
-    // 6
-    -to_i->data[0]  * to_i->data[6] * to_i->data[15] +
-    to_i->data[0]  * to_i->data[7] * to_i->data[14] + 
-    to_i->data[4]  * to_i->data[2] * to_i->data[15] - 
-    to_i->data[4]  * to_i->data[3] * to_i->data[14] - 
-    to_i->data[12] * to_i->data[2] * to_i->data[7] + 
-    to_i->data[12] * to_i->data[3] * to_i->data[6],
-
-    // 7
-    to_i->data[0] * to_i->data[6] * to_i->data[11] -
-    to_i->data[0] * to_i->data[7] * to_i->data[10] - 
-    to_i->data[4] * to_i->data[2] * to_i->data[11] + 
-    to_i->data[4] * to_i->data[3] * to_i->data[10] + 
-    to_i->data[8] * to_i->data[2] * to_i->data[7] - 
-    to_i->data[8] * to_i->data[3] * to_i->data[6],
-
-    // 8
-    to_i->data[4]  * to_i->data[9] * to_i->data[15] -
-    to_i->data[4]  * to_i->data[11] * to_i->data[13] -
-    to_i->data[8]  * to_i->data[5] * to_i->data[15] + 
-    to_i->data[8]  * to_i->data[7] * to_i->data[13] + 
-    to_i->data[12] * to_i->data[5] * to_i->data[11] - 
-    to_i->data[12] * to_i->data[7] * to_i->data[9],
-
-    // 9
-    -to_i->data[0]  * to_i->data[9] * to_i->data[15] +
-    to_i->data[0]  * to_i->data[11] * to_i->data[13] + 
-    to_i->data[8]  * to_i->data[1] * to_i->data[15] - 
-    to_i->data[8]  * to_i->data[3] * to_i->data[13] - 
-    to_i->data[12] * to_i->data[1] * to_i->data[11] + 
-    to_i->data[12] * to_i->data[3] * to_i->data[9],
-  
-    // 10
-    to_i->data[0]  * to_i->data[5] * to_i->data[15] -
-    to_i->data[0]  * to_i->data[7] * to_i->data[13] - 
-    to_i->data[4]  * to_i->data[1] * to_i->data[15] + 
-    to_i->data[4]  * to_i->data[3] * to_i->data[13] + 
-    to_i->data[12] * to_i->data[1] * to_i->data[7] - 
-    to_i->data[12] * to_i->data[3] * to_i->data[5],
-  
-    // 11
-    -to_i->data[0] * to_i->data[5] * to_i->data[11] +
-    to_i->data[0] * to_i->data[7] * to_i->data[9] + 
-    to_i->data[4] * to_i->data[1] * to_i->data[11] - 
-    to_i->data[4] * to_i->data[3] * to_i->data[9] - 
-    to_i->data[8] * to_i->data[1] * to_i->data[7] + 
-    to_i->data[8] * to_i->data[3] * to_i->data[5],
-
-    // 12
-    -to_i->data[4]  * to_i->data[9] * to_i->data[14] +
-    to_i->data[4]  * to_i->data[10] * to_i->data[13] +
-    to_i->data[8]  * to_i->data[5] * to_i->data[14] - 
-    to_i->data[8]  * to_i->data[6] * to_i->data[13] - 
-    to_i->data[12] * to_i->data[5] * to_i->data[10] + 
-    to_i->data[12] * to_i->data[6] * to_i->data[9],
-  
-    // 13
-    to_i->data[0]  * to_i->data[9] * to_i->data[14] -
-    to_i->data[0]  * to_i->data[10] * to_i->data[13] - 
-    to_i->data[8]  * to_i->data[1] * to_i->data[14] + 
-    to_i->data[8]  * to_i->data[2] * to_i->data[13] + 
-    to_i->data[12] * to_i->data[1] * to_i->data[10] - 
-    to_i->data[12] * to_i->data[2] * to_i->data[9],
-    
-    // 14
-    -to_i->data[0]  * to_i->data[5] * to_i->data[14] +
-    to_i->data[0]  * to_i->data[6] * to_i->data[13] +
-    to_i->data[4]  * to_i->data[1] * to_i->data[14] -
-    to_i->data[4]  * to_i->data[2] * to_i->data[13] -
-    to_i->data[12] * to_i->data[1] * to_i->data[6] +
-    to_i->data[12] * to_i->data[2] * to_i->data[5],
-
-    // 16
-    to_i->data[0] * to_i->data[5] * to_i->data[10] -
-    to_i->data[0] * to_i->data[6] * to_i->data[9] - 
-    to_i->data[4] * to_i->data[1] * to_i->data[10] + 
-    to_i->data[4] * to_i->data[2] * to_i->data[9] + 
-    to_i->data[8] * to_i->data[1] * to_i->data[6] - 
-    to_i->data[8] * to_i->data[2] * to_i->data[5]
-  };
-  
-  const float determinant = to_i->data[0] * temp[0] + to_i->data[1] * temp[4] + to_i->data[2] * temp[8] + to_i->data[3] * temp[12];
-
-  assert(determinant != 0);
-  
-  const float one_over_det = 1.f / determinant;
-  
-  float inverse[16]{};
-  
-  for(size_t i = 0; i < 16; ++i)
-  {
-    inverse[i] = temp[i] * one_over_det;
-  }
-  
-  return mat4_init(inverse);
-}
-
-
-float
-mat4_get_determinant(const mat4 &det)
-{
-  /*
-    I J K l     0 1 2 3
-    a b c d  =  4 5 6 7
-    e f g h     8 9 10 11
-    i j k l     12 13 14 15
-  */
-  
-  const detail::internal_mat4 *mat = reinterpret_cast<const detail::internal_mat4*>(&det);
-
-  const float det_a_data[9]
-  {
-    mat->data[5], mat->data[6], mat->data[7],
-    mat->data[9], mat->data[10], mat->data[11],
-    mat->data[13], mat->data[14], mat->data[15]
-  };
-
-  const mat3 det_a_mat = mat3_init(det_a_data);
-  const float det_a = mat->data[0] * mat3_determinant(det_a_mat);
-
-  const float det_b_data[9]
-  {
-    mat->data[4], mat->data[6], mat->data[7],
-    mat->data[8], mat->data[10], mat->data[11],
-    mat->data[12], mat->data[14], mat->data[15]
-  };
-  
-  const mat3 det_b_mat = mat3_init(det_b_data);
-  const float det_b = -mat->data[1] * mat3_determinant(det_b_mat);
-  
-  const float det_c_data[9]
-  {
-    mat->data[4], mat->data[5], mat->data[7],
-    mat->data[8], mat->data[9], mat->data[11],
-    mat->data[12], mat->data[13], mat->data[15]
-  };
-  
-  const mat3 det_c_mat = mat3_init(det_c_data);
-  const float det_c = mat->data[2] * mat3_determinant(det_c_mat);
-  
-  const float det_d_data[9]
-  {
-    mat->data[4], mat->data[5], mat->data[6],
-    mat->data[8], mat->data[9], mat->data[10],
-    mat->data[12], mat->data[13], mat->data[14]
-  };
-
-  const mat3 det_d_mat = mat3_init(det_d_data);
-  const float det_d = -mat->data[3] * mat3_determinant(det_d_mat);
-
-  return det_a + det_b + det_c + det_d;
 }
 
 
@@ -664,25 +254,25 @@ mat4_translate(const float x, const float y, const float z)
 
   return translate_mat;
 }
-  
-  
+
+
 mat4
 mat4_rotate_around_axis(const vec3 axis, const float radians)
 {
   mat4 rotation = mat4_id();
   detail::internal_mat4 *rotate_me = reinterpret_cast<detail::internal_mat4*>(&rotation);
-  
+
   const MATH_NS_NAME::vec3 norm_axis = MATH_NS_NAME::vec3_normalize(axis);
-  assert(MATH_NS_NAME::vec3_length(norm_axis));
+  MATH_ASSERT(MATH_NS_NAME::vec3_length(norm_axis));
 
   const float sin_theta           = MATH_NS_NAME::sin(radians);
   const float cos_theta           = MATH_NS_NAME::cos(radians);
   const float one_minus_cos_theta = 1.f - cos_theta;
-  
-  const float x = vec3_get_x(norm_axis);
-  const float y = vec3_get_y(norm_axis);
-  const float z = vec3_get_z(norm_axis);
-  
+
+  const float x = MATH_NS_NAME::vec3_get_x(norm_axis);
+  const float y = MATH_NS_NAME::vec3_get_y(norm_axis);
+  const float z = MATH_NS_NAME::vec3_get_z(norm_axis);
+
   rotate_me->data[0]  = cos_theta + ((x * x) * one_minus_cos_theta);
   rotate_me->data[1]  = ((x * y) * one_minus_cos_theta) - (z * sin_theta);
   rotate_me->data[2]  = ((x * z) * one_minus_cos_theta) + (y * sin_theta);
@@ -702,8 +292,575 @@ mat4_rotate_around_axis(const vec3 axis, const float radians)
   rotate_me->data[13] = 0;
   rotate_me->data[14] = 0;
   rotate_me->data[15] = 1;
-  
+
   return rotation;
+}
+
+
+// ---------------------------------------------------------- [ Camera Mats ] --
+
+
+mat4
+mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up)
+{
+  const MATH_NS_NAME::vec3 z_axis = MATH_NS_NAME::vec3_normalize(vec3_subtract(look_at_position, eye_position));
+  const MATH_NS_NAME::vec3 x_axis = MATH_NS_NAME::vec3_normalize(vec3_cross(z_axis, up));
+  const MATH_NS_NAME::vec3 y_axis = MATH_NS_NAME::vec3_cross(x_axis, z_axis);
+
+  const float array_mat[16] =
+  {
+    +MATH_NS_NAME::vec3_get_x(x_axis),
+    +MATH_NS_NAME::vec3_get_x(y_axis),
+    -MATH_NS_NAME::vec3_get_x(z_axis),
+    0.f,
+
+    +MATH_NS_NAME::vec3_get_y(x_axis),
+    +MATH_NS_NAME::vec3_get_y(y_axis),
+    -MATH_NS_NAME::vec3_get_y(z_axis),
+    0.f,
+
+    +MATH_NS_NAME::vec3_get_z(x_axis),
+    +MATH_NS_NAME::vec3_get_z(y_axis),
+    -MATH_NS_NAME::vec3_get_z(z_axis),
+    0.f,
+
+    -(MATH_NS_NAME::vec3_dot(x_axis, eye_position)),
+    -(MATH_NS_NAME::vec3_dot(y_axis, eye_position)),
+    +(MATH_NS_NAME::vec3_dot(z_axis, eye_position)),
+    1.f,
+  };
+
+  return MATH_NS_NAME::mat4_init(array_mat);
+}
+
+
+mat4
+mat4_perspective(const float width, const float height, const float near_plane, const float far_plane, const float fov)
+{
+  const float aspect_ratio = width / height;
+  const float one_over_tan_half_fov = 1.f / MATH_NS_NAME::tan(fov * 0.5f);
+  const float plane_diff = far_plane - near_plane;
+
+  //mat4 return_mat = mat4_zero();
+  const float proj_mat[16] =
+  {
+    one_over_tan_half_fov / aspect_ratio,
+    0.f,
+    0.f,
+    0.f,
+
+    0.f,
+    one_over_tan_half_fov,
+    0.f,
+    0.f,
+
+    0.f,
+    0.f,
+    -(far_plane + near_plane) / plane_diff,
+    -1.f,
+
+    0.f,
+    0.f,
+    -(2.f * far_plane * near_plane) / plane_diff,
+    0.f,
+
+ };
+
+ return MATH_NS_NAME::mat4_init(proj_mat);
+}
+
+
+mat4
+mat4_orthographic(const float width, const float height, const float near_plane, const float far_plane)
+{
+  const float depth = far_plane - near_plane;
+  MATH_ASSERT(depth > 0);
+
+  const float ortho_mat[16] =
+  {
+    2.f / width,
+    0.f,
+    0.f,
+    0.f,
+
+    0.f,
+    2.f / height,
+    0.f,
+    0.f,
+
+    0.f,
+    0.f,
+    2.f / depth,
+    0.f,//-near_plane / depth,
+
+    0.f,
+    0.f,
+    0.f,
+    1.f,
+  };
+
+  return MATH_NS_NAME::mat4_init(ortho_mat);
+}
+
+
+// ----------------------------------------------------------- [ Operations ] --
+
+
+mat4
+mat4_add(const mat4 &lhs, const mat4 &rhs)
+{
+  const detail::internal_mat4 *left = reinterpret_cast<const detail::internal_mat4*>(&lhs);
+  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
+
+  mat4 return_mat;
+  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
+
+  for(int i = 0; i < 16; ++i)
+  {
+    internal_mat->data[i] = left->data[0] + right->data[0];
+  }
+
+  return return_mat;
+}
+
+
+mat4
+mat4_subtract(const mat4 &lhs, const mat4 &rhs)
+{
+  const detail::internal_mat4 *left = reinterpret_cast<const detail::internal_mat4*>(&lhs);
+  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
+
+  mat4 return_mat;
+  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
+
+  for(uint32_t i = 0; i < 16; ++i)
+  {
+    internal_mat->data[i] = left->data[0] - right->data[0];
+  }
+
+  return return_mat;
+}
+
+
+mat4
+mat4_multiply(const float lhs, const mat4 &rhs)
+{
+  mat4 multiply_mat = mat4_init(lhs);
+
+  for(uint32_t i = 0; i < 16; ++i)
+  {
+    multiply_mat.data[i] = rhs.data[i] * lhs;
+  }
+
+  return multiply_mat;
+}
+
+
+vec4
+mat4_multiply(const vec4 lhs, const mat4 &rhs)
+{
+  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
+  float result[4];
+
+  for(uint32_t i = 0; i < 4; ++i)
+  {
+    const vec4 dot_vec = MATH_NS_NAME::vec4_init(
+      right->data[i + 0],
+      right->data[i + 4],
+      right->data[i + 8],
+      right->data[i + 12]
+    );
+
+    result[i] = MATH_NS_NAME::vec4_dot(lhs, dot_vec);
+  }
+
+  return MATH_NS_NAME::vec4_init_with_array(result);
+}
+
+
+mat4
+mat4_multiply(const mat4 &one, const mat4 &two, const mat4 &three)
+{
+  return MATH_NS_NAME::mat4_multiply(
+    MATH_NS_NAME::mat4_multiply(one, two),
+    three
+  );
+}
+
+
+mat4
+mat4_multiply(const mat4 &lhs, const mat4 &rhs)
+{
+  const detail::internal_mat4 *left  = reinterpret_cast<const detail::internal_mat4*>(&lhs);
+  const detail::internal_mat4 *right = reinterpret_cast<const detail::internal_mat4*>(&rhs);
+
+  mat4 return_mat = MATH_NS_NAME::mat4_id();
+  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&return_mat);
+
+  for(uint32_t i = 0; i < 16; ++i)
+  {
+    // Starting index for data.
+    const uint32_t row = (i / 4) * 4;
+    const uint32_t col = (i % 4);
+
+    const vec4 row_vec = MATH_NS_NAME::vec4_init(
+      left->data[row + 0],
+      left->data[row + 1],
+      left->data[row + 2],
+      left->data[row + 3]
+    );
+
+    const vec4 col_vec = MATH_NS_NAME::vec4_init(
+      right->data[col + 0],
+      right->data[col + 4],
+      right->data[col + 8],
+      right->data[col + 12]
+    );
+
+    const float dot = MATH_NS_NAME::vec4_dot(row_vec, col_vec);
+
+    internal_mat->data[i] = dot;
+  }
+
+  return return_mat;
+}
+
+
+mat4
+mat4_transpose(const mat4 &to_transpose)
+{
+  const detail::internal_mat4 *transpose_data = reinterpret_cast<const detail::internal_mat4*>(&to_transpose);
+
+  const float mat_transpose[16]
+  {
+    transpose_data->data[0],  transpose_data->data[4],  transpose_data->data[8],  transpose_data->data[12],
+    transpose_data->data[1],  transpose_data->data[5],  transpose_data->data[9],  transpose_data->data[13],
+    transpose_data->data[2],  transpose_data->data[6],  transpose_data->data[10], transpose_data->data[14],
+    transpose_data->data[3],  transpose_data->data[7],  transpose_data->data[11], transpose_data->data[15],
+  };
+
+  return MATH_NS_NAME::mat4_init(mat_transpose);
+}
+
+
+mat4
+mat4_inverse(const mat4 &to_inverse)
+{
+  const detail::internal_mat4 *to_i = reinterpret_cast<const detail::internal_mat4*>(&to_inverse);
+
+  const float temp[16]
+  {
+    // 0
+    to_i->data[5]  * to_i->data[10] * to_i->data[15] -
+    to_i->data[5]  * to_i->data[11] * to_i->data[14] -
+    to_i->data[9]  * to_i->data[6]  * to_i->data[15] +
+    to_i->data[9]  * to_i->data[7]  * to_i->data[14] +
+    to_i->data[13] * to_i->data[6]  * to_i->data[11] -
+    to_i->data[13] * to_i->data[7]  * to_i->data[10],
+
+    // 1
+    -to_i->data[1]  * to_i->data[10] * to_i->data[15] +
+    to_i->data[1]  * to_i->data[11] * to_i->data[14] +
+    to_i->data[9]  * to_i->data[2] * to_i->data[15] -
+    to_i->data[9]  * to_i->data[3] * to_i->data[14] -
+    to_i->data[13] * to_i->data[2] * to_i->data[11] +
+    to_i->data[13] * to_i->data[3] * to_i->data[10],
+
+    // 2
+    to_i->data[1]  * to_i->data[6] * to_i->data[15] -
+    to_i->data[1]  * to_i->data[7] * to_i->data[14] -
+    to_i->data[5]  * to_i->data[2] * to_i->data[15] +
+    to_i->data[5]  * to_i->data[3] * to_i->data[14] +
+    to_i->data[13] * to_i->data[2] * to_i->data[7] -
+    to_i->data[13] * to_i->data[3] * to_i->data[6],
+
+    // 3
+    -to_i->data[1] * to_i->data[6] * to_i->data[11] +
+    to_i->data[1] * to_i->data[7] * to_i->data[10] +
+    to_i->data[5] * to_i->data[2] * to_i->data[11] -
+    to_i->data[5] * to_i->data[3] * to_i->data[10] -
+    to_i->data[9] * to_i->data[2] * to_i->data[7] +
+    to_i->data[9] * to_i->data[3] * to_i->data[6],
+
+    // 4
+    -to_i->data[4]  * to_i->data[10] * to_i->data[15] +
+    to_i->data[4]  * to_i->data[11] * to_i->data[14] +
+    to_i->data[8]  * to_i->data[6]  * to_i->data[15] -
+    to_i->data[8]  * to_i->data[7]  * to_i->data[14] -
+    to_i->data[12] * to_i->data[6]  * to_i->data[11] +
+    to_i->data[12] * to_i->data[7]  * to_i->data[10],
+
+    // 5
+    to_i->data[0]  * to_i->data[10] * to_i->data[15] -
+    to_i->data[0]  * to_i->data[11] * to_i->data[14] -
+    to_i->data[8]  * to_i->data[2] * to_i->data[15] +
+    to_i->data[8]  * to_i->data[3] * to_i->data[14] +
+    to_i->data[12] * to_i->data[2] * to_i->data[11] -
+    to_i->data[12] * to_i->data[3] * to_i->data[10],
+
+    // 6
+    -to_i->data[0]  * to_i->data[6] * to_i->data[15] +
+    to_i->data[0]  * to_i->data[7] * to_i->data[14] +
+    to_i->data[4]  * to_i->data[2] * to_i->data[15] -
+    to_i->data[4]  * to_i->data[3] * to_i->data[14] -
+    to_i->data[12] * to_i->data[2] * to_i->data[7] +
+    to_i->data[12] * to_i->data[3] * to_i->data[6],
+
+    // 7
+    to_i->data[0] * to_i->data[6] * to_i->data[11] -
+    to_i->data[0] * to_i->data[7] * to_i->data[10] -
+    to_i->data[4] * to_i->data[2] * to_i->data[11] +
+    to_i->data[4] * to_i->data[3] * to_i->data[10] +
+    to_i->data[8] * to_i->data[2] * to_i->data[7] -
+    to_i->data[8] * to_i->data[3] * to_i->data[6],
+
+    // 8
+    to_i->data[4]  * to_i->data[9] * to_i->data[15] -
+    to_i->data[4]  * to_i->data[11] * to_i->data[13] -
+    to_i->data[8]  * to_i->data[5] * to_i->data[15] +
+    to_i->data[8]  * to_i->data[7] * to_i->data[13] +
+    to_i->data[12] * to_i->data[5] * to_i->data[11] -
+    to_i->data[12] * to_i->data[7] * to_i->data[9],
+
+    // 9
+    -to_i->data[0]  * to_i->data[9] * to_i->data[15] +
+    to_i->data[0]  * to_i->data[11] * to_i->data[13] +
+    to_i->data[8]  * to_i->data[1] * to_i->data[15] -
+    to_i->data[8]  * to_i->data[3] * to_i->data[13] -
+    to_i->data[12] * to_i->data[1] * to_i->data[11] +
+    to_i->data[12] * to_i->data[3] * to_i->data[9],
+
+    // 10
+    to_i->data[0]  * to_i->data[5] * to_i->data[15] -
+    to_i->data[0]  * to_i->data[7] * to_i->data[13] -
+    to_i->data[4]  * to_i->data[1] * to_i->data[15] +
+    to_i->data[4]  * to_i->data[3] * to_i->data[13] +
+    to_i->data[12] * to_i->data[1] * to_i->data[7] -
+    to_i->data[12] * to_i->data[3] * to_i->data[5],
+
+    // 11
+    -to_i->data[0] * to_i->data[5] * to_i->data[11] +
+    to_i->data[0] * to_i->data[7] * to_i->data[9] +
+    to_i->data[4] * to_i->data[1] * to_i->data[11] -
+    to_i->data[4] * to_i->data[3] * to_i->data[9] -
+    to_i->data[8] * to_i->data[1] * to_i->data[7] +
+    to_i->data[8] * to_i->data[3] * to_i->data[5],
+
+    // 12
+    -to_i->data[4]  * to_i->data[9] * to_i->data[14] +
+    to_i->data[4]  * to_i->data[10] * to_i->data[13] +
+    to_i->data[8]  * to_i->data[5] * to_i->data[14] -
+    to_i->data[8]  * to_i->data[6] * to_i->data[13] -
+    to_i->data[12] * to_i->data[5] * to_i->data[10] +
+    to_i->data[12] * to_i->data[6] * to_i->data[9],
+
+    // 13
+    to_i->data[0]  * to_i->data[9] * to_i->data[14] -
+    to_i->data[0]  * to_i->data[10] * to_i->data[13] -
+    to_i->data[8]  * to_i->data[1] * to_i->data[14] +
+    to_i->data[8]  * to_i->data[2] * to_i->data[13] +
+    to_i->data[12] * to_i->data[1] * to_i->data[10] -
+    to_i->data[12] * to_i->data[2] * to_i->data[9],
+
+    // 14
+    -to_i->data[0]  * to_i->data[5] * to_i->data[14] +
+    to_i->data[0]  * to_i->data[6] * to_i->data[13] +
+    to_i->data[4]  * to_i->data[1] * to_i->data[14] -
+    to_i->data[4]  * to_i->data[2] * to_i->data[13] -
+    to_i->data[12] * to_i->data[1] * to_i->data[6] +
+    to_i->data[12] * to_i->data[2] * to_i->data[5],
+
+    // 16
+    to_i->data[0] * to_i->data[5] * to_i->data[10] -
+    to_i->data[0] * to_i->data[6] * to_i->data[9] -
+    to_i->data[4] * to_i->data[1] * to_i->data[10] +
+    to_i->data[4] * to_i->data[2] * to_i->data[9] +
+    to_i->data[8] * to_i->data[1] * to_i->data[6] -
+    to_i->data[8] * to_i->data[2] * to_i->data[5]
+  };
+
+  const float determinant = mat4_get_determinant(to_inverse);
+
+  MATH_ASSERT(determinant != 0);
+
+  const float one_over_det = 1.f / determinant;
+
+  float inverse[16]{};
+
+  for(size_t i = 0; i < 16; ++i)
+  {
+    inverse[i] = temp[i] * one_over_det;
+  }
+
+  return mat4_init(inverse);
+}
+
+
+float
+mat4_get_determinant(const mat4 &det)
+{
+  const detail::internal_mat4 *to_det = reinterpret_cast<const detail::internal_mat4*>(&det);
+
+  const float temp[16]
+  {
+    // 0
+   to_det->data[5]  *to_det->data[10] *to_det->data[15] -
+   to_det->data[5]  *to_det->data[11] *to_det->data[14] -
+   to_det->data[9]  *to_det->data[6]  *to_det->data[15] +
+   to_det->data[9]  *to_det->data[7]  *to_det->data[14] +
+   to_det->data[13] *to_det->data[6]  *to_det->data[11] -
+   to_det->data[13] *to_det->data[7]  *to_det->data[10],
+
+    // 1
+    -to_det->data[1]  *to_det->data[10] *to_det->data[15] +
+   to_det->data[1]  *to_det->data[11] *to_det->data[14] +
+   to_det->data[9]  *to_det->data[2] *to_det->data[15] -
+   to_det->data[9]  *to_det->data[3] *to_det->data[14] -
+   to_det->data[13] *to_det->data[2] *to_det->data[11] +
+   to_det->data[13] *to_det->data[3] *to_det->data[10],
+
+    // 2
+   to_det->data[1]  *to_det->data[6] *to_det->data[15] -
+   to_det->data[1]  *to_det->data[7] *to_det->data[14] -
+   to_det->data[5]  *to_det->data[2] *to_det->data[15] +
+   to_det->data[5]  *to_det->data[3] *to_det->data[14] +
+   to_det->data[13] *to_det->data[2] *to_det->data[7] -
+   to_det->data[13] *to_det->data[3] *to_det->data[6],
+
+    // 3
+    -to_det->data[1] *to_det->data[6] *to_det->data[11] +
+   to_det->data[1] *to_det->data[7] *to_det->data[10] +
+   to_det->data[5] *to_det->data[2] *to_det->data[11] -
+   to_det->data[5] *to_det->data[3] *to_det->data[10] -
+   to_det->data[9] *to_det->data[2] *to_det->data[7] +
+   to_det->data[9] *to_det->data[3] *to_det->data[6],
+
+    // 4
+    -to_det->data[4]  *to_det->data[10] *to_det->data[15] +
+   to_det->data[4]  *to_det->data[11] *to_det->data[14] +
+   to_det->data[8]  *to_det->data[6]  *to_det->data[15] -
+   to_det->data[8]  *to_det->data[7]  *to_det->data[14] -
+   to_det->data[12] *to_det->data[6]  *to_det->data[11] +
+   to_det->data[12] *to_det->data[7]  *to_det->data[10],
+
+    // 5
+   to_det->data[0]  *to_det->data[10] *to_det->data[15] -
+   to_det->data[0]  *to_det->data[11] *to_det->data[14] -
+   to_det->data[8]  *to_det->data[2] *to_det->data[15] +
+   to_det->data[8]  *to_det->data[3] *to_det->data[14] +
+   to_det->data[12] *to_det->data[2] *to_det->data[11] -
+   to_det->data[12] *to_det->data[3] *to_det->data[10],
+
+    // 6
+    -to_det->data[0]  *to_det->data[6] *to_det->data[15] +
+   to_det->data[0]  *to_det->data[7] *to_det->data[14] +
+   to_det->data[4]  *to_det->data[2] *to_det->data[15] -
+   to_det->data[4]  *to_det->data[3] *to_det->data[14] -
+   to_det->data[12] *to_det->data[2] *to_det->data[7] +
+   to_det->data[12] *to_det->data[3] *to_det->data[6],
+
+    // 7
+   to_det->data[0] *to_det->data[6] *to_det->data[11] -
+   to_det->data[0] *to_det->data[7] *to_det->data[10] -
+   to_det->data[4] *to_det->data[2] *to_det->data[11] +
+   to_det->data[4] *to_det->data[3] *to_det->data[10] +
+   to_det->data[8] *to_det->data[2] *to_det->data[7] -
+   to_det->data[8] *to_det->data[3] *to_det->data[6],
+
+    // 8
+   to_det->data[4]  *to_det->data[9] *to_det->data[15] -
+   to_det->data[4]  *to_det->data[11] *to_det->data[13] -
+   to_det->data[8]  *to_det->data[5] *to_det->data[15] +
+   to_det->data[8]  *to_det->data[7] *to_det->data[13] +
+   to_det->data[12] *to_det->data[5] *to_det->data[11] -
+   to_det->data[12] *to_det->data[7] *to_det->data[9],
+
+    // 9
+    -to_det->data[0]  *to_det->data[9] *to_det->data[15] +
+   to_det->data[0]  *to_det->data[11] *to_det->data[13] +
+   to_det->data[8]  *to_det->data[1] *to_det->data[15] -
+   to_det->data[8]  *to_det->data[3] *to_det->data[13] -
+   to_det->data[12] *to_det->data[1] *to_det->data[11] +
+   to_det->data[12] *to_det->data[3] *to_det->data[9],
+
+    // 10
+   to_det->data[0]  *to_det->data[5] *to_det->data[15] -
+   to_det->data[0]  *to_det->data[7] *to_det->data[13] -
+   to_det->data[4]  *to_det->data[1] *to_det->data[15] +
+   to_det->data[4]  *to_det->data[3] *to_det->data[13] +
+   to_det->data[12] *to_det->data[1] *to_det->data[7] -
+   to_det->data[12] *to_det->data[3] *to_det->data[5],
+
+    // 11
+    -to_det->data[0] *to_det->data[5] *to_det->data[11] +
+   to_det->data[0] *to_det->data[7] *to_det->data[9] +
+   to_det->data[4] *to_det->data[1] *to_det->data[11] -
+   to_det->data[4] *to_det->data[3] *to_det->data[9] -
+   to_det->data[8] *to_det->data[1] *to_det->data[7] +
+   to_det->data[8] *to_det->data[3] *to_det->data[5],
+
+    // 12
+    -to_det->data[4]  *to_det->data[9] *to_det->data[14] +
+   to_det->data[4]  *to_det->data[10] *to_det->data[13] +
+   to_det->data[8]  *to_det->data[5] *to_det->data[14] -
+   to_det->data[8]  *to_det->data[6] *to_det->data[13] -
+   to_det->data[12] *to_det->data[5] *to_det->data[10] +
+   to_det->data[12] *to_det->data[6] *to_det->data[9],
+
+    // 13
+   to_det->data[0]  *to_det->data[9] *to_det->data[14] -
+   to_det->data[0]  *to_det->data[10] *to_det->data[13] -
+   to_det->data[8]  *to_det->data[1] *to_det->data[14] +
+   to_det->data[8]  *to_det->data[2] *to_det->data[13] +
+   to_det->data[12] *to_det->data[1] *to_det->data[10] -
+   to_det->data[12] *to_det->data[2] *to_det->data[9],
+
+    // 14
+    -to_det->data[0]  *to_det->data[5] *to_det->data[14] +
+   to_det->data[0]  *to_det->data[6] *to_det->data[13] +
+   to_det->data[4]  *to_det->data[1] *to_det->data[14] -
+   to_det->data[4]  *to_det->data[2] *to_det->data[13] -
+   to_det->data[12] *to_det->data[1] *to_det->data[6] +
+   to_det->data[12] *to_det->data[2] *to_det->data[5],
+
+    // 16
+   to_det->data[0] *to_det->data[5] *to_det->data[10] -
+   to_det->data[0] *to_det->data[6] *to_det->data[9] -
+   to_det->data[4] *to_det->data[1] *to_det->data[10] +
+   to_det->data[4] *to_det->data[2] *to_det->data[9] +
+   to_det->data[8] *to_det->data[1] *to_det->data[6] -
+   to_det->data[8] *to_det->data[2] *to_det->data[5]
+  };
+
+  const float determinant =to_det->data[0] * temp[0] +to_det->data[1] * temp[4] +to_det->data[2] * temp[8] +to_det->data[3] * temp[12];
+
+  return determinant;
+}
+
+
+// ----------------------------------------------------------------- [ Data ] --
+
+
+mat3
+mat4_get_sub_mat3(const mat4 &m)
+{
+  const detail::internal_mat4 *internal_mat = reinterpret_cast<const detail::internal_mat4*>(&m);
+
+  const float mat_data[9] = {
+    internal_mat->data[0], internal_mat->data[1], internal_mat->data[2],
+    internal_mat->data[4], internal_mat->data[5], internal_mat->data[6],
+    internal_mat->data[8], internal_mat->data[9], internal_mat->data[10],
+  };
+
+  return mat3_init(mat_data);
+}
+
+
+const float*
+mat4_data(const mat4 &mat)
+{
+  const detail::internal_mat4 *internal_mat = reinterpret_cast<const detail::internal_mat4*>(&mat);
+  return &(internal_mat->data[0]);
 }
 
 
@@ -715,56 +872,13 @@ mat4_to_array(const mat4 &mat, float *out_array)
 }
 
 
-float
-mat4_get(const mat4 &mat, const uint32_t row, const uint32_t col)
+// ------------------------------------------------------------- [ Equality ] --
+
+
+bool
+mat4_is_not_near(const mat4 &a, const mat4 &b, const float error)
 {
-  assert(row < 4 && col < 4);
-
-  const uint32_t i = (row * 4) + col;
-  return mat4_get(mat, i);
-}
-
-
-float
-mat4_get(const mat4 &mat, const uint32_t index)
-{
-  assert(index < 16);
-  
-  const detail::internal_mat4 *internal_mat = reinterpret_cast<const detail::internal_mat4*>(&mat);
-  return internal_mat->data[index];
-}
-
-  
-const float*
-mat4_data(const mat4 &mat)
-{
-  const detail::internal_mat4 *internal_mat = reinterpret_cast<const detail::internal_mat4*>(&mat);
-  return &(internal_mat->data[0]);
-}
-
-  
-void
-mat4_set(mat4 &mat, const uint32_t row, const uint32_t col, const float set)
-{
-  assert(row < 4 && col < 4);
-
-  detail::internal_mat4 *internal_mat = reinterpret_cast<detail::internal_mat4*>(&mat);
-  internal_mat->data[(row * 4) + col] = set;
-}
-
-
-mat3
-mat4_get_sub_mat3(const mat4 &m)
-{
-  const detail::internal_mat4 *internal_mat = reinterpret_cast<const detail::internal_mat4*>(&m);
-  
-  const float mat_data[9] = {
-    internal_mat->data[0], internal_mat->data[1], internal_mat->data[2],
-    internal_mat->data[4], internal_mat->data[5], internal_mat->data[6],
-    internal_mat->data[8], internal_mat->data[9], internal_mat->data[10],
-  };
-  
-  return mat3_init(mat_data);
+  return !mat4_is_near(a, b, error);
 }
 
 
@@ -774,13 +888,13 @@ mat4_is_near(const mat4 &a, const mat4 &b, const float error)
   for(uint32_t i = 0; i < 16; ++i)
   {
     const float diff = b.data[i] - a.data[i];
-  
+
     if(MATH_NS_NAME::abs(diff) > error)
     {
       return false;
     }
   }
-  
+
   return true;
 }
 
