@@ -2,13 +2,6 @@
 #define MATRIX33_INCLUDED_D6DCE389_FA7C_4C48_A303_C0EDC9A90C8B
 
 
-/*
-  Matrix 33
-  Through out this library we consider a 3x3 matrix as a
-  rotation and scale matrix specifically.
-*/
-
-
 #include "../detail/detail.hpp"
 #include "mat_types.hpp"
 #include "../vec/vec3.hpp"
@@ -17,6 +10,9 @@
 
 
 // --------------------------------------------------------------- [ Config ] --
+/*
+  The inline for matrix functions
+*/
 
 
 #define MATH_MAT3_INLINE inline
@@ -26,6 +22,9 @@ _MATH_NS_OPEN
 
 
 // ------------------------------------------------------------ [ Constants ] --
+/*
+  Common matrix constants
+*/
 
 
 MATH_MAT3_INLINE mat3          mat3_id();
@@ -33,6 +32,10 @@ MATH_MAT3_INLINE mat3          mat3_zero();
 
 
 // ----------------------------------------------------------- [ Initialize ] --
+/*
+  Initialize a mat3, an mat3_init() will return an identity matrix.
+  Perhaps these are the wrong defaults, but need some data to show that.
+*/
 
 
 MATH_MAT3_INLINE mat3          mat3_init(); // will return an id array
@@ -40,18 +43,14 @@ MATH_MAT3_INLINE mat3          mat3_init(const float x);
 MATH_MAT3_INLINE mat3          mat3_init(const float arr[]);
 
 
-// ----------------------------------------------------------- [ Operations ] --
+// ----------------------------------------------- [ Special Init With Data ] --
+/*
+  These return some specific to 2D/3D rendering mats. Scale Rotate and Translate.
+*/
 
 
-MATH_MAT3_INLINE mat3          mat3_add(const mat3 &lhs, const mat3 &rhs);
-MATH_MAT3_INLINE mat3          mat3_subtract(const mat3 &lhs, const mat3 &rhs);
 MATH_MAT3_INLINE mat3          mat3_scale(const float x, const float y);
 MATH_MAT3_INLINE mat3          mat3_scale(const vec2 scale);
-
-MATH_MAT3_INLINE vec3          mat3_multiply(const vec3 vec, const mat3 &b);
-MATH_MAT3_INLINE mat3          mat3_multiply(const mat3 &lhs, const mat3 &rhs);
-MATH_MAT3_INLINE mat3          mat3_multiply(const mat3 &a, const mat3 &b, const mat3 &c);
-
 MATH_MAT3_INLINE mat3          mat3_translate(const vec2 vec); // no imp
 MATH_MAT3_INLINE mat3          mat3_translate(const float x, const float y); // no imp
 
@@ -59,28 +58,49 @@ MATH_MAT3_INLINE mat3          mat3_rotation_pitch_from_euler(const float radian
 MATH_MAT3_INLINE mat3          mat3_rotation_yaw_from_euler(const float radians);
 MATH_MAT3_INLINE mat3          mat3_rotation_roll_from_euler(const float radians);
 
-MATH_MAT3_INLINE float         mat3_determinant(const mat3 &a);
+
+// ----------------------------------------------------------- [ Operations ] --
+
+
+MATH_MAT3_INLINE mat3          mat3_add(const mat3 &lhs, const mat3 &rhs);
+MATH_MAT3_INLINE mat3          mat3_subtract(const mat3 &lhs, const mat3 &rhs);
+
+MATH_MAT3_INLINE vec3          mat3_multiply(const vec3 vec, const mat3 &b);
+MATH_MAT3_INLINE mat3          mat3_multiply(const mat3 &lhs, const mat3 &rhs);
+MATH_MAT3_INLINE mat3          mat3_multiply(const mat3 &a, const mat3 &b, const mat3 &c);
+MATH_MAT3_INLINE mat3          mat3_scale(const mat3 &a, const vec3 scale); // ?? what does this do
 
 MATH_MAT3_INLINE mat3          mat3_transpose(const mat3 &a);
 MATH_MAT3_INLINE mat3          mat3_inverse(const mat3 &a);
-MATH_MAT3_INLINE mat3          mat3_scale(const mat3 &a, const vec3 scale);
+MATH_MAT3_INLINE float         mat3_determinant(const mat3 &a);
+
+
+// ----------------------------------------------------------------- [ Data ] --
+/*
+  Utility methods, for getting and setting data.
+*/
+
 
 MATH_MAT3_INLINE void          mat3_to_array(const mat3 &m, float *array);
+MATH_MAT3_INLINE float         mat3_get(const mat3 &mat, const uint32_t row, const uint32_t col);
+MATH_MAT3_INLINE float         mat3_get(const mat3 &mat, const uint32_t i);
+MATH_MAT3_INLINE void          mat3_set(mat3 &mat, const uint32_t row, const uint32_t col, const float set);
+MATH_MAT3_INLINE vec3          mat3_get_scale(const mat3 &a); // ??
 
 
 // ------------------------------------------------------------- [ Equality ] --
+/*
+  Mat operators.
+*/
 
 
 MATH_MAT3_INLINE bool          mat3_equal(const mat3 &left, const mat3 &right, const float error = MATH_NS_NAME::epsilon());
 
 
-// ------------------------------------------------------------ [ Get / Set ] --
+// --------------------------------------------------------------- [ Config ] --
 
 
-MATH_MAT3_INLINE float         mat3_get(const mat3 &mat, const uint32_t row, const uint32_t col);
-MATH_MAT3_INLINE float         mat3_get(const mat3 &mat, const uint32_t i);
-MATH_MAT3_INLINE void          mat3_set(mat3 &mat, const uint32_t row, const uint32_t col, const float set);
-MATH_MAT3_INLINE vec3          mat3_get_scale(const mat3 &a);
+#undef MATH_MAT3_INLINE
 
 
 // ------------------------------------------------------- [ Constants Impl ] --
