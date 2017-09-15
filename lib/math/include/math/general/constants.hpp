@@ -8,9 +8,7 @@
 // --------------------------------------------------------------- [ Config ] --
 
 
-#ifndef MATH_CONST_CONSTEXPR
 #define MATH_CONST_CONSTEXPR constexpr
-#endif
 
 
 _MATH_NS_OPEN

@@ -20,7 +20,6 @@
 // --------------------------------------------------------------- [ Config ] --
 
 
-#define MATH_GENR_CONSTEXPR constexpr
 #define MATH_GENR_INLINE MATH_INLINE
 
 
@@ -108,7 +107,7 @@ MATH_GENR_INLINE int32_t            abs(const int32_t x);
 
 MATH_GENR_INLINE float              sqrt(const float x);
 
-MATH_GENR_INLINE float              sign(const float x); // Returns 1 or -1
+MATH_GENR_INLINE float              sign(const float x);
 MATH_GENR_INLINE float              mod(const float x, const float divisor);
 
 

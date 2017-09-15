@@ -19,16 +19,28 @@
 _MATH_NS_OPEN
 
 
-// ------------------------------------------------------------ [ Interface ] --
+// ----------------------------------------------------------------- [ Init ] --
 
 
 inline transform    transform_init();
 inline transform    transform_init(const vec3 position, const vec3 scale, const quat &rotation);
 inline transform    transform_init_from_world_matrix(const mat4 &matrix);
+
+
+// ----------------------------------------------------------- [ Operations ] --
+
+
 inline mat4         transform_get_world_matrix(const transform &transform);
 inline mat4         transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up);
-inline void         transform_set_with_world_matrix(transform &transform, const mat4 &matrix);
 inline transform    transform_inherited(const transform &parent, const transform &child);
+
+
+// ---------------------------------------------------- [ Direction Vectors ] --
+
+
+inline vec3         transform_world_fwd();
+inline vec3         transform_world_up();
+inline vec3         transform_world_left();
 
 inline vec3         transform_fwd(const transform &trans);
 inline vec3         transform_up(const transform &trans);
