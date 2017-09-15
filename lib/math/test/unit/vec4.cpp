@@ -18,7 +18,7 @@ TEST_CASE("Vector 4")
   REQUIRE(math::vec4_get_z(four) == 4.f);
   REQUIRE(math::vec4_get_w(four) == 4.f);
 
-  const std::array<float, 4> arr_data = {5.f, 6.f, 7.f, 8.f};
+  const float arr_data[] {5.f, 6.f, 7.f, 8.f};
   const math::vec4 five_six_seven_eight = math::vec4_init_with_array(&arr_data[0]);
   REQUIRE(math::vec4_get_x(five_six_seven_eight) == 5.f);
   REQUIRE(math::vec4_get_y(five_six_seven_eight) == 6.f);
@@ -30,14 +30,14 @@ TEST_CASE("Vector 4")
 
   SECTION("Export Data")
   {
-    std::array<float, 4> arr_export = {0.f, 0.f, 0.f, 0.f};
+    float arr_export[]{};
     const math::vec4 to_export = math::vec4_one();
-    math::vec4_to_array(to_export, arr_export.data());
+    math::vec4_to_array(to_export, arr_export);
     
-    REQUIRE(arr_export.at(0) == 1.f);
-    REQUIRE(arr_export.at(1) == 1.f);
-    REQUIRE(arr_export.at(2) == 1.f);
-    REQUIRE(arr_export.at(3) == 1.f);
+    REQUIRE(arr_export[0] == 1.f);
+    REQUIRE(arr_export[1] == 1.f);
+    REQUIRE(arr_export[2] == 1.f);
+    REQUIRE(arr_export[3] == 1.f);
   }
   
 
