@@ -128,7 +128,7 @@ transform_get_world_matrix(const transform &to_world)
 
   // Get rotation
   mat4 rotation = mat4_init(quat_get_rotation_matrix(to_world.rotation));
-  mat4_set(rotation, 3, 3, 1.f);
+  rotation.data[15] = 1.f;
 
   // Get translation
   const mat4 translation = mat4_translate(to_world.position);

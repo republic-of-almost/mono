@@ -95,9 +95,10 @@ MATH_MAT4_INLINE float        mat4_get_determinant(const mat4 &a);
 */
 
 
-MATH_MAT4_INLINE mat3         mat4_get_sub_mat3(const mat4 &a);
+MATH_MAT4_INLINE mat3         mat4_get_sub_mat3(const mat4 &mat);
+MATH_MAT4_INLINE float        mat4_get(const mat4 &mat, const uint32_t row, const uint32_t col);
 MATH_MAT4_INLINE const float* mat4_data(const mat4 &mat);
-MATH_MAT4_INLINE void         mat4_to_array(const mat4 &m, float *array);
+MATH_MAT4_INLINE void         mat4_to_array(const mat4 &mat, float *array);
 
 
 // ------------------------------------------------------------- [ Equality ] --
@@ -817,6 +818,16 @@ mat4_get_sub_mat3(const mat4 &mat)
   };
 
   return mat3_init(mat_data);
+}
+
+
+float
+mat4_get(const mat4 &mat, const uint32_t row, const uint32_t col)
+{
+  MATH_ASSERT(row < 4);
+  MATH_ASSERT(col < 4);
+  
+  return mat.data[row * 4 + col];
 }
 
 

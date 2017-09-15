@@ -434,6 +434,22 @@ TEST_CASE("Matrix 4x4")
     }
   }
   
+  SECTION("Get")
+  {
+    const float expected_mat_data[] {
+      0.f, 1.f, 2.f, 3.f,
+      4.f, 5.f, 6.f, 7.f,
+      8.f, 9.f, 10.f, 11.f,
+      12.f, 13.f, 14.f, 15.f,
+    };
+    
+    const math::mat4 mat_a = math::mat4_init(expected_mat_data);
+    
+    REQUIRE(math::mat4_get(mat_a, 0, 0) == 0.f);
+    REQUIRE(math::mat4_get(mat_a, 1, 0) == 4.f);
+    REQUIRE(math::mat4_get(mat_a, 3, 3) == 15.f);
+  }
+  
   SECTION("Data")
   {
     const float expected_mat_data[] {

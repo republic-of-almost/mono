@@ -162,44 +162,127 @@ TEST_CASE("General")
   
   SECTION("Min/Max int")
   {
+    const int32_t a = -32;
+    const int32_t b = 55;
+    
+    REQUIRE(math::min(a, b) < b);
+    REQUIRE(math::max(a, b) > a);
   }
   
   SECTION("Min/Max uint")
   {
+    const uint32_t a = 32;
+    const uint32_t b = 55;
+    
+    REQUIRE(math::min(a, b) < b);
+    REQUIRE(math::max(a, b) > a);
+
   }
   
   SECTION("Min/Max uint64")
   {
-  }
-  
-  SECTION("Min/Max Length")
-  {
+    const uint64_t a = 32;
+    const uint64_t b = 55;
+    
+    REQUIRE(math::min(a, b) < b);
   }
   
   SECTION("Min/Max In Array")
   {
+    constexpr size_t count = 4;
+  
+    const float a[count] {1.f, 1.f, 1.f, 1.f};
+    const float b[count] {2.f, 2.f, 2.f, 2.f};
+    
+    float out[count]{};
+    
+    math::max(out, a, b, count);
+    
+    for(uint32_t i = 0; i < count; ++i)
+    {
+      REQUIRE(out[i] == b[i]);
+    }
+    
+    math::min(out, a, b, count);
+    
+    for(uint32_t i = 0; i < count; ++i)
+    {
+      REQUIRE(out[i] == a[i]);
+    }
   }
 
   // ----------------------------------------------------------- [ Rounding ] --
   
-  SECTION("Min/Max Length")
+  SECTION("Ceil")
   {
+    const float a = 123.3;
+    const float ceil_a = math::ceil(a);
+    
+    REQUIRE(ceil_a == 124.f);
+    
+    const float b = 123.7;
+    const float ceil_b = math::ceil(b);
+    
+    REQUIRE(ceil_b == 124.f);
   }
-  
-  SECTION("Min/Max Length")
+
+  SECTION("Floor")
   {
+    const float a = 123.3;
+    const float floor_a = math::floor(a);
+    
+    REQUIRE(floor_a == 123.f);
+    
+    const float b = 123.7;
+    const float floor_b = math::floor(b);
+    
+    REQUIRE(floor_b == 123.f);
+  }
+
+  
+  SECTION("Floor nearest")
+  {
+    const float a = 123.5f;
+    const float floor = math::nearest_floor(a, 0.2f);
+    
+    REQUIRE(floor == 123.4f);
   }
   
   // --------------------------------------------------------- [ Arithmetic ] --
   
   SECTION("Sum")
   {
+    constexpr size_t count = 4;
+  
+    const float a[count] {1.f, 1.f, 1.f, 1.f};
+    const float b[count] {1.f, 1.f, 1.f, 1.f};
+    const float expected[count] {2.f, 2.f, 2.f, 2.f};
+    
+    float out[count]{};
+    
+    math::add(out, a, b, count);
+    
+    for(uint32_t i = 0; i < count; ++i)
+    {
+      REQUIRE(out[i] == expected[i]);
+    }
   }
   
   // --------------------------------------------------------------- [ Misc ] --
+  
+  SECTION("Min/Max Length")
+  {
+    const float a = -100;
+    const float b = 10;
+    
+    REQUIRE(math::max_length(a, b) == a);
+    REQUIRE(math::min_length(a, b) == b);
+  }
 
   SECTION("Abs")
   {
+    REQUIRE(math::abs(-123.f) == 123.f);
+    REQUIRE(math::abs(123.f) == 123.f);
   }
   
   SECTION("Sqrt")
@@ -208,28 +291,49 @@ TEST_CASE("General")
   
   SECTION("Clamp")
   {
+    REQUIRE(math::clamp(567.5f, 123.f, 345.f) == 345.f);
+    REQUIRE(math::clamp(1.f, 123.f, 345.f) == 123.f);
   }
   
   SECTION("Sign")
   {
+    const float a = -1234.f;
+    const float b = 1235.f;
+    
+    REQUIRE(math::sign(a) == -1.f);
+    REQUIRE(math::sign(b) == +1.f);
   }
   
   SECTION("Mod")
   {
+    const float a = 123.f;
+    const float mod = math::mod(a, 100.f);
+    
+    REQUIRE(mod == 23.f);
   }
   
   // ----------------------------------------------------------- [ Equality ] --
   
   SECTION("Is between")
   {
+    REQUIRE(math::is_between(0, -1.f, 1.f) == true);
+    REQUIRE(math::is_between(3, -1.f, 5.f) == true);
+    REQUIRE(math::is_between(3.f, -1.f, 1.f) == false);
+    REQUIRE(math::is_between(-8.f, -5.f, 1.f) == false);
   }
   
   SECTION("Is Near")
   {
+    REQUIRE(math::is_near(1.123f, 1.123f) == true);
+    REQUIRE(math::is_near(23.34f, 1.123f) == false);
   }
   
   SECTION("Is POW 2")
   {
+    REQUIRE(math::is_pow_two(256) == true);
+    REQUIRE(math::is_pow_two(512) == true);
+    REQUIRE(math::is_pow_two(123) == false);
+    REQUIRE(math::is_pow_two(456) == false);
   }
   
 }

@@ -76,9 +76,6 @@ MATH_GENR_INLINE uint32_t           min(const uint32_t a, const uint32_t b);
 
 MATH_GENR_INLINE uint64_t           min(const uint64_t a, const uint64_t b);
 
-MATH_GENR_INLINE float              max_length(const float a, const float b);
-MATH_GENR_INLINE float              min_length(const float a, const float b);
-
 MATH_GENR_INLINE void               max(float *out, const float *a, const float *b, const size_t count);
 MATH_GENR_INLINE void               min(float *out, const float *a, const float *b, const size_t count);
 
@@ -99,6 +96,10 @@ MATH_GENR_INLINE void               add(float *out, const float *a, const float 
 
 
 // ----------------------------------------------------------------- [ Misc ] --
+
+
+MATH_GENR_INLINE float              max_length(const float a, const float b);
+MATH_GENR_INLINE float              min_length(const float a, const float b);
 
 
 MATH_GENR_INLINE float              abs(const float x);
@@ -394,7 +395,7 @@ abs(const int32_t x)
 float
 sign(const float x)
 {
-  return x >= 0.f ? 1.f : -1.f;
+  return x >= 0.f ? +1.f : -1.f;
 }
 
 
