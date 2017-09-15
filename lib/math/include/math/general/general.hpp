@@ -62,27 +62,27 @@ MATH_GENR_INLINE uint32_t           rand_range(const uint32_t start, const uint3
 MATH_GENR_INLINE int32_t            rand_range(const int32_t start, const int32_t end);
 
 
-// -------------------------------------------------------------- [ General ] --
+// ------------------------------------------------------------ [ Min / Max ] --
 
 
-MATH_GENR_INLINE float              sqrt(const float x);
-MATH_GENR_INLINE float              abs(const float x);
-MATH_GENR_INLINE int32_t            abs(const int32_t x);
 MATH_GENR_INLINE float              max(const float a, const float b);
-MATH_GENR_INLINE int32_t            max(const int32_t a, const int32_t b);
-MATH_GENR_INLINE uint32_t           max(const uint32_t a, const uint32_t b);
 MATH_GENR_INLINE float              min(const float a, const float b);
+
+MATH_GENR_INLINE int32_t            max(const int32_t a, const int32_t b);
 MATH_GENR_INLINE int32_t            min(const int32_t a, const int32_t b);
+
+MATH_GENR_INLINE uint32_t           max(const uint32_t a, const uint32_t b);
 MATH_GENR_INLINE uint32_t           min(const uint32_t a, const uint32_t b);
+
 MATH_GENR_INLINE uint64_t           min(const uint64_t a, const uint64_t b);
+
 MATH_GENR_INLINE float              max_length(const float a, const float b);
 MATH_GENR_INLINE float              min_length(const float a, const float b);
-MATH_GENR_INLINE float              clamp(const float x, const float between_a, const float between_b);
-MATH_GENR_INLINE bool               is_between(const float to_check, const float a, const float b);
-MATH_GENR_INLINE bool               is_near(const float a, const float b, const float error_margin = math::epsilon());
-MATH_GENR_INLINE bool               is_pow_two(const uint32_t i);
-MATH_GENR_INLINE float              sign(const float x); // Returns 1 or -1
-MATH_GENR_INLINE float              mod(const float x, const float divisor);
+
+
+// ------------------------------------------------------------- [ Rounding ] --
+
+
 MATH_GENR_INLINE float              ceil(const float x);
 MATH_GENR_INLINE float              floor(const float x);
 MATH_GENR_INLINE float              nearest_floor(const float x, const float increments);
@@ -94,6 +94,27 @@ MATH_GENR_INLINE float              nearest_floor(const float x, const float inc
 MATH_GENR_INLINE void               add(float *out, const float *a, const float *b, const size_t count);
 MATH_GENR_INLINE void               max(float *out, const float *a, const float *b, const size_t count);
 MATH_GENR_INLINE void               min(float *out, const float *a, const float *b, const size_t count);
+
+
+// ----------------------------------------------------------------- [ Misc ] --
+
+
+MATH_GENR_INLINE float              abs(const float x);
+MATH_GENR_INLINE int32_t            abs(const int32_t x);
+
+MATH_GENR_INLINE float              sqrt(const float x);
+
+MATH_GENR_INLINE float              clamp(const float x, const float between_a, const float between_b);
+MATH_GENR_INLINE float              sign(const float x); // Returns 1 or -1
+MATH_GENR_INLINE float              mod(const float x, const float divisor);
+
+
+// ------------------------------------------------------------- [ Equality ] --
+
+
+MATH_GENR_INLINE bool               is_between(const float to_check, const float a, const float b);
+MATH_GENR_INLINE bool               is_near(const float a, const float b, const float error_margin = math::epsilon());
+MATH_GENR_INLINE bool               is_pow_two(const uint32_t i);
 
 
 // ------------------------------------------------------------ [ Trig Impl ] --
