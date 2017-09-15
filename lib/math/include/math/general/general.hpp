@@ -87,6 +87,7 @@ MATH_GENR_INLINE void               min(float *out, const float *a, const float 
 MATH_GENR_INLINE float              ceil(const float x);
 MATH_GENR_INLINE float              floor(const float x);
 MATH_GENR_INLINE float              nearest_floor(const float x, const float increments);
+MATH_GENR_INLINE float              clamp(const float x, const float between_a, const float between_b);
 
 
 // ----------------------------------------------------------- [ Arithmetic ] --
@@ -107,7 +108,6 @@ MATH_GENR_INLINE int32_t            abs(const int32_t x);
 
 MATH_GENR_INLINE float              sqrt(const float x);
 
-MATH_GENR_INLINE float              clamp(const float x, const float between_a, const float between_b);
 MATH_GENR_INLINE float              sign(const float x); // Returns 1 or -1
 MATH_GENR_INLINE float              mod(const float x, const float divisor);
 
@@ -120,7 +120,7 @@ MATH_GENR_INLINE bool               is_near(const float a, const float b, const 
 MATH_GENR_INLINE bool               is_pow_two(const uint32_t i);
 
 
-// ------------------------------------------------------------ [ Trig Impl ] --
+// ----------------------------------------------------------------- [ Trig ] --
 
 
 float
@@ -165,31 +165,26 @@ a_sin(const float radians)
 }
 
 
-// ----------------------------------------------- [ Degrees / Radians Impl ] --
-
-
-namespace detail
-{
-  MATH_GENR_CONSTEXPR float over_pi()  { return 180.f / pi(); }
-  MATH_GENR_CONSTEXPR float over_180() { return pi() / 180.f; }
-}
+// ---------------------------------------------------- [ Degrees / Radians ] --
 
 
 float
 to_degrees(const float radians)
 {
-  return radians * detail::over_pi();
+  constexpr float over_pi = 180.f / pi();
+  return radians * over_pi;
 }
 
 
 float
 to_radians(const float degrees)
 {
-  return degrees * detail::over_180();
+  constexpr float over_180 = pi() / 180.f;
+  return degrees * over_180;
 }
 
 
-// --------------------------------------------------------- [ Casting Impl ] --
+// -------------------------------------------------------------- [ Casting ] --
 
 
 float
@@ -220,7 +215,7 @@ to_uint(const float x)
 }
 
 
-// ---------------------------------------------------------- [ Random Impl ] --
+// --------------------------------------------------------------- [ Random ] --
 
 
 float
@@ -263,39 +258,7 @@ rand_range(const int32_t start, const int32_t end)
   return dist(re);
 }
 
-
-// --------------------------------------------------------- [ General Impl ] --
-
-
-float
-max_length(const float a, const float b)
-{
-  if(MATH_NS_NAME::abs(a) >= MATH_NS_NAME::abs(b))
-  {
-    return a;
-  }
-
-  return b;
-}
-
-
-float
-min_length(const float a, const float b)
-{
-  if(MATH_NS_NAME::abs(a) <= MATH_NS_NAME::abs(b))
-  {
-    return a;
-  }
-
-  return b;
-}
-
-
-float
-sqrt(const float x)
-{
-  return sqrtf(x);
-}
+// ------------------------------------------------------------ [ Min / Max ] --
 
 
 float
@@ -333,7 +296,6 @@ min(const int32_t x, const int32_t y)
 }
 
 
-
 uint32_t
 min(const uint32_t x, const uint32_t y)
 {
@@ -345,121 +307,6 @@ uint64_t
 min(const uint64_t x, const uint64_t y)
 {
   return std::min(x, y);
-}
-
-
-float
-clamp(const float x, const float between_a, const float between_b)
-{
-  const float highest = between_a >= between_b ? between_a : between_b;
-  const float lowest  = between_a != highest ? between_a : between_b;
-
-  if(x >= highest)
-  {
-    return highest;
-  }
-  else if(x <= lowest)
-  {
-    return lowest;
-  }
-
-  return x;
-}
-
-
-bool
-is_between(const float value, const float limit_a, const float limit_b)
-{
-  const float min = MATH_NS_NAME::min(limit_a, limit_b);
-  const float max = MATH_NS_NAME::max(limit_a, limit_b);
-
-  return value > min && value < max;
-}
-
-
-float
-abs(const float x)
-{
-  return fabsf(x);
-}
-
-
-int32_t
-abs(const int32_t x)
-{
-  return std::abs(x);
-}
-
-
-
-float
-sign(const float x)
-{
-  return x >= 0.f ? +1.f : -1.f;
-}
-
-
-bool
-is_pow_two(const uint32_t i)
-{
-  return (i & (i - 1)) == 0;
-}
-
-
-float
-ceil(const float x)
-{
-  return ((float)(long)((x)+1));
-}
-
-
-float
-floor(const float x)
-{
-  return ((float)(long)x);
-}
-
-
-bool
-is_near(const float a, const float b, const float error_margin)
-{
-  const float abs_error = abs(error_margin);
-
-  return abs(b - a) <= abs_error;
-}
-
-
-float
-mod(const float x, const float divisor)
-{
-  return fmodf(x, divisor);
-}
-
-
-float
-nearest_floor(const float x, const float increments)
-{
-  const float remainder = mod(x, increments);
-  return x - remainder;
-}
-
-
-// ----------------------------------------------------------- [ Arithmetic ] --
-
-
-void
-add(float *out, const float *a, const float *b, const size_t count)
-{
-  // -- Param Check -- //
-  MATH_ASSERT(out);
-  MATH_ASSERT(a);
-  MATH_ASSERT(b);
-
-  // -- Add Array together -- //
-  for(size_t i = 0; i < count; ++i)
-  {
-    out[i] = a[i] + b[i];
-  }
 }
 
 
@@ -492,6 +339,160 @@ min(float *out, const float *a, const float *b, const size_t count)
   {
     out[i] = min(a[i], b[i]);
   }
+}
+
+
+// ------------------------------------------------------------- [ Rounding ] --
+
+
+float
+clamp(const float x, const float between_a, const float between_b)
+{
+  const float highest = between_a >= between_b ? between_a : between_b;
+  const float lowest  = between_a != highest ? between_a : between_b;
+
+  if(x >= highest)
+  {
+    return highest;
+  }
+  else if(x <= lowest)
+  {
+    return lowest;
+  }
+
+  return x;
+}
+
+
+float
+ceil(const float x)
+{
+  return ((float)(long)((x)+1));
+}
+
+
+float
+floor(const float x)
+{
+  return ((float)(long)x);
+}
+
+
+float
+nearest_floor(const float x, const float increments)
+{
+  const float remainder = mod(x, increments);
+  return x - remainder;
+}
+
+
+// ----------------------------------------------------------- [ Arithmetic ] --
+
+
+void
+add(float *out, const float *a, const float *b, const size_t count)
+{
+  // -- Param Check -- //
+  MATH_ASSERT(out);
+  MATH_ASSERT(a);
+  MATH_ASSERT(b);
+
+  // -- Add Array together -- //
+  for(size_t i = 0; i < count; ++i)
+  {
+    out[i] = a[i] + b[i];
+  }
+}
+
+
+// ----------------------------------------------------------------- [ Misc ] --
+
+
+float
+max_length(const float a, const float b)
+{
+  if(MATH_NS_NAME::abs(a) >= MATH_NS_NAME::abs(b))
+  {
+    return a;
+  }
+
+  return b;
+}
+
+
+float
+min_length(const float a, const float b)
+{
+  if(MATH_NS_NAME::abs(a) <= MATH_NS_NAME::abs(b))
+  {
+    return a;
+  }
+
+  return b;
+}
+
+
+float
+sqrt(const float x)
+{
+  return sqrtf(x);
+}
+
+
+float
+abs(const float x)
+{
+  return fabsf(x);
+}
+
+
+int32_t
+abs(const int32_t x)
+{
+  return std::abs(x);
+}
+
+
+float
+sign(const float x)
+{
+  return x >= 0.f ? +1.f : -1.f;
+}
+
+
+float
+mod(const float x, const float divisor)
+{
+  return fmodf(x, divisor);
+}
+
+
+// ------------------------------------------------------------- [ Equality ] --
+
+
+bool
+is_between(const float value, const float limit_a, const float limit_b)
+{
+  const float min = MATH_NS_NAME::min(limit_a, limit_b);
+  const float max = MATH_NS_NAME::max(limit_a, limit_b);
+
+  return value > min && value < max;
+}
+
+
+bool
+is_pow_two(const uint32_t i)
+{
+  return (i & (i - 1)) == 0;
+}
+
+
+bool
+is_near(const float a, const float b, const float error_margin)
+{
+  const float abs_error = abs(error_margin);
+
+  return abs(b - a) <= abs_error;
 }
 
 
