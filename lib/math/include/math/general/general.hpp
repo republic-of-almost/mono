@@ -79,6 +79,10 @@ MATH_GENR_INLINE uint64_t           min(const uint64_t a, const uint64_t b);
 MATH_GENR_INLINE float              max_length(const float a, const float b);
 MATH_GENR_INLINE float              min_length(const float a, const float b);
 
+MATH_GENR_INLINE void               max(float *out, const float *a, const float *b, const size_t count);
+MATH_GENR_INLINE void               min(float *out, const float *a, const float *b, const size_t count);
+
+
 
 // ------------------------------------------------------------- [ Rounding ] --
 
@@ -92,8 +96,6 @@ MATH_GENR_INLINE float              nearest_floor(const float x, const float inc
 
 
 MATH_GENR_INLINE void               add(float *out, const float *a, const float *b, const size_t count);
-MATH_GENR_INLINE void               max(float *out, const float *a, const float *b, const size_t count);
-MATH_GENR_INLINE void               min(float *out, const float *a, const float *b, const size_t count);
 
 
 // ----------------------------------------------------------------- [ Misc ] --
