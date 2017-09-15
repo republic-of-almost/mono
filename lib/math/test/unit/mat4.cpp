@@ -43,8 +43,9 @@ TEST_CASE("Matrix 4x4")
   SECTION("Init With Nothing")
   {
     const math::mat4 mat_default_init = math::mat4_init();
+    const math::mat4 id = math::mat4_id();
     
-    REQUIRE(math::mat4_is_near(mat_default_init, math::mat4_id()));
+    REQUIRE(math::mat4_is_near(mat_default_init, id));
   }
   
   SECTION("Init with value")
@@ -105,7 +106,7 @@ TEST_CASE("Matrix 4x4")
     
     const math::mat4 mat_b = math::mat4_init(mat_data_2);
     
-    REQUIRE(math::mat4_is_near(mat_a, mat_b) != true);
+    REQUIRE(math::mat4_is_not_near(mat_a, mat_b));
   }
   
   

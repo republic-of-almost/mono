@@ -51,8 +51,6 @@ MATH_MAT3_INLINE mat3          mat3_init(const float arr[]);
 
 MATH_MAT3_INLINE mat3          mat3_scale(const float x, const float y);
 MATH_MAT3_INLINE mat3          mat3_scale(const vec2 scale);
-MATH_MAT3_INLINE mat3          mat3_translate(const vec2 vec); // no imp
-MATH_MAT3_INLINE mat3          mat3_translate(const float x, const float y); // no imp
 
 MATH_MAT3_INLINE mat3          mat3_rotation_pitch_from_euler(const float radians);
 MATH_MAT3_INLINE mat3          mat3_rotation_yaw_from_euler(const float radians);
@@ -60,6 +58,9 @@ MATH_MAT3_INLINE mat3          mat3_rotation_roll_from_euler(const float radians
 
 
 // ----------------------------------------------------------- [ Operations ] --
+/*
+  General mat math.
+*/
 
 
 MATH_MAT3_INLINE mat3          mat3_add(const mat3 &lhs, const mat3 &rhs);
@@ -68,10 +69,8 @@ MATH_MAT3_INLINE mat3          mat3_subtract(const mat3 &lhs, const mat3 &rhs);
 MATH_MAT3_INLINE vec3          mat3_multiply(const vec3 vec, const mat3 &b);
 MATH_MAT3_INLINE mat3          mat3_multiply(const mat3 &lhs, const mat3 &rhs);
 MATH_MAT3_INLINE mat3          mat3_multiply(const mat3 &a, const mat3 &b, const mat3 &c);
-MATH_MAT3_INLINE mat3          mat3_scale(const mat3 &a, const vec3 scale); // ?? what does this do
 
 MATH_MAT3_INLINE mat3          mat3_transpose(const mat3 &a);
-MATH_MAT3_INLINE mat3          mat3_inverse(const mat3 &a);
 MATH_MAT3_INLINE float         mat3_determinant(const mat3 &a);
 
 
@@ -85,7 +84,7 @@ MATH_MAT3_INLINE void          mat3_to_array(const mat3 &m, float *array);
 MATH_MAT3_INLINE float         mat3_get(const mat3 &mat, const uint32_t row, const uint32_t col);
 MATH_MAT3_INLINE float         mat3_get(const mat3 &mat, const uint32_t i);
 MATH_MAT3_INLINE void          mat3_set(mat3 &mat, const uint32_t row, const uint32_t col, const float set);
-MATH_MAT3_INLINE vec3          mat3_get_scale(const mat3 &a); // ??
+MATH_MAT3_INLINE const float*  mat3_data(const mat3 &mat);
 
 
 // ------------------------------------------------------------- [ Equality ] --
@@ -94,7 +93,8 @@ MATH_MAT3_INLINE vec3          mat3_get_scale(const mat3 &a); // ??
 */
 
 
-MATH_MAT3_INLINE bool          mat3_equal(const mat3 &left, const mat3 &right, const float error = MATH_NS_NAME::epsilon());
+MATH_MAT3_INLINE bool          mat3_is_near(const mat3 &left, const mat3 &right, const float error = MATH_NS_NAME::epsilon());
+MATH_MAT3_INLINE bool          mat3_is_not_near(const mat3 &left, const mat3 &right, const float error = MATH_NS_NAME::epsilon());
 
 
 // --------------------------------------------------------------- [ Config ] --
@@ -162,6 +162,70 @@ mat3_init(const float array[])
 }
 
 
+// ----------------------------------------------- [ Special Init With Data ] --
+
+
+mat3
+mat3_scale(const vec2 scale)
+{
+  return mat3_scale(vec2_get_x(scale), vec2_get_y(scale));
+}
+
+
+mat3
+mat3_scale(const float x, const float y)
+{
+  mat3 return_mat = mat3_id();
+
+  return_mat.data[0] = x;
+  return_mat.data[4] = y;
+
+  return return_mat;
+}
+
+
+mat3
+mat3_rotation_pitch_from_euler(const float rad)
+{
+  const float array[9]
+  {
+    1.f, 0.f, 0.f,
+    0.f, MATH_NS_NAME::cos(rad), MATH_NS_NAME::sin(rad),
+    0.f, -MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad),
+  };
+
+  return mat3_init(array);
+}
+
+
+mat3
+mat3_rotation_yaw_from_euler(const float rad)
+{
+  const float array[9]
+  {
+    MATH_NS_NAME::cos(rad), 0.f, -MATH_NS_NAME::sin(rad),
+    0.f, 1.f, 0.f,
+    MATH_NS_NAME::sin(rad), 0.f, MATH_NS_NAME::cos(rad),
+  };
+
+  return mat3_init(array);
+}
+
+
+mat3
+mat3_rotation_roll_from_euler(const float rad)
+{
+  const float array[9]
+  {
+    MATH_NS_NAME::cos(rad), MATH_NS_NAME::sin(rad), 0.f,
+    -MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad), 0.f,
+    0.f, 0.f, 1.f,
+  };
+
+  return mat3_init(array);
+}
+
+
 // ------------------------------------------------------ [ Operations Impl ] --
 
 
@@ -188,25 +252,6 @@ mat3_subtract(const mat3 &lhs, const mat3 &rhs)
   {
     return_mat.data[i] = lhs.data[0] - rhs.data[0];
   }
-
-  return return_mat;
-}
-
-
-mat3
-mat3_scale(const vec2 scale)
-{
-  return mat3_scale(vec2_get_x(scale), vec2_get_y(scale));
-}
-
-
-mat3
-mat3_scale(const float x, const float y)
-{
-  mat3 return_mat = mat3_id();
-
-  return_mat.data[0] = x;
-  return_mat.data[4] = y;
 
   return return_mat;
 }
@@ -270,48 +315,6 @@ mat3_multiply(const mat3 &a, const mat3 &b, const mat3 &c)
 }
 
 
-mat3
-mat3_rotation_pitch_from_euler(const float rad)
-{
-  const float array[9]
-  {
-    1.f, 0.f, 0.f,
-    0.f, MATH_NS_NAME::cos(rad), MATH_NS_NAME::sin(rad),
-    0.f, -MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad),
-  };
-
-  return mat3_init(array);
-}
-
-
-mat3
-mat3_rotation_yaw_from_euler(const float rad)
-{
-  const float array[9]
-  {
-    MATH_NS_NAME::cos(rad), 0.f, -MATH_NS_NAME::sin(rad),
-    0.f, 1.f, 0.f,
-    MATH_NS_NAME::sin(rad), 0.f, MATH_NS_NAME::cos(rad),
-  };
-
-  return mat3_init(array);
-}
-
-
-mat3
-mat3_rotation_roll_from_euler(const float rad)
-{
-  const float array[9]
-  {
-    MATH_NS_NAME::cos(rad), MATH_NS_NAME::sin(rad), 0.f,
-    -MATH_NS_NAME::sin(rad), MATH_NS_NAME::cos(rad), 0.f,
-    0.f, 0.f, 1.f,
-  };
-
-  return mat3_init(array);
-}
-
-
 float
 mat3_determinant(const mat3 &det)
 {
@@ -352,40 +355,14 @@ mat3_transpose(const mat3 &m)
 }
 
 
+// ----------------------------------------------------------------- [ Data ] --
+
+
 void
 mat3_to_array(const mat3 &m, float out_data[9])
 {
   memcpy(out_data, m.data, sizeof(float) * 9);
 }
-
-
-// -------------------------------------------------------- [ Equality Impl ] --
-
-
-bool
-mat3_equal(const mat3 &left,
-           const mat3 &right,
-           const float error)
-{
-  float a[9];
-  mat3_to_array(left, a);
-
-  float b[9];
-  mat3_to_array(right, b);
-
-  for(uint32_t i = 0; i < 9; ++i)
-  {
-    if(!MATH_NS_NAME::is_near(a[i], b[i], error))
-    {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-
-// ------------------------------------------------------- [ Get / Set Impl ] --
 
 
 float
@@ -413,6 +390,48 @@ mat3_set(mat3 &mat, const uint32_t row, const uint32_t col, const float set)
   assert(row < 4 && col < 4);
 
   mat.data[(row * 4) + col] = set;
+}
+
+
+const float*
+mat3_data(const mat3 &mat)
+{
+  return mat.data;
+}
+
+
+// -------------------------------------------------------- [ Equality Impl ] --
+
+
+bool
+mat3_is_near(const mat3 &left,
+           const mat3 &right,
+           const float error)
+{
+  float a[9];
+  mat3_to_array(left, a);
+
+  float b[9];
+  mat3_to_array(right, b);
+
+  for(uint32_t i = 0; i < 9; ++i)
+  {
+    if(!MATH_NS_NAME::is_near(a[i], b[i], error))
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+bool
+mat3_is_not_near(const mat3 &left,
+           const mat3 &right,
+           const float error)
+{
+return !mat3_is_near(left, right, error);
 }
 
 

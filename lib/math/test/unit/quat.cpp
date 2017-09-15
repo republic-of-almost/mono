@@ -34,7 +34,7 @@ TEST_CASE("Quat rotations")
       const math::mat3 mat_from_quat = math::quat_get_rotation_matrix(pitch_rot);
       const math::mat3 mat_data = math::mat3_rotation_pitch_from_euler(math::tau());
     
-      REQUIRE(math::mat3_equal(mat_from_quat, mat_data));
+      REQUIRE(math::mat3_is_near(mat_from_quat, mat_data));
     }
     
     // Roll
@@ -44,7 +44,7 @@ TEST_CASE("Quat rotations")
       const math::mat3 mat_from_quat = math::quat_get_rotation_matrix(roll_rot);
       const math::mat3 mat_data = math::mat3_rotation_roll_from_euler(math::tau());
     
-      REQUIRE(math::mat3_equal(mat_from_quat, mat_data));
+      REQUIRE(math::mat3_is_near(mat_from_quat, mat_data));
     }
 
     // Yaw
@@ -54,7 +54,7 @@ TEST_CASE("Quat rotations")
       const math::mat3 mat_from_quat = math::quat_get_rotation_matrix(yaw_rot);
       const math::mat3 mat_data = math::mat3_rotation_yaw_from_euler(math::tau());
     
-      REQUIRE(math::mat3_equal(mat_from_quat, mat_data));
+      REQUIRE(math::mat3_is_near(mat_from_quat, mat_data));
     }
   }
   
