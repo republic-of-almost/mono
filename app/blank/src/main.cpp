@@ -74,8 +74,6 @@ main()
       ROA::Material mat("Basic Mat");
       mat.set_color(ROA::Color(0xFF00FFFF));
 
-      printf("DT %f\n", ROA::Time::get_delta_time());
-
       const float rot_angle = spin;
       const ROA::Quaternion rot(ROA::Vector3(1.f, 0.f, 0.f), rot_angle);
 

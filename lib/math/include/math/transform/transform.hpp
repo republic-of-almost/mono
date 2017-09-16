@@ -2,13 +2,6 @@
 #define TRANSFORM_INCLUDED_E79342EA_D69A_4FEB_BEAD_BA21D7B8B8E6
 
 
-/*
-  Transform
-  --
-  Transform is a position and rotation in 3D space.
-*/
-
-
 #include "../detail/detail.hpp"
 #include "../transform/transform_types.hpp"
 #include "../quat/quat.hpp"
@@ -16,38 +9,56 @@
 #include "../mat/mat4.hpp"
 
 
+// --------------------------------------------------------------- [ Config ] --
+
+
+#ifndef MATH_TRANS_INLINE
+#define MATH_TRANS_INLINE inline
+#endif
+
+
 _MATH_NS_OPEN
 
 
 // ----------------------------------------------------------------- [ Init ] --
+/*
+  Create a transform with some default data.
+*/
 
 
-inline transform    transform_init();
-inline transform    transform_init(const vec3 position, const vec3 scale, const quat &rotation);
-//inline transform    transform_init_from_world_matrix(const mat4 &matrix); // Rotation is borked.
+MATH_TRANS_INLINE transform    transform_init();
+MATH_TRANS_INLINE transform    transform_init(const vec3 position, const vec3 scale, const quat &rotation);
+//MATH_TRANS_INLINE transform    transform_init_from_world_matrix(const mat4 &matrix); // Rotation is borked.
 
 
 // ----------------------------------------------------------- [ Operations ] --
+/*
+  Convert a transform into other forms, or inherit it from another transform.
+*/
 
 
-inline mat4         transform_world_matrix(const transform &transform);
-inline mat4         transform_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up);
-inline transform    transform_inherited(const transform &parent, const transform &child);
+MATH_TRANS_INLINE mat4         transform_world_matrix(const transform &transform);
+MATH_TRANS_INLINE mat4         transform_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up);
+MATH_TRANS_INLINE transform    transform_inherited(const transform &parent, const transform &child);
 
 
 // ---------------------------------------------------- [ Direction Vectors ] --
+/*
+  Change the world directions to suit, and the local transforms will use that
+  to give you the relative direction.
+*/
 
 
-inline vec3         transform_world_fwd();
-inline vec3         transform_world_up();
-inline vec3         transform_world_left();
+MATH_TRANS_INLINE vec3         transform_world_fwd();
+MATH_TRANS_INLINE vec3         transform_world_up();
+MATH_TRANS_INLINE vec3         transform_world_left();
 
-inline vec3         transform_fwd(const transform &trans);
-inline vec3         transform_up(const transform &trans);
-inline vec3         transform_left(const transform &trans);
+MATH_TRANS_INLINE vec3         transform_fwd(const transform &trans);
+MATH_TRANS_INLINE vec3         transform_up(const transform &trans);
+MATH_TRANS_INLINE vec3         transform_left(const transform &trans);
 
 
-// ----------------------------------------------------------------- [ Init ] --
+// ------------------------------------------------------------ [ Init Impl ] --
 
 
 transform
@@ -109,7 +120,7 @@ transform_init(const vec3 position, const vec3 scale, const quat &rotation)
 //}
 
 
-// ----------------------------------------------------------- [ Operations ] --
+// ------------------------------------------------------ [ Operations Impl ] --
 
 
 transform
@@ -163,7 +174,7 @@ transform_lookat_matrix(const transform &to_view, const vec3 world_fwd, const ve
 }
 
 
-// ---------------------------------------------------- [ Direction Vectors ] --
+// ----------------------------------------------- [ Direction Vectors Impl ] --
 
 
 vec3
