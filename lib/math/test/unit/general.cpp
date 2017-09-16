@@ -118,8 +118,8 @@ TEST_CASE("General")
     const float to_degs = math::to_degrees(rads);
     const float to_rads = math::to_radians(degs);
     
-    REQUIRE(math::is_near(to_degs, 7.0473809f));
-    REQUIRE(math::is_near(to_rads, 2.14675497995f));
+    REQUIRE(math::is_near(to_degs, 7.0473809f, 0.00001f));
+    REQUIRE(math::is_near(to_rads, 2.14675497995f, 0.00001f));
   }
   
   // ------------------------------------------------------------ [ Casting ] --
