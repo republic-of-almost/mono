@@ -40,7 +40,7 @@ get_mat_data()
       math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
       );
 
-      math::mat4 mat = math::transform_get_world_matrix(internal_trans);
+      math::mat4 mat = math::transform_world_matrix(internal_trans);
 
       memcpy(
         data->data[index].world_mat,
@@ -92,7 +92,7 @@ set(Node &node, const Renderable &in)
   math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
   );
 
-  math::mat4 mat = math::transform_get_world_matrix(internal_trans);
+  math::mat4 mat = math::transform_world_matrix(internal_trans);
 
   memcpy(
     cpy.world_mat,

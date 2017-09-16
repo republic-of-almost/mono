@@ -34,7 +34,7 @@ get_camera_data()
       math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
       );
 
-      math::mat4 view = transform_get_lookat_matrix(internal_trans, math::vec3_init(0,0,1), math::vec3_init(0,1,0));
+      math::mat4 view = transform_lookat_matrix(internal_trans, math::vec3_init(0,0,1), math::vec3_init(0,1,0));
 
       memcpy(
         data->data[index].view_mat,
@@ -93,7 +93,7 @@ set(Node &node, const Camera &in)
   math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
   );
 
-  math::mat4 view = transform_get_lookat_matrix(internal_trans, math::vec3_init(1,0,0), math::vec3_init(0,1,0));
+  math::mat4 view = transform_lookat_matrix(internal_trans, math::vec3_init(1,0,0), math::vec3_init(0,1,0));
 
   memcpy(
     cpy.view_mat,

@@ -163,7 +163,7 @@ quat_init_with_mat3(const mat3 &mat)
   const float q_y = y * MATH_NS_NAME::sign(mat3_get(mat,0,2) - mat3_get(mat,2,0));
   const float q_z = z * MATH_NS_NAME::sign(mat3_get(mat,1,0) - mat3_get(mat,0,1));
   
-  return quat_init(q_x, q_y, q_z, w);
+  return quat_normalize(quat_init(q_x, q_y, q_z, w));
 }
 
 

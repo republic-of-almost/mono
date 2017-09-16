@@ -79,7 +79,6 @@ MATH_GENR_INLINE void               max(float *out, const float *a, const float 
 MATH_GENR_INLINE void               min(float *out, const float *a, const float *b, const size_t count);
 
 
-
 // ------------------------------------------------------------- [ Rounding ] --
 
 

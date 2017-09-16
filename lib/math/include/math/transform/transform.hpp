@@ -24,14 +24,14 @@ _MATH_NS_OPEN
 
 inline transform    transform_init();
 inline transform    transform_init(const vec3 position, const vec3 scale, const quat &rotation);
-inline transform    transform_init_from_world_matrix(const mat4 &matrix);
+//inline transform    transform_init_from_world_matrix(const mat4 &matrix); // Rotation is borked.
 
 
 // ----------------------------------------------------------- [ Operations ] --
 
 
-inline mat4         transform_get_world_matrix(const transform &transform);
-inline mat4         transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up);
+inline mat4         transform_world_matrix(const transform &transform);
+inline mat4         transform_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up);
 inline transform    transform_inherited(const transform &parent, const transform &child);
 
 
@@ -47,7 +47,7 @@ inline vec3         transform_up(const transform &trans);
 inline vec3         transform_left(const transform &trans);
 
 
-// ----------------------------------------------------------------- [ Impl ] --
+// ----------------------------------------------------------------- [ Init ] --
 
 
 transform
@@ -64,7 +64,7 @@ transform_init()
 transform
 transform_init(const vec3 position, const vec3 scale, const quat &rotation)
 {
-  transform return_transform;
+  MATH_NS_NAME::transform return_transform;
   return_transform.position = position;
   return_transform.scale    = scale;
   return_transform.rotation = rotation;
@@ -73,40 +73,43 @@ transform_init(const vec3 position, const vec3 scale, const quat &rotation)
 }
 
 
-transform
-transform_init_from_world_matrix(const mat4 &matrix)
-{
-  // get position
-  const float x = mat4_get(matrix, 3, 0);
-  const float y = mat4_get(matrix, 3, 1);
-  const float z = mat4_get(matrix, 3, 2);
+//transform
+//transform_init_from_world_matrix(const mat4 &matrix)
+//{
+//  // get position
+//  const float x = MATH_NS_NAME::mat4_get(matrix, 3, 0);
+//  const float y = MATH_NS_NAME::mat4_get(matrix, 3, 1);
+//  const float z = MATH_NS_NAME::mat4_get(matrix, 3, 2);
+//
+//  const MATH_NS_NAME::vec3 position = MATH_NS_NAME::vec3_init(x, y, z);
+//
+//  // get scale.
+//  const float s_x = MATH_NS_NAME::sign(mat4_get(matrix, 0, 0)) *
+//                    MATH_NS_NAME::sqrt((mat4_get(matrix, 0, 0) * mat4_get(matrix, 0, 0)) +
+//                               (mat4_get(matrix, 0, 1) * mat4_get(matrix, 0, 1)) +
+//                               (mat4_get(matrix, 0, 2) * mat4_get(matrix, 0, 2)));
+//
+//  const float s_y = MATH_NS_NAME::sign(mat4_get(matrix, 1, 1)) *
+//                    MATH_NS_NAME::sqrt((mat4_get(matrix, 1, 0) * mat4_get(matrix, 1, 0)) +
+//                               (mat4_get(matrix, 1, 1) * mat4_get(matrix, 1, 1)) +
+//                               (mat4_get(matrix, 1, 2) * mat4_get(matrix, 1, 2)));
+//
+//  const float s_z = MATH_NS_NAME::sign(mat4_get(matrix, 2, 2)) *
+//                    MATH_NS_NAME::sqrt((mat4_get(matrix, 2, 0) * mat4_get(matrix, 2, 0)) +
+//                               (mat4_get(matrix, 2, 1) * mat4_get(matrix, 2, 1)) +
+//                               (mat4_get(matrix, 2, 2) * mat4_get(matrix, 2, 2)));
+//
+//  const vec3 scale = vec3_init(s_x, s_y, s_z);
+//
+//  // get rotation.
+//  const mat3 sub_mat  = mat4_get_sub_mat3(matrix);
+//  const quat rotation = quat_init_with_mat3(sub_mat);
+//
+//  return transform_init(position, scale, rotation);
+//}
 
-  const vec3 position = vec3_init(x, y, z);
 
-  // get scale.
-  const float s_x = MATH_NS_NAME::sign(mat4_get(matrix, 0, 0)) *
-                    MATH_NS_NAME::sqrt((mat4_get(matrix, 0, 0) * mat4_get(matrix, 0, 0)) +
-                               (mat4_get(matrix, 0, 1) * mat4_get(matrix, 0, 1)) +
-                               (mat4_get(matrix, 0, 2) * mat4_get(matrix, 0, 2)));
-
-  const float s_y = MATH_NS_NAME::sign(mat4_get(matrix, 1, 1)) *
-                    MATH_NS_NAME::sqrt((mat4_get(matrix, 1, 0) * mat4_get(matrix, 1, 0)) +
-                               (mat4_get(matrix, 1, 1) * mat4_get(matrix, 1, 1)) +
-                               (mat4_get(matrix, 1, 2) * mat4_get(matrix, 1, 2)));
-
-  const float s_z = MATH_NS_NAME::sign(mat4_get(matrix, 2, 2)) *
-                    MATH_NS_NAME::sqrt((mat4_get(matrix, 2, 0) * mat4_get(matrix, 2, 0)) +
-                               (mat4_get(matrix, 2, 1) * mat4_get(matrix, 2, 1)) +
-                               (mat4_get(matrix, 2, 2) * mat4_get(matrix, 2, 2)));
-
-  const vec3 scale = vec3_init(s_x, s_y, s_z);
-
-  // get rotation.
-  const mat3 sub_mat  = mat4_get_sub_mat3(matrix);
-  const quat rotation = quat_init_with_mat3(sub_mat);
-
-  return transform_init(position, scale, rotation);
-}
+// ----------------------------------------------------------- [ Operations ] --
 
 
 transform
@@ -133,7 +136,7 @@ transform_inherited(const transform &parent, const transform &child)
 
 
 mat4
-transform_get_world_matrix(const transform &to_world)
+transform_world_matrix(const transform &to_world)
 {
   // Get scale
   const mat4 scale = mat4_scale(to_world.scale);
@@ -150,7 +153,7 @@ transform_get_world_matrix(const transform &to_world)
 
 
 mat4
-transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up)
+transform_lookat_matrix(const transform &to_view, const vec3 world_fwd, const vec3 world_up)
 {
   const math::vec3 cam_fwd  = math::quat_rotate_point(to_view.rotation, world_fwd);
   const math::vec3 look_fwd = math::vec3_add(to_view.position, cam_fwd);
@@ -160,11 +163,37 @@ transform_get_lookat_matrix(const transform &to_view, const vec3 world_fwd, cons
 }
 
 
+// ---------------------------------------------------- [ Direction Vectors ] --
+
+
+vec3
+transform_world_fwd()
+{
+  return math::vec3_init(0,0,1);
+}
+
+
+vec3
+transform_world_up()
+{
+  return math::vec3_init(0,1,0);
+}
+
+
+vec3
+transform_world_left()
+{
+  return math::vec3_init(1,0,0);
+}
+
+
 vec3
 transform_fwd(const transform &trans)
 {
-  const math::vec3 dir = math::vec3_init(0,0,1);
-  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
+  const math::vec3 rot_dir = math::quat_rotate_point(
+    trans.rotation,
+    transform_world_fwd()
+  );
   
   return math::vec3_normalize(rot_dir);
 }
@@ -173,8 +202,10 @@ transform_fwd(const transform &trans)
 vec3
 transform_up(const transform &trans)
 {
-  const math::vec3 dir = math::vec3_init(0,1,0);
-  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
+  const math::vec3 rot_dir = math::quat_rotate_point(
+    trans.rotation,
+    transform_world_up()
+  );
   
   return math::vec3_normalize(rot_dir);
 }
@@ -183,8 +214,10 @@ transform_up(const transform &trans)
 vec3
 transform_left(const transform &trans)
 {
-  const math::vec3 dir = math::vec3_init(1,0,0);
-  const math::vec3 rot_dir = math::quat_rotate_point(trans.rotation, dir);
+  const math::vec3 rot_dir = math::quat_rotate_point(
+    trans.rotation,
+    transform_world_left()
+  );
   
   return math::vec3_normalize(rot_dir);
 }

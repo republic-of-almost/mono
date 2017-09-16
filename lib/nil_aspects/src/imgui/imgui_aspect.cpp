@@ -494,7 +494,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
       cam[0].fov
     );
 
-    math::mat4 world = math::transform_get_world_matrix(m_trans);
+    math::mat4 world = math::transform_world_matrix(m_trans);
 //    math::mat4 world = math::mat4_id();
 
     ImGuizmo::Enable(true);
