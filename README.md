@@ -2,6 +2,7 @@
 
 Mono-repo for all ROA code. Individual projects are in their own directories. `app` directory contains executables projects, `lib` contains libraries, and `thirdparty` contains all external code.
 
+[![Discored](https://img.shields.io/badge/Discord-Republic_Of_Almost-green.svg?style=flat)](https://discord.gg/DU3s4fS)
 
 ## Health Report
 
@@ -30,8 +31,8 @@ Project assets are not included in the repo as they are subject copyright.
   Then you can build the solution.
 
   ```
-  git clone rep_of_a
-  cd rep_of_a/scripts/solution
+  git clone https://github.com/republic-of-almost/mono.git
+  cd mono/scripts/solution
   premake4 --file=solution.lua xcode4
   open RepublicOfAlmost.xcworkspace/
   ```
@@ -49,8 +50,8 @@ Project assets are not included in the repo as they are subject copyright.
   Then you can build the solution
 
   ```
-  git clone rep_of_a
-  cd rep_of_a/scripts/solution
+  git clone https://github.com/republic-of-almost/mono.git
+  cd mono/scripts/solution
   premake4 --file=solution.lua gmake
   ```
 
@@ -58,11 +59,11 @@ Project assets are not included in the repo as they are subject copyright.
 
 ### Windows
 
-  You need Premake5 you can download it from their website.
+  You need Premake5 you can download it from their [website](https://premake.github.io/).
 
   ```
-  git clone rep_of_a
-  cd rep_of_a/scripts/solution
+  git clone https://github.com/republic-of-almost/mono.git
+  cd mono/scripts/solution
   premake5 --file=solution.lua vs2015
   ```
 
@@ -74,11 +75,11 @@ Project assets are not included in the repo as they are subject copyright.
 
 Name                  | Links
 ----------------------|----------------------------
-Phil Cooper-King      | [www](http://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
+Phil Cooper-King      | [Web](http://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
 
-### Third Party
+### Third Party Code
 
-Project  | Website                                       | License
+Name     | Website                                       | License
 ---------|-----------------------------------------------|--------
 Catch    | https://github.com/philsquared/Catch          | MIT
 GLFW     | https://github.com/glfw/glfw                  | zlib
@@ -90,6 +91,13 @@ Remotery | https://github.com/Celtoys/Remotery           | Apache 2.0
 SoLoud   | https://github.com/jarikomppa/soloud          | Zlib/LibPng
 STB      | https://github.com/nothings/stb               | Public Domain
 TinyDIR  | https://github.com/cxong/tinydir.git          | Simplified BSD
+
+
+### Other Third Party
+
+Name           | Website                  | License
+---------------|--------------------------|---------
+Proggy Fonts   | https://proggyfonts.net/ | Free
 
 
 ## License
