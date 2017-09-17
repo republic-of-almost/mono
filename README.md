@@ -30,7 +30,7 @@ Project assets are not included in the repo as they are subject copyright.
   Then you can build the solution.
 
   ```
-  git clone rep_of_a
+  git clone https://github.com/republic-of-almost/mono.git
   cd rep_of_a/scripts/solution
   premake4 --file=solution.lua xcode4
   open RepublicOfAlmost.xcworkspace/
@@ -49,7 +49,7 @@ Project assets are not included in the repo as they are subject copyright.
   Then you can build the solution
 
   ```
-  git clone rep_of_a
+  git clone https://github.com/republic-of-almost/mono.git
   cd rep_of_a/scripts/solution
   premake4 --file=solution.lua gmake
   ```
@@ -61,7 +61,7 @@ Project assets are not included in the repo as they are subject copyright.
   You need Premake5 you can download it from their website.
 
   ```
-  git clone rep_of_a
+  git clone https://github.com/republic-of-almost/mono.git
   cd rep_of_a/scripts/solution
   premake5 --file=solution.lua vs2015
   ```
@@ -74,7 +74,7 @@ Project assets are not included in the repo as they are subject copyright.
 
 Name                  | Links
 ----------------------|----------------------------
-Phil Cooper-King      | [www](http://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
+Phil Cooper-King      | [Web](http://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
 
 ### Third Party
 
