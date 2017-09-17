@@ -54,27 +54,57 @@ TEST_CASE("Transform")
   
   SECTION("world mat")
   {
+    // mat4 currently doens't support matrix decomposition.
   }
   
   SECTION("lookat mat")
   {
+    // need data
   }
   
   SECTION("inherited")
   {
+    // Rotation is required
+    
+    const math::vec3 pos = math::vec3_init(0.5f);
+    const math::vec3 scale = math::vec3_init(0.5f);
+    
+    const math::transform trans_a = math::transform_init(pos, scale, math::quat_init());
+    const math::transform inherited = math::transform_inherited(trans_a, trans_a);
+    
+    const math::vec3 expected_pos = math::vec3_init(0.75f);
+    const math::vec3 expected_scale = math::vec3_init(0.25f);
+    
+    REQUIRE(math::vec3_is_near(inherited.position, expected_pos));
+    REQUIRE(math::vec3_is_near(inherited.scale, expected_scale));
   }
   
   // -------------------------------------------------- [ Direction Vectors ] --
   
   SECTION("fwd")
   {
+    const math::vec3 w_dir = math::transform_world_fwd();
+    const math::transform trans = math::transform_init();
+    const math::vec3 l_dir = math::transform_fwd(trans);
+    
+    REQUIRE(math::vec3_is_near(w_dir, l_dir));
   }
   
   SECTION("up")
   {
+    const math::vec3 w_dir = math::transform_world_up();
+    const math::transform trans = math::transform_init();
+    const math::vec3 l_dir = math::transform_up(trans);
+    
+    REQUIRE(math::vec3_is_near(w_dir, l_dir));
   }
   
   SECTION("left")
   {
+    const math::vec3 w_dir = math::transform_world_left();
+    const math::transform trans = math::transform_init();
+    const math::vec3 l_dir = math::transform_left(trans);
+    
+    REQUIRE(math::vec3_is_near(w_dir, l_dir));
   }
 }

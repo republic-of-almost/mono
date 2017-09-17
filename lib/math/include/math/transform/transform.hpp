@@ -180,21 +180,21 @@ transform_lookat_matrix(const transform &to_view, const vec3 world_fwd, const ve
 vec3
 transform_world_fwd()
 {
-  return math::vec3_init(0,0,1);
+  return math::vec3_init(0.f,0.f,1.f);
 }
 
 
 vec3
 transform_world_up()
 {
-  return math::vec3_init(0,1,0);
+  return math::vec3_init(0.f,1.f,0.f);
 }
 
 
 vec3
 transform_world_left()
 {
-  return math::vec3_init(1,0,0);
+  return math::vec3_init(1.f,0.f,0.f);
 }
 
 

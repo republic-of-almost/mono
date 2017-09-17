@@ -164,8 +164,8 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         if(win_data.width == 0 || win_data.height == 0)
         {
           const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-          win_data.width = 2 * (mode->width / 3);
-          win_data.height = 2 * (mode->height / 3);
+          win_data.width = 3 * (mode->width / 4);
+          win_data.height = 3 * (mode->height / 4);
           Nil::Data::set(self->window_node, win_data);
         }
 
