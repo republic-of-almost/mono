@@ -59,7 +59,7 @@ Project assets are not included in the repo as they are subject copyright.
 
 ### Windows
 
-  You need Premake5 you can download it from their website.
+  You need Premake5 you can download it from their [website](https://premake.github.io/).
 
   ```
   git clone https://github.com/republic-of-almost/mono.git
