@@ -30,6 +30,9 @@ constexpr uint32_t rovShader_Lit        = 1;
 constexpr uint32_t rovShader_DirLight   = 2;
 constexpr uint32_t rovShader_Count      = 3;
 
+constexpr uint32_t rovGraphicsApi_NOP = 0;
+constexpr uint32_t rovGraphicsApi_GL4 = 1;
+
 
 struct rovLight
 {
@@ -47,7 +50,7 @@ struct rovRasterizer
 // ------------------------------------------------------------- [ Lifetime ] --
 
 
-void        rov_initialize(const char *asset_prefix);
+void        rov_initialize(const uint32_t graphics_api, const char *asset_prefix);
 void        rov_destroy();
 void        rov_execute();
 

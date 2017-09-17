@@ -35,9 +35,10 @@ table.insert(
     },
 
     defines = {
-      
+
       -- See build.md for build flags doc
 
+      "ROV_NOP",
       "ROV_GL4",
       "ROV_GL4_VR_PROTO",
     },

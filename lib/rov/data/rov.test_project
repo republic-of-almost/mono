@@ -2,14 +2,14 @@
 
 --[[
 
-  ROA Test Project Description
+  Render 'O' Vision Test Project Description
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "ROATest",
+    name     = "ROVTest",
     kind     = "ConsoleApp",
     language = "C++",
     location = make.get_proj_root(),
@@ -30,17 +30,14 @@ table.insert(
     },
 
     defines = {
-
-      -- See roa's build.md for build flags doc
-
+      -- See build.md
     },
 
     project_dependencies = {
 
       -- First Party --
 
-      "NIL",
-      "AspectsControllers",
+      "ROV",
 
       -- Third Party --
 

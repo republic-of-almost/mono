@@ -1,7 +1,15 @@
 #include <rov/rov.hpp>
+
+#ifdef ROV_GL4
 #include "ogl/rov_gl.hpp"
 #include "ogl/rov_gl_resources.hpp"
 #include "ogl/rov_gl_exec.hpp"
+#endif
+
+#ifdef ROV_NOP
+#include "nop/rov_nop.hpp"
+#endif
+
 #include "rov_data.hpp"
 #include <lib/color.hpp>
 #include <lib/assert.hpp>
@@ -10,7 +18,17 @@
 namespace {
 
 struct ROV_data {
+  
+  #ifdef ROV_GL4
   ROV_Internal::rovGLData gl_data;
+  #endif
+  
+  #ifdef ROV_NOP
+  ROV_Internal::rovNopData nop_data;
+  #endif
+  
+  uint32_t graphics_api = 0;
+  
   ROV_Internal::rovData rov_data;
 };
 
@@ -28,23 +46,64 @@ get_rov_data()
 
 
 void
-rov_initialize(const char *asset_prefix)
+rov_initialize(const uint32_t graphics_api, const char *asset_prefix)
 {
-  ROV_Internal::ogl_init(&get_rov_data().gl_data, asset_prefix);
+  get_rov_data().graphics_api = graphics_api;
+
+  switch(graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      ROV_Internal::ogl_init(&get_rov_data().gl_data, asset_prefix);
+      break;
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      ROV_Internal::nop_init();
+      break;
+    #endif
+  }
 }
 
 
 void
 rov_destroy()
 {
-  ROV_Internal::ogl_destroy(&get_rov_data().gl_data);
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      ROV_Internal::ogl_destroy(&get_rov_data().gl_data);
+      break;
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      ROV_Internal::nop_destroy();
+    #endif
+  }
 }
 
 
 void
 rov_execute()
 {
-  ROV_Internal::ogl_exec(&get_rov_data().gl_data, &get_rov_data().rov_data);
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      ROV_Internal::ogl_exec(&get_rov_data().gl_data, &get_rov_data().rov_data);
+      break;
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      ROV_Internal::nop_exec();
+      break;
+    #endif
+  }
+  
   get_rov_data().rov_data.rov_render_passes.clear();
 }
 
@@ -61,15 +120,28 @@ rov_createTexture(
   uint32_t format,
   uintptr_t *out_platform_resource)
 {
-  return ROV_Internal::ogl_createTexture(
-    &get_rov_data().gl_data,
-    data,
-    width,
-    height,
-    size,
-    format,
-    out_platform_resource
-  );
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      return ROV_Internal::ogl_createTexture(
+        &get_rov_data().gl_data,
+        data,
+        width,
+        height,
+        size,
+        format,
+        out_platform_resource
+      );
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      return ROV_Internal::nop_createTexture();
+    #endif
+  }
+  
+  return false;
 }
 
 
