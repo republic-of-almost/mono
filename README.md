@@ -2,6 +2,7 @@
 
 Mono-repo for all ROA code. Individual projects are in their own directories. `app` directory contains executables projects, `lib` contains libraries, and `thirdparty` contains all external code.
 
+[![Discored](https://img.shields.io/badge/Discord-Republic_Of_Almost-green.svg?style=flat)](https://discord.gg/DU3s4fS)
 
 ## Health Report
 
