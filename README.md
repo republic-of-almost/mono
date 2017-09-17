@@ -32,7 +32,7 @@ Project assets are not included in the repo as they are subject copyright.
 
   ```
   git clone https://github.com/republic-of-almost/mono.git
-  cd rep_of_a/scripts/solution
+  cd mono/scripts/solution
   premake4 --file=solution.lua xcode4
   open RepublicOfAlmost.xcworkspace/
   ```
@@ -51,7 +51,7 @@ Project assets are not included in the repo as they are subject copyright.
 
   ```
   git clone https://github.com/republic-of-almost/mono.git
-  cd rep_of_a/scripts/solution
+  cd mono/scripts/solution
   premake4 --file=solution.lua gmake
   ```
 
@@ -63,7 +63,7 @@ Project assets are not included in the repo as they are subject copyright.
 
   ```
   git clone https://github.com/republic-of-almost/mono.git
-  cd rep_of_a/scripts/solution
+  cd mono/scripts/solution
   premake5 --file=solution.lua vs2015
   ```
 
