@@ -77,7 +77,7 @@ Name                  | Links
 ----------------------|----------------------------
 Phil Cooper-King      | [Web](http://www.cooperking.net), [Linkedin](https://www.linkedin.com/in/philcooperking/), [Twitter](https://twitter.com/rep_of_a)
 
-### Third Party
+### Third Party Code
 
 Project  | Website                                       | License
 ---------|-----------------------------------------------|--------
@@ -91,6 +91,13 @@ Remotery | https://github.com/Celtoys/Remotery           | Apache 2.0
 SoLoud   | https://github.com/jarikomppa/soloud          | Zlib/LibPng
 STB      | https://github.com/nothings/stb               | Public Domain
 TinyDIR  | https://github.com/cxong/tinydir.git          | Simplified BSD
+
+
+### Other Third Party
+
+Name           | Website                  | License
+---------------|--------------------------|---------
+Proggy Fonts   | https://proggyfonts.net/ | Free
 
 
 ## License
