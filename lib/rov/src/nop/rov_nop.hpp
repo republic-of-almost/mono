@@ -28,6 +28,7 @@ nop_destroy() {}
 
 // ------------------------------------------------------------ [ Resources ] --
 
+
 bool
 nop_createTexture() { return true; }
 
@@ -45,6 +46,7 @@ nop_updateLights() { return true; }
 
 bool
 nop_createRenderTarget() { return true; }
+
 
 } // ns
 

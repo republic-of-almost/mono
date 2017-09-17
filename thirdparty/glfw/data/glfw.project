@@ -7,16 +7,19 @@
 table.insert(
   projects,
   {
-    name     = "GLFW",
-    kind     = "StaticLib",
-    language = "C",
-    location = make.get_proj_root(),
+    -- General Settings --
+    name            = "GLFW",
+    kind            = "StaticLib",
+    language        = "C",
+    location        = make.get_proj_root(),
     ignore_defaults = true,
 
+    -- Directories --
     inc_dirs = {
       make.get_proj_root() .. "../include/",
     },
 
+    -- Common Files --
     src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),
       --
@@ -30,7 +33,9 @@ table.insert(
       make.get_proj_root() .. "../src/osmesa_context.c",
     },
 
-    -- OSX Setup
+    ---------------
+    -- OSX Setup --
+    ---------------
 
     src_files_macosx = {
       -- Common Nix
@@ -60,7 +65,9 @@ table.insert(
       "_GLFW_COCOA",
     },
 
-    -- Linux Setup
+    -----------------
+    -- Linux Setup --
+    -----------------
 
     src_files_linux = {
       -- Common Nix
@@ -97,7 +104,9 @@ table.insert(
        "_GLFW_X11",
     },
 
-    -- Windows Setup
+    -------------------
+    -- Windows Setup --
+    -------------------
 
     src_files_windows = {
       make.get_proj_root() .. "../src/win32_init.c",
@@ -111,7 +120,6 @@ table.insert(
 
     link_dependencies_windows = {
       "opengl32",
-
     },
 
     defines_windows = {

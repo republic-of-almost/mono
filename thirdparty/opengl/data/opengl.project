@@ -7,12 +7,14 @@
 table.insert(
   projects,
   {
-    name     = "OpenGL",
-    kind     = "StaticLib",
-    language = "C++",
-    location = make.get_proj_root(),
+    -- General Settings --
+    name            = "OpenGL",
+    kind            = "StaticLib",
+    language        = "C++",
+    location        = make.get_proj_root(),
     ignore_defaults = true,
 
+    -- Files --
     src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),
       make.add_headers(make.get_proj_root() .. "../src/"),
@@ -23,8 +25,16 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
+    -- Directories --
     inc_dirs = {
       make.get_proj_root() .. "../include/",
+    },
+
+    -- Dependencies --
+    link_dependencies_macosx = {
+      "OpenGL.framework",
+      "CoreFoundation.framework",
+      "Foundation.framework",
     },
 
     link_dependencies_linux = {

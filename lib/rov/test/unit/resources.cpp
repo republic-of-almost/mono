@@ -4,5 +4,12 @@
 
 TEST_CASE("ROV - Resources")
 {
+  rov_initialize(rovGraphicsApi_NOP, "./");
   
+  SECTION("Create Texture")
+  {
+    REQUIRE(true);
+  }
+  
+  rov_destroy();
 }

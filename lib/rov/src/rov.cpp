@@ -153,14 +153,28 @@ rov_createMesh(
   size_t count,
   uintptr_t *out_platform_resource)
 {
-  return ROV_Internal::ogl_createMesh(
-    &get_rov_data().gl_data,
-    pos,
-    normals,
-    tex_coords,
-    count,
-    out_platform_resource
-  );
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      return ROV_Internal::ogl_createMesh(
+        &get_rov_data().gl_data,
+        pos,
+        normals,
+        tex_coords,
+        count,
+        out_platform_resource
+      );
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      return ROV_Internal::nop_createMesh();
+    #endif
+  }
+  
+  LIB_ASSERT(false); // Why no api?
+  return 0;
 }
 
 uint32_t
@@ -169,12 +183,26 @@ rov_createIndex(
   size_t index_count,
   uintptr_t *out_platform_resource)
 {
-  return ROV_Internal::ogl_createIndex(
-    &get_rov_data().gl_data,
-    index,
-    index_count,
-    out_platform_resource
-  );
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      return ROV_Internal::ogl_createIndex(
+        &get_rov_data().gl_data,
+        index,
+        index_count,
+        out_platform_resource
+      );
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      return ROV_Internal::nop_createIndex();
+    #endif
+  }
+  
+  LIB_ASSERT(false); // Why no api?
+  return 0;
 }
 
 
@@ -183,11 +211,25 @@ rov_createLights(
   rovLight *lights,
   size_t count)
 {
-  return ROV_Internal::ogl_createLights(
-    &get_rov_data().gl_data,
-    lights,
-    count
-  );
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      return ROV_Internal::ogl_createLights(
+        &get_rov_data().gl_data,
+        lights,
+        count
+      );
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      return ROV_Internal::nop_createLights();
+    #endif
+  }
+  
+  LIB_ASSERT(false); // why no api?
+  return 0;
 }
 
 
@@ -197,12 +239,26 @@ rov_updateLights(
   rovLight *lights,
   size_t count)
 {
-  return ROV_Internal::ogl_updateLights(
-    &get_rov_data().gl_data,
-    id,
-    lights,
-    count
-  );
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      return ROV_Internal::ogl_updateLights(
+        &get_rov_data().gl_data,
+        id,
+        lights,
+        count
+      );
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      return ROV_Internal::nop_updateLights();
+    #endif
+  }
+  
+  LIB_ASSERT(false); // Why no api?
+  return 0;
 }
 
 
@@ -214,13 +270,27 @@ rov_createRenderTarget(
   uintptr_t *out_platform_resource
 )
 {
-  return ROV_Internal::ogl_createFramebuffer(
-    &get_rov_data().gl_data,
-    width,
-    height, 
-    format,
-    out_platform_resource
-  );
+  switch(get_rov_data().graphics_api)
+  {
+    #ifdef ROV_GL4
+    case(rovGraphicsApi_GL4):
+      return ROV_Internal::ogl_createFramebuffer(
+        &get_rov_data().gl_data,
+        width,
+        height, 
+        format,
+        out_platform_resource
+      );
+    #endif
+    
+    #ifdef ROV_NOP
+    case(rovGraphicsApi_NOP):
+      return ROV_Internal::nop_createRenderTarget();
+    #endif
+  }
+  
+  LIB_ASSERT(false); // Why no api?
+  return 0;
 }
 
 
