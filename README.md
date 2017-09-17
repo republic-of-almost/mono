@@ -79,7 +79,7 @@ Phil Cooper-King      | [Web](http://www.cooperking.net), [Linkedin](https://www
 
 ### Third Party Code
 
-Project  | Website                                       | License
+Name     | Website                                       | License
 ---------|-----------------------------------------------|--------
 Catch    | https://github.com/philsquared/Catch          | MIT
 GLFW     | https://github.com/glfw/glfw                  | zlib
