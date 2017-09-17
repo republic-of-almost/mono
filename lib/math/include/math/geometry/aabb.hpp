@@ -189,28 +189,6 @@ aabb_get_max(const aabb &a)
 }
 
 
-float
-aabb_get_width(const aabb &a)
-{
-  return math::get_x(a.max) - math::get_x(a.min);
-}
-
-
-float
-aabb_get_height(const aabb &a)
-{
-  return math::get_y(a.max) - math::get_y(a.min);
-}
-
-
-float
-aabb_get_depth(const aabb &a)
-{
-  return math::get_z(a.max) - math::get_z(a.min);
-}
-
-
-
 // ------------------------------------------------------ [ Operations Impl ] --
 
 
