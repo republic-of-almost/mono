@@ -270,9 +270,23 @@ aabb_intersection_test(const aabb &a,
   const vec3 half_ext_b = aabb_get_half_extents(b);
   const vec3 combined_half_extent = vec3_add(half_ext_a, half_ext_b);
 
-  return (detail::sat_test(MATH_NS_NAME::vec3_get_x(origin_a), MATH_NS_NAME::vec3_get_x(origin_b), MATH_NS_NAME::vec3_get_x(combined_half_extent)) &&
-          detail::sat_test(MATH_NS_NAME::vec3_get_y(origin_a), MATH_NS_NAME::vec3_get_y(origin_b), MATH_NS_NAME::vec3_get_y(combined_half_extent)) &&
-          detail::sat_test(MATH_NS_NAME::vec3_get_z(origin_a), MATH_NS_NAME::vec3_get_z(origin_b), MATH_NS_NAME::vec3_get_z(combined_half_extent)));
+  return (
+    detail::sat_test(
+      MATH_NS_NAME::vec3_get_x(origin_a),
+      MATH_NS_NAME::vec3_get_x(origin_b),
+      MATH_NS_NAME::vec3_get_x(combined_half_extent)
+    ) &&
+    detail::sat_test(
+      MATH_NS_NAME::vec3_get_y(origin_a),
+      MATH_NS_NAME::vec3_get_y(origin_b),
+      MATH_NS_NAME::vec3_get_y(combined_half_extent)
+    ) &&
+    detail::sat_test(
+      MATH_NS_NAME::vec3_get_z(origin_a),
+      MATH_NS_NAME::vec3_get_z(origin_b),
+      MATH_NS_NAME::vec3_get_z(combined_half_extent)
+    )
+  );
 }
 
 
