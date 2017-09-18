@@ -59,6 +59,22 @@ Game_manager::on_start()
       }
     }
   }
+  
+  // -- Remove Navmesh object -- //
+  {
+    const size_t children = scene.get_child_count();
+    
+    for(size_t i = 0; i < children; ++i)
+    {
+      ROA::Object child = scene.get_child(i);
+      const char *child_name = child.get_name();
+      
+      if(strcmp(child_name, "WH-Nav") == 0)
+      {
+        child.destroy();
+      }
+    }
+  }
 
   // -- Create the Actor -- //
   {

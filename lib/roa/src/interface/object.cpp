@@ -435,14 +435,27 @@ Object::set_world_transform(const Transform &in)
     Nil::Data::get(other_node, that_data);
     Nil::Data::get(this_node, this_data);
     
-    // Calculate world difference //
+    // -- Calculate world difference -- //
     
-    math::vec3 this_pos = math::vec3_init(this_data.world_position);
-    math::vec3 that_pos = math::vec3_init(that_data.world_position);
+    // Position
+    {
+      math::vec3 this_pos = math::vec3_init(this_data.world_position);
+      math::vec3 that_pos = math::vec3_init(that_data.world_position);
+      
+      math::vec3 diff_pos = math::vec3_subtract(that_pos, this_pos);
+      
+      memcpy(this_data.position, diff_pos.data, sizeof(this_data.position));
+    }
     
-    math::vec3 diff_pos = math::vec3_subtract(that_pos, this_pos);
+    LOG_TODO_ONCE("This is incomplete.");
     
-    memcpy(this_data.position, diff_pos.data, sizeof(this_data.position));
+    // Scale
+    {
+    }
+    
+    // Rotation
+    {
+    }
     
     Nil::Data::set(this_node, this_data);
   }
