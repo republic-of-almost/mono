@@ -316,7 +316,7 @@ rov_startRenderPass(
   rps.emplace_back();
   ROV_Internal::rovRenderPass *rp = &rps.back();
 
-  rp->light_buffer = light_buffer;
+  rp->light_buffer  = light_buffer;
   rp->render_target = render_target;
 
   memcpy(rp->view, view, sizeof(rovMat4));
@@ -326,8 +326,7 @@ rov_startRenderPass(
 
   rp->clear_color = lib::color::init(get_rov_data().rov_data.curr_rov_color);
   rp->clear_flags = clear_flags;
-  
-  rp->rasterizer = data.rov_data.curr_rov_rasterizer;
+  rp->rasterizer  = data.rov_data.curr_rov_rasterizer;
 
   rp->materials.emplace_back(rov_curr_material(&get_rov_data().rov_data), size_t{0});
 }
