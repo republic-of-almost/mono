@@ -78,6 +78,8 @@ Engine::~Engine()
           t.func(*this, t.user_data);
         }
       }
+      
+      tasks.pre_render.clear();
     }
   }
 
