@@ -65,16 +65,23 @@ namespace Data {
 
 
 void
-get(const Node &node, Transform &out, const bool inherited)
+get(const Node &node, Transform &out)
 {
   if(node.is_valid())
   {
     math::transform internal;
-    if(Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal, inherited))
+    if(Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal))
     {
       memcpy(out.position, &internal.position, sizeof(float) * 3);
       memcpy(out.scale,    &internal.scale,    sizeof(float) * 3);
       memcpy(out.rotation, &internal.rotation, sizeof(float) * 4);
+      
+      Graph::node_get_transform(Data::get_graph_data(), node.get_id(), &internal, true);
+      
+      memcpy(out.world_position, &internal.position, sizeof(float) * 3);
+      memcpy(out.world_scale,    &internal.scale,    sizeof(float) * 3);
+      memcpy(out.world_rotation, &internal.rotation, sizeof(float) * 4);
+      
     }
     else
     {

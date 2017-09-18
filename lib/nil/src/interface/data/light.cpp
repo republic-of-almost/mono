@@ -28,11 +28,11 @@ get_light_data()
       Nil::Node node(id);
       
       Nil::Data::Transform trans;
-      Nil::Data::get(node, trans, true);
+      Nil::Data::get(node, trans);
 
       memcpy(
         data->data[index].position,
-        trans.position,
+        trans.world_position,
         sizeof(data->data[index].position)
       );
     }
@@ -72,11 +72,11 @@ set(Node &node, const Light &in)
   Light cpy = in;
 
   Nil::Data::Transform trans;
-  Nil::Data::get(node, trans, true);
+  Nil::Data::get(node, trans);
 
   memcpy(
     cpy.position,
-    trans.position,
+    trans.world_position,
     sizeof(in.position)
   );
 

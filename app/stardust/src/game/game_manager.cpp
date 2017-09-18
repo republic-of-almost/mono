@@ -31,36 +31,34 @@ Game_manager::on_start()
   }
   
   // -- Find Spawn Point -- //
-  /*
-    This currently fails, for a bunch of reasons see todo's.
-  */
-//  ROA::Object spawn_point;
-//  {
-//    const size_t children = scene.get_child_count();
-//    
-//    for(size_t i = 0; i < children; ++i)
-//    {
-//      ROA::Object child = scene.get_child(i);
-//      const char *child_name = child.get_name();
-//      
-//      if(strcmp(child_name, "Warehouse") == 0)
-//      {
-//        const size_t gran_children = child.get_child_count();
-//        
-//        for(size_t j = 0; j < gran_children; ++j)
-//        {
-//          ROA::Object gran_child = child.get_child(j);
-//          const char *gran_child_name = gran_child.get_name();
-//        
-//          if(strcmp(gran_child_name, "SpawnPoint") == 0)
-//          {
-//            spawn_point = gran_child;
-//            break;
-//          }
-//        }
-//      }
-//    }
-//  }
+  ROA::Object spawn_point;
+  {
+    const size_t children = scene.get_child_count();
+    
+    for(size_t i = 0; i < children; ++i)
+    {
+      ROA::Object child = scene.get_child(i);
+      const char *child_name = child.get_name();
+      
+      if(strcmp(child_name, "SpawnPoints") == 0)
+      {
+        const size_t gran_children = child.get_child_count();
+        
+        for(size_t j = 0; j < gran_children; ++j)
+        {
+          ROA::Object gran_child = child.get_child(j);
+          const char *gran_child_name = gran_child.get_name();
+        
+          if(strcmp(gran_child_name, "SpawnPoint") == 0)
+          {
+            spawn_point = gran_child;
+            spawn_point.set_transform(gran_child.get_transform());
+            break;
+          }
+        }
+      }
+    }
+  }
 
   // -- Create the Actor -- //
   {
@@ -70,6 +68,8 @@ Game_manager::on_start()
     
     Actor_kinematic *actor_comp = actor.get_component<Actor_kinematic>();
     LIB_ASSERT(actor_comp);
+    
+    actor.set_world_transform(spawn_point.get_transform());
     
     // -- Find Navmesh -- //
     {

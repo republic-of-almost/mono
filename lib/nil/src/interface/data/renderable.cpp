@@ -32,12 +32,12 @@ get_mat_data()
       Nil::Node node(id);
       
       Nil::Data::Transform trans;
-      Nil::Data::get(node, trans, true);
+      Nil::Data::get(node, trans);
 
       math::transform internal_trans = math::transform_init(
-      math::vec3_init(trans.position),
-      math::vec3_init(trans.scale),
-      math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
+      math::vec3_init(trans.world_position),
+      math::vec3_init(trans.world_scale),
+      math::quat_init(trans.world_rotation[0], trans.world_rotation[1], trans.world_rotation[2], trans.world_rotation[3])
       );
 
       math::mat4 mat = math::transform_world_matrix(internal_trans);
@@ -84,12 +84,12 @@ set(Node &node, const Renderable &in)
   Renderable cpy = in;
 
   Nil::Data::Transform trans;
-  Nil::Data::get(node, trans, true);
+  Nil::Data::get(node, trans);
 
   math::transform internal_trans = math::transform_init(
-  math::vec3_init(trans.position),
-  math::vec3_init(trans.scale),
-  math::quat_init(trans.rotation[0], trans.rotation[1], trans.rotation[2], trans.rotation[3])
+  math::vec3_init(trans.world_position),
+  math::vec3_init(trans.world_scale),
+  math::quat_init(trans.world_rotation[0], trans.world_rotation[1], trans.world_rotation[2], trans.world_rotation[3])
   );
 
   math::mat4 mat = math::transform_world_matrix(internal_trans);

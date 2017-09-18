@@ -129,11 +129,11 @@ struct Bounding_box_data
           Nil::Data::Bounding_box in = data->local_bb[index];
           
           Nil::Data::Transform trans;
-          Nil::Data::get(node, trans, true);
+          Nil::Data::get(node, trans);
           
           // -- Scale -- //
           
-          const math::vec3 scale = math::vec3_init(trans.scale);
+          const math::vec3 scale = math::vec3_init(trans.world_scale);
           constexpr size_t count = 8;
           
           const float *max = in.max;
@@ -154,7 +154,7 @@ struct Bounding_box_data
           
           // -- Rotate -- //
           
-          const math::quat rot = math::quat_init(trans.rotation);
+          const math::quat rot = math::quat_init(trans.world_rotation);
           
           math::vec3 rot_corners[count];
           
@@ -181,8 +181,8 @@ struct Bounding_box_data
           
           // -- Translate -- //
           
-          math::add(new_min, new_min, trans.position, 3);
-          math::add(new_max, new_max, trans.position, 3);
+          math::add(new_min, new_min, trans.world_position, 3);
+          math::add(new_max, new_max, trans.world_position, 3);
           
           // -- Save -- //
           

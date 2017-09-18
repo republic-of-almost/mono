@@ -17,6 +17,12 @@ struct Transform
   float position[3];
   float scale[3];
   float rotation[4];
+  
+  // -- Output -- //
+  
+  float world_position[3];
+  float world_scale[3];
+  float world_rotation[4];
 };
 
 
@@ -24,7 +30,7 @@ struct Transform
 
 
 void
-get(const Node &node, Transform &out, const bool world = false);
+get(const Node &node, Transform &out);
 
 
 void

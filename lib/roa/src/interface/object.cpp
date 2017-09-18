@@ -2,6 +2,7 @@
 #include <common/common.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
+#include <math/vec/vec3.hpp>
 #include <lib/assert.hpp>
 #include <new>
 
@@ -417,6 +418,33 @@ Object::set_transform(const Transform &in)
     
     Nil::Data::get(other_node, data);
     Nil::Data::set(this_node, data);
+  }
+}
+
+void
+Object::set_world_transform(const Transform &in)
+{
+  if(in.get_instance_id() != get_instance_id())
+  {
+    Nil::Node other_node = ROA_detail::get_node(in);
+    Nil::Node this_node = ROA_detail::get_node(*this);
+    
+    Nil::Data::Transform this_data{};
+    Nil::Data::Transform that_data{};
+    
+    Nil::Data::get(other_node, that_data);
+    Nil::Data::get(this_node, this_data);
+    
+    // Calculate world difference //
+    
+    math::vec3 this_pos = math::vec3_init(this_data.world_position);
+    math::vec3 that_pos = math::vec3_init(that_data.world_position);
+    
+    math::vec3 diff_pos = math::vec3_subtract(that_pos, this_pos);
+    
+    memcpy(this_data.position, diff_pos.data, sizeof(this_data.position));
+    
+    Nil::Data::set(this_node, this_data);
   }
 }
 

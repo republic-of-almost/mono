@@ -171,6 +171,8 @@ public:
   const Transform       get_transform() const;
   Transform             get_transform();
   void                  set_transform(const Transform &in);
+  void                  set_world_transform(const Transform &in);
+  
   
   const Renderable      get_renderable() const;
   Renderable            get_renderable();

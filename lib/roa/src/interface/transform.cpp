@@ -48,9 +48,9 @@ Transform::get_world_position() const
 {
   Nil::Data::Transform data{};
   Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data, true);
+  Nil::Data::get(node, data);
   
-  return Vector3(data.position);
+  return Vector3(data.world_position);
 }
 
 
@@ -83,9 +83,9 @@ Transform::get_world_scale() const
 {
   Nil::Data::Transform data{};
   Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data, true);
+  Nil::Data::get(node, data);
   
-  return Vector3(data.scale);
+  return Vector3(data.world_scale);
 }
 
 
@@ -118,9 +118,9 @@ Transform::get_world_rotation() const
 {
   Nil::Data::Transform data{};
   Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data, true);
+  Nil::Data::get(node, data);
   
-  return Quaternion(data.rotation);
+  return Quaternion(data.world_rotation);
 }
 
 
@@ -163,12 +163,12 @@ Transform::get_world_forward() const
 {
   Nil::Data::Transform data{};
   Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data, true);
+  Nil::Data::get(node, data);
   
   const math::transform trans = math::transform_init(
-    math::vec3_init(data.position),
-    math::vec3_init(data.scale),
-    math::quat_init(data.rotation)
+    math::vec3_init(data.world_position),
+    math::vec3_init(data.world_scale),
+    math::quat_init(data.world_rotation)
   );
   
   const math::vec3 dir = math::transform_fwd(trans);
@@ -201,12 +201,12 @@ Transform::get_world_up() const
 {
   Nil::Data::Transform data{};
   Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data, true);
+  Nil::Data::get(node, data);
   
   const math::transform trans = math::transform_init(
-    math::vec3_init(data.position),
-    math::vec3_init(data.scale),
-    math::quat_init(data.rotation)
+    math::vec3_init(data.world_position),
+    math::vec3_init(data.world_scale),
+    math::quat_init(data.world_rotation)
   );
   
   const math::vec3 dir = math::transform_up(trans);
@@ -239,12 +239,12 @@ Transform::get_world_left() const
 {
   Nil::Data::Transform data{};
   Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::get(node, data, true);
+  Nil::Data::get(node, data);
   
   const math::transform trans = math::transform_init(
-    math::vec3_init(data.position),
-    math::vec3_init(data.scale),
-    math::quat_init(data.rotation)
+    math::vec3_init(data.world_position),
+    math::vec3_init(data.world_scale),
+    math::quat_init(data.world_rotation)
   );
   
   const math::vec3 dir = math::transform_left(trans);
