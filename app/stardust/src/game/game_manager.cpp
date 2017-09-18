@@ -17,13 +17,17 @@ Game_manager::on_start()
   }
   
   // -- Load Scene -- //
+  constexpr float scene_scale = 4.f;
   {
     scene = ROA::Object{};
+
     scene.set_name("Game Scene");
     ROA::Scene::load(scene, "mesh/test_level.gltf");
     
     ROA::Transform trans = scene.get_transform();
-    trans.set_scale(ROA::Vector3(5.f, 5.f, 5.f));
+    
+    
+    trans.set_scale(ROA::Vector3(scene_scale, scene_scale, scene_scale));
   }
   
   // -- Find Spawn Point -- //
@@ -88,9 +92,9 @@ Game_manager::on_start()
           
           LIB_ASSERT(nav_index / 3 < index_count);
           
-          nav_mesh[nav_index + 0] = verts[vert_index + 0] * 5.f;
-          nav_mesh[nav_index + 1] = verts[vert_index + 1] * 5.f;
-          nav_mesh[nav_index + 2] = verts[vert_index + 2] * 5.f;
+          nav_mesh[nav_index + 0] = verts[vert_index + 0] * scene_scale;
+          nav_mesh[nav_index + 1] = verts[vert_index + 1] * scene_scale;
+          nav_mesh[nav_index + 2] = verts[vert_index + 2] * scene_scale;
         }
         
         actor_comp->nav_mesh = nav_mesh;

@@ -397,7 +397,12 @@ node_recalc_transform_branch(
     // Pop off all unrequired transforms.
     if(curr_depth > depth)
     {
-      transform_stack.pop_back();
+      const size_t to_pop = curr_depth - depth;
+      
+      for(uint32_t i = 0; i < to_pop; ++i)
+      {
+        transform_stack.pop_back();
+      }
     }
     else if(curr_depth < depth)
     {

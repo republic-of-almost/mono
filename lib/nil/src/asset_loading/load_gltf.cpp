@@ -943,6 +943,11 @@ load_gltf(Nil::Node root_node, const char *path)
               json_ext_attr = json_ext_attr->next;
             }
           }
+          else if(json_obj_name(json_node_attr, "camera"))
+          {
+            // Later
+            LOG_TODO_ONCE("Caemra")
+          }
           else
           {
             // Missing somethign
