@@ -205,7 +205,7 @@ initialize_rov(Nil::Engine &engine, uintptr_t user_data)
 
       LOG_INFO("Initialize ROV")
 
-      rov_initialize(Nil::Resource::asset_path());
+      rov_initialize(rovGraphicsApi_GL4, Nil::Resource::asset_path());
 
       self->has_initialized = true;
       self->light_pack = rov_createLights(nullptr, 0);
