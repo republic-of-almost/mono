@@ -82,6 +82,7 @@ ogl_destroyTextures(rovGLData *gl_data)
   }
 
   glDeleteTextures(textures_to_destroy.size(), textures_to_destroy.data());
+  memset(textures_to_destroy.data(), 0, sizeof(decltype(textures_to_destroy[0])) * textures_to_destroy.size());
 }
 
 
@@ -313,6 +314,7 @@ ogl_destroyLights(rovGLData *gl_data)
   }
 
   glDeleteTextures(buffer_to_destroy.size(), buffer_to_destroy.data());
+  memset(buffer_to_destroy.data(), 0, sizeof(decltype(buffer_to_destroy[0])) * buffer_to_destroy.size());
 }
 
 
@@ -595,6 +597,7 @@ ogl_destroyPrograms(rovGLData *gl_data)
     }
 
     glDeleteProgram(prog.program);
+    prog.program = 0;
   }
 
   for (ROV_Internal::rovGLLineProgram &prog : gl_data->rov_line_programs)
@@ -609,6 +612,7 @@ ogl_destroyPrograms(rovGLData *gl_data)
     }
 
     glDeleteProgram(prog.program);
+    prog.program = 0;
   }
 }
 
