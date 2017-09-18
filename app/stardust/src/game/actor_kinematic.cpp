@@ -284,26 +284,10 @@ Actor_kinematic::on_think()
 void
 Actor_kinematic::on_start()
 {
-  this->height = 2.f;
+  this->height = 4.5f;
   
   ROA::Object entity = get_object();
   
-//  // Nav mesh
-//  {
-//    lib::model model = lib::model_import::load_obj_from_file(
-//      Nil::Resource::directory("mesh/nav_mesh.obj")
-//    );
-//    
-//    float foo[32]{};
-//    memcpy(foo, model.verts[0], sizeof(foo));
-//
-//    if(model.mesh_count > 0) 
-//    {
-//      this->nav_mesh = model.verts[0];
-//      this->nav_mesh_count = model.triangle_count[0];
-//    }
-//  }
-
   // Audio Test
   {
     ROA::Audio_source audio_src("/Users/PhilCK/Desktop/test.ogg");
@@ -317,7 +301,7 @@ Actor_kinematic::on_start()
   {
     ROA::Transform trans;
     
-    float pos[] = {1.f, 0.f, 0.f};
+    float pos[] = {0.f, 0.f, 0.f};
     float scale[] = {1.f, 1.f, 1.f};
     float rot[] = {0.f, 0.f, 0.f, 1.f};
     
@@ -339,7 +323,7 @@ Actor_kinematic::on_start()
     {
       ROA::Transform trans;
       
-      float pos[]   = {0.f, math::g_ratio() * 2, 0.f};
+      float pos[]   = {0.f, this->height, 0.f};
       float scale[] = {1.f, 1.f, 1.f};
       float rot[]   = {0.f, 0.f, 0.f, 1.f};
       
