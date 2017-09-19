@@ -102,7 +102,7 @@ set(Node &node, const Renderable_text &in)
 
 
 void
-remove_renderable(Node &node)
+remove_renderable_text(Node &node)
 {
   get_mat_data().remove_data(node);
 }

@@ -127,6 +127,12 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
       (uintptr_t)self,
       think
     );
+    
+    Nil::Task::gpu_task(
+      Nil::Task::GPU::PRE_RENDER,
+      (uintptr_t)self,
+      generate_text_meshes
+    );
 
     #ifndef NVRSUPPORT
     if(self->vr_device)
@@ -178,6 +184,23 @@ shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 // ------------------------------------------------------- [ Renderer Tasks ] --
+
+
+void
+generate_text_meshes(Nil::Engine &engine, uintptr_t user_data)
+{
+  BENCH_SCOPED_CPU(GenerateTextMesh_data);
+  
+  // Handle strings
+  {
+    size_t count = 0;
+    Nil::Data::Renderable_text *win = nullptr;
+    Nil::Data::get(&count, &win);
+    
+    // If needs updated then process //
+    
+  }
+}
 
 
 void

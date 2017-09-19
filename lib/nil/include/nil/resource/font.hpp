@@ -23,6 +23,10 @@ struct Font
   // -- Output -- //
   enum { PENDING, LOADED, FAILED, STATUS_COUNT } status;
   
+  uint32_t *glyph_data;
+  size_t    glyph_data_count;
+  
+  uint32_t      texture_id;
   const char    *typeface_name;
   uint32_t      glyph_count;
   uintptr_t     platform_resource;

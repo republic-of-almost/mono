@@ -126,6 +126,10 @@ void
 think(Nil::Engine &engine, uintptr_t user_data);
 
 
+void
+generate_text_meshes(Nil::Engine &engine, uintptr_t user_data);
+
+
 // -- Optional Tasks -- //
 
 

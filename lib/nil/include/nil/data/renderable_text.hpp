@@ -19,6 +19,7 @@ struct Renderable_text
   
   // -- Output -- //
   
+  uint32_t      mesh_id;
   float         world_mat[16];
 
 };
