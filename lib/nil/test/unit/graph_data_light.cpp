@@ -1,7 +1,8 @@
 #include <catch/catch.hpp>
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
-#include <nil/data/data.hpp>
+#include <nil/data/light.hpp>
+#include <nil/data/transform.hpp>
 
 
 TEST_CASE("Data - Light")
@@ -49,8 +50,6 @@ TEST_CASE("Data - Light")
       REQUIRE(light.atten_const == 1.f);
       REQUIRE(light.atten_linear == 2.f);
       REQUIRE(light.atten_exponential == 3.f);
-      
-      Nil::Data::set(node, light);
     }
     
     // Check

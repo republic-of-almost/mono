@@ -17,6 +17,7 @@
 #include "logic.hpp"
 #include "mouse.hpp"
 #include "renderable.hpp"
+#include "renderable_text.hpp"
 #include "transform.hpp"
 #include "window.hpp"
 
