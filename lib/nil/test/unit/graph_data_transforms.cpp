@@ -47,14 +47,14 @@ TEST_CASE("Graph Data Transforms")
       Nil::Data::set(child, child_trans);
       
       Nil::Data::Transform gran_world_trans{};
-      Nil::Data::get(gran_child, gran_world_trans, true);
+      Nil::Data::get(gran_child, gran_world_trans);
       
       float expected_01[] {0.f, 1.f, 0.f};
       
       REQUIRE(
         math::vec3_is_near(
           math::vec3_init(expected_01),
-          math::vec3_init(gran_world_trans.position)
+          math::vec3_init(gran_world_trans.world_position)
         )
       );
     }
@@ -70,24 +70,24 @@ TEST_CASE("Graph Data Transforms")
       float expected_02[] {0.f, 2.f, 0.f};
       
       Nil::Data::Transform child_world_trans{};
-      Nil::Data::get(child, child_world_trans, true);
+      Nil::Data::get(child, child_world_trans);
       
       REQUIRE(
         math::vec3_is_near(
           math::vec3_init(expected_02),
-          math::vec3_init(child_world_trans.position)
+          math::vec3_init(child_world_trans.world_position)
         )
       );
       
       Nil::Data::Transform gran_world_trans;
-      Nil::Data::get(gran_child, gran_world_trans, true);
+      Nil::Data::get(gran_child, gran_world_trans);
       
       float expected_03[] {0.f, 2.f, 0.f};
       
       REQUIRE(
         math::vec3_is_near(
           math::vec3_init(expected_03),
-          math::vec3_init(gran_world_trans.position)
+          math::vec3_init(gran_world_trans.world_position)
         )
       );
     }

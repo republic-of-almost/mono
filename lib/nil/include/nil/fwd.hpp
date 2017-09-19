@@ -1,3 +1,11 @@
+/*
+  fwd.hpp
+  --
+  This files fwd declears all nil types and includes very common headers.
+  It also contains some basic/common types.
+  
+  Be wary about what you put in here.
+*/
 #ifndef FWD_INCLUDED_22AF1857_0685_4D1B_849A_F3380F902EF1
 #define FWD_INCLUDED_22AF1857_0685_4D1B_849A_F3380F902EF1
 
@@ -58,7 +66,7 @@ enum ENUM : uint32_t {
 namespace Status {
 enum ENUM : uint32_t {
   PENDING     = 1 << 0,
-  ERR       = 1 << 1,
+  ERR         = 1 << 1,
   OK          = 1 << 2,
   UNKNOWN     = 1 << 3,
   NOT_FOUND   = 1 << 4,

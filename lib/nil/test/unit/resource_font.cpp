@@ -1,46 +1,46 @@
 #include <catch/catch.hpp>
 #include <nil/nil.hpp>
-#include <nil/resource/audio.hpp>
+#include <nil/resource/font.hpp>
 #include <lib/logging.hpp>
 
 
-TEST_CASE("Resource - Audio")
+TEST_CASE("Resource - Font")
 {
   Nil::Engine nil_engine;
   lib::logging::set_output(0);
   
   SECTION("Initial")
   {
-    REQUIRE(Nil::Resource::audio_count() == 1);
-    REQUIRE(strcmp(Nil::Resource::get_type_name(Nil::Resource::Audio{}), "Audio") == 0);
+    REQUIRE(Nil::Resource::font_count() == 1);
+    REQUIRE(strcmp(Nil::Resource::get_type_name(Nil::Resource::Font{}), "Font") == 0);
   }
   
   SECTION("Load Pass")
   {
-    Nil::Resource::Audio data{};
-    data.name = "audio_to_pass";
+    Nil::Resource::Font data{};
+    data.name = "my_title_font";
     
     const char *filename = "some_filename";
     data.data = (uintptr_t)filename;
     data.data_size = strlen(filename) + 1;
-    data.data_type = Nil::Resource::Audio::FILENAME;
+    data.data_type = Nil::Resource::Font::FILENAME;
     
     const bool loaded = Nil::Resource::load(data);
     
     REQUIRE(loaded == true);
-    REQUIRE(Nil::Resource::audio_count() == 2);
+    REQUIRE(Nil::Resource::font_count() == 2);
     REQUIRE(data.id > 0);
   }
   
-  SECTION("Load Fail")
+  SECTION("Load fail")
   {
-    Nil::Resource::Audio data{};
-    data.name = "audio_to_fail";
+    Nil::Resource::Font data{};
+    data.name = "font_to_fail";
     
     const char *filename = "some_other_filename";
     data.data = (uintptr_t)filename;
     data.data_size = strlen(filename) + 1;
-    data.data_type = Nil::Resource::Audio::FILENAME;
+    data.data_type = Nil::Resource::Font::FILENAME;
     
     const bool should_pass = Nil::Resource::load(data);
     const bool should_fail = Nil::Resource::load(data);
