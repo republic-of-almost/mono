@@ -8,9 +8,6 @@
 #include <lib/utilities.hpp>
 #include "common.hpp"
 
-#include <stdint.h>
-#include <stddef.h>
-
 
 // ----------------------------------------------------------------- [ Data ] --
 

@@ -29,6 +29,7 @@ struct Aspect;
 namespace Resource {
 
 struct Audio;
+struct Font;
 struct Material;
 struct Mesh;
 struct Texture;
@@ -49,6 +50,7 @@ struct Light;
 struct Logic;
 struct Mouse;
 struct Renderable;
+struct Renderable_text;
 struct Rigidbody;
 struct Transform;
 struct Window;
