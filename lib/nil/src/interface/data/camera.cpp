@@ -28,13 +28,13 @@ get_camera_data()
       Nil::Data::Transform trans;
       Nil::Data::get(node, trans);
 
-      math::transform internal_trans = math::transform_init(
-      math::vec3_init(trans.world_position),
-      math::vec3_init(trans.world_scale),
-      math::quat_init(trans.world_rotation[0], trans.world_rotation[1], trans.world_rotation[2], trans.world_rotation[3])
+      const math::transform internal_trans = math::transform_init(
+        math::vec3_init(trans.world_position),
+        math::vec3_init(trans.world_scale),
+        math::quat_init(trans.world_rotation)
       );
 
-      math::mat4 view = transform_lookat_matrix(internal_trans, math::vec3_init(0,0,1), math::vec3_init(0,1,0));
+      const math::mat4 view = transform_lookat_matrix(internal_trans);
 
       memcpy(
         data->data[index].view_mat,
@@ -93,7 +93,7 @@ set(Node &node, const Camera &in)
   math::quat_init(trans.world_rotation[0], trans.world_rotation[1], trans.world_rotation[2], trans.world_rotation[3])
   );
 
-  math::mat4 view = transform_lookat_matrix(internal_trans, math::vec3_init(1,0,0), math::vec3_init(0,1,0));
+  math::mat4 view = transform_lookat_matrix(internal_trans);
 
   memcpy(
     cpy.view_mat,

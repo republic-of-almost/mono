@@ -6,6 +6,7 @@
 #include <nil/data/renderable.hpp>
 #include <nil/data/transform.hpp>
 #include <nil/data/light.hpp>
+#include <nil/data/camera.hpp>
 #include <lib/string.hpp>
 #include <lib/file.hpp>
 #include <lib/logging.hpp>
@@ -224,6 +225,7 @@ load_gltf(Nil::Node root_node, const char *path)
   {
     int32_t mesh;
     int32_t light;
+    int32_t camera;
     
     char name[64];
     
@@ -292,6 +294,17 @@ load_gltf(Nil::Node root_node, const char *path)
     uint32_t source;
   };
   
+  struct gltf_camera
+  {
+    char name[64];
+    float near_plane;
+    float far_plane;
+    float yfov;
+    float aspect_ratio;
+    enum {PERP, ORTHO} type;
+  };
+
+  
   // -- Extensions -- //
   
   lib::array<gltf_asset>        assets;
@@ -305,7 +318,9 @@ load_gltf(Nil::Node root_node, const char *path)
   lib::array<gltf_sampler>      samplers;
   lib::array<gltf_texture>      textures;
   lib::array<gltf_material>     materials;
+//  lib::array<gltf_camera>       cameras;
   
+  lib::array<Nil::Data::Camera> cameras;
   lib::array<Nil::Data::Light>  lights;
 
   // --
@@ -816,6 +831,76 @@ load_gltf(Nil::Node root_node, const char *path)
     }
     
     /*
+      Cameras
+    */
+    else if(json_obj_name(json_gltf_element, "cameras"))
+    {
+      const json_array_element_s *json_cam_node = json_arr_element(json_gltf_element);
+      
+      while(json_cam_node != nullptr)
+      {
+        Nil::Data::Camera cam{};
+        cam.clear_color_buffer = true;
+        cam.clear_depth_buffer = true;
+        cam.width = 1.f;
+        cam.height = 1.f;
+        cam.priority = 1;
+        
+        const json_object_element_s *json_node_attr = json_obj_element(json_cam_node->value);
+        
+        while(json_node_attr != nullptr)
+        {
+          if(json_obj_name(json_node_attr, "name"))
+          {
+//            size_t data_length = 0;
+//            const char *data = json_to_string(json_node_attr->value, &data_length);
+//            
+//            const size_t len = data_length > 63 ? 63 : data_length;
+//            memcpy(cam.name, data, len);
+          }
+          else if(json_obj_name(json_node_attr, "perspective"))
+          {
+            const json_object_element_s *json_persp_attr = json_obj_element(json_node_attr->value);
+            
+            while(json_persp_attr != nullptr)
+            {
+              if(json_obj_name(json_persp_attr, "aspectRatio"))
+              {
+//                cam.aspect_ratio = json_to_float(json_persp_attr->value);
+              }
+              else if(json_obj_name(json_persp_attr, "yfov"))
+              {
+//                cam.yfov = json_to_float(json_persp_attr->value);
+                cam.fov = json_to_float(json_persp_attr->value);
+              }
+              else if(json_obj_name(json_persp_attr, "zfar"))
+              {
+//                cam.far_plane = json_to_float(json_persp_attr->value);
+                cam.far_plane = json_to_float(json_persp_attr->value);
+              }
+              else if(json_obj_name(json_persp_attr, "znear"))
+              {
+//                cam.near_plane = json_to_float(json_persp_attr->value);
+                cam.near_plane = json_to_float(json_persp_attr->value);
+              }
+              
+              json_persp_attr = json_persp_attr->next;
+            }
+          }
+          else if(json_obj_name(json_node_attr, "type"))
+          {
+            
+          }
+          
+          json_node_attr = json_node_attr->next;
+        }
+        
+        cameras.emplace_back(cam);
+        json_cam_node = json_cam_node->next;
+      }
+    }
+    
+    /*
       Parse Nodes
     */
     else if(json_obj_name(json_gltf_element, "nodes"))
@@ -827,6 +912,7 @@ load_gltf(Nil::Node root_node, const char *path)
         gltf_node node{};
         node.mesh = -1;
         node.light = -1;
+        node.camera = -1;
         node.scale[0] = 1.f; node.scale[1] = 1.f; node.scale[2] = 1.f;
         node.rotation[0] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 0.f; node.rotation[3] = 1.f;
         
@@ -945,8 +1031,7 @@ load_gltf(Nil::Node root_node, const char *path)
           }
           else if(json_obj_name(json_node_attr, "camera"))
           {
-            // Later
-            LOG_TODO_ONCE("Caemra")
+            node.camera = json_to_int(json_node_attr->value);
           }
           else
           {
@@ -1292,6 +1377,14 @@ load_gltf(Nil::Node root_node, const char *path)
         const Nil::Data::Light light_data = lights[light_index];
       
         Nil::Data::set(node, light_data);
+      }
+      
+      if(nodes[i].camera != -1)
+      {
+        const size_t camera_index = nodes[i].camera;
+        const Nil::Data::Camera camera_data = cameras[camera_index];
+        
+        Nil::Data::set(node, camera_data);
       }
       
       if(nodes[i].child_size > 0)

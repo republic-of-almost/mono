@@ -289,33 +289,33 @@ mat4_rotate_around_axis(const vec3 axis, const float radians)
 mat4
 mat4_lookat(const vec3 eye_position, const vec3 look_at_position, const vec3 up)
 {
-  const MATH_NS_NAME::vec3 z_axis = MATH_NS_NAME::vec3_normalize(vec3_subtract(look_at_position, eye_position));
-  const MATH_NS_NAME::vec3 x_axis = MATH_NS_NAME::vec3_normalize(vec3_cross(z_axis, up));
-  const MATH_NS_NAME::vec3 y_axis = MATH_NS_NAME::vec3_cross(x_axis, z_axis);
+  const MATH_NS_NAME::vec3 z_axis = MATH_NS_NAME::vec3_normalize(vec3_subtract(eye_position, look_at_position));
+  const MATH_NS_NAME::vec3 x_axis = MATH_NS_NAME::vec3_normalize(vec3_cross(up, z_axis));
+  const MATH_NS_NAME::vec3 y_axis = MATH_NS_NAME::vec3_cross(z_axis, x_axis);
 
   const float array_mat[16] =
   {
     +MATH_NS_NAME::vec3_get_x(x_axis),
     +MATH_NS_NAME::vec3_get_x(y_axis),
-    -MATH_NS_NAME::vec3_get_x(z_axis),
+    +MATH_NS_NAME::vec3_get_x(z_axis),
     0.f,
 
     +MATH_NS_NAME::vec3_get_y(x_axis),
     +MATH_NS_NAME::vec3_get_y(y_axis),
-    -MATH_NS_NAME::vec3_get_y(z_axis),
+    +MATH_NS_NAME::vec3_get_y(z_axis),
     0.f,
 
     +MATH_NS_NAME::vec3_get_z(x_axis),
     +MATH_NS_NAME::vec3_get_z(y_axis),
-    -MATH_NS_NAME::vec3_get_z(z_axis),
+    +MATH_NS_NAME::vec3_get_z(z_axis),
     0.f,
 
     -(MATH_NS_NAME::vec3_dot(x_axis, eye_position)),
     -(MATH_NS_NAME::vec3_dot(y_axis, eye_position)),
-    +(MATH_NS_NAME::vec3_dot(z_axis, eye_position)),
+    -(MATH_NS_NAME::vec3_dot(z_axis, eye_position)),
     1.f,
   };
-
+  
   return MATH_NS_NAME::mat4_init(array_mat);
 }
 

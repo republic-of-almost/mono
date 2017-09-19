@@ -22,6 +22,7 @@ _MATH_NS_OPEN
 // Interface
 
 inline quat             quat_init();
+inline quat             quat_init(const float data[4]);
 inline quat             quat_init(const float x, const float y, const float z, const float w);
 inline quat             quat_init_with_axis_angle(const float x, const float y, const float z, const float theta_radians);
 inline quat             quat_init_with_axis_angle(const vec3 axis, const float theta_radians);
@@ -72,6 +73,13 @@ quat
 quat_init()
 {
   return quat_init(0,0,0,1);
+}
+
+
+quat
+quat_init(const float data[4])
+{
+  return quat_init(data[0], data[1], data[2], data[3]);
 }
 
 
@@ -141,13 +149,6 @@ quat_init_with_euler_angles(const float pitch_radians, const float yaw_radians, 
   const float z = sz * cy * cx - cz * sy * sz;
 
   return quat_init(x, y, z, w);
-}
-
-
-quat
-quat_init(const float rot[])
-{
-  return quat_init(rot[0],rot[1],rot[2],rot[3]);
 }
 
 

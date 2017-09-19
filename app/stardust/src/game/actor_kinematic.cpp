@@ -43,7 +43,7 @@ Actor_kinematic::on_think()
     );
 
     ROA::Transform trans = entity.get_transform();
-    trans.set_rotation(ROA::Quaternion(yaw.data));
+    //trans.set_rotation(ROA::Quaternion(yaw.data));
   }
   
   // Head trans
@@ -54,7 +54,7 @@ Actor_kinematic::on_think()
     );
 
     ROA::Transform trans = this->head.get_transform();
-    trans.set_rotation(ROA::Quaternion(pitch.data));
+    //trans.set_rotation(ROA::Quaternion(pitch.data));
   }
   
   // Movement
@@ -166,7 +166,7 @@ Actor_kinematic::on_think()
 
       const math::vec3 pos = hit;
       
-      trans.set_position(ROA::Vector3(pos.data));
+      //trans.set_position(ROA::Vector3(pos.data));
     }
     
     /*
