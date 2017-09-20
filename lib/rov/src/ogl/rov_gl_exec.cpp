@@ -162,22 +162,32 @@ ogl_exec(
         
         for(uint8_t t = 0; t < rov_max_texture_maps; ++t)
         {
+          glActiveTexture(GL_TEXTURE0 + texture_slots);
+        
           if(texture_maps[t] && shd.uni_tex[t] != -1)
           {
-            const size_t texture_index = texture_maps[t]  - 1;
+            const size_t texture_index = texture_maps[t] - 1;
 
             if(texture_index < rov_gl_data->rov_textures.size())
             {
               const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
               
-              glActiveTexture(GL_TEXTURE0 + texture_slots);
               glBindTexture(GL_TEXTURE_2D, tex.gl_id);
-              
               glUniform1i(shd.uni_tex[t], texture_slots);
-              
-              ++texture_slots;
+            }
+            else
+            {
+              glBindTexture(GL_TEXTURE_2D, rov_gl_data->dummy_texture);
+              glUniform1i(shd.uni_tex[t], texture_slots);
             }
           }
+          else
+          {
+            glBindTexture(GL_TEXTURE_2D, rov_gl_data->dummy_texture);
+            glUniform1i(shd.uni_tex[t], texture_slots);
+          }
+          
+          ++texture_slots;
         }
         
         /*

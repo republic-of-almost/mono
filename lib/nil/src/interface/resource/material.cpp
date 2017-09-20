@@ -16,7 +16,7 @@ namespace {
 struct Material_data
 {
   lib::array<uint32_t, 128> keys{uint32_t{0}};
-  lib::array<Nil::Resource::Material, 128> materials{Nil::Resource::Material{}};
+  lib::array<Nil::Resource::Material, 128> materials{Nil::Resource::Material{"", 0xFFFFFFFF}};
 };
 
 

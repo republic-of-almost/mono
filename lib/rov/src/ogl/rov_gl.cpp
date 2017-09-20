@@ -30,6 +30,14 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
   glGenVertexArrays(1, &gl_data->vao);
   glBindVertexArray(gl_data->vao);
   #endif
+  
+  // Dummy texture //
+  {
+    // 2 x 2 texture
+    uint8_t data[2 * 2 * 4]{};
+    
+    ogl_createTexture(gl_data, data, 2, 2, 2 * 2 * 4, rovPixel_RGBA8, (uintptr_t*)&gl_data->dummy_texture);
+  }
 
   // Mesh Shaders //
   {

@@ -108,6 +108,7 @@ struct rovGLLightPack
 struct rovGLData
 {
   GLuint vao;
+  GLuint dummy_texture;
 
   lib::array<rovGLTexture>      rov_textures;
   lib::array<rovGLMesh>         rov_meshes;

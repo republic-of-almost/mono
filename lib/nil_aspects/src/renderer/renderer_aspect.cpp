@@ -766,6 +766,8 @@ think(Nil::Engine &engine, uintptr_t user_data)
 
   for(uint32_t j = 0; j < cam_count; ++j)
   {
+    rov_resetState();
+  
     Nil::Data::Camera cam = cameras[j];
 
     uint32_t clear_flags = 0;
@@ -852,8 +854,8 @@ think(Nil::Engine &engine, uintptr_t user_data)
       const uint32_t viewport[4] {
         0,
         0,
-        self->current_viewport[0],
-        self->current_viewport[1]
+        j == 0 ? self->current_viewport[0] : self->current_viewport[0] / 2,
+        j == 0 ? self->current_viewport[1] : self->current_viewport[1] / 2
       };
 
       rov_setColor(cam.clear_color);

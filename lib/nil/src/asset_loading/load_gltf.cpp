@@ -1243,6 +1243,7 @@ load_gltf(Nil::Node root_node, const char *path)
   for(auto &mat : materials)
   {
     Nil::Resource::Material data{};
+    data.color = 0xFFFFFFFF;
     
     data.name = mat.name;
     

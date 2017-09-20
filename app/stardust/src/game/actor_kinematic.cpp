@@ -81,13 +81,6 @@ Actor_kinematic::on_think()
       {
         x_move += 1.f;
       }
-      if(ROA::Keyboard::key_state(ROA::KeyCode::UP) == ROA::KeyState::UP_ON_FRAME)
-      {
-        ROA::Camera cam = camera.get_camera();
-        cam.set_priority(cam.get_priority() == 0 ? -2 : 0);
-      }
-      
-    
     
       // Toggle mouse capture //
       #ifndef LIB_PLATFORM_WEB

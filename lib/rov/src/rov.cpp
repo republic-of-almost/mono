@@ -336,6 +336,22 @@ rov_startRenderPass(
 
 
 void
+rov_resetState()
+{
+//  get_rov_data().rov_data = ROV_Internal::rovData{};
+  
+  get_rov_data().rov_data.curr_rov_rasterizer = rovRasterizer{};
+  memset(get_rov_data().rov_data.curr_rov_clear_color, 0, sizeof(get_rov_data().rov_data.curr_rov_clear_color));
+  memset(get_rov_data().rov_data.curr_rov_color, 0xFF, sizeof(get_rov_data().rov_data.curr_rov_color));
+  memset(get_rov_data().rov_data.curr_rov_textures, 0, sizeof(get_rov_data().rov_data.curr_rov_textures));
+  get_rov_data().rov_data.curr_rov_mesh = 0;
+  get_rov_data().rov_data.curr_rov_index = 0;
+  get_rov_data().rov_data.curr_rov_mesh_shader = rovShader_Fullbright;
+  get_rov_data().rov_data.curr_rov_framebuffer = 0;
+}
+
+
+void
 rov_setRasterizer(rovRasterizer rasterizer)
 {
   get_rov_data().rov_data.curr_rov_rasterizer = rasterizer;

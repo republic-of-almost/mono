@@ -115,6 +115,7 @@ void        rov_startRenderPass(
 
 // ----------------------------------------------------- [ General Settings ] --
 
+void        rov_resetState();
 
 void        rov_setRasterizer(rovRasterizer rasterizer);
 
