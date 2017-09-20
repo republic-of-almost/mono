@@ -112,14 +112,14 @@ set(Node &node, const Camera &in)
   
     for(int i = 0; i < count; ++i)
     {
-      for(int j = 1; j < count; ++j)
+      for(int j = i; j < count; ++j)
       {
         const uint32_t priority_a = cam[i].priority;
         const uint32_t priority_b = cam[j].priority;
       
         if(priority_b < priority_a)
         {
-          const uint32_t key_temp = keys[i];
+          const uint32_t key_temp          = keys[i];
           const Nil::Data::Camera cam_temp = cam[i];
           
           keys[i] = keys[j];

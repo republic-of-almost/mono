@@ -84,7 +84,7 @@ Actor_kinematic::on_think()
       if(ROA::Keyboard::key_state(ROA::KeyCode::UP) == ROA::KeyState::UP_ON_FRAME)
       {
         ROA::Camera cam = camera.get_camera();
-        cam.set_priority(cam.get_priority() > 0 ? 0 : 100);
+        cam.set_priority(cam.get_priority() > 0 ? 0 : 2);
       }
       
     
