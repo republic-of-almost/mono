@@ -155,20 +155,27 @@ ogl_exec(
       {
         uint32_t texture_slots = 0;
         
+        // -- Texture Maps -- //
         /*
-          Texture Maps
+          Bind the texture to the texture slots, if a texture can't be found
+          or there is none, we bind a dummy transparent texture, this allows the
+          shader to be able to try and select the materials color.
         */
-        const uint8_t texture_maps[] = { texture_01, texture_02, texture_03 };
-        
-        for(uint8_t t = 0; t < rov_max_texture_maps; ++t)
         {
-          glActiveTexture(GL_TEXTURE0 + texture_slots);
-        
-          if(texture_maps[t] && shd.uni_tex[t] != -1)
+          const uint8_t texture_maps[] = { texture_01, texture_02, texture_03 };
+          
+          for(uint8_t t = 0; t < rov_max_texture_maps; ++t)
           {
+            glActiveTexture(GL_TEXTURE0 + texture_slots);
+            
             const size_t texture_index = texture_maps[t] - 1;
-
-            if(texture_index < rov_gl_data->rov_textures.size())
+            const size_t texture_size  = rov_gl_data->rov_textures.size();
+            
+            const bool has_texture_map     = !!texture_maps[t];
+            const bool has_texture_uniform = shd.uni_tex[t] != -1;
+            const bool texture_in_bounds   = texture_index < texture_size;
+            
+            if(has_texture_map && has_texture_uniform && texture_in_bounds)
             {
               const rovGLTexture tex = rov_gl_data->rov_textures[texture_index];
               
@@ -180,14 +187,9 @@ ogl_exec(
               glBindTexture(GL_TEXTURE_2D, rov_gl_data->dummy_texture);
               glUniform1i(shd.uni_tex[t], texture_slots);
             }
+            
+            ++texture_slots;
           }
-          else
-          {
-            glBindTexture(GL_TEXTURE_2D, rov_gl_data->dummy_texture);
-            glUniform1i(shd.uni_tex[t], texture_slots);
-          }
-          
-          ++texture_slots;
         }
         
         /*
