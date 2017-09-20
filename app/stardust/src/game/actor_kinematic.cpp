@@ -25,7 +25,7 @@ Actor_kinematic::on_think()
     const float head_speed = 0.05f;
     const float final_speed = delta_time * head_speed;
     
-    this->accum_pitch -= ms_delta.y * final_speed;
+    this->accum_pitch += ms_delta.y * final_speed;
     this->accum_yaw   += ms_delta.x * final_speed;
     
     this->accum_pitch = math::clamp(
@@ -43,7 +43,7 @@ Actor_kinematic::on_think()
     );
 
     ROA::Transform trans = entity.get_transform();
-    //trans.set_rotation(ROA::Quaternion(yaw.data));
+    trans.set_rotation(ROA::Quaternion(yaw.data));
   }
   
   // Head trans
@@ -54,7 +54,7 @@ Actor_kinematic::on_think()
     );
 
     ROA::Transform trans = this->head.get_transform();
-    //trans.set_rotation(ROA::Quaternion(pitch.data));
+    trans.set_rotation(ROA::Quaternion(pitch.data));
   }
   
   // Movement
@@ -67,19 +67,19 @@ Actor_kinematic::on_think()
       if(ROA::Keyboard::key_state(ROA::KeyCode::W) == ROA::KeyState::DOWN)
       {
         player.play();
-        z_move += 1.f;
+        z_move -= 1.f;
       }
       if(ROA::Keyboard::key_state(ROA::KeyCode::S) == ROA::KeyState::DOWN)
       {
-        z_move -= 1.f;
+        z_move += 1.f;
       }
       if(ROA::Keyboard::key_state(ROA::KeyCode::A) == ROA::KeyState::DOWN)
       {
-        x_move += 1.f;
+        x_move -= 1.f;
       }
       if(ROA::Keyboard::key_state(ROA::KeyCode::D) == ROA::KeyState::DOWN)
       {
-        x_move -= 1.f;
+        x_move += 1.f;
       }
     
     
@@ -166,7 +166,7 @@ Actor_kinematic::on_think()
 
       const math::vec3 pos = hit;
       
-      //trans.set_position(ROA::Vector3(pos.data));
+      trans.set_position(ROA::Vector3(pos.data));
     }
     
     /*

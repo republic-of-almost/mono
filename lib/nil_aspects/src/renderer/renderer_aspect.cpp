@@ -764,7 +764,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
   Nil::Resource::Material *mats;
   Nil::Resource::get(&mat_count, &mats);
 
-  for(uint32_t j = 0; j < 1; ++j)
+  for(uint32_t j = 0; j < cam_count; ++j)
   {
     Nil::Data::Camera cam = cameras[j];
 
