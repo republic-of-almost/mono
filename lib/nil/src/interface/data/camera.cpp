@@ -102,6 +102,37 @@ set(Node &node, const Camera &in)
   );
 
   get_camera_data().set_data(node, cpy);
+  
+  // -- Resort in order of priority -- //
+  {
+    const size_t count = get_camera_data().keys.size();
+    
+    Nil::Data::Camera *cam = get_camera_data().data.data();
+    uint32_t *keys = get_camera_data().keys.data();
+  
+    for(int i = 0; i < count; ++i)
+    {
+      for(int j = 1; j < count; ++j)
+      {
+        const uint32_t priority_a = cam[i].priority;
+        const uint32_t priority_b = cam[j].priority;
+      
+        if(priority_b < priority_a)
+        {
+          const uint32_t key_temp = keys[i];
+          const Nil::Data::Camera cam_temp = cam[i];
+          
+          keys[i] = keys[j];
+          cam[i] = cam[j];
+          
+          keys[j] = key_temp;
+          cam[j] = cam_temp;
+        }
+      }
+    }
+  }
+
+  
 }
 
 

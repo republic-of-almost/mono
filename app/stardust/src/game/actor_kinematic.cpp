@@ -81,6 +81,12 @@ Actor_kinematic::on_think()
       {
         x_move += 1.f;
       }
+      if(ROA::Keyboard::key_state(ROA::KeyCode::UP) == ROA::KeyState::UP_ON_FRAME)
+      {
+        ROA::Camera cam = camera.get_camera();
+        cam.set_priority(cam.get_priority() > 0 ? 0 : 100);
+      }
+      
     
     
       // Toggle mouse capture //
@@ -336,9 +342,9 @@ Actor_kinematic::on_start()
     
     // Camera
     {
-      ROA::Object camera;
-      camera.set_name("Camera");
-      camera.set_parent(head);
+      ROA::Object cam;
+      cam.set_name("Camera");
+      cam.set_parent(head);
     
       // Transform
       {
@@ -347,7 +353,7 @@ Actor_kinematic::on_start()
         float rot[] = {0.f, 0.f, 0.f, 1.f};
         trans.set_rotation(ROA::Quaternion(rot));
         
-        camera.set_transform(trans);
+        cam.set_transform(trans);
       }
       
       // Camera
@@ -356,10 +362,10 @@ Actor_kinematic::on_start()
         cam_data.set_field_of_view(math::tau() * 0.12f);
         cam_data.set_clear_color(ROA::Color(0x111122FF));
         
-        camera.set_camera(cam_data);
+        cam.set_camera(cam_data);
       }
       
-      
+      this->camera = cam;
     } // cam
   } // head
   

@@ -31,6 +31,7 @@ struct Actor_kinematic : public ROA::Component
   
   ROA::Object     body{nullptr};
   ROA::Object     head{nullptr};
+  ROA::Object     camera{nullptr};
   
   ROA::Audio_player player;
   

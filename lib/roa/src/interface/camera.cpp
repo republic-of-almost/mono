@@ -38,6 +38,26 @@ Camera::~Camera()
 // ----------------------------------------------------------- [ Attributes ] --
 
 
+uint32_t
+Camera::get_priority() const
+{
+  Nil::Data::Camera data{};
+  ROA_detail::get_nil_data(*this, data);
+  
+  return data.priority;
+}
+
+
+void
+Camera::set_priority(const uint32_t priority)
+{
+  Nil::Data::Camera data{};
+  ROA_detail::get_nil_data(*this, data);
+  data.priority = priority;
+  ROA_detail::set_nil_data(*this, data);
+}
+
+
 float
 Camera::get_field_of_view() const
 {

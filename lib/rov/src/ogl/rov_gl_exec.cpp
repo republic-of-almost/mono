@@ -62,7 +62,7 @@ ogl_exec(
       Clear buffers
     */
     GLbitfield cl_flags = 0;
-    if(rp.clear_flags & rovClearFlag_Color) { cl_flags |= GL_COLOR_BUFFER_BIT; }
+//    if(rp.clear_flags & rovClearFlag_Color) { cl_flags |= GL_COLOR_BUFFER_BIT; }
     if(rp.clear_flags & rovClearFlag_Depth) { cl_flags |= GL_DEPTH_BUFFER_BIT; }
 
     const float cl_color[4]

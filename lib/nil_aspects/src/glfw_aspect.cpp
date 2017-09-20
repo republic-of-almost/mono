@@ -93,6 +93,11 @@ glfw_key_to_nil(const int glfw_key)
     case(GLFW_KEY_8) : return Nil::Data::KeyCode::EIGHT;
     case(GLFW_KEY_9) : return Nil::Data::KeyCode::NINE;
     case(GLFW_KEY_0) : return Nil::Data::KeyCode::ZERO;
+    
+    case(GLFW_KEY_UP)    : return Nil::Data::KeyCode::UP;
+    case(GLFW_KEY_DOWN)  : return Nil::Data::KeyCode::DOWN;
+    case(GLFW_KEY_LEFT)  : return Nil::Data::KeyCode::LEFT;
+    case(GLFW_KEY_RIGHT) : return Nil::Data::KeyCode::RIGHT;
 
     case(GLFW_KEY_F1)  : return Nil::Data::KeyCode::F1;
     case(GLFW_KEY_F2)  : return Nil::Data::KeyCode::F2;
