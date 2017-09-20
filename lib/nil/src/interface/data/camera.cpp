@@ -114,8 +114,8 @@ set(Node &node, const Camera &in)
     {
       for(int j = i; j < count; ++j)
       {
-        const uint32_t priority_a = cam[i].priority;
-        const uint32_t priority_b = cam[j].priority;
+        const int32_t priority_a = cam[i].priority;
+        const int32_t priority_b = cam[j].priority;
       
         if(priority_b < priority_a)
         {

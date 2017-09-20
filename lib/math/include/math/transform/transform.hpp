@@ -187,14 +187,14 @@ transform_world_fwd()
 vec3
 transform_world_up()
 {
-  return math::vec3_init(0.f,1.f,0.f);
+  return math::vec3_init(0.f,+1.f,0.f);
 }
 
 
 vec3
 transform_world_left()
 {
-  return math::vec3_init(1.f,0.f,0.f);
+  return math::vec3_init(+1.f,0.f,0.f);
 }
 
 

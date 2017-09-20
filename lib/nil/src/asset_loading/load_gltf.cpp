@@ -844,7 +844,7 @@ load_gltf(Nil::Node root_node, const char *path)
         cam.clear_depth_buffer = true;
         cam.width = 1.f;
         cam.height = 1.f;
-        cam.priority = 1;
+        cam.priority = -1;
         
         const json_object_element_s *json_node_attr = json_obj_element(json_cam_node->value);
         

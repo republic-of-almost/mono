@@ -38,7 +38,7 @@ Camera::~Camera()
 // ----------------------------------------------------------- [ Attributes ] --
 
 
-uint32_t
+int32_t
 Camera::get_priority() const
 {
   Nil::Data::Camera data{};
@@ -49,7 +49,7 @@ Camera::get_priority() const
 
 
 void
-Camera::set_priority(const uint32_t priority)
+Camera::set_priority(const int32_t priority)
 {
   Nil::Data::Camera data{};
   ROA_detail::get_nil_data(*this, data);

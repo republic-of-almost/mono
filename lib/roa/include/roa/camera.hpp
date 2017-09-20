@@ -24,8 +24,8 @@ public:
   // --------------------------------------------------------- [ Attributes ] --
 
   
-  uint32_t          get_priority() const;
-  void              set_priority(const uint32_t priority);
+  int32_t           get_priority() const;
+  void              set_priority(const int32_t priority);
   
   float             get_width() const;
   void              set_width(const float width);
