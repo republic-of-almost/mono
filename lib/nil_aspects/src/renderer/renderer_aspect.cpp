@@ -854,8 +854,8 @@ think(Nil::Engine &engine, uintptr_t user_data)
       const uint32_t viewport[4] {
         0,
         0,
-        j == 0 ? self->current_viewport[0] : self->current_viewport[0] / 2,
-        j == 0 ? self->current_viewport[1] : self->current_viewport[1] / 2
+        self->current_viewport[0],
+        self->current_viewport[1]
       };
 
       rov_setColor(cam.clear_color);
