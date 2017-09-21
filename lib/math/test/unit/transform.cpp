@@ -87,7 +87,7 @@ TEST_CASE("Transform")
     const math::transform trans = math::transform_init();
     const math::vec3 l_dir = math::transform_fwd(trans);
     
-    REQUIRE(math::vec3_is_near(w_dir, l_dir));
+    REQUIRE(math::vec3_is_near(w_dir, l_dir, 0.00001));
   }
   
   SECTION("up")
@@ -96,7 +96,7 @@ TEST_CASE("Transform")
     const math::transform trans = math::transform_init();
     const math::vec3 l_dir = math::transform_up(trans);
     
-    REQUIRE(math::vec3_is_near(w_dir, l_dir));
+    REQUIRE(math::vec3_is_near(w_dir, l_dir, 0.00001));
   }
   
   SECTION("left")
@@ -105,6 +105,6 @@ TEST_CASE("Transform")
     const math::transform trans = math::transform_init();
     const math::vec3 l_dir = math::transform_left(trans);
     
-    REQUIRE(math::vec3_is_near(w_dir, l_dir));
+    REQUIRE(math::vec3_is_near(w_dir, l_dir, 0.00001));
   }
 }
