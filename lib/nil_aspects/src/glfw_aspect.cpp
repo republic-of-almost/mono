@@ -177,6 +177,45 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         self->window = glfwCreateWindow(win_data.width, win_data.height, win_data.title, NULL, NULL);
         glfwSetWindowUserPointer(self->window, self);
 
+        {
+          int count = 0;
+          GLFWmonitor **mons = 	glfwGetMonitors (&count);
+          
+          int xpos, ypos;
+          glfwGetWindowPos(self->window, &xpos, &ypos);
+          
+          int width, height;
+          glfwGetWindowSize(self->window, &width, &height);
+          
+          int point_x = xpos + (width / 2);
+          int point_y = ypos + (height / 2);
+          
+          for(int i = 0; i < count; ++i)
+          {
+            int xpos, ypos;
+            glfwGetMonitorPos(mons[i], &xpos, &ypos);
+            
+            const GLFWvidmode *v_mode =	glfwGetVideoMode (mons[i]);
+            
+            if(point_x > xpos && point_x < xpos + v_mode->width)
+            {
+              if(point_y > ypos && point_y < xpos + v_mode->height)
+              {
+                const GLFWvidmode * mode = glfwGetVideoMode(mons[i]);
+                win_data.width = 3 * (mode->width / 4);
+                win_data.height = 3 * (mode->height / 4);
+                Nil::Data::set(self->window_node, win_data);
+                
+                glfwSetWindowSize(self->window, win_data.width, win_data.height);
+                
+                glfwSetWindowPos(self->window, xpos + ((mode->width - win_data.width) / 2), ypos + ((mode->height - win_data.height) / 2));
+                break;
+              }
+            }
+          };
+        }
+
+
         LIB_ASSERT(self->window);
 
         glfwMakeContextCurrent(self->window);
