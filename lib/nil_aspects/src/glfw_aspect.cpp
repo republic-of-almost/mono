@@ -165,56 +165,63 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         Nil::Data::Window win_data = data[0];
-
-        if(win_data.width == 0 || win_data.height == 0)
+        
+        // -- Create a small window -- //
         {
-          const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-          win_data.width = 3 * (mode->width / 4);
-          win_data.height = 3 * (mode->height / 4);
-          Nil::Data::set(self->window_node, win_data);
+          self->window = glfwCreateWindow(10, 10, win_data.title, NULL, NULL);
+          glfwSetWindowUserPointer(self->window, self);
         }
 
-        self->window = glfwCreateWindow(win_data.width, win_data.height, win_data.title, NULL, NULL);
-        glfwSetWindowUserPointer(self->window, self);
-
+        // -- Resize Window -- //
+        if(win_data.width == 0 && win_data.height == 0)
         {
           int count = 0;
-          GLFWmonitor **mons = 	glfwGetMonitors (&count);
+          GLFWmonitor **monitors = 	glfwGetMonitors(&count);
           
-          int xpos, ypos;
+          int xpos = 0;
+          int ypos = 0;
           glfwGetWindowPos(self->window, &xpos, &ypos);
           
-          int width, height;
+          int width = 0;
+          int height = 0;
           glfwGetWindowSize(self->window, &width, &height);
           
-          int point_x = xpos + (width / 2);
-          int point_y = ypos + (height / 2);
+          const int point_x = xpos + (width / 2);
+          const int point_y = ypos + (height / 2);
           
+          // Find the monitor the center of the app is on //
           for(int i = 0; i < count; ++i)
           {
             int xpos, ypos;
-            glfwGetMonitorPos(mons[i], &xpos, &ypos);
+            glfwGetMonitorPos(monitors[i], &xpos, &ypos);
             
-            const GLFWvidmode *v_mode =	glfwGetVideoMode (mons[i]);
+            const GLFWvidmode *v_mode =	glfwGetVideoMode (monitors[i]);
             
             if(point_x > xpos && point_x < xpos + v_mode->width)
             {
               if(point_y > ypos && point_y < xpos + v_mode->height)
               {
-                const GLFWvidmode * mode = glfwGetVideoMode(mons[i]);
-                win_data.width = 3 * (mode->width / 4);
-                win_data.height = 3 * (mode->height / 4);
-                Nil::Data::set(self->window_node, win_data);
+                const GLFWvidmode * mode = glfwGetVideoMode(monitors[i]);
+
+                // Update Node
+                {
+                  win_data.width  = 3 * (mode->width / 4);
+                  win_data.height = 3 * (mode->height / 4);
+                  
+                  Nil::Data::set(self->window_node, win_data);
+                }
+                
+                const int new_xpos = xpos + ((mode->width - win_data.width) / 2);
+                const int new_ypos = ypos + ((mode->height - win_data.height) / 2);
                 
                 glfwSetWindowSize(self->window, win_data.width, win_data.height);
+                glfwSetWindowPos(self->window, new_xpos, new_ypos);
                 
-                glfwSetWindowPos(self->window, xpos + ((mode->width - win_data.width) / 2), ypos + ((mode->height - win_data.height) / 2));
                 break;
               }
             }
-          };
+          }
         }
-
 
         LIB_ASSERT(self->window);
 
