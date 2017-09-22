@@ -108,6 +108,6 @@ TEST_CASE("Ray")
   {
     /*
       Test data needed.
-    */  
+    */
   }
 }
