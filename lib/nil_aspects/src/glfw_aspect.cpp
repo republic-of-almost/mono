@@ -202,20 +202,38 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
               if(point_y > ypos && point_y < xpos + v_mode->height)
               {
                 const GLFWvidmode * mode = glfwGetVideoMode(monitors[i]);
-
-                // Update Node
+                
+                const bool fullscreen = false; // temp hack
+                
+                if(!fullscreen)
                 {
-                  win_data.width  = 3 * (mode->width / 4);
-                  win_data.height = 3 * (mode->height / 4);
+                  // Update Node
+                  {
+                    win_data.width  = 3 * (mode->width / 4);
+                    win_data.height = 3 * (mode->height / 4);
+                    
+                    Nil::Data::set(self->window_node, win_data);
+                  }
                   
-                  Nil::Data::set(self->window_node, win_data);
+                  const int new_xpos = xpos + ((mode->width - win_data.width) / 2);
+                  const int new_ypos = ypos + ((mode->height - win_data.height) / 2);
+                  
+                  glfwSetWindowSize(self->window, win_data.width, win_data.height);
+                  glfwSetWindowPos(self->window, new_xpos, new_ypos);
                 }
-                
-                const int new_xpos = xpos + ((mode->width - win_data.width) / 2);
-                const int new_ypos = ypos + ((mode->height - win_data.height) / 2);
-                
-                glfwSetWindowSize(self->window, win_data.width, win_data.height);
-                glfwSetWindowPos(self->window, new_xpos, new_ypos);
+                else
+                {
+                  // Update Node
+                  {
+                    win_data.width      = mode->width;
+                    win_data.height     = mode->height;
+                    win_data.fullscreen = true;
+                    
+                    Nil::Data::set(self->window_node, win_data);
+                  }
+                  
+                  glfwSetWindowMonitor(self->window, monitors[i], 0, 0, mode->width, mode->height, mode->refreshRate);
+                }
                 
                 break;
               }
