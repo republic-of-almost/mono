@@ -42,7 +42,7 @@ main()
     const math::vec3 b = math::vec3_init(bb.get_max().get_x(), bb.get_max().get_y(), bb.get_max().get_z());
 
     const float y = (math::abs(math::get_y(a)) + math::abs(math::get_y(b))) * 0.7f;
-    const float z = (math::abs(math::get_z(a)) + math::abs(math::get_z(b))) * -4.f;
+    const float z = (math::abs(math::get_z(a)) + math::abs(math::get_z(b))) * 4.f;
 
     const ROA::Transform transform(
       ROA::Vector3(0.f, y, z),
