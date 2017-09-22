@@ -166,8 +166,10 @@ ray_test_aabb(const ray &in_ray, const aabb &box)
   
   t[1] = (get_x(box.min) - get_x(in_ray.start)) / get_x(ray_dir);
   t[2] = (get_x(box.max) - get_x(in_ray.start)) / get_x(ray_dir);
+  
   t[3] = (get_y(box.min) - get_y(in_ray.start)) / get_y(ray_dir);
   t[4] = (get_y(box.max) - get_y(in_ray.start)) / get_y(ray_dir);
+  
   t[5] = (get_z(box.min) - get_z(in_ray.start)) / get_z(ray_dir);
   t[6] = (get_z(box.max) - get_z(in_ray.start)) / get_z(ray_dir);
   
