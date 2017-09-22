@@ -14,8 +14,9 @@
   The inline for matrix functions
 */
 
-
+#ifndef MATH_MAT3_INLINE
 #define MATH_MAT3_INLINE inline
+#endif
 
 
 _MATH_NS_OPEN

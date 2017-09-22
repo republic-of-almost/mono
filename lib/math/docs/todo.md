@@ -24,3 +24,7 @@ SIMD
 
 ### Build docs and inlines
 need doc and tidy for inliness
+
+
+### Ray tests need to be split out
+Means we have to recompile alot more when a test is updated.

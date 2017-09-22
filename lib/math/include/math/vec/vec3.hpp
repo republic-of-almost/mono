@@ -26,7 +26,7 @@ MATH_VEC3_INLINE vec3                   vec3_zero_zero_one();
 // Initialize vector.
 MATH_VEC3_INLINE vec3                   vec3_init(const float val);
 MATH_VEC3_INLINE vec3                   vec3_init(const float x, const float y, const float z);
-MATH_VEC3_INLINE vec3                   vec3_init(const float *arr);
+MATH_VEC3_INLINE vec3                   vec3_init(const float arr[3]);
 
 // Get components.
 MATH_VEC3_INLINE float                  vec3_get_x(const vec3 vec);

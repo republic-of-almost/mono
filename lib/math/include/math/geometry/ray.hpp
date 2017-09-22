@@ -8,23 +8,42 @@
 #include "../mat/mat.hpp"
 #include "../general/general.hpp"
 
+
+// --------------------------------------------------------------- [ Config ] --
+/*
+  The inline for ray functions
+*/
+
+
+#ifndef MATH_RAY_INLINE
+#define MATH_RAY_INLINE inline
+#endif
+
+
 _MATH_NS_OPEN
 
 
-// ----------------------------------------------------------- [ Interface ] --
+// ----------------------------------------------------------- [ Initialize ] --
+/*
+  Initialize a ray.
+*/
 
 
-inline ray        ray_init(const vec3 start, const vec3 end);
-inline ray        ray_inverse(const ray &inverse);
-inline float      ray_length(const ray &ray);
-inline vec3       ray_direction(const ray &ray);
+MATH_RAY_INLINE ray        ray_init();
+MATH_RAY_INLINE ray        ray_init(const float start[3], const float end[3]);
+MATH_RAY_INLINE ray        ray_init(const vec3 start, const vec3 end);
 
-inline float      ray_test_aabb(const ray &ray, const aabb &target);
-inline bool       ray_test_plane(const ray &ray, const plane &target, float *out_distance = nullptr);
-inline bool       ray_test_triangles(const ray &in_ray, const float tris[], const size_t tri_count, float *out_distance = nullptr);
-inline bool       ray_test_closest_edge(const float tris[], const size_t tri_count, const vec3 point, vec3 &seg_a, vec3 &seg_b);
 
-inline ray        ray_from_perpective_viewport(
+// ----------------------------------------------------------- [ Operations ] --
+/*
+  Ray transforms to other data.
+*/
+
+
+MATH_RAY_INLINE ray        ray_inverse(const ray &inverse);
+MATH_RAY_INLINE float      ray_length(const ray &ray);
+MATH_RAY_INLINE vec3       ray_direction(const ray &ray);
+MATH_RAY_INLINE ray        ray_from_perpective_viewport(
   const float vp_width,
   const float vp_height,
   const float vp_coord_x,
@@ -35,42 +54,112 @@ inline ray        ray_from_perpective_viewport(
   const float distance);
 
 
+// ------------------------------------------------------------- [ Equality ] --
+/*
+  Test the state of a ray.
+*/
 
-// ---------------------------------------------------------------- [ Impl ] --
+
+MATH_RAY_INLINE bool       ray_is_near(const ray &a, const ray &b, const float error = MATH_NS_NAME::epsilon());
+
+
+// ----------------------------------------------------------------- [ Test ] --
+/*
+  Test a ray against various geometry.
+*/
+
+
+MATH_RAY_INLINE float      ray_test_aabb(const ray &ray, const aabb &target);
+MATH_RAY_INLINE bool       ray_test_plane(const ray &ray, const plane &target, float *out_distance = nullptr);
+
+MATH_RAY_INLINE bool       ray_test_triangles(const ray &in_ray, const float tris[], const size_t tri_count, float *out_distance = nullptr);
+MATH_RAY_INLINE bool       ray_test_closest_edge(const float tris[], const size_t tri_count, const vec3 point, vec3 &seg_a, vec3 &seg_b);
+
+
+// ------------------------------------------------------ [ Initialize Impl ] --
+
+
+ray
+ray_init()
+{
+  return MATH_NS_NAME::ray_init(
+    MATH_NS_NAME::vec3_zero(),
+    MATH_NS_NAME::vec3_zero()
+  );
+}
+
+
+ray
+ray_init(const float start[3], const float end[3])
+{
+  return MATH_NS_NAME::ray_init(
+    MATH_NS_NAME::vec3_init(start),
+    MATH_NS_NAME::vec3_init(end)
+  );
+}
 
 
 ray
 ray_init(const vec3 start, const vec3 end)
 {
-  return ray{start, end};
+  return MATH_NS_NAME::ray{
+    start,
+    end
+  };
 }
+
+
+// ------------------------------------------------------ [ Operations Impl ] --
 
 
 ray
 ray_inverse(const ray &ray)
 {
-  return ray_init(ray.end, ray.start);
+  return MATH_NS_NAME::ray_init(
+    ray.end,
+    ray.start
+  );
 }
 
 
 float
 ray_length(const ray &ray)
 {
-  return vec3_length(vec3_subtract(ray.end, ray.start));
+  return MATH_NS_NAME::vec3_length(
+    MATH_NS_NAME::vec3_subtract(ray.end, ray.start)
+  );
 }
 
 
 vec3
 ray_direction(const ray &ray)
 {
-  return vec3_normalize(vec3_subtract(ray.end, ray.start));
+  return MATH_NS_NAME::vec3_normalize(
+    vec3_subtract(ray.end, ray.start)
+  );
 }
+
+
+// -------------------------------------------------------- [ Equality Impl ] --
+
+
+bool
+ray_is_near(const ray &a, const ray &b, const float error)
+{
+  const bool start = MATH_NS_NAME::vec3_is_near(a.start, b.start);
+  const bool end   = MATH_NS_NAME::vec3_is_near(a.end, b.end);
+  
+  return (start == true) && (end == true);
+}
+
+
+// ------------------------------------------------------------ [ Test Impl ] --
 
 
 float
 ray_test_aabb(const ray &in_ray, const aabb &box)
 {
-  const vec3 ray_dir = ray_direction(in_ray);
+  const MATH_NS_NAME::vec3 ray_dir = MATH_NS_NAME::ray_direction(in_ray);
   constexpr float no_hit = 0.f;
 
   float t[10];

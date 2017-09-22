@@ -67,7 +67,7 @@ vec3_init(const float x, const float y, const float z)
 
 
 vec3
-vec3_init(const float *arr)
+vec3_init(const float arr[3])
 {
   return vec3_init(arr[0], arr[1], arr[2]);
 }
