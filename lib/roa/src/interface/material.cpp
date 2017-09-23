@@ -1,4 +1,5 @@
 #include <roa/material.hpp>
+#include <roa/shader.hpp>
 #include <roa/color.hpp>
 #include <nil/resource/material.hpp>
 #include <lib/logging.hpp>
@@ -92,6 +93,33 @@ Material::set_color(const Color &col)
   }
 }
 
+
+Shader
+Material::get_shader() const
+{
+  return Shader{};
+}
+
+
+void
+Material::set_shader(const Shader &shader)
+{
+}
+
+
+// ------------------------------------------------------------ [ Inherited ] --
+
+
+const char *
+Material::get_resource_type_name() const
+{
+}
+
+
+Resource_status
+Material::get_load_status() const
+{
+}
 
 
 } // ns

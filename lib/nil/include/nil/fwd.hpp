@@ -32,7 +32,14 @@ struct Audio;
 struct Font;
 struct Material;
 struct Mesh;
+struct Shader;
 struct Texture;
+
+enum class Load_status {
+  PENDING,
+  LOADED,
+  FAILED,
+};
 
 } // ns
 
@@ -65,15 +72,15 @@ enum ENUM : uint32_t {
 };
 }
 
-namespace Status {
-enum ENUM : uint32_t {
-  PENDING     = 1 << 0,
-  ERR         = 1 << 1,
-  OK          = 1 << 2,
-  UNKNOWN     = 1 << 3,
-  NOT_FOUND   = 1 << 4,
-};
-}
+//namespace Status {
+//enum ENUM : uint32_t {
+//  PENDING     = 1 << 0,
+//  ERR         = 1 << 1,
+//  OK          = 1 << 2,
+//  UNKNOWN     = 1 << 3,
+//  NOT_FOUND   = 1 << 4,
+//};
+//}
 
 
 } // ns

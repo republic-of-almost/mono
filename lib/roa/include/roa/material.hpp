@@ -24,12 +24,23 @@ public:
                     ~Material();
   
   
-  // ---------------------------------------------------------- [ Attibutes ] --
+  // --------------------------------------------------------- [ Attributes ] --
   
   
   Color             get_color() const;
   void              set_color(const Color &col);
   
+  Shader            get_shader() const;
+  void              set_shader(const Shader &shader);
+  
+  
+  // ---------------------------------------------------------- [ Inherited ] --
+  
+  
+  const char *      get_resource_type_name() const override;
+  Resource_status   get_load_status() const override;
+
+
 };
 
 

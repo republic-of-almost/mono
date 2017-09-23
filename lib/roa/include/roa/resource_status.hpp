@@ -1,0 +1,22 @@
+#ifndef RESOURCE_STATUS_INCLUDED_3C958A6A_34C8_4C22_80CA_F77128C759BF
+#define RESOURCE_STATUS_INCLUDED_3C958A6A_34C8_4C22_80CA_F77128C759BF
+
+
+namespace ROA {
+
+
+enum class Resource_status {
+
+  PENDING,
+  LOADED,
+  FAILED,
+  
+  ERROR,
+
+};
+
+
+} // ns
+
+
+#endif // inc guard

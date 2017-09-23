@@ -231,6 +231,7 @@ load(Mesh &in_out)
 
         LOG_ERROR(msg_mesh_failed, in_out.name);
         LIB_ASSERT(false);
+        
         return false;
       }
     }

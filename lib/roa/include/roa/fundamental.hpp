@@ -43,10 +43,12 @@ struct Point;
 class Ray;
 class Renderable;
 class Resource;
+class Shader;
 class Transform;
 class Vector3;
 
 enum class Ray_search;
+enum class Resource_status;
 
 } // ns
 

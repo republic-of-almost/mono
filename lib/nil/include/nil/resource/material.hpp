@@ -26,6 +26,8 @@ struct Material
   uint32_t texture_02;
   uint32_t texture_03;
   
+  uint32_t shader_id;
+  
   // -- Output -- //
   
   uint32_t id;

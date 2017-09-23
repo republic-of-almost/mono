@@ -8,6 +8,7 @@
 #include "mesh.hpp"
 #include "model.hpp"
 #include "scene.hpp"
+#include "shader.hpp"
 #include "texture.hpp"
 
 

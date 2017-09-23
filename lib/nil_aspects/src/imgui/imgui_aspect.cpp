@@ -336,6 +336,10 @@ think(Nil::Engine &engine, uintptr_t user_data)
     Nil::Resource::Material *mats = nullptr;
     Nil::Resource::get(&mat_count, &mats);
     
+    size_t shd_count = 0;
+    Nil::Resource::Shader *shds = nullptr;
+    Nil::Resource::get(&shd_count, &shds);
+    
     // Create window and show data //
     const char *rsrc_overview = "Resource Overview##rsrc_over";
     ImGui::Begin(rsrc_overview, &self->show_rsrc_overview);
@@ -343,7 +347,8 @@ think(Nil::Engine &engine, uintptr_t user_data)
     Nil::ImGUI::render_resource_overview(
       tex, tex_count,  // textures
       mats, mat_count, // materials 
-      mesh, mesh_count // meshes
+      mesh, mesh_count, // meshes
+      shds, shd_count
     );
 
     ImGui::End();

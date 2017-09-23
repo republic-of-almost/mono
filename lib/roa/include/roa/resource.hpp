@@ -16,27 +16,31 @@ protected:
   // ----------------------------------------------------------- [ Lifetime ] --
   
 
-  explicit            Resource(const uint32_t id);
+  explicit                  Resource(const uint32_t id);
+  explicit                  Resource();
+  virtual                   ~Resource();
 
 
 public:
-
-
-  explicit            Resource();
-                      ~Resource();
   
   
   // ---------------------------------------------------------- [ Attibutes ] --
   
   
-  inline uint32_t     get_id() const { return m_id; }
+  inline uint32_t           get_id() const { return m_id; }
+  bool                      is_valid() const;
   
-  bool                is_valid() const;
+  
+  // ---------------------------------------------------------- [ Inherited ] --
+  
+  
+  virtual const char *      get_resource_type_name() const;
+  virtual Resource_status   get_load_status() const;
   
   
 protected:
 
-  uint32_t            m_id;
+  uint32_t                  m_id;
 
 };
 

@@ -16,9 +16,10 @@ namespace ImGUI {
 
 
 void render_resource_overview(
-    const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
-    const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
-    const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count)
+  const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
+  const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
+  const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count,
+  const Nil::Resource::Shader *shd_rsrc, const size_t shd_count)
 {
   // -- Texture Resource Overview -- //
   if (ImGui::CollapsingHeader("Textures##rsrc_over_t"))
@@ -83,6 +84,11 @@ void render_resource_overview(
     {
       ImGui::Text("No Material data provided");
     }
+  }
+  
+  if (ImGui::CollapsingHeader("Shaders##rsrc_over"))
+  {
+    ImGui::Text("No UI");
   }
   
 }
@@ -379,6 +385,25 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
       
       ImGui::Spacing();
     } // if collapsing header
+  }
+}
+
+
+void
+render_resource(const Nil::Resource::Shader *rsrc, const size_t count)
+{
+  ImGui::Text("Shader Count %zu", count);
+  
+  static uint32_t tex_slider = 6;
+  
+  char name[32]{};
+  sprintf(name, "Size: %d", 1 << tex_slider);
+  ImGui::Separator();
+  
+  
+  for(size_t i = 0; i < count; ++i)
+  {
+//    const Nil::Resource::Shader *shd = &rsrc[i];
   }
 }
 
