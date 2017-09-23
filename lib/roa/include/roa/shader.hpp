@@ -18,16 +18,13 @@ public:
   
   
   explicit          Shader();
-  explicit          Shader(const uint32_t id);
-  explicit          Shader(const char *name, const char *filepath = nullptr);
-                    ~Shader();
+  virtual           ~Shader();
 
 
   // ---------------------------------------------------------- [ Inherited ] --
   
   
-  const char *      get_resource_type_name() const override;
-  Resource_status   get_load_status() const override;
+  Resource_status   get_load_status() const;
   
   
 };

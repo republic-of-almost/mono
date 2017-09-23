@@ -3,6 +3,7 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/detail/resource_interface.hpp>
 
 
 namespace ROA {
@@ -10,37 +11,89 @@ namespace ROA {
 
 class Resource
 {
-protected:
+private:
+
+  friend ROA::Resource ROA_detail::setup_resource(const uint32_t id);
+
+public:
 
 
   // ----------------------------------------------------------- [ Lifetime ] --
-  
 
-  explicit                  Resource(const uint32_t id);
+
   explicit                  Resource();
   virtual                   ~Resource();
+  
+                            Resource(const Resource &other);
+                            Resource(Resource &&other);
 
 
-public:
+  // ---------------------------------------------------------- [ Operators ] --
+  
+  
+                            operator bool() const;
+  
+  bool                      operator==(const Resource &other) const;
+  bool                      operator!=(const Resource &other) const;
+  
+  Resource&                 operator=(const Resource &other);
+  Resource&                 operator=(Resource &&other);
   
   
   // ---------------------------------------------------------- [ Attibutes ] --
   
   
-  inline uint32_t           get_id() const { return m_id; }
   bool                      is_valid() const;
+  uint32_t                  get_id() const;
+  
+  uint32_t                  get_resource_type_id() const;
+  const char *              get_resource_type_name() const;
+  const char *              get_instance_name() const;
+  
+  void                      load();
   
   
-  // ---------------------------------------------------------- [ Inherited ] --
+  // ----------------------------------------------- [ Create / Load / Find ] --
   
   
-  virtual const char *      get_resource_type_name() const;
-  virtual Resource_status   get_load_status() const;
+  template<typename T>
+  static T
+  create(const char *name)
+  {
+    T rsrc{};
+    
+    static_assert(rsrc.is_resource_type_id() > 0, "This is not a valid ROA::Resource");
+    
+    return ROA_detail::create_resource(rsrc, name);
+  }
+  
+  template<typename T>
+  static T
+  load(const char *filename)
+  {
+    T rsrc{};
+    
+    static_assert(rsrc.is_resource_type_id() > 0, "This is not a valid ROA::Resource");
+    
+    return ROA_detail::load_resource(rsrc, filename);
+  }
+  
+  template<typename T>
+  static T
+  find(const char *name)
+  {
+    T rsrc{};
+    
+    static_assert(rsrc.is_resource_type_id() > 0, "This is not a valid ROA::Resource");
+    
+    return ROA_detail::find_resource(rsrc, name);
+  }
   
   
 protected:
 
-  uint32_t                  m_id;
+
+  uint32_t          m_id;
 
 };
 

@@ -49,7 +49,8 @@ Audio_player::get_source() const
   Nil::Data::Audio data{};
   Nil::Data::get(node, data);
   
-  return Audio_source(data.audio_id);
+//  return Audio_source(data.audio_id);
+  return Audio_source{};
 }
 
 

@@ -18,8 +18,6 @@ public:
   
   
   explicit          Audio_source();
-  explicit          Audio_source(const uint32_t id);
-  explicit          Audio_source(const char *filename);
   
 
 };

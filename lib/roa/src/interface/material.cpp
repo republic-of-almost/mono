@@ -1,8 +1,10 @@
 #include <roa/material.hpp>
 #include <roa/shader.hpp>
 #include <roa/color.hpp>
+#include <common/resource_identifiers.hpp>
 #include <nil/resource/material.hpp>
 #include <lib/logging.hpp>
+#include <lib/entity.hpp>
 #include <string.h>
 
 
@@ -13,39 +15,7 @@ namespace ROA {
 
 
 Material::Material()
-: Material("")
 {
-}
-
-
-
-Material::Material(const uint32_t id)
-: Resource(id)
-{
-}
-
-
-Material::Material(const char *name)
-: Material(name, Color(0xFFFFFFFF))
-{
-}
-
-
-Material::Material(
-  const char *name,
-  const Color &color
-)
-: Resource()
-{
-  if(strlen(name) > 0)
-  {
-    Nil::Resource::Material mat{};
-    mat.name = name;
-    mat.color = color.get_uint();
-    Nil::Resource::load(mat);
-    
-    m_id = mat.id;
-  }
 }
 
 
@@ -110,9 +80,10 @@ Material::set_shader(const Shader &shader)
 // ------------------------------------------------------------ [ Inherited ] --
 
 
-const char *
-Material::get_resource_type_name() const
+const char*
+Material::get_instance_name() const
 {
+  return "Foo";
 }
 
 

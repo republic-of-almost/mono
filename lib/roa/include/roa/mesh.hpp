@@ -18,8 +18,7 @@ public:
   
   
   explicit          Mesh();
-  explicit          Mesh(const uint32_t id);
-  explicit          Mesh(const char *name);
+                    ~Mesh();
   
   
   // --------------------------------------------------------- [ Attributes ] --

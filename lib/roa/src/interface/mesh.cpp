@@ -13,28 +13,26 @@ namespace ROA {
 
 
 Mesh::Mesh()
-: Mesh("")
 {
 }
 
 
-Mesh::Mesh(const uint32_t id)
-: Resource(id)
+Mesh::~Mesh()
 {
 }
 
 
-Mesh::Mesh(const char *name)
-: Resource()
-{
-  if(strlen(name) > 0)
-  {
-    Nil::Resource::Mesh mesh{};
-    Nil::Resource::find_by_name(name, mesh);
-    
-    m_id = mesh.id;
-  }
-}
+//Mesh::Mesh(const char *name)
+////: Resource()
+//{
+//  if(strlen(name) > 0)
+//  {
+//    Nil::Resource::Mesh mesh{};
+//    Nil::Resource::find_by_name(name, mesh);
+//    
+//    m_id = mesh.id;
+//  }
+//}
 
 
 // ----------------------------------------------------------- [ Attributes ] --

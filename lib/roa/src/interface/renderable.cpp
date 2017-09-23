@@ -43,7 +43,8 @@ Renderable::get_mesh() const
   Nil::Data::Renderable data{};
   ROA_detail::get_nil_data(*this, data);
   
-  return Mesh(data.mesh_id);
+//  return Mesh(data.mesh_id);
+  return Mesh();
 }
 
 
@@ -63,7 +64,7 @@ Renderable::get_material() const
   Nil::Data::Renderable data{};
   ROA_detail::get_nil_data(*this, data);
   
-  return Material(data.material_id);
+  return Material();
 }
 
 

@@ -16,29 +16,26 @@ public:
 
   // ----------------------------------------------------------- [ Lifetime ] --
   
-
-  explicit          Material();
-  explicit          Material(const uint32_t id);
-  explicit          Material(const char *name);
-  explicit          Material(const char *name, const Color &col);
-                    ~Material();
+  
+  explicit            Material();
+  virtual             ~Material();
   
   
   // --------------------------------------------------------- [ Attributes ] --
   
   
-  Color             get_color() const;
-  void              set_color(const Color &col);
+  Shader              get_shader() const;
+  void                set_shader(const Shader &shd);
   
-  Shader            get_shader() const;
-  void              set_shader(const Shader &shader);
+  Color               get_color() const;
+  void                set_color(const Color &col);
   
   
   // ---------------------------------------------------------- [ Inherited ] --
   
   
-  const char *      get_resource_type_name() const override;
-  Resource_status   get_load_status() const override;
+  const char *        get_instance_name() const;
+  Resource_status     get_load_status() const;
 
 
 };

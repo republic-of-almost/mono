@@ -36,6 +36,7 @@ struct Shader;
 struct Texture;
 
 enum class Load_status {
+  NONE,
   PENDING,
   LOADED,
   FAILED,

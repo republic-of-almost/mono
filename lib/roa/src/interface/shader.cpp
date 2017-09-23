@@ -10,35 +10,17 @@ namespace ROA {
 
 
 Shader::Shader()
-: Resource(0)
+: Resource()
 {
 }
 
 
-Shader::Shader(const uint32_t id)
-: Resource(id)
+Shader::~Shader()
 {
-  // -- Check given id is valid -- //
-}
-
-
-Shader::Shader(const char *name, const char *filepath)
-{
-  // -- Param Check -- //
-  {
-    
-  }
 }
 
 
 // ------------------------------------------------------------ [ Inherited ] --
-  
-  
-const char *
-Resource::get_resource_type_name() const
-{
-  return "Shader Resource";
-}
 
 
 Resource_status
