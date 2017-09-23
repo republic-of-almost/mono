@@ -18,6 +18,10 @@ public:
   
   
   explicit          Audio_source();
+                    ~Audio_source();
+  
+  
+  // --------------------------------------------------------- [ Attributes ] --
   
 
 };

@@ -9,22 +9,27 @@ namespace ROA {
 
 
 Audio_player::Audio_player()
-: Audio_player(Audio_source{})
+//: Audio_player(Audio_source{})
 {
 }
 
 
-Audio_player::Audio_player(const Audio_source &src)
-: Object()
+Audio_player::~Audio_player()
 {
-  Nil::Data::Audio data{};
-  
-  data.audio_id = src.get_id();
-  data.volume = 1.f;
-  
-  Nil::Node node = ROA_detail::get_node(*this);
-  Nil::Data::set(node, data);
 }
+
+
+//Audio_player::Audio_player(const Audio_source &src)
+//: Object()
+//{
+//  Nil::Data::Audio data{};
+//  
+//  data.audio_id = src.get_id();
+//  data.volume = 1.f;
+//  
+//  Nil::Node node = ROA_detail::get_node(*this);
+//  Nil::Data::set(node, data);
+//}
 
 
 void
@@ -81,14 +86,14 @@ Audio_player::get_volume() const
 
 
 void
-Audio_player::play()
+Audio_player::set_play(const bool play)
 {
   Nil::Node node = ROA_detail::get_node(*this);
   
   Nil::Data::Audio data{};
   Nil::Data::get(node, data);
   
-  data.request_state = Nil::Data::Audio::PLAY;
+  data.request_state = play ? Nil::Data::Audio::PLAY : Nil::Data::Audio::STOP;
   
   Nil::Data::set(node, data);
 }

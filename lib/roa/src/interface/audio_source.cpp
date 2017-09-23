@@ -25,6 +25,10 @@ Audio_source::Audio_source()
 }
 
 
+Audio_source::~Audio_source()
+{
+}
+
 
 //Audio_source::Audio_source(const char *filename)
 //: Resource()

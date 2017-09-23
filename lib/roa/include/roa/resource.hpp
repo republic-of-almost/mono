@@ -93,7 +93,7 @@ public:
 protected:
 
 
-  uint32_t          m_id;
+  mutable uint32_t m_id;
 
 };
 
