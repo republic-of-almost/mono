@@ -86,6 +86,8 @@ in vec2 in_ps_texcoord;
 in vec3 in_ps_normal;
 in vec3 in_ps_world_pos;
 
+in vec3 in_ps_world_test;
+
 
 /*
   Uniforms
