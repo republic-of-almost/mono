@@ -18,6 +18,7 @@ public:
 
 
   explicit        Renderable();
+  explicit        Renderable(const ROA_nullptr null);
   explicit        Renderable(const Mesh &mesh, const Material &mat);
                   ~Renderable();
   

@@ -17,6 +17,12 @@ Bounding_box::Bounding_box()
 }
 
 
+Bounding_box::Bounding_box(const ROA_nullptr null)
+: ROA::Object(null)
+{
+}
+
+
 Bounding_box::Bounding_box(const Vector3 &min, const Vector3 &max)
 : Object()
 {

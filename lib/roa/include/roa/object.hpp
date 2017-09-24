@@ -164,7 +164,7 @@ public:
   T
   get_data()
   {
-    T t;
+    T t(nullptr);
     
     const uint32_t instance_id = this->get_instance_id();
     
@@ -177,7 +177,7 @@ public:
   const T
   get_data() const
   {
-    T t;
+    T t(nullptr);
     
     const uint32_t instance_id = this->get_instance_id();
     

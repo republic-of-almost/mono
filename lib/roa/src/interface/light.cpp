@@ -25,6 +25,12 @@ Light::Light()
 }
 
 
+Light::Light(const ROA_nullptr null)
+: Object(null)
+{
+}
+
+
 Light::~Light()
 {
 }

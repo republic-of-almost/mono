@@ -17,6 +17,12 @@ Transform::Transform()
 }
 
 
+Transform::Transform(const ROA_nullptr null)
+: Object(null)
+{
+}
+
+
 Transform::Transform(
   const Vector3 &pos,
   const Vector3 &scale,

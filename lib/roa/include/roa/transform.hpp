@@ -18,6 +18,7 @@ public:
 
 
   explicit      Transform();
+  explicit      Transform(const ROA_nullptr null);
   explicit      Transform(const Vector3 &pos,
                           const Vector3 &scale,
                           const Quaternion &rotation);

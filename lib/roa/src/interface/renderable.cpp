@@ -21,6 +21,13 @@ Renderable::Renderable()
   Nil::Data::set(node, renderable);
 }
 
+
+Renderable::Renderable(const ROA_nullptr null)
+: Object(null)
+{
+}
+
+
 Renderable::Renderable(const Mesh &mesh, const Material &mat)
 : Renderable()
 {

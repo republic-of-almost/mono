@@ -14,6 +14,12 @@ Audio_player::Audio_player()
 }
 
 
+Audio_player::Audio_player(const ROA_nullptr null)
+: ROA::Object(null)
+{
+}
+
+
 Audio_player::~Audio_player()
 {
 }

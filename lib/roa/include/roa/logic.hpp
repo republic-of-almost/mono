@@ -23,6 +23,7 @@ public:
   
 
   explicit            Logic();
+  explicit            Logic(const ROA_nullptr null);
                       ~Logic();
   
   

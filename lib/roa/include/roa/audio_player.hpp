@@ -18,6 +18,8 @@ public:
 
 
   explicit          Audio_player();
+  explicit          Audio_player(const ROA_nullptr null);
+  
                     ~Audio_player();
   
 //                    Audio_player(const Audio_source &src);

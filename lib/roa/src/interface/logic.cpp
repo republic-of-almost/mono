@@ -21,6 +21,12 @@ Logic::Logic()
 }
 
 
+Logic::Logic(const ROA_nullptr null)
+: Object(null)
+{
+}
+
+
 Logic::~Logic()
 {
 }
