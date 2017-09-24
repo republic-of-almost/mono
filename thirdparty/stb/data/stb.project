@@ -22,7 +22,7 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
-    inc_dirs = {
+    public_inc_dirs = {
       make.get_proj_root() .. "../include/",
     },
   }

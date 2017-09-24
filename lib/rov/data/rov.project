@@ -25,7 +25,7 @@ table.insert(
       make.get_proj_root() .. "../assets/**",
     },
 
-    inc_dirs = {
+    public_inc_dirs = {
       make.get_proj_root() .. "../include/",
     },
 
