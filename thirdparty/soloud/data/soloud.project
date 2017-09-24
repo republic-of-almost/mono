@@ -7,10 +7,10 @@
 table.insert(
   projects,
   {
-    name     = "SoLoud",
-    kind     = "StaticLib",
-    language = "C++",
-    location = make.get_proj_root(),
+    name            = "SoLoud",
+    kind            = "StaticLib",
+    language        = "C++",
+    location        = make.get_proj_root(),
     ignore_defaults = true,
 
     src_files = {
