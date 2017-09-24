@@ -151,37 +151,47 @@ public:
     valid data.
   */
   
+  template<typename T>
+  void
+  set_data(const T &t)
+  {
+    const uint32_t instance_id = this->get_instance_id();
+    
+    ROA_detail::set_node_data(instance_id, t);
+  }
   
-  const Bounding_box    get_bounding_box() const;
-  Bounding_box          get_bounding_box();
-  void                  set_bounding_box(const Bounding_box &in);
+  template<typename T>
+  T
+  get_data()
+  {
+    T t;
+    
+    const uint32_t instance_id = this->get_instance_id();
+    
+    ROA_detail::get_node_data(instance_id, t);
+    
+    return t;
+  }
   
-  const Camera          get_camera() const;
-  Camera                get_camera();
-  void                  set_camera(const Camera &in);
+  template<typename T>
+  const T
+  get_data() const
+  {
+    T t;
+    
+    const uint32_t instance_id = this->get_instance_id();
+    
+    ROA_detail::get_node_data(instance_id, t);
+    
+    return t;
+  };
   
-  const Light           get_light() const;
-  Light                 get_light();
-  void                  set_light(const Light &in);
-  
-  const Logic           get_logic() const;
-  Logic                 get_logic();
-  void                  set_logic(const Logic &in);
-  
-  const Transform       get_transform() const;
-  Transform             get_transform();
-  void                  set_transform(const Transform &in);
-  void                  set_world_transform(const Transform &in);
-  
-  
-  const Renderable      get_renderable() const;
-  Renderable            get_renderable();
-  void                  set_renderable(const Renderable &in);
-  
-  const Audio_player    get_audio_player() const;
-  Audio_player          get_audio_player();
-  void                  set_audio_player(const Audio_player &in);
-  
+  template<typename T>
+  bool
+  has_data() const
+  {
+    return false;
+  }
   
 private:
 

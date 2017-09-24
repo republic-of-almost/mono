@@ -28,15 +28,15 @@ main()
 
     const ROA::Renderable renderable(mesh, mat);
 
-    obj_scene.set_renderable(renderable);
-    obj_scene.set_bounding_box(mesh.get_bounding_box());
+    obj_scene.set_data(renderable);
+    obj_scene.set_data(mesh.get_bounding_box());
   }
 
   // Camera
   {
     obj_camera.set_name("ROA_Camera");
 
-    const ROA::Bounding_box bb = obj_scene.get_bounding_box();
+    const ROA::Bounding_box bb = obj_scene.get_data<ROA::Bounding_box>();
 
     const math::vec3 a = math::vec3_init(bb.get_min().get_x(), bb.get_min().get_y(), bb.get_min().get_z());
     const math::vec3 b = math::vec3_init(bb.get_max().get_x(), bb.get_max().get_y(), bb.get_max().get_z());
@@ -50,7 +50,7 @@ main()
       ROA::Quaternion()
     );
 
-    obj_camera.set_transform(transform);
+    obj_camera.set_data(transform);
   }
 
 
@@ -77,7 +77,7 @@ main()
       const float rot_angle = spin;
       const ROA::Quaternion rot(ROA::Vector3(1.f, 0.f, 0.f), rot_angle);
 
-      ROA::Transform trans = obj->get_transform();
+      ROA::Transform trans = obj->get_data<ROA::Transform>();
       trans.set_rotation(rot);
     },
     (uintptr_t)&obj_scene

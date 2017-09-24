@@ -49,25 +49,25 @@ Object::Object(const uint64_t data_bitfield)
   if(data_bitfield & Data::BOUNDING_BOX)
   {
     Bounding_box data;
-    this->set_bounding_box(data);
+    this->set_data(data);
   }
   
   if(data_bitfield & Data::CAMERA)
   {
     Camera data;
-    this->set_camera(data);
+    this->set_data(data);
   }
   
   if(data_bitfield & Data::LOGIC)
   {
     Logic data;
-    this->set_logic(data);
+    this->set_data(data);
   }
   
   if(data_bitfield & Data::RENDERABLE)
   {
     Renderable data;
-    this->set_renderable(data);
+    this->set_data(data);
   }
 }
 
@@ -274,252 +274,252 @@ Object::set_user_data(uintptr_t user_data)
 // ------------------------------------------------------ [ Data Components ] --
 
 
-const Bounding_box
-Object::get_bounding_box() const
-{
-  return const_cast<Object*>(this)->get_bounding_box();
-}
-  
-  
-Bounding_box
-Object::get_bounding_box()
-{
-  return *reinterpret_cast<const Bounding_box*>(this);
-}
-
-
-void
-Object::set_bounding_box(const Bounding_box &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Bounding_box data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
-
-
-const Camera
-Object::get_camera() const
-{
-  return const_cast<Object*>(this)->get_camera();
-}
-
-Camera
-Object::get_camera()
-{
-  return *reinterpret_cast<Camera*>(this);
-}
-
-
-void
-Object::set_camera(const Camera &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Camera data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
-
-
-const Light
-Object::get_light() const
-{
-  return const_cast<Object*>(this)->get_light();
-}
-
-
-Light
-Object::get_light()
-{
-  return *reinterpret_cast<Light*>(this);
-}
-
-
-void
-Object::set_light(const Light &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Light data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
-
-
-const Logic
-Object::get_logic() const
-{
-  return const_cast<Object*>(this)->get_logic();
-}
-
-Logic
-Object::get_logic()
-{
-  return *reinterpret_cast<Logic*>(this);
-}
-
-
-void
-Object::set_logic(const Logic &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Logic data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
-
-
-const Transform
-Object::get_transform() const
-{
-  return const_cast<Object*>(this)->get_transform();
-}
-
-
-Transform
-Object::get_transform()
-{
-  return *reinterpret_cast<Transform*>(this);
-}
-
-
-void
-Object::set_transform(const Transform &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Transform data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
-
-void
-Object::set_world_transform(const Transform &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::Transform this_data{};
-    Nil::Data::Transform that_data{};
-    
-    Nil::Data::get(other_node, that_data);
-    Nil::Data::get(this_node, this_data);
-    
-    // -- Calculate world difference -- //
-    
-    // Position
-    {
-      math::vec3 this_pos = math::vec3_init(this_data.world_position);
-      math::vec3 that_pos = math::vec3_init(that_data.world_position);
-      
-      math::vec3 diff_pos = math::vec3_subtract(that_pos, this_pos);
-      
-      memcpy(this_data.position, diff_pos.data, sizeof(this_data.position));
-    }
-    
-    LOG_TODO_ONCE("This is incomplete.");
-    
-    // Scale
-    {
-    }
-    
-    // Rotation
-    {
-    }
-    
-    Nil::Data::set(this_node, this_data);
-  }
-}
-
-
-const Renderable
-Object::get_renderable() const
-{
-  return const_cast<Object*>(this)->get_renderable();
-}
-
-
-Renderable
-Object::get_renderable()
-{
-  return *reinterpret_cast<Renderable*>(this);
-}
-
-
-void
-Object::set_renderable(const Renderable &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Renderable data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
-
-
-const Audio_player
-Object::get_audio_player() const
-{
-  return const_cast<Object*>(this)->get_audio_player();
-}
-
-
-Audio_player
-Object::get_audio_player()
-{
-  return *reinterpret_cast<Audio_player*>(this);
-}
-
-
-void
-Object::set_audio_player(const Audio_player &in)
-{
-  if(in.get_instance_id() != get_instance_id())
-  {
-    Nil::Data::Audio data{};
-    
-    Nil::Node other_node = ROA_detail::get_node(in);
-    Nil::Node this_node = ROA_detail::get_node(*this);
-    
-    Nil::Data::get(other_node, data);
-    Nil::Data::set(this_node, data);
-  }
-}
+//const Bounding_box
+//Object::get_bounding_box() const
+//{
+//  return const_cast<Object*>(this)->get_bounding_box();
+//}
+//  
+//  
+//Bounding_box
+//Object::get_bounding_box()
+//{
+//  return *reinterpret_cast<const Bounding_box*>(this);
+//}
+//
+//
+//void
+//Object::set_bounding_box(const Bounding_box &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Bounding_box data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
+//
+//
+//const Camera
+//Object::get_camera() const
+//{
+//  return const_cast<Object*>(this)->get_camera();
+//}
+//
+//Camera
+//Object::get_camera()
+//{
+//  return *reinterpret_cast<Camera*>(this);
+//}
+//
+//
+//void
+//Object::set_camera(const Camera &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Camera data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
+//
+//
+//const Light
+//Object::get_light() const
+//{
+//  return const_cast<Object*>(this)->get_light();
+//}
+//
+//
+//Light
+//Object::get_light()
+//{
+//  return *reinterpret_cast<Light*>(this);
+//}
+//
+//
+//void
+//Object::set_light(const Light &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Light data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
+//
+//
+//const Logic
+//Object::get_logic() const
+//{
+//  return const_cast<Object*>(this)->get_logic();
+//}
+//
+//Logic
+//Object::get_logic()
+//{
+//  return *reinterpret_cast<Logic*>(this);
+//}
+//
+//
+//void
+//Object::set_logic(const Logic &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Logic data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
+//
+//
+//const Transform
+//Object::get_transform() const
+//{
+//  return const_cast<Object*>(this)->get_transform();
+//}
+//
+//
+//Transform
+//Object::get_transform()
+//{
+//  return *reinterpret_cast<Transform*>(this);
+//}
+//
+//
+//void
+//Object::set_transform(const Transform &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Transform data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
+//
+//void
+//Object::set_world_transform(const Transform &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::Transform this_data{};
+//    Nil::Data::Transform that_data{};
+//    
+//    Nil::Data::get(other_node, that_data);
+//    Nil::Data::get(this_node, this_data);
+//    
+//    // -- Calculate world difference -- //
+//    
+//    // Position
+//    {
+//      math::vec3 this_pos = math::vec3_init(this_data.world_position);
+//      math::vec3 that_pos = math::vec3_init(that_data.world_position);
+//      
+//      math::vec3 diff_pos = math::vec3_subtract(that_pos, this_pos);
+//      
+//      memcpy(this_data.position, diff_pos.data, sizeof(this_data.position));
+//    }
+//    
+//    LOG_TODO_ONCE("This is incomplete.");
+//    
+//    // Scale
+//    {
+//    }
+//    
+//    // Rotation
+//    {
+//    }
+//    
+//    Nil::Data::set(this_node, this_data);
+//  }
+//}
+//
+//
+//const Renderable
+//Object::get_renderable() const
+//{
+//  return const_cast<Object*>(this)->get_renderable();
+//}
+//
+//
+//Renderable
+//Object::get_renderable()
+//{
+//  return *reinterpret_cast<Renderable*>(this);
+//}
+//
+//
+//void
+//Object::set_renderable(const Renderable &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Renderable data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
+//
+//
+//const Audio_player
+//Object::get_audio_player() const
+//{
+//  return const_cast<Object*>(this)->get_audio_player();
+//}
+//
+//
+//Audio_player
+//Object::get_audio_player()
+//{
+//  return *reinterpret_cast<Audio_player*>(this);
+//}
+//
+//
+//void
+//Object::set_audio_player(const Audio_player &in)
+//{
+//  if(in.get_instance_id() != get_instance_id())
+//  {
+//    Nil::Data::Audio data{};
+//    
+//    Nil::Node other_node = ROA_detail::get_node(in);
+//    Nil::Node this_node = ROA_detail::get_node(*this);
+//    
+//    Nil::Data::get(other_node, data);
+//    Nil::Data::set(this_node, data);
+//  }
+//}
 
 
 } // ns
