@@ -4,6 +4,7 @@
 
 #include "audio.hpp"
 #include "directory.hpp"
+#include "font.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
 #include "model.hpp"

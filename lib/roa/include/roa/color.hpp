@@ -23,10 +23,17 @@ public:
   explicit          Color(const uint8_t rgba[]);
   
   
+  // ---------------------------------------------------------- [ Operators ] --
+  
+  
+  bool              operator==(const Color &other) const;
+  bool              operator!=(const Color &other) const;
+  
+  
   // --------------------------------------------------------- [ Attributes ] --
   
   
-  inline uint32_t   get_uint() const { return m_data; }
+  uint32_t          get_uint() const;
   
   
 private:

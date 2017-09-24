@@ -19,13 +19,6 @@ public:
   
   explicit          Shader();
   virtual           ~Shader();
-
-
-  // ---------------------------------------------------------- [ Inherited ] --
-  
-  
-  Resource_status   get_load_status() const;
-  
   
 };
 

@@ -30,7 +30,8 @@ struct Material
   
   // -- Output -- //
   
-  uint32_t id;
+  Load_status       status;
+  uint32_t          id;
 };
 
 

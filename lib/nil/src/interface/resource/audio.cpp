@@ -53,6 +53,24 @@ namespace Resource {
 // ------------------------------------------------------------- [ Get Data ] --
 
 
+bool
+find_by_name(const char *name, Audio &out)
+{
+  const uint32_t find_key = lib::string_pool::find(name);
+  
+  for(size_t i = 0; i < get_audio_data().keys.size(); ++i)
+  {
+    if(get_audio_data().keys[i] == find_key)
+    {
+      out = get_audio_data().audio[i];
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+
 void
 get(size_t *count, Audio **out)
 {

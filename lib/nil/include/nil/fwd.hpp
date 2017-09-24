@@ -40,6 +40,8 @@ enum class Load_status {
   PENDING,
   LOADED,
   FAILED,
+  
+  ERROR,
 };
 
 } // ns

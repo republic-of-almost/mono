@@ -16,20 +16,20 @@ main()
 
   // Scene
   {
-//    obj_scene.set_name("ROA_Scene");
-//
-//    ROA::Model::load("mesh/unit_bev_cube.obj");
-//    const ROA::Mesh mesh("Unit_bev_cube");
-//
-//    const ROA::Material mat(
-//      "Basic Mat",
-//      ROA::Color(0xFFFF00FF)
-//    );
-//
-//    const ROA::Renderable renderable(mesh, mat);
-//
-//    obj_scene.set_renderable(renderable);
-//    obj_scene.set_bounding_box(mesh.get_bounding_box());
+    obj_scene.set_name("ROA_Scene");
+
+    ROA::Model::load("mesh/unit_bev_cube.obj");
+    
+    const ROA::Mesh mesh = ROA::Resource::find<ROA::Mesh>("Unit_bev_cube");
+
+    ROA::Material mat = ROA::Resource::create<ROA::Material>("Basic Mat");
+    mat.set_color(ROA::Color(0xFFFF00FF));
+    mat.load();
+
+    const ROA::Renderable renderable(mesh, mat);
+
+    obj_scene.set_renderable(renderable);
+    obj_scene.set_bounding_box(mesh.get_bounding_box());
   }
 
   // Camera
@@ -60,25 +60,25 @@ main()
   app.run(
     [](uintptr_t user_data)
     {
-//      /*
-//        Custom tick stuff.
-//      */
-//      ROA::Object *obj = reinterpret_cast<ROA::Object*>(user_data);
-//
-//      static float spin = 0.f;
-//      constexpr float speed = 0.15f;
-//      const float delta_speed = speed * ROA::Time::get_delta_time();
-//
-//      spin += delta_speed;
-//
-//      ROA::Material mat("Basic Mat");
-//      mat.set_color(ROA::Color(0xFF00FFFF));
-//
-//      const float rot_angle = spin;
-//      const ROA::Quaternion rot(ROA::Vector3(1.f, 0.f, 0.f), rot_angle);
-//
-//      ROA::Transform trans = obj->get_transform();
-//      trans.set_rotation(rot);
+      /*
+        Custom tick stuff.
+      */
+      ROA::Object *obj = reinterpret_cast<ROA::Object*>(user_data);
+
+      static float spin = 0.f;
+      constexpr float speed = 0.15f;
+      const float delta_speed = speed * ROA::Time::get_delta_time();
+
+      spin += delta_speed;
+
+      ROA::Material mat = ROA::Resource::create<ROA::Material>("Basic Mat");
+      mat.set_color(ROA::Color(0xFF00FFFF));
+
+      const float rot_angle = spin;
+      const ROA::Quaternion rot(ROA::Vector3(1.f, 0.f, 0.f), rot_angle);
+
+      ROA::Transform trans = obj->get_transform();
+      trans.set_rotation(rot);
     },
     (uintptr_t)&obj_scene
   );

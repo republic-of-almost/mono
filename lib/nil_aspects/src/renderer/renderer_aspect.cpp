@@ -487,7 +487,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
       Nil::Resource::Texture *tex = &textures[i];
 
       const bool has_data = tex && !!tex->data;
-      const bool is_pending = tex && tex->status == Nil::Resource::Texture::PENDING;
+      const bool is_pending = tex && tex->status == Nil::Resource::Load_status::PENDING;
 
       if (has_data && is_pending)
       {
@@ -516,14 +516,14 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
         {
           LIB_ASSERT(false);
           LOG_ERROR("Unknown data type to load texture");
-          tex->status = Nil::Resource::Texture::FAILED;
+          tex->status = Nil::Resource::Load_status::FAILED;
           continue;
         }
         
         // -- Did we Fail to load texture -- //
         if (img_data == nullptr)
         {
-          tex->status = Nil::Resource::Texture::FAILED;
+          tex->status = Nil::Resource::Load_status::FAILED;
 
           char err_msg[1024]{};
           strcat(err_msg, "Failed to load texture: ");
@@ -559,13 +559,13 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
         stbi_image_free(img_data);
 
-        tex->status = Nil::Resource::Texture::LOADED;
+        tex->status = Nil::Resource::Load_status::LOADED;
       }
       else if (!has_data && i > 0)
       {
         LIB_ASSERT(false);
         LOG_ERROR("Tried to load a texture with no data");
-        tex->status = Nil::Resource::Texture::FAILED;
+        tex->status = Nil::Resource::Load_status::FAILED;
       }
     }
   } // Load Textures
@@ -583,11 +583,11 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
     {
       Nil::Resource::Mesh *mesh_resource = &meshes[i];
 
-      if (mesh_resource->status == Nil::Resource::Mesh::PENDING)
+      if (mesh_resource->status == Nil::Resource::Load_status::PENDING)
       {
         if (mesh_resource->triangle_count == 0)
         {
-          mesh_resource->status = Nil::Resource::Mesh::LOADED;
+          mesh_resource->status = Nil::Resource::Load_status::LOADED;
           continue;
         }
 
@@ -610,7 +610,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
         self->index_ids.emplace_back(index);
         self->mesh_ids.emplace_back(mesh);
 
-        mesh_resource->status = Nil::Resource::Mesh::LOADED;
+        mesh_resource->status = Nil::Resource::Load_status::LOADED;
       }
     }
   } // Load Meshes

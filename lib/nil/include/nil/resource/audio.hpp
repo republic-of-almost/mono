@@ -24,9 +24,9 @@ struct Audio
   
   // -- Output -- //
   
-  enum { PENDING, LOADED, FAILED, STATUS_COUNT } status;
-  uintptr_t platform_resource;
-  uint32_t id;
+  Load_status       status;
+  uintptr_t         platform_resource;
+  uint32_t          id;
 };
 
 

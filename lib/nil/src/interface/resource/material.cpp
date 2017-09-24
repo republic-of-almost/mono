@@ -80,9 +80,6 @@ load(Material &in_out)
     const bool has_name   = !!in_out.name;
     const bool has_length = strlen(in_out.name);
 
-    LIB_ASSERT(has_name);
-    LIB_ASSERT(has_length);
-
     if (!has_name || !has_length)
     {
       LOG_ERROR(msg_material_must_have_name);

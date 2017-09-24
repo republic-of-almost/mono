@@ -5,6 +5,8 @@
 #include <math/general/general.hpp>
 #include <imgui/imgui.h>
 #include <lib/color.hpp>
+#include <lib/helpers.hpp>
+#include <lib/assert.hpp>
 #include <stdio.h>
 
 
@@ -22,24 +24,27 @@ void render_resource_overview(
   const Nil::Resource::Shader *shd_rsrc, const size_t shd_count)
 {
   // -- Texture Resource Overview -- //
-  if (ImGui::CollapsingHeader("Textures##rsrc_over_t"))
+  if (ImGui::CollapsingHeader("Textures##rsrc_over"))
   {
     if(tex_rsrc != nullptr)
     {
-      size_t load_status[Nil::Resource::Texture::STATUS_COUNT]{};
+      size_t load_status[4]{};
 
       // Gather stats //
       for (size_t i = 0; i < tex_count; ++i)
       {
         const Nil::Resource::Texture *data = &tex_rsrc[i];
-        load_status[data->status] += 1;
+        LIB_ASSERT((int)data->status < LIB_ARRAY_SIZE(load_status));
+        
+        load_status[(int)data->status] += 1;
       }
 
       // Render stats //
-      ImGui::LabelText("Count##rover_tex", "%zu", tex_count);
-      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[Nil::Resource::Texture::PENDING]);
-      ImGui::LabelText("Loaded##rover_tex", "%zu", load_status[Nil::Resource::Texture::LOADED]);
-      ImGui::LabelText("Failed##rover_tex", "%zu", load_status[Nil::Resource::Texture::FAILED]);
+      ImGui::LabelText("Count##rover_tex",   "%zu", tex_count);
+      ImGui::LabelText("Unloaded#rover_tex", "%zu", load_status[(int)Resource::Load_status::NONE]);
+      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[(int)Resource::Load_status::PENDING]);
+      ImGui::LabelText("Loaded##rover_tex",  "%zu", load_status[(int)Resource::Load_status::LOADED]);
+      ImGui::LabelText("Failed##rover_tex",  "%zu", load_status[(int)Resource::Load_status::FAILED]);
     }
     else
     {
@@ -52,20 +57,23 @@ void render_resource_overview(
   {
     if(mesh_rsrc != nullptr)
     {
-      size_t load_status[Nil::Resource::Mesh::STATUS_COUNT]{};
+      size_t load_status[4]{};
 
       // Gather stats //
       for (size_t i = 0; i < mesh_count; ++i)
       {
         const Nil::Resource::Mesh *data = &mesh_rsrc[i];
-        load_status[data->status] += 1;
+        LIB_ASSERT((int)data->status < LIB_ARRAY_SIZE(load_status));
+        
+        load_status[(int)data->status] += 1;
       }
 
       // Render stats //
-      ImGui::LabelText("Count##rover_mesh", "%zu", mesh_count);
-      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::PENDING]);
-      ImGui::LabelText("Loaded##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::LOADED]);
-      ImGui::LabelText("Failed##rover_mesh", "%zu", load_status[Nil::Resource::Mesh::FAILED]);
+      ImGui::LabelText("Count##rover_mesh",   "%zu", tex_count);
+      ImGui::LabelText("Unloaded#rover_mesh", "%zu", load_status[(int)Resource::Load_status::NONE]);
+      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[(int)Resource::Load_status::PENDING]);
+      ImGui::LabelText("Loaded##rover_mesh",  "%zu", load_status[(int)Resource::Load_status::LOADED]);
+      ImGui::LabelText("Failed##rover_mesh",  "%zu", load_status[(int)Resource::Load_status::FAILED]);
     }
     else
     {

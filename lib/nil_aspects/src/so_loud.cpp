@@ -96,7 +96,7 @@ resource_update(Nil::Engine &engine, uintptr_t user_data)
     {
       Nil::Resource::Audio *audio = &audio_data[i];
     
-      if(audio->status == Nil::Resource::Audio::PENDING)
+      if(audio->status == Nil::Resource::Load_status::PENDING)
       {
         if(audio->data_type == Nil::Resource::Audio::FILENAME)
         {
@@ -107,12 +107,12 @@ resource_update(Nil::Engine &engine, uintptr_t user_data)
             SoLoud::Wav *sample = new SoLoud::Wav;
             
             sample->load(filename);
-            audio->status = Nil::Resource::Audio::LOADED;
+            audio->status = Nil::Resource::Load_status::LOADED;
             audio->platform_resource = (uintptr_t)sample;
           }
           else
           {
-            audio->status = Nil::Resource::Audio::FAILED;
+            audio->status = Nil::Resource::Load_status::FAILED;
           }
         }
       }

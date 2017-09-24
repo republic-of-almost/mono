@@ -15,6 +15,7 @@ namespace ROA {
 
 
 Material::Material()
+: Resource()
 {
 }
 
@@ -30,13 +31,15 @@ Material::~Material()
 Color
 Material::get_color() const
 {
+  const uint32_t instance = lib::entity::instance(m_id);
+
   size_t count = 0;
   Nil::Resource::Material *mats = nullptr;
   Nil::Resource::get(&count, &mats);
   
-  if(count > m_id)
+  if(count > instance)
   {
-    return Color(mats[m_id].color);
+    return Color(mats[instance].color);
   }
   else
   {
@@ -49,13 +52,15 @@ Material::get_color() const
 void
 Material::set_color(const Color &col)
 {
+  const uint32_t instance = lib::entity::instance(m_id);
+
   size_t count = 0;
   Nil::Resource::Material *mats = nullptr;
   Nil::Resource::get(&count, &mats);
   
-  if(count > m_id)
+  if(count > instance)
   {
-    mats[m_id].color = col.get_uint();
+    mats[instance].color = col.get_uint();
   }
   else
   {
@@ -73,22 +78,6 @@ Material::get_shader() const
 
 void
 Material::set_shader(const Shader &shader)
-{
-}
-
-
-// ------------------------------------------------------------ [ Inherited ] --
-
-
-const char*
-Material::get_instance_name() const
-{
-  return "Foo";
-}
-
-
-Resource_status
-Material::get_load_status() const
 {
 }
 

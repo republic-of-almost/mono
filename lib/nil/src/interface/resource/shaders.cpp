@@ -33,7 +33,7 @@ get_shd_data()
 // ------------------------------------------------------------- [ Messages ] --
 
 
-constexpr char msg_shader_no_name[]     = "Loading a Shader - must have a name.";
+constexpr char msg_shader_no_name[]     = "Sahder needs to have a name.";
 constexpr char msg_shader_name_exists[] = "Shader with name %s already exists";
 constexpr char msg_shader_failed[]      = "Failed to add Shader %s";
 
@@ -55,16 +55,39 @@ namespace Resource {
 
 
 bool
-find_by_name(const char *name, Shader &out)
+find_by_name(const char *name, Shader *out)
 {
-  const uint32_t find_key = lib::string_pool::find(name);
-  
-  for(size_t i = 0; i < get_shd_data().keys.size(); ++i)
+  // -- Param Check -- //
   {
-    if(get_shd_data().keys[i] == find_key)
+    const bool has_name   = !!name;
+    const bool has_length = strlen(name);
+
+    LIB_ASSERT(has_name);
+    LIB_ASSERT(has_length);
+
+    if (!has_name || !has_length)
     {
-      out = get_shd_data().shader[i];
-      return true;
+      LOG_ERROR(msg_shader_no_name);
+
+      return false;
+    }
+  }
+  
+  size_t count = get_shd_data().keys.size();
+  Shader *shaders = get_shd_data().shader.data();
+  
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(shaders[i].name)
+    {
+      if(strcmp(shaders[i].name, name) == 0)
+      {
+        if(out)
+        {
+          *out = shaders[i];
+        }
+        return true;
+      }
     }
   }
   
@@ -78,27 +101,11 @@ find_by_name(const char *name, Shader &out)
 bool
 load(Shader &in_out)
 {
-  // -- Param Check -- //
-  {
-    const bool has_name   = !!in_out.name;
-    const bool has_length = strlen(in_out.name);
 
-    LIB_ASSERT(has_name);
-    LIB_ASSERT(has_length);
-
-    if (!has_name || !has_length)
-    {
-      LOG_ERROR(msg_shader_no_name);
-
-      return false;
-    }
-  }
 
   // -- Check and return if exists, no support for updating atm -- //
   {
-    const uint32_t check_key = lib::string_pool::find(in_out.name);
-
-    if(check_key)
+    if(find_by_name(in_out.name, nullptr))
     {
       LOG_WARNING(msg_shader_name_exists, in_out.name);
       return false;
@@ -174,8 +181,7 @@ load(Shader &in_out)
 
       // Normalize other outputs //
       {
-
-        in_out.status = Load_status::PENDING;
+        in_out.status = Load_status::NONE;
         in_out.platform_resource = 0;
         
         cpy.status = in_out.status;
@@ -186,7 +192,7 @@ load(Shader &in_out)
 
   // -- Save new Shader Copy -- //
   {
-    const uint32_t key = lib::string_pool::add(cpy.name);
+    const uint32_t key = in_out.id;
     get_shd_data().keys.emplace_back(key);
     get_shd_data().shader.emplace_back(cpy);
   }

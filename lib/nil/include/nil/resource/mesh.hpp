@@ -35,11 +35,10 @@ struct Mesh
   
   // -- Output -- //
   
-  uint32_t id;
+  uint32_t                id;
   Nil::Data::Bounding_box bounding_box;
-
-  enum { PENDING, LOADED, FAILED, STATUS_COUNT } status;
-  uintptr_t platform_resource;
+  Load_status             status;
+  uintptr_t               platform_resource;
 };
 
 

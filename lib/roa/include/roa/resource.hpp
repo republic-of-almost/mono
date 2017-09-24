@@ -49,6 +49,7 @@ public:
   uint32_t                  get_resource_type_id() const;
   const char *              get_resource_type_name() const;
   const char *              get_instance_name() const;
+  Resource_status           get_status() const;
   
   void                      load();
   
@@ -62,8 +63,6 @@ public:
   {
     T rsrc{};
     
-    static_assert(rsrc.is_resource_type_id() > 0, "This is not a valid ROA::Resource");
-    
     return ROA_detail::create_resource(rsrc, name);
   }
   
@@ -73,8 +72,6 @@ public:
   {
     T rsrc{};
     
-    static_assert(rsrc.is_resource_type_id() > 0, "This is not a valid ROA::Resource");
-    
     return ROA_detail::load_resource(rsrc, filename);
   }
   
@@ -83,8 +80,6 @@ public:
   find(const char *name)
   {
     T rsrc{};
-    
-    static_assert(rsrc.is_resource_type_id() > 0, "This is not a valid ROA::Resource");
     
     return ROA_detail::find_resource(rsrc, name);
   }

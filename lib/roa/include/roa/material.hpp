@@ -29,14 +29,6 @@ public:
   
   Color               get_color() const;
   void                set_color(const Color &col);
-  
-  
-  // ---------------------------------------------------------- [ Inherited ] --
-  
-  
-  const char *        get_instance_name() const;
-  Resource_status     get_load_status() const;
-
 
 };
 

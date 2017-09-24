@@ -34,10 +34,6 @@ public:
   
   uint32_t *        get_index() const;
   size_t            get_index_count() const;
-  
-  
-private:
-  
 
 };
 

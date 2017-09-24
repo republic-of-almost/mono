@@ -7,12 +7,13 @@ namespace ROA {
 
 enum class Resource_status {
 
+  WAITING,
+
   PENDING,
   LOADED,
   FAILED,
   
-  ERROR,
-
+  UNKNOWN,
 };
 
 

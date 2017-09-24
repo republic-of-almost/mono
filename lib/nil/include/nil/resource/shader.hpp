@@ -48,7 +48,7 @@ struct Shader
   if found returns true else returns false.
 */
 bool
-find_by_name(const char *name, Shader &out);
+find_by_name(const char *name, Shader *out = nullptr);
 
 
 // ----------------------------------------------------------- [ Get / Load ] --

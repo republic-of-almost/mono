@@ -20,14 +20,6 @@ Shader::~Shader()
 }
 
 
-// ------------------------------------------------------------ [ Inherited ] --
-
-
-Resource_status
-Shader::get_load_status() const
-{
-  return Resource_status::PENDING;
-}
 
 
 } // ns
