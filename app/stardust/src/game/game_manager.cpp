@@ -86,8 +86,10 @@ Game_manager::on_start()
     Actor_kinematic *actor_comp = actor.get_component<Actor_kinematic>();
     LIB_ASSERT(actor_comp);
     
-//    actor.set_world_transform(spawn_point.get_transform());
-    actor.set_data<ROA::Transform>(spawn_point.get_data<ROA::Transform>());
+    const ROA::Transform spawn_trans = spawn_point.get_data<ROA::Transform>();
+    ROA::Transform actor_trans = actor.get_data<ROA::Transform>();
+    
+    actor_trans.set_world_position(spawn_trans.get_world_position());
     
     // -- Find Navmesh -- //
     {

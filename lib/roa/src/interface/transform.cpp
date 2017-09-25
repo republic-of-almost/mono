@@ -40,16 +40,6 @@ Transform::Transform(
 
 
 Vector3
-Transform::get_position() const
-{
-  Nil::Data::Transform data{};
-  ROA_detail::get_nil_data(*this, data);
-
-  return Vector3(data.position);
-}
-
-
-Vector3
 Transform::get_world_position() const
 {
   Nil::Data::Transform data{};
@@ -57,6 +47,39 @@ Transform::get_world_position() const
   Nil::Data::get(node, data);
   
   return Vector3(data.world_position);
+}
+
+
+void
+Transform::set_world_position(const Vector3 pos)
+{
+  Nil::Node this_node = ROA_detail::get_node(*this);
+  Nil::Data::Transform this_data{};
+  Nil::Data::get(this_node, this_data);
+  
+  // -- Calculate world difference -- //
+  
+  // Position
+  {
+    math::vec3 this_pos = math::vec3_init(this_data.world_position);
+    math::vec3 that_pos = math::vec3_init(pos.get_data());
+    
+    math::vec3 diff_pos = math::vec3_subtract(that_pos, this_pos);
+    
+    memcpy(this_data.position, diff_pos.data, sizeof(this_data.position));
+    
+    Nil::Data::set(this_node, this_data);
+  }
+}
+
+
+Vector3
+Transform::get_position() const
+{
+  Nil::Data::Transform data{};
+  ROA_detail::get_nil_data(*this, data);
+
+  return Vector3(data.position);
 }
 
 
