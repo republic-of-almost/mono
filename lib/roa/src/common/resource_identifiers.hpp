@@ -29,20 +29,20 @@ enum ENUM : uint32_t {
 /*
   Order must be the same as Resource::ENUM
 */
-static const char *resource_names[]
+constexpr const char *resource_names[]
 {
   "Unknown",
   
-  "Audio"
+  "Audio",
   "Font",
   "Material",
   "Mesh",
-  "Model"
+  "Model",
   "Shader",
   "Texture",
 };
 
-constexpr const char *
+static const char *
 convert_from_type_id(const uint32_t type_id)
 {
   return resource_names[type_id];
