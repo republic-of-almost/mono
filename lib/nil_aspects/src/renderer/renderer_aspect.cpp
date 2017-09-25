@@ -1033,7 +1033,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
   if(Nil::Data::has(self->debug_lines, line_data))
   {
     Nil::Data::get(self->debug_lines, line_data);
-        
+    
     // Signal to line renderer not reset the data buffer.
     line_data.aux_02 = 0;
     Nil::Data::set(self->debug_lines, line_data);
