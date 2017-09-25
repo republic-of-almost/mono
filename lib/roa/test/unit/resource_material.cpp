@@ -21,7 +21,11 @@ TEST_CASE("ROA::Material")
     REQUIRE(!!rsrc == true);
     REQUIRE(rsrc.get_id() > 0);
     REQUIRE(rsrc.get_resource_type_id() > 0);
-    REQUIRE(rsrc.get_resource_type_name() > 0);
+    
+    const char *type_name = rsrc.get_resource_type_name();
+    const char *expected_type_name = "Material";
+    
+    REQUIRE(strcmp(type_name, expected_type_name) == 0);
     REQUIRE(rsrc.get_status() == ROA::Resource_status::WAITING);
     
     const char *name = rsrc.get_instance_name();
