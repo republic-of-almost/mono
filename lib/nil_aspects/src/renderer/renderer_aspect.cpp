@@ -959,10 +959,6 @@ think(Nil::Engine &engine, uintptr_t user_data)
               rov_submitLine(&data[index + 0], &data[index + 3]);
             }
           }
-
-          // Signal to line renderer not reset the data buffer.
-          line_data.aux_02 = 0;
-          Nil::Data::set(self->debug_lines, line_data);
         }
       }
     
@@ -1030,6 +1026,19 @@ think(Nil::Engine &engine, uintptr_t user_data)
   glFlush();
   glFinish();
   #endif 
+  
+  #ifndef NDEBUG_LINES
+  Nil::Data::Developer line_data{};
+
+  if(Nil::Data::has(self->debug_lines, line_data))
+  {
+    Nil::Data::get(self->debug_lines, line_data);
+        
+    // Signal to line renderer not reset the data buffer.
+    line_data.aux_02 = 0;
+    Nil::Data::set(self->debug_lines, line_data);
+  }
+  #endif
 }
 
 
