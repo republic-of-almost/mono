@@ -9,18 +9,6 @@
 namespace ROA {
 
 
-namespace Data {
-enum ENUM : uint64_t {
-
-  BOUNDING_BOX    = 1 << 0,
-  CAMERA          = 1 << 1,
-  LOGIC           = 1 << 2,
-  RENDERABLE      = 1 << 3,
-
-};
-} // ns
-
-
 class Object
 {
 public:
@@ -35,7 +23,6 @@ public:
 
   explicit              Object();
   explicit              Object(const uint32_t instance_id);
-  explicit              Object(const uint64_t data_bitfield);
   explicit              Object(const ROA_nullptr);
   
                         Object(const Object &other) noexcept;
@@ -43,18 +30,22 @@ public:
   
   virtual               ~Object();
   
-  Object&               operator=(const Object &other) noexcept;
-  Object&               operator=(Object &&other) noexcept;
-  
   void                  destroy();
   
   
   // ---------------------------------------------------------- [ Operators ] --
+  /*
+    Various short hand operators.
+  */
   
   
-                        operator bool() const;
-  bool                  operator==(const Object &other);
-  bool                  operator!=(const Object &other);
+  Object&               operator=(const Object &other) noexcept;
+  Object&               operator=(Object &&other) noexcept;
+  
+                        operator bool() const noexcept;
+                        
+  bool                  operator==(const Object &other) const noexcept;
+  bool                  operator!=(const Object &other) const noexcept;
 
 
   // -------------------------------------------------------------- [ State ] --
@@ -168,10 +159,18 @@ public:
   }
   
   template<typename T>
+  void
+  add_data()
+  {
+    T t{};
+    ROA_detail::set_node_data(*this, t);
+  }
+  
+  template<typename T>
   T
   get_data()
   {
-    T t(nullptr);
+    T t{nullptr};
     
     return ROA_detail::get_node_data(*this, t);
   }
@@ -180,7 +179,7 @@ public:
   const T
   get_data() const
   {
-    T t(nullptr);
+    T t{nullptr};
     
     return ROA_detail::get_node_data(*this, t);
   };
@@ -189,7 +188,7 @@ public:
   bool
   has_data() const
   {
-    T t(nullptr);
+    T t{nullptr};
     
     return ROA_detail::has_node_data(*this, t);
   }

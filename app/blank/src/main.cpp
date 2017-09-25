@@ -3,8 +3,8 @@
 
 
 ROA::Application app;
-ROA::Object obj_camera(ROA::Data::CAMERA);
-ROA::Object obj_scene(ROA::Data::RENDERABLE | ROA::Data::BOUNDING_BOX);
+ROA::Object obj_camera;
+ROA::Object obj_scene;
 
 
 int
@@ -17,6 +17,8 @@ main()
   // Scene
   {
     obj_scene.set_name("ROA_Scene");
+    obj_scene.add_data<ROA::Renderable>();
+    obj_scene.add_data<ROA::Bounding_box>();
 
     ROA::Model::load("mesh/unit_bev_cube.obj");
     
@@ -35,6 +37,8 @@ main()
   // Camera
   {
     obj_camera.set_name("ROA_Camera");
+    
+    obj_camera.add_data<ROA::Camera>();
 
     const ROA::Bounding_box bb = obj_scene.get_data<ROA::Bounding_box>();
 

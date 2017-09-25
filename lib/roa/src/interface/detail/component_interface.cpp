@@ -28,7 +28,7 @@ namespace ROA_detail {
 
 
 ROA::Bounding_box
-get_node_data(ROA::Object obj, const ROA::Bounding_box &data)
+get_node_data(ROA::Object &obj, const ROA::Bounding_box &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -42,7 +42,7 @@ get_node_data(ROA::Object obj, const ROA::Bounding_box &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Bounding_box &data)
+has_node_data(ROA::Object &obj, const ROA::Bounding_box &data)
 {
   if(obj)
   {
@@ -57,7 +57,7 @@ has_node_data(ROA::Object obj, const ROA::Bounding_box &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Bounding_box &data)
+set_node_data(ROA::Object &obj, const ROA::Bounding_box &data)
 {
   if(obj)
   {
@@ -76,7 +76,7 @@ set_node_data(ROA::Object obj, const ROA::Bounding_box &data)
 
 
 ROA::Camera
-get_node_data(ROA::Object obj, const ROA::Camera &data)
+get_node_data(ROA::Object &obj, const ROA::Camera &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -90,7 +90,7 @@ get_node_data(ROA::Object obj, const ROA::Camera &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Camera &data)
+has_node_data(ROA::Object &obj, const ROA::Camera &data)
 {
   if(obj)
   {
@@ -105,7 +105,7 @@ has_node_data(ROA::Object obj, const ROA::Camera &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Camera &data)
+set_node_data(ROA::Object &obj, const ROA::Camera &data)
 {
   if(obj)
   {
@@ -124,7 +124,7 @@ set_node_data(ROA::Object obj, const ROA::Camera &data)
 
 
 ROA::Light
-get_node_data(ROA::Object obj, const ROA::Light &data)
+get_node_data(ROA::Object &obj, const ROA::Light &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -138,7 +138,7 @@ get_node_data(ROA::Object obj, const ROA::Light &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Light &data)
+has_node_data(ROA::Object &obj, const ROA::Light &data)
 {
   if(obj)
   {
@@ -153,7 +153,7 @@ has_node_data(ROA::Object obj, const ROA::Light &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Light &data)
+set_node_data(ROA::Object &obj, const ROA::Light &data)
 {
   if(obj)
   {
@@ -172,7 +172,7 @@ set_node_data(ROA::Object obj, const ROA::Light &data)
 
 
 ROA::Transform
-get_node_data(ROA::Object obj, const ROA::Transform &data)
+get_node_data(ROA::Object &obj, const ROA::Transform &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -186,7 +186,7 @@ get_node_data(ROA::Object obj, const ROA::Transform &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Transform &data)
+has_node_data(ROA::Object &obj, const ROA::Transform &data)
 {
   if(obj)
   {
@@ -201,7 +201,7 @@ has_node_data(ROA::Object obj, const ROA::Transform &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Transform &data)
+set_node_data(ROA::Object &obj, const ROA::Transform &data)
 {
   if(obj)
   {
@@ -220,7 +220,7 @@ set_node_data(ROA::Object obj, const ROA::Transform &data)
 
 
 ROA::Renderable
-get_node_data(ROA::Object obj, const ROA::Renderable &data)
+get_node_data(ROA::Object &obj, const ROA::Renderable &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -235,7 +235,7 @@ get_node_data(ROA::Object obj, const ROA::Renderable &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Renderable &data)
+has_node_data(ROA::Object &obj, const ROA::Renderable &data)
 {
   if(obj)
   {
@@ -250,7 +250,7 @@ has_node_data(ROA::Object obj, const ROA::Renderable &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Renderable &data)
+set_node_data(ROA::Object &obj, const ROA::Renderable &data)
 {
   if(obj)
   {
@@ -269,7 +269,7 @@ set_node_data(ROA::Object obj, const ROA::Renderable &data)
 
 
 ROA::Audio_player
-get_node_data(ROA::Object obj, const ROA::Audio_player &data)
+get_node_data(ROA::Object &obj, const ROA::Audio_player &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -283,7 +283,7 @@ get_node_data(ROA::Object obj, const ROA::Audio_player &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Audio_player &data)
+has_node_data(ROA::Object &obj, const ROA::Audio_player &data)
 {
   if(obj)
   {
@@ -298,7 +298,7 @@ has_node_data(ROA::Object obj, const ROA::Audio_player &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Audio_player &data)
+set_node_data(ROA::Object &obj, const ROA::Audio_player &data)
 {
   if(obj)
   {
@@ -317,7 +317,7 @@ set_node_data(ROA::Object obj, const ROA::Audio_player &data)
 
 
 ROA::Logic
-get_node_data(ROA::Object obj, const ROA::Logic &data)
+get_node_data(ROA::Object &obj, const ROA::Logic &data)
 {
   const bool has_data = has_node_data(obj, data);
 
@@ -331,7 +331,7 @@ get_node_data(ROA::Object obj, const ROA::Logic &data)
 
 
 bool
-has_node_data(ROA::Object obj, const ROA::Logic &data)
+has_node_data(ROA::Object &obj, const ROA::Logic &data)
 {
   if(obj)
   {
@@ -346,7 +346,7 @@ has_node_data(ROA::Object obj, const ROA::Logic &data)
 
 
 void
-set_node_data(ROA::Object obj, const ROA::Logic &data)
+set_node_data(ROA::Object &obj, const ROA::Logic &data)
 {
   if(obj)
   {

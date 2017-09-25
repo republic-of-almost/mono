@@ -41,6 +41,11 @@ Audio_player::~Audio_player()
 void
 Audio_player::set_source(Audio_source &in)
 {
+  if(!in)
+  {
+    return;
+  }
+
   Nil::Node node = ROA_detail::get_node(*this);
   
   Nil::Data::Audio data{};

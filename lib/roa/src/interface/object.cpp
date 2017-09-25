@@ -38,37 +38,6 @@ Object::Object()
   static_assert(sizeof(Nil::Node) <= sizeof(m_id), "Not enough storeage");
   
   new(&m_id) Nil::Node();
-  
-  Nil::Node *this_node = reinterpret_cast<Nil::Node*>(&m_id);
-}
-
-
-Object::Object(const uint64_t data_bitfield)
-: Object()
-{
-  if(data_bitfield & Data::BOUNDING_BOX)
-  {
-    Bounding_box data;
-    this->set_data(data);
-  }
-  
-  if(data_bitfield & Data::CAMERA)
-  {
-    Camera data;
-    this->set_data(data);
-  }
-  
-  if(data_bitfield & Data::LOGIC)
-  {
-    Logic data;
-    this->set_data(data);
-  }
-  
-  if(data_bitfield & Data::RENDERABLE)
-  {
-    Renderable data;
-    this->set_data(data);
-  }
 }
 
 
@@ -99,13 +68,25 @@ Object::Object(Object &&other) noexcept
 
 Object::~Object()
 {
-  Nil::Node *node = reinterpret_cast<Nil::Node*>(&m_id);
-  
-  if(!node->is_ref())
+  if(is_valid() && !is_ref())
   {
+    Nil::Node *node = reinterpret_cast<Nil::Node*>(&m_id);
     node->destroy();
   }
 }
+
+
+void
+Object::destroy()
+{
+  if(m_id)
+  {
+    reinterpret_cast<Nil::Node*>(&m_id)->destroy();
+  }
+}
+
+
+// ------------------------------------------------------------ [ Operators ] --
 
 
 Object&
@@ -131,35 +112,22 @@ Object::operator=(Object &&other) noexcept
   return *this;
 }
 
-
-void
-Object::destroy()
-{
-  if(m_id)
-  {
-    reinterpret_cast<Nil::Node*>(&m_id)->destroy();
-  }
-}
-
-
-// ------------------------------------------------------------ [ Operators ] --
   
-  
-Object::operator bool() const
+Object::operator bool() const noexcept
 {
   return is_valid();
 }
 
 
 bool
-Object::operator==(const Object &other)
+Object::operator==(const Object &other) const noexcept
 {
   return get_instance_id() == other.get_instance_id();
 }
 
 
 bool
-Object::operator!=(const Object &other)
+Object::operator!=(const Object &other) const noexcept
 {
   return get_instance_id() != other.get_instance_id();
 }

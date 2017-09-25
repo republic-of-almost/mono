@@ -64,10 +64,9 @@ load_assets()
       {
         child.set_user_data((uintptr_t)obj);
       
-        ROA::Logic log;
-        child.set_logic(log);
+        child.add_data<ROA::Logic>();
+        ROA::Logic log = child.get_data<ROA::Logic>();
         
-        log = child.get_logic();
         log.set_update_func(Dynamic_object::update);
         log.set_message_func(Dynamic_object::message_handler);
       }
@@ -90,12 +89,12 @@ load_assets()
       child.set_parent(asset);
       child.set_name(lights.name[i]);
       
-      ROA::Transform trans = child.get_transform();
+      ROA::Transform trans = child.get_data<ROA::Transform>();
       
       const math::vec3 origin = math::get_vec3_origin(lights.verts[i], lights.triangle_count[i]);
       trans.set_position(ROA::Vector3(origin.data));
       
-      child.set_transform(trans);
+      child.set_data<ROA::Transform>(trans);
       
       ROA::Light light;
       light.set_type(ROA::Light_type::POINT);
@@ -103,7 +102,7 @@ load_assets()
       light.set_linear_atten(0.014f);
       light.set_exponential_atten(0.014f);
       
-      child.set_light(light);      
+      child.set_data<ROA::Light>(light);
     }
   }
 }

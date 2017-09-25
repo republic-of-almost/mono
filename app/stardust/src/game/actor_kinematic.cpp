@@ -42,7 +42,7 @@ Actor_kinematic::on_think()
       this->accum_yaw
     );
 
-    ROA::Transform trans = entity.get_transform();
+    ROA::Transform trans = entity.get_data<ROA::Transform>();
     trans.set_rotation(ROA::Quaternion(yaw.data));
   }
   
@@ -53,7 +53,7 @@ Actor_kinematic::on_think()
       this->accum_pitch
     );
 
-    ROA::Transform trans = this->head.get_transform();
+    ROA::Transform trans = this->head.get_data<ROA::Transform>();
     trans.set_rotation(ROA::Quaternion(pitch.data));
   }
   
@@ -66,7 +66,7 @@ Actor_kinematic::on_think()
     {
       if(ROA::Keyboard::key_state(ROA::KeyCode::W) == ROA::KeyState::DOWN)
       {
-        player.play();
+        //player.set_play(true);
         z_move -= 1.f;
       }
       if(ROA::Keyboard::key_state(ROA::KeyCode::S) == ROA::KeyState::DOWN)
@@ -94,7 +94,7 @@ Actor_kinematic::on_think()
       // Create query
       if(ROA::Keyboard::key_state(ROA::KeyCode::SPACE) == ROA::KeyState::UP_ON_FRAME)
       {
-        ROA::Transform trans = this->head.get_transform();
+        ROA::Transform trans = this->head.get_data<ROA::Transform>();
       
         ROA::Ray ray(trans.get_world_position(), trans.get_world_forward().scale(10000));
       
@@ -104,7 +104,7 @@ Actor_kinematic::on_think()
         {
           if(strcmp(c.get_name(), "Dyn_football") == 0)
           {
-            ROA::Logic logic = c.get_logic();
+            ROA::Logic logic = c.get_data<ROA::Logic>();
             logic.send_message(1, 1); 
           }
         }
@@ -114,8 +114,8 @@ Actor_kinematic::on_think()
 
     const float move_speed = 0.5f * delta_time;
 
-    ROA::Transform trans = entity.get_transform();
-    ROA::Transform head_trans = this->head.get_transform();
+    ROA::Transform trans = entity.get_data<ROA::Transform>();
+    ROA::Transform head_trans = this->head.get_data<ROA::Transform>();
     
     math::vec3 height = math::vec3_init(head_trans.get_position().get_data());
     math::vec3 pos = math::vec3_init(trans.get_position().get_data());
@@ -289,11 +289,13 @@ Actor_kinematic::on_start()
   
   // Audio Test
   {
-    ROA::Audio_source audio_src("/Users/PhilCK/Desktop/test.ogg");
+//    ROA::Audio_source audio_src sad= ROA::Resource::load<ROA::Audio_source>("/Users/PhilCK/Desktop/test.ogg");
+  
+//    ROA::Audio_source audio_src("/Users/PhilCK/Desktop/test.ogg");
     
-    player.set_source(audio_src);
+//    player.set_source(audio_src);
     
-    entity.set_audio_player(player);
+//    entity.set_data(player);
   }
   
   // Main Entity
@@ -308,7 +310,7 @@ Actor_kinematic::on_start()
     trans.set_scale(ROA::Vector3(scale));
     trans.set_rotation(ROA::Quaternion(rot));
     
-    entity.set_transform(trans);
+    entity.set_data<ROA::Transform>(trans);
   }
   
   // Head
@@ -330,7 +332,7 @@ Actor_kinematic::on_start()
       trans.set_scale(ROA::Vector3(scale));
       trans.set_rotation(ROA::Quaternion(rot));
       
-      this->head.set_transform(trans);
+      this->head.set_data<ROA::Transform>(trans);
     }
     
     // Camera
@@ -346,7 +348,7 @@ Actor_kinematic::on_start()
         float rot[] = {0.f, 0.f, 0.f, 1.f};
         trans.set_rotation(ROA::Quaternion(rot));
         
-        cam.set_transform(trans);
+        cam.set_data<ROA::Transform>(trans);
       }
       
       // Camera
@@ -355,7 +357,7 @@ Actor_kinematic::on_start()
         cam_data.set_field_of_view(math::tau() * 0.12f);
         cam_data.set_clear_color(ROA::Color(0x111122FF));
         
-        cam.set_camera(cam_data);
+        cam.set_data<ROA::Camera>(cam_data);
       }
       
       this->camera = cam;
@@ -379,7 +381,7 @@ Actor_kinematic::on_start()
       trans.set_scale(ROA::Vector3(scale));
       trans.set_rotation(ROA::Quaternion(rot));
       
-      body.set_transform(trans);
+      body.set_data(trans);
     }
   }
 }

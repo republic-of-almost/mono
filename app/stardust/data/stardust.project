@@ -42,10 +42,8 @@ table.insert(
       "STB",
     },
 
-    inc_dirs = {
-      make.get_proj_root() .. "../include/",
+    private_inc_dirs = {
       make.get_proj_root() .. "../src/",
-      make.get_proj_root() .. "../nil_aspects/",
     },
   }
 )

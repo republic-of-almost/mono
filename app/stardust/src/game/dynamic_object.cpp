@@ -72,7 +72,7 @@ update(ROA::Object obj)
     const float t = float(self->time - self->start) / float(length);
     const float tt = linear(t);
     
-    ROA::Transform trans = obj.get_transform();
+    ROA::Transform trans = obj.get_data<ROA::Transform>();
     trans.set_position(ROA::Vector3(trans.get_position().get_x(), tt, trans.get_position().get_z()));
   }
 }
