@@ -142,6 +142,32 @@ Object::destroy()
 }
 
 
+// ------------------------------------------------------------ [ Operators ] --
+  
+  
+Object::operator bool() const
+{
+  return is_valid();
+}
+
+
+bool
+Object::operator==(const Object &other)
+{
+  return get_instance_id() == other.get_instance_id();
+}
+
+
+bool
+Object::operator!=(const Object &other)
+{
+  return get_instance_id() != other.get_instance_id();
+}
+
+
+// ---------------------------------------------------------------- [ State ] --
+
+
 bool
 Object::is_valid() const
 {

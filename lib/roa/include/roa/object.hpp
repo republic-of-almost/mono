@@ -47,12 +47,21 @@ public:
   Object&               operator=(Object &&other) noexcept;
   
   void                  destroy();
+  
+  
+  // ---------------------------------------------------------- [ Operators ] --
+  
+  
+                        operator bool() const;
+  bool                  operator==(const Object &other);
+  bool                  operator!=(const Object &other);
 
 
   // -------------------------------------------------------------- [ State ] --
   /*
     Various state checks.
   */
+
 
   bool                  is_valid() const;
   bool                  is_ref() const;
@@ -155,9 +164,7 @@ public:
   void
   set_data(const T &t)
   {
-    const uint32_t instance_id = this->get_instance_id();
-    
-    ROA_detail::set_node_data(instance_id, t);
+    ROA_detail::set_node_data(*this, t);
   }
   
   template<typename T>
@@ -166,11 +173,7 @@ public:
   {
     T t(nullptr);
     
-    const uint32_t instance_id = this->get_instance_id();
-    
-    ROA_detail::get_node_data(instance_id, t);
-    
-    return t;
+    return ROA_detail::get_node_data(*this, t);
   }
   
   template<typename T>
@@ -179,18 +182,16 @@ public:
   {
     T t(nullptr);
     
-    const uint32_t instance_id = this->get_instance_id();
-    
-    ROA_detail::get_node_data(instance_id, t);
-    
-    return t;
+    return ROA_detail::get_node_data(*this, t);
   };
   
   template<typename T>
   bool
   has_data() const
   {
-    return false;
+    T t(nullptr);
+    
+    return ROA_detail::has_node_data(*this, t);
   }
   
 private:
