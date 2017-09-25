@@ -619,7 +619,6 @@ node_child_count(
   LIB_ASSERT(graph);
 
   // -- Count Children -- //
-  size_t child_count = 0;
   size_t index = 0;
   
   if(node_id > 0)
@@ -636,6 +635,7 @@ node_child_count(
   }
   
   // Calculate children.
+  size_t child_count = 0;
   {
     const int64_t this_depth = node_id ? (int64_t)get_depth(graph->parent_depth_data[index]) : -1;
     const size_t start_index = node_id ? index + 1 : 0;

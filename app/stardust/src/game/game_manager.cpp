@@ -52,7 +52,7 @@ Game_manager::on_start()
           if(strcmp(gran_child_name, "SpawnPoint") == 0)
           {
             spawn_point = gran_child;
-            spawn_point.set_data<ROA::Transform>(gran_child.get_data<ROA::Transform>());
+//            spawn_point.set_data<ROA::Transform>(gran_child.get_data<ROA::Transform>());
             break;
           }
         }
@@ -72,6 +72,7 @@ Game_manager::on_start()
       if(strcmp(child_name, "WH-Nav") == 0)
       {
         child.destroy();
+        break;
       }
     }
   }
