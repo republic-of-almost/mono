@@ -26,6 +26,7 @@ public:
   
   // --------------------------------------------------------- [ Attributes ] --
   
+  
   Vector3       get_world_position() const;
   void          set_world_position(const Vector3 pos);
   

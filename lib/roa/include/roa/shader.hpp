@@ -20,6 +20,19 @@ public:
   explicit          Shader();
   virtual           ~Shader();
   
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  
+  
+  bool              set_vertex_shader_code(const char *src);
+  const char *      get_vertex_shader_code() const;
+  
+  bool              set_geometry_shader_code(const char *src);
+  const char *      get_geometry_shader_code() const;
+  
+  bool              set_fragment_shader_code(const char *src);
+  const char *      get_fragment_shader_code() const;
+  
 };
 
 

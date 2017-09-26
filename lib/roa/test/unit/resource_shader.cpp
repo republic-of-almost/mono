@@ -82,10 +82,46 @@ TEST_CASE("ROA::Shader")
   
   
   // --------------------------------------------------------- [ Attributes ] --
+
+
+  SECTION("Load code")
+  {
+    ROA::Shader rsrc_load = ROA::Resource::create<ROA::Shader>("Load Code");
+    
+    const char *vs_code = "vs_code";
+    REQUIRE(rsrc_load.set_vertex_shader_code(vs_code) == true);
+    const char *got_vs_code = rsrc_load.get_vertex_shader_code();
+    REQUIRE(strcmp(got_vs_code, vs_code) == 0);
+    
+    const char *gs_code = "gs_code";
+    REQUIRE(rsrc_load.set_geometry_shader_code(gs_code) == true);
+    const char *got_gs_code = rsrc_load.get_geometry_shader_code();
+    REQUIRE(strcmp(got_gs_code, gs_code) == 0);
+    
+    const char *fs_code = "fs_code";
+    REQUIRE(rsrc_load.set_fragment_shader_code(fs_code) == true);
+    const char *got_fs_code = rsrc_load.get_fragment_shader_code();
+    REQUIRE(strcmp(got_fs_code, fs_code) == 0);
+    
+    // Shouldn't be able to update code after heap //
+    rsrc_load.load();
+    
+    const char *new_vs_code = "new_vs_code";
+    REQUIRE(rsrc_load.set_vertex_shader_code(new_vs_code) == false);
+    const char *got_old_vs_code = rsrc_load.get_vertex_shader_code();
+    REQUIRE(strcmp(got_old_vs_code, vs_code) == 0);
+    
+    const char *new_gs_code = "new_gs_code";
+    REQUIRE(rsrc_load.set_geometry_shader_code(new_gs_code) == false);
+    const char *got_old_gs_code = rsrc_load.get_geometry_shader_code();
+    REQUIRE(strcmp(got_old_gs_code, gs_code) == 0);
+    
+    const char *new_fs_code = "new_fs_code";
+    REQUIRE(rsrc_load.set_fragment_shader_code(new_fs_code) == false);
+    const char *got_old_fs_code = rsrc_load.get_fragment_shader_code();
+    REQUIRE(strcmp(got_old_fs_code, fs_code) == 0);
+  }
   
-  /*
-    None yet
-  */
   
   // ---------------------------------------------------------- [ Inherited ] --
   

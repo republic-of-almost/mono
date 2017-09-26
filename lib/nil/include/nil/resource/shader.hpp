@@ -41,23 +41,25 @@ struct Shader
 
 
 // ----------------------------------------------------------------- [ Find ] --
-
-
-/*!
-  Searches for a Shader by name.
-  if found returns true else returns false.
+/*
+  Search for shaders by various means.
 */
+
+
 bool
 find_by_name(const char *name, Shader *out = nullptr);
+
+
+bool
+find_by_index(const uint32_t index, Shader *out = nullptr);
 
 
 // ----------------------------------------------------------- [ Get / Load ] --
 
 
 /*!
-  Loads a new Texture.
-  Does *not* update an existing texture if name already exists.
-  If it fails to load it will return false.
+  Loads a new Shader.
+  Will update the shader only if it's status is NONE
 */
 bool
 load(Shader &in);

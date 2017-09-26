@@ -10,6 +10,7 @@ TEST_CASE("ROA::Transform")
   
   // ----------------------------------------------------------- [ Lifetime ] --
   
+  
   SECTION("Create Defaults")
   {
     ROA::Transform data;
@@ -19,14 +20,19 @@ TEST_CASE("ROA::Transform")
     REQUIRE(data.is_ref() == false);
   }
   
+  
   SECTION("Create Null")
   {
+    ROA::Transform data(nullptr);
+    
+    REQUIRE(data.is_valid() == false);
+    REQUIRE(data == false);
+    REQUIRE(data.is_ref() == false);
   }
-  
-  // ------------------------------------------------------------- [ Object ] --
   
   
   // --------------------------------------------------------- [ Attributes ] --
+  
   
   
 }

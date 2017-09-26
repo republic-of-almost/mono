@@ -95,30 +95,56 @@ find_by_name(const char *name, Shader *out)
 }
 
 
+bool
+find_by_index(const uint32_t index, Shader *out)
+{
+  size_t count = get_shd_data().keys.size();
+  Shader *shaders = get_shd_data().shader.data();
+
+  if(index < count)
+  {
+    *out = shaders[index];
+    
+    return true;
+  }
+  
+  return false;
+}
+
+
 // ----------------------------------------------------------- [ Get / Load ] --
 
 
 bool
 load(Shader &in_out)
 {
-
-
-  // -- Check and return if exists, no support for updating atm -- //
+  // -- Existing Shader -- //
+  Shader local{};
   {
-    if(find_by_name(in_out.name, nullptr))
+    if(in_out.name && in_out.id)
     {
-      LOG_WARNING(msg_shader_name_exists, in_out.name);
-      return false;
+      find_by_index(in_out.id, &local);
     }
   }
-
-  // -- Load new Shader -- //
-  Shader cpy = in_out;
+  
+  // -- Only process new or not submitted for load shaders -- //
+  if(local.status != Nil::Resource::Load_status::NONE)
+  {
+    LOG_WARNING("Can't update shader after its loaded.");
+    return false;
+  }
+  
+  // -- Remove any heap data that has been updated. -- //
+  {
+    if(local.name != in_out.name)       { free((void*)local.name);    }
+    if(local.vs_code != in_out.vs_code) { free((void*)local.vs_code); }
+    if(local.gs_code != in_out.gs_code) { free((void*)local.gs_code); }
+    if(local.fs_code != in_out.fs_code) { free((void*)local.fs_code); }
+  }
+  
+  // -- Save Shader -- //
   {
     // Transfer ownership //
-    /*
-      Do this first because if it fails we need to unset output data.
-    */
     {
       bool failed = false;
 
@@ -151,10 +177,10 @@ load(Shader &in_out)
       // If not failed add the new data, else delete and return.
       if(!failed)
       {
-        cpy.name    = cpy_name;
-        cpy.vs_code = cpy_shd_data[0];
-        cpy.gs_code = cpy_shd_data[1];
-        cpy.fs_code = cpy_shd_data[2];
+        local.name    = cpy_name;
+        local.vs_code = cpy_shd_data[0];
+        local.gs_code = cpy_shd_data[1];
+        local.fs_code = cpy_shd_data[2];
       }
       else
       {
@@ -171,12 +197,13 @@ load(Shader &in_out)
     }
     
     // Set Outputs //
+    if(local.id == 0)
     {
       // Generate new id //
       {
         const uint32_t new_id = get_shd_data().keys.size();
         in_out.id = new_id;
-        cpy.id = in_out.id;
+        local.id = in_out.id;
       }
 
       // Normalize other outputs //
@@ -184,20 +211,27 @@ load(Shader &in_out)
         in_out.status = Load_status::NONE;
         in_out.platform_resource = 0;
         
-        cpy.status = in_out.status;
-        cpy.platform_resource = in_out.platform_resource;
+        local.status = in_out.status;
+        local.platform_resource = in_out.platform_resource;
+      }
+      
+      // -- Save new Shader Copy -- //
+      {
+        const uint32_t key = in_out.id;
+        get_shd_data().keys.emplace_back(key);
+        get_shd_data().shader.emplace_back(local);
+      }
+    }
+    else
+    {
+      // Update existing
+      {
+        get_shd_data().shader[local.id] = local;
       }
     }
   }
 
-  // -- Save new Shader Copy -- //
-  {
-    const uint32_t key = in_out.id;
-    get_shd_data().keys.emplace_back(key);
-    get_shd_data().shader.emplace_back(cpy);
-  }
-
-   return true;
+ return true;
 }
 
 

@@ -13,20 +13,68 @@ main()
   /*
     Setup Objects
   */
+  
+  // Resources
+  ROA::Model::load("mesh/unit_bev_cube.obj");
+  const ROA::Mesh mesh = ROA::Resource::find<ROA::Mesh>("Unit_bev_cube");
+
+  ROA::Material mat = ROA::Resource::create<ROA::Material>("Basic Mat");
+  {
+    // Shader //
+    ROA::Shader shd = ROA::Resource::create<ROA::Shader>("world_pos");
+    shd.set_vertex_shader_code(
+      R"GLSL(
+        #version 100
+
+        attribute mediump vec3 vs_in_position;
+        attribute mediump vec3 vs_in_normal;
+        attribute mediump vec2 vs_in_texture_coords;
+
+        uniform mediump mat4 uni_wvp;
+
+        varying mediump vec2 ps_in_texture_coords;
+        varying mediump vec3 ps_in_color;
+
+        void
+        main()
+        {
+          gl_Position          = uni_wvp * vec4(vs_in_position, 1.0);
+          ps_in_texture_coords = vs_in_texture_coords;
+          ps_in_color          = vs_in_normal;
+        }
+      )GLSL"
+    );
+    
+    shd.set_fragment_shader_code(
+      R"GLSL(
+        #version 100
+
+        varying mediump vec2 ps_in_texture_coords;
+        varying mediump vec3 ps_in_color;
+
+        uniform mediump vec4 uni_color;
+
+        void
+        main()
+        {
+          gl_FragColor = vec4(1.f,0.f,1.f,1.f);
+        }
+      )GLSL"
+    );
+    
+    shd.load();
+    
+    // Material //
+    mat.set_color(ROA::Color(0xFFFF00FF));
+    mat.set_shader(shd);
+    mat.load();
+  }
 
   // Scene
   {
     obj_scene.set_name("ROA_Scene");
     obj_scene.add_data<ROA::Renderable>();
     obj_scene.add_data<ROA::Bounding_box>();
-
-    ROA::Model::load("mesh/unit_bev_cube.obj");
-    
-    const ROA::Mesh mesh = ROA::Resource::find<ROA::Mesh>("Unit_bev_cube");
-
-    ROA::Material mat = ROA::Resource::create<ROA::Material>("Basic Mat");
-    mat.set_color(ROA::Color(0xFFFF00FF));
-    mat.load();
 
     const ROA::Renderable renderable(mesh, mat);
 
