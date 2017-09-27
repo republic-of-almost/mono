@@ -6,6 +6,7 @@
 
 
 #include <roa/application.hpp>
+#include <roa/assert.hpp>
 #include <roa/audio_player.hpp>
 #include <roa/audio_source.hpp>
 #include <roa/bounding_box.hpp>
@@ -30,6 +31,7 @@
 #include <roa/resource_status.hpp>
 #include <roa/scene.hpp>
 #include <roa/shader.hpp>
+#include <roa/shader_type.hpp>
 #include <roa/time.hpp>
 #include <roa/transform.hpp>
 #include <roa/vector3.hpp>

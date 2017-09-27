@@ -5,93 +5,116 @@
 #include <nil/fwd.hpp>
 
 
-namespace Nil {
-namespace Resource {
+/* -------------------------------------------------------------- [ Type ] -- */
 
 
-enum class Shader_type
+struct Nil_shader
 {
-  NONE,
+  /* input */
+
+  const char          *name;
+  Nil_shader_type     type;
+  const char          *vs_code;
+  const char          *gs_code;
+  const char          *fs_code;
   
-  ROV_Dbg_line_renderer,
-  ROV_Mesh_renderer,
+  /* output */
   
-  PANE,
+  Nil_resource_status status;
+  uintptr_t           platform_resource;
+  uint32_t            id;
 };
 
 
-struct Shader
-{
-  // -- Input -- //
-  
-  Shader_type type;
-  
-  const char *name;
-
-  const char *vs_code;
-  const char *gs_code;
-  const char *fs_code;
-  
-  // -- Output -- //
-  
-  Load_status status;
-  uintptr_t   platform_resource;
-  uint32_t    id;
-};
-
-
-// ----------------------------------------------------------------- [ Find ] --
+/* ------------------------------------------------------------ [ Static ] -- */
 /*
-  Search for shaders by various means.
+  These functions operate on the collective shader data.
 */
 
+/* rsrc lifetime */
 
 bool
-find_by_name(const char *name, Shader *out = nullptr);
-
+nil_rsrc_shader_initialize();
 
 bool
-find_by_index(const uint32_t index, Shader *out = nullptr);
+nil_rsrc_shader_destroy();
 
 
-// ----------------------------------------------------------- [ Get / Load ] --
+/* search / access */
 
-
-/*!
-  Loads a new Shader.
-  Will update the shader only if it's status is NONE
-*/
 bool
-load(Shader &in);
+nil_rsrc_shader_find_by_name(const char *name, Nil_shader *out = NULL);
 
+bool
+nil_rsrc_shader_find_by_id(const uint32_t id, Nil_shader *out = NULL);
 
-/*!
-  Gets access to the underlying data.
-
-  size_t count = 0;
-  Texture *data = nullptr;
-  get(&count, &data);
-*/
 void
-get(size_t *count, Shader **out);
+nil_rsrc_shader_get_data(size_t *out_count, Nil_shader **out_data = NULL);
 
 
-// ----------------------------------------------------------------- [ Info ] --
+/* batch */
+
+void
+nil_rsrc_shader_create_batch(Nil_shader *in, size_t count);
+
+
+/* ---------------------------------------------------------- [ Instance ] -- */
 /*
-  Get general information of textures.
+  These functions operator on an instance of a shader.
 */
 
+/* lifetime */
 
-const char *
-get_type_name(const Shader &in);
+uint32_t
+nil_rsrc_shader_create(Nil_shader *shd = NULL);
+
+bool
+nil_rsrc_shader_destroy(uint32_t id);
 
 
-size_t
-shader_count();
+/* type */
+
+void
+nil_rsrc_shader_set_type(uint32_t id, uint32_t type);
+
+Nil_shader_type
+nil_rsrc_shader_get_type(uint32_t id);
 
 
-} // ns
-} // ns
+/* vertex shader */
+
+void
+nil_rsrc_shader_set_vs_src(uint32_t id, const char *src);
+
+const char*
+nil_rsrc_shader_get_vs_src(uint32_t id);
+
+
+/* geo shader */
+
+void
+nil_rsrc_shader_set_gs_src(uint32_t id, const char *src);
+
+const char*
+nil_rsrc_shader_get_gs_src(uint32_t id);
+
+
+/* frag shader */
+
+void
+nil_rsrc_shader_set_fs_src(uint32_t id, const char *src);
+
+const char*
+nil_rsrc_shader_get_fs_src(uint32_t id);
+
+
+/* status */
+
+Nil_resource_status
+nil_rsrc_shader_get_load_status(uint32_t id);
+
+void
+nil_rsrc_shader_load(uint32_t id);
 
 
 #endif // inc guard

@@ -24,6 +24,9 @@ public:
   // --------------------------------------------------------- [ Attributes ] --
   
   
+  void              set_shader_type(const Shader_type type);
+  Shader_type       get_shader_type() const;
+  
   bool              set_vertex_shader_code(const char *src);
   const char *      get_vertex_shader_code() const;
   

@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 
 namespace Nil {
@@ -88,6 +89,37 @@ enum ENUM : uint32_t {
 
 } // ns
 } // ns
+
+
+/* CAPI */
+
+struct Nil_ctx;
+struct Nil_shader;
+
+typedef enum
+{
+  RSRC_STATUS_NONE,
+  RSRC_STATUS_PENDING,
+  RSRC_STATUS_LOADED,
+  RSRC_STATUS_FAILED,
+  RSRC_STATUS_ERROR
+} Nil_resource_status;
+
+typedef enum
+{
+  SHD_NONE,
+
+  SHD_LINE_RENDERER_01,
+  SHD_MESH_RENDERER_01,
+  SHD_PAINT_RENDERER_01,
+  
+} Nil_shader_type;
+
+
+
+typedef int NIL_BOOL;
+#define NIL_TRUE 1
+#define NIL_FALSE 0
 
 
 #endif // inc guard

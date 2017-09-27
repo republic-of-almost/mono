@@ -50,6 +50,7 @@ class Vector3;
 
 enum class Ray_search;
 enum class Resource_status;
+enum class Shader_type;
 
 
 } // ns

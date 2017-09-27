@@ -22,10 +22,14 @@ I think this meakes better sense.
 We should be able to delte a resource.
 
 
-### C linkage interface
+### C interface
 
-Consider would `transform_set(node, transoform)` be better than\
-`set(node, transform)`?
+Move to a c or c like code base for Nil, its a simple bit of code, lets keep it
+that way.
+
+### Have a context
+
+Have a context that contains the resource data.
 
 
 ### Nil::Node / ROA::Object

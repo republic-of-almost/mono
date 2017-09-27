@@ -24,7 +24,36 @@ Shader::~Shader()
 
 
 // ----------------------------------------------------------- [ Attributes ] --
-  
+
+
+void
+Shader::set_shader_type(const Shader_type type)
+{
+  if(m_id)
+  {
+    Nil::Resource::Shader shd;
+    const uint32_t index = lib::entity::instance(m_id);
+    
+    if(Nil::Resource::find_by_index(index, &shd))
+    {
+      if(shd.status == Nil::Resource::Load_status::NONE)
+      {
+        
+      }
+    }
+  }
+  else
+  {
+    LOG_ERROR("Invalid Shader")
+  }
+}
+
+
+Shader_type
+Shader::get_shader_type() const
+{
+}
+
   
 bool
 Shader::set_vertex_shader_code(const char *src)
