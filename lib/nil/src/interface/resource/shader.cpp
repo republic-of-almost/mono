@@ -283,15 +283,17 @@ nil_rsrc_shader_create_batch(Nil_shader *in, size_t count, bool move)
 
 
 bool
-nil_rsrc_copy_src_helper(const char *dest, const char *new_src)
+nil_rsrc_copy_src_helper(const char **dest, const char *new_src)
 {
   const size_t bytes = (strlen(new_src) + 1) * sizeof(char);
   const char *new_alloc = (char*)malloc(bytes);
   
   if(new_alloc)
   {
-    free((void*)dest);
-    memcpy((void*)dest, new_src, bytes);
+    free((void*)*dest);
+    *dest = new_alloc;
+    
+    memcpy((void*)*dest, new_src, bytes);
   }
   
   return !!new_alloc;
@@ -334,7 +336,7 @@ nil_rsrc_shader_set_type(uint32_t id, Nil_shader_type type)
   Nil_shader *self = nullptr;
   
   const bool found  = nil_rsrc_shader_get_by_id(id, &self);
-  const bool status = (found && self->status != NIL_RSRC_STATUS_NONE);
+  const bool status = (found && self->status == NIL_RSRC_STATUS_NONE);
   
   if(found && status)
   {
@@ -371,12 +373,12 @@ nil_rsrc_shader_set_vs_src(uint32_t id, const char *src)
   Nil_shader *self = nullptr;
   
   const bool found           = nil_rsrc_shader_get_by_id(id, &self);
-  const bool status          = (found && self->status != NIL_RSRC_STATUS_NONE);
+  const bool status          = (found && self->status == NIL_RSRC_STATUS_NONE);
   const bool self_assignment = (found && (self->vs_code == src));
   
   if(found && status && !self_assignment)
   {
-    return nil_rsrc_copy_src_helper(self->vs_code, src);
+    return nil_rsrc_copy_src_helper(&self->vs_code, src);
   }
 
   LOG_ERROR("Cant find or update shader.");
@@ -408,12 +410,12 @@ nil_rsrc_shader_set_gs_src(uint32_t id, const char *src)
   Nil_shader *self = nullptr;
   
   const bool found           = nil_rsrc_shader_get_by_id(id, &self);
-  const bool status          = (found && self->status != NIL_RSRC_STATUS_NONE);
+  const bool status          = (found && self->status == NIL_RSRC_STATUS_NONE);
   const bool self_assignment = (found && (self->gs_code == src));
   
   if(found && status && !self_assignment)
   {
-    return nil_rsrc_copy_src_helper(self->gs_code, src);
+    return nil_rsrc_copy_src_helper(&self->gs_code, src);
   }
 
   LOG_ERROR("Cant find or update shader.");
@@ -445,12 +447,12 @@ nil_rsrc_shader_set_fs_src(uint32_t id, const char *src)
   Nil_shader *self = nullptr;
   
   const bool found           = nil_rsrc_shader_get_by_id(id, &self);
-  const bool status          = (found && self->status != NIL_RSRC_STATUS_NONE);
+  const bool status          = (found && self->status == NIL_RSRC_STATUS_NONE);
   const bool self_assignment = (found && (self->fs_code == src));
   
   if(found && status && !self_assignment)
   {
-    return nil_rsrc_copy_src_helper(self->fs_code, src);
+    return nil_rsrc_copy_src_helper(&self->fs_code, src);
   }
 
   LOG_ERROR("Cant find or update shader.");

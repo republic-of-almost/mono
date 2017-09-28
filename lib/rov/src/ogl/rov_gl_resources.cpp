@@ -70,10 +70,6 @@ ogl_createTexture(
 void
 ogl_destroyTextures(rovGLData *gl_data)
 {
-  #ifdef GL_HAS_VAO
-  glBindVertexArray(gl_data->vao);
-  #endif
-
   lib::array<GLuint, 64> textures_to_destroy;
 
   for (ROV_Internal::rovGLTexture tex : gl_data->rov_textures)
@@ -302,10 +298,6 @@ ogl_updateLights(
 void
 ogl_destroyLights(rovGLData *gl_data)
 {
-  #ifdef GL_HAS_VAO
-  glBindVertexArray(gl_data->vao);
-  #endif
-
   lib::array<GLuint, 64> buffer_to_destroy;
 
   for (ROV_Internal::rovGLLightPack buf : gl_data->light_buffers)
@@ -579,10 +571,6 @@ ogl_createProgram(
 void
 ogl_destroyPrograms(rovGLData *gl_data)
 {
-  #ifdef GL_HAS_VAO
-  glBindVertexArray(gl_data->vao);
-  #endif
-
   glUseProgram(0);
 
   for (ROV_Internal::rovGLMeshProgram &prog : gl_data->rov_mesh_programs)

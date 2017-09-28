@@ -866,11 +866,11 @@ load_gltf(Nil::Node root_node, const char *path)
             {
               if(json_obj_name(json_persp_attr, "aspectRatio"))
               {
-//                cam.aspect_ratio = json_to_float(json_persp_attr->value);
+//                cam.width = 1 * json_to_float(json_persp_attr->value);
+//                cam.height = 1;
               }
               else if(json_obj_name(json_persp_attr, "yfov"))
               {
-//                cam.yfov = json_to_float(json_persp_attr->value);
                 cam.fov = json_to_float(json_persp_attr->value);
               }
               else if(json_obj_name(json_persp_attr, "zfar"))

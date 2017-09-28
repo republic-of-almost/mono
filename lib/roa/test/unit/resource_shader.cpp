@@ -93,7 +93,8 @@ TEST_CASE("ROA::Shader")
     ROA::Shader rsrc_load = ROA::Resource::create<ROA::Shader>("Load Code");
     
     const char *vs_code = "vs_code";
-    REQUIRE(rsrc_load.set_vertex_shader_code(vs_code) == true);
+    const bool update_vs_pre_load = rsrc_load.set_vertex_shader_code(vs_code);
+    REQUIRE(update_vs_pre_load == true);
     const char *got_vs_code = rsrc_load.get_vertex_shader_code();
     REQUIRE(strcmp(got_vs_code, vs_code) == 0);
     

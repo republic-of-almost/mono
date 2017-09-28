@@ -286,6 +286,7 @@ Actor_kinematic::on_start()
   this->height = 4.5f;
   
   ROA::Object entity = get_object();
+  ROA::Model::load("mesh/unit_bev_cube.obj");
   
   // Audio Test
   {
@@ -318,6 +319,12 @@ Actor_kinematic::on_start()
     this->head = ROA::Object{};
     head.set_name("Head");
     head.set_parent(entity);
+   
+    ROA::Model::load("mesh/unit_bev_cube.obj");
+    ROA::Renderable renderable;
+    renderable.set_mesh(ROA::Resource::find<ROA::Mesh>("Unit_bev_cube"));
+    
+    head.set_data<ROA::Renderable>(renderable);
     
     
     // Head Trans
@@ -370,10 +377,21 @@ Actor_kinematic::on_start()
     body.set_name("Body");
     body.set_parent(entity);
     
+    ROA::Model::load("mesh/unit_bev_cube.obj");
+    ROA::Renderable renderable;
+    renderable.set_mesh(ROA::Resource::find<ROA::Mesh>("Unit_bev_cube"));
+    
+    body.set_data<ROA::Renderable>(renderable);
+
+    
     // Body Transform
     {
-      float pos[] = {0.f, 0.f, 0.f};
-      float scale[] = {1.f, math::g_ratio(), 1.f};
+      const float h_factor = this->height * 0.5f;
+      const float q_factor = this->height * 0.33f;
+      const float t_factor = this->height * 0.2f;
+    
+      float pos[] = {0.f, h_factor, 0.f};
+      float scale[] = {t_factor * math::g_ratio(), q_factor * math::g_ratio(), 1.f};
       float rot[] = {0.f, 0.f, 0.f, 1.f};
 
       ROA::Transform trans;
