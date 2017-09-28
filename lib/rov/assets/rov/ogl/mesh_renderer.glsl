@@ -77,7 +77,7 @@ main()
   Defines
 */
 #define CONST_AMB 0.0
-#define CONST_SHININESS 0
+#define CONST_SHININESS 512
 
 /*
   Inputs
@@ -129,8 +129,8 @@ calculate_attenuation(
   Attenuation atten)
 {
   float distance        = length(light_pos - frag_pos);
-  float atten_lin_dist  = 1.0 + atten.linear * distance;
-  float atten_exp_dist  = 1.0 + atten.exponential * (distance * distance);
+  float atten_lin_dist  = atten.linear * distance;
+  float atten_exp_dist  = atten.exponential * (distance * distance);
   float attenuation     = 1.0 / (atten.constant + atten_lin_dist + atten_exp_dist);
 
 //  float attenuation = 1.0 / (1.0 + atten.linear * pow(distance, 2));
@@ -212,8 +212,8 @@ main()
     Material mat;
     mat.Ka = vec3(0.0);
     mat.Kd = diffuse_color.rgb;
-    mat.Ks = vec3(0.0);//vec3(0.2,0.2,0.2);//specular_map.rgb;
-    mat.shininess = 0;//CONST_SHININESS;
+    mat.Ks = vec3(0.2,0.2,0.2);//specular_map.rgb;
+    mat.shininess = CONST_SHININESS;
 
     vec3 accum_color = vec3(0,0,0);
 
