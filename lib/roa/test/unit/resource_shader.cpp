@@ -7,6 +7,7 @@
 TEST_CASE("ROA::Shader")
 {
   lib::logging::set_output(0);
+//  lib::logging::set_output(lib::logging::out::console);
 
 
   // --------------------------------------------------- [ Resource Factory ] --
@@ -56,12 +57,15 @@ TEST_CASE("ROA::Shader")
   SECTION("Load Waiting")
   {
     ROA::Shader rsrc_load = ROA::Resource::create<ROA::Shader>("Make Pending");
+    const ROA::Resource_status before_load = rsrc_load.get_status();
     
-    REQUIRE(rsrc_load.get_status() == ROA::Resource_status::WAITING);
+    REQUIRE(before_load == ROA::Resource_status::WAITING);
     
     rsrc_load.load();
     
-    REQUIRE(rsrc_load.get_status() == ROA::Resource_status::PENDING);
+    const ROA::Resource_status after_load = rsrc_load.get_status();
+    
+    REQUIRE(after_load == ROA::Resource_status::PENDING);
   }
   
   

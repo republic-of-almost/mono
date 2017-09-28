@@ -4,6 +4,7 @@
 
 #include <roa/fundamental.hpp>
 #include <roa/resource_status.hpp>
+#include <roa/shader_type.hpp>
 #include <nil/fwd.hpp>
 
 
@@ -62,11 +63,59 @@ static const ROA::Resource_status roa_rsrc_status_from_nil_rsrc_status[]
   ROA::Resource_status::UNKNOWN,  // Nil::Rsource::Load_status::ERROR
 };
 
+static const Nil::Resource::Load_status nil_rsrc_status_from_roa_rsrc_status[]
+{
+  Nil::Resource::Load_status::NONE,
+  Nil::Resource::Load_status::PENDING,
+  Nil::Resource::Load_status::LOADED,
+  Nil::Resource::Load_status::FAILED,
+  Nil::Resource::Load_status::ERROR,
+};
+
 
 constexpr ROA::Resource_status
 convert_from_nil(const Nil::Resource::Load_status status)
 {
   return (ROA::Resource_status)roa_rsrc_status_from_nil_rsrc_status[(int)status];
+}
+
+constexpr Nil::Resource::Load_status
+convert_from_roa(const ROA::Resource_status status)
+{
+  return (Nil::Resource::Load_status)nil_rsrc_status_from_roa_rsrc_status[(int)status];
+}
+
+inline Nil_shader_type
+convert_from_roa(const ROA::Shader_type type)
+{
+  switch(type)
+  {
+    case(ROA::Shader_type::DEBUG_LINE_RENDERER):
+      return NIL_SHD_LINE_RENDERER_01;
+    case(ROA::Shader_type::MESH_RENDERER):
+      return NIL_SHD_MESH_RENDERER_01;
+    case(ROA::Shader_type::PANE_RENDERER):
+      return NIL_SHD_PAINT_RENDERER_01;
+    case(ROA::Shader_type::NONE):
+      return NIL_SHD_NONE;
+  }
+}
+
+
+inline ROA::Shader_type
+convert_from_nil(const Nil_shader_type type)
+{
+  switch(type)
+  {
+    case(NIL_SHD_LINE_RENDERER_01):
+      return ROA::Shader_type::DEBUG_LINE_RENDERER;
+    case(NIL_SHD_MESH_RENDERER_01):
+      return ROA::Shader_type::MESH_RENDERER;
+    case(NIL_SHD_PAINT_RENDERER_01):
+      return ROA::Shader_type::PANE_RENDERER;
+    case(NIL_SHD_NONE):
+      return ROA::Shader_type::NONE;
+  }
 }
 
 

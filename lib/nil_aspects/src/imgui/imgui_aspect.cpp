@@ -337,8 +337,8 @@ think(Nil::Engine &engine, uintptr_t user_data)
     Nil::Resource::get(&mat_count, &mats);
     
     size_t shd_count = 0;
-    Nil::Resource::Shader *shds = nullptr;
-    Nil::Resource::get(&shd_count, &shds);
+    Nil_shader *shds = nullptr;
+    nil_rsrc_shader_get_data(&shd_count, &shds);
     
     // Create window and show data //
     const char *rsrc_overview = "Resource Overview##rsrc_over";

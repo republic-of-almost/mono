@@ -173,9 +173,9 @@ Resource::get_instance_name() const
     case ROA_detail::Resource::SHADER:
     {
       size_t count = 0;
-      Nil::Resource::Shader *data = nullptr;
+      Nil_shader *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_shader_get_data(&count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -200,7 +200,7 @@ Resource::get_status() const
   const uint32_t type_id     = lib::entity::type(m_id);
   const uint32_t instance_id = lib::entity::instance(m_id);
   
-  Nil::Resource::Load_status status = Nil::Resource::Load_status::ERROR;
+  uint32_t status = (uint32_t)Nil::Resource::Load_status::ERROR;
   
   switch (type_id)
   {
@@ -213,7 +213,7 @@ Resource::get_status() const
       
       LIB_ASSERT(instance_id < count);
       
-      status = data[instance_id].status;
+      status = (uint32_t)data[instance_id].status;
       
       break;
     }
@@ -227,7 +227,7 @@ Resource::get_status() const
       
       LIB_ASSERT(instance_id < count);
       
-      status = data[instance_id].status;
+      status = (uint32_t)data[instance_id].status;
       
       break;
     }
@@ -241,7 +241,7 @@ Resource::get_status() const
       
       LIB_ASSERT(instance_id < count);
       
-      status = data[instance_id].status;
+      status = (uint32_t)data[instance_id].status;
       
       break;
     }
@@ -255,7 +255,7 @@ Resource::get_status() const
       
       LIB_ASSERT(instance_id < count);
       
-      status = data[instance_id].status;
+      status = (uint32_t)data[instance_id].status;
       
       break;
     }
@@ -263,9 +263,9 @@ Resource::get_status() const
     case ROA_detail::Resource::SHADER:
     {
       size_t count = 0;
-      Nil::Resource::Shader *data = nullptr;
+      Nil_shader *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_shader_get_data(&count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -277,13 +277,13 @@ Resource::get_status() const
     default:
     {
       LIB_ASSERT(false); // Missing something
-      status = Nil::Resource::Load_status::ERROR;
+      status = (uint32_t)Nil::Resource::Load_status::ERROR;
       
       break;
     }
   }
 
-  return ROA_detail::convert_from_nil(status);
+  return ROA_detail::convert_from_nil((Nil::Resource::Load_status)status);
 }
 
 
@@ -366,15 +366,15 @@ Resource::load()
     case ROA_detail::Resource::SHADER:
     {
       size_t count = 0;
-      Nil::Resource::Shader *data = nullptr;
+      Nil_shader *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_shader_get_data(&count, &data);
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;

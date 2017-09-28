@@ -87,14 +87,18 @@ find_resource(ROA::Material &mat, const char *name)
 ROA::Shader
 create_resource(ROA::Shader &mat, const char *name)
 {
-  Nil::Resource::Shader rsrc_data{};
+  Nil_shader rsrc_data{};
   rsrc_data.name   = name;
-  rsrc_data.status = Nil::Resource::Load_status::NONE;
-
-  const bool submited = Nil::Resource::load(rsrc_data);
+  rsrc_data.status = NIL_RSRC_STATUS_NONE;
   
-  if(submited)
+  const uint32_t id = nil_rsrc_shader_create(&rsrc_data);
+  
+  LOG_ERROR("E? %d", id);
+  
+  if(id)
   {
+    LOG_ERROR("B?");
+  
     const uint32_t entity_id = lib::entity::create(Resource::SHADER, rsrc_data.id);
     ROA::Resource rsrc = setup_resource(entity_id);
     return *reinterpret_cast<ROA::Shader*>(&rsrc);
@@ -116,9 +120,9 @@ load_resource(ROA::Shader &mat, const char *file)
 ROA::Shader
 find_resource(ROA::Shader &mat, const char *name)
 {
-  Nil::Resource::Shader rsrc_data{};
+  Nil_shader rsrc_data{};
 
-  const bool found = Nil::Resource::find_by_name(name, &rsrc_data);
+  const bool found = nil_rsrc_shader_find_by_name(name, &rsrc_data);
   
   if(found)
   {

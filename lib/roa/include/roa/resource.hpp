@@ -4,6 +4,7 @@
 
 #include <roa/fundamental.hpp>
 #include <roa/detail/resource_interface.hpp>
+#include <lib/logging.hpp>
 
 
 namespace ROA {
@@ -61,6 +62,7 @@ public:
   static T
   create(const char *name)
   {
+    LOG_ERROR("C?");
     T rsrc{};
     
     return ROA_detail::create_resource(rsrc, name);

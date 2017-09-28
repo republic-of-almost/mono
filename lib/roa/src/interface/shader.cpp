@@ -1,5 +1,6 @@
 #include <roa/shader.hpp>
 #include <roa/resource_status.hpp>
+#include <common/resource_identifiers.hpp>
 #include <nil/resource/shader.hpp>
 #include <lib/assert.hpp>
 #include <lib/entity.hpp>
@@ -31,16 +32,9 @@ Shader::set_shader_type(const Shader_type type)
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
-    
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      if(shd.status == Nil::Resource::Load_status::NONE)
-      {
-        
-      }
-    }
+
+    nil_rsrc_shader_set_type(index, ROA_detail::convert_from_roa(type));
   }
   else
   {
@@ -52,6 +46,19 @@ Shader::set_shader_type(const Shader_type type)
 Shader_type
 Shader::get_shader_type() const
 {
+  if(m_id)
+  {
+    const uint32_t index = lib::entity::instance(m_id);
+    Nil_shader_type type = nil_rsrc_shader_get_type(index);
+    
+    return ROA_detail::convert_from_nil(type);
+  }
+  else
+  {
+    LOG_ERROR("Invalid Shader")
+  }
+  
+  return Shader_type::NONE;
 }
 
   
@@ -60,21 +67,9 @@ Shader::set_vertex_shader_code(const char *src)
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
     
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      if(shd.status == Nil::Resource::Load_status::NONE)
-      {
-        shd.vs_code = src;
-        return Nil::Resource::load(shd);
-      }
-      else
-      {
-        LOG_ERROR("Can't set shader its already loaded");
-      }
-    }
+    return nil_rsrc_shader_set_vs_src(index, src);
   }
   else
   {
@@ -90,13 +85,9 @@ Shader::get_vertex_shader_code() const
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
     
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      return shd.vs_code;
-    }
+    return nil_rsrc_shader_get_vs_src(index);
   }
   else
   {
@@ -112,21 +103,9 @@ Shader::set_geometry_shader_code(const char *src)
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
     
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      if(shd.status == Nil::Resource::Load_status::NONE)
-      {
-        shd.gs_code = src;
-        return Nil::Resource::load(shd);
-      }
-      else
-      {
-        LOG_ERROR("Can't set shader its already loaded");
-      }
-    }
+    return nil_rsrc_shader_set_gs_src(index, src);
   }
   else
   {
@@ -142,13 +121,9 @@ Shader::get_geometry_shader_code() const
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
     
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      return shd.gs_code;
-    }
+    return nil_rsrc_shader_get_gs_src(index);
   }
   else
   {
@@ -164,21 +139,9 @@ Shader::set_fragment_shader_code(const char *src)
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
     
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      if(shd.status == Nil::Resource::Load_status::NONE)
-      {
-        shd.fs_code = src;
-        return Nil::Resource::load(shd);
-      }
-      else
-      {
-        LOG_ERROR("Can't set shader its already loaded");
-      }
-    }
+    return nil_rsrc_shader_set_fs_src(index, src);
   }
   else
   {
@@ -194,13 +157,9 @@ Shader::get_fragment_shader_code() const
 {
   if(m_id)
   {
-    Nil::Resource::Shader shd;
     const uint32_t index = lib::entity::instance(m_id);
     
-    if(Nil::Resource::find_by_index(index, &shd))
-    {
-      return shd.fs_code;
-    }
+    return nil_rsrc_shader_get_fs_src(index);
   }
   else
   {
