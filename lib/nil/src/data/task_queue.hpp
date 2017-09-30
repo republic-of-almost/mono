@@ -6,6 +6,13 @@
 #include <lib/array.hpp>
 
 
+void
+nil_task_cpu_process();
+
+void
+nil_task_gpu_process();
+
+
 namespace Nil {
 namespace Data {
 

@@ -177,12 +177,14 @@ nil_rsrc_shader_create_batch(Nil_shader *in, size_t count, bool move)
       /* name exists */
       if(shd->name == NULL || strlen(shd->name) == 0)
       {
+        shd->id = 0;
         continue;
       }
       
       /* name not in use */
       if(nil_rsrc_shader_find_by_name(shd->name))
       {
+        shd->id = 0;
         continue;
       }
     }

@@ -5,9 +5,10 @@ General coding guidelines for Nil.
 Nothing is sacrosanct!
 
 
-## Main Public Engine/Graph Class Types
+## C Like Interface
 
-Follow RIIA for data cleanup.
+This should have a c-like iterface, and maybe in the future just move to
+C.
 
 
 ## Resources and Data Types

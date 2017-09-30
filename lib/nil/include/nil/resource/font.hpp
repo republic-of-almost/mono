@@ -21,6 +21,7 @@ struct Font
   size_t            data_size;
 
   // -- Output -- //
+  
   Load_status       status;
   
   uint32_t *glyph_data;

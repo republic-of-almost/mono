@@ -5,6 +5,15 @@
 #include <nil/fwd.hpp>
 
 
+typedef void(*aspect_callback_fn)(Nil_ctx *ctx, void *self);
+
+
+struct Nil_aspect
+{
+
+};
+
+
 namespace Nil {
 
 

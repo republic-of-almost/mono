@@ -94,7 +94,13 @@ enum ENUM : uint32_t {
 /* CAPI */
 
 struct Nil_ctx;
+struct Nil_aspect;
 struct Nil_shader;
+
+
+typedef void(*nil_cpu_task_fn)(Nil_ctx *ctx, uintptr_t user_data);
+typedef void(*nil_gpu_task_fn)(Nil_ctx *ctx, uintptr_t user_data);
+
 
 typedef enum
 {

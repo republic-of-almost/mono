@@ -13,6 +13,162 @@
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
+#include <stdlib.h>
+
+
+/* ---------------------------------------------------------- [ Lifetime ] -- */
+
+
+int
+nil_ctx_initialize(Nil_ctx **ctx)
+{
+  Nil_ctx *new_ctx = (Nil_ctx*)malloc(sizeof(Nil_ctx));
+  
+  if(new_ctx)
+  {
+    *ctx = new_ctx;
+  }
+  
+  return 0;
+}
+
+
+void
+nil_ctx_destroy(Nil_ctx **ctx)
+{
+  free(*ctx);
+}
+
+
+bool
+nil_ctx_think(Nil_ctx *ctx)
+{
+  BENCH_SCOPED_CPU(Tick)
+
+  // Delta Time
+  {
+    const lib::milliseconds curr_tick = lib::timer::get_current_time();
+    const lib::milliseconds delta     = lib::timer::get_delta(ctx->last_tick, curr_tick);
+
+    ctx->last_tick  = curr_tick;
+    ctx->delta_time = lib::timer::to_seconds(delta);
+  }
+  
+  /* aspects */
+  {
+    /* startup */
+    if(ctx->aspect_startup_callback_count)
+    {
+      const size_t start_count = ctx->aspect_startup_callback_count;
+      
+      for(size_t i = 0; i < start_count; ++i)
+      {
+        aspect_callback_fn fn = ctx->aspect_startup_callbacks[i].callback;
+        
+        if(fn)
+        {
+          void *data = ctx->aspect_startup_callbacks[i].user_data;
+          fn(ctx, data);
+        }
+      }
+      
+      ctx->aspect_startup_callback_count = 0;
+    }
+    
+    /* tick */
+    const size_t tick_count = ctx->aspect_tick_callback_count;
+    
+    for(size_t i = 0 ; i < tick_count; ++i)
+    {
+      aspect_callback_fn fn = ctx->aspect_tick_callbacks[i].callback;
+      
+      for(size_t i = 0; i < tick_count; ++i)
+      {
+        if(fn)
+        {
+          void *data= ctx->aspect_tick_callbacks[i].user_data;
+          fn(ctx, data);
+        }
+      }
+    }
+  }
+  
+  Nil::Graph::think(Nil::Data::get_graph_data());
+  
+  /* tasks */
+  {
+    nil_cpu_tasks_process(ctx->early_think_tasks, ctx->early_think_task_count);
+    nil_gpu_tasks_process(ctx->pre_render_tasks, ctx->pre_render_task_count);
+    
+    nil_cpu_tasks_process(ctx->think_tasks, ctx->think_task_count);
+    nil_gpu_tasks_process(ctx->pre_render_tasks, ctx->pre_render_task_count);
+    
+    nil_cpu_tasks_process(ctx->late_think_tasks, ctx->late_think_task_count);
+    nil_gpu_tasks_process(ctx->pre_render_tasks, ctx->pre_render_task_count);
+    
+    nil_gpu_tasks_process(ctx->render_tasks, ctx->render_task_count);
+    nil_gpu_tasks_process(ctx->post_render_tasks, ctx->post_render_task_count);
+  }
+  
+  return ctx->quit_signal;
+}
+
+
+/* ------------------------------------------------------ [ Engine State ] -- */
+
+
+float
+nil_ctx_get_delta_time(Nil_ctx *ctx)
+{
+}
+
+
+size_t
+nil_ctx_graph_data_count(Nil_ctx *ctx)
+{
+}
+
+
+const uint32_t*
+nil_ctx_graph_data_ids(Nil_ctx *ctx)
+{
+}
+
+
+const uint64_t*
+nil_ctx_graph_data_details(Nil_ctx *ctx)
+{
+}
+
+
+const math::transform*
+nil_ctx_graph_data_local_transforms(Nil_ctx *ctx)
+{
+}
+
+
+const math::transform*
+nil_ctx_graph_data_world_transforms(Nil_ctx *ctx)
+{
+}
+
+
+
+/* ----------------------------------------------------------- [ Aspects ] -- */
+
+
+void
+nil_ctx_add_aspect(Nil_ctx *ctx)
+{
+}
+
+
+size_t
+nil_ctx_aspect_count(Nil_ctx *ctx)
+{
+}
+
+
 
 
 namespace Nil {
