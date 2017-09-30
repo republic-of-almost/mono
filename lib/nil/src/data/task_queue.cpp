@@ -1,17 +1,28 @@
 #include <data/task_queue.hpp>
+#include <data/internal_data.hpp>
 
 
-namespace Nil {
-namespace Data {
-
-
-Task_queues&
-get_task_queues()
+void
+nil_task_cpu_process(Nil_ctx *ctx, const Nil_cpu_task *tasks, const size_t count)
 {
-  static Task_queues tasks;
-  return tasks;
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(tasks[i].callback)
+    {
+      tasks[i].callback(ctx, tasks[i].user_data);
+    }
+  }
 }
 
 
-} // ns
-} // ns
+void
+nil_task_gpu_process(Nil_ctx *ctx, const Nil_gpu_task *tasks, const size_t count)
+{
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(tasks[i].callback)
+    {
+      tasks[i].callback(ctx, tasks[i].user_data);
+    }
+  }
+}

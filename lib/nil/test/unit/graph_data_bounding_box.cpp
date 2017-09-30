@@ -6,7 +6,9 @@
 
 TEST_CASE("Data - Bounding box")
 {
-  Nil::Engine nil_engine;
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
+
   Nil::Node node;
   
   SECTION("Initial")
@@ -64,4 +66,6 @@ TEST_CASE("Data - Bounding box")
       REQUIRE(Nil::Data::has_bounding_box(node) == false);
     }
   }
+  
+  nil_ctx_destroy(&ctx);
 }

@@ -93,13 +93,30 @@ enum ENUM : uint32_t {
 
 /* CAPI */
 
+
+typedef enum
+{
+  NIL_CPU_TASK_EARLY_THINK,
+  NIL_CPU_TASK_THINK,
+  NIL_CPU_TASK_LATE_THINK,
+} Nil_cpu_task_queue;
+
+
+typedef enum
+{
+  NIL_GPU_TASK_PRE_RENDER,
+  NIL_GPU_TASK_RENDER,
+  NIL_GPU_TASK_POST_RENDER,
+} Nil_gpu_task_queue;
+
+
 struct Nil_ctx;
 struct Nil_aspect;
 struct Nil_shader;
 
-
-typedef void(*nil_cpu_task_fn)(Nil_ctx *ctx, uintptr_t user_data);
-typedef void(*nil_gpu_task_fn)(Nil_ctx *ctx, uintptr_t user_data);
+typedef void(*Nil_aspect_callback_fn)(Nil_ctx *ctx, void *self);
+typedef void(*Nil_cpu_task_fn)(Nil_ctx *ctx, void *user_data);
+typedef void(*Nil_gpu_task_fn)(Nil_ctx *ctx, void *user_data);
 
 
 typedef enum

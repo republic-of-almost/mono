@@ -7,8 +7,8 @@
 
 TEST_CASE("Resource - Mesh")
 {
-  Nil::Engine nil_engine;
-  lib::logging::set_output(0);
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
   
   SECTION("Initial")
   {
@@ -46,4 +46,6 @@ TEST_CASE("Resource - Mesh")
     REQUIRE(should_pass == true);
     REQUIRE(should_fail == false);
   }
+  
+  nil_ctx_destroy(&ctx);
 };

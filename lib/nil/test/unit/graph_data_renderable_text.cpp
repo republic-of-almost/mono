@@ -6,7 +6,9 @@
 
 TEST_CASE("Data - Renderable Text")
 {
-  Nil::Engine nil_engine;
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
+
   Nil::Node node;
   
   SECTION("Initial")
@@ -74,5 +76,6 @@ TEST_CASE("Data - Renderable Text")
       REQUIRE(Nil::Data::has_renderable_text(node) == false);
     }
   }
-
+  
+  nil_ctx_destroy(&ctx);
 }

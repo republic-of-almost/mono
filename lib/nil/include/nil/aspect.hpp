@@ -5,12 +5,15 @@
 #include <nil/fwd.hpp>
 
 
-typedef void(*aspect_callback_fn)(Nil_ctx *ctx, void *self);
-
-
 struct Nil_aspect
 {
-
+  Nil_aspect_callback_fn      startup;
+  Nil_aspect_callback_fn      tick;
+  Nil_aspect_callback_fn      shutdown;
+  Nil_aspect_callback_fn      ui_window;
+  Nil_aspect_callback_fn      ui_menu;
+  
+  void                        *data;
 };
 
 

@@ -5,7 +5,8 @@
 
 TEST_CASE("Resources")
 {
-  Nil::Engine nil_engine;
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
   
   SECTION("Materials")
   {
@@ -40,4 +41,6 @@ TEST_CASE("Resources")
       REQUIRE(mats[1].color == 0xFF0000FF);
     }
   }
+  
+  nil_ctx_destroy(&ctx);
 }

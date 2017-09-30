@@ -26,6 +26,10 @@ void
 nil_ctx_destroy(Nil_ctx **ctx);
 
 
+void
+nil_ctx_quit_signal(Nil_ctx *ctx);
+
+
 bool
 nil_ctx_think(Nil_ctx *ctx);
 

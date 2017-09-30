@@ -22,23 +22,23 @@
 #endif
 
 
-struct Aspect_callback
+struct Nil_aspect_callback
 {
-  aspect_callback_fn callback;
+  Nil_aspect_callback_fn callback;
   void *user_data;
 };
 
 
-struct Cpu_task
+struct Nil_cpu_task
 {
-  nil_cpu_task_fn callback;
+  Nil_cpu_task_fn callback;
   void *user_data;
 };
 
 
-struct Gpu_task
+struct Nil_gpu_task
 {
-  nil_gpu_task_fn callback;
+  Nil_gpu_task_fn callback;
   void *user_data;
 };
 
@@ -56,19 +56,19 @@ struct Nil_ctx
   /* ----------------------------------------------------- [ Aspect Data ] -- */
 
 
-  Aspect_callback     aspect_startup_callbacks[NIL_MAX_ASPECT_COUNT];
+  Nil_aspect_callback aspect_startup_callbacks[NIL_MAX_ASPECT_COUNT];
   size_t              aspect_startup_callback_count;
   
-  Aspect_callback     aspect_tick_callbacks[NIL_MAX_ASPECT_COUNT];
+  Nil_aspect_callback aspect_tick_callbacks[NIL_MAX_ASPECT_COUNT];
   size_t              aspect_tick_callback_count;
   
-  Aspect_callback     aspect_shutdown_callbacks[NIL_MAX_ASPECT_COUNT];
+  Nil_aspect_callback aspect_shutdown_callbacks[NIL_MAX_ASPECT_COUNT];
   size_t              aspect_shutdown_callback_count;
 
-  Aspect_callback     aspect_ui_window_callbacks[NIL_MAX_ASPECT_COUNT];
+  Nil_aspect_callback aspect_ui_window_callbacks[NIL_MAX_ASPECT_COUNT];
   size_t              aspect_ui_window_callback_count;
 
-  Aspect_callback     aspect_ui_menu_callbacks[NIL_MAX_ASPECT_COUNT];
+  Nil_aspect_callback aspect_ui_menu_callbacks[NIL_MAX_ASPECT_COUNT];
   size_t              aspect_ui_menu_callback_count;
   
   size_t              current_aspect_count;
@@ -77,22 +77,22 @@ struct Nil_ctx
   /* ------------------------------------------------------- [ Task Data ] -- */
   
   
-  Cpu_task            early_think_tasks[NIL_MAX_CPU_TASK_COUNT];
+  Nil_cpu_task        early_think_tasks[NIL_MAX_CPU_TASK_COUNT];
   size_t              early_think_task_count;
 
-  Cpu_task            think_tasks[NIL_MAX_CPU_TASK_COUNT];
+  Nil_cpu_task        think_tasks[NIL_MAX_CPU_TASK_COUNT];
   size_t              think_task_count;
   
-  Cpu_task            late_think_tasks[NIL_MAX_CPU_TASK_COUNT];
+  Nil_cpu_task        late_think_tasks[NIL_MAX_CPU_TASK_COUNT];
   size_t              late_think_task_count;
   
-  Gpu_task            pre_render_tasks[NIL_MAX_GPU_TASK_COUNT];
+  Nil_gpu_task        pre_render_tasks[NIL_MAX_GPU_TASK_COUNT];
   size_t              pre_render_task_count;
   
-  Gpu_task            render_tasks[NIL_MAX_GPU_TASK_COUNT];
+  Nil_gpu_task        render_tasks[NIL_MAX_GPU_TASK_COUNT];
   size_t              render_task_count;
 
-  Gpu_task            post_render_tasks[NIL_MAX_GPU_TASK_COUNT];
+  Nil_gpu_task        post_render_tasks[NIL_MAX_GPU_TASK_COUNT];
   size_t              post_render_task_count;
   
   
