@@ -21,16 +21,17 @@ namespace Nil_ext {
 
 
 void
-load_aspects(Nil::Engine &nil_engine)
+load_aspects(Nil_ctx *ctx)
 {
   {
     static Nil_ext::GLFW_Aspect::Data glfw;
-    Nil::Aspect aspect{};
-    aspect.start_up_fn    = Nil_ext::GLFW_Aspect::start_up;
-    aspect.tick_fn        = Nil_ext::GLFW_Aspect::events;
-    aspect.user_data      = (uintptr_t)&glfw;
+    Nil_aspect aspect{};
+    aspect.startup    = Nil_ext::GLFW_Aspect::start_up;
+    aspect.tick       = Nil_ext::GLFW_Aspect::events;
+    aspect.shutdown   = Nil_ext::GLFW_Aspect::shutdown;
+    aspect.data       = (uintptr_t)&glfw;
 
-    nil_engine.add_aspect(aspect);
+    nil_ctx_add_aspect(ctx, aspect);
   }
 
   /*
@@ -40,13 +41,13 @@ load_aspects(Nil::Engine &nil_engine)
   */
   {
     static Nil_ext::ROV_Aspect::Data rov;
-    Nil::Aspect aspect{};
-    aspect.start_up_fn    = Nil_ext::ROV_Aspect::start_up;
-    aspect.tick_fn        = Nil_ext::ROV_Aspect::events;
-    aspect.shutdown_fn    = Nil_ext::ROV_Aspect::shut_down;
-    aspect.user_data      = (uintptr_t)&rov;
+    Nil_aspect aspect{};
+    aspect.startup    = Nil_ext::ROV_Aspect::start_up;
+    aspect.tick       = Nil_ext::ROV_Aspect::events;
+    aspect.shutdown   = Nil_ext::ROV_Aspect::shut_down;
+    aspect.data       = (void*)&rov;
 
-    nil_engine.add_aspect(aspect);
+    nil_ctx_add_aspect(ctx, aspect);
   }
 
   /*
@@ -54,13 +55,14 @@ load_aspects(Nil::Engine &nil_engine)
   */
   {
     static Nil_ext::ROA_Aspect::Data logic;
-    Nil::Aspect aspect{};
+    Nil_aspect aspect{};
 
-    aspect.start_up_fn    = Nil_ext::ROA_Aspect::start_up;
-    aspect.tick_fn        = Nil_ext::ROA_Aspect::events;
-    aspect.user_data      = (uintptr_t)&logic;
+    aspect.startup    = Nil_ext::ROA_Aspect::start_up;
+    aspect.tick       = Nil_ext::ROA_Aspect::events;
+    aspect.shutdown   = Nil_ext::ROA_Aspect::shut_down;
+    aspect.data       = (void*)&logic;
 
-    nil_engine.add_aspect(aspect);
+    nil_ctx_add_aspect(ctx, aspect);
   }
   
   /*
@@ -68,13 +70,14 @@ load_aspects(Nil::Engine &nil_engine)
   */
   {
     static Nil_ext::SoLoud_Aspect::Data soloud;
-    Nil::Aspect aspect{};
+    Nil_aspect aspect{};
     
-    aspect.start_up_fn = Nil_ext::SoLoud_Aspect::start_up;
-    aspect.tick_fn = Nil_ext::SoLoud_Aspect::think;
-    aspect.user_data = (uintptr_t)&soloud;
+    aspect.startup  = Nil_ext::SoLoud_Aspect::start_up;
+    aspect.tick     = Nil_ext::SoLoud_Aspect::think;
+    aspect.shutdown = Nil_ext::SoLoud_Aspect::shut_down;
+    aspect.data     = (void*)&soloud;
     
-    nil_engine.add_aspect(aspect);
+    nil_ctx_add_aspect(ctx, aspect);
   }
   
   /*
@@ -85,13 +88,14 @@ load_aspects(Nil::Engine &nil_engine)
   #ifndef NIMGUI
   {
     static Nil_ext::ImGui_Aspect::Data imgui;
-    Nil::Aspect aspect{};
+    Nil_aspect aspect{};
 
-    aspect.start_up_fn = Nil_ext::ImGui_Aspect::start_up;
-    aspect.tick_fn     = Nil_ext::ImGui_Aspect::events;
-    aspect.user_data   = (uintptr_t)&imgui;
+    aspect.startup  = Nil_ext::ImGui_Aspect::start_up;
+    aspect.tick     = Nil_ext::ImGui_Aspect::events;
+    aspect.shutdown = Nil_ext::ImGui_Aspect::shut_down;
+    aspect.data     = (void*)&imgui;
 
-    nil_engine.add_aspect(aspect);
+    nil_ctx_add_aspect(ctx, aspect);
   }
   #endif
 }

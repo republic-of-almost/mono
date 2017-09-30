@@ -19,12 +19,9 @@ namespace Nil {
 
 
 class Node;
-class Engine;
 
 class Node_list;
 class Node_controller;
-
-struct Aspect;
 
 
 namespace Resource {

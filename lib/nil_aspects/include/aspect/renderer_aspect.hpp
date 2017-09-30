@@ -93,42 +93,42 @@ struct Data
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect);
+start_up(Nil_ctx *ctx, void *data);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect);
+events(Nil_ctx *ctx, void *data);
 
 
 void
-shut_down(Nil::Engine &engine, Nil::Aspect &aspect);
+shut_down(Nil_ctx *ctx, void *data);
 
 
 // ------------------------------------------------------- [ Renderer Tasks ] --
 
 
 void
-initialize_rov(Nil::Engine &engine, uintptr_t user_data);
+initialize_rov(Nil_ctx *ctx, void *data);
 
 
 void
-load_gpu_resources(Nil::Engine &engine, uintptr_t user_data);
+load_gpu_resources(Nil_ctx *ctx, void *data);
 
 
 void
-unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data);
+unload_gpu_resources(Nil_ctx *ctx, void *data);
 
 
 void
-early_think(Nil::Engine &engine, uintptr_t user_data);
+early_think(Nil_ctx *ctx, void *data);
 
 
 void
-think(Nil::Engine &engine, uintptr_t user_data);
+think(Nil_ctx *ctx, void *data);
 
 
 void
-generate_text_meshes(Nil::Engine &engine, uintptr_t user_data);
+generate_text_meshes(Nil_ctx *ctx, void *data);
 
 
 // -- Optional Tasks -- //
@@ -136,16 +136,16 @@ generate_text_meshes(Nil::Engine &engine, uintptr_t user_data);
 
 #ifndef NDEBUGLINES
 void
-find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data);
+find_lookat_bounding_box(Nil_ctx *ctx, void *data);
 #endif
 
 
 #ifndef NVRSUPPORT
 void
-load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data);
+load_gpu_vr_resources(Nil_ctx *ctx, void *data);
 
 void
-update_vr(Nil::Engine &engine, uintptr_t user_data);
+update_vr(Nil_ctx *ctx, void *data);
 #endif
 
 
@@ -153,11 +153,11 @@ update_vr(Nil::Engine &engine, uintptr_t user_data);
 
 
 void
-ui_menu(uintptr_t user_data);
+ui_menu(Nil_ctx *ctx, void *data);
 
 
 void
-ui_window(uintptr_t user_data);
+ui_window(Nil_ctx *ctx, void *data);
 
 
 

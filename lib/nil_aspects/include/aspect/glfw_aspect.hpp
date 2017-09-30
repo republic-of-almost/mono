@@ -37,19 +37,26 @@ struct Data
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect);
+start_up(Nil_ctx *ctx, void *data);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect);
+events(Nil_ctx *ctx, void *data);
 
 
 void
-early_think(Nil::Engine &engine, uintptr_t user_data);
+shut_down(Nil_ctx *ctx, void *data);
+
+
+// --------------------------------------------------------- [ Aspect Tasks ] --
 
 
 void
-late_think(Nil::Engine &engine, uintptr_t user_data);
+early_think(Nil_ctx *ctx, void *data);
+
+
+void
+late_think(Nil_ctx *ctx, void *data);
 
 
 } // ns

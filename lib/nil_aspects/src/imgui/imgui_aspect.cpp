@@ -66,15 +66,16 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect)
+events(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
-  Nil::Task::cpu_task(
-    Nil::Task::CPU::THINK,
-    (uintptr_t)self,
-    think
+  nil_task_cpu_add(
+    ctx,
+    NIL_CPU_TASK_THINK,
+    think,
+    (void*)self,
   );
 }
 
@@ -215,10 +216,9 @@ render_rsrc(bool *window)
 
 
 void
-//think(Nil::Engine &engine, Nil::Aspect &aspect)
-think(Nil::Engine &engine, uintptr_t user_data)
+think(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   BENCH_SCOPED_CPU(Logic_Think)

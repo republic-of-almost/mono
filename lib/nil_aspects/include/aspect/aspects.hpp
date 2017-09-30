@@ -9,7 +9,7 @@ namespace Nil_ext {
 
 
 void
-load_aspects(Nil::Engine &nil_engine);
+load_aspects(Nil_ctx *ctx);
 
 
 } // ns

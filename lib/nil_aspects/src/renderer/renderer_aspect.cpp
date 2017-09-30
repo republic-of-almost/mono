@@ -29,11 +29,11 @@ namespace ROV_Aspect {
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+start_up(Nil_ctx *ctx, void *data)
 {
   LOG_INFO("Startup Renderer Aspect")
 
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   self->mesh_ids.emplace_back(uint32_t{0});
@@ -62,7 +62,7 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect)
+events(Nil_ctx *ctx, void *data)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -160,7 +160,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
+shut_down(Nil_ctx *ctx, void *data)
 {
   Data *self = reinterpret_cast<Data*>(aspect.user_data);
   LIB_ASSERT(self);
@@ -187,7 +187,7 @@ shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-generate_text_meshes(Nil::Engine &engine, uintptr_t user_data)
+generate_text_meshes(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(GenerateTextMesh_data);
   
@@ -204,7 +204,7 @@ generate_text_meshes(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-initialize_rov(Nil::Engine &engine, uintptr_t user_data)
+initialize_rov(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_InitializeROV)
 
@@ -275,7 +275,7 @@ initialize_rov(Nil::Engine &engine, uintptr_t user_data)
 
 #ifndef NVRSUPPORT
 void
-load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
+load_gpu_vr_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_LoadVRGPUResources)
 
@@ -358,7 +358,7 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
 }
 
 void
-update_vr(Nil::Engine &engine, uintptr_t user_data)
+update_vr(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_VRUpdate)
 
@@ -466,7 +466,7 @@ update_vr(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
+load_gpu_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_LoadGPUResources)
 
@@ -618,7 +618,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
+unload_gpu_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_UnloadResources);
   
@@ -638,7 +638,7 @@ unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
 #ifndef NDEBUGLINES
 void
-find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
+find_lookat_bounding_box(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_FindLookAtBoundingBox)
   
@@ -696,7 +696,7 @@ find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-early_think(Nil::Engine &engine, uintptr_t user_data)
+early_think(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_EarlyThink)
 
@@ -749,7 +749,7 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
   Convert Nil Data into ROV Data
 */
 void
-think(Nil::Engine &engine, uintptr_t user_data)
+think(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_Think)
 
@@ -1046,7 +1046,7 @@ think(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-ui_menu(uintptr_t user_data)
+ui_menu(Nil_ctx *ctx, void *data)
 {
   #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(
@@ -1066,7 +1066,7 @@ ui_menu(uintptr_t user_data)
 
 
 void
-ui_window(uintptr_t user_data)
+ui_window(Nil_ctx *ctx, void *data)
 {
   #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(

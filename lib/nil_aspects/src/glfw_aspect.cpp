@@ -2,6 +2,8 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
+#include <nil/nil.hpp>
+
 #include <aspect/glfw_aspect.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
@@ -27,9 +29,9 @@ namespace GLFW_Aspect {
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+start_up(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   self->window_node = Nil::Node(nullptr);
@@ -132,9 +134,9 @@ glfw_key_to_nil(const int glfw_key)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect)
+events(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   // Added Window
@@ -412,30 +414,45 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   // Quit?
   if(self->window)
   {
-    aspect.want_to_quit = !!glfwWindowShouldClose(self->window);
+    const bool should_close = !!glfwWindowShouldClose(self->window);
+    
+    if(should_close)
+    {
+      nil_ctx_quit_signal(ctx);
+    }
   }
   
   // Tasks
   
-  Nil::Task::cpu_task(
-    Nil::Task::CPU::EARLY_THINK,
-    (uintptr_t)self,
-    early_think
+  nil_task_cpu_add(
+    ctx,
+    NIL_CPU_TASK_EARLY_THINK,
+    early_think,
+    (void*)self
   );
   
-  Nil::Task::cpu_task(
-    Nil::Task::CPU::LATE_THINK,
-    (uintptr_t)self,
-    late_think
+  nil_task_cpu_add(
+    ctx,
+    NIL_CPU_TASK_LATE_THINK,
+    late_think,
+    (void*)self
   );
 }
 
 
 void
-//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
-early_think(Nil::Engine &engine, uintptr_t user_data)
+shut_down(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+}
+
+
+// --------------------------------------------------------- [ Aspect Tasks ] --
+
+
+void
+early_think(Nil_ctx *ctx, void *data)
+{
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   if(self->window)
@@ -446,10 +463,9 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-//late_think(Nil::Engine &engine, Nil::Aspect &aspect)
-late_think(Nil::Engine &engine, uintptr_t user_data)
+late_think(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   if(self->window)
