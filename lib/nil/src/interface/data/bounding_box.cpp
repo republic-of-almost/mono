@@ -1,6 +1,6 @@
 #include <nil/data/bounding_box.hpp>
 #include <nil/node.hpp>
-#include <data/internal_data.hpp>
+#include <internal_data/internal_data.hpp>
 #include <graph/graph.hpp>
 #include <math/geometry/geometry.hpp>
 #include <string.h>

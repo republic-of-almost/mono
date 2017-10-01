@@ -5,27 +5,14 @@
 #include <nil/fwd.hpp>
 
 
-namespace Nil {
-namespace Resource {
-
-
-// ------------------------------------------------------------- [ Resource ] --
-
-
-/*!
-  The calling code should set the attributes.
-  When you load a texture the id will be set.
-  When the renderer loads the texture from file, the dimentions will be set.
-  When the renderer loads the texture, the status will be set.
-*/
-struct Texture
+struct Nil_texture
 {  
   // -- Input --//
 
-  const char                      *name;      // Internally copied
-  enum { FILENAME, DATA, LOCAL }  data_type;
-  uintptr_t                 data;       // Internally copied
-  size_t                    data_size;
+  const char        *name;      // Internally copied
+  Nil_data_type     data_type;
+  uintptr_t         data;       // Internally copied
+  size_t            data_size;
   
   // -- Input / Output -- //
   
@@ -36,62 +23,76 @@ struct Texture
   
   // -- Output -- //
   
-  Load_status       status;
-  uintptr_t         platform_resource;
-  uint32_t          id;
+  Nil_resource_status status;
+  uintptr_t           platform_resource;
+  uint32_t            id;
 };
 
 
-// ----------------------------------------------------------------- [ Find ] --
+/* ------------------------------------------------- [ Resource Lifetime ] -- */
 
 
-/*!
-  Searches for a Texture by name.
-  if found returns true else returns false.
-*/
 bool
-find_by_name(const char *name, Texture &out);
+nil_rsrc_texture_initialize(Nil_ctx *ctx);
 
 
-// ----------------------------------------------------------- [ Get / Load ] --
-
-
-/*!
-  Loads a new Texture.
-  Does *not* update an existing texture if name already exists.
-  If it fails to load it will return false.
-*/
 bool
-load(Texture &in);
+nil_rsrc_texture_destroy(Nil_ctx *ctx);
 
 
-/*!
-  Gets access to the underlying data.
+/* --------------------------------------------------- [ Resource Access ] -- */
 
-  size_t count = 0;
-  Texture *data = nullptr;
-  get(&count, &data);
-*/
+
+bool
+nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out = NULL);
+
+
+bool
+nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out = NULL);
+
+
 void
-get(size_t *count, Texture **out);
+nil_rsrc_texture_get_data(Nil_ctx *ctx, size_t *out_count, Nil_texture **out_data = NULL);
 
 
-// ----------------------------------------------------------------- [ Info ] --
-/*
-  Get general information of textures.
-*/
+bool
+nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture **out);
 
 
-const char *
-get_type_name(const Texture &in);
+/* -------------------------------------------------- [ Resource Details ] -- */
 
 
 size_t
-texture_count();
+nil_rsrc_texture_get_count(Nil_ctx *ctx);
 
 
-} // ns
-} // ns
+/* ---------------------------------------------------- [ Resource Batch ] -- */
+
+
+void
+nil_rsrc_texture_create_batch(Nil_ctx *ctx, Nil_texture *in, size_t count, bool move = false);
+
+
+/* ------------------------------------------------- [ Resource Instance ] -- */
+
+
+uint32_t
+nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *shd, bool move = false);
+
+
+bool
+nil_rsrc_texture_destroy(Nil_ctx *ctx, uint32_t id);
+
+
+/* status */
+
+
+bool
+nil_rsrc_texture_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status status);
+
+
+Nil_resource_status
+nil_rsrc_texture_get_load_status(Nil_ctx *ctx, uint32_t id);
 
 
 #endif // inc guard

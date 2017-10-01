@@ -1,5 +1,6 @@
 #include <roa/resource.hpp>
 #include <roa/resource_status.hpp>
+#include <common/context.hpp>
 #include <common/resource_identifiers.hpp>
 #include <nil/resource/resource.hpp>
 #include <lib/assert.hpp>
@@ -149,9 +150,9 @@ Resource::get_instance_name() const
     case ROA_detail::Resource::TEXTURE:
     {
       size_t count = 0;
-      Nil::Resource::Texture *data = nullptr;
+      Nil_texture *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_texture_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -175,7 +176,7 @@ Resource::get_instance_name() const
       size_t count = 0;
       Nil_shader *data = nullptr;
       
-      nil_rsrc_shader_get_data(&count, &data);
+      nil_rsrc_shader_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -235,9 +236,9 @@ Resource::get_status() const
     case ROA_detail::Resource::TEXTURE:
     {
       size_t count = 0;
-      Nil::Resource::Texture *data = nullptr;
+      Nil_texture *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_texture_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -265,7 +266,7 @@ Resource::get_status() const
       size_t count = 0;
       Nil_shader *data = nullptr;
       
-      nil_rsrc_shader_get_data(&count, &data);
+      nil_rsrc_shader_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -332,15 +333,15 @@ Resource::load()
     case ROA_detail::Resource::TEXTURE:
     {
       size_t count = 0;
-      Nil::Resource::Texture *data = nullptr;
+      Nil_texture *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_texture_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;
@@ -368,7 +369,7 @@ Resource::load()
       size_t count = 0;
       Nil_shader *data = nullptr;
       
-      nil_rsrc_shader_get_data(&count, &data);
+      nil_rsrc_shader_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       

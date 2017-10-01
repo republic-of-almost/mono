@@ -5,6 +5,7 @@
 #include <roa/material.hpp>
 #include <roa/model.hpp>
 #include <roa/audio_source.hpp>
+#include <common/context.hpp>
 #include <common/resource_identifiers.hpp>
 #include <nil/resource/resource.hpp>
 #include <lib/logging.hpp>
@@ -91,7 +92,7 @@ create_resource(ROA::Shader &mat, const char *name)
   rsrc_data.name   = name;
   rsrc_data.status = NIL_RSRC_STATUS_NONE;
   
-  const uint32_t id = nil_rsrc_shader_create(&rsrc_data);
+  const uint32_t id = nil_rsrc_shader_create(ROA_detail::get_ctx(), &rsrc_data);
   
   if(id)
   {
@@ -118,7 +119,7 @@ find_resource(ROA::Shader &mat, const char *name)
 {
   Nil_shader rsrc_data{};
 
-  const bool found = nil_rsrc_shader_find_by_name(name, &rsrc_data);
+  const bool found = nil_rsrc_shader_find_by_name(ROA_detail::get_ctx(), name, &rsrc_data);
   
   if(found)
   {

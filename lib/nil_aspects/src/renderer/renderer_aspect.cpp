@@ -490,9 +490,9 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
   */
   {
     size_t count = 0;
-    Nil::Resource::Texture *textures = nullptr;
+    Nil_texture *textures = nullptr;
 
-    Nil::Resource::get(&count, &textures);
+    nil_rsrc_texture_get_data(ctx, &count, &textures);
 
     for (size_t i = 0; i < count; ++i)
     {

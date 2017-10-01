@@ -90,3 +90,4 @@ NIL_GRAPH_TRANSFORM_STACK_HINT=\<count\> | 32      | Number of transforms to sta
 NIL_MAX_ASPECT_COUNT=\<count\>           | 16      | Max number of supported aspects.
 NIL_MAX_CPU_TASK_COUNT=\<count\>         | 32      | Max CPU task per slot per tick.
 NIL_MAX_GPU_TASK_COUNT=\<count\>         | 16      | Max GPU task per slot per tick.
+NIL_CLEANUP_ON_EXIT=\<1 or 0\>           | 1       | If Nil should try and clean up on exit.

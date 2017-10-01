@@ -1,5 +1,5 @@
 #include <nil/task.hpp>
-#include <data/task_queue.hpp>
+#include <internal_data/task_queue.hpp>
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 

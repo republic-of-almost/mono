@@ -1,4 +1,8 @@
 #include <asset_loading/asset_loading.hpp>
+#include <internal_data/resources/texture.hpp>
+#include <internal_data/resources/shader.hpp>
+#include <internal_data/resources/audio_src.hpp>
+#include <internal_data/resources/mesh.hpp>
 #include <nil/resource/mesh.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/directory.hpp>
@@ -167,7 +171,7 @@ namespace Assets {
 
 
 bool
-load_gltf(Nil::Node root_node, const char *path)
+load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
 {
 //  char path[2048]{};
 //  strcat(path, lib::dir::exe_path());
@@ -1217,13 +1221,13 @@ load_gltf(Nil::Node root_node, const char *path)
   } // while json_element_value
 
   lib::array<Nil::Resource::Mesh> internal_meshes;
-  lib::array<Nil::Resource::Texture> internal_textures;
+  lib::array<Nil_texture> internal_textures;
   lib::array<Nil::Resource::Material> internal_materials;
 
   for(auto &tex : textures)
   {
-    Nil::Resource::Texture data{};
-    data.data_type = Nil::Resource::Texture::DATA;
+    Nil_texture data{};
+    data.data_type = NIL_DATA_RAW;
     data.data = (uintptr_t)images[tex.source].uri;
     data.data_size = images[tex.source].size;
     
@@ -1235,7 +1239,12 @@ load_gltf(Nil::Node root_node, const char *path)
     
     data.name = import_name;
     
-    Nil::Resource::load(data);
+    const uint32_t id = nil_rsrc_texture_create(ctx, &data);
+    if(id)
+    {
+      nil_rsrc_texture_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+    }
+    
     
     internal_textures.emplace_back(data);
   }

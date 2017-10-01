@@ -1,6 +1,7 @@
 #include <roa/shader.hpp>
 #include <roa/resource_status.hpp>
 #include <common/resource_identifiers.hpp>
+#include <common/context.hpp>
 #include <nil/resource/shader.hpp>
 #include <lib/assert.hpp>
 #include <lib/entity.hpp>
@@ -34,7 +35,7 @@ Shader::set_shader_type(const Shader_type type)
   {
     const uint32_t index = lib::entity::instance(m_id);
 
-    nil_rsrc_shader_set_type(index, ROA_detail::convert_from_roa(type));
+    nil_rsrc_shader_set_type(ROA_detail::get_ctx(), index, ROA_detail::convert_from_roa(type));
   }
   else
   {
@@ -49,7 +50,7 @@ Shader::get_shader_type() const
   if(m_id)
   {
     const uint32_t index = lib::entity::instance(m_id);
-    Nil_shader_type type = nil_rsrc_shader_get_type(index);
+    Nil_shader_type type = nil_rsrc_shader_get_type(ROA_detail::get_ctx(), index);
     
     return ROA_detail::convert_from_nil(type);
   }
@@ -69,7 +70,7 @@ Shader::set_vertex_shader_code(const char *src)
   {
     const uint32_t index = lib::entity::instance(m_id);
     
-    return nil_rsrc_shader_set_vs_src(index, src);
+    return nil_rsrc_shader_set_vs_src(ROA_detail::get_ctx(), index, src);
   }
   else
   {
@@ -87,7 +88,7 @@ Shader::get_vertex_shader_code() const
   {
     const uint32_t index = lib::entity::instance(m_id);
     
-    return nil_rsrc_shader_get_vs_src(index);
+    return nil_rsrc_shader_get_vs_src(ROA_detail::get_ctx(), index);
   }
   else
   {
@@ -105,7 +106,7 @@ Shader::set_geometry_shader_code(const char *src)
   {
     const uint32_t index = lib::entity::instance(m_id);
     
-    return nil_rsrc_shader_set_gs_src(index, src);
+    return nil_rsrc_shader_set_gs_src(ROA_detail::get_ctx(), index, src);
   }
   else
   {
@@ -123,7 +124,7 @@ Shader::get_geometry_shader_code() const
   {
     const uint32_t index = lib::entity::instance(m_id);
     
-    return nil_rsrc_shader_get_gs_src(index);
+    return nil_rsrc_shader_get_gs_src(ROA_detail::get_ctx(), index);
   }
   else
   {
@@ -141,7 +142,7 @@ Shader::set_fragment_shader_code(const char *src)
   {
     const uint32_t index = lib::entity::instance(m_id);
     
-    return nil_rsrc_shader_set_fs_src(index, src);
+    return nil_rsrc_shader_set_fs_src(ROA_detail::get_ctx(), index, src);
   }
   else
   {
@@ -159,7 +160,7 @@ Shader::get_fragment_shader_code() const
   {
     const uint32_t index = lib::entity::instance(m_id);
     
-    return nil_rsrc_shader_get_fs_src(index);
+    return nil_rsrc_shader_get_fs_src(ROA_detail::get_ctx(), index);
   }
   else
   {

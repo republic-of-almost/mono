@@ -330,8 +330,8 @@ think(Nil_ctx *ctx, void *data)
   {
     // Get data //
     size_t tex_count = 0;
-    Nil::Resource::Texture *tex = nullptr;
-    Nil::Resource::get(&tex_count, &tex);
+    Nil_texture *tex = nullptr;
+    nil_rsrc_texture_get_data(ctx, &tex_count, &tex);
 
     size_t mesh_count = 0;
     Nil::Resource::Mesh *mesh = nullptr;
@@ -343,7 +343,7 @@ think(Nil_ctx *ctx, void *data)
     
     size_t shd_count = 0;
     Nil_shader *shds = nullptr;
-    nil_rsrc_shader_get_data(&shd_count, &shds);
+    nil_rsrc_shader_get_data(ctx, &shd_count, &shds);
     
     // Create window and show data //
     const char *rsrc_overview = "Resource Overview##rsrc_over";

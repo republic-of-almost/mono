@@ -110,6 +110,8 @@ typedef enum
 struct Nil_ctx;
 struct Nil_aspect;
 struct Nil_shader;
+struct Nil_texture;
+
 
 typedef void(*Nil_aspect_callback_fn)(Nil_ctx *ctx, void *self);
 typedef void(*Nil_cpu_task_fn)(Nil_ctx *ctx, void *user_data);
@@ -128,13 +130,20 @@ typedef enum
 typedef enum
 {
   NIL_SHD_NONE,
-
   NIL_SHD_LINE_RENDERER_01,
   NIL_SHD_MESH_RENDERER_01,
   NIL_SHD_PAINT_RENDERER_01,
   
 } Nil_shader_type;
 
+
+typedef enum
+{
+  NIL_DATA_FILENAME,
+  NIL_DATA_RAW,
+  NIL_DATA_LOCAL,
+
+} Nil_data_type;
 
 
 typedef int NIL_BOOL;

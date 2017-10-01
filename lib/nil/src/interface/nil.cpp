@@ -3,8 +3,8 @@
 #include <nil/resource/texture.hpp>
 #include <nil/aspect.hpp>
 #include <nil/task.hpp>
-#include <data/internal_data.hpp>
-#include <data/task_queue.hpp>
+#include <internal_data/internal_data.hpp>
+#include <internal_data/task_queue.hpp>
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
 #include <lib/array.hpp>
@@ -14,6 +14,11 @@
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
 #include <stdlib.h>
+
+
+#ifndef NIL_CLEANUP_ON_EXIT
+#define NIL_CLEANUP_ON_EXIT 1
+#endif
 
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
@@ -41,7 +46,9 @@ nil_ctx_initialize(Nil_ctx **ctx)
 void
 nil_ctx_destroy(Nil_ctx **ctx)
 {
+  #if NIL_CLEANUP_ON_EXIT == 1
   free(*ctx);
+  #endif
 }
 
 
