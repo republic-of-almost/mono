@@ -1,8 +1,4 @@
 #include <aspect/aspects.hpp>
-
-#include <nil/aspect.hpp>
-#include <nil/nil.hpp>
-
 #include <aspect/glfw_aspect.hpp>
 #include <aspect/roa_aspect.hpp>
 #include <aspect/renderer_aspect.hpp>
@@ -13,6 +9,8 @@
 
 #include <aspect/so_loud.hpp>
 
+#include <nil/aspect.hpp>
+#include <nil/nil.hpp>
 #include <assert.h>
 #include <stddef.h>
 
@@ -23,6 +21,11 @@ namespace Nil_ext {
 void
 load_aspects(Nil_ctx *ctx)
 {
+  /*
+    GLFW Aspect
+    --
+    Deals with the Input/Window.
+  */
   {
     static GLFW_data glfw;
     Nil_aspect aspect{};

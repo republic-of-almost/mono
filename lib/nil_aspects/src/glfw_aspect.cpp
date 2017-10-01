@@ -440,6 +440,10 @@ glfw_aspect_tick(Nil_ctx *ctx, void *data)
 void
 glfw_aspect_shutdown(Nil_ctx *ctx, void *data)
 {
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
+  LIB_ASSERT(self);
+
+  glfwDestroyWindow(self->window);
 }
 
 
