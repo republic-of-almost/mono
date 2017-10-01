@@ -5,23 +5,18 @@
 #include <nil/fwd.hpp>
 #include <nil/node.hpp>
 #include <nil/data/keyboard.hpp>
-#include <nil/task.hpp>
 
 
-// --------------------------------------------------- [ GLFW Aspect Config ] --
+/* ------------------------------------------------ [ GLFW Aspect Config ] -- */
 
 
 struct GLFWwindow;
 
 
-// ----------------------------------------------------- [ GLFW Aspect Data ] --
+/* -------------------------------------------------- [ GLFW Aspect Data ] -- */
 
 
-namespace Nil_ext {
-namespace GLFW_Aspect {
-
-
-struct Data
+struct GLFW_data
 {
   GLFWwindow *window{nullptr};
   Nil::Node window_node{nullptr};
@@ -33,34 +28,30 @@ struct Data
 };
 
 
-// ----------------------------------------------------- [ Aspect Interface ] --
+/* ----------------------------------------------------- [ GLFW Lifetime ] -- */
 
 
 void
-start_up(Nil_ctx *ctx, void *data);
+glfw_aspect_startup(Nil_ctx *ctx, void *data);
 
 
 void
-events(Nil_ctx *ctx, void *data);
+glfw_aspect_tick(Nil_ctx *ctx, void *data);
 
 
 void
-shut_down(Nil_ctx *ctx, void *data);
+glfw_aspect_shutdown(Nil_ctx *ctx, void *data);
 
 
-// --------------------------------------------------------- [ Aspect Tasks ] --
-
-
-void
-early_think(Nil_ctx *ctx, void *data);
+/* ------------------------------------------------------ [ Aspect Tasks ] -- */
 
 
 void
-late_think(Nil_ctx *ctx, void *data);
+glfw_aspect_swap_buffer(Nil_ctx *ctx, void *data);
 
 
-} // ns
-} // ns
+void
+glfw_aspect_process_state(Nil_ctx *ctx, void *data);
 
 
 #endif // inc guard

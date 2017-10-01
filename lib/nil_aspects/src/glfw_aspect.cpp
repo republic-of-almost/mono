@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include <nil/nil.hpp>
+#include <nil/task.hpp>
 
 #include <aspect/glfw_aspect.hpp>
 #include <nil/aspect.hpp>
@@ -21,17 +22,13 @@
 #include <stddef.h>
 
 
-namespace Nil_ext {
-namespace GLFW_Aspect {
-
-
-// ----------------------------------------------------- [ Aspect Interface ] --
+/* ----------------------------------------------------- [ GLFW Lifetime ] -- */
 
 
 void
-start_up(Nil_ctx *ctx, void *data)
+glfw_aspect_startup(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   self->window_node = Nil::Node(nullptr);
@@ -134,9 +131,9 @@ glfw_key_to_nil(const int glfw_key)
 
 
 void
-events(Nil_ctx *ctx, void *data)
+glfw_aspect_tick(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   // Added Window
@@ -277,7 +274,7 @@ events(Nil_ctx *ctx, void *data)
           self->window,
           [](GLFWwindow *window, int width, int height)
           {
-            Data *self = reinterpret_cast<Data*>(glfwGetWindowUserPointer(window));
+            GLFW_data *self = reinterpret_cast<GLFW_data*>(glfwGetWindowUserPointer(window));
             LIB_ASSERT(self);
 
             if(self->window_node)
@@ -312,7 +309,7 @@ events(Nil_ctx *ctx, void *data)
           self->window,
           [](GLFWwindow *window, double x, double y)
           {
-            Data *self = reinterpret_cast<Data*>(glfwGetWindowUserPointer(window));
+            GLFW_data *self = reinterpret_cast<GLFW_data*>(glfwGetWindowUserPointer(window));
             LIB_ASSERT(self);
 
             const float this_mouse_x = (float)x;
@@ -344,7 +341,7 @@ events(Nil_ctx *ctx, void *data)
           self->window,
           [](GLFWwindow* window, int key, int scancode, int action, int mods)
           {
-            Data *self = reinterpret_cast<Data*>(glfwGetWindowUserPointer(window));
+            GLFW_data *self = reinterpret_cast<GLFW_data*>(glfwGetWindowUserPointer(window));
             LIB_ASSERT(self);
 
             const uint32_t nil_key = glfw_key_to_nil(key);
@@ -427,32 +424,32 @@ events(Nil_ctx *ctx, void *data)
   nil_task_cpu_add(
     ctx,
     NIL_CPU_TASK_EARLY_THINK,
-    early_think,
+    glfw_aspect_swap_buffer,
     (void*)self
   );
   
   nil_task_cpu_add(
     ctx,
     NIL_CPU_TASK_LATE_THINK,
-    late_think,
+    glfw_aspect_process_state,
     (void*)self
   );
 }
 
 
 void
-shut_down(Nil_ctx *ctx, void *data)
+glfw_aspect_shutdown(Nil_ctx *ctx, void *data)
 {
 }
 
 
-// --------------------------------------------------------- [ Aspect Tasks ] --
+/* ------------------------------------------------------ [ Aspect Tasks ] -- */
 
 
 void
-early_think(Nil_ctx *ctx, void *data)
+glfw_aspect_swap_buffer(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   if(self->window)
@@ -463,9 +460,9 @@ early_think(Nil_ctx *ctx, void *data)
 
 
 void
-late_think(Nil_ctx *ctx, void *data)
+glfw_aspect_process_state(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   if(self->window)
@@ -508,7 +505,3 @@ late_think(Nil_ctx *ctx, void *data)
     glfwPollEvents();
   }
 }
-
-
-} // ns
-} // ns

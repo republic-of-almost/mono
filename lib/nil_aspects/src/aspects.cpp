@@ -24,11 +24,11 @@ void
 load_aspects(Nil_ctx *ctx)
 {
   {
-    static Nil_ext::GLFW_Aspect::Data glfw;
+    static GLFW_data glfw;
     Nil_aspect aspect{};
-    aspect.startup    = Nil_ext::GLFW_Aspect::start_up;
-    aspect.tick       = Nil_ext::GLFW_Aspect::events;
-    aspect.shutdown   = Nil_ext::GLFW_Aspect::shut_down;
+    aspect.startup    = glfw_aspect_startup;
+    aspect.tick       = glfw_aspect_tick;
+    aspect.shutdown   = glfw_aspect_shutdown;
     aspect.data       = (void*)&glfw;
 
     nil_ctx_add_aspect(ctx, aspect);
