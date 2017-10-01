@@ -12,18 +12,16 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 
 namespace Nil {
 
 
 class Node;
-class Engine;
 
 class Node_list;
 class Node_controller;
-
-struct Aspect;
 
 
 namespace Resource {
@@ -36,9 +34,12 @@ struct Shader;
 struct Texture;
 
 enum class Load_status {
+  NONE,
   PENDING,
   LOADED,
   FAILED,
+  
+  ERROR,
 };
 
 } // ns
@@ -85,6 +86,60 @@ enum ENUM : uint32_t {
 
 } // ns
 } // ns
+
+
+/* CAPI */
+
+
+typedef enum
+{
+  NIL_CPU_TASK_EARLY_THINK,
+  NIL_CPU_TASK_THINK,
+  NIL_CPU_TASK_LATE_THINK,
+} Nil_cpu_task_queue;
+
+
+typedef enum
+{
+  NIL_GPU_TASK_PRE_RENDER,
+  NIL_GPU_TASK_RENDER,
+  NIL_GPU_TASK_POST_RENDER,
+} Nil_gpu_task_queue;
+
+
+struct Nil_ctx;
+struct Nil_aspect;
+struct Nil_shader;
+
+typedef void(*Nil_aspect_callback_fn)(Nil_ctx *ctx, void *self);
+typedef void(*Nil_cpu_task_fn)(Nil_ctx *ctx, void *user_data);
+typedef void(*Nil_gpu_task_fn)(Nil_ctx *ctx, void *user_data);
+
+
+typedef enum
+{
+  NIL_RSRC_STATUS_NONE,
+  NIL_RSRC_STATUS_PENDING,
+  NIL_RSRC_STATUS_LOADED,
+  NIL_RSRC_STATUS_FAILED,
+  NIL_RSRC_STATUS_ERROR
+} Nil_resource_status;
+
+typedef enum
+{
+  NIL_SHD_NONE,
+
+  NIL_SHD_LINE_RENDERER_01,
+  NIL_SHD_MESH_RENDERER_01,
+  NIL_SHD_PAINT_RENDERER_01,
+  
+} Nil_shader_type;
+
+
+
+typedef int NIL_BOOL;
+#define NIL_TRUE 1
+#define NIL_FALSE 0
 
 
 #endif // inc guard

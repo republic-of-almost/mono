@@ -13,334 +13,245 @@
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
+#include <stdlib.h>
 
 
-namespace Nil {
+/* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
-struct Engine::Impl
+int
+nil_ctx_initialize(Nil_ctx **ctx)
 {
-  std::vector<Aspect> aspects;
-
-  Engine_settings settings;
-
-  lib::milliseconds last_tick;
-  float delta_time;
+  const size_t bytes = sizeof(Nil_ctx);
+  Nil_ctx *new_ctx = (Nil_ctx*)malloc(bytes);
+  memset(new_ctx, 0, bytes);
   
-  bool quit = false;
-};
-
-
-Engine::Engine()
-: m_impl(new Impl)
-{
-  BENCH_INIT_CPU
-
-  LIB_ASSERT(m_impl);
-
-  if(!m_impl)
+  if(new_ctx)
   {
-    LOG_ERROR_ONCE("Engine is in corrupted state.");
-    return;
-  }
-
-  m_impl->last_tick = lib::timer::get_current_time();
-  m_impl->delta_time = 0.f;
-}
-
-
-Engine::~Engine()
-{
-  LIB_ASSERT(m_impl);
+    new_ctx->last_tick = lib::timer::get_current_time();
+    new_ctx->delta_time = 0.f;
   
-  // -- Destroy Aspects -- //
-  {
-    BENCH_SCOPED_CPU(DestroyAspecrts)
-
-    for(Aspect &asp : m_impl->aspects)
-    {
-      BENCH_SCOPED_CPU(AspectDestroy)
-
-      if(asp.shutdown_fn)
-      {
-        asp.shutdown_fn(*this, asp);
-      }
-
-      /*
-        We need to run GPU Tasks after each shutdown call as that has a thread
-        context issue.
-      */
-      Nil::Data::Task_queues &tasks = Nil::Data::get_task_queues();
-      for (auto &t : tasks.pre_render)
-      {
-        if (t.func)
-        {
-          t.func(*this, t.user_data);
-        }
-      }
-      
-      tasks.pre_render.clear();
-    }
+    *ctx = new_ctx;
   }
-
-  delete m_impl;
-  m_impl = nullptr;
+  
+  return 0;
 }
 
 
 void
-Engine::add_aspect(Nil::Aspect aspect)
+nil_ctx_destroy(Nil_ctx **ctx)
 {
-  LIB_ASSERT(m_impl);
-
-  if(!m_impl)
-  {
-    LOG_ERROR_ONCE("Engine is in corrupted state.");
-    return;
-  }
-
-  m_impl->aspects.emplace_back(aspect);
-
-  if(aspect.start_up_fn)
-  {
-    aspect.start_up_fn(*this, m_impl->aspects.back());
-  }
+  free(*ctx);
 }
 
 
-size_t
-Engine::aspect_count() const
+void
+nil_ctx_quit_signal(Nil_ctx *ctx)
 {
-  LIB_ASSERT(m_impl);
-
-  if(!m_impl)
-  {
-    LOG_ERROR_ONCE("Engine is in corrupted state.");
-    return false;
-  }
-
-  return m_impl->aspects.size();
+  ctx->quit_signal = true;
 }
 
 
 bool
-Engine::run()
+nil_ctx_think(Nil_ctx *ctx)
 {
-  LIB_ASSERT(m_impl);
-
   BENCH_SCOPED_CPU(Tick)
-
-  if(!m_impl)
-  {
-    LOG_ERROR_ONCE("Engine is in corrupted state.");
-    return false;
-  }
 
   // Delta Time
   {
     const lib::milliseconds curr_tick = lib::timer::get_current_time();
-    const lib::milliseconds delta     = lib::timer::get_delta(m_impl->last_tick, curr_tick);
+    const lib::milliseconds delta     = lib::timer::get_delta(ctx->last_tick, curr_tick);
 
-    m_impl->last_tick  = curr_tick;
-    m_impl->delta_time = lib::timer::to_seconds(delta);
+    ctx->last_tick  = curr_tick;
+    ctx->delta_time = lib::timer::to_seconds(delta);
   }
   
-  // Thinking
+  /* aspects */
   {
-    BENCH_SCOPED_CPU(Thinking)
-
-    for(Aspect &asp : m_impl->aspects)
+    /* startup */
+    if(ctx->aspect_startup_callback_count)
     {
-      BENCH_SCOPED_CPU(AspectTick)
-
-      if(asp.tick_fn)
+      const size_t start_count = ctx->aspect_startup_callback_count;
+      
+      for(size_t i = 0; i < start_count; ++i)
       {
-        asp.tick_fn(*this, asp);
+        Nil_aspect_callback_fn fn = ctx->aspect_startup_callbacks[i].callback;
+        
+        if(fn)
+        {
+          void *data = ctx->aspect_startup_callbacks[i].user_data;
+          fn(ctx, data);
+        }
       }
+      
+      ctx->aspect_startup_callback_count = 0;
     }
     
-    Graph::think(Data::get_graph_data());
+    /* tick */
+    const size_t tick_count = ctx->aspect_tick_callback_count;
     
-    
-    /*
-      TASKS
-      This is awful!
-    */
-    Nil::Data::Task_queues &tasks = Nil::Data::get_task_queues();
-    
-    for(auto &t : tasks.early_think)
+    for(size_t i = 0 ; i < tick_count; ++i)
     {
-      if(t.func)
+      Nil_aspect_callback_fn fn = ctx->aspect_tick_callbacks[i].callback;
+      
+      if(fn)
       {
-        t.func(*this, t.user_data);
+        void *data= ctx->aspect_tick_callbacks[i].user_data;
+        fn(ctx, data);
       }
     }
-    
-    tasks.early_think.clear();
-    
-    for(auto &t : tasks.pre_render)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.pre_render.clear();
-    
-    // -- //
-    
-    for(auto &t : tasks.think)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.think.clear();
-    
-    for(auto &t : tasks.pre_render)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.pre_render.clear();
-    
-    // -- //
-    
-    for(auto &t : tasks.late_think)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.late_think.clear();
-    
-    for(auto &t : tasks.pre_render)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.pre_render.clear();
-    
-    // -- //
-    
-    for(auto &t : tasks.render)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.render.clear();
-    
-    for(auto &t : tasks.post_render)
-    {
-      if(t.func)
-      {
-        t.func(*this, t.user_data);
-      }
-    }
-    
-    tasks.post_render.clear();
   }
-
-  /*
-    Check to see if any aspects are ready to quit.
-  */
+  
+  Nil::Graph::think(Nil::Data::get_graph_data());
+  
+  /* tasks */
   {
-    for(Aspect &asp : m_impl->aspects)
-    {
-      m_impl->quit |= asp.want_to_quit;
-    }
-
-    return !m_impl->quit;
+    /* early think */
+    
+    nil_task_cpu_process(ctx, ctx->early_think_tasks, ctx->early_think_task_count);
+    ctx->early_think_task_count = 0;
+    
+    nil_task_gpu_process(ctx, ctx->pre_render_tasks,  ctx->pre_render_task_count);
+    ctx->pre_render_task_count = 0;
+    
+    /* think */
+    
+    nil_task_cpu_process(ctx, ctx->think_tasks,       ctx->think_task_count);
+    ctx->think_task_count = 0;
+    
+    nil_task_gpu_process(ctx, ctx->pre_render_tasks,  ctx->pre_render_task_count);
+    ctx->pre_render_task_count = 0;
+    
+    /* late think */
+    
+    nil_task_cpu_process(ctx, ctx->late_think_tasks,  ctx->late_think_task_count);
+    ctx->late_think_task_count = 0;
+    
+    nil_task_gpu_process(ctx, ctx->pre_render_tasks,  ctx->pre_render_task_count);
+    ctx->pre_render_task_count = 0;
+    
+    /* render */
+    
+    nil_task_gpu_process(ctx, ctx->render_tasks,      ctx->render_task_count);
+    ctx->render_task_count = 0;
+    
+    nil_task_gpu_process(ctx, ctx->post_render_tasks, ctx->post_render_task_count);
+    ctx->post_render_task_count = 0;
   }
+  
+  return !ctx->quit_signal;
 }
+
+
+/* ------------------------------------------------------ [ Engine State ] -- */
 
 
 float
-Engine::get_delta_time() const
+nil_ctx_get_delta_time(Nil_ctx *ctx)
 {
-  return m_impl->delta_time;
+  return ctx->delta_time;
 }
-
-
-void
-Engine::set_settings(const Engine_settings &in)
-{
-  m_impl->settings = in;
-}
-
-
-void
-Engine::get_settings(Engine_settings &out)
-{
-  out = m_impl->settings;
-}
-
-
-void
-Engine::get_state(Engine_state &out)
-{
-
-}
-
-
-void
-Engine::send_quit_signal()
-{
-  m_impl->quit = true;
-}
-
-
-
-// ------------------------------------------------------- [ Debugging Info ] --
 
 
 size_t
-Engine::graph_data_count() const
+nil_ctx_graph_data_count(Nil_ctx *ctx)
 {
-  return Data::get_graph_data()->node_id.size();
+  return Nil::Data::get_graph_data()->node_id.size();
 }
 
 
 const uint32_t*
-Engine::graph_data_get_ids() const
+nil_ctx_graph_data_ids(Nil_ctx *ctx)
 {
-  return Data::get_graph_data()->node_id.data();
+  return Nil::Data::get_graph_data()->node_id.data();
 }
 
 
 const uint64_t*
-Engine::graph_data_details() const
+nil_ctx_graph_data_details(Nil_ctx *ctx)
 {
-  return Data::get_graph_data()->parent_depth_data.data();
+  return Nil::Data::get_graph_data()->parent_depth_data.data();
 }
 
 
 const math::transform*
-Engine::graph_data_local_transforms() const
+nil_ctx_graph_data_local_transforms(Nil_ctx *ctx)
 {
-  return Data::get_graph_data()->local_transform.data();
+  return Nil::Data::get_graph_data()->local_transform.data();
 }
 
 
 const math::transform*
-Engine::graph_data_world_transforms() const
+nil_ctx_graph_data_world_transforms(Nil_ctx *ctx)
 {
-  return Data::get_graph_data()->world_transform.data();
+  return Nil::Data::get_graph_data()->world_transform.data();
 }
 
 
-} // ns
+/* ----------------------------------------------------------- [ Aspects ] -- */
+
+
+void
+nil_ctx_add_aspect(Nil_ctx *ctx, Nil_aspect aspect)
+{
+  if(ctx->current_aspect_count >= NIL_MAX_ASPECT_COUNT)
+  {
+    LIB_ASSERT(false);
+    LOG_ERROR("Maxed out of aspect slots build with more slots");
+    return;
+  }
+
+  if(aspect.startup)
+  {
+    const size_t index = ctx->aspect_startup_callback_count;
+    ctx->aspect_startup_callbacks[index].callback = aspect.startup;
+    ctx->aspect_startup_callbacks[index].user_data = aspect.data;
+    
+    ctx->aspect_startup_callback_count += 1;
+  }
+  
+  if(aspect.tick)
+  {
+    const size_t index = ctx->aspect_tick_callback_count;
+    ctx->aspect_tick_callbacks[index].callback = aspect.tick;
+    ctx->aspect_tick_callbacks[index].user_data = aspect.data;
+    
+    ctx->aspect_tick_callback_count += 1;
+  }
+  
+  if(aspect.shutdown)
+  {
+    const size_t index = ctx->aspect_shutdown_callback_count;
+    ctx->aspect_shutdown_callbacks[index].callback = aspect.shutdown;
+    ctx->aspect_shutdown_callbacks[index].user_data = aspect.data;
+    
+    ctx->aspect_shutdown_callback_count += 1;
+  }
+  
+  if(aspect.ui_menu)
+  {
+    const size_t index = ctx->aspect_ui_menu_callback_count;
+    ctx->aspect_ui_menu_callbacks[index].callback = aspect.ui_menu;
+    ctx->aspect_ui_menu_callbacks[index].user_data = aspect.data;
+    
+    ctx->aspect_ui_menu_callback_count += 1;
+  }
+  
+  if(aspect.ui_window)
+  {
+    const size_t index = ctx->aspect_ui_window_callback_count;
+    ctx->aspect_ui_window_callbacks[index].callback = aspect.ui_window;
+    ctx->aspect_ui_window_callbacks[index].user_data = aspect.data;
+    
+    ctx->aspect_ui_window_callback_count += 1;
+  }
+  
+  ctx->current_aspect_count += 1;
+}
+
+
+size_t
+nil_ctx_aspect_count(Nil_ctx *ctx)
+{
+  return ctx->current_aspect_count;
+}

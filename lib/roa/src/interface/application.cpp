@@ -1,5 +1,6 @@
 #include <roa/application.hpp>
 #include <common/common.hpp>
+#include <common/context.hpp>
 #include <nil/nil.hpp>
 #include <nil/node.hpp>
 #include <nil/data/data.hpp>
@@ -10,16 +11,11 @@
 namespace ROA {
 
 
-struct Application::Impl
-{
-  
-};
-
-
 Application::Application()
-: m_impl{new Impl}
 {
-  Nil_ext::load_aspects(ROA_detail::get_engine());
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+
+  Nil_ext::load_aspects(ctx);
 
   Nil::Node app_node = ROA_detail::get_application_node();
   app_node.set_name("Application");
@@ -36,19 +32,15 @@ Application::Application()
 
 Application::~Application()
 {
-  LIB_ASSERT(m_impl);
-  
-  if(m_impl)
-  {
-    delete m_impl;
-  }
 }
 
 
 void
 Application::run(Custom_tick_fn tick, uintptr_t user_data)
 {
-  while(ROA_detail::get_engine().run())
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+
+  while(nil_ctx_think(ctx))
   {
     /*
       Components

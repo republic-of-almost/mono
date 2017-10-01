@@ -2,6 +2,9 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
+#include <nil/nil.hpp>
+#include <nil/task.hpp>
+
 #include <aspect/glfw_aspect.hpp>
 #include <nil/aspect.hpp>
 #include <nil/data/data.hpp>
@@ -19,17 +22,13 @@
 #include <stddef.h>
 
 
-namespace Nil_ext {
-namespace GLFW_Aspect {
-
-
-// ----------------------------------------------------- [ Aspect Interface ] --
+/* ----------------------------------------------------- [ GLFW Lifetime ] -- */
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+glfw_aspect_startup(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   self->window_node = Nil::Node(nullptr);
@@ -132,9 +131,9 @@ glfw_key_to_nil(const int glfw_key)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect)
+glfw_aspect_tick(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   // Added Window
@@ -275,7 +274,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           self->window,
           [](GLFWwindow *window, int width, int height)
           {
-            Data *self = reinterpret_cast<Data*>(glfwGetWindowUserPointer(window));
+            GLFW_data *self = reinterpret_cast<GLFW_data*>(glfwGetWindowUserPointer(window));
             LIB_ASSERT(self);
 
             if(self->window_node)
@@ -310,7 +309,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           self->window,
           [](GLFWwindow *window, double x, double y)
           {
-            Data *self = reinterpret_cast<Data*>(glfwGetWindowUserPointer(window));
+            GLFW_data *self = reinterpret_cast<GLFW_data*>(glfwGetWindowUserPointer(window));
             LIB_ASSERT(self);
 
             const float this_mouse_x = (float)x;
@@ -342,7 +341,7 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
           self->window,
           [](GLFWwindow* window, int key, int scancode, int action, int mods)
           {
-            Data *self = reinterpret_cast<Data*>(glfwGetWindowUserPointer(window));
+            GLFW_data *self = reinterpret_cast<GLFW_data*>(glfwGetWindowUserPointer(window));
             LIB_ASSERT(self);
 
             const uint32_t nil_key = glfw_key_to_nil(key);
@@ -412,30 +411,49 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   // Quit?
   if(self->window)
   {
-    aspect.want_to_quit = !!glfwWindowShouldClose(self->window);
+    const bool should_close = !!glfwWindowShouldClose(self->window);
+    
+    if(should_close)
+    {
+      nil_ctx_quit_signal(ctx);
+    }
   }
   
   // Tasks
   
-  Nil::Task::cpu_task(
-    Nil::Task::CPU::EARLY_THINK,
-    (uintptr_t)self,
-    early_think
+  nil_task_cpu_add(
+    ctx,
+    NIL_CPU_TASK_EARLY_THINK,
+    glfw_aspect_swap_buffer,
+    (void*)self
   );
   
-  Nil::Task::cpu_task(
-    Nil::Task::CPU::LATE_THINK,
-    (uintptr_t)self,
-    late_think
+  nil_task_cpu_add(
+    ctx,
+    NIL_CPU_TASK_LATE_THINK,
+    glfw_aspect_process_state,
+    (void*)self
   );
 }
 
 
 void
-//early_think(Nil::Engine &engine, Nil::Aspect &aspect)
-early_think(Nil::Engine &engine, uintptr_t user_data)
+glfw_aspect_shutdown(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
+  LIB_ASSERT(self);
+
+  glfwDestroyWindow(self->window);
+}
+
+
+/* ------------------------------------------------------ [ Aspect Tasks ] -- */
+
+
+void
+glfw_aspect_swap_buffer(Nil_ctx *ctx, void *data)
+{
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   if(self->window)
@@ -446,10 +464,9 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-//late_think(Nil::Engine &engine, Nil::Aspect &aspect)
-late_think(Nil::Engine &engine, uintptr_t user_data)
+glfw_aspect_process_state(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  GLFW_data *self = reinterpret_cast<GLFW_data*>(data);
   LIB_ASSERT(self);
 
   if(self->window)
@@ -492,7 +509,3 @@ late_think(Nil::Engine &engine, uintptr_t user_data)
     glfwPollEvents();
   }
 }
-
-
-} // ns
-} // ns

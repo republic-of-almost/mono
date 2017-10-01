@@ -5,7 +5,8 @@
 
 TEST_CASE("Graph Nodes")
 {
-  Nil::Engine nil_engine;
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
   
   SECTION("Null Node")
   {
@@ -13,7 +14,7 @@ TEST_CASE("Graph Nodes")
     
     REQUIRE(node.is_valid() == false);
     REQUIRE(node.is_ref() == false);
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
   }
   
   SECTION("Default Node")
@@ -37,16 +38,16 @@ TEST_CASE("Graph Nodes")
   
   SECTION("Basic Out of Scope")
   {
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
     
     // Scoped
     {
       Nil::Node node;
       
-      REQUIRE(nil_engine.graph_data_count() == 1);
+      REQUIRE(nil_ctx_graph_data_count(ctx) == 1);
     }
     
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
   }
   
   SECTION("Try to move a ref")
@@ -76,7 +77,7 @@ TEST_CASE("Graph Nodes")
       child.set_parent(parent);
       gran_child.set_parent(child);
       
-      REQUIRE(nil_engine.graph_data_count() == 3);
+      REQUIRE(nil_ctx_graph_data_count(ctx) == 3);
       
       REQUIRE(parent.is_ref() == false);
       REQUIRE(parent.is_valid() == true);
@@ -98,7 +99,7 @@ TEST_CASE("Graph Nodes")
 
     }
     
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
   }
   
   SECTION("Child in Scope Parent Out of Scope")
@@ -108,7 +109,7 @@ TEST_CASE("Graph Nodes")
       Nil::Node parent;
       child.set_parent(parent);
       
-      REQUIRE(nil_engine.graph_data_count() == 2);
+      REQUIRE(nil_ctx_graph_data_count(ctx) == 2);
       
       REQUIRE(parent.is_ref() == false);
       REQUIRE(child.is_valid() == true);
@@ -120,19 +121,19 @@ TEST_CASE("Graph Nodes")
     REQUIRE(child.is_ref() == false);
     REQUIRE(child.is_valid() == false);
     
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
   }
   
   SECTION("Manual Destroy")
   {
     Nil::Node node;
     
-    REQUIRE(nil_engine.graph_data_count() == 1);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 1);
     REQUIRE(node.is_valid() == true);
     
     node.destroy();
     
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
     REQUIRE(node.is_valid() == false);
   }
   
@@ -145,11 +146,11 @@ TEST_CASE("Graph Nodes")
     child.set_parent(parent);
     gran_child.set_parent(child);
     
-    REQUIRE(nil_engine.graph_data_count() == 3);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 3);
     
     parent.destroy();
     
-    REQUIRE(nil_engine.graph_data_count() == 0);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 0);
   }
   
   SECTION("Destroy Child")
@@ -161,11 +162,11 @@ TEST_CASE("Graph Nodes")
     child.set_parent(parent);
     gran_child.set_parent(child);
     
-    REQUIRE(nil_engine.graph_data_count() == 3);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 3);
     
     child.destroy();
     
-    REQUIRE(nil_engine.graph_data_count() == 1);
+    REQUIRE(nil_ctx_graph_data_count(ctx) == 1);
     
     REQUIRE(parent.is_valid() == true);
     REQUIRE(child.is_valid() == false);
@@ -224,4 +225,6 @@ TEST_CASE("Graph Nodes")
     REQUIRE(strcmp(node.get_tag(0), "FOO") == 0);
     REQUIRE(strcmp(node.get_tag(1), "BAR") == 0);
   }
+  
+  nil_ctx_destroy(&ctx);
 }

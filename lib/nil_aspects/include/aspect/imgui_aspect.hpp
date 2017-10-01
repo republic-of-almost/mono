@@ -66,16 +66,22 @@ struct Data
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect);
+start_up(Nil_ctx *ctx, void *data);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect);
+events(Nil_ctx *ctx, void *data);
 
 
 void
-//think(Nil::Engine &engine, Nil::Aspect &aspect);
-think(Nil::Engine &engine, uintptr_t user_data);
+shut_down(Nil_ctx *ctx, void *data);
+
+
+// ---------------------------------------------------------------- [ Tasks ] --
+
+
+void
+think(Nil_ctx *ctx, void *data);
 
 
 } // ns

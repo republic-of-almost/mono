@@ -18,6 +18,7 @@ public:
 
 
   explicit          Camera();
+  explicit          Camera(const ROA_nullptr null);
                     ~Camera();
   
   

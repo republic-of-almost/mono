@@ -18,6 +18,7 @@ public:
 
 
   explicit      Bounding_box();
+  explicit      Bounding_box(const ROA_nullptr null);
   explicit      Bounding_box(const Vector3 &min, const Vector3 &max);
   
   

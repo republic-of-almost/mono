@@ -3,6 +3,7 @@
 #include <roa/vector3.hpp>
 #include <nil/resource/mesh.hpp>
 #include <lib/logging.hpp>
+#include <lib/entity.hpp>
 #include <string.h>
 
 
@@ -13,27 +14,12 @@ namespace ROA {
 
 
 Mesh::Mesh()
-: Mesh("")
 {
 }
 
 
-Mesh::Mesh(const uint32_t id)
-: Resource(id)
+Mesh::~Mesh()
 {
-}
-
-
-Mesh::Mesh(const char *name)
-: Resource()
-{
-  if(strlen(name) > 0)
-  {
-    Nil::Resource::Mesh mesh{};
-    Nil::Resource::find_by_name(name, mesh);
-    
-    m_id = mesh.id;
-  }
 }
 
 
@@ -47,11 +33,13 @@ Mesh::get_bounding_box() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
   
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count > instance)
   {
     return Bounding_box(
-      Vector3(mesh[m_id].bounding_box.min),
-      Vector3(mesh[m_id].bounding_box.max)
+      Vector3(mesh[instance].bounding_box.min),
+      Vector3(mesh[instance].bounding_box.max)
     );
   }
   
@@ -66,9 +54,11 @@ Mesh::get_positions_vec3() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
  
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+ 
+  if(count > instance)
   {
-    return mesh[m_id].position_vec3;
+    return mesh[instance].position_vec3;
   }
   
   return nullptr;
@@ -82,9 +72,11 @@ Mesh::get_normals_vec3() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
   
-  if(count >= m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count >= instance)
   {
-    return mesh[m_id].normal_vec3;
+    return mesh[instance].normal_vec3;
   }
   
   return nullptr;
@@ -98,9 +90,11 @@ Mesh::get_texture_coords_vec2() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
   
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count > instance)
   {
-    return mesh[m_id].texture_coords_vec2;
+    return mesh[instance].texture_coords_vec2;
   }
   
   return nullptr;
@@ -114,9 +108,11 @@ Mesh::get_triangle_count() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
   
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count > instance)
   {
-    return mesh[m_id].index_count / 3;
+    return mesh[instance].index_count / 3;
   }
   
   return 0;
@@ -132,9 +128,11 @@ Mesh::get_vertex_count() const
   
   LOG_TODO("TRIANGLE COUNT IS NOT REPRESENTIVE");
   
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count > instance)
   {
-    return mesh[m_id].triangle_count;
+    return mesh[instance].triangle_count;
   }
   
   return 0;
@@ -148,9 +146,11 @@ Mesh::get_index() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
   
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count > instance)
   {
-    return mesh[m_id].index;
+    return mesh[instance].index;
   }
   
   return nullptr;
@@ -164,9 +164,11 @@ Mesh::get_index_count() const
   Nil::Resource::Mesh *mesh = nullptr;
   Nil::Resource::get(&count, &mesh);
   
-  if(count > m_id)
+  const uint32_t instance = lib::entity::instance(m_id);
+  
+  if(count > instance)
   {
-    return mesh[m_id].index_count;
+    return mesh[instance].index_count;
   }
   
   return 0;

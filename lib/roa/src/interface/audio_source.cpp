@@ -21,44 +21,42 @@ namespace ROA {
 
 
 Audio_source::Audio_source()
-: Audio_source("")
 {
 }
 
 
-Audio_source::Audio_source(const uint32_t id)
-: Resource(id)
+Audio_source::~Audio_source()
 {
 }
 
 
-Audio_source::Audio_source(const char *filename)
-: Resource()
-{
-  // -- Param Check -- //
-  const bool has_filename = !!filename;
-  const bool has_length = strlen(filename);
-
-  if(has_filename && has_length)
-  {
-    Nil::Resource::Audio audio{};
-    
-    char name[1024]{};
-    
-    lib::string::filename_from_path(filename, name);
-    audio.name = name;
-    audio.data = (uintptr_t)filename;
-    audio.data_size = strlen(filename) + 1;
-    audio.data_type = Nil::Resource::Audio::FILENAME;
-    Nil::Resource::load(audio);
-    
-    m_id = audio.id;
-  }
-  else
-  {
-    LOG_ERROR(msg_roa_audio_failed);
-  }
-}
+//Audio_source::Audio_source(const char *filename)
+//: Resource()
+//{
+//  // -- Param Check -- //
+//  const bool has_filename = !!filename;
+//  const bool has_length = strlen(filename);
+//
+//  if(has_filename && has_length)
+//  {
+//    Nil::Resource::Audio audio{};
+//    
+//    char name[1024]{};
+//    
+//    lib::string::filename_from_path(filename, name);
+//    audio.name = name;
+//    audio.data = (uintptr_t)filename;
+//    audio.data_size = strlen(filename) + 1;
+//    audio.data_type = Nil::Resource::Audio::FILENAME;
+//    Nil::Resource::load(audio);
+//    
+//    m_id = audio.id;
+//  }
+//  else
+//  {
+//    LOG_ERROR(msg_roa_audio_failed);
+//  }
+//}
 
 
 } // ns

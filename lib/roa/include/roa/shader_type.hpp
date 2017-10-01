@@ -1,0 +1,21 @@
+#ifndef SHADER_TYPE_INCLUDED_D89A2E75_5322_4D71_951B_A3366EEB1633
+#define SHADER_TYPE_INCLUDED_D89A2E75_5322_4D71_951B_A3366EEB1633
+
+
+namespace ROA {
+
+
+enum class Shader_type
+{
+  NONE,
+  
+  MESH_RENDERER,
+  DEBUG_LINE_RENDERER,
+  PANE_RENDERER,
+};
+
+
+} // ns
+
+
+#endif // inc guard

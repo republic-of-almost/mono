@@ -76,8 +76,8 @@ main()
 /*
   Defines
 */
-#define CONST_AMB 0.0
-#define CONST_SHININESS 0
+#define CONST_AMB 0.02
+#define CONST_SHININESS 12.3
 
 /*
   Inputs
@@ -129,8 +129,8 @@ calculate_attenuation(
   Attenuation atten)
 {
   float distance        = length(light_pos - frag_pos);
-  float atten_lin_dist  = 1.0 + atten.linear * distance;
-  float atten_exp_dist  = 1.0 + atten.exponential * (distance * distance);
+  float atten_lin_dist  = atten.linear * distance;
+  float atten_exp_dist  = atten.exponential * (distance * distance);
   float attenuation     = 1.0 / (atten.constant + atten_lin_dist + atten_exp_dist);
 
 //  float attenuation = 1.0 / (1.0 + atten.linear * pow(distance, 2));
@@ -210,10 +210,10 @@ main()
     vec4 specular_map = texture(uni_map_03, in_ps_texcoord);
 
     Material mat;
-    mat.Ka = vec3(0.0);
+    mat.Ka = vec3(CONST_AMB);
     mat.Kd = diffuse_color.rgb;
-    mat.Ks = vec3(0.0);//vec3(0.2,0.2,0.2);//specular_map.rgb;
-    mat.shininess = 0;//CONST_SHININESS;
+    mat.Ks = vec3(0.5);//specular_map.rgb;
+    mat.shininess = CONST_SHININESS;
 
     vec3 accum_color = vec3(0,0,0);
 
@@ -270,10 +270,8 @@ main()
     }
 
     // Output Result //
-//    vec3 const_amb = vec3(CONST_AMB);
-//    vec3 color = vec3(max(CONST_AMB + accum_color.r, accum_color.r), max(CONST_AMB + accum_color.g, accum_color.g), max(CONST_AMB + accum_color.b, accum_color.b));
-    
-    vec3 color = (mat.Kd * accum_color);
+//    vec3 amb = vec3(CONST_AMB);
+    vec3 color = mat.Kd * accum_color;
     
     // Gamma correction.
     vec3 gamma = vec3(1.0/2.2);

@@ -29,11 +29,11 @@ namespace ROV_Aspect {
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+start_up(Nil_ctx *ctx, void *data)
 {
   LOG_INFO("Startup Renderer Aspect")
 
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   self->mesh_ids.emplace_back(uint32_t{0});
@@ -62,9 +62,9 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect)
+events(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
   
   /*
@@ -83,7 +83,12 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
       if(!self->has_initialized)
       {
-        Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, initialize_rov);
+        nil_task_cpu_add(
+          ctx,
+          NIL_CPU_TASK_EARLY_THINK,
+          initialize_rov,
+          (void*)self
+        );
       }
 
       // Added Debug Lines
@@ -110,37 +115,42 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   
   if(self->has_initialized)
   {
-    Nil::Task::gpu_task(
-      Nil::Task::GPU::PRE_RENDER,
-      (uintptr_t)self,
-      load_gpu_resources
+    nil_task_gpu_add(
+      ctx,
+      NIL_GPU_TASK_PRE_RENDER,
+      load_gpu_resources,
+      (void*)self
     );
 
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::EARLY_THINK,
-      (uintptr_t)self,
-      early_think
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      early_think,
+      (void*)self
     );
-    
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::THINK,
-      (uintptr_t)self,
-      think
+
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_THINK,
+      think,
+      (void*)self
     );
-    
-    Nil::Task::gpu_task(
-      Nil::Task::GPU::PRE_RENDER,
-      (uintptr_t)self,
-      generate_text_meshes
+
+    nil_task_gpu_add(
+      ctx,
+      NIL_GPU_TASK_PRE_RENDER,
+      generate_text_meshes,
+      (void*)self
     );
 
     #ifndef NVRSUPPORT
     if(self->vr_device)
     {
-      Nil::Task::cpu_task(
-        Nil::Task::CPU::EARLY_THINK,
-        (uintptr_t)self,
-        update_vr
+      nil_task_cpu_add(
+        ctx,
+        NIL_CPU_TASK_EARLY_THINK,
+        update_vr,
+        (void*)self
       );
     }
     #endif
@@ -149,10 +159,11 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
   #ifndef NDEBUGLINES
   if(self->show_lookat_bounding_box)
   {
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::EARLY_THINK,
-      (uintptr_t)self,
-      find_lookat_bounding_box
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      find_lookat_bounding_box,
+      (void*)self
     );
   }
   #endif
@@ -160,17 +171,18 @@ events(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
+shut_down(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   if(self->has_initialized)
   {
-    Nil::Task::gpu_task(
-      Nil::Task::GPU::PRE_RENDER,
-      (uintptr_t)self,
-      unload_gpu_resources
+    nil_task_gpu_add(
+      ctx,
+      NIL_GPU_TASK_PRE_RENDER, // should be post, not supported in nil yet.
+      unload_gpu_resources,
+      (void*)self
     );
   }
 
@@ -187,7 +199,7 @@ shut_down(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-generate_text_meshes(Nil::Engine &engine, uintptr_t user_data)
+generate_text_meshes(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(GenerateTextMesh_data);
   
@@ -204,11 +216,11 @@ generate_text_meshes(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-initialize_rov(Nil::Engine &engine, uintptr_t user_data)
+initialize_rov(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_InitializeROV)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
 
@@ -275,7 +287,7 @@ initialize_rov(Nil::Engine &engine, uintptr_t user_data)
 
 #ifndef NVRSUPPORT
 void
-load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
+load_gpu_vr_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_LoadVRGPUResources)
 
@@ -358,7 +370,7 @@ load_gpu_vr_resources(Nil::Engine &engine, uintptr_t user_data)
 }
 
 void
-update_vr(Nil::Engine &engine, uintptr_t user_data)
+update_vr(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_VRUpdate)
 
@@ -466,11 +478,11 @@ update_vr(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
+load_gpu_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_LoadGPUResources)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   /*
@@ -487,7 +499,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
       Nil::Resource::Texture *tex = &textures[i];
 
       const bool has_data = tex && !!tex->data;
-      const bool is_pending = tex && tex->status == Nil::Resource::Texture::PENDING;
+      const bool is_pending = tex && tex->status == Nil::Resource::Load_status::PENDING;
 
       if (has_data && is_pending)
       {
@@ -516,14 +528,14 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
         {
           LIB_ASSERT(false);
           LOG_ERROR("Unknown data type to load texture");
-          tex->status = Nil::Resource::Texture::FAILED;
+          tex->status = Nil::Resource::Load_status::FAILED;
           continue;
         }
         
         // -- Did we Fail to load texture -- //
         if (img_data == nullptr)
         {
-          tex->status = Nil::Resource::Texture::FAILED;
+          tex->status = Nil::Resource::Load_status::FAILED;
 
           char err_msg[1024]{};
           strcat(err_msg, "Failed to load texture: ");
@@ -559,13 +571,13 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
         stbi_image_free(img_data);
 
-        tex->status = Nil::Resource::Texture::LOADED;
+        tex->status = Nil::Resource::Load_status::LOADED;
       }
       else if (!has_data && i > 0)
       {
         LIB_ASSERT(false);
         LOG_ERROR("Tried to load a texture with no data");
-        tex->status = Nil::Resource::Texture::FAILED;
+        tex->status = Nil::Resource::Load_status::FAILED;
       }
     }
   } // Load Textures
@@ -583,11 +595,11 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
     {
       Nil::Resource::Mesh *mesh_resource = &meshes[i];
 
-      if (mesh_resource->status == Nil::Resource::Mesh::PENDING)
+      if (mesh_resource->status == Nil::Resource::Load_status::PENDING)
       {
         if (mesh_resource->triangle_count == 0)
         {
-          mesh_resource->status = Nil::Resource::Mesh::LOADED;
+          mesh_resource->status = Nil::Resource::Load_status::LOADED;
           continue;
         }
 
@@ -610,7 +622,7 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
         self->index_ids.emplace_back(index);
         self->mesh_ids.emplace_back(mesh);
 
-        mesh_resource->status = Nil::Resource::Mesh::LOADED;
+        mesh_resource->status = Nil::Resource::Load_status::LOADED;
       }
     }
   } // Load Meshes
@@ -618,11 +630,11 @@ load_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
+unload_gpu_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_UnloadResources);
   
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   rov_destroy();
@@ -638,11 +650,11 @@ unload_gpu_resources(Nil::Engine &engine, uintptr_t user_data)
 
 #ifndef NDEBUGLINES
 void
-find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
+find_lookat_bounding_box(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_FindLookAtBoundingBox)
   
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
   
   size_t cam_count = 0;
@@ -696,11 +708,11 @@ find_lookat_bounding_box(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-early_think(Nil::Engine &engine, uintptr_t user_data)
+early_think(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_EarlyThink)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   /*
@@ -749,11 +761,11 @@ early_think(Nil::Engine &engine, uintptr_t user_data)
   Convert Nil Data into ROV Data
 */
 void
-think(Nil::Engine &engine, uintptr_t user_data)
+think(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_Think)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   size_t cam_count = 0;
@@ -959,10 +971,6 @@ think(Nil::Engine &engine, uintptr_t user_data)
               rov_submitLine(&data[index + 0], &data[index + 3]);
             }
           }
-
-          // Signal to line renderer not reset the data buffer.
-          line_data.aux_02 = 0;
-          Nil::Data::set(self->debug_lines, line_data);
         }
       }
     
@@ -1030,6 +1038,19 @@ think(Nil::Engine &engine, uintptr_t user_data)
   glFlush();
   glFinish();
   #endif 
+  
+  #ifndef NDEBUG_LINES
+  Nil::Data::Developer line_data{};
+
+  if(Nil::Data::has(self->debug_lines, line_data))
+  {
+    Nil::Data::get(self->debug_lines, line_data);
+    
+    // Signal to line renderer not reset the data buffer.
+    line_data.aux_02 = 0;
+    Nil::Data::set(self->debug_lines, line_data);
+  }
+  #endif
 }
 
 
@@ -1037,11 +1058,11 @@ think(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-ui_menu(uintptr_t user_data)
+ui_menu(Nil_ctx *ctx, void *data)
 {
   #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
+    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(data)
   );
 
   LIB_ASSERT(self);
@@ -1057,11 +1078,11 @@ ui_menu(uintptr_t user_data)
 
 
 void
-ui_window(uintptr_t user_data)
+ui_window(Nil_ctx *ctx, void *data)
 {
   #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
+    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(data)
   );
 
   LIB_ASSERT(self);

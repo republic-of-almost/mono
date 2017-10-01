@@ -1,8 +1,10 @@
 #include <roa/material.hpp>
 #include <roa/shader.hpp>
 #include <roa/color.hpp>
+#include <common/resource_identifiers.hpp>
 #include <nil/resource/material.hpp>
 #include <lib/logging.hpp>
+#include <lib/entity.hpp>
 #include <string.h>
 
 
@@ -13,39 +15,8 @@ namespace ROA {
 
 
 Material::Material()
-: Material("")
-{
-}
-
-
-
-Material::Material(const uint32_t id)
-: Resource(id)
-{
-}
-
-
-Material::Material(const char *name)
-: Material(name, Color(0xFFFFFFFF))
-{
-}
-
-
-Material::Material(
-  const char *name,
-  const Color &color
-)
 : Resource()
 {
-  if(strlen(name) > 0)
-  {
-    Nil::Resource::Material mat{};
-    mat.name = name;
-    mat.color = color.get_uint();
-    Nil::Resource::load(mat);
-    
-    m_id = mat.id;
-  }
 }
 
 
@@ -60,13 +31,15 @@ Material::~Material()
 Color
 Material::get_color() const
 {
+  const uint32_t instance = lib::entity::instance(m_id);
+
   size_t count = 0;
   Nil::Resource::Material *mats = nullptr;
   Nil::Resource::get(&count, &mats);
   
-  if(count > m_id)
+  if(count > instance)
   {
-    return Color(mats[m_id].color);
+    return Color(mats[instance].color);
   }
   else
   {
@@ -79,13 +52,15 @@ Material::get_color() const
 void
 Material::set_color(const Color &col)
 {
+  const uint32_t instance = lib::entity::instance(m_id);
+
   size_t count = 0;
   Nil::Resource::Material *mats = nullptr;
   Nil::Resource::get(&count, &mats);
   
-  if(count > m_id)
+  if(count > instance)
   {
-    mats[m_id].color = col.get_uint();
+    mats[instance].color = col.get_uint();
   }
   else
   {
@@ -103,21 +78,6 @@ Material::get_shader() const
 
 void
 Material::set_shader(const Shader &shader)
-{
-}
-
-
-// ------------------------------------------------------------ [ Inherited ] --
-
-
-const char *
-Material::get_resource_type_name() const
-{
-}
-
-
-Resource_status
-Material::get_load_status() const
 {
 }
 

@@ -268,7 +268,7 @@ load(Mesh &in_out)
 
       // Normalize other outputs //
       {
-        in_out.status = Mesh::PENDING;
+        in_out.status = Load_status::PENDING;
         cpy.status = in_out.status;
 
         in_out.platform_resource = 0;

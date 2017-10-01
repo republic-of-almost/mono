@@ -178,10 +178,16 @@ make.create_solution(solution_data, project_defaults, projects)
     local platform_exclude = find_table_with_platform(proj, "src_files_exclude")
     if platform_exclude then excludes(platform_exclude) end
 
-    -- Include dirs
-    if proj.inc_dirs then includedirs(proj.inc_dirs) end
+    -- Public include dirs
+    if proj.public_inc_dirs then includedirs(proj.public_inc_dirs) end
 
-    local platform_inc_dirs = find_table_with_platform(proj, "inc_dirs")
+    local platform_inc_dirs = find_table_with_platform(proj, "public_inc_dirs")
+    if platform_inc_dirs then includedirs(platform_inc_dirs) end
+
+    -- Private include dirs
+    if proj.private_inc_dirs then includedirs(proj.private_inc_dirs) end
+
+    local platform_inc_dirs = find_table_with_platform(proj, "private_inc_dirs")
     if platform_inc_dirs then includedirs(platform_inc_dirs) end
 
     -- Library directories
@@ -257,8 +263,8 @@ make.create_solution(solution_data, project_defaults, projects)
               end
 
               -- Include dirs
-              if other_proj.inc_dirs then includedirs(other_proj.inc_dirs) end
-              local platform_inc_dirs = find_table_with_platform(other_proj, "inc_dirs")
+              if other_proj.public_inc_dirs then includedirs(other_proj.public_inc_dirs) end
+              local platform_inc_dirs = find_table_with_platform(other_proj, "public_inc_dirs")
               if platform_inc_dirs then includedirs(platform_inc_dirs) end
 
               -- We also need link dirs
@@ -344,10 +350,8 @@ make.create_solution(solution_data, project_defaults, projects)
         -- MacOSX Copy --
         if os.get() == "macosx" then
           if proj.kind == "WindowedApp" then
-            -- postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
             postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
           elseif proj.kind == "ConsoleApp" then
-            -- postbuildcommands("ditto ${SRCROOT}/".. dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
             postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
           end
         -- Linux Copy --

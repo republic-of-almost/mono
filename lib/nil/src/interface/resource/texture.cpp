@@ -178,7 +178,7 @@ load(Texture &in_out)
       {
         if(in_out.data_type != Texture::LOCAL)
         {
-          in_out.status = Texture::PENDING;
+          in_out.status = Load_status::PENDING;
           in_out.platform_resource = 0;
         }
         cpy.status = in_out.status;

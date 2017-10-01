@@ -7,11 +7,11 @@
 table.insert(
   projects,
   {
-    name     = "Json",
-    kind     = "StaticLib",
-    language = "C++",
+    name            = "Json",
+    kind            = "StaticLib",
+    language        = "C++",
     ignore_defaults = true,
-    location = make.get_proj_root(),
+    location        = make.get_proj_root(),
 
     src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),
@@ -23,14 +23,12 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
-    inc_dirs = {
-
-      -- Public Headers --
+    public_inc_dirs = {
       make.get_proj_root() .. "../include/",
+    },
 
-      -- Private Header --
+    private_inc_dirs = {
       make.get_proj_root() .. "../include/json",
-
     },
   }
 )

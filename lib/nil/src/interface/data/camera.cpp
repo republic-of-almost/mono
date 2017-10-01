@@ -44,7 +44,7 @@ get_camera_data()
       
       memcpy(
         data->data[index].position,
-        trans.position,
+        trans.world_position,
         sizeof(data->data[index].position)
       );
     }

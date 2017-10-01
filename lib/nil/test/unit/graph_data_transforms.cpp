@@ -7,7 +7,8 @@
 
 TEST_CASE("Graph Data Transforms")
 {
-  Nil::Engine nil_engine;
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
   
   SECTION("Sensible Default Transform")
   {
@@ -92,4 +93,6 @@ TEST_CASE("Graph Data Transforms")
       );
     }
   }
+  
+  nil_ctx_destroy(&ctx);
 }

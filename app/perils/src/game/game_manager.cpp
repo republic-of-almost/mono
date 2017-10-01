@@ -24,7 +24,7 @@ Game_manager::on_start()
     scene.set_name("Game Scene");
     ROA::Scene::load(scene, "mesh/test_level.gltf");
     
-    ROA::Transform trans = scene.get_transform();
+    ROA::Transform trans = scene.get_data<ROA::Transform>();
     
     
     trans.set_scale(ROA::Vector3(scene_scale, scene_scale, scene_scale));
@@ -52,7 +52,7 @@ Game_manager::on_start()
           if(strcmp(gran_child_name, "SpawnPoint") == 0)
           {
             spawn_point = gran_child;
-            spawn_point.set_transform(gran_child.get_transform());
+//            spawn_point.set_data<ROA::Transform>(gran_child.get_data<ROA::Transform>());
             break;
           }
         }
@@ -72,6 +72,7 @@ Game_manager::on_start()
       if(strcmp(child_name, "WH-Nav") == 0)
       {
         child.destroy();
+        break;
       }
     }
   }
@@ -85,11 +86,14 @@ Game_manager::on_start()
     Actor_kinematic *actor_comp = actor.get_component<Actor_kinematic>();
     LIB_ASSERT(actor_comp);
     
-    actor.set_world_transform(spawn_point.get_transform());
+    const ROA::Transform spawn_trans = spawn_point.get_data<ROA::Transform>();
+    ROA::Transform actor_trans = actor.get_data<ROA::Transform>();
+    
+    actor_trans.set_world_position(spawn_trans.get_world_position());
     
     // -- Find Navmesh -- //
     {
-      ROA::Mesh mesh = ROA::Mesh("navmesh");
+      ROA::Mesh mesh = ROA::Resource::find<ROA::Mesh>("navmesh");
       
       if(mesh.is_valid())
       {

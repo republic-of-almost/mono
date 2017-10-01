@@ -18,8 +18,7 @@ public:
   
   
   explicit          Mesh();
-  explicit          Mesh(const uint32_t id);
-  explicit          Mesh(const char *name);
+                    ~Mesh();
   
   
   // --------------------------------------------------------- [ Attributes ] --
@@ -35,10 +34,6 @@ public:
   
   uint32_t *        get_index() const;
   size_t            get_index_count() const;
-  
-  
-private:
-  
 
 };
 

@@ -9,7 +9,7 @@
 namespace ROA {
 
 
-class Audio_player : public Object
+class Audio_player final : public Object
 {
 public:
 
@@ -18,7 +18,11 @@ public:
 
 
   explicit          Audio_player();
-  explicit          Audio_player(const Audio_source &src);
+  explicit          Audio_player(const ROA_nullptr null);
+  
+                    ~Audio_player();
+  
+//                    Audio_player(const Audio_source &src);
   
   
   // --------------------------------------------------------- [ Attributes ] --
@@ -27,12 +31,11 @@ public:
   void              set_source(Audio_source &in);
   Audio_source      get_source() const;
   
-  
   void              set_volume(const float vol);
   float             get_volume() const;
   
-  
-  void              play();
+  void              set_play(const bool play);
+  void              is_playing() const;
 };
 
 

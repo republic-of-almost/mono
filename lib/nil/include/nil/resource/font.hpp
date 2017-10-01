@@ -21,7 +21,8 @@ struct Font
   size_t            data_size;
 
   // -- Output -- //
-  enum { PENDING, LOADED, FAILED, STATUS_COUNT } status;
+  
+  Load_status       status;
   
   uint32_t *glyph_data;
   size_t    glyph_data_count;

@@ -10,7 +10,7 @@ namespace Nil_ext {
 namespace ROA_Aspect {
 
 
-// ------------------------------------------------------ [ ROA Aspect Data ] --
+/* ---------------------------------------------------------- [ ROA Data ] -- */
 
 
 struct Data
@@ -19,26 +19,30 @@ struct Data
 };
 
 
-// ------------------------------------------------- [ ROA Aspect Interface ] --
+/* ------------------------------------------------------ [ ROA Lifetime ] -- */
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect);
+start_up(Nil_ctx *ctx, void *data);
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect);
-
-
-// ------------------------------------------------------------ [ ROA Tasks ] --
+events(Nil_ctx *ctx, void *data);
 
 
 void
-logic_start_callback(Nil::Engine &engine, uintptr_t user_data);
+shut_down(Nil_ctx *ctx, void *data);
+
+
+/* --------------------------------------------------------- [ ROA Tasks ] -- */
 
 
 void
-logic_update_callback(Nil::Engine &engine, uintptr_t user_data);
+logic_start_callback(Nil_ctx *ctx, void *data);
+
+
+void
+logic_update_callback(Nil_ctx *ctx, void *data);
 
 
 } // ns

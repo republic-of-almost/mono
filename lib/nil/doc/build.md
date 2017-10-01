@@ -87,3 +87,6 @@ Preprocessor Flag                        | Default | Description
 NIL_MAX_TAG_NAME_LENGTH=\<count\>        | 64      | Max `char` length of a tag
 NIL_MAX_NODE_NAME_LENGTH=\<count\>       | 32      | Max `char` length of a node name
 NIL_GRAPH_TRANSFORM_STACK_HINT=\<count\> | 32      | Number of transforms to stack alloc on updates.
+NIL_MAX_ASPECT_COUNT=\<count\>           | 16      | Max number of supported aspects.
+NIL_MAX_CPU_TASK_COUNT=\<count\>         | 32      | Max CPU task per slot per tick.
+NIL_MAX_GPU_TASK_COUNT=\<count\>         | 16      | Max GPU task per slot per tick.

@@ -25,6 +25,7 @@ public:
   
   
   explicit        Light();
+  explicit        Light(const ROA_nullptr null);
                   ~Light();
   
   

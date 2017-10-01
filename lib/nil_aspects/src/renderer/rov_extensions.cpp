@@ -39,7 +39,7 @@ rov_render_camera_cross(Nil::Data::Camera cam, uint32_t viewport[2])
   
   math::vec3 pos = math::vec3_init(cam.position);
   math::vec3 dir = math::ray_direction(r);
-  math::plane p = math::plane_init(math::vec3_add(pos, math::vec3_scale(dir, cam.near_plane)), math::vec3_scale(dir, -1.f));
+  math::plane p  = math::plane_init(math::vec3_add(pos, math::vec3_scale(dir, cam.near_plane)), math::vec3_scale(dir, -1.f));
   
   float dist = 0.f;
   ray_test_plane(r, p, &dist);

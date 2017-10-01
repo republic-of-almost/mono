@@ -30,6 +30,12 @@ Camera::Camera()
 }
 
 
+Camera::Camera(const ROA_nullptr null)
+: Object(null)
+{
+}
+
+
 Camera::~Camera()
 {
 }

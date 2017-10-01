@@ -18,17 +18,23 @@ public:
   
   
   explicit          Shader();
-  explicit          Shader(const uint32_t id);
-  explicit          Shader(const char *name, const char *filepath = nullptr);
-                    ~Shader();
-
-
-  // ---------------------------------------------------------- [ Inherited ] --
+  virtual           ~Shader();
   
   
-  const char *      get_resource_type_name() const override;
-  Resource_status   get_load_status() const override;
+  // --------------------------------------------------------- [ Attributes ] --
   
+  
+  void              set_shader_type(const Shader_type type);
+  Shader_type       get_shader_type() const;
+  
+  bool              set_vertex_shader_code(const char *src);
+  const char *      get_vertex_shader_code() const;
+  
+  bool              set_geometry_shader_code(const char *src);
+  const char *      get_geometry_shader_code() const;
+  
+  bool              set_fragment_shader_code(const char *src);
+  const char *      get_fragment_shader_code() const;
   
 };
 

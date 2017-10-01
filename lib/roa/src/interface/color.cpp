@@ -9,7 +9,7 @@ namespace ROA {
 
 
 Color::Color()
-: Color(0xFFFFFFFF)
+: Color(uint32_t{0})
 {
 }
 
@@ -36,6 +36,34 @@ Color::Color(const uint8_t rgba[])
 : Color(lib::color::init(rgba))
 {
 }
+
+
+// ---------------------------------------------------------- [ Operators ] --
+
+
+bool
+Color::operator==(const Color &other) const
+{
+  return get_uint() == other.get_uint();
+}
+
+
+bool
+Color::operator!=(const Color &other) const
+{
+  return get_uint() != other.get_uint();
+}
+
+
+// --------------------------------------------------------- [ Attributes ] --
+
+
+uint32_t
+Color::get_uint() const
+{
+  return m_data;
+}
+
 
 
 

@@ -7,7 +7,10 @@
 
 TEST_CASE("Data - Light")
 {
-  Nil::Engine nil_engine;
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
+
+  
   Nil::Node node;
   
   SECTION("Initial")
@@ -108,4 +111,6 @@ TEST_CASE("Data - Light")
       REQUIRE(Nil::Data::has_light(node) == false);
     }
   }
+  
+  nil_ctx_destroy(&ctx);
 }

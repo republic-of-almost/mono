@@ -7,32 +7,35 @@
 
 TEST_CASE("Resource - Shader")
 {
-  Nil::Engine nil_engine;
-  lib::logging::set_output(0);
+  Nil_ctx *ctx;
+  nil_ctx_initialize(&ctx);
   
   SECTION("Initial")
   {
-    REQUIRE(Nil::Resource::shader_count() == 1);
+    const size_t count = nil_rsrc_shader_get_count();
+  
+    REQUIRE(count == 1);
   }
   
   SECTION("Load Pass")
   {
-    Nil::Resource::Shader shd{};
+    Nil_shader shd{};
     shd.name = "shd_to_pass";
     
     shd.vs_code = "VS";
     shd.gs_code = "GS";
     shd.fs_code = "FS";
     
-    const bool loaded = Nil::Resource::load(shd);
+    const bool loaded  = nil_rsrc_shader_create(&shd);
+    const size_t count = nil_rsrc_shader_get_count();
     
     REQUIRE(loaded == true);
-    REQUIRE(Nil::Resource::shader_count() == 2);
+    REQUIRE(count == 2);
     REQUIRE(shd.id > 0);
     
-    Nil::Resource::Shader get_shd{};
+    Nil_shader get_shd{};
     
-    Nil::Resource::find_by_name("shd_to_pass", get_shd);
+    nil_rsrc_shader_find_by_name("shd_to_pass", &get_shd);
     
     REQUIRE(strcmp(shd.vs_code, get_shd.vs_code) == 0);
     REQUIRE(strcmp(shd.gs_code, get_shd.gs_code) == 0);
@@ -41,13 +44,15 @@ TEST_CASE("Resource - Shader")
   
   SECTION("Load Fail")
   {
-    Nil::Resource::Shader shd{};
+    Nil_shader shd{};
     shd.name = "shd_to_fail";
     
-    const bool should_pass = Nil::Resource::load(shd);
-    const bool should_fail = Nil::Resource::load(shd);
+    const bool should_pass = nil_rsrc_shader_create(&shd);
+    const bool should_fail = nil_rsrc_shader_create(&shd);
     
     REQUIRE(should_pass == true);
     REQUIRE(should_fail == false);
   }
+  
+  nil_ctx_destroy(&ctx);
 };

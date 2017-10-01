@@ -20,7 +20,7 @@ render_resource_overview(
   const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
   const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
   const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count,
-  const Nil::Resource::Shader *shd_rsrc, const size_t shd_count
+  const Nil_shader *shd_rsrc, const size_t shd_count
  );
 
 
@@ -37,7 +37,7 @@ render_resource(const Nil::Resource::Mesh *rsrc, const size_t count);
 
 
 void
-render_resource(const Nil::Resource::Shader *rsrc, const size_t count);
+render_resource(const Nil_shader *rsrc, const size_t count);
 
 
 } // ns

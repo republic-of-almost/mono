@@ -9,18 +9,6 @@
 namespace ROA {
 
 
-namespace Data {
-enum ENUM : uint64_t {
-
-  BOUNDING_BOX    = 1 << 0,
-  CAMERA          = 1 << 1,
-  LOGIC           = 1 << 2,
-  RENDERABLE      = 1 << 3,
-
-};
-} // ns
-
-
 class Object
 {
 public:
@@ -35,7 +23,6 @@ public:
 
   explicit              Object();
   explicit              Object(const uint32_t instance_id);
-  explicit              Object(const uint64_t data_bitfield);
   explicit              Object(const ROA_nullptr);
   
                         Object(const Object &other) noexcept;
@@ -43,16 +30,29 @@ public:
   
   virtual               ~Object();
   
+  void                  destroy();
+  
+  
+  // ---------------------------------------------------------- [ Operators ] --
+  /*
+    Various short hand operators.
+  */
+  
+  
   Object&               operator=(const Object &other) noexcept;
   Object&               operator=(Object &&other) noexcept;
   
-  void                  destroy();
+                        operator bool() const noexcept;
+                        
+  bool                  operator==(const Object &other) const noexcept;
+  bool                  operator!=(const Object &other) const noexcept;
 
 
   // -------------------------------------------------------------- [ State ] --
   /*
     Various state checks.
   */
+
 
   bool                  is_valid() const;
   bool                  is_ref() const;
@@ -151,37 +151,47 @@ public:
     valid data.
   */
   
+  template<typename T>
+  void
+  set_data(const T &t)
+  {
+    ROA_detail::set_node_data(*this, t);
+  }
   
-  const Bounding_box    get_bounding_box() const;
-  Bounding_box          get_bounding_box();
-  void                  set_bounding_box(const Bounding_box &in);
+  template<typename T>
+  void
+  add_data()
+  {
+    T t{};
+    ROA_detail::set_node_data(*this, t);
+  }
   
-  const Camera          get_camera() const;
-  Camera                get_camera();
-  void                  set_camera(const Camera &in);
+  template<typename T>
+  T
+  get_data()
+  {
+    T t{nullptr};
+    
+    return ROA_detail::get_node_data(*this, t);
+  }
   
-  const Light           get_light() const;
-  Light                 get_light();
-  void                  set_light(const Light &in);
+  template<typename T>
+  const T
+  get_data() const
+  {
+    T t{nullptr};
+    
+    return ROA_detail::get_node_data(*this, t);
+  };
   
-  const Logic           get_logic() const;
-  Logic                 get_logic();
-  void                  set_logic(const Logic &in);
-  
-  const Transform       get_transform() const;
-  Transform             get_transform();
-  void                  set_transform(const Transform &in);
-  void                  set_world_transform(const Transform &in);
-  
-  
-  const Renderable      get_renderable() const;
-  Renderable            get_renderable();
-  void                  set_renderable(const Renderable &in);
-  
-  const Audio_player    get_audio_player() const;
-  Audio_player          get_audio_player();
-  void                  set_audio_player(const Audio_player &in);
-  
+  template<typename T>
+  bool
+  has_data() const
+  {
+    T t{nullptr};
+    
+    return ROA_detail::has_node_data(*this, t);
+  }
   
 private:
 
