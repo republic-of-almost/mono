@@ -1,5 +1,5 @@
 #include <roa/time.hpp>
-#include <common/common.hpp>
+#include <common/context.hpp>
 #include <nil/nil.hpp>
 #include <lib/timer.hpp>
 
@@ -11,7 +11,8 @@ namespace Time {
 float
 get_delta_time()
 {
-  return ROA_detail::get_engine().get_delta_time();
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  return nil_ctx_get_delta_time(ctx);
 }
 
 

@@ -13,10 +13,6 @@
 namespace ROA_detail {
 
 
-Nil::Engine&
-get_engine();
-
-
 Nil::Node
 get_application_node();
 

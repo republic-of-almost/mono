@@ -62,7 +62,6 @@ public:
   static T
   create(const char *name)
   {
-    LOG_ERROR("C?");
     T rsrc{};
     
     return ROA_detail::create_resource(rsrc, name);

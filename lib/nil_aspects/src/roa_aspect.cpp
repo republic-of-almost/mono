@@ -10,47 +10,54 @@ namespace Nil_ext {
 namespace ROA_Aspect {
 
 
-// ------------------------------------------------- [ ROA Aspect Interface ] --
+/* ------------------------------------------------------ [ ROA Lifetime ] -- */
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+start_up(Nil_ctx *ctx, void *data)
 {
   
 }
 
 
 void
-events(Nil::Engine &engine, Nil::Aspect &aspect)
+events(Nil_ctx *ctx, void *data)
 {
   
   // Logic Task
   {
     // No need to check if data exists. 99.99999999% of the time it does.
     
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::EARLY_THINK,
-      aspect.user_data,
-      logic_update_callback
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      logic_update_callback,
+      data
     );
   }
 }
 
 
-// ------------------------------------------------------------ [ ROA Tasks ] --
+void
+shut_down(Nil_ctx *ctx, void *data)
+{
+}
+
+
+/* --------------------------------------------------------- [ ROA Tasks ] -- */
 
 
 void
-logic_start_callback(Nil::Engine &engine, uintptr_t user_data)
+logic_start_callback(Nil_ctx *ctx, void *data)
 {
 
 }
 
 
 void
-logic_update_callback(Nil::Engine &engine, uintptr_t user_data)
+logic_update_callback(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
   
   size_t logic_count = 0;

@@ -28,6 +28,9 @@ nil_ctx_initialize(Nil_ctx **ctx)
   
   if(new_ctx)
   {
+    new_ctx->last_tick = lib::timer::get_current_time();
+    new_ctx->delta_time = 0.f;
+  
     *ctx = new_ctx;
   }
   
@@ -91,13 +94,10 @@ nil_ctx_think(Nil_ctx *ctx)
     {
       Nil_aspect_callback_fn fn = ctx->aspect_tick_callbacks[i].callback;
       
-      for(size_t i = 0; i < tick_count; ++i)
+      if(fn)
       {
-        if(fn)
-        {
-          void *data= ctx->aspect_tick_callbacks[i].user_data;
-          fn(ctx, data);
-        }
+        void *data= ctx->aspect_tick_callbacks[i].user_data;
+        fn(ctx, data);
       }
     }
   }
@@ -106,20 +106,40 @@ nil_ctx_think(Nil_ctx *ctx)
   
   /* tasks */
   {
+    /* early think */
+    
     nil_task_cpu_process(ctx, ctx->early_think_tasks, ctx->early_think_task_count);
+    ctx->early_think_task_count = 0;
+    
     nil_task_gpu_process(ctx, ctx->pre_render_tasks,  ctx->pre_render_task_count);
+    ctx->pre_render_task_count = 0;
+    
+    /* think */
     
     nil_task_cpu_process(ctx, ctx->think_tasks,       ctx->think_task_count);
+    ctx->think_task_count = 0;
+    
     nil_task_gpu_process(ctx, ctx->pre_render_tasks,  ctx->pre_render_task_count);
+    ctx->pre_render_task_count = 0;
+    
+    /* late think */
     
     nil_task_cpu_process(ctx, ctx->late_think_tasks,  ctx->late_think_task_count);
+    ctx->late_think_task_count = 0;
+    
     nil_task_gpu_process(ctx, ctx->pre_render_tasks,  ctx->pre_render_task_count);
+    ctx->pre_render_task_count = 0;
+    
+    /* render */
     
     nil_task_gpu_process(ctx, ctx->render_tasks,      ctx->render_task_count);
+    ctx->render_task_count = 0;
+    
     nil_task_gpu_process(ctx, ctx->post_render_tasks, ctx->post_render_task_count);
+    ctx->post_render_task_count = 0;
   }
   
-  return ctx->quit_signal;
+  return !ctx->quit_signal;
 }
 
 
@@ -183,7 +203,7 @@ nil_ctx_add_aspect(Nil_ctx *ctx, Nil_aspect aspect)
 
   if(aspect.startup)
   {
-    const size_t index = ctx->aspect_startup_callback_count++;
+    const size_t index = ctx->aspect_startup_callback_count;
     ctx->aspect_startup_callbacks[index].callback = aspect.startup;
     ctx->aspect_startup_callbacks[index].user_data = aspect.data;
     
@@ -192,7 +212,7 @@ nil_ctx_add_aspect(Nil_ctx *ctx, Nil_aspect aspect)
   
   if(aspect.tick)
   {
-    const size_t index = ctx->aspect_tick_callback_count++;
+    const size_t index = ctx->aspect_tick_callback_count;
     ctx->aspect_tick_callbacks[index].callback = aspect.tick;
     ctx->aspect_tick_callbacks[index].user_data = aspect.data;
     
@@ -201,7 +221,7 @@ nil_ctx_add_aspect(Nil_ctx *ctx, Nil_aspect aspect)
   
   if(aspect.shutdown)
   {
-    const size_t index = ctx->aspect_shutdown_callback_count++;
+    const size_t index = ctx->aspect_shutdown_callback_count;
     ctx->aspect_shutdown_callbacks[index].callback = aspect.shutdown;
     ctx->aspect_shutdown_callbacks[index].user_data = aspect.data;
     
@@ -210,7 +230,7 @@ nil_ctx_add_aspect(Nil_ctx *ctx, Nil_aspect aspect)
   
   if(aspect.ui_menu)
   {
-    const size_t index = ctx->aspect_ui_menu_callback_count++;
+    const size_t index = ctx->aspect_ui_menu_callback_count;
     ctx->aspect_ui_menu_callbacks[index].callback = aspect.ui_menu;
     ctx->aspect_ui_menu_callbacks[index].user_data = aspect.data;
     
@@ -219,7 +239,7 @@ nil_ctx_add_aspect(Nil_ctx *ctx, Nil_aspect aspect)
   
   if(aspect.ui_window)
   {
-    const size_t index = ctx->aspect_ui_window_callback_count++;
+    const size_t index = ctx->aspect_ui_window_callback_count;
     ctx->aspect_ui_window_callbacks[index].callback = aspect.ui_window;
     ctx->aspect_ui_window_callbacks[index].user_data = aspect.data;
     

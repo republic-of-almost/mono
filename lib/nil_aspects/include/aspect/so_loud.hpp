@@ -33,22 +33,26 @@ struct Data
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect);
+start_up(Nil_ctx *ctx, void *data);
 
 
 void
-think(Nil::Engine &engine, Nil::Aspect &aspect);
+think(Nil_ctx *ctx, void *data);
+
+
+void
+shut_down(Nil_ctx *ctx, void *data);
 
 
 // --------------------------------------------------------- [ SoLoud Tasks ] --
 
 
 void
-resource_update(Nil::Engine &engine, uintptr_t user_data);
+resource_update(Nil_ctx *ctx, void *data);
 
 
 void
-player_update(Nil::Engine &engine, uintptr_t user_data);
+player_update(Nil_ctx *ctx, void *data);
 
 
 // ---------------------------------------------------------- [ Renderer UI ] --
@@ -56,11 +60,11 @@ player_update(Nil::Engine &engine, uintptr_t user_data);
 
 #ifndef NIMGUI
 void
-ui_menu(uintptr_t user_data);
+ui_menu(Nil_ctx *ctx, void *data);
 
 
 void
-ui_window(uintptr_t user_data);
+ui_window(Nil_ctx *ctx, void *data);
 #endif
 
 

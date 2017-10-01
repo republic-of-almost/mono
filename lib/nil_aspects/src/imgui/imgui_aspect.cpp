@@ -24,9 +24,9 @@ namespace ImGui_Aspect {
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+start_up(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   self->inspector_node        = Nil::Node(nullptr);
@@ -56,9 +56,9 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
   self->show_rsrc_textures    = false;
   self->show_rsrc_meshes      = false;
 
-  // Aspects can hook into UI callbacks with developer data.
-  aspect.data_types = 0;
-  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Developer{});
+//  // Aspects can hook into UI callbacks with developer data.
+//  aspect.data_types = 0;
+//  aspect.data_types |= Nil::Data::get_type_id(Nil::Data::Developer{});
 }
 
 
@@ -75,8 +75,13 @@ events(Nil_ctx *ctx, void *data)
     ctx,
     NIL_CPU_TASK_THINK,
     think,
-    (void*)self,
+    (void*)self
   );
+}
+
+void
+shut_down(Nil_ctx *ctx, void *data)
+{
 }
 
 
@@ -393,7 +398,7 @@ think(Nil_ctx *ctx, void *data)
 
     ImGui::BeginChild("scrolling", ImVec2(0,0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
-    const size_t graph_count = engine.graph_data_count();
+    const size_t graph_count = nil_ctx_graph_data_count(ctx);
 
     for(size_t i = 0; i < graph_count; ++i)
     {
@@ -403,12 +408,12 @@ think(Nil_ctx *ctx, void *data)
 
       ImGui::BeginChild(graph_data, ImVec2(150,0), true);
 
-      ImGui::Text("%d(%d)", engine.graph_data_get_ids()[i], lib::bits::upper32(engine.graph_data_details()[i]));
-      ImGui::Text("%d", lib::bits::lower32(engine.graph_data_details()[i]));
+      ImGui::Text("%d(%d)", nil_ctx_graph_data_ids(ctx)[i], lib::bits::upper32(nil_ctx_graph_data_details(ctx)[i]));
+      ImGui::Text("%d", lib::bits::lower32(nil_ctx_graph_data_details(ctx)[i]));
 
       ImGui::Separator();
 
-      math::transform l_trans = engine.graph_data_local_transforms()[i];
+      math::transform l_trans = nil_ctx_graph_data_local_transforms(ctx)[i];
 
       ImGui::Text("%.01f, %.01f, %.1f", l_trans.position.data[0], l_trans.position.data[1], l_trans.position.data[2]);
       ImGui::Text("%.01f, %.01f, %.1f", l_trans.scale.data[0], l_trans.scale.data[1], l_trans.scale.data[2]);
@@ -416,7 +421,7 @@ think(Nil_ctx *ctx, void *data)
 
       ImGui::Separator();
 
-      math::transform w_trans = engine.graph_data_world_transforms()[i];
+      math::transform w_trans = nil_ctx_graph_data_world_transforms(ctx)[i];
 
       ImGui::Text("%.01f, %.01f, %.1f", w_trans.position.data[0], w_trans.position.data[1], w_trans.position.data[2]);
       ImGui::Text("%.01f, %.01f, %.1f", w_trans.scale.data[0], w_trans.scale.data[1], w_trans.scale.data[2]);
@@ -775,7 +780,7 @@ think(Nil_ctx *ctx, void *data)
 
       if(ImGui::MenuItem("Quit"))
       {
-        engine.send_quit_signal();
+        nil_ctx_quit_signal(ctx);
       }
 
       ImGui::EndMenu();
@@ -798,8 +803,8 @@ think(Nil_ctx *ctx, void *data)
       {
         if(dev[i].type_id == 1 && dev[i].aux_01)
         {
-          using fn = void(*)(uintptr_t user_data);
-          ((fn)dev[i].aux_01)(dev[i].aux_02);
+          using fn = void(*)(Nil_ctx *ctx, void *user_data);
+          ((fn)dev[i].aux_01)(ctx, (void*)dev[i].aux_02);
         }
       }
     }
@@ -821,8 +826,8 @@ think(Nil_ctx *ctx, void *data)
     {
       if(dev[i].type_id == 1 && dev[i].aux_03)
       {
-        using fn = void(*)(uintptr_t user_data);
-        ((fn)dev[i].aux_03)(dev[i].aux_04);
+        using fn = void(*)(Nil_ctx *ctx, void *user_data);
+        ((fn)dev[i].aux_03)(ctx, (void*)dev[i].aux_04);
       }
     }
   }

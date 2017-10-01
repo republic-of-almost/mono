@@ -32,9 +32,9 @@ get_mat_data()
       Nil::Data::get(node, trans);
 
       math::transform internal_trans = math::transform_init(
-      math::vec3_init(trans.world_position),
-      math::vec3_init(trans.world_scale),
-      math::quat_init(trans.world_rotation[0], trans.world_rotation[1], trans.world_rotation[2], trans.world_rotation[3])
+        math::vec3_init(trans.world_position),
+        math::vec3_init(trans.world_scale),
+        math::quat_init(trans.world_rotation)
       );
 
       math::mat4 mat = math::transform_world_matrix(internal_trans);

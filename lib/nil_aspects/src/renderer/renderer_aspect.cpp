@@ -64,7 +64,7 @@ start_up(Nil_ctx *ctx, void *data)
 void
 events(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
   
   /*
@@ -83,7 +83,12 @@ events(Nil_ctx *ctx, void *data)
 
       if(!self->has_initialized)
       {
-        Nil::Task::cpu_task(Nil::Task::CPU::EARLY_THINK, (uintptr_t)self, initialize_rov);
+        nil_task_cpu_add(
+          ctx,
+          NIL_CPU_TASK_EARLY_THINK,
+          initialize_rov,
+          (void*)self
+        );
       }
 
       // Added Debug Lines
@@ -110,37 +115,42 @@ events(Nil_ctx *ctx, void *data)
   
   if(self->has_initialized)
   {
-    Nil::Task::gpu_task(
-      Nil::Task::GPU::PRE_RENDER,
-      (uintptr_t)self,
-      load_gpu_resources
+    nil_task_gpu_add(
+      ctx,
+      NIL_GPU_TASK_PRE_RENDER,
+      load_gpu_resources,
+      (void*)self
     );
 
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::EARLY_THINK,
-      (uintptr_t)self,
-      early_think
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      early_think,
+      (void*)self
     );
-    
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::THINK,
-      (uintptr_t)self,
-      think
+
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_THINK,
+      think,
+      (void*)self
     );
-    
-    Nil::Task::gpu_task(
-      Nil::Task::GPU::PRE_RENDER,
-      (uintptr_t)self,
-      generate_text_meshes
+
+    nil_task_gpu_add(
+      ctx,
+      NIL_GPU_TASK_PRE_RENDER,
+      generate_text_meshes,
+      (void*)self
     );
 
     #ifndef NVRSUPPORT
     if(self->vr_device)
     {
-      Nil::Task::cpu_task(
-        Nil::Task::CPU::EARLY_THINK,
-        (uintptr_t)self,
-        update_vr
+      nil_task_cpu_add(
+        ctx,
+        NIL_CPU_TASK_EARLY_THINK,
+        update_vr,
+        (void*)self
       );
     }
     #endif
@@ -149,10 +159,11 @@ events(Nil_ctx *ctx, void *data)
   #ifndef NDEBUGLINES
   if(self->show_lookat_bounding_box)
   {
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::EARLY_THINK,
-      (uintptr_t)self,
-      find_lookat_bounding_box
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      find_lookat_bounding_box,
+      (void*)self
     );
   }
   #endif
@@ -162,15 +173,16 @@ events(Nil_ctx *ctx, void *data)
 void
 shut_down(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   if(self->has_initialized)
   {
-    Nil::Task::gpu_task(
-      Nil::Task::GPU::PRE_RENDER,
-      (uintptr_t)self,
-      unload_gpu_resources
+    nil_task_gpu_add(
+      ctx,
+      NIL_GPU_TASK_PRE_RENDER, // should be post, not supported in nil yet.
+      unload_gpu_resources,
+      (void*)self
     );
   }
 
@@ -208,7 +220,7 @@ initialize_rov(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_InitializeROV)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
 
@@ -470,7 +482,7 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_LoadGPUResources)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   /*
@@ -622,7 +634,7 @@ unload_gpu_resources(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_UnloadResources);
   
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   rov_destroy();
@@ -642,7 +654,7 @@ find_lookat_bounding_box(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_FindLookAtBoundingBox)
   
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
   
   size_t cam_count = 0;
@@ -700,7 +712,7 @@ early_think(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_EarlyThink)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   /*
@@ -753,7 +765,7 @@ think(Nil_ctx *ctx, void *data)
 {
   BENCH_SCOPED_CPU(ROV_Think)
 
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   size_t cam_count = 0;
@@ -1050,7 +1062,7 @@ ui_menu(Nil_ctx *ctx, void *data)
 {
   #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
+    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(data)
   );
 
   LIB_ASSERT(self);
@@ -1070,7 +1082,7 @@ ui_window(Nil_ctx *ctx, void *data)
 {
   #ifndef NIMGUI
   Nil_ext::ROV_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(user_data)
+    reinterpret_cast<Nil_ext::ROV_Aspect::Data*>(data)
   );
 
   LIB_ASSERT(self);

@@ -124,7 +124,8 @@ main()
 
       constexpr float speed   = 0.15f;
       static float spin       = 0.f;
-      const float delta_speed = speed * ROA::Time::get_delta_time();
+      const float dt = ROA::Time::get_delta_time();
+      const float delta_speed = speed * dt;
 
       spin += delta_speed;
 

@@ -6,14 +6,6 @@
 namespace ROA_detail {
 
 
-Nil::Engine&
-get_engine()
-{
-  static Nil::Engine engine;
-  return engine;
-}
-
-
 Nil::Node
 get_application_node()
 {

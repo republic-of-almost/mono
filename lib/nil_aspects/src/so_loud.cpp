@@ -19,9 +19,9 @@ namespace SoLoud_Aspect {
 
 
 void
-start_up(Nil::Engine &engine, Nil::Aspect &aspect)
+start_up(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(aspect.user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   
   self->soloud.init();
   
@@ -43,10 +43,10 @@ start_up(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-think(Nil::Engine &engine, Nil::Aspect &aspect)
+think(Nil_ctx *ctx, void *data)
 {
-  Data *data = reinterpret_cast<Data*>(aspect.user_data);
-  LIB_ASSERT(data);
+  Data *self = reinterpret_cast<Data*>(data);
+  LIB_ASSERT(self);
   
   // -- Update Resources -- //
   {
@@ -54,10 +54,11 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       TODO: This task should only be fired if we know there are
       resources to update.
     */
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::EARLY_THINK,
-      aspect.user_data,
-      resource_update
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      resource_update,
+      (void*)self
     );
   }
   
@@ -67,12 +68,19 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
       TODO: This task should only be fired if we know there are
       players to update.
     */
-    Nil::Task::cpu_task(
-      Nil::Task::CPU::THINK,
-      aspect.user_data,
-      player_update
+    nil_task_cpu_add(
+      ctx,
+      NIL_CPU_TASK_EARLY_THINK,
+      player_update,
+      (void*)self
     );
   }
+}
+
+
+void
+shut_down(Nil_ctx *ctx, void *data)
+{
 }
 
 
@@ -80,9 +88,9 @@ think(Nil::Engine &engine, Nil::Aspect &aspect)
 
 
 void
-resource_update(Nil::Engine &engine, uintptr_t user_data)
+resource_update(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   // If new Audio Files then load
@@ -123,9 +131,9 @@ resource_update(Nil::Engine &engine, uintptr_t user_data)
 
 
 void
-player_update(Nil::Engine &engine, uintptr_t user_data)
+player_update(Nil_ctx *ctx, void *data)
 {
-  Data *self = reinterpret_cast<Data*>(user_data);
+  Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
   Nil::Resource::Audio *audio_data = nullptr;
@@ -195,10 +203,10 @@ player_update(Nil::Engine &engine, uintptr_t user_data)
 
 #ifndef NIMGUI
 void
-ui_menu(uintptr_t user_data)
+ui_menu(Nil_ctx *ctx, void *data)
 {
   Nil_ext::SoLoud_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::SoLoud_Aspect::Data*>(user_data)
+    reinterpret_cast<Nil_ext::SoLoud_Aspect::Data*>(data)
   );
   LIB_ASSERT(self);
 
@@ -212,10 +220,10 @@ ui_menu(uintptr_t user_data)
 
 
 void
-ui_window(uintptr_t user_data)
+ui_window(Nil_ctx *ctx, void *data)
 {
   Nil_ext::SoLoud_Aspect::Data *self(
-    reinterpret_cast<Nil_ext::SoLoud_Aspect::Data*>(user_data)
+    reinterpret_cast<Nil_ext::SoLoud_Aspect::Data*>(data)
   );
 
   if(self->show_info)

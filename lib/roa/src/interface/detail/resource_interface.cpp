@@ -93,12 +93,8 @@ create_resource(ROA::Shader &mat, const char *name)
   
   const uint32_t id = nil_rsrc_shader_create(&rsrc_data);
   
-  LOG_ERROR("E? %d", id);
-  
   if(id)
   {
-    LOG_ERROR("B?");
-  
     const uint32_t entity_id = lib::entity::create(Resource::SHADER, rsrc_data.id);
     ROA::Resource rsrc = setup_resource(entity_id);
     return *reinterpret_cast<ROA::Shader*>(&rsrc);

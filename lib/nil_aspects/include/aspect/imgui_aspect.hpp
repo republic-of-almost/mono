@@ -73,6 +73,10 @@ void
 events(Nil_ctx *ctx, void *data);
 
 
+void
+shut_down(Nil_ctx *ctx, void *data);
+
+
 // ---------------------------------------------------------------- [ Tasks ] --
 
 
