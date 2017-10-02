@@ -65,7 +65,7 @@ nil_rsrc_mesh_find_by_name(Nil_ctx *ctx, const char *name, Nil_mesh *out)
     {
       if(out)
       {
-        out = &ctx->rsrc_mesh->meshes[i];
+        *out = ctx->rsrc_mesh->meshes[i];
       }
       
       return true;
