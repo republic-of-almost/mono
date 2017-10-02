@@ -5,6 +5,7 @@
 #include <nil/fwd.hpp>
 #include <nil/aspect.hpp>
 #include <nil/task.hpp>
+#include <internal_data/resources/texture.hpp>
 #include <graph/graph_fwd.hpp>
 #include <lib/timer.hpp>
 
@@ -13,12 +14,12 @@
 #define NIL_MAX_ASPECT_COUNT 16
 #endif
 
-#ifndef NIL_MAX_CPU_TASK_COUNT
-#define NIL_MAX_CPU_TASK_COUNT 32
+#ifndef NIL_MAX_CPU_TASK_QUEUE
+#define NIL_MAX_CPU_TASK_QUEUE 32
 #endif
 
-#ifndef NIL_MAX_GPU_TASK_COUNT
-#define NIL_MAX_GPU_TASK_COUNT 16
+#ifndef NIL_MAX_GPU_TASK_QUEUE
+#define NIL_MAX_GPU_TASK_QUEUE 16
 #endif
 
 
@@ -47,6 +48,8 @@ struct Nil_ctx
 {
   /* --------------------------------------------------- [ Resource Data ] -- */
   
+  
+  Nil_texture_data    rsrc_texture;
   
   
   /* ------------------------------------------------------- [ Node Data ] -- */
@@ -77,22 +80,22 @@ struct Nil_ctx
   /* ------------------------------------------------------- [ Task Data ] -- */
   
   
-  Nil_cpu_task        early_think_tasks[NIL_MAX_CPU_TASK_COUNT];
+  Nil_cpu_task        early_think_tasks[NIL_MAX_CPU_TASK_QUEUE];
   size_t              early_think_task_count;
 
-  Nil_cpu_task        think_tasks[NIL_MAX_CPU_TASK_COUNT];
+  Nil_cpu_task        think_tasks[NIL_MAX_CPU_TASK_QUEUE];
   size_t              think_task_count;
   
-  Nil_cpu_task        late_think_tasks[NIL_MAX_CPU_TASK_COUNT];
+  Nil_cpu_task        late_think_tasks[NIL_MAX_CPU_TASK_QUEUE];
   size_t              late_think_task_count;
   
-  Nil_gpu_task        pre_render_tasks[NIL_MAX_GPU_TASK_COUNT];
+  Nil_gpu_task        pre_render_tasks[NIL_MAX_GPU_TASK_QUEUE];
   size_t              pre_render_task_count;
   
-  Nil_gpu_task        render_tasks[NIL_MAX_GPU_TASK_COUNT];
+  Nil_gpu_task        render_tasks[NIL_MAX_GPU_TASK_QUEUE];
   size_t              render_task_count;
 
-  Nil_gpu_task        post_render_tasks[NIL_MAX_GPU_TASK_COUNT];
+  Nil_gpu_task        post_render_tasks[NIL_MAX_GPU_TASK_QUEUE];
   size_t              post_render_task_count;
   
   

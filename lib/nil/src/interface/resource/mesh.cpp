@@ -1,4 +1,5 @@
 #include <nil/resource/mesh.hpp>
+#include <internal_data/resources/mesh.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/string.hpp>
@@ -13,12 +14,6 @@ namespace {
 
 
 // ------------------------------------------------------------- [ Resource ] --
-
-
-struct Mesh_data {
-  lib::array<uint32_t, 128> keys{uint32_t{0}};
-  lib::array<Nil::Resource::Mesh, 128> meshes{Nil::Resource::Mesh{}};
-};
 
 
 Mesh_data&

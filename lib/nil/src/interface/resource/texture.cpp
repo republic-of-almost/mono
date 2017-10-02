@@ -1,5 +1,5 @@
 #include <nil/resource/texture.hpp>
-#include <internal_data/resources/texture.hpp>
+#include <internal_data/internal_data.hpp>
 #include <lib/array.hpp>
 #include <lib/key.hpp>
 #include <lib/string_pool.hpp>
@@ -15,13 +15,12 @@ namespace {
 // ------------------------------------------------------------- [ Resource ] --
 
 
-
-Nil_texture_data&
-get_tex_data()
-{
-  static Nil_texture_data tex_data;
-  return tex_data;
-};
+//Nil_texture_data&
+//get_tex_data()
+//{
+//  static Nil_texture_data tex_data;
+//  return tex_data;
+//};
 
 
 // ------------------------------------------------------------- [ Messages ] --
@@ -58,13 +57,13 @@ nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
   
-  for(size_t i = 0; i < get_tex_data().keys.size(); ++i)
+  for(size_t i = 0; i < ctx->rsrc_texture.keys.size(); ++i)
   {
-    if(get_tex_data().keys[i] == find_key)
+    if(ctx->rsrc_texture.keys[i] == find_key)
     {
       if(out)
       {
-        out = &get_tex_data().textures[i];
+        out = &ctx->rsrc_texture.textures[i];
       }
       
       return true;
@@ -78,15 +77,15 @@ nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
 bool
 nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out)
 {
-  const uint32_t *ids = get_tex_data().keys.data();
-  const size_t id_count = get_tex_data().keys.size();
+  const uint32_t *ids = ctx->rsrc_texture.keys.data();
+  const size_t id_count = ctx->rsrc_texture.keys.size();
   size_t index = 0;
   
   if(lib::key::linear_search(id, ids, id_count))
   {
     if(out)
     {
-      out = &get_tex_data().textures[index];
+      out = &ctx->rsrc_texture.textures[index];
     }
     
     return true;
@@ -99,19 +98,19 @@ nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out)
 void
 nil_rsrc_texture_get_data(Nil_ctx *ctx, size_t *out_count, Nil_texture **out_data)
 {
-  *out_count = get_tex_data().keys.size();
-  *out_data = get_tex_data().textures.data();
+  *out_count = ctx->rsrc_texture.keys.size();
+  *out_data = ctx->rsrc_texture.textures.data();
 }
 
 
 bool
 nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture **out)
 {
-  const size_t count = get_tex_data().textures.size();
+  const size_t count = ctx->rsrc_texture.textures.size();
   
-  if(count < id)
+  if(count > id)
   {
-    *out = &get_tex_data().textures[id];
+    *out = &ctx->rsrc_texture.textures[id];
 
     return true;
   }
@@ -126,7 +125,7 @@ nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture **out)
 size_t
 nil_rsrc_texture_get_count(Nil_ctx *ctx)
 {
-  return get_tex_data().keys.size();
+  return ctx->rsrc_texture.keys.size();
 }
 
 
@@ -157,7 +156,7 @@ nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
     {
       LOG_ERROR(msg_texture_no_name);
 
-      return false;
+      return 0;
     }
   }
 
@@ -168,7 +167,7 @@ nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
     if(check_key)
     {
       LOG_WARNING(msg_texture_name_exists, in_out->name);
-      return false;
+      return 0;
     }
   }
 
@@ -230,7 +229,7 @@ nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
         LOG_ERROR(msg_texture_failed, in_out->name);
 
         LIB_ASSERT(false);
-        return false;
+        return 0;
       }
     }
 
@@ -238,7 +237,7 @@ nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
     {
       // Generate new id //
       {
-        const uint32_t new_id = get_tex_data().keys.size();
+        const uint32_t new_id = ctx->rsrc_texture.keys.size();
         in_out->id = new_id;
         cpy.id = in_out->id;
       }
@@ -260,11 +259,11 @@ nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
   // -- Save new Texture Copy -- //
   {
     const uint32_t key = lib::string_pool::add(cpy.name);
-    get_tex_data().keys.emplace_back(key);
-    get_tex_data().textures.emplace_back(cpy);
+    ctx->rsrc_texture.keys.emplace_back(key);
+    ctx->rsrc_texture.textures.emplace_back(cpy);
   }
 
-  return true;
+  return in_out->id;
 }
 
 

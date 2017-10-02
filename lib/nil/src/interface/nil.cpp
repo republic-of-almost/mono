@@ -35,6 +35,7 @@ nil_ctx_initialize(Nil_ctx **ctx)
   {
     new_ctx->last_tick = lib::timer::get_current_time();
     new_ctx->delta_time = 0.f;
+    new_ctx->rsrc_texture = Nil_texture_data{};
   
     *ctx = new_ctx;
   }

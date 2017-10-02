@@ -1,4 +1,5 @@
 #include <nil/resource/audio.hpp>
+#include <internal_data/resources/audio_src.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
@@ -12,12 +13,6 @@ namespace {
 
 
 // ------------------------------------------------------------ [ Resources ] --
-
-
-struct Audio_data {
-  lib::array<uint32_t, 128>             keys{uint32_t{}};
-  lib::array<Nil::Resource::Audio, 128> audio{Nil::Resource::Audio{}};
-};
 
 
 Audio_data&
