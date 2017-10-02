@@ -12,17 +12,6 @@
 namespace {
 
 
-// ------------------------------------------------------------- [ Resource ] --
-
-
-//Nil_texture_data&
-//get_tex_data()
-//{
-//  static Nil_texture_data tex_data;
-//  return tex_data;
-//};
-
-
 // ------------------------------------------------------------- [ Messages ] --
 
 

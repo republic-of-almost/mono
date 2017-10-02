@@ -1,4 +1,6 @@
 #include <nil/resource/shader.hpp>
+#include <internal_data/internal_data.hpp>
+#include <internal_data/resources/shader.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
@@ -7,21 +9,9 @@
 #include <lib/string.hpp>
 #include <lib/helpers.hpp>
 #include <common/common.hpp>
-#include <internal_data/resources/shader.hpp>
 
 
 namespace {
-
-
-// ------------------------------------------------------------- [ Resource ] --
-
-
-Nil_shader_data&
-get_shd_data()
-{
-  static Nil_shader_data shd_data;
-  return shd_data;
-};
 
 
 // ------------------------------------------------------------- [ Messages ] --
@@ -48,7 +38,6 @@ constexpr char shader_type_name[] = "Shader";
 bool
 nil_rsrc_shader_initialize(Nil_ctx *ctx)
 {
-  get_shd_data(); // enough to init
   return true;
 }
 
@@ -81,8 +70,8 @@ nil_rsrc_shader_find_by_name(Nil_ctx *ctx, const char *name, Nil_shader *out)
     }
   }
   
-  size_t count        = get_shd_data().keys.size();
-  Nil_shader *shaders = get_shd_data().shader.data();
+  size_t count        = ctx->rsrc_shader->keys.size();
+  Nil_shader *shaders = ctx->rsrc_shader->shader.data();
   
   for(size_t i = 0; i < count; ++i)
   {
@@ -105,8 +94,8 @@ nil_rsrc_shader_find_by_name(Nil_ctx *ctx, const char *name, Nil_shader *out)
 bool
 nil_rsrc_shader_find_by_id(Nil_ctx *ctx, const uint32_t id, Nil_shader *out)
 {
-  size_t count = get_shd_data().keys.size();
-  Nil_shader *shaders = get_shd_data().shader.data();
+  size_t count = ctx->rsrc_shader->keys.size();
+  Nil_shader *shaders = ctx->rsrc_shader->shader.data();
 
   if(id < count)
   {
@@ -121,8 +110,8 @@ nil_rsrc_shader_find_by_id(Nil_ctx *ctx, const uint32_t id, Nil_shader *out)
 void
 nil_rsrc_shader_get_data(Nil_ctx *ctx, size_t *count, Nil_shader **data)
 {
-  *count = get_shd_data().keys.size();
-  *data = get_shd_data().shader.data();
+  *count = ctx->rsrc_shader->keys.size();
+  *data = ctx->rsrc_shader->shader.data();
 }
 
 
@@ -150,7 +139,7 @@ nil_rsrc_shader_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_shader **out)
 size_t
 nil_rsrc_shader_get_count(Nil_ctx *ctx)
 {
-  return get_shd_data().keys.size();
+  return ctx->rsrc_shader->keys.size();
 }
 
 
@@ -247,7 +236,7 @@ nil_rsrc_shader_create_batch(Nil_ctx *ctx, Nil_shader *in, size_t count, bool mo
     {
       // Generate new id //
       {
-        const uint32_t new_id = get_shd_data().keys.size();
+        const uint32_t new_id = ctx->rsrc_shader->keys.size();
         shd->id = new_id;
         local.id = shd->id;
       }
@@ -264,8 +253,8 @@ nil_rsrc_shader_create_batch(Nil_ctx *ctx, Nil_shader *in, size_t count, bool mo
       /* save a new copy */
       {
         const uint32_t key = shd->id;
-        get_shd_data().keys.emplace_back(key);
-        get_shd_data().shader.emplace_back(local);
+        ctx->rsrc_shader->keys.emplace_back(key);
+        ctx->rsrc_shader->shader.emplace_back(local);
       }
     }
   }
