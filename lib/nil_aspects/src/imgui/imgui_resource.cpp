@@ -20,7 +20,7 @@ namespace ImGUI {
 void render_resource_overview(
   const Nil_texture *tex_rsrc, const size_t tex_count,
   const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
-  const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count,
+  const Nil_mesh *mesh_rsrc, const size_t mesh_count,
   const Nil_shader *shd_rsrc, const size_t shd_count)
 {
   // -- Texture Resource Overview -- //
@@ -62,7 +62,7 @@ void render_resource_overview(
       // Gather stats //
       for (size_t i = 0; i < mesh_count; ++i)
       {
-        const Nil::Resource::Mesh *data = &mesh_rsrc[i];
+        const Nil_mesh *data = &mesh_rsrc[i];
         LIB_ASSERT((int)data->status < LIB_ARRAY_SIZE(load_status));
         
         load_status[(int)data->status] += 1;
@@ -210,13 +210,13 @@ render_resource(const Nil::Resource::Material *rsrc, const size_t count)
 
 
 void
-render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
+render_resource(const Nil_mesh *rsrc, const size_t count)
 {
   ImGui::Text("Mesh Count %zu", count);
 
   for(size_t i = 0; i < count; ++i)
   {
-    const Nil::Resource::Mesh *data = &rsrc[i];
+    const Nil_mesh *data = &rsrc[i];
 
     char name[1024]{};
     sprintf(name, "Mesh - %s##%zu", data->name, i + 1);

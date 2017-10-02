@@ -587,19 +587,19 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
   */
   {
     size_t count = 0;
-    Nil::Resource::Mesh *meshes = nullptr;
+    Nil_mesh *meshes = nullptr;
 
-    Nil::Resource::get(&count, &meshes);
+    nil_rsrc_mesh_get_data(ctx, &count, &meshes);
 
     for (size_t i = 0; i < count; ++i)
     {
-      Nil::Resource::Mesh *mesh_resource = &meshes[i];
+      Nil_mesh *mesh_resource = &meshes[i];
 
-      if (mesh_resource->status == Nil::Resource::Load_status::PENDING)
+      if (mesh_resource->status == NIL_RSRC_STATUS_PENDING)
       {
         if (mesh_resource->triangle_count == 0)
         {
-          mesh_resource->status = Nil::Resource::Load_status::LOADED;
+          mesh_resource->status = NIL_RSRC_STATUS_LOADED;
           continue;
         }
 
@@ -622,7 +622,7 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
         self->index_ids.emplace_back(index);
         self->mesh_ids.emplace_back(mesh);
 
-        mesh_resource->status = Nil::Resource::Load_status::LOADED;
+        mesh_resource->status = NIL_RSRC_STATUS_LOADED;
       }
     }
   } // Load Meshes

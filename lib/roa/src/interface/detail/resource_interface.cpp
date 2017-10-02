@@ -139,10 +139,11 @@ find_resource(ROA::Shader &mat, const char *name)
 ROA::Mesh
 create_resource(ROA::Mesh &rsrc, const char *name)
 {
-  Nil::Resource::Mesh rsrc_data{};
+  Nil_mesh rsrc_data{};
   rsrc_data.name = name;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool submited = Nil::Resource::load(rsrc_data);
+  const bool submited = nil_rsrc_mesh_create(ctx, &rsrc_data);
   
   if(submited)
   {
@@ -167,9 +168,10 @@ load_resource(ROA::Mesh &rsrc, const char *file)
 ROA::Mesh
 find_resource(ROA::Mesh &rsrc, const char *name)
 {
-  Nil::Resource::Mesh rsrc_data{};
+  Nil_mesh rsrc_data{};
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool found = Nil::Resource::find_by_name(name, rsrc_data);
+  const bool found = nil_rsrc_mesh_find_by_name(ctx, name, &rsrc_data);
   
   if(found)
   {

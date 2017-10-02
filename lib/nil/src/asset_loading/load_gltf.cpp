@@ -1220,7 +1220,7 @@ load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
     json_gltf_element = json_gltf_element->next;
   } // while json_element_value
 
-  lib::array<Nil::Resource::Mesh> internal_meshes;
+  lib::array<Nil_mesh> internal_meshes;
   lib::array<Nil_texture> internal_textures;
   lib::array<Nil::Resource::Material> internal_materials;
 
@@ -1272,9 +1272,9 @@ load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
   
   for(auto &mesh : meshes)
   {
-    Nil::Resource::Mesh data{};
+    Nil_mesh data{};
     
-    if(!Nil::Resource::find_by_name(mesh.name, data))
+    if(!nil_rsrc_mesh_find_by_name(ctx, mesh.name, &data))
     {
       data.name = mesh.name;
       
@@ -1332,7 +1332,12 @@ load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
       
       data.triangle_count = accessors[mesh.primitives.attr_position].count;
       
-      Nil::Resource::load(data);
+      const uint32_t id = nil_rsrc_mesh_create(ctx, &data);
+      
+      if(id)
+      {
+        nil_rsrc_mesh_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+      }
       
       internal_meshes.emplace_back(data);
     }

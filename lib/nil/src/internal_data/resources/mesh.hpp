@@ -6,10 +6,10 @@
 #include <lib/array.hpp>
 
 
-struct Mesh_data
+struct Nil_mesh_data
 {
   lib::array<uint32_t, 128> keys{uint32_t{0}};
-  lib::array<Nil::Resource::Mesh, 128> meshes{Nil::Resource::Mesh{}};
+  lib::array<Nil_mesh, 128> meshes{Nil_mesh{}};
 };
 
 

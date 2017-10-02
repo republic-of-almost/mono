@@ -5,6 +5,9 @@
 #include <nil/fwd.hpp>
 
 
+/* ---------------------------------------------------------- [ Resource ] -- */
+
+
 struct Nil_texture
 {  
   // -- Input --//

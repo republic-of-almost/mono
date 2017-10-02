@@ -7,6 +7,7 @@
 #include <nil/task.hpp>
 #include <internal_data/resources/texture.hpp>
 #include <internal_data/resources/shader.hpp>
+#include <internal_data/resources/mesh.hpp>
 #include <graph/graph_fwd.hpp>
 #include <lib/timer.hpp>
 
@@ -52,6 +53,7 @@ struct Nil_ctx
   
   Nil_texture_data*    rsrc_texture;
   Nil_shader_data*     rsrc_shader;
+  Nil_mesh_data*       rsrc_mesh;
   
   
   /* ------------------------------------------------------- [ Node Data ] -- */

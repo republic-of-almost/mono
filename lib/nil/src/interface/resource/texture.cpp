@@ -45,8 +45,9 @@ bool
 nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
 {
   const uint32_t find_key = lib::string_pool::find(name);
+  const size_t count = ctx->rsrc_texture->keys.size();
   
-  for(size_t i = 0; i < ctx->rsrc_texture->keys.size(); ++i)
+  for(size_t i = 0; i < count; ++i)
   {
     if(ctx->rsrc_texture->keys[i] == find_key)
     {

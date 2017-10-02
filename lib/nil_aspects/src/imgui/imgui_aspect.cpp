@@ -335,8 +335,9 @@ think(Nil_ctx *ctx, void *data)
     nil_rsrc_texture_get_data(ctx, &tex_count, &tex);
 
     size_t mesh_count = 0;
-    Nil::Resource::Mesh *mesh = nullptr;
-    Nil::Resource::get(&mesh_count, &mesh);
+    Nil_mesh *mesh = nullptr;
+    
+    nil_rsrc_mesh_get_data(ctx, &mesh_count, &mesh);
 
     size_t mat_count = 0;
     Nil::Resource::Material *mats = nullptr;
@@ -361,8 +362,8 @@ think(Nil_ctx *ctx, void *data)
   }
 
   // Individual Resources //
-  render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
-  render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
+  render_rsrc<Nil_texture>(&self->show_rsrc_textures);
+  render_rsrc<Nil_mesh>(&self->show_rsrc_meshes);
   render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
 
 

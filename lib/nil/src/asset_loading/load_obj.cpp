@@ -33,14 +33,19 @@ load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename)
 
   for(size_t i = 0; i < model.mesh_count; ++i)
   {
-    Nil::Resource::Mesh mesh{};
+    Nil_mesh mesh{};
     mesh.name                = model.name[i];
     mesh.position_vec3       = model.verts[i];
     mesh.normal_vec3         = model.normals[i];
     mesh.texture_coords_vec2 = model.uvs[i];
     mesh.triangle_count      = model.vertex_count[i];
 
-    Nil::Resource::load(mesh);
+    const uint32_t id = nil_rsrc_mesh_create(ctx, &mesh);
+    
+    if(id)
+    {
+      nil_rsrc_mesh_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+    }
   }
   
   // -- Load Textures -- //
@@ -112,8 +117,8 @@ load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename)
 
       const char *mesh_name = model.name[i];
 
-      Nil::Resource::Mesh mesh{};
-      Nil::Resource::find_by_name(mesh_name, mesh);
+      Nil_mesh mesh{};
+      nil_rsrc_mesh_find_by_name(ctx, mesh_name, &mesh);
 
       Nil::Resource::Material mat{};
       const int32_t mat_id = model.material_id[i];

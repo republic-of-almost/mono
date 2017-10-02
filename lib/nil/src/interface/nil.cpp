@@ -43,6 +43,8 @@ nil_ctx_initialize(Nil_ctx **ctx)
     new_ctx->rsrc_texture->textures.emplace_back(Nil_texture{});
     
     new_ctx->rsrc_shader = new Nil_shader_data();
+    
+    new_ctx->rsrc_mesh = new Nil_mesh_data();
   
     *ctx = new_ctx;
   }

@@ -29,9 +29,6 @@ namespace Resource {
 struct Audio;
 struct Font;
 struct Material;
-struct Mesh;
-struct Shader;
-struct Texture;
 
 enum class Load_status {
   NONE,
@@ -109,6 +106,7 @@ typedef enum
 
 struct Nil_ctx;
 struct Nil_aspect;
+struct Nil_mesh;
 struct Nil_shader;
 struct Nil_texture;
 
