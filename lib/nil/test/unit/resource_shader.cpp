@@ -12,7 +12,7 @@ TEST_CASE("Resource - Shader")
   
   SECTION("Initial")
   {
-    const size_t count = nil_rsrc_shader_get_count();
+    const size_t count = nil_rsrc_shader_get_count(ctx);
   
     REQUIRE(count == 1);
   }
@@ -26,8 +26,8 @@ TEST_CASE("Resource - Shader")
     shd.gs_code = "GS";
     shd.fs_code = "FS";
     
-    const bool loaded  = nil_rsrc_shader_create(&shd);
-    const size_t count = nil_rsrc_shader_get_count();
+    const bool loaded  = !!nil_rsrc_shader_create(ctx, &shd);
+    const size_t count = nil_rsrc_shader_get_count(ctx);
     
     REQUIRE(loaded == true);
     REQUIRE(count == 2);
@@ -35,7 +35,7 @@ TEST_CASE("Resource - Shader")
     
     Nil_shader get_shd{};
     
-    nil_rsrc_shader_find_by_name("shd_to_pass", &get_shd);
+    nil_rsrc_shader_find_by_name(ctx, "shd_to_pass", &get_shd);
     
     REQUIRE(strcmp(shd.vs_code, get_shd.vs_code) == 0);
     REQUIRE(strcmp(shd.gs_code, get_shd.gs_code) == 0);
@@ -47,8 +47,8 @@ TEST_CASE("Resource - Shader")
     Nil_shader shd{};
     shd.name = "shd_to_fail";
     
-    const bool should_pass = nil_rsrc_shader_create(&shd);
-    const bool should_fail = nil_rsrc_shader_create(&shd);
+    const bool should_pass = !!nil_rsrc_shader_create(ctx, &shd);
+    const bool should_fail = !!nil_rsrc_shader_create(ctx, &shd);
     
     REQUIRE(should_pass == true);
     REQUIRE(should_fail == false);
