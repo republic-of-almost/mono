@@ -276,7 +276,35 @@ nil_rsrc_texture_destroy(Nil_ctx *ctx, uint32_t id)
 
 
 bool
-nil_rsrc_texture_load(Nil_ctx *ctx, uint32_t id)
+nil_rsrc_texture_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status new_status)
 {
+  Nil_texture *self = nullptr;
+  
+  const bool found  = nil_rsrc_texture_get_by_id(ctx, id, &self);
+  
+  if(found)
+  {
+    self->status = new_status;
+    return true;
+  }
+
+  LOG_ERROR("Cant find or update shader.");
   return false;
+}
+
+
+Nil_resource_status
+nil_rsrc_texture_get_load_status(Nil_ctx *ctx, uint32_t id)
+{
+  Nil_texture *self;
+  
+  const bool found = nil_rsrc_texture_get_by_id(ctx, id, &self);
+  
+  if(found)
+  {
+    return self->status;
+  }
+
+  LOG_ERROR("Cant find shader.");
+  return NIL_RSRC_STATUS_NONE;
 }

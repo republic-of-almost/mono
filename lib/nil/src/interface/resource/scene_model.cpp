@@ -15,7 +15,7 @@ namespace {
   created for scene, so we funnel both through here.
 */
 inline bool
-load_assets(Nil::Node node, const char *filename)
+load_assets(Nil_ctx *ctx, Nil::Node node, const char *filename)
 {
   // -- Param Check -- //
 
@@ -29,11 +29,11 @@ load_assets(Nil::Node node, const char *filename)
   
   if(lib::file::has_extension(filename, ".gltf"))
   {
-    return Nil::Assets::load_gltf(node, filename);
+    return Nil::Assets::load_gltf(ctx, node, filename);
   }
   else if(lib::file::has_extension(filename, ".obj"))
   {
-    return Nil::Assets::load_obj(node, filename);
+    return Nil::Assets::load_obj(ctx, node, filename);
   }
   else
   {
@@ -52,9 +52,9 @@ namespace Model {
 
 
 bool
-load(const char *filename)
+load(Nil_ctx *ctx, const char *filename)
 {
-  return load_assets(Nil::Node(nullptr), filename);
+  return load_assets(ctx, Nil::Node(nullptr), filename);
 }
 
 
@@ -69,9 +69,9 @@ namespace Scene {
 
 
 bool
-load(Nil::Node &node, const char *filename)
+load(Nil_ctx *ctx, Nil::Node &node, const char *filename)
 {
-  return load_assets(node, filename);
+  return load_assets(ctx, node, filename);
 }
 
 

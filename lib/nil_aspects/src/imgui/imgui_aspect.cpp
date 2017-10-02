@@ -200,19 +200,20 @@ render_rsrc(bool *window)
 {
   if(*window)
   {
-    char name[1024]{};
-    strcat(name, Nil::Resource::get_type_name(T{}));
-    strcat(name, " Resource##RPool");
-
-    ImGui::Begin(name, window);
-
-    size_t count = 0;
-    T *rsrc;
-    Nil::Resource::get(&count, &rsrc);
-
-    Nil::ImGUI::render_resource(rsrc, count);
-
-    ImGui::End();
+    ImGui::Text("Refactoring Nil");
+//    char name[1024]{};
+//    strcat(name, Nil::Resource::get_type_name(T{}));
+//    strcat(name, " Resource##RPool");
+//
+//    ImGui::Begin(name, window);
+//
+//    size_t count = 0;
+//    T *rsrc;
+//    Nil::Resource::get(&count, &rsrc);
+//
+//    Nil::ImGUI::render_resource(rsrc, count);
+//
+//    ImGui::End();
   }
 }
 

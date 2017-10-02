@@ -14,7 +14,7 @@ namespace Assets {
   If you pass a valid node, instances will be created and added to this node.
 */
 bool
-load_obj(Nil::Node node, const char *filename);
+load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename);
 
 
 /*!
@@ -22,7 +22,7 @@ load_obj(Nil::Node node, const char *filename);
   If you pass a valid node, instances will be created and added to this node.
 */
 bool
-load_gltf(Nil::Node node, const char *filename);
+load_gltf(Nil_ctx *ctx, Nil::Node node, const char *filename);
 
 
 } // ns

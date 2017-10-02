@@ -11,7 +11,7 @@ namespace Scene {
 
 
 bool
-load(Nil::Node &node, const char *filename);
+load(Nil_ctx *ctx, Nil::Node &node, const char *filename);
 
 
 } // ns

@@ -496,15 +496,15 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
 
     for (size_t i = 0; i < count; ++i)
     {
-      Nil::Resource::Texture *tex = &textures[i];
+      Nil_texture *tex = &textures[i];
 
       const bool has_data = tex && !!tex->data;
-      const bool is_pending = tex && tex->status == Nil::Resource::Load_status::PENDING;
+      const bool is_pending = tex && tex->status == NIL_RSRC_STATUS_PENDING;
 
       if (has_data && is_pending)
       {
-        const bool data_is_filename = tex->data_type == Nil::Resource::Texture::FILENAME;
-        const bool data_is_array    = tex->data_type == Nil::Resource::Texture::DATA;
+        const bool data_is_filename = tex->data_type == NIL_DATA_FILENAME;
+        const bool data_is_array    = tex->data_type == NIL_DATA_RAW;
 
         // -- //
         
@@ -528,14 +528,14 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
         {
           LIB_ASSERT(false);
           LOG_ERROR("Unknown data type to load texture");
-          tex->status = Nil::Resource::Load_status::FAILED;
+          tex->status = NIL_RSRC_STATUS_FAILED;
           continue;
         }
         
         // -- Did we Fail to load texture -- //
         if (img_data == nullptr)
         {
-          tex->status = Nil::Resource::Load_status::FAILED;
+          tex->status = NIL_RSRC_STATUS_FAILED;
 
           char err_msg[1024]{};
           strcat(err_msg, "Failed to load texture: ");
@@ -571,13 +571,13 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
 
         stbi_image_free(img_data);
 
-        tex->status = Nil::Resource::Load_status::LOADED;
+        tex->status = NIL_RSRC_STATUS_LOADED;
       }
       else if (!has_data && i > 0)
       {
         LIB_ASSERT(false);
         LOG_ERROR("Tried to load a texture with no data");
-        tex->status = Nil::Resource::Load_status::FAILED;
+        tex->status = NIL_RSRC_STATUS_FAILED;
       }
     }
   } // Load Textures
