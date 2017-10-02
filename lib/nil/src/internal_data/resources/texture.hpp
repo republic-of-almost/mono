@@ -8,8 +8,8 @@
 
 struct Nil_texture_data
 {
-  lib::array<uint32_t, 128> keys{uint32_t{0}};
-  lib::array<Nil_texture, 128> textures{Nil_texture{}};
+  lib::array<uint32_t, 128> keys;
+  lib::array<Nil_texture, 128> textures;
 };
 
 

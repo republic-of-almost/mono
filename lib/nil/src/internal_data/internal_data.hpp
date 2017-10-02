@@ -49,7 +49,7 @@ struct Nil_ctx
   /* --------------------------------------------------- [ Resource Data ] -- */
   
   
-  Nil_texture_data    rsrc_texture;
+  Nil_texture_data*    rsrc_texture;
   
   
   /* ------------------------------------------------------- [ Node Data ] -- */

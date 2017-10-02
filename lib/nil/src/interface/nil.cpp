@@ -35,7 +35,12 @@ nil_ctx_initialize(Nil_ctx **ctx)
   {
     new_ctx->last_tick = lib::timer::get_current_time();
     new_ctx->delta_time = 0.f;
-    new_ctx->rsrc_texture = Nil_texture_data{};
+    
+    // lib::array forces us todo this otherwise its not a valid object.
+    new_ctx->rsrc_texture = new Nil_texture_data();
+    
+    new_ctx->rsrc_texture->keys.emplace_back(uint32_t{0});
+    new_ctx->rsrc_texture->textures.emplace_back(Nil_texture{});
   
     *ctx = new_ctx;
   }
