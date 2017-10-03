@@ -87,6 +87,7 @@ ogl_init(rovGLData *gl_data, const char *asset_prefix)
       prog.uni_color       = glGetUniformLocation(prog.program, "uni_color");
       prog.uni_normal      = glGetUniformLocation(prog.program, "uni_normal");
       prog.uni_wv          = glGetUniformLocation(prog.program, "uni_wv");
+      prog.uni_mode        = glGetUniformLocation(prog.program, "uni_mode");
     }
   }
 

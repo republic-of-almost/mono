@@ -83,6 +83,7 @@ struct rovGLMeshProgram
   GLint uni_color;
   GLint uni_normal;
   GLint uni_wv;
+  GLint uni_mode;
 };
 
 

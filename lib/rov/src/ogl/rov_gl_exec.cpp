@@ -148,6 +148,13 @@ ogl_exec(
         last_shd = shd.program;
         glUseProgram(shd.program);
       }
+    
+      /*
+        Set Mode
+      */
+      {
+        glUniform1i(shd.uni_mode, 3);
+      }
       
       /*
         Load the textures and buffers
