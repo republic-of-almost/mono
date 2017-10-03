@@ -20,7 +20,7 @@ TEST_CASE("Resource - Mesh")
   
   SECTION("Load Pass")
   {
-    Nil_mesh mesh;
+    Nil_mesh mesh{};
     mesh.name = "mesh_to_pass";
     
     float some_data[] = {1,2,3};
@@ -46,11 +46,11 @@ TEST_CASE("Resource - Mesh")
     mesh.position_vec3 = some_data;
     mesh.triangle_count = 1;
     
-    const uint32_t should_pass = nil_rsrc_mesh_create(ctx, &mesh);
-    const uint32_t should_fail = nil_rsrc_mesh_create(ctx, &mesh);
+    const uint32_t should_pass = !!nil_rsrc_mesh_create(ctx, &mesh);
+    const uint32_t should_fail = !nil_rsrc_mesh_create(ctx, &mesh);
     
-    REQUIRE(should_pass > 0);
-    REQUIRE(should_fail != 0);
+    REQUIRE(should_pass == true);
+    REQUIRE(should_fail == true);
   }
   
   nil_ctx_destroy(&ctx);
