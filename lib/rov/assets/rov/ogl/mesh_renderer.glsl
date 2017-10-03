@@ -82,6 +82,7 @@ main()
 #define ShaderMode_Lighting    1
 #define ShaderMode_Fullbright  2
 #define ShaderMode_Depth       3
+#define ShaderMode_Grey        4
 
 
 /*
@@ -211,6 +212,7 @@ main()
   */
   vec4 diffuse_map = texture(uni_map_01, in_ps_texcoord);
   vec3 color;
+  float alpha = 1.0;
 
   /*
     If we have lights calculate color with them.
@@ -301,12 +303,32 @@ main()
     color = diffuse_color.rgb;
   }
   
+  /*
+    Depth mode
+  */
   else if(uni_mode == ShaderMode_Depth)
   {
     float factor = 5.0; // so we can see it better
     color = vec3(gl_FragCoord.w * factor);
   }
   
-  out_ps_color = vec4(color.rgb, 1.0);
+  /*
+    Grey mode
+  */
+  else if(uni_mode == ShaderMode_Grey)
+  {
+    color = vec3(0.25);
+    alpha = 1;
+  }
+  
+  /*
+    Err
+  */
+  else
+  {
+    color = vec3(1.0, 0.0, 1.0);
+  }
+  
+  out_ps_color = vec4(color.rgb, alpha);
 }
 // FRAG_END //

@@ -90,7 +90,8 @@ ogl_exec(
       glViewport(0, 0, fb.width, fb.height);
     }
 
-    glClearColor(cl_color[0], cl_color[1], cl_color[2], cl_color[3]);
+//    glClearColor(cl_color[0], cl_color[1], cl_color[2], cl_color[3]);
+    glClearColor(0,0,0,1);
     glClear(cl_flags);
     glEnable(GL_DEPTH_TEST);
 
@@ -137,7 +138,7 @@ ogl_exec(
       const uint8_t texture_02 = lib::bits::third8(details);
       const uint8_t texture_03 = lib::bits::forth8(details);
       
-      const rovGLMeshProgram shd = rov_gl_data->rov_mesh_programs[shader];
+      const rovGLMeshProgram shd = rov_gl_data->rov_mesh_programs[1];
       
 
       /*
@@ -153,7 +154,16 @@ ogl_exec(
         Set Mode
       */
       {
-        glUniform1i(shd.uni_mode, 3);
+        glUniform1i(shd.uni_mode, rp.shader_type);
+        
+        /*
+          This isn't working right now.
+        */
+        if(rp.shader_type == rovShader_Overdraw)
+        {
+          glEnable(GL_BLEND);
+          glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+        }
       }
       
       /*

@@ -892,6 +892,8 @@ think(Nil_ctx *ctx, void *data)
         self->light_pack,
         rt.render_target
       );
+      
+      rov_setShader(rovShader_Lit);
 
       size_t renderable_count = 0;
       Nil::Data::Renderable *renderables;
