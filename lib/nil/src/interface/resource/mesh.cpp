@@ -106,7 +106,7 @@ nil_rsrc_mesh_get_data(Nil_ctx *ctx, size_t *out_count, Nil_mesh **out_data)
 
 
 bool
-nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh **out)
+nil_rsrc_mesh_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh **out)
 {
   const size_t count = ctx->rsrc_mesh->meshes.size();
   

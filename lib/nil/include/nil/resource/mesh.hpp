@@ -62,7 +62,7 @@ nil_rsrc_mesh_get_data(Nil_ctx *ctx, size_t *out_count, Nil_mesh **out_data = NU
 
 
 bool
-nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh **out);
+nil_rsrc_mesh_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh **out);
 
 
 /* -------------------------------------------------- [ Resource Details ] -- */
@@ -76,14 +76,14 @@ nil_rsrc_mesh_get_count(Nil_ctx *ctx);
 
 
 void
-nil_rsrc_mesh_create_batch(Nil_ctx *ctx, Nil_mesh *in, size_t count, bool move = false);
+nil_rsrc_mesh_create_batch(Nil_ctx *ctx, Nil_mesh *in_out, size_t count, bool move = false);
 
 
 /* ------------------------------------------------- [ Resource Instance ] -- */
 
 
 uint32_t
-nil_rsrc_mesh_create(Nil_ctx *ctx, Nil_mesh *shd, bool move = false);
+nil_rsrc_mesh_create(Nil_ctx *ctx, Nil_mesh *in_out, bool move = false);
 
 
 bool
