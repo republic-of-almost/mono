@@ -317,6 +317,7 @@ main()
   */
   else if(uni_mode == ShaderMode_Grey)
   {
+  
     color = vec3(0.25);
     alpha = 1;
   }

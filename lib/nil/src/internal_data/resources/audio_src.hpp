@@ -6,10 +6,10 @@
 #include <lib/array.hpp>
 
 
-struct Audio_data
+struct Nil_audio_src_data
 {
   lib::array<uint32_t, 128>             keys{uint32_t{}};
-  lib::array<Nil::Resource::Audio, 128> audio{Nil::Resource::Audio{}};
+  lib::array<Nil_audio_src, 128> audio{Nil_audio_src{}};
 };
 
 

@@ -14,7 +14,7 @@ struct Nil_audio_src
   /* input */
   
   const char *name;
-  enum { FILENAME } data_type;
+  Nil_data_type data_type;
   uintptr_t         data;
   size_t            data_size;
   

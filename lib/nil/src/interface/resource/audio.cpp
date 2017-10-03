@@ -1,5 +1,6 @@
 #include <nil/resource/audio.hpp>
 #include <internal_data/resources/audio_src.hpp>
+#include <internal_data/internal_data.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
@@ -11,16 +12,6 @@
 
 namespace {
 
-
-// ------------------------------------------------------------ [ Resources ] --
-
-
-Audio_data&
-get_audio_data()
-{
-  static Audio_data aud_data;
-  return aud_data;
-}
 
 	
 // ------------------------------------------------------------- [ Messages ] --
@@ -41,23 +32,43 @@ constexpr char audio_type_name[] = "Audio";
 } // anon ns
 
 
-namespace Nil {
-namespace Resource {
 
 
-// ------------------------------------------------------------- [ Get Data ] --
+/* ------------------------------------------------- [ Resource Lifetime ] -- */
 
 
 bool
-find_by_name(const char *name, Audio &out)
+nil_rsrc_audio_src_initialize(Nil_ctx *ctx)
 {
-  const uint32_t find_key = lib::string_pool::find(name);
+  return true;
+}
+
+
+bool
+nil_rsrc_audio_src_destroy(Nil_ctx *ctx)
+{
+  return true;
+}
+
+
+/* --------------------------------------------------- [ Resource Access ] -- */
+
+
+bool
+nil_rsrc_audio_src_find_by_name(Nil_ctx *ctx, const char *name, Nil_audio_src *out)
+{
+  const size_t count = ctx->rsrc_audio->keys.size();
+  const Nil_audio_src *data = ctx->rsrc_audio->audio.data();
   
-  for(size_t i = 0; i < get_audio_data().keys.size(); ++i)
+  for(size_t i = 0; i < count; ++i)
   {
-    if(get_audio_data().keys[i] == find_key)
+    if(data[i].name && strcmp(data[i].name, name) == 0)
     {
-      out = get_audio_data().audio[i];
+      if(out)
+      {
+        *out = ctx->rsrc_audio->audio[i];
+      }
+      
       return true;
     }
   }
@@ -66,26 +77,83 @@ find_by_name(const char *name, Audio &out)
 }
 
 
-void
-get(size_t *count, Audio **out)
+bool
+nil_rsrc_audio_src_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_audio_src *out)
 {
-  *count = get_audio_data().audio.size();
-  *out = get_audio_data().audio.data();
+  const uint32_t *ids = ctx->rsrc_audio->keys.data();
+  const size_t id_count = ctx->rsrc_audio->keys.size();
+  size_t index = 0;
+  
+  if(lib::key::linear_search(id, ids, id_count))
+  {
+    if(out)
+    {
+      out = &ctx->rsrc_audio->audio[index];
+    }
+    
+    return true;
+  }
+  
+  return false;
 }
 
 
-// ----------------------------------------------------------------- [ Load ] --
+void
+nil_rsrc_audio_src_get_data(Nil_ctx *ctx, size_t *out_count, Nil_audio_src **out_data)
+{
+  *out_count = ctx->rsrc_audio->keys.size();
+  *out_data = ctx->rsrc_audio->audio.data();
+}
 
 
 bool
-load(Audio &in_out)
+nil_rsrc_audio_src_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_audio_src **out)
+{
+  const size_t count = ctx->rsrc_audio->audio.size();
+  
+  if(count > id)
+  {
+    *out = &ctx->rsrc_audio->audio[id];
+
+    return true;
+  }
+  
+  return false;
+}
+
+
+/* -------------------------------------------------- [ Resource Details ] -- */
+
+
+size_t
+nil_rsrc_audio_src_get_count(Nil_ctx *ctx)
+{
+  return ctx->rsrc_audio->keys.size();
+}
+
+
+/* ---------------------------------------------------- [ Resource Batch ] -- */
+
+
+void
+nil_rsrc_audio_src_create_batch(Nil_ctx *ctx, Nil_audio_src *in_out, size_t count, bool move)
+{
+  LIB_ASSERT(false);
+}
+
+
+/* ------------------------------------------------- [ Resource Instance ] -- */
+
+
+uint32_t
+nil_rsrc_audio_src_create(Nil_ctx *ctx, Nil_audio_src *in_out, bool move)
 {
   // -- Param Check -- //
   {
-    const bool has_name     = !!in_out.name;
-    const bool has_length   = strlen(in_out.name);
-    const bool has_data     = !!in_out.data;
-    const bool has_data_len = !!in_out.data_size;
+    const bool has_name     = !!in_out->name;
+    const bool has_length   = strlen(in_out->name);
+    const bool has_data     = !!in_out->data;
+    const bool has_data_len = !!in_out->data_size;
     
     LIB_ASSERT(has_name);
     LIB_ASSERT(has_length);
@@ -94,34 +162,35 @@ load(Audio &in_out)
     if(!has_name || !has_length)
     {
       LOG_ERROR(msg_audio_no_name);
-      return false;
+      return 0;
     }
     
     if(!has_data || !has_data_len)
     {
-      LOG_ERROR(msg_audio_no_data, in_out.name);
-      return false;
+      LOG_ERROR(msg_audio_no_data, in_out->name);
+      return 0;
     }
   }
   
   // -- Check if file is loaded -- //
   {
-    const uint32_t check_key = lib::string_pool::find(in_out.name);
+    const uint32_t check_key = lib::string_pool::find(in_out->name);
+    
 
     if(check_key)
     {
       size_t index = 0;
     
-      if (lib::key::linear_search(check_key, get_audio_data().keys.data(), get_audio_data().keys.size(), &index))
+      if (lib::key::linear_search(check_key, ctx->rsrc_audio->keys.data(), ctx->rsrc_audio->keys.size(), &index))
       {
-        LOG_WARNING(msg_audio_name_exists, in_out.name);
+        LOG_WARNING(msg_audio_name_exists, in_out->name);
         return false;
       }
     }
   }
   
   // -- Load Audio -- //
-  Audio cpy = in_out;
+  Nil_audio_src cpy = *in_out;
   {
     // Transfer Ownership //
     /*
@@ -135,7 +204,7 @@ load(Audio &in_out)
       {
         if(!failed)
         {
-          failed = !Nil_detail::copy_data_name(&cpy_name, in_out.name, malloc);
+          failed = !Nil_detail::copy_data_name(&cpy_name, in_out->name, malloc);
         }
       }
       
@@ -144,7 +213,7 @@ load(Audio &in_out)
       {
         if(!failed)
         {
-          failed = !Nil_detail::copy_data(&cpy_data, (void*)in_out.data, in_out.data_size, malloc);
+          failed = !Nil_detail::copy_data(&cpy_data, (void*)in_out->data, in_out->data_size, malloc);
         }
       }
     
@@ -160,7 +229,7 @@ load(Audio &in_out)
           if(cpy_data) { free((void*)cpy_data); }
           if(cpy_name) { free(cpy_name);        }
         
-          LOG_ERROR(msg_audio_failed, in_out.name);
+          LOG_ERROR(msg_audio_failed, in_out->name);
         
           LIB_ASSERT(false);
           return false;
@@ -171,38 +240,63 @@ load(Audio &in_out)
   
   // Generate new id //
   {
-    const uint32_t new_id = get_audio_data().keys.size();
-    in_out.id = new_id;
-    cpy.id = in_out.id;
+    const uint32_t new_id = ctx->rsrc_audio->keys.size();
+    in_out->id = new_id;
+    cpy.id = in_out->id;
   }
   
   // -- Save new Mesh -- //
   {
     const uint32_t key = lib::string_pool::add(cpy.name);
-    get_audio_data().keys.emplace_back(key);
-    get_audio_data().audio.emplace_back(cpy);
+    ctx->rsrc_audio->keys.emplace_back(key);
+    ctx->rsrc_audio->audio.emplace_back(cpy);
   }
   
-  return true;
+  return in_out->id;
 }
 
 
-// ----------------------------------------------------------------- [ Info ] --
-
-
-const char *
-get_type_name(const Audio &)
+bool
+nil_rsrc_audio_src_destroy(Nil_ctx *ctx, uint32_t id)
 {
-  return audio_type_name;
+  LIB_ASSERT(false);
+  return false;
 }
 
 
-size_t
-audio_count()
+/* status */
+
+
+bool
+nil_rsrc_audio_src_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status new_status)
 {
-  return get_audio_data().keys.size();
+  Nil_audio_src *self = nullptr;
+  
+  const bool found = nil_rsrc_audio_src_get_by_id(ctx, id, &self);
+  
+  if(found)
+  {
+    self->status = new_status;
+    return true;
+  }
+
+  LOG_ERROR("Cant find or update Audio src.");
+  return false;
 }
 
 
-} // ns
-} // ns
+Nil_resource_status
+nil_rsrc_audio_src_get_load_status(Nil_ctx *ctx, uint32_t id)
+{
+  Nil_audio_src *self = nullptr;
+  
+  const bool found = nil_rsrc_audio_src_get_by_id(ctx, id, &self);
+  
+  if(found)
+  {
+    return self->status;
+  }
+
+  LOG_ERROR("Cant find Audio src.");
+  return NIL_RSRC_STATUS_NONE;
+}

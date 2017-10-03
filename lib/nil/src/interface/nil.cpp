@@ -38,13 +38,12 @@ nil_ctx_initialize(Nil_ctx **ctx)
     
     // lib::array forces us todo this otherwise its not a valid object.
     new_ctx->rsrc_texture = new Nil_texture_data();
-    
     new_ctx->rsrc_texture->keys.emplace_back(uint32_t{0});
     new_ctx->rsrc_texture->textures.emplace_back(Nil_texture{});
     
-    new_ctx->rsrc_shader = new Nil_shader_data();
-    
-    new_ctx->rsrc_mesh = new Nil_mesh_data();
+    new_ctx->rsrc_shader  = new Nil_shader_data();
+    new_ctx->rsrc_mesh    = new Nil_mesh_data();
+    new_ctx->rsrc_audio   = new Nil_audio_src_data();
   
     *ctx = new_ctx;
   }

@@ -126,10 +126,11 @@ Resource::get_instance_name() const
     case ROA_detail::Resource::AUDIO:
     {
       size_t count = 0;
-      Nil::Resource::Audio *data = nullptr;
+      Nil_audio_src *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
-      
+      nil_rsrc_audio_src_get_data(ctx, &count, &data);
+
       LIB_ASSERT(instance_id < count);
       
       return data[instance_id].name;
@@ -151,8 +152,9 @@ Resource::get_instance_name() const
     {
       size_t count = 0;
       Nil_texture *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      nil_rsrc_texture_get_data(ROA_detail::get_ctx(), &count, &data);
+      nil_rsrc_texture_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -208,9 +210,11 @@ Resource::get_status() const
     case ROA_detail::Resource::AUDIO:
     {
       size_t count = 0;
-      Nil::Resource::Audio *data = nullptr;
+      Nil_audio_src *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_audio_src_get_data(ctx, &count, &data);
+
       
       LIB_ASSERT(instance_id < count);
       
@@ -299,15 +303,17 @@ Resource::load()
     case ROA_detail::Resource::AUDIO:
     {
       size_t count = 0;
-      Nil::Resource::Audio *data = nullptr;
+      Nil_audio_src *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_audio_src_get_data(ctx, &count, &data);
+
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;

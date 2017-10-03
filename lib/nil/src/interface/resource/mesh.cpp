@@ -137,6 +137,7 @@ nil_rsrc_mesh_get_count(Nil_ctx *ctx)
 void
 nil_rsrc_mesh_create_batch(Nil_ctx *ctx, Nil_mesh *in, size_t count, bool move)
 {
+  LIB_ASSERT(false);
 }
 
 
@@ -349,9 +350,9 @@ nil_rsrc_mesh_destroy(Nil_ctx *ctx, uint32_t id)
 bool
 nil_rsrc_mesh_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status new_status)
 {
-  Nil_texture *self = nullptr;
+  Nil_mesh *self = nullptr;
   
-  const bool found  = nil_rsrc_texture_get_by_id(ctx, id, &self);
+  const bool found  = nil_rsrc_mesh_get_by_id(ctx, id, &self);
   
   if(found)
   {
@@ -367,9 +368,9 @@ nil_rsrc_mesh_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status new
 Nil_resource_status
 nil_rsrc_mesh_get_load_status(Nil_ctx *ctx, uint32_t id)
 {
-  Nil_texture *self;
+  Nil_mesh *self = nullptr;
   
-  const bool found = nil_rsrc_texture_get_by_id(ctx, id, &self);
+  const bool found = nil_rsrc_mesh_get_by_id(ctx, id, &self);
   
   if(found)
   {
