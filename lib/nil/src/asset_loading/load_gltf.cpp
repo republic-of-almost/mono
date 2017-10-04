@@ -1,4 +1,8 @@
 #include <asset_loading/asset_loading.hpp>
+#include <internal_data/resources/texture_data.hpp>
+#include <internal_data/resources/shader_data.hpp>
+#include <internal_data/resources/audio_src_data.hpp>
+#include <internal_data/resources/mesh_data.hpp>
 #include <nil/resource/mesh.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/directory.hpp>
@@ -167,7 +171,7 @@ namespace Assets {
 
 
 bool
-load_gltf(Nil::Node root_node, const char *path)
+load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
 {
 //  char path[2048]{};
 //  strcat(path, lib::dir::exe_path());
@@ -1216,14 +1220,14 @@ load_gltf(Nil::Node root_node, const char *path)
     json_gltf_element = json_gltf_element->next;
   } // while json_element_value
 
-  lib::array<Nil::Resource::Mesh> internal_meshes;
-  lib::array<Nil::Resource::Texture> internal_textures;
-  lib::array<Nil::Resource::Material> internal_materials;
+  lib::array<Nil_mesh> internal_meshes;
+  lib::array<Nil_texture> internal_textures;
+  lib::array<Nil_material> internal_materials;
 
   for(auto &tex : textures)
   {
-    Nil::Resource::Texture data{};
-    data.data_type = Nil::Resource::Texture::DATA;
+    Nil_texture data{};
+    data.data_type = NIL_DATA_RAW;
     data.data = (uintptr_t)images[tex.source].uri;
     data.data_size = images[tex.source].size;
     
@@ -1235,14 +1239,19 @@ load_gltf(Nil::Node root_node, const char *path)
     
     data.name = import_name;
     
-    Nil::Resource::load(data);
+    const uint32_t id = nil_rsrc_texture_create(ctx, &data);
+    if(id)
+    {
+      nil_rsrc_texture_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+    }
+    
     
     internal_textures.emplace_back(data);
   }
   
   for(auto &mat : materials)
   {
-    Nil::Resource::Material data{};
+    Nil_material data{};
     data.color = 0xFFFFFFFF;
     
     data.name = mat.name;
@@ -1254,7 +1263,7 @@ load_gltf(Nil::Node root_node, const char *path)
     
     data.color = lib::color::init(mat.ext_blinn_phong.diffuse_factor);
     
-    Nil::Resource::load(data);
+    nil_rsrc_material_create(ctx, &data);
     
     internal_materials.emplace_back(data);
   }
@@ -1263,9 +1272,9 @@ load_gltf(Nil::Node root_node, const char *path)
   
   for(auto &mesh : meshes)
   {
-    Nil::Resource::Mesh data{};
+    Nil_mesh data{};
     
-    if(!Nil::Resource::find_by_name(mesh.name, data))
+    if(!nil_rsrc_mesh_find_by_name(ctx, mesh.name, &data))
     {
       data.name = mesh.name;
       
@@ -1323,7 +1332,12 @@ load_gltf(Nil::Node root_node, const char *path)
       
       data.triangle_count = accessors[mesh.primitives.attr_position].count;
       
-      Nil::Resource::load(data);
+      const uint32_t id = nil_rsrc_mesh_create(ctx, &data);
+      
+      if(id)
+      {
+        nil_rsrc_mesh_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+      }
       
       internal_meshes.emplace_back(data);
     }

@@ -5,6 +5,7 @@
 #include <roa/material.hpp>
 #include <roa/model.hpp>
 #include <roa/audio_source.hpp>
+#include <common/context.hpp>
 #include <common/resource_identifiers.hpp>
 #include <nil/resource/resource.hpp>
 #include <lib/logging.hpp>
@@ -35,12 +36,14 @@ setup_resource(const uint32_t id)
 ROA::Material
 create_resource(ROA::Material &mat, const char *name)
 {
-  Nil::Resource::Material rsrc_data{};
+  Nil_material rsrc_data{};
   rsrc_data.name   = name;
   rsrc_data.color  = 0xFFFFFFFF;
-  rsrc_data.status = Nil::Resource::Load_status::NONE;
+  rsrc_data.status = NIL_RSRC_STATUS_NONE;
+  
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool submited = Nil::Resource::load(rsrc_data);
+  const bool submited = !!nil_rsrc_material_create(ctx, &rsrc_data);
   
   if(submited)
   {
@@ -65,9 +68,10 @@ load_resource(ROA::Material &mat, const char *file)
 ROA::Material
 find_resource(ROA::Material &mat, const char *name)
 {
-  Nil::Resource::Material rsrc_data{};
+  Nil_material rsrc_data{};
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool found = Nil::Resource::find_by_name(name, rsrc_data);
+  const bool found = nil_rsrc_material_find_by_name(ctx, name, &rsrc_data);
   
   if(found)
   {
@@ -91,7 +95,7 @@ create_resource(ROA::Shader &mat, const char *name)
   rsrc_data.name   = name;
   rsrc_data.status = NIL_RSRC_STATUS_NONE;
   
-  const uint32_t id = nil_rsrc_shader_create(&rsrc_data);
+  const uint32_t id = nil_rsrc_shader_create(ROA_detail::get_ctx(), &rsrc_data);
   
   if(id)
   {
@@ -118,7 +122,7 @@ find_resource(ROA::Shader &mat, const char *name)
 {
   Nil_shader rsrc_data{};
 
-  const bool found = nil_rsrc_shader_find_by_name(name, &rsrc_data);
+  const bool found = nil_rsrc_shader_find_by_name(ROA_detail::get_ctx(), name, &rsrc_data);
   
   if(found)
   {
@@ -138,10 +142,11 @@ find_resource(ROA::Shader &mat, const char *name)
 ROA::Mesh
 create_resource(ROA::Mesh &rsrc, const char *name)
 {
-  Nil::Resource::Mesh rsrc_data{};
+  Nil_mesh rsrc_data{};
   rsrc_data.name = name;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool submited = Nil::Resource::load(rsrc_data);
+  const bool submited = nil_rsrc_mesh_create(ctx, &rsrc_data);
   
   if(submited)
   {
@@ -166,9 +171,10 @@ load_resource(ROA::Mesh &rsrc, const char *file)
 ROA::Mesh
 find_resource(ROA::Mesh &rsrc, const char *name)
 {
-  Nil::Resource::Mesh rsrc_data{};
+  Nil_mesh rsrc_data{};
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool found = Nil::Resource::find_by_name(name, rsrc_data);
+  const bool found = nil_rsrc_mesh_find_by_name(ctx, name, &rsrc_data);
   
   if(found)
   {
@@ -188,10 +194,12 @@ find_resource(ROA::Mesh &rsrc, const char *name)
 ROA::Audio_source
 create_resource(ROA::Audio_source &rsrc, const char *name)
 {
-  Nil::Resource::Audio rsrc_data{};
+  Nil_audio_src rsrc_data{};
   rsrc_data.name = name;
+  
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool submited = Nil::Resource::load(rsrc_data);
+  const bool submited = nil_rsrc_audio_src_create(ctx, &rsrc_data);
   
   if(submited)
   {
@@ -216,9 +224,10 @@ load_resource(ROA::Audio_source &rsrc, const char *file)
 ROA::Audio_source
 find_resource(ROA::Audio_source &rsrc, const char *name)
 {
-  Nil::Resource::Audio rsrc_data{};
-
-  const bool found = Nil::Resource::find_by_name(name, rsrc_data);
+  Nil_audio_src rsrc_data{};
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  const bool found = nil_rsrc_audio_src_find_by_name(ctx, name, &rsrc_data);
   
   if(found)
   {

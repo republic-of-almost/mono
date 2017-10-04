@@ -490,21 +490,21 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
   */
   {
     size_t count = 0;
-    Nil::Resource::Texture *textures = nullptr;
+    Nil_texture *textures = nullptr;
 
-    Nil::Resource::get(&count, &textures);
+    nil_rsrc_texture_get_data(ctx, &count, &textures);
 
     for (size_t i = 0; i < count; ++i)
     {
-      Nil::Resource::Texture *tex = &textures[i];
+      Nil_texture *tex = &textures[i];
 
       const bool has_data = tex && !!tex->data;
-      const bool is_pending = tex && tex->status == Nil::Resource::Load_status::PENDING;
+      const bool is_pending = tex && tex->status == NIL_RSRC_STATUS_PENDING;
 
       if (has_data && is_pending)
       {
-        const bool data_is_filename = tex->data_type == Nil::Resource::Texture::FILENAME;
-        const bool data_is_array    = tex->data_type == Nil::Resource::Texture::DATA;
+        const bool data_is_filename = tex->data_type == NIL_DATA_FILENAME;
+        const bool data_is_array    = tex->data_type == NIL_DATA_RAW;
 
         // -- //
         
@@ -528,14 +528,14 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
         {
           LIB_ASSERT(false);
           LOG_ERROR("Unknown data type to load texture");
-          tex->status = Nil::Resource::Load_status::FAILED;
+          tex->status = NIL_RSRC_STATUS_FAILED;
           continue;
         }
         
         // -- Did we Fail to load texture -- //
         if (img_data == nullptr)
         {
-          tex->status = Nil::Resource::Load_status::FAILED;
+          tex->status = NIL_RSRC_STATUS_FAILED;
 
           char err_msg[1024]{};
           strcat(err_msg, "Failed to load texture: ");
@@ -571,13 +571,13 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
 
         stbi_image_free(img_data);
 
-        tex->status = Nil::Resource::Load_status::LOADED;
+        tex->status = NIL_RSRC_STATUS_LOADED;
       }
       else if (!has_data && i > 0)
       {
         LIB_ASSERT(false);
         LOG_ERROR("Tried to load a texture with no data");
-        tex->status = Nil::Resource::Load_status::FAILED;
+        tex->status = NIL_RSRC_STATUS_FAILED;
       }
     }
   } // Load Textures
@@ -587,19 +587,19 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
   */
   {
     size_t count = 0;
-    Nil::Resource::Mesh *meshes = nullptr;
+    Nil_mesh *meshes = nullptr;
 
-    Nil::Resource::get(&count, &meshes);
+    nil_rsrc_mesh_get_data(ctx, &count, &meshes);
 
     for (size_t i = 0; i < count; ++i)
     {
-      Nil::Resource::Mesh *mesh_resource = &meshes[i];
+      Nil_mesh *mesh_resource = &meshes[i];
 
-      if (mesh_resource->status == Nil::Resource::Load_status::PENDING)
+      if (mesh_resource->status == NIL_RSRC_STATUS_PENDING)
       {
         if (mesh_resource->triangle_count == 0)
         {
-          mesh_resource->status = Nil::Resource::Load_status::LOADED;
+          mesh_resource->status = NIL_RSRC_STATUS_LOADED;
           continue;
         }
 
@@ -622,7 +622,7 @@ load_gpu_resources(Nil_ctx *ctx, void *data)
         self->index_ids.emplace_back(index);
         self->mesh_ids.emplace_back(mesh);
 
-        mesh_resource->status = Nil::Resource::Load_status::LOADED;
+        mesh_resource->status = NIL_RSRC_STATUS_LOADED;
       }
     }
   } // Load Meshes
@@ -773,8 +773,8 @@ think(Nil_ctx *ctx, void *data)
   Nil::Data::get(&cam_count, &cameras);
 
   size_t mat_count = 0;
-  Nil::Resource::Material *mats;
-  Nil::Resource::get(&mat_count, &mats);
+  Nil_material *mats;
+  nil_rsrc_material_get_data(ctx, &mat_count, &mats);
 
   for(uint32_t j = 0; j < cam_count; ++j)
   {
@@ -892,6 +892,8 @@ think(Nil_ctx *ctx, void *data)
         self->light_pack,
         rt.render_target
       );
+      
+      rov_setShader(rovShader_Lit);
 
       size_t renderable_count = 0;
       Nil::Data::Renderable *renderables;
@@ -906,7 +908,7 @@ think(Nil_ctx *ctx, void *data)
 
         if(render.mesh_id && mesh_count > render.mesh_id)
         {        
-          const Nil::Resource::Material mat = mats[render.material_id];
+          const Nil_material mat = mats[render.material_id];
           
           const float colorf[4]
           {

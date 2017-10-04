@@ -2,6 +2,7 @@
 #include <roa/shader.hpp>
 #include <roa/color.hpp>
 #include <common/resource_identifiers.hpp>
+#include <common/context.hpp>
 #include <nil/resource/material.hpp>
 #include <lib/logging.hpp>
 #include <lib/entity.hpp>
@@ -34,8 +35,10 @@ Material::get_color() const
   const uint32_t instance = lib::entity::instance(m_id);
 
   size_t count = 0;
-  Nil::Resource::Material *mats = nullptr;
-  Nil::Resource::get(&count, &mats);
+  Nil_material *mats = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_material_get_data(ctx, &count, &mats);
   
   if(count > instance)
   {
@@ -55,8 +58,10 @@ Material::set_color(const Color &col)
   const uint32_t instance = lib::entity::instance(m_id);
 
   size_t count = 0;
-  Nil::Resource::Material *mats = nullptr;
-  Nil::Resource::get(&count, &mats);
+  Nil_material *mats = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_material_get_data(ctx, &count, &mats);
   
   if(count > instance)
   {

@@ -40,6 +40,7 @@ struct rovRenderPass
   rovViewport viewport;
   uint32_t light_buffer;
   rovVec3 eye_position;
+  uint32_t shader_type;
 
   uint32_t clear_flags;
   uint32_t clear_color;

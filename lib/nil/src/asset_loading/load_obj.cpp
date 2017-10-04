@@ -15,7 +15,7 @@ namespace Assets {
 
 
 bool
-load_obj(Nil::Node node, const char *filename)
+load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename)
 {
   // -- File Check -- //
   
@@ -33,14 +33,19 @@ load_obj(Nil::Node node, const char *filename)
 
   for(size_t i = 0; i < model.mesh_count; ++i)
   {
-    Nil::Resource::Mesh mesh{};
+    Nil_mesh mesh{};
     mesh.name                = model.name[i];
     mesh.position_vec3       = model.verts[i];
     mesh.normal_vec3         = model.normals[i];
     mesh.texture_coords_vec2 = model.uvs[i];
     mesh.triangle_count      = model.vertex_count[i];
 
-    Nil::Resource::load(mesh);
+    const uint32_t id = nil_rsrc_mesh_create(ctx, &mesh);
+    
+    if(id)
+    {
+      nil_rsrc_mesh_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+    }
   }
   
   // -- Load Textures -- //
@@ -49,23 +54,26 @@ load_obj(Nil::Node node, const char *filename)
   {
     for(size_t j = 0; j < model.mesh_material[i].map_count; ++j)
     {
-      Nil::Resource::Texture texture{};
+      Nil_texture texture{};
 
       const char *path = Nil::Resource::directory(model.mesh_material[i].map_path[j]);
       
       char load_name[2048]{};
       lib::string::filename_from_path(path, load_name, sizeof(load_name), true);
 
-      if(!Nil::Resource::find_by_name(load_name, texture))
+      if(!nil_rsrc_texture_find_by_name(ctx, load_name, &texture))
       {
         texture.name      = load_name;
-        texture.data_type = Nil::Resource::Texture::FILENAME;
+        texture.data_type = NIL_DATA_FILENAME;
         texture.data      = (uintptr_t)path;
         texture.data_size = strlen(path) + 1;
 
-        Nil::Resource::load(
-          texture
-        );
+        const uint32_t id = nil_rsrc_texture_create(ctx, &texture);
+        
+        if(id)
+        {
+          nil_rsrc_texture_set_load_status(ctx, id, NIL_RSRC_STATUS_PENDING);
+        }
       }
     }
 
@@ -77,24 +85,24 @@ load_obj(Nil::Node node, const char *filename)
   {
     lib::material *mesh_mat = &model.mesh_material[i];
 
-    Nil::Resource::Material mat{};
+    Nil_material mat{};
     mat.name = model.mesh_material[i].name;
     mat.color = 0xEEEEFF00;
 
-    Nil::Resource::Texture tex{};
+    Nil_texture tex{};
 
     // -- Get Texture Name -- //
     char name[2048]{};
     lib::string::filename_from_path(mesh_mat->map_path[0], name, sizeof(name), true);
 
-    if(!Nil::Resource::find_by_name(name, tex))
+    if(!nil_rsrc_texture_find_by_name(ctx, name, &tex))
     {
       mat.color = mat.color | 0x000000FF;
     }
 
     mat.texture_01 = tex.id;
-
-    Nil::Resource::load(mat);
+    
+    nil_rsrc_material_create(ctx, &mat);
   }
 
   // -- Create Nodes and Renderables -- //
@@ -109,14 +117,14 @@ load_obj(Nil::Node node, const char *filename)
 
       const char *mesh_name = model.name[i];
 
-      Nil::Resource::Mesh mesh{};
-      Nil::Resource::find_by_name(mesh_name, mesh);
+      Nil_mesh mesh{};
+      nil_rsrc_mesh_find_by_name(ctx, mesh_name, &mesh);
 
-      Nil::Resource::Material mat{};
+      Nil_material mat{};
       const int32_t mat_id = model.material_id[i];
       if(mat_id > -1)
       {
-        Nil::Resource::find_by_name(model.mesh_material[mat_id].name, mat);
+        nil_rsrc_material_find_by_name(ctx, model.mesh_material[mat_id].name, &mat);
       }
 
       Nil::Data::Renderable renderable{};

@@ -1,4 +1,6 @@
 #include <nil/resource/mesh.hpp>
+#include <internal_data/internal_data.hpp>
+#include <internal_data/resources/mesh_data.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/string.hpp>
@@ -10,23 +12,6 @@
 
 
 namespace {
-
-
-// ------------------------------------------------------------- [ Resource ] --
-
-
-struct Mesh_data {
-  lib::array<uint32_t, 128> keys{uint32_t{0}};
-  lib::array<Nil::Resource::Mesh, 128> meshes{Nil::Resource::Mesh{}};
-};
-
-
-Mesh_data&
-get_mesh_data()
-{
-  static Mesh_data data;
-  return data;
-}
 
 
 // ------------------------------------------------------------- [ Messages ] --
@@ -47,63 +32,127 @@ constexpr char mesh_type_name[] = "Mesh";
 } // anon ns
 
 
-namespace Nil {
-namespace Resource {
 
-
-// ----------------------------------------------------------------- [ Find ] --
+/* ------------------------------------------------- [ Resource Lifetime ] -- */
 
 
 bool
-find_by_name(const char *name, Mesh &out)
+nil_rsrc_mesh_initialize(Nil_ctx *ctx)
 {
-  /*
-    TODO: Key hashing needs sorting!
-  */
+  return true;
+}
 
-  for(auto &m : get_mesh_data().meshes)
+
+bool
+nil_rsrc_mesh_destroy(Nil_ctx *ctx)
+{
+  return true;
+}
+
+
+/* --------------------------------------------------- [ Resource Access ] -- */
+
+
+bool
+nil_rsrc_mesh_find_by_name(Nil_ctx *ctx, const char *name, Nil_mesh *out)
+{
+  const size_t count = ctx->rsrc_mesh->keys.size();
+  const Nil_mesh *data = ctx->rsrc_mesh->meshes.data();
+  
+  for(size_t i = 0; i < count; ++i)
   {
-    if(m.name)
+    if(data[i].name && strcmp(data[i].name, name) == 0)
     {
-      if(strcmp(m.name, name) == 0)
+      if(out)
       {
-        out = m;
-        return true;
+        *out = ctx->rsrc_mesh->meshes[i];
       }
+      
+      return true;
     }
   }
   
   return false;
-
-//  const uint32_t find_key = lib::string_pool::find(name);
-//  
-//  for(size_t i = 0; i < get_mesh_data().keys.size(); ++i)
-//  {
-//    const uint32_t key = get_mesh_data().keys[i];
-//  
-//    if(key == find_key)
-//    {
-//      out = get_mesh_data().meshes[i];
-//      return true;
-//    }
-//  }
-//  
-//  return false;
 }
 
 
-// ----------------------------------------------------------- [ Get / Load ] --
+bool
+nil_rsrc_mesh_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh *out)
+{
+  const uint32_t *ids = ctx->rsrc_mesh->keys.data();
+  const size_t id_count = ctx->rsrc_mesh->keys.size();
+  size_t index = 0;
+  
+  if(lib::key::linear_search(id, ids, id_count))
+  {
+    if(out)
+    {
+      out = &ctx->rsrc_mesh->meshes[index];
+    }
+    
+    return true;
+  }
+  
+  return false;
+}
+
+
+void
+nil_rsrc_mesh_get_data(Nil_ctx *ctx, size_t *out_count, Nil_mesh **out_data)
+{
+  *out_count = ctx->rsrc_mesh->keys.size();
+  *out_data = ctx->rsrc_mesh->meshes.data();
+}
 
 
 bool
-load(Mesh &in_out)
+nil_rsrc_mesh_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh **out)
+{
+  const size_t count = ctx->rsrc_mesh->meshes.size();
+  
+  if(count > id)
+  {
+    *out = &ctx->rsrc_mesh->meshes[id];
+
+    return true;
+  }
+  
+  return false;
+}
+
+
+/* -------------------------------------------------- [ Resource Details ] -- */
+
+
+size_t
+nil_rsrc_mesh_get_count(Nil_ctx *ctx)
+{
+  return ctx->rsrc_mesh->keys.size();
+}
+
+
+/* ---------------------------------------------------- [ Resource Batch ] -- */
+
+
+void
+nil_rsrc_mesh_create_batch(Nil_ctx *ctx, Nil_mesh *in, size_t count, bool move)
+{
+  LIB_ASSERT(false);
+}
+
+
+/* ------------------------------------------------- [ Resource Instance ] -- */
+
+
+uint32_t
+nil_rsrc_mesh_create(Nil_ctx *ctx, Nil_mesh *in_out, bool move)
 {
   // -- Param Check -- //
   {
     // Must have valid name
     {
-      const bool has_name   = !!in_out.name;
-      const bool has_length = strlen(in_out.name);
+      const bool has_name   = !!in_out->name;
+      const bool has_length = strlen(in_out->name);
 
       LIB_ASSERT(has_name);
       LIB_ASSERT(has_length);
@@ -112,48 +161,48 @@ load(Mesh &in_out)
       {
         LOG_ERROR(msg_mesh_no_name);
 
-        return false;
+        return 0;
       }
     }
 
     // Must have valid mesh data
     {
-      const bool has_position = !!in_out.position_vec3;
-      const bool has_color    = !!in_out.color_vec4;
-      const bool has_normal   = !!in_out.normal_vec3;
-      const bool has_texc     = !!in_out.texture_coords_vec2;
+      const bool has_position = !!in_out->position_vec3;
+      const bool has_color    = !!in_out->color_vec4;
+      const bool has_normal   = !!in_out->normal_vec3;
+      const bool has_texc     = !!in_out->texture_coords_vec2;
       
       const bool has_something = has_position | has_color | has_normal | has_texc;
-      const bool has_verts     = !!in_out.triangle_count;
+      const bool has_verts     = !!in_out->triangle_count;
       
       LIB_ASSERT(has_something);
       LIB_ASSERT(has_verts);
       
       if (!has_something || !has_verts)
       {
-        LOG_ERROR(msg_mesh_has_no_vertex, in_out.name);
-        return false;
+        LOG_ERROR(msg_mesh_has_no_vertex, in_out->name);
+        return 0;
       }
     }
   }
   
   // -- Check and return if exists, no support for updating atm -- //
   {
-    const uint32_t check_key = lib::string_pool::find(in_out.name);
+    const uint32_t check_key = lib::string_pool::find(in_out->name);
 
     if(check_key)
     {
       size_t index = 0;
-      if (lib::key::linear_search(check_key, get_mesh_data().keys.data(), get_mesh_data().keys.size(), &index))
+      if (lib::key::linear_search(check_key, ctx->rsrc_mesh->keys.data(), ctx->rsrc_mesh->keys.size(), &index))
       {
-        LOG_WARNING(msg_mesh_name_exists, in_out.name);
-        return false;
+        LOG_WARNING(msg_mesh_name_exists, in_out->name);
+        return 0;
       }
     }
   }
   
   // -- Load new Mesh -- //
-  Mesh cpy = in_out;
+  Nil_mesh cpy = *in_out;
   {
     // Transfer ownership //
     /*
@@ -167,7 +216,7 @@ load(Mesh &in_out)
 
       if(!failed)
       {
-        failed = !Nil_detail::copy_data_name(&cpy_name, in_out.name, malloc);
+        failed = !Nil_detail::copy_data_name(&cpy_name, in_out->name, malloc);
       }
 
       // Copy all the mesh data //
@@ -179,34 +228,34 @@ load(Mesh &in_out)
 
       if(!failed)
       {
-        if (in_out.position_vec3 && !failed)
+        if (in_out->position_vec3 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.triangle_count * 3;
-          failed = !Nil_detail::copy_data((void**)&pos_data, (void*)in_out.position_vec3, data_size, malloc);
+          const size_t data_size = sizeof(float) * in_out->triangle_count * 3;
+          failed = !Nil_detail::copy_data((void**)&pos_data, (void*)in_out->position_vec3, data_size, malloc);
         }
 
-        if (in_out.normal_vec3 && !failed)
+        if (in_out->normal_vec3 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.triangle_count * 3;
-          failed = !Nil_detail::copy_data((void**)&norm_data, (void*)in_out.normal_vec3, data_size, malloc);
+          const size_t data_size = sizeof(float) * in_out->triangle_count * 3;
+          failed = !Nil_detail::copy_data((void**)&norm_data, (void*)in_out->normal_vec3, data_size, malloc);
         }
 
-        if (in_out.texture_coords_vec2 && !failed)
+        if (in_out->texture_coords_vec2 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.triangle_count * 2;
-          failed = !Nil_detail::copy_data((void**)&texc_data, (void*)in_out.texture_coords_vec2, data_size, malloc);
+          const size_t data_size = sizeof(float) * in_out->triangle_count * 2;
+          failed = !Nil_detail::copy_data((void**)&texc_data, (void*)in_out->texture_coords_vec2, data_size, malloc);
         };
 
-        if (in_out.color_vec4 && !failed)
+        if (in_out->color_vec4 && !failed)
         {
-          const size_t data_size = sizeof(float) * in_out.triangle_count * 2;
-          failed = !Nil_detail::copy_data((void**)&color_data, (void*)in_out.color_vec4, data_size, malloc);
+          const size_t data_size = sizeof(float) * in_out->triangle_count * 2;
+          failed = !Nil_detail::copy_data((void**)&color_data, (void*)in_out->color_vec4, data_size, malloc);
         }
         
-        if (in_out.index && !failed)
+        if (in_out->index && !failed)
         {
-          const size_t data_size = sizeof(uint32_t) * in_out.index_count;
-          failed = !Nil_detail::copy_data((void**)&index_data, (void*)in_out.index, data_size, malloc);
+          const size_t data_size = sizeof(uint32_t) * in_out->index_count;
+          failed = !Nil_detail::copy_data((void**)&index_data, (void*)in_out->index, data_size, malloc);
         }
       }
 
@@ -229,10 +278,10 @@ load(Mesh &in_out)
         if(texc_data)   { free(texc_data);  }
         if(index_data)  { free(index_data); }
 
-        LOG_ERROR(msg_mesh_failed, in_out.name);
+        LOG_ERROR(msg_mesh_failed, in_out->name);
         LIB_ASSERT(false);
         
-        return false;
+        return 0;
       }
     }
 
@@ -241,77 +290,93 @@ load(Mesh &in_out)
       // Generate bounding box //
       {
         const math::aabb box(
-          math::aabb_init(in_out.position_vec3, in_out.triangle_count * 3)
+          math::aabb_init(in_out->position_vec3, in_out->triangle_count * 3)
         );
       
         memcpy(
-          in_out.bounding_box.min,
+          in_out->bounding_box.min,
           box.min.data,
-          sizeof(in_out.bounding_box.min)
+          sizeof(in_out->bounding_box.min)
         );
       
         memcpy(
-          in_out.bounding_box.max,
+          in_out->bounding_box.max,
           box.max.data,
-          sizeof(in_out.bounding_box.max)
+          sizeof(in_out->bounding_box.max)
         );
 
-        cpy.bounding_box = in_out.bounding_box;
+        cpy.bounding_box = in_out->bounding_box;
       }
     
       // Generate new id //
       {
-        const uint32_t new_id = get_mesh_data().keys.size();
-        in_out.id = new_id;
-        cpy.id = in_out.id;
+        const uint32_t new_id = ctx->rsrc_mesh->keys.size();
+        in_out->id = new_id;
+        cpy.id = in_out->id;
       }
 
       // Normalize other outputs //
       {
-        in_out.status = Load_status::PENDING;
-        cpy.status = in_out.status;
+        in_out->status = NIL_RSRC_STATUS_PENDING;
+        cpy.status = in_out->status;
 
-        in_out.platform_resource = 0;
-        cpy.platform_resource = in_out.platform_resource;
+        in_out->platform_resource = 0;
+        cpy.platform_resource = in_out->platform_resource;
       }
     }
     
     // -- Save new Mesh Copy -- //
     {
       const uint32_t key = lib::string_pool::add(cpy.name);
-      get_mesh_data().keys.emplace_back(key);
-      get_mesh_data().meshes.emplace_back(cpy);
+      ctx->rsrc_mesh->keys.emplace_back(key);
+      ctx->rsrc_mesh->meshes.emplace_back(cpy);
     }    
   }
 
-  return true;
+  return in_out->id;
 }
 
 
-void
-get(size_t *count, Mesh **out)
+bool
+nil_rsrc_mesh_destroy(Nil_ctx *ctx, uint32_t id)
 {
-  *count = get_mesh_data().keys.size();
-  *out   = get_mesh_data().meshes.begin();
+  return false;
 }
 
 
-// ----------------------------------------------------------------- [ Info ] --
+/* status */
 
 
-const char *
-get_type_name(const Mesh &)
+bool
+nil_rsrc_mesh_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status new_status)
 {
-  return mesh_type_name;
+  Nil_mesh *self = nullptr;
+  
+  const bool found  = nil_rsrc_mesh_get_by_id(ctx, id, &self);
+  
+  if(found)
+  {
+    self->status = new_status;
+    return true;
+  }
+
+  LOG_ERROR("Cant find or update Mesh.");
+  return false;
 }
 
 
-size_t
-mesh_count()
+Nil_resource_status
+nil_rsrc_mesh_get_load_status(Nil_ctx *ctx, uint32_t id)
 {
-  return get_mesh_data().keys.size();
+  Nil_mesh *self = nullptr;
+  
+  const bool found = nil_rsrc_mesh_get_by_id(ctx, id, &self);
+  
+  if(found)
+  {
+    return self->status;
+  }
+
+  LOG_ERROR("Cant find Mesh.");
+  return NIL_RSRC_STATUS_NONE;
 }
-
-
-} // ns
-} // ns

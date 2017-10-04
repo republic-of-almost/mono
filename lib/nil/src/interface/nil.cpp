@@ -3,8 +3,13 @@
 #include <nil/resource/texture.hpp>
 #include <nil/aspect.hpp>
 #include <nil/task.hpp>
-#include <data/internal_data.hpp>
-#include <data/task_queue.hpp>
+#include <internal_data/internal_data.hpp>
+#include <internal_data/resources/texture_data.hpp>
+#include <internal_data/resources/shader_data.hpp>
+#include <internal_data/resources/mesh_data.hpp>
+#include <internal_data/resources/audio_src_data.hpp>
+#include <internal_data/resources/material_data.hpp>
+#include <internal_data/task_queue.hpp>
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
 #include <lib/array.hpp>
@@ -14,6 +19,11 @@
 #include <lib/assert.hpp>
 #include <lib/timer.hpp>
 #include <stdlib.h>
+
+
+#ifndef NIL_CLEANUP_ON_EXIT
+#define NIL_CLEANUP_ON_EXIT 1
+#endif
 
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
@@ -30,6 +40,16 @@ nil_ctx_initialize(Nil_ctx **ctx)
   {
     new_ctx->last_tick = lib::timer::get_current_time();
     new_ctx->delta_time = 0.f;
+    
+    // lib::array forces us todo this otherwise its not a valid object.
+    new_ctx->rsrc_texture = new Nil_texture_data();
+    new_ctx->rsrc_texture->keys.emplace_back(uint32_t{0});
+    new_ctx->rsrc_texture->textures.emplace_back(Nil_texture{});
+    
+    new_ctx->rsrc_shader   = new Nil_shader_data();
+    new_ctx->rsrc_mesh     = new Nil_mesh_data();
+    new_ctx->rsrc_audio    = new Nil_audio_src_data();
+    new_ctx->rsrc_material = new Nil_material_data();
   
     *ctx = new_ctx;
   }
@@ -41,7 +61,9 @@ nil_ctx_initialize(Nil_ctx **ctx)
 void
 nil_ctx_destroy(Nil_ctx **ctx)
 {
+  #if NIL_CLEANUP_ON_EXIT == 1
   free(*ctx);
+  #endif
 }
 
 

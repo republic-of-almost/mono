@@ -420,8 +420,6 @@ void
 rov_setShader(uint32_t shader_type)
 {
   // -- Param Check -- //
-  LIB_ASSERT(shader_type < rovShader_Count);
-
   get_rov_data().rov_data.curr_rov_mesh_shader = shader_type;
 }
 
@@ -461,6 +459,7 @@ rov_submitMeshTransform(const float world[16])
   new_mat.material = rov_curr_material(&get_rov_data().rov_data);
 
   ROV_Internal::rovRenderPass &rp = get_rov_data().rov_data.rov_render_passes.back();
+  rp.shader_type = get_rov_data().rov_data.curr_rov_mesh_shader;
 
   const size_t mat_count = rp.materials.size();
   ROV_Internal::rovMaterial *mat = rp.materials.data();

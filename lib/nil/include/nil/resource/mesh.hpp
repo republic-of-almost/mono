@@ -6,17 +6,10 @@
 #include <nil/data/bounding_box.hpp>
 
 
-namespace Nil {
-namespace Resource {
+/* ---------------------------------------------------------- [ Resource ] -- */
 
 
-// ------------------------------------------------------------- [ Resource ] --
-/*!
-  The calling code should set the attributes.
-  When you successfully load a mesh the id and bounding box will be set.
-  When the renderer loads the mesh the platform_resource and status will be set.
-*/
-struct Mesh
+struct Nil_mesh
 {
   // -- Input -- //
 
@@ -37,61 +30,76 @@ struct Mesh
   
   uint32_t                id;
   Nil::Data::Bounding_box bounding_box;
-  Load_status             status;
+  Nil_resource_status     status;
   uintptr_t               platform_resource;
 };
 
 
-// ----------------------------------------------------------------- [ Find ] --
+/* ------------------------------------------------- [ Resource Lifetime ] -- */
 
 
-/*!
-  Searches for a Mesh by name.
-  if found returns true else returns false.
-*/
 bool
-find_by_name(const char *name, Mesh &out);
+nil_rsrc_mesh_initialize(Nil_ctx *ctx);
 
 
-// ----------------------------------------------------------- [ Get / Load ] --
-
-
-/*!
-  Loads a new Mesh.
-  Does *not* update an existing mesh if name already exists.
-  If it fails to load it will return false.
-*/
 bool
-load(Mesh &in);
+nil_rsrc_mesh_destroy(Nil_ctx *ctx);
 
 
-/*!
-  Gets access to the underlying data.
+/* --------------------------------------------------- [ Resource Access ] -- */
 
-  size_t count = 0;
-  Mesh *data = nullptr;
-  get(&count, &data);
-*/
+
+bool
+nil_rsrc_mesh_find_by_name(Nil_ctx *ctx, const char *name, Nil_mesh *out = NULL);
+
+
+bool
+nil_rsrc_mesh_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh *out = NULL);
+
+
 void
-get(size_t *count, Mesh **out);
+nil_rsrc_mesh_get_data(Nil_ctx *ctx, size_t *out_count, Nil_mesh **out_data = NULL);
 
 
-// ----------------------------------------------------------------- [ Info ] --
-/*
-  Various information about Mesh data.
-*/
+bool
+nil_rsrc_mesh_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_mesh **out);
 
 
-const char *
-get_type_name(const Mesh &in);
+/* -------------------------------------------------- [ Resource Details ] -- */
 
 
 size_t
-mesh_count();
+nil_rsrc_mesh_get_count(Nil_ctx *ctx);
 
 
-} // ns
-} // ns
+/* ---------------------------------------------------- [ Resource Batch ] -- */
+
+
+void
+nil_rsrc_mesh_create_batch(Nil_ctx *ctx, Nil_mesh *in_out, size_t count, bool move = false);
+
+
+/* ------------------------------------------------- [ Resource Instance ] -- */
+
+
+uint32_t
+nil_rsrc_mesh_create(Nil_ctx *ctx, Nil_mesh *in_out, bool move = false);
+
+
+bool
+nil_rsrc_mesh_destroy(Nil_ctx *ctx, uint32_t id);
+
+
+/* status */
+
+
+bool
+nil_rsrc_mesh_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status status);
+
+
+Nil_resource_status
+nil_rsrc_mesh_get_load_status(Nil_ctx *ctx, uint32_t id);
+
 
 
 #endif // inc guard

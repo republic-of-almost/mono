@@ -94,38 +94,37 @@ resource_update(Nil_ctx *ctx, void *data)
   LIB_ASSERT(self);
 
   // If new Audio Files then load
-  Nil::Resource::Audio *audio_data  = nullptr;
+  Nil_audio_src *audio_data  = nullptr;
   size_t audio_data_count = 0;
 
+  nil_rsrc_audio_src_get_data(ctx, &audio_data_count, &audio_data);
+  
+  for(size_t i = 0; i < audio_data_count; ++i)
   {
-    Nil::Resource::get(&audio_data_count, &audio_data);
-    
-    for(size_t i = 0; i < audio_data_count; ++i)
+    Nil_audio_src *audio = &audio_data[i];
+  
+    if(audio->status == NIL_RSRC_STATUS_PENDING)
     {
-      Nil::Resource::Audio *audio = &audio_data[i];
-    
-      if(audio->status == Nil::Resource::Load_status::PENDING)
+      if(audio->data_type == NIL_DATA_FILENAME)
       {
-        if(audio->data_type == Nil::Resource::Audio::FILENAME)
+        const char *filename = (char*)audio->data;
+        
+        if(filename)
         {
-          const char *filename = (char*)audio->data;
+          SoLoud::Wav *sample = new SoLoud::Wav;
           
-          if(filename)
-          {
-            SoLoud::Wav *sample = new SoLoud::Wav;
-            
-            sample->load(filename);
-            audio->status = Nil::Resource::Load_status::LOADED;
-            audio->platform_resource = (uintptr_t)sample;
-          }
-          else
-          {
-            audio->status = Nil::Resource::Load_status::FAILED;
-          }
+          sample->load(filename);
+          audio->status = NIL_RSRC_STATUS_LOADED;
+          audio->platform_resource = (uintptr_t)sample;
+        }
+        else
+        {
+          audio->status = NIL_RSRC_STATUS_FAILED;
         }
       }
     }
   }
+
 
 }
 
@@ -136,10 +135,10 @@ player_update(Nil_ctx *ctx, void *data)
   Data *self = reinterpret_cast<Data*>(data);
   LIB_ASSERT(self);
 
-  Nil::Resource::Audio *audio_data = nullptr;
-  size_t audio_data_count          = 0;
-  
-  Nil::Resource::get(&audio_data_count, &audio_data);
+  Nil_audio_src *audio_data  = nullptr;
+  size_t audio_data_count = 0;
+
+  nil_rsrc_audio_src_get_data(ctx, &audio_data_count, &audio_data);
   
   // If new Audio players then play
   {

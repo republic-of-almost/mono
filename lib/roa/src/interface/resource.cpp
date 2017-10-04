@@ -1,5 +1,6 @@
 #include <roa/resource.hpp>
 #include <roa/resource_status.hpp>
+#include <common/context.hpp>
 #include <common/resource_identifiers.hpp>
 #include <nil/resource/resource.hpp>
 #include <lib/assert.hpp>
@@ -125,10 +126,11 @@ Resource::get_instance_name() const
     case ROA_detail::Resource::AUDIO:
     {
       size_t count = 0;
-      Nil::Resource::Audio *data = nullptr;
+      Nil_audio_src *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
-      
+      nil_rsrc_audio_src_get_data(ctx, &count, &data);
+
       LIB_ASSERT(instance_id < count);
       
       return data[instance_id].name;
@@ -136,22 +138,24 @@ Resource::get_instance_name() const
     
     case ROA_detail::Resource::FONT:
     {
-      size_t count = 0;
-      Nil::Resource::Font *data = nullptr;
-      
-      Nil::Resource::get(&count, &data);
-      
-      LIB_ASSERT(instance_id < count);
-      
-      return data[instance_id].name;
+//      size_t count = 0;
+//      Nil::Resource::Font *data = nullptr;
+//      
+//      Nil::Resource::get(&count, &data);
+//      
+//      LIB_ASSERT(instance_id < count);
+//      
+//      return data[instance_id].name;
+      return "";
     }
     
     case ROA_detail::Resource::TEXTURE:
     {
       size_t count = 0;
-      Nil::Resource::Texture *data = nullptr;
+      Nil_texture *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_texture_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -161,9 +165,10 @@ Resource::get_instance_name() const
     case ROA_detail::Resource::MATERIAL:
     {
       size_t count = 0;
-      Nil::Resource::Material *data = nullptr;
+      Nil_material *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_material_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -175,7 +180,7 @@ Resource::get_instance_name() const
       size_t count = 0;
       Nil_shader *data = nullptr;
       
-      nil_rsrc_shader_get_data(&count, &data);
+      nil_rsrc_shader_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -200,16 +205,18 @@ Resource::get_status() const
   const uint32_t type_id     = lib::entity::type(m_id);
   const uint32_t instance_id = lib::entity::instance(m_id);
   
-  uint32_t status = (uint32_t)Nil::Resource::Load_status::ERROR;
+  uint32_t status = (uint32_t)NIL_RSRC_STATUS_ERROR;
   
   switch (type_id)
   {
     case ROA_detail::Resource::AUDIO:
     {
       size_t count = 0;
-      Nil::Resource::Audio *data = nullptr;
+      Nil_audio_src *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_audio_src_get_data(ctx, &count, &data);
+
       
       LIB_ASSERT(instance_id < count);
       
@@ -220,14 +227,14 @@ Resource::get_status() const
     
     case ROA_detail::Resource::FONT:
     {
-      size_t count = 0;
-      Nil::Resource::Font *data = nullptr;
-      
-      Nil::Resource::get(&count, &data);
-      
-      LIB_ASSERT(instance_id < count);
-      
-      status = (uint32_t)data[instance_id].status;
+//      size_t count = 0;
+//      Nil::Resource::Font *data = nullptr;
+//      
+//      Nil::Resource::get(&count, &data);
+//      
+//      LIB_ASSERT(instance_id < count);
+//      
+//      status = (uint32_t)data[instance_id].status;
       
       break;
     }
@@ -235,9 +242,9 @@ Resource::get_status() const
     case ROA_detail::Resource::TEXTURE:
     {
       size_t count = 0;
-      Nil::Resource::Texture *data = nullptr;
+      Nil_texture *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_texture_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -249,9 +256,10 @@ Resource::get_status() const
     case ROA_detail::Resource::MATERIAL:
     {
       size_t count = 0;
-      Nil::Resource::Material *data = nullptr;
+      Nil_material *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_material_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -265,7 +273,7 @@ Resource::get_status() const
       size_t count = 0;
       Nil_shader *data = nullptr;
       
-      nil_rsrc_shader_get_data(&count, &data);
+      nil_rsrc_shader_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -277,13 +285,13 @@ Resource::get_status() const
     default:
     {
       LIB_ASSERT(false); // Missing something
-      status = (uint32_t)Nil::Resource::Load_status::ERROR;
+      status = (uint32_t)NIL_RSRC_STATUS_ERROR;
       
       break;
     }
   }
 
-  return ROA_detail::convert_from_nil((Nil::Resource::Load_status)status);
+  return ROA_detail::convert_from_nil((Nil_resource_status)status);
 }
 
 
@@ -298,15 +306,17 @@ Resource::load()
     case ROA_detail::Resource::AUDIO:
     {
       size_t count = 0;
-      Nil::Resource::Audio *data = nullptr;
+      Nil_audio_src *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_audio_src_get_data(ctx, &count, &data);
+
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;
@@ -314,17 +324,17 @@ Resource::load()
     
     case ROA_detail::Resource::FONT:
     {
-      size_t count = 0;
-      Nil::Resource::Font *data = nullptr;
-      
-      Nil::Resource::get(&count, &data);
-      
-      LIB_ASSERT(instance_id < count);
-      
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
-      {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
-      }
+//      size_t count = 0;
+//      Nil::Resource::Font *data = nullptr;
+//      
+//      Nil::Resource::get(&count, &data);
+//      
+//      LIB_ASSERT(instance_id < count);
+//      
+//      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+//      {
+//        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+//      }
       
       break;
     }
@@ -332,15 +342,15 @@ Resource::load()
     case ROA_detail::Resource::TEXTURE:
     {
       size_t count = 0;
-      Nil::Resource::Texture *data = nullptr;
+      Nil_texture *data = nullptr;
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_texture_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;
@@ -349,15 +359,16 @@ Resource::load()
     case ROA_detail::Resource::MATERIAL:
     {
       size_t count = 0;
-      Nil::Resource::Material *data = nullptr;
+      Nil_material *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_material_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;
@@ -368,7 +379,7 @@ Resource::load()
       size_t count = 0;
       Nil_shader *data = nullptr;
       
-      nil_rsrc_shader_get_data(&count, &data);
+      nil_rsrc_shader_get_data(ROA_detail::get_ctx(), &count, &data);
       
       LIB_ASSERT(instance_id < count);
       

@@ -5,7 +5,7 @@
 #include <nil/node.hpp>
 #include <nil/data/transform.hpp>
 #include <graph/graph_data.hpp>
-#include <data/internal_data.hpp>
+#include <internal_data/internal_data.hpp>
 #include <lib/key.hpp>
 #include <lib/optimizations.hpp>
 #include <lib/logging.hpp>

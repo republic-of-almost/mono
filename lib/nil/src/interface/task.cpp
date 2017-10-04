@@ -1,5 +1,5 @@
 #include <nil/task.hpp>
-#include <data/task_queue.hpp>
+#include <internal_data/task_queue.hpp>
 #include <lib/logging.hpp>
 #include <lib/assert.hpp>
 
@@ -39,7 +39,7 @@ nil_task_cpu_add(
         return;
     }
     
-    if(*task_count < NIL_MAX_CPU_TASK_COUNT)
+    if(*task_count < NIL_MAX_CPU_TASK_QUEUE)
     {
       const size_t index = *task_count;
       task_pool[index].callback = task_fn;
@@ -86,7 +86,7 @@ nil_task_gpu_add(
         return;
     }
     
-    if(*task_count < NIL_MAX_GPU_TASK_COUNT)
+    if(*task_count < NIL_MAX_GPU_TASK_QUEUE)
     {
       const size_t index = *task_count;
       task_pool[index].callback = task_fn;

@@ -25,10 +25,12 @@ constexpr uint32_t rovClearFlag_Depth = 2;
 
 constexpr uint32_t rovInputFormat_PNT = 1;
 
-constexpr uint32_t rovShader_Fullbright = 0;
 constexpr uint32_t rovShader_Lit        = 1;
-constexpr uint32_t rovShader_DirLight   = 2;
-constexpr uint32_t rovShader_Count      = 3;
+constexpr uint32_t rovShader_Fullbright = 2;
+constexpr uint32_t rovShader_Depth      = 3;
+constexpr uint32_t rovShader_Overdraw   = 4;
+
+constexpr uint32_t rovShader_Count      = 4;
 
 constexpr uint32_t rovGraphicsApi_NOP = 0;
 constexpr uint32_t rovGraphicsApi_GL4 = 1;

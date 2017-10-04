@@ -24,26 +24,6 @@ class Node_list;
 class Node_controller;
 
 
-namespace Resource {
-
-struct Audio;
-struct Font;
-struct Material;
-struct Mesh;
-struct Shader;
-struct Texture;
-
-enum class Load_status {
-  NONE,
-  PENDING,
-  LOADED,
-  FAILED,
-  
-  ERROR,
-};
-
-} // ns
-
 
 namespace Data {
 
@@ -73,17 +53,6 @@ enum ENUM : uint32_t {
 };
 }
 
-//namespace Status {
-//enum ENUM : uint32_t {
-//  PENDING     = 1 << 0,
-//  ERR         = 1 << 1,
-//  OK          = 1 << 2,
-//  UNKNOWN     = 1 << 3,
-//  NOT_FOUND   = 1 << 4,
-//};
-//}
-
-
 } // ns
 } // ns
 
@@ -91,30 +60,33 @@ enum ENUM : uint32_t {
 /* CAPI */
 
 
-typedef enum
-{
-  NIL_CPU_TASK_EARLY_THINK,
-  NIL_CPU_TASK_THINK,
-  NIL_CPU_TASK_LATE_THINK,
-} Nil_cpu_task_queue;
-
-
-typedef enum
-{
-  NIL_GPU_TASK_PRE_RENDER,
-  NIL_GPU_TASK_RENDER,
-  NIL_GPU_TASK_POST_RENDER,
-} Nil_gpu_task_queue;
-
+/* engine */
 
 struct Nil_ctx;
 struct Nil_aspect;
+
+/* data */
+
+
+
+/* resources */
+
+struct Nil_audio_src;
+struct Nil_font;
+struct Nil_material;
+struct Nil_mesh;
 struct Nil_shader;
+struct Nil_texture;
+struct Nil_material;
+struct Nil_font;
+
+/* callback prototypes */
 
 typedef void(*Nil_aspect_callback_fn)(Nil_ctx *ctx, void *self);
 typedef void(*Nil_cpu_task_fn)(Nil_ctx *ctx, void *user_data);
 typedef void(*Nil_gpu_task_fn)(Nil_ctx *ctx, void *user_data);
 
+/* state identifiers */
 
 typedef enum
 {
@@ -128,13 +100,41 @@ typedef enum
 typedef enum
 {
   NIL_SHD_NONE,
-
   NIL_SHD_LINE_RENDERER_01,
   NIL_SHD_MESH_RENDERER_01,
   NIL_SHD_PAINT_RENDERER_01,
   
 } Nil_shader_type;
 
+typedef enum
+{
+  NIL_CPU_TASK_EARLY_THINK,
+  NIL_CPU_TASK_THINK,
+  NIL_CPU_TASK_LATE_THINK,
+} Nil_cpu_task_queue;
+
+typedef enum
+{
+  NIL_GPU_TASK_PRE_RENDER,
+  NIL_GPU_TASK_RENDER,
+  NIL_GPU_TASK_POST_RENDER,
+} Nil_gpu_task_queue;
+
+
+typedef enum
+{
+  NIL_AUDIO_SRC_SAMPLE,
+  NIL_AUDIO_SRC_SONG,
+} Nil_audio_src_type;
+
+
+typedef enum
+{
+  NIL_DATA_FILENAME,
+  NIL_DATA_RAW,
+  NIL_DATA_LOCAL,
+
+} Nil_data_type;
 
 
 typedef int NIL_BOOL;

@@ -63,26 +63,26 @@ static const ROA::Resource_status roa_rsrc_status_from_nil_rsrc_status[]
   ROA::Resource_status::UNKNOWN,  // Nil::Rsource::Load_status::ERROR
 };
 
-static const Nil::Resource::Load_status nil_rsrc_status_from_roa_rsrc_status[]
+static const Nil_resource_status nil_rsrc_status_from_roa_rsrc_status[]
 {
-  Nil::Resource::Load_status::NONE,
-  Nil::Resource::Load_status::PENDING,
-  Nil::Resource::Load_status::LOADED,
-  Nil::Resource::Load_status::FAILED,
-  Nil::Resource::Load_status::ERROR,
+  NIL_RSRC_STATUS_NONE,
+  NIL_RSRC_STATUS_PENDING,
+  NIL_RSRC_STATUS_LOADED,
+  NIL_RSRC_STATUS_FAILED,
+  NIL_RSRC_STATUS_ERROR,
 };
 
 
 constexpr ROA::Resource_status
-convert_from_nil(const Nil::Resource::Load_status status)
+convert_from_nil(const Nil_resource_status status)
 {
   return (ROA::Resource_status)roa_rsrc_status_from_nil_rsrc_status[(int)status];
 }
 
-constexpr Nil::Resource::Load_status
+constexpr Nil_resource_status
 convert_from_roa(const ROA::Resource_status status)
 {
-  return (Nil::Resource::Load_status)nil_rsrc_status_from_roa_rsrc_status[(int)status];
+  return (Nil_resource_status)nil_rsrc_status_from_roa_rsrc_status[(int)status];
 }
 
 inline Nil_shader_type

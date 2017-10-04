@@ -12,39 +12,45 @@ TEST_CASE("Resource - Mesh")
   
   SECTION("Initial")
   {
-    REQUIRE(Nil::Resource::mesh_count() == 1);
+    const size_t count = nil_rsrc_mesh_get_count(ctx);
+    const size_t expected_count = 1;
+    
+    REQUIRE(count == expected_count);
   }
   
   SECTION("Load Pass")
   {
-    Nil::Resource::Mesh mesh{};
+    Nil_mesh mesh{};
     mesh.name = "mesh_to_pass";
     
     float some_data[] = {1,2,3};
     mesh.position_vec3 = some_data;
     mesh.triangle_count = 1;
     
-    const bool loaded = Nil::Resource::load(mesh);
+    const uint32_t id = nil_rsrc_mesh_create(ctx, &mesh);
     
-    REQUIRE(loaded == true);
-    REQUIRE(Nil::Resource::mesh_count() == 2);
-    REQUIRE(mesh.id > 0);
+    REQUIRE(id > 0);
+    
+    const size_t count = nil_rsrc_mesh_get_count(ctx);
+    const size_t expected_count = 2;
+    
+    REQUIRE(count == expected_count);
   }
   
   SECTION("Load Fail")
   {
-    Nil::Resource::Mesh mesh{};
+    Nil_mesh mesh{};
     mesh.name = "mesh_to_fail";
     
     float some_data[] = {1,2,3};
     mesh.position_vec3 = some_data;
     mesh.triangle_count = 1;
     
-    const bool should_pass = Nil::Resource::load(mesh);
-    const bool should_fail = Nil::Resource::load(mesh);
+    const uint32_t should_pass = !!nil_rsrc_mesh_create(ctx, &mesh);
+    const uint32_t should_fail = !nil_rsrc_mesh_create(ctx, &mesh);
     
     REQUIRE(should_pass == true);
-    REQUIRE(should_fail == false);
+    REQUIRE(should_fail == true);
   }
   
   nil_ctx_destroy(&ctx);

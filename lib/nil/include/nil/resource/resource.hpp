@@ -7,8 +7,7 @@
 #include "font.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
-#include "model.hpp"
-#include "scene.hpp"
+#include "load.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
 

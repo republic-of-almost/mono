@@ -1,6 +1,7 @@
 #include <roa/mesh.hpp>
 #include <roa/bounding_box.hpp>
 #include <roa/vector3.hpp>
+#include <common/context.hpp>
 #include <nil/resource/mesh.hpp>
 #include <lib/logging.hpp>
 #include <lib/entity.hpp>
@@ -30,8 +31,10 @@ Bounding_box
 Mesh::get_bounding_box() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   const uint32_t instance = lib::entity::instance(m_id);
   
@@ -51,8 +54,10 @@ float *
 Mesh::get_positions_vec3() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
  
   const uint32_t instance = lib::entity::instance(m_id);
  
@@ -69,8 +74,10 @@ float *
 Mesh::get_normals_vec3() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   const uint32_t instance = lib::entity::instance(m_id);
   
@@ -87,8 +94,10 @@ float *
 Mesh::get_texture_coords_vec2() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   const uint32_t instance = lib::entity::instance(m_id);
   
@@ -105,8 +114,10 @@ size_t
 Mesh::get_triangle_count() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   const uint32_t instance = lib::entity::instance(m_id);
   
@@ -123,8 +134,10 @@ size_t
 Mesh::get_vertex_count() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   LOG_TODO("TRIANGLE COUNT IS NOT REPRESENTIVE");
   
@@ -143,8 +156,10 @@ uint32_t*
 Mesh::get_index() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   const uint32_t instance = lib::entity::instance(m_id);
   
@@ -161,8 +176,10 @@ size_t
 Mesh::get_index_count() const
 {
   size_t count = 0;
-  Nil::Resource::Mesh *mesh = nullptr;
-  Nil::Resource::get(&count, &mesh);
+  Nil_mesh *mesh = nullptr;
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+  
+  nil_rsrc_mesh_get_data(ctx, &count, &mesh);
   
   const uint32_t instance = lib::entity::instance(m_id);
   

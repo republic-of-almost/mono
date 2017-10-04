@@ -26,104 +26,103 @@ struct Nil_shader
 };
 
 
-/* ------------------------------------------------------------ [ Static ] -- */
-/*
-  These functions operate on the collective shader data.
-*/
+/* ------------------------------------------------- [ Resource Lifetime ] -- */
 
-/* rsrc lifetime */
 
 bool
-nil_rsrc_shader_initialize();
+nil_rsrc_shader_initialize(Nil_ctx *ctx);
+
 
 bool
-nil_rsrc_shader_destroy();
+nil_rsrc_shader_destroy(Nil_ctx *ctx);
 
 
-/* search / access */
+/* --------------------------------------------------- [ Resource Access ] -- */
+
 
 bool
-nil_rsrc_shader_find_by_name(const char *name, Nil_shader *out = NULL);
+nil_rsrc_shader_find_by_name(Nil_ctx *ctx, const char *name, Nil_shader *out = NULL);
+
 
 bool
-nil_rsrc_shader_find_by_id(uint32_t id, Nil_shader *out = NULL);
+nil_rsrc_shader_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_shader *out = NULL);
+
 
 void
-nil_rsrc_shader_get_data(size_t *out_count, Nil_shader **out_data = NULL);
+nil_rsrc_shader_get_data(Nil_ctx *ctx, size_t *out_count, Nil_shader **out_data = NULL);
+
 
 bool
-nil_rsrc_shader_get_by_id(uint32_t id, Nil_shader **out);
+nil_rsrc_shader_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_shader **out);
 
 
-/* details */
+/* -------------------------------------------------- [ Resource Details ] -- */
+
 
 size_t
-nil_rsrc_shader_get_count();
+nil_rsrc_shader_get_count(Nil_ctx *ctx);
 
 
-/* batch */
+/* ---------------------------------------------------- [ Resource Batch ] -- */
+
 
 void
-nil_rsrc_shader_create_batch(Nil_shader *in, size_t count, bool move = false);
+nil_rsrc_shader_create_batch(Nil_ctx *ctx, Nil_shader *in, size_t count, bool move = false);
 
 
-/* ---------------------------------------------------------- [ Instance ] -- */
-/*
-  These functions operator on an instance of a shader.
-*/
+/* ------------------------------------------------- [ Resource Instance ] -- */
 
-/* lifetime */
 
 uint32_t
-nil_rsrc_shader_create(Nil_shader *shd, bool move = false);
+nil_rsrc_shader_create(Nil_ctx *ctx, Nil_shader *shd, bool move = false);
 
 bool
-nil_rsrc_shader_destroy(uint32_t id);
+nil_rsrc_shader_destroy(Nil_ctx *ctx, uint32_t id);
 
 
 /* type */
 
 bool
-nil_rsrc_shader_set_type(uint32_t id, Nil_shader_type type);
+nil_rsrc_shader_set_type(Nil_ctx *ctx, uint32_t id, Nil_shader_type type);
 
 Nil_shader_type
-nil_rsrc_shader_get_type(uint32_t id);
+nil_rsrc_shader_get_type(Nil_ctx *ctx, uint32_t id);
 
 
 /* vertex shader */
 
 bool
-nil_rsrc_shader_set_vs_src(uint32_t id, const char *src);
+nil_rsrc_shader_set_vs_src(Nil_ctx *ctx, uint32_t id, const char *src);
 
 const char*
-nil_rsrc_shader_get_vs_src(uint32_t id);
+nil_rsrc_shader_get_vs_src(Nil_ctx *ctx, uint32_t id);
 
 
 /* geo shader */
 
 bool
-nil_rsrc_shader_set_gs_src(uint32_t id, const char *src);
+nil_rsrc_shader_set_gs_src(Nil_ctx *ctx, uint32_t id, const char *src);
 
 const char*
-nil_rsrc_shader_get_gs_src(uint32_t id);
+nil_rsrc_shader_get_gs_src(Nil_ctx *ctx, uint32_t id);
 
 
 /* frag shader */
 
 bool
-nil_rsrc_shader_set_fs_src(uint32_t id, const char *src);
+nil_rsrc_shader_set_fs_src(Nil_ctx *ctx, uint32_t id, const char *src);
 
 const char*
-nil_rsrc_shader_get_fs_src(uint32_t id);
+nil_rsrc_shader_get_fs_src(Nil_ctx *ctx, uint32_t id);
 
 
 /* status */
 
 bool
-nil_rsrc_shader_set_load_status(uint32_t id, Nil_resource_status status);
+nil_rsrc_shader_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status status);
 
 Nil_resource_status
-nil_rsrc_shader_get_load_status(uint32_t id);
+nil_rsrc_shader_get_load_status(Nil_ctx *ctx, uint32_t id);
 
 
 #endif // inc guard

@@ -18,9 +18,9 @@ namespace ImGUI {
 
 
 void render_resource_overview(
-  const Nil::Resource::Texture *tex_rsrc, const size_t tex_count,
-  const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
-  const Nil::Resource::Mesh *mesh_rsrc, const size_t mesh_count,
+  const Nil_texture *tex_rsrc, const size_t tex_count,
+  const Nil_material *mat_rsrc, const size_t mat_count,
+  const Nil_mesh *mesh_rsrc, const size_t mesh_count,
   const Nil_shader *shd_rsrc, const size_t shd_count)
 {
   // -- Texture Resource Overview -- //
@@ -28,12 +28,12 @@ void render_resource_overview(
   {
     if(tex_rsrc != nullptr)
     {
-      size_t load_status[4]{};
+      size_t load_status[5]{};
 
       // Gather stats //
       for (size_t i = 0; i < tex_count; ++i)
       {
-        const Nil::Resource::Texture *data = &tex_rsrc[i];
+        const Nil_texture *data = &tex_rsrc[i];
         LIB_ASSERT((int)data->status < LIB_ARRAY_SIZE(load_status));
         
         load_status[(int)data->status] += 1;
@@ -41,10 +41,10 @@ void render_resource_overview(
 
       // Render stats //
       ImGui::LabelText("Count##rover_tex",   "%zu", tex_count);
-      ImGui::LabelText("Unloaded#rover_tex", "%zu", load_status[(int)Resource::Load_status::NONE]);
-      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[(int)Resource::Load_status::PENDING]);
-      ImGui::LabelText("Loaded##rover_tex",  "%zu", load_status[(int)Resource::Load_status::LOADED]);
-      ImGui::LabelText("Failed##rover_tex",  "%zu", load_status[(int)Resource::Load_status::FAILED]);
+      ImGui::LabelText("Unloaded#rover_tex", "%zu", load_status[(int)NIL_RSRC_STATUS_NONE]);
+      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[(int)NIL_RSRC_STATUS_PENDING]);
+      ImGui::LabelText("Loaded##rover_tex",  "%zu", load_status[(int)NIL_RSRC_STATUS_LOADED]);
+      ImGui::LabelText("Failed##rover_tex",  "%zu", load_status[(int)NIL_RSRC_STATUS_FAILED]);
     }
     else
     {
@@ -57,12 +57,12 @@ void render_resource_overview(
   {
     if(mesh_rsrc != nullptr)
     {
-      size_t load_status[4]{};
+      size_t load_status[5]{};
 
       // Gather stats //
       for (size_t i = 0; i < mesh_count; ++i)
       {
-        const Nil::Resource::Mesh *data = &mesh_rsrc[i];
+        const Nil_mesh *data = &mesh_rsrc[i];
         LIB_ASSERT((int)data->status < LIB_ARRAY_SIZE(load_status));
         
         load_status[(int)data->status] += 1;
@@ -70,10 +70,10 @@ void render_resource_overview(
 
       // Render stats //
       ImGui::LabelText("Count##rover_mesh",   "%zu", tex_count);
-      ImGui::LabelText("Unloaded#rover_mesh", "%zu", load_status[(int)Resource::Load_status::NONE]);
-      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[(int)Resource::Load_status::PENDING]);
-      ImGui::LabelText("Loaded##rover_mesh",  "%zu", load_status[(int)Resource::Load_status::LOADED]);
-      ImGui::LabelText("Failed##rover_mesh",  "%zu", load_status[(int)Resource::Load_status::FAILED]);
+      ImGui::LabelText("Unloaded#rover_mesh", "%zu", load_status[(int)NIL_RSRC_STATUS_NONE]);
+      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[(int)NIL_RSRC_STATUS_PENDING]);
+      ImGui::LabelText("Loaded##rover_mesh",  "%zu", load_status[(int)NIL_RSRC_STATUS_LOADED]);
+      ImGui::LabelText("Failed##rover_mesh",  "%zu", load_status[(int)NIL_RSRC_STATUS_FAILED]);
     }
     else
     {
@@ -107,7 +107,7 @@ namespace {
 
 void
 helper_render_texture(
-  const Nil::Resource::Texture *tex,
+  const Nil_texture *tex,
   const uint32_t width,
   const uint32_t height)
 {
@@ -135,7 +135,7 @@ helper_render_texture(
 
 
 void
-render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
+render_resource(const Nil_texture *rsrc, const size_t count)
 {
   ImGui::Text("Texture Count %zu", count);
   
@@ -155,7 +155,7 @@ render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
   
   for(size_t i = 0; i < count; ++i)
   {
-    const Nil::Resource::Texture *tex = &rsrc[i];
+    const Nil_texture *tex = &rsrc[i];
     helper_render_texture(tex, tex_size, tex_size);
     
     if((i + 1) % (cols ))
@@ -167,39 +167,40 @@ render_resource(const Nil::Resource::Texture *rsrc, const size_t count)
 
 
 void
-render_resource(const Nil::Resource::Material *rsrc, const size_t count)
+render_resource(const Nil_material *rsrc, const size_t count)
 {
   ImGui::Text("Material Count %zu", count);
 
   for(size_t i = 0; i < count; ++i)
   {
-    const Nil::Resource::Material *data = &rsrc[i];
+    const Nil_material *data = &rsrc[i];
   
     char name[1024]{};
     sprintf(name, "Material - %s ##%zu", data->name, i + 1);
     
     if(ImGui::CollapsingHeader(name))
     {
-      size_t tex_count = 0;
-      Nil::Resource::Texture *textures;
-      Nil::Resource::get(&tex_count, &textures);
-      
-      helper_render_texture(&textures[data->texture_01], 64, 64);
-      
-      ImGui::SameLine();
-      
-      helper_render_texture(&textures[data->texture_02], 64, 64);
-      
-      ImGui::SameLine();
-      
-      helper_render_texture(&textures[data->texture_03], 64, 64);
+      ImGui::Text("Disabled while cleaning up nil interface");
+//      size_t tex_count = 0;
+//      Nil_texture *textures;
+//      nil_rsrc_texture_get_data(ctx, &tex_count, &textures);
+//      
+//      helper_render_texture(&textures[data->texture_01], 64, 64);
+//      
+//      ImGui::SameLine();
+//      
+//      helper_render_texture(&textures[data->texture_02], 64, 64);
+//      
+//      ImGui::SameLine();
+//      
+//      helper_render_texture(&textures[data->texture_03], 64, 64);
     
       float color[4]
       {
-        lib::color::get_channel_1f(data->color),
-        lib::color::get_channel_2f(data->color),
-        lib::color::get_channel_3f(data->color),
-        lib::color::get_channel_4f(data->color),
+//        lib::color::get_channel_1f(data->color),
+//        lib::color::get_channel_2f(data->color),
+//        lib::color::get_channel_3f(data->color),
+//        lib::color::get_channel_4f(data->color),
       };
     
       ImGui::ColorEdit4("Color##Mat", color);
@@ -209,13 +210,13 @@ render_resource(const Nil::Resource::Material *rsrc, const size_t count)
 
 
 void
-render_resource(const Nil::Resource::Mesh *rsrc, const size_t count)
+render_resource(const Nil_mesh *rsrc, const size_t count)
 {
   ImGui::Text("Mesh Count %zu", count);
 
   for(size_t i = 0; i < count; ++i)
   {
-    const Nil::Resource::Mesh *data = &rsrc[i];
+    const Nil_mesh *data = &rsrc[i];
 
     char name[1024]{};
     sprintf(name, "Mesh - %s##%zu", data->name, i + 1);

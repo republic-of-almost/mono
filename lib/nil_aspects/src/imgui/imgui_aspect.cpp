@@ -200,19 +200,20 @@ render_rsrc(bool *window)
 {
   if(*window)
   {
-    char name[1024]{};
-    strcat(name, Nil::Resource::get_type_name(T{}));
-    strcat(name, " Resource##RPool");
-
-    ImGui::Begin(name, window);
-
-    size_t count = 0;
-    T *rsrc;
-    Nil::Resource::get(&count, &rsrc);
-
-    Nil::ImGUI::render_resource(rsrc, count);
-
-    ImGui::End();
+    ImGui::Text("Refactoring Nil");
+//    char name[1024]{};
+//    strcat(name, Nil::Resource::get_type_name(T{}));
+//    strcat(name, " Resource##RPool");
+//
+//    ImGui::Begin(name, window);
+//
+//    size_t count = 0;
+//    T *rsrc;
+//    Nil::Resource::get(&count, &rsrc);
+//
+//    Nil::ImGUI::render_resource(rsrc, count);
+//
+//    ImGui::End();
   }
 }
 
@@ -330,20 +331,21 @@ think(Nil_ctx *ctx, void *data)
   {
     // Get data //
     size_t tex_count = 0;
-    Nil::Resource::Texture *tex = nullptr;
-    Nil::Resource::get(&tex_count, &tex);
+    Nil_texture *tex = nullptr;
+    nil_rsrc_texture_get_data(ctx, &tex_count, &tex);
 
     size_t mesh_count = 0;
-    Nil::Resource::Mesh *mesh = nullptr;
-    Nil::Resource::get(&mesh_count, &mesh);
+    Nil_mesh *mesh = nullptr;
+    
+    nil_rsrc_mesh_get_data(ctx, &mesh_count, &mesh);
 
     size_t mat_count = 0;
-    Nil::Resource::Material *mats = nullptr;
-    Nil::Resource::get(&mat_count, &mats);
+    Nil_material *mats = nullptr;
+    nil_rsrc_material_get_data(ctx, &mat_count, &mats);
     
     size_t shd_count = 0;
     Nil_shader *shds = nullptr;
-    nil_rsrc_shader_get_data(&shd_count, &shds);
+    nil_rsrc_shader_get_data(ctx, &shd_count, &shds);
     
     // Create window and show data //
     const char *rsrc_overview = "Resource Overview##rsrc_over";
@@ -360,9 +362,9 @@ think(Nil_ctx *ctx, void *data)
   }
 
   // Individual Resources //
-  render_rsrc<Nil::Resource::Texture>(&self->show_rsrc_textures);
-  render_rsrc<Nil::Resource::Mesh>(&self->show_rsrc_meshes);
-  render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
+  render_rsrc<Nil_texture>(&self->show_rsrc_textures);
+  render_rsrc<Nil_mesh>(&self->show_rsrc_meshes);
+  render_rsrc<Nil_material>(&self->show_rsrc_materials);
 
 
   // ---------------------------------------------------------- [ Raw Graph ] --

@@ -79,6 +79,12 @@ main()
 #define CONST_AMB 0.02
 #define CONST_SHININESS 12.3
 
+#define ShaderMode_Lighting    1
+#define ShaderMode_Fullbright  2
+#define ShaderMode_Depth       3
+#define ShaderMode_Grey        4
+
+
 /*
   Inputs
 */
@@ -100,6 +106,8 @@ uniform int       uni_light_count;
 uniform sampler1D uni_light_array;
 
 uniform vec4      uni_color;
+
+uniform int       uni_mode = ShaderMode_Fullbright;
 
 
 /*
@@ -200,13 +208,18 @@ void
 main()
 {
   /*
+    Common to all modes
+  */
+  vec4 diffuse_map = texture(uni_map_01, in_ps_texcoord);
+  vec3 color;
+  float alpha = 1.0;
+
+  /*
     If we have lights calculate color with them.
   */
-  if(uni_light_count > 0)
+  if(uni_mode == ShaderMode_Lighting)
   {
-    vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
     vec4 diffuse_color = mix(uni_color, diffuse_map, diffuse_map.a);
-    
     vec4 specular_map = texture(uni_map_03, in_ps_texcoord);
 
     Material mat;
@@ -269,26 +282,54 @@ main()
       accum_color += (final_light * final_atten);
     }
 
-    // Output Result //
-//    vec3 amb = vec3(CONST_AMB);
-    vec3 color = mat.Kd * accum_color;
-    
+    color = mat.Kd * accum_color;
+
     // Gamma correction.
     vec3 gamma = vec3(1.0/2.2);
     vec3 final_color = pow(color, gamma);
 
-    out_ps_color = vec4(final_color.rgb, 1.0);
+    // Output Result //
+    color = final_color;
   }
   
   /*
     Fullbright
   */
-  else
+  else if(uni_mode == ShaderMode_Fullbright)
   {
     vec4 diffuse_map   = texture(uni_map_01, in_ps_texcoord);
-    vec4 diffuse_color = mix(diffuse_map, uni_color, uni_color.a);
+    vec4 diffuse_color = mix(uni_color, diffuse_map, diffuse_map.a);
     
-    out_ps_color = diffuse_color;
+    color = diffuse_color.rgb;
   }
+  
+  /*
+    Depth mode
+  */
+  else if(uni_mode == ShaderMode_Depth)
+  {
+    float factor = 5.0; // so we can see it better
+    color = vec3(gl_FragCoord.w * factor);
+  }
+  
+  /*
+    Grey mode
+  */
+  else if(uni_mode == ShaderMode_Grey)
+  {
+  
+    color = vec3(0.25);
+    alpha = 1;
+  }
+  
+  /*
+    Err
+  */
+  else
+  {
+    color = vec3(1.0, 0.0, 1.0);
+  }
+  
+  out_ps_color = vec4(color.rgb, alpha);
 }
 // FRAG_END //
