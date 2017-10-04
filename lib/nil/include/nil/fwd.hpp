@@ -26,7 +26,6 @@ class Node_controller;
 
 namespace Resource {
 
-struct Audio;
 struct Font;
 struct Material;
 
