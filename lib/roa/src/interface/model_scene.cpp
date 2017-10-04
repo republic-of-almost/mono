@@ -3,8 +3,7 @@
 #include <common/context.hpp>
 #include <nil/node.hpp>
 #include <nil/resource/directory.hpp>
-#include <nil/resource/scene.hpp>
-#include <nil/resource/model.hpp>
+#include <nil/resource/load.hpp>
 
 
 namespace {
@@ -15,7 +14,7 @@ bool asset_load(Nil::Node node, const char *filename)
   const char *path = Nil::Resource::directory(filename);
   Nil_ctx *ctx = ROA_detail::get_ctx();
   
-  return Nil::Resource::Scene::load(ctx, node, path);
+  return nil_rsrc_load_scene(ctx, node, path);
 }
 
 

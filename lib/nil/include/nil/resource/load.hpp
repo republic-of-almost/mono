@@ -5,18 +5,12 @@
 #include <nil/fwd.hpp>
 
 
-namespace Nil {
-namespace Resource {
-namespace Model {
+bool
+nil_rsrc_load_model(Nil_ctx *ctx, const char *filename);
 
 
 bool
-load(Nil_ctx *ctx, const char *filename);
-
-
-} // ns
-} // ns
-} // ns
+nil_rsrc_load_scene(Nil_ctx *ctx, Nil::Node &node, const char *filename);
 
 
 #endif // inc guard
