@@ -1,6 +1,6 @@
 #include <nil/resource/mesh.hpp>
 #include <internal_data/internal_data.hpp>
-#include <internal_data/resources/mesh.hpp>
+#include <internal_data/resources/mesh_data.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/string.hpp>

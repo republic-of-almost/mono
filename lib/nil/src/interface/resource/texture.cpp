@@ -1,5 +1,6 @@
 #include <nil/resource/texture.hpp>
 #include <internal_data/internal_data.hpp>
+#include <internal_data/resources/texture_data.hpp>
 #include <lib/array.hpp>
 #include <lib/key.hpp>
 #include <lib/string_pool.hpp>

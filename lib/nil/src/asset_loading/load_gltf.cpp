@@ -1,8 +1,8 @@
 #include <asset_loading/asset_loading.hpp>
-#include <internal_data/resources/texture.hpp>
-#include <internal_data/resources/shader.hpp>
-#include <internal_data/resources/audio_src.hpp>
-#include <internal_data/resources/mesh.hpp>
+#include <internal_data/resources/texture_data.hpp>
+#include <internal_data/resources/shader_data.hpp>
+#include <internal_data/resources/audio_src_data.hpp>
+#include <internal_data/resources/mesh_data.hpp>
 #include <nil/resource/mesh.hpp>
 #include <nil/resource/texture.hpp>
 #include <nil/resource/directory.hpp>
@@ -1222,7 +1222,7 @@ load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
 
   lib::array<Nil_mesh> internal_meshes;
   lib::array<Nil_texture> internal_textures;
-  lib::array<Nil::Resource::Material> internal_materials;
+  lib::array<Nil_material> internal_materials;
 
   for(auto &tex : textures)
   {
@@ -1251,7 +1251,7 @@ load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
   
   for(auto &mat : materials)
   {
-    Nil::Resource::Material data{};
+    Nil_material data{};
     data.color = 0xFFFFFFFF;
     
     data.name = mat.name;
@@ -1263,7 +1263,7 @@ load_gltf(Nil_ctx *ctx, Nil::Node root_node, const char *path)
     
     data.color = lib::color::init(mat.ext_blinn_phong.diffuse_factor);
     
-    Nil::Resource::load(data);
+    nil_rsrc_material_create(ctx, &data);
     
     internal_materials.emplace_back(data);
   }

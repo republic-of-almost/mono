@@ -85,7 +85,7 @@ load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename)
   {
     lib::material *mesh_mat = &model.mesh_material[i];
 
-    Nil::Resource::Material mat{};
+    Nil_material mat{};
     mat.name = model.mesh_material[i].name;
     mat.color = 0xEEEEFF00;
 
@@ -101,8 +101,8 @@ load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename)
     }
 
     mat.texture_01 = tex.id;
-
-    Nil::Resource::load(mat);
+    
+    nil_rsrc_material_create(ctx, &mat);
   }
 
   // -- Create Nodes and Renderables -- //
@@ -120,11 +120,11 @@ load_obj(Nil_ctx *ctx, Nil::Node node, const char *filename)
       Nil_mesh mesh{};
       nil_rsrc_mesh_find_by_name(ctx, mesh_name, &mesh);
 
-      Nil::Resource::Material mat{};
+      Nil_material mat{};
       const int32_t mat_id = model.material_id[i];
       if(mat_id > -1)
       {
-        Nil::Resource::find_by_name(model.mesh_material[mat_id].name, mat);
+        nil_rsrc_material_find_by_name(ctx, model.mesh_material[mat_id].name, &mat);
       }
 
       Nil::Data::Renderable renderable{};

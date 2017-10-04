@@ -19,7 +19,7 @@ namespace ImGUI {
 
 void render_resource_overview(
   const Nil_texture *tex_rsrc, const size_t tex_count,
-  const Nil::Resource::Material *mat_rsrc, const size_t mat_count,
+  const Nil_material *mat_rsrc, const size_t mat_count,
   const Nil_mesh *mesh_rsrc, const size_t mesh_count,
   const Nil_shader *shd_rsrc, const size_t shd_count)
 {
@@ -167,13 +167,13 @@ render_resource(const Nil_texture *rsrc, const size_t count)
 
 
 void
-render_resource(const Nil::Resource::Material *rsrc, const size_t count)
+render_resource(const Nil_material *rsrc, const size_t count)
 {
   ImGui::Text("Material Count %zu", count);
 
   for(size_t i = 0; i < count; ++i)
   {
-    const Nil::Resource::Material *data = &rsrc[i];
+    const Nil_material *data = &rsrc[i];
   
     char name[1024]{};
     sprintf(name, "Material - %s ##%zu", data->name, i + 1);
@@ -197,10 +197,10 @@ render_resource(const Nil::Resource::Material *rsrc, const size_t count)
     
       float color[4]
       {
-        lib::color::get_channel_1f(data->color),
-        lib::color::get_channel_2f(data->color),
-        lib::color::get_channel_3f(data->color),
-        lib::color::get_channel_4f(data->color),
+//        lib::color::get_channel_1f(data->color),
+//        lib::color::get_channel_2f(data->color),
+//        lib::color::get_channel_3f(data->color),
+//        lib::color::get_channel_4f(data->color),
       };
     
       ImGui::ColorEdit4("Color##Mat", color);

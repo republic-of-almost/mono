@@ -93,6 +93,8 @@ struct Nil_material;
 struct Nil_mesh;
 struct Nil_shader;
 struct Nil_texture;
+struct Nil_material;
+struct Nil_font;
 
 /* callback prototypes */
 
@@ -133,6 +135,13 @@ typedef enum
   NIL_GPU_TASK_RENDER,
   NIL_GPU_TASK_POST_RENDER,
 } Nil_gpu_task_queue;
+
+
+typedef enum
+{
+  NIL_AUDIO_SRC_SAMPLE,
+  NIL_AUDIO_SRC_SONG,
+} Nil_audio_src_type;
 
 
 typedef enum

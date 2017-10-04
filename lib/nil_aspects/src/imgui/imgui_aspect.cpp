@@ -340,8 +340,8 @@ think(Nil_ctx *ctx, void *data)
     nil_rsrc_mesh_get_data(ctx, &mesh_count, &mesh);
 
     size_t mat_count = 0;
-    Nil::Resource::Material *mats = nullptr;
-    Nil::Resource::get(&mat_count, &mats);
+    Nil_material *mats = nullptr;
+    nil_rsrc_material_get_data(ctx, &mat_count, &mats);
     
     size_t shd_count = 0;
     Nil_shader *shds = nullptr;

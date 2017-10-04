@@ -1,5 +1,5 @@
 #include <nil/resource/audio.hpp>
-#include <internal_data/resources/audio_src.hpp>
+#include <internal_data/resources/audio_src_data.hpp>
 #include <internal_data/internal_data.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>

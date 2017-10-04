@@ -4,6 +4,11 @@
 #include <nil/aspect.hpp>
 #include <nil/task.hpp>
 #include <internal_data/internal_data.hpp>
+#include <internal_data/resources/texture_data.hpp>
+#include <internal_data/resources/shader_data.hpp>
+#include <internal_data/resources/mesh_data.hpp>
+#include <internal_data/resources/audio_src_data.hpp>
+#include <internal_data/resources/material_data.hpp>
 #include <internal_data/task_queue.hpp>
 #include <graph/graph.hpp>
 #include <graph/graph_data.hpp>
@@ -41,9 +46,10 @@ nil_ctx_initialize(Nil_ctx **ctx)
     new_ctx->rsrc_texture->keys.emplace_back(uint32_t{0});
     new_ctx->rsrc_texture->textures.emplace_back(Nil_texture{});
     
-    new_ctx->rsrc_shader  = new Nil_shader_data();
-    new_ctx->rsrc_mesh    = new Nil_mesh_data();
-    new_ctx->rsrc_audio   = new Nil_audio_src_data();
+    new_ctx->rsrc_shader   = new Nil_shader_data();
+    new_ctx->rsrc_mesh     = new Nil_mesh_data();
+    new_ctx->rsrc_audio    = new Nil_audio_src_data();
+    new_ctx->rsrc_material = new Nil_material_data();
   
     *ctx = new_ctx;
   }

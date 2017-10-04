@@ -1,6 +1,6 @@
 #include <nil/resource/shader.hpp>
 #include <internal_data/internal_data.hpp>
-#include <internal_data/resources/shader.hpp>
+#include <internal_data/resources/shader_data.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>

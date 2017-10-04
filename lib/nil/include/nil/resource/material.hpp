@@ -5,83 +5,91 @@
 #include <nil/fwd.hpp>
 
 
-namespace Nil {
-namespace Resource {
-
-
 // ------------------------------------------------------------- [ Resource ] --
 
 
-/*!
-  The calling code should set the attributes.
-  When you successfully load a material the id field is updated.
-*/
-struct Material
+struct Nil_material
 {
-  // -- Input -- //
+  /* input */
 
-  const char *name;     // Internally copied
-  uint32_t color;
-  uint32_t texture_01;
-  uint32_t texture_02;
-  uint32_t texture_03;
+  const char      *name;
+  uint32_t        color;
+  uint32_t        texture_01;
+  uint32_t        texture_02;
+  uint32_t        texture_03;
+  uint32_t        shader_id;
   
-  uint32_t shader_id;
+  /* output */
   
-  // -- Output -- //
-  
-  Load_status       status;
-  uint32_t          id;
+  Nil_resource_status   status;
+  uint32_t              id;
 };
 
 
-// ----------------------------------------------------------------- [ Find ] --
+/* ------------------------------------------------- [ Resource Lifetime ] -- */
 
 
-/*!
-  Searches for a Material by name.
-  if found returns true else returns false.
-*/
 bool
-find_by_name(const char *name, Material &out);
+nil_rsrc_material_initialize(Nil_ctx *ctx);
 
 
-// ------------------------------------------------------------ [ Set / Get ] --
-
-
-/*!
-  Loads a new Material.
-  Updates an existing material if name exists.
-  If it fails to load it will return false.
-*/
 bool
-load(Material &in_out);
+nil_rsrc_material_destroy(Nil_ctx *ctx);
 
 
-/*!
-  Gets access to the underlying data.
+/* --------------------------------------------------- [ Resource Access ] -- */
 
-  size_t count = 0;
-  Matieral *data = nullptr;
-  get(&count, &data);
-*/
+
+bool
+nil_rsrc_material_find_by_name(Nil_ctx *ctx, const char *name, Nil_material *out = NULL);
+
+
+bool
+nil_rsrc_material_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_material *out = NULL);
+
+
 void
-get(size_t *count, Material **out);
+nil_rsrc_material_get_data(Nil_ctx *ctx, size_t *out_count, Nil_material **out_data);
 
 
-// ----------------------------------------------------------------- [ Info ] --
+bool
+nil_rsrc_material_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_material **out);
 
 
-/*!
-  Convence method good for templates and UI.
-  returns the type name.
-*/
-const char *
-get_type_name(const Material &in);
+/* -------------------------------------------------- [ Resource Details ] -- */
 
 
-} // ns
-} // ns
+size_t
+nil_rsrc_material_get_count(Nil_ctx *ctx);
+
+
+/* ---------------------------------------------------- [ Resource Batch ] -- */
+
+
+void
+nil_rsrc_material_create_batch(Nil_ctx *ctx, Nil_material *in_out, size_t count, bool move = false);
+
+
+/* ------------------------------------------------- [ Resource Instance ] -- */
+
+
+uint32_t
+nil_rsrc_material_create(Nil_ctx *ctx, Nil_material *in_out, bool move = false);
+
+
+bool
+nil_rsrc_material_destroy(Nil_ctx *ctx, uint32_t id);
+
+
+/* status */
+
+
+bool
+nil_rsrc_material_set_load_status(Nil_ctx *ctx, uint32_t id, Nil_resource_status status);
+
+
+Nil_resource_status
+nil_rsrc_material_get_load_status(Nil_ctx *ctx, uint32_t id);
 
 
 #endif // inc guard

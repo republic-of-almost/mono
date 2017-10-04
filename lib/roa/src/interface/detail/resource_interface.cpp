@@ -36,12 +36,14 @@ setup_resource(const uint32_t id)
 ROA::Material
 create_resource(ROA::Material &mat, const char *name)
 {
-  Nil::Resource::Material rsrc_data{};
+  Nil_material rsrc_data{};
   rsrc_data.name   = name;
   rsrc_data.color  = 0xFFFFFFFF;
-  rsrc_data.status = Nil::Resource::Load_status::NONE;
+  rsrc_data.status = NIL_RSRC_STATUS_NONE;
+  
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool submited = Nil::Resource::load(rsrc_data);
+  const bool submited = !!nil_rsrc_material_create(ctx, &rsrc_data);
   
   if(submited)
   {
@@ -66,9 +68,10 @@ load_resource(ROA::Material &mat, const char *file)
 ROA::Material
 find_resource(ROA::Material &mat, const char *name)
 {
-  Nil::Resource::Material rsrc_data{};
+  Nil_material rsrc_data{};
+  Nil_ctx *ctx = ROA_detail::get_ctx();
 
-  const bool found = Nil::Resource::find_by_name(name, rsrc_data);
+  const bool found = nil_rsrc_material_find_by_name(ctx, name, &rsrc_data);
   
   if(found)
   {

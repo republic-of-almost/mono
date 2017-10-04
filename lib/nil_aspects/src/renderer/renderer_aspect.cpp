@@ -773,8 +773,8 @@ think(Nil_ctx *ctx, void *data)
   Nil::Data::get(&cam_count, &cameras);
 
   size_t mat_count = 0;
-  Nil::Resource::Material *mats;
-  Nil::Resource::get(&mat_count, &mats);
+  Nil_material *mats;
+  nil_rsrc_material_get_data(ctx, &mat_count, &mats);
 
   for(uint32_t j = 0; j < cam_count; ++j)
   {
@@ -908,7 +908,7 @@ think(Nil_ctx *ctx, void *data)
 
         if(render.mesh_id && mesh_count > render.mesh_id)
         {        
-          const Nil::Resource::Material mat = mats[render.material_id];
+          const Nil_material mat = mats[render.material_id];
           
           const float colorf[4]
           {

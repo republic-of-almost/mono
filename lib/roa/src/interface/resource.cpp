@@ -164,9 +164,10 @@ Resource::get_instance_name() const
     case ROA_detail::Resource::MATERIAL:
     {
       size_t count = 0;
-      Nil::Resource::Material *data = nullptr;
+      Nil_material *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_material_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -254,9 +255,10 @@ Resource::get_status() const
     case ROA_detail::Resource::MATERIAL:
     {
       size_t count = 0;
-      Nil::Resource::Material *data = nullptr;
+      Nil_material *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_material_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
@@ -356,15 +358,16 @@ Resource::load()
     case ROA_detail::Resource::MATERIAL:
     {
       size_t count = 0;
-      Nil::Resource::Material *data = nullptr;
+      Nil_material *data = nullptr;
+      Nil_ctx *ctx = ROA_detail::get_ctx();
       
-      Nil::Resource::get(&count, &data);
+      nil_rsrc_material_get_data(ctx, &count, &data);
       
       LIB_ASSERT(instance_id < count);
       
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+      if(data[instance_id].status == NIL_RSRC_STATUS_NONE)
       {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+        data[instance_id].status = NIL_RSRC_STATUS_PENDING;
       }
       
       break;

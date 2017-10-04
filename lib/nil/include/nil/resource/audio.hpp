@@ -13,12 +13,12 @@ struct Nil_audio_src
 {
   /* input */
   
-  const char *name;
-  Nil_data_type data_type;
-  uintptr_t         data;
-  size_t            data_size;
+  const char          *name;
+  Nil_data_type       data_type;
+  uintptr_t           data;
+  size_t              data_size;
   
-  enum { SAMPLE, SONG } audio_type;
+  Nil_audio_src_type  audio_type;
   
   /* output */
   

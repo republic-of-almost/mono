@@ -5,12 +5,15 @@
 #include <nil/fwd.hpp>
 #include <nil/aspect.hpp>
 #include <nil/task.hpp>
-#include <internal_data/resources/texture.hpp>
-#include <internal_data/resources/shader.hpp>
-#include <internal_data/resources/mesh.hpp>
-#include <internal_data/resources/audio_src.hpp>
 #include <graph/graph_fwd.hpp>
 #include <lib/timer.hpp>
+
+
+struct Nil_texture_data;
+struct Nil_shader_data;
+struct Nil_mesh_data;
+struct Nil_audio_src_data;
+struct Nil_material_data;
 
 
 #ifndef NIL_MAX_ASPECT_COUNT
@@ -56,6 +59,7 @@ struct Nil_ctx
   Nil_shader_data*     rsrc_shader;
   Nil_mesh_data*       rsrc_mesh;
   Nil_audio_src_data*  rsrc_audio;
+  Nil_material_data*   rsrc_material;
   
   
   /* ------------------------------------------------------- [ Node Data ] -- */
