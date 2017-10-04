@@ -5,15 +5,7 @@
 #include <nil/fwd.hpp>
 
 
-namespace Nil {
-namespace Resource {
-
-
-// ------------------------------------------------------------- [ Resource ] --
-/*
-  Font Resource
-*/
-struct Font
+struct Nil_font
 {
   const char        *name;
   enum { FILENAME } data_type;
@@ -22,7 +14,7 @@ struct Font
 
   // -- Output -- //
   
-  Load_status       status;
+  Nil_resource_status       status;
   
   uint32_t *glyph_data;
   size_t    glyph_data_count;
@@ -35,40 +27,6 @@ struct Font
 };
 
 
-// ------------------------------------------------------------- [ Get Data ] --
-
-
-bool
-find_by_name(const char *name, Font &out);
-
-
-void
-get(size_t *count, Font **out);
-
-
-// ----------------------------------------------------------------- [ Load ] --
-
-
-bool
-load(Font &in);
-
-
-// ----------------------------------------------------------------- [ Info ] --
-/*
-  Various information about Font data.
-*/
-
-
-const char *
-get_type_name(const Font &in);
-
-
-size_t
-font_count();
-
-
-} // ns
-} // ns
 
 
 #endif // inc guard

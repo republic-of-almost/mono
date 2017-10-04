@@ -24,22 +24,6 @@ class Node_list;
 class Node_controller;
 
 
-namespace Resource {
-
-struct Font;
-struct Material;
-
-enum class Load_status {
-  NONE,
-  PENDING,
-  LOADED,
-  FAILED,
-  
-  ERROR,
-};
-
-} // ns
-
 
 namespace Data {
 

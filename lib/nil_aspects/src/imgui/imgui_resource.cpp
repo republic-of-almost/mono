@@ -28,7 +28,7 @@ void render_resource_overview(
   {
     if(tex_rsrc != nullptr)
     {
-      size_t load_status[4]{};
+      size_t load_status[5]{};
 
       // Gather stats //
       for (size_t i = 0; i < tex_count; ++i)
@@ -41,10 +41,10 @@ void render_resource_overview(
 
       // Render stats //
       ImGui::LabelText("Count##rover_tex",   "%zu", tex_count);
-      ImGui::LabelText("Unloaded#rover_tex", "%zu", load_status[(int)Resource::Load_status::NONE]);
-      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[(int)Resource::Load_status::PENDING]);
-      ImGui::LabelText("Loaded##rover_tex",  "%zu", load_status[(int)Resource::Load_status::LOADED]);
-      ImGui::LabelText("Failed##rover_tex",  "%zu", load_status[(int)Resource::Load_status::FAILED]);
+      ImGui::LabelText("Unloaded#rover_tex", "%zu", load_status[(int)NIL_RSRC_STATUS_NONE]);
+      ImGui::LabelText("Pending##rover_tex", "%zu", load_status[(int)NIL_RSRC_STATUS_PENDING]);
+      ImGui::LabelText("Loaded##rover_tex",  "%zu", load_status[(int)NIL_RSRC_STATUS_LOADED]);
+      ImGui::LabelText("Failed##rover_tex",  "%zu", load_status[(int)NIL_RSRC_STATUS_FAILED]);
     }
     else
     {
@@ -57,7 +57,7 @@ void render_resource_overview(
   {
     if(mesh_rsrc != nullptr)
     {
-      size_t load_status[4]{};
+      size_t load_status[5]{};
 
       // Gather stats //
       for (size_t i = 0; i < mesh_count; ++i)
@@ -70,10 +70,10 @@ void render_resource_overview(
 
       // Render stats //
       ImGui::LabelText("Count##rover_mesh",   "%zu", tex_count);
-      ImGui::LabelText("Unloaded#rover_mesh", "%zu", load_status[(int)Resource::Load_status::NONE]);
-      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[(int)Resource::Load_status::PENDING]);
-      ImGui::LabelText("Loaded##rover_mesh",  "%zu", load_status[(int)Resource::Load_status::LOADED]);
-      ImGui::LabelText("Failed##rover_mesh",  "%zu", load_status[(int)Resource::Load_status::FAILED]);
+      ImGui::LabelText("Unloaded#rover_mesh", "%zu", load_status[(int)NIL_RSRC_STATUS_NONE]);
+      ImGui::LabelText("Pending##rover_mesh", "%zu", load_status[(int)NIL_RSRC_STATUS_PENDING]);
+      ImGui::LabelText("Loaded##rover_mesh",  "%zu", load_status[(int)NIL_RSRC_STATUS_LOADED]);
+      ImGui::LabelText("Failed##rover_mesh",  "%zu", load_status[(int)NIL_RSRC_STATUS_FAILED]);
     }
     else
     {

@@ -364,7 +364,7 @@ think(Nil_ctx *ctx, void *data)
   // Individual Resources //
   render_rsrc<Nil_texture>(&self->show_rsrc_textures);
   render_rsrc<Nil_mesh>(&self->show_rsrc_meshes);
-  render_rsrc<Nil::Resource::Material>(&self->show_rsrc_materials);
+  render_rsrc<Nil_material>(&self->show_rsrc_materials);
 
 
   // ---------------------------------------------------------- [ Raw Graph ] --

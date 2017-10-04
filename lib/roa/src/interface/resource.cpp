@@ -138,14 +138,15 @@ Resource::get_instance_name() const
     
     case ROA_detail::Resource::FONT:
     {
-      size_t count = 0;
-      Nil::Resource::Font *data = nullptr;
-      
-      Nil::Resource::get(&count, &data);
-      
-      LIB_ASSERT(instance_id < count);
-      
-      return data[instance_id].name;
+//      size_t count = 0;
+//      Nil::Resource::Font *data = nullptr;
+//      
+//      Nil::Resource::get(&count, &data);
+//      
+//      LIB_ASSERT(instance_id < count);
+//      
+//      return data[instance_id].name;
+      return "";
     }
     
     case ROA_detail::Resource::TEXTURE:
@@ -204,7 +205,7 @@ Resource::get_status() const
   const uint32_t type_id     = lib::entity::type(m_id);
   const uint32_t instance_id = lib::entity::instance(m_id);
   
-  uint32_t status = (uint32_t)Nil::Resource::Load_status::ERROR;
+  uint32_t status = (uint32_t)NIL_RSRC_STATUS_ERROR;
   
   switch (type_id)
   {
@@ -226,14 +227,14 @@ Resource::get_status() const
     
     case ROA_detail::Resource::FONT:
     {
-      size_t count = 0;
-      Nil::Resource::Font *data = nullptr;
-      
-      Nil::Resource::get(&count, &data);
-      
-      LIB_ASSERT(instance_id < count);
-      
-      status = (uint32_t)data[instance_id].status;
+//      size_t count = 0;
+//      Nil::Resource::Font *data = nullptr;
+//      
+//      Nil::Resource::get(&count, &data);
+//      
+//      LIB_ASSERT(instance_id < count);
+//      
+//      status = (uint32_t)data[instance_id].status;
       
       break;
     }
@@ -284,13 +285,13 @@ Resource::get_status() const
     default:
     {
       LIB_ASSERT(false); // Missing something
-      status = (uint32_t)Nil::Resource::Load_status::ERROR;
+      status = (uint32_t)NIL_RSRC_STATUS_ERROR;
       
       break;
     }
   }
 
-  return ROA_detail::convert_from_nil((Nil::Resource::Load_status)status);
+  return ROA_detail::convert_from_nil((Nil_resource_status)status);
 }
 
 
@@ -323,17 +324,17 @@ Resource::load()
     
     case ROA_detail::Resource::FONT:
     {
-      size_t count = 0;
-      Nil::Resource::Font *data = nullptr;
-      
-      Nil::Resource::get(&count, &data);
-      
-      LIB_ASSERT(instance_id < count);
-      
-      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
-      {
-        data[instance_id].status = Nil::Resource::Load_status::PENDING;
-      }
+//      size_t count = 0;
+//      Nil::Resource::Font *data = nullptr;
+//      
+//      Nil::Resource::get(&count, &data);
+//      
+//      LIB_ASSERT(instance_id < count);
+//      
+//      if(data[instance_id].status == Nil::Resource::Load_status::NONE)
+//      {
+//        data[instance_id].status = Nil::Resource::Load_status::PENDING;
+//      }
       
       break;
     }
