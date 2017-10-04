@@ -1,4 +1,6 @@
 #include <nil/resource/font.hpp>
+#include <internal_data/internal_data.hpp>
+#include <internal_data/resources/font_data.hpp>
 #include <lib/array.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
@@ -12,12 +14,6 @@ namespace {
 
 
 // ------------------------------------------------------------ [ Resources ] --
-
-
-struct Font_data {
-  lib::array<uint32_t>            keys{uint32_t{}};
-  lib::array<Nil::Resource::Font> font{Nil::Resource::Font{}};
-};
 
 
 Font_data&
