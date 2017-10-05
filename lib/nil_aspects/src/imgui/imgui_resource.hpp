@@ -1,5 +1,4 @@
 #ifndef NIMGUI
-
 #ifndef IMGUI_RESOURCE_INCLUDED_8D7DB56E_D91E_41D5_92D9_2250EDE3174E
 #define IMGUI_RESOURCE_INCLUDED_8D7DB56E_D91E_41D5_92D9_2250EDE3174E
 
@@ -45,5 +44,4 @@ render_resource(const Nil_shader *rsrc, const size_t count);
 
 
 #endif // inc guard
-
 #endif // build guard
