@@ -91,3 +91,4 @@ NIL_MAX_ASPECT_COUNT=\<count\>           | 16      | Max number of supported asp
 NIL_MAX_CPU_TASK_QUEUE=\<count\>         | 32      | Max CPU task per slot per tick.
 NIL_MAX_GPU_TASK_QUEUE=\<count\>         | 16      | Max GPU task per slot per tick.
 NIL_CLEANUP_ON_EXIT=\<1 or 0\>           | 1       | If Nil should try and clean up on exit.
+NNIL_ASSERT                              | undef   | If defined asserts will happen in debug (for testing)

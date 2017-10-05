@@ -5,13 +5,10 @@
 #include <lib/key.hpp>
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
-#include <lib/assert.hpp>
-#include <lib/key.hpp>
 #include <lib/string.hpp>
 
-
-namespace {
-
+#include <common/utilities.hpp>
+#include <common/error_msgs.hpp>
 
 // ------------------------------------------------------------- [ Messages ] --
 
@@ -20,7 +17,6 @@ constexpr char msg_texture_no_name[]     = "Loading a Texture - must have a name
 constexpr char msg_texture_name_exists[] = "Texture with name %s already exists";
 constexpr char msg_texture_failed[]      = "Failed to add Texture %s";
 
-}
 
 /* ------------------------------------------------- [ Resource Lifetime ] -- */
 
@@ -28,6 +24,7 @@ constexpr char msg_texture_failed[]      = "Failed to add Texture %s";
 bool
 nil_rsrc_texture_initialize(Nil_ctx *ctx)
 {
+  LOG_TODO("CTX Data should be init here rather than in ctx init");
   return true;
 }
 
@@ -35,6 +32,7 @@ nil_rsrc_texture_initialize(Nil_ctx *ctx)
 bool
 nil_rsrc_texture_destroy(Nil_ctx *ctx)
 {
+  LOG_TODO("CTX Data should be destroyed here.");
   return true;
 }
 
@@ -45,6 +43,27 @@ nil_rsrc_texture_destroy(Nil_ctx *ctx)
 bool
 nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
 {
+  /* Param Check */
+  {
+    const bool has_ctx = !!ctx;
+    const bool has_name = !!name;
+
+    NIL_ASSERT(has_ctx);
+    NIL_ASSERT(has_name);
+
+    if(!has_ctx)
+    {
+      LOG_ERROR(nil_err_msg_param_fail_no_ctx);
+      return false;
+    }
+
+    if(!has_name)
+    {
+      LOG_ERROR(nil_err_msg_rsrc_name_required, "Texture");
+      return false;
+    }
+  }
+
   const uint32_t find_key = lib::string_pool::find(name);
   const size_t count = ctx->rsrc_texture->keys.size();
   
