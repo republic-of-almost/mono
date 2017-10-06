@@ -44,6 +44,7 @@ bool
 nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
 {
   /* Param Check */
+  #ifdef NIL_PEDANTIC
   {
     const bool has_ctx = !!ctx;
     const bool has_name = !!name;
@@ -63,20 +64,24 @@ nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
       return false;
     }
   }
-
-  const uint32_t find_key = lib::string_pool::find(name);
-  const size_t count = ctx->rsrc_texture->keys.size();
+  #endif
   
-  for(size_t i = 0; i < count; ++i)
+  /* Search by name */
   {
-    if(ctx->rsrc_texture->keys[i] == find_key)
+    const uint32_t find_key = lib::string_pool::find(name);
+    const size_t count = ctx->rsrc_texture->keys.size();
+    
+    for(size_t i = 0; i < count; ++i)
     {
-      if(out)
+      if(ctx->rsrc_texture->keys[i] == find_key)
       {
-        out = &ctx->rsrc_texture->textures[i];
+        if(out)
+        {
+          out = &ctx->rsrc_texture->textures[i];
+        }
+        
+        return true;
       }
-      
-      return true;
     }
   }
   
@@ -87,18 +92,44 @@ nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out)
 bool
 nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out)
 {
-  const uint32_t *ids = ctx->rsrc_texture->keys.data();
-  const size_t id_count = ctx->rsrc_texture->keys.size();
-  size_t index = 0;
-  
-  if(lib::key::linear_search(id, ids, id_count))
+  /* Param Check */
+  #ifdef NIL_PEDANTIC
   {
-    if(out)
+    const bool has_ctx = !!ctx;
+    const bool has_name = !!id;
+
+    NIL_ASSERT(has_ctx);
+    NIL_ASSERT(has_name);
+
+    if(!has_ctx)
     {
-      out = &ctx->rsrc_texture->textures[index];
+      LOG_ERROR(nil_err_msg_param_fail_no_ctx);
+      return false;
     }
+
+    if(!has_name)
+    {
+      LOG_ERROR(nil_err_msg_rsrc_id_required, "Texture");
+      return false;
+    }
+  }
+  #endif
+  
+  /* Search by ID */
+  {
+    const uint32_t *ids = ctx->rsrc_texture->keys.data();
+    const size_t id_count = ctx->rsrc_texture->keys.size();
+    size_t index = 0;
     
-    return true;
+    if(lib::key::linear_search(id, ids, id_count))
+    {
+      if(out)
+      {
+        out = &ctx->rsrc_texture->textures[index];
+      }
+      
+      return true;
+    }
   }
   
   return false;
@@ -108,8 +139,49 @@ nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out)
 void
 nil_rsrc_texture_get_data(Nil_ctx *ctx, size_t *out_count, Nil_texture **out_data)
 {
-  *out_count = ctx->rsrc_texture->keys.size();
-  *out_data = ctx->rsrc_texture->textures.data();
+  /* Param Check */
+  #ifdef NIL_PEDANTIC
+  {
+    const bool has_ctx = !!ctx;
+    const bool has_count = !!out_count;
+    const bool has_data = !!out_data;
+
+    NIL_ASSERT(has_ctx);
+    NIL_ASSERT(has_count);
+    NIL_ASSERT(has_data);
+
+    if(!has_ctx)
+    {
+      LOG_ERROR(nil_err_msg_param_fail_no_ctx);
+      return;
+    }
+
+    if(!has_count)
+    {
+      LOG_ERROR(nil_err_msg_rsrc_no_count, "Texture");
+      return;
+    }
+    
+    if(!has_data)
+    {
+      LOG_ERROR(nil_err_msg_rsrc_no_data, "Texture");
+      return;
+    }
+  }
+  #endif
+
+  /* fetch data */
+  {
+    if(out_count)
+    {
+      *out_count = ctx->rsrc_texture->keys.size();
+    }
+    
+    if(out_data)
+    {
+      *out_data = ctx->rsrc_texture->textures.data();
+    }
+  }
 }
 
 

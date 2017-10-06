@@ -47,15 +47,15 @@ nil_rsrc_texture_destroy(Nil_ctx *ctx);
 
 
 bool
-nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out = NULL);
+nil_rsrc_texture_find_by_name(Nil_ctx *ctx, const char *name, Nil_texture *out);
 
 
 bool
-nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out = NULL);
+nil_rsrc_texture_find_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture *out);
 
 
 void
-nil_rsrc_texture_get_data(Nil_ctx *ctx, size_t *out_count, Nil_texture **out_data = NULL);
+nil_rsrc_texture_get_data(Nil_ctx *ctx, size_t *out_count, Nil_texture **out_data);
 
 
 bool
