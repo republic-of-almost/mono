@@ -2,7 +2,7 @@
 
 --[[
 
-  Nau Test Project Description
+  Nau Unit Test Project Description
 
 ]]--
 
@@ -42,18 +42,19 @@ table.insert(
   }
 )
 
+--[[
+
+  Nau Functional Test Project Description
+
+]]--
+
 table.insert(
   projects,
   {
     name     = "NauFuncTests",
-    kind     = "ConsoleApp",
+    kind     = "WindowedApp",
     language = "C++",
     location = make.get_proj_root(),
-
-    lang_settings = {
-      exceptions  = true,
-      rtti        = true,
-    },
 
     src_files = {
       make.add_headers(make.get_proj_root() .. "../tests/func"),

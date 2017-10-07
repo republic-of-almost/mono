@@ -47,7 +47,6 @@ table.insert(
 
       -- Third Party --
 
-      "GLFW",
       "TinyDIR",
       "Json",
     },

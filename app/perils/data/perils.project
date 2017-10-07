@@ -1,7 +1,7 @@
 #!lua
 
 --[[
-  Stardust Project Description
+  PerilsPast Project Description
 ]]--
 
 table.insert(
@@ -31,15 +31,6 @@ table.insert(
 
     project_dependencies = {
       "ROA",
-      "Nil",
-      "Lib",
-      "Math",
-      "AspectsControllers",
-      "Nau",
-
-      -- Thirdparty
-
-      "STB",
     },
 
     private_inc_dirs = {

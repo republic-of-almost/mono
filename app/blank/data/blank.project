@@ -30,10 +30,6 @@ table.insert(
 
     project_dependencies = {
       "ROA",
-      "Nil",
-      "Lib",
-      "Math",
-      "AspectsControllers",
     },
 
     inc_dirs = {

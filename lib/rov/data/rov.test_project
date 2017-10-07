@@ -2,14 +2,14 @@
 
 --[[
 
-  Render 'O' Vision Test Project Description
+  Render 'O' Vision Unit Test Project Description
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "ROVTest",
+    name     = "ROVUnitTest",
     kind     = "ConsoleApp",
     language = "C++",
     location = make.get_proj_root(),
@@ -42,6 +42,49 @@ table.insert(
       -- Third Party --
 
       "Catch",
+    },
+  }
+)
+
+
+--[[
+
+  Render 'O' Vision Functional Test Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "ROVFuncTest",
+    kind     = "WindowedApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../test/"),
+      make.add_src(make.get_proj_root() .. "../test/"),
+      make.add_doc(make.get_proj_root() .. "../test/"),
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "./",
+    },
+
+    defines = {
+      -- See build.md
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+
+      "ROV",
+
+      -- Third Party --
+
+      "GLFW",
+      "OpenGL",
     },
   }
 )

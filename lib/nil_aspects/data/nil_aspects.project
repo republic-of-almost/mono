@@ -2,7 +2,7 @@
 
 --[[
 
-  Aspect Project Description
+  Nil Controller Project Description
 
 ]]--
 
@@ -10,7 +10,7 @@
 table.insert(
   projects,
   {
-    name     = "AspectsControllers",
+    name     = "NilControllers",
     kind     = "StaticLib",
     language = "C++",
     location = make.get_proj_root(),
@@ -26,6 +26,7 @@ table.insert(
 
     public_inc_dirs = {
       make.get_proj_root() .. "../include/",
+      make.get_proj_root() .. "../../roa/include", -- we have a cyclical dependency on this.
     },
 
     private_inc_dirs = {
@@ -45,12 +46,12 @@ table.insert(
 
       -- First Party --
 
-      "ROA",
       "Nil",
       "Lib",
       "External",
       "ROV",
       "Math",
+      -- "ROA", -- cyclical we just include the inc path.
 
       -- Thrid Party --
 
