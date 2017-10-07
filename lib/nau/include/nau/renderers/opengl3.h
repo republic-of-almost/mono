@@ -9,7 +9,7 @@
 
 
 void      nau_gl3_init();
-void      nau_gl3_render(Nau_renderable *renderables, size_t count);
+void      nau_gl3_render(Nau_draw_cmd *renderables, int count);
 void      nau_gl3_destroy();
 
 

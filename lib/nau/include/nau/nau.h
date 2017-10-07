@@ -2,49 +2,50 @@
 #define NAU_INCLUDED_38EB9B7F_8D78_411D_8EF1_E08A411AC701
 
 
-#include <stdint.h>
-#include <stddef.h>
+/* ------------------------------------------------------------- [ Types ] -- */
 
 
-// ----------------------------------------------------------------- [ Data ] --
+struct Nau_ctx;
 
 
-struct Nau_renderable
+struct Nau_draw_cmd
 {
-  int32_t     box[4];
-  int32_t     clip[4];
-  uint32_t    color;
+  int clip[4];
+  int count;
 };
 
 
-// ------------------------------------------------------------- [ Lifetime ] --
+typedef void(*Nau_panel_callback)(Nau_ctx *ctx);
 
 
-void      nau_init();
-void      nau_destroy();
-void      nau_new_frame();
-void      nau_render_data(Nau_renderable **renderables, size_t *count);
+/* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
-// ------------------------------------------------------------- [ Settings ] --
+void      nau_initialize(Nau_ctx **ctx);
+void      nau_destroy(Nau_ctx **ctx);
+
+/* -------------------------------------------------------------- [ Data ] -- */
 
 
-void      nau_set_viewport(const uint32_t width, const uint32_t height);
-void      nau_set_color_inactive_window(const uint32_t color);
-void      nau_set_color_active_window(const uint32_t color);
+void      nau_new_frame(Nau_ctx *ctx);
+void      nau_create_draw_cmds(Nau_ctx *ctx);
+void      nau_render_data(Nau_ctx *ctx, Nau_draw_cmd **renderables, int *count);
 
 
-// --------------------------------------------------------------- [ Window ] --
+/* ---------------------------------------------------------- [ Settings ] -- */
 
 
-void      nau_begin(const char *name);
-void      nau_end();
+void      nau_set_viewport(Nau_ctx *ctx, const int width, const int height);
 
 
-// -------------------------------------------------------------- [ Widgets ] --
+/* ------------------------------------------------------------ [ Panels ] -- */
 
 
-void      nau_float(const char *name, float *data);
+void      nau_register_panel(Nau_ctx *ctx, const char *name, const Nau_panel_callback cb);
+
+
+/* ----------------------------------------------------------- [ Widgets ] -- */
+
 
 
 #endif // inc guard

@@ -126,7 +126,7 @@ nau_gl3_init()
   get_nau_gl3().fs_shader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(get_nau_gl3().fs_shader, 1, &fragmentSource, NULL);
   glCompileShader(get_nau_gl3().fs_shader);
-
+  
   // Link the vertex and fragment shader into a shader program
   get_nau_gl3().program = glCreateProgram();
   glAttachShader(get_nau_gl3().program, get_nau_gl3().vs_shader);
@@ -134,7 +134,7 @@ nau_gl3_init()
   glBindFragDataLocation(get_nau_gl3().program, 0, "outColor");
   glLinkProgram(get_nau_gl3().program);
   glUseProgram(get_nau_gl3().program);
-
+  
   // Specify the layout of the vertex data
   GLint pos = glGetAttribLocation(get_nau_gl3().program, "position");
   glEnableVertexAttribArray(pos);
@@ -143,7 +143,7 @@ nau_gl3_init()
 
 
 void
-nau_gl3_render(Nau_renderable *renderables, size_t count)
+nau_gl3_render(Nau_draw_cmd *renderables, int count)
 {
   glClear(GL_DEPTH_BUFFER_BIT);
   
