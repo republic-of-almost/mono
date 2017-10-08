@@ -90,8 +90,7 @@ ogl_exec(
       glViewport(0, 0, fb.width, fb.height);
     }
 
-//    glClearColor(cl_color[0], cl_color[1], cl_color[2], cl_color[3]);
-    glClearColor(0,0,0,1);
+    glClearColor(cl_color[0], cl_color[1], cl_color[2], cl_color[3]);
     glClear(cl_flags);
     glEnable(GL_DEPTH_TEST);
 

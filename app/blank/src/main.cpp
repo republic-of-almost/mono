@@ -94,6 +94,8 @@ main()
       obj_camera.set_name("ROA_Camera");
       
       obj_camera.add_data<ROA::Camera>();
+      ROA::Camera cam = obj_camera.get_data<ROA::Camera>();
+      cam.set_clear_color(ROA::Color(0xFF00FFFF));
 
       const ROA::Bounding_box bb = obj_scene.get_data<ROA::Bounding_box>();
 

@@ -276,7 +276,7 @@ public:
     {
       const size_t index_to_erase = start;
       const size_t start_index    = start + count;
-      const size_t size_to_end    = (sizeof(T) * curr_size) - (sizeof(T) * start);
+      const size_t size_to_end    = (sizeof(T) * (curr_size - 1)) - (sizeof(T) * start);
 
       memmove(m_begin + index_to_erase, m_begin + start_index, size_to_end);
 
