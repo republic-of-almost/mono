@@ -28,7 +28,7 @@ table.insert(
     public_inc_dirs = {
       make.get_proj_root() .. "../include/",
     },
-
+    
     assets = {
       -- Shaders --
       make.get_proj_root() .. "../assets/"
@@ -38,7 +38,7 @@ table.insert(
 
       -- See build.md for build flags doc
 
-      "ROV_NOP",
+      -- "ROV_NOP",
       "ROV_GL4",
       "ROV_GL4_VR_PROTO",
     },

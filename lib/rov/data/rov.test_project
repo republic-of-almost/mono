@@ -20,9 +20,9 @@ table.insert(
     },
 
     src_files = {
-      make.add_headers(make.get_proj_root() .. "../test/"),
-      make.add_src(make.get_proj_root() .. "../test/"),
-      make.add_doc(make.get_proj_root() .. "../test/"),
+      make.add_headers(make.get_proj_root() .. "../test/unit"),
+      make.add_src(make.get_proj_root() .. "../test/unit"),
+      make.add_doc(make.get_proj_root() .. "../test/unit"),
     },
 
     public_inc_dirs = {
@@ -62,9 +62,9 @@ table.insert(
     location = make.get_proj_root(),
 
     src_files = {
-      make.add_headers(make.get_proj_root() .. "../test/"),
-      make.add_src(make.get_proj_root() .. "../test/"),
-      make.add_doc(make.get_proj_root() .. "../test/"),
+      make.add_headers(make.get_proj_root() .. "../test/functional"),
+      make.add_src(make.get_proj_root() .. "../test/functional"),
+      make.add_doc(make.get_proj_root() .. "../test/functional"),
     },
 
     public_inc_dirs = {
