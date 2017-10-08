@@ -1,5 +1,5 @@
 /*
-  Stress
+  Nil Stress Tests
   --
   This has no output.
   Attach a profiler to this program, make changes accordingly.
@@ -17,22 +17,23 @@
 int
 main()
 {
-  Nil_ctx *ctx;
-  nil_ctx_initialize(&ctx);
-  
-  
   /*
     Simple create and destroy test.
     Only to find slowness Ctor/Dtors.
   */
   #ifdef NIL_STRESS_CREATE_DESTROY
   {
+    Nil_ctx *ctx;
+    nil_ctx_initialize(&ctx);
+
     constexpr unsigned int test_size = 10000000;
     
     for(uint32_t i = 0; i < test_size; ++i)
     {
       Nil::Node node;
     }
+    
+    nil_ctx_destroy(&ctx);
   }
   #endif
   
@@ -43,6 +44,9 @@ main()
   */
   #ifdef NIL_STRESS_LONG_LINEAR_RELATIONSHIP
   {
+    Nil_ctx *ctx;
+    nil_ctx_initialize(&ctx);
+
     constexpr unsigned int test_size = 20000;
   
     Nil::Node parent;
@@ -52,6 +56,8 @@ main()
       Nil::Node node;
       node.set_parent(parent);
     }
+    
+    nil_ctx_destroy(&ctx);
   }
   #endif
   
@@ -63,6 +69,9 @@ main()
   */
   #ifdef NIL_STRESS_LONG_SHUFFLE_RELATIONSHIP
   {
+    Nil_ctx *ctx;
+    nil_ctx_initialize(&ctx);
+
     constexpr unsigned int test_size = 20000;
   
     std::vector<Nil::Node> nodes;
@@ -72,11 +81,11 @@ main()
     {
       nodes[i].set_parent(nodes[i -1]);
     }
+    
+    nil_ctx_destroy(&ctx);
   }
   #endif
 
-
-  nil_ctx_destroy(&ctx);
 
   return 0;
 }
