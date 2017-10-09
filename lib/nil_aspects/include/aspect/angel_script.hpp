@@ -18,6 +18,17 @@ class asIScriptContext;
 
 /* ------------------------------------------- [ AngelScript Aspect Data ] -- */
 
+struct obj_method {
+  asIScriptObject *obj;
+  asIScriptFunction *func;
+};
+
+
+struct update_method {
+
+
+};
+
 
 struct AScript_data
 {
@@ -25,9 +36,9 @@ struct AScript_data
   asIScriptModule  *module;
   asIScriptContext *ctx;
 
-  lib::array<asIScriptObject*>    objects;
-  lib::array<asIScriptFunction*>  methods_start;
-  lib::array<asIScriptFunction*>  methods_update;
+  lib::array<asIScriptObject*>  objects;
+  lib::array<obj_method>        methods_start;
+  lib::array<obj_method>        methods_update;
 };
 
 

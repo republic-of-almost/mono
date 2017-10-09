@@ -20,6 +20,14 @@ bool
 load_script_directory(asIScriptEngine *engine, const char *dir);
 
 
+asIScriptObject*
+create_object(asIScriptEngine *engine, asIScriptContext *ctx, asITypeInfo *type_info, const char *obj_name);
+
+
+asIScriptFunction*
+get_method(asITypeInfo *type_info, const char *decl);
+
+
 }
 
 

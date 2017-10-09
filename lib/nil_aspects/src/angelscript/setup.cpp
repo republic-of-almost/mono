@@ -120,4 +120,40 @@ load_script_directory(asIScriptEngine *engine, const char *dir)
 }
 
 
+asIScriptObject*
+create_object(asIScriptEngine *engine, asIScriptContext *ctx, asITypeInfo *type, const char *obj_name)
+{
+  int r = 0;
+  
+  char name[2048]{};
+  strcat(name, obj_name);
+  strcat(name, " @");
+  strcat(name, obj_name);
+  strcat(name, "()");
+
+  asIScriptFunction *factory = type->GetFactoryByDecl(name);
+  
+  r = ctx->Prepare(factory);
+  r = ctx->Execute();
+  
+  asIScriptObject *obj = *(asIScriptObject**)ctx->GetAddressOfReturnValue();
+  
+  if(obj)
+  {
+    obj->AddRef();
+  }
+
+  return obj;
+}
+
+
+asIScriptFunction *
+get_method(asITypeInfo *type, const char *decl)
+{
+  asIScriptFunction *method = type->GetMethodByDecl(decl);
+  
+  return method;
+}
+
+
 } // ns

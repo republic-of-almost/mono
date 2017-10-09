@@ -8,6 +8,7 @@ class asIScriptFunction;
 class asIScriptModule;
 class asIScriptContext;
 class asSMessageInfo;
+class asITypeInfo;
 
 
 #endif // inc guard
