@@ -2,12 +2,12 @@
 #include <aspect/glfw_aspect.hpp>
 #include <aspect/roa_aspect.hpp>
 #include <aspect/renderer_aspect.hpp>
+#include <aspect/angel_script.hpp>
+#include <aspect/so_loud.hpp>
 
 #ifndef NIMGUI
 #include <aspect/imgui_aspect.hpp>
 #endif
-
-#include <aspect/so_loud.hpp>
 
 #include <nil/aspect.hpp>
 #include <nil/nil.hpp>
@@ -101,6 +101,22 @@ load_aspects(Nil_ctx *ctx)
     nil_ctx_add_aspect(ctx, aspect);
   }
   #endif
+  
+  /*
+    Angel Script
+  */
+  {
+    static AScript_data as;
+    Nil_aspect aspect{};
+    
+    aspect.startup  = angelscript_aspect_startup;
+    aspect.tick     = angelscript_aspect_tick;
+    aspect.shutdown = angelscript_aspect_shutdown;
+    aspect.data     = (void*)&as;
+    
+    nil_ctx_add_aspect(ctx, aspect);
+  }
+  
 }
 
 

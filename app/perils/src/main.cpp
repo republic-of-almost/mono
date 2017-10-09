@@ -7,6 +7,8 @@
 #include <data/data.hpp>
 
 
+#include <angelscript/angelscript.h>
+
 /*
   Use this for any testing, fires at the end of the frame.
 */
@@ -16,12 +18,13 @@ custom_tick(uintptr_t user_data)
 }
 
 
-/*
-  Entry Point
-*/
+
 int
 main()
 {
+
+  
+
 //  lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
 
   lib::logging::set_output(lib::logging::out::file | lib::logging::out::console);

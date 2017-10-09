@@ -1,4 +1,6 @@
 #include <nil/resource/texture.hpp>
+#include <common/utilities.hpp>
+#include <common/error_msgs.hpp>
 #include <internal_data/internal_data.hpp>
 #include <internal_data/resources/texture_data.hpp>
 #include <lib/array.hpp>
@@ -6,16 +8,6 @@
 #include <lib/string_pool.hpp>
 #include <lib/logging.hpp>
 #include <lib/string.hpp>
-
-#include <common/utilities.hpp>
-#include <common/error_msgs.hpp>
-
-// ------------------------------------------------------------- [ Messages ] --
-
-
-constexpr char msg_texture_no_name[]     = "Loading a Texture - must have a name.";
-constexpr char msg_texture_name_exists[] = "Texture with name %s already exists";
-constexpr char msg_texture_failed[]      = "Failed to add Texture %s";
 
 
 /* ------------------------------------------------- [ Resource Lifetime ] -- */
@@ -188,6 +180,29 @@ nil_rsrc_texture_get_data(Nil_ctx *ctx, size_t *out_count, Nil_texture **out_dat
 bool
 nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture **out)
 {
+  /* param check */
+  #ifdef NIL_PEDANTIC
+  {
+    const bool has_ctx = !!ctx;
+    const bool has_id = !!id;
+    
+    LIB_ASSERT(has_ctx);
+    LIB_ASSERT(has_id);
+    
+    if(!has_ctx)
+    {
+      LOG_ERROR(nil_err_msg_param_fail_no_ctx);
+      return false;
+    }
+    
+    if(!has_id)
+    {
+      LOG_ERROR(nil_err_msg_rsrc_id_required, "Texture");
+      return false;
+    }
+  }
+  #endif
+
   const size_t count = ctx->rsrc_texture->textures.size();
   
   if(count > id)
@@ -207,6 +222,21 @@ nil_rsrc_texture_get_by_id(Nil_ctx *ctx, uint32_t id, Nil_texture **out)
 size_t
 nil_rsrc_texture_get_count(Nil_ctx *ctx)
 {
+  /* param check */
+  #ifdef NIL_PEDANTIC
+  {
+    const bool has_ctx = !!ctx;
+    
+    LIB_ASSERT(has_ctx);
+    
+    if(!has_ctx)
+    {
+      LOG_ERROR(nil_err_msg_param_fail_no_ctx);
+      return 0;
+    }
+  }
+  #endif
+
   return ctx->rsrc_texture->keys.size();
 }
 
@@ -214,49 +244,55 @@ nil_rsrc_texture_get_count(Nil_ctx *ctx)
 /* ---------------------------------------------------- [ Resource Batch ] -- */
 
 
-void
-nil_rsrc_texture_create_batch(Nil_ctx *ctx, Nil_texture *in, size_t count, bool move)
-{
-}
+/* batch functions removed for the time */
 
 
 /* ------------------------------------------------- [ Resource Instance ] -- */
 
 
 uint32_t
-nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
+nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out)
 {
-  // -- Param Check -- //
+  /* param check */
+  #ifdef NIL_PEDANTIC
   {
+    const bool has_ctx    = !!ctx;
     const bool has_name   = !!in_out->name;
     const bool has_length = strlen(in_out->name);
 
+    LIB_ASSERT(has_ctx);
     LIB_ASSERT(has_name);
     LIB_ASSERT(has_length);
 
+    if(!has_ctx)
+    {
+      LOG_ERROR(nil_err_msg_param_fail_no_ctx);
+      return 0;
+    }
+
     if (!has_name || !has_length)
     {
-      LOG_ERROR(msg_texture_no_name);
-
+      LOG_ERROR(nil_err_msg_rsrc_name_required, "Texture");
       return 0;
     }
   }
+  #endif
 
-  // -- Check and return if exists, no support for updating atm -- //
+  /* Check and return if exists, no support for updating atm */
   {
     const uint32_t check_key = lib::string_pool::find(in_out->name);
 
     if(check_key)
     {
-      LOG_WARNING(msg_texture_name_exists, in_out->name);
+      LOG_WARNING(nil_err_msg_rsrc_exists, in_out->name);
       return 0;
     }
   }
-
-  // -- Load new Texture -- //
+  
+  /* Load new Texture */
   Nil_texture cpy = *in_out;
   {
-    // Transfer ownership //
+    /* Transfer ownership */
     /*
       Do this first because if it fails we need to unset output data.
     */
@@ -308,7 +344,7 @@ nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *in_out, bool move)
         if(cpy_data) { free((void*)cpy_data); }
         if(cpy_name) { free(cpy_name);        }
 
-        LOG_ERROR(msg_texture_failed, in_out->name);
+        LOG_ERROR(nil_err_msg_rsrc_failed, in_out->name, "Texture");
 
         LIB_ASSERT(false);
         return 0;

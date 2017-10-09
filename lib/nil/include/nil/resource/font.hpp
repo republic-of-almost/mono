@@ -27,6 +27,4 @@ struct Nil_font
 };
 
 
-
-
 #endif // inc guard

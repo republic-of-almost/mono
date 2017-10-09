@@ -55,6 +55,7 @@ table.insert(
 
       -- Thrid Party --
 
+      "Angelscript",
       "GLFW",
       "ImGUI",
       "ImGuizmo",

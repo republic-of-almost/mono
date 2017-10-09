@@ -72,15 +72,14 @@ nil_rsrc_texture_get_count(Nil_ctx *ctx);
 /* ---------------------------------------------------- [ Resource Batch ] -- */
 
 
-void
-nil_rsrc_texture_create_batch(Nil_ctx *ctx, Nil_texture *in, size_t count, bool move = false);
+/* batch functions removed for the time */
 
 
 /* ------------------------------------------------- [ Resource Instance ] -- */
 
 
 uint32_t
-nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *shd, bool move = false);
+nil_rsrc_texture_create(Nil_ctx *ctx, Nil_texture *shd);
 
 
 bool

@@ -9,6 +9,9 @@
 #include <vector>
 
 
+/*
+  Uncomment to run that test.
+*/
 //#define NIL_STRESS_CREATE_DESTROY
 //#define NIL_STRESS_LONG_LINEAR_RELATIONSHIP
 #define NIL_STRESS_LONG_SHUFFLE_RELATIONSHIP

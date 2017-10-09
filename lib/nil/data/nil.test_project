@@ -37,6 +37,11 @@ table.insert(
 )
 
 
+--[[
+
+  Nil Stress Test Project Description
+
+]]--
 table.insert(
   projects,
   {
