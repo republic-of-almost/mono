@@ -24,7 +24,7 @@ angelscript_aspect_startup(Nil_ctx *nil_ctx, void *data)
   
 	AS_utils::load_script_directory(self->engine, "");
   
-  const char *name = "GameManager";
+  const char *name = "ApplicationMain";
   auto type = self->engine->GetModule(0)->GetTypeInfoByDecl(name);
   asIScriptObject *obj = AS_utils::create_object(self->engine, self->ctx, type, name);
   asIScriptFunction *start_method = AS_utils::get_method(type, "void on_start()");

@@ -1,0 +1,12 @@
+#ifndef LIGHT_INCLUDED_D02A31A8_7052_4FDF_81BB_AE91196AD618
+#define LIGHT_INCLUDED_D02A31A8_7052_4FDF_81BB_AE91196AD618
+
+
+namespace AS_utils {
+
+
+
+} // ns
+
+
+#endif // inc guard

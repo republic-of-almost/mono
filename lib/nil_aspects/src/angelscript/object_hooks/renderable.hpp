@@ -1,0 +1,14 @@
+#ifndef RENDERABLE_INCLUDED_0D166DD5_55DE_45AF_A2CF_8BFEDBF30FD0
+#define RENDERABLE_INCLUDED_0D166DD5_55DE_45AF_A2CF_8BFEDBF30FD0
+
+
+namespace AS_utils {
+
+
+
+
+
+} // ns
+
+
+#endif // inc guard
