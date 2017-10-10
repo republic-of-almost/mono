@@ -6,9 +6,6 @@
 #include <game/game_manager.hpp>
 #include <data/data.hpp>
 
-
-#include <angelscript/angelscript.h>
-
 /*
   Use this for any testing, fires at the end of the frame.
 */
