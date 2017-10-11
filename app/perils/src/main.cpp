@@ -15,13 +15,9 @@ custom_tick(uintptr_t user_data)
 }
 
 
-
 int
 main()
 {
-
-  
-
 //  lib::mem::alloc<float, lib::mem::tag::NUMBER, 256>();
 
   lib::logging::set_output(lib::logging::out::file | lib::logging::out::console);

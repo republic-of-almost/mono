@@ -1,0 +1,41 @@
+#!lua
+
+--[[
+  Null Project Description
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "Null",
+    kind     = "WindowedApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      --
+      make.add_src(make.get_proj_root() .. "../src/"),
+      --
+      make.add_doc(make.get_proj_root() .. "../include/"),
+      make.add_doc(make.get_proj_root() .. "../src/"),
+    },
+
+    assets = {
+      -- Generic Assets --
+      make.get_proj_root() .. "../../../assets/generic/textures",
+      make.get_proj_root() .. "../../../assets/generic/mesh",
+    },
+
+    project_dependencies = {
+      "ROA",
+    },
+
+    inc_dirs = {
+      make.get_proj_root() .. "../include/",
+      make.get_proj_root() .. "../src/",
+      make.get_proj_root() .. "../nil_aspects/",
+    },
+  }
+)
