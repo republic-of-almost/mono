@@ -3,15 +3,27 @@
 
 
 #include <game_code/fundamental.hpp>
+#include <roa/fundamental.hpp>
+
+
+#define FREE_CAM_SPEED_MULTIPLIER 0.3
 
 
 struct Free_cam {
 
   float pitch;
   float yaw;
-  float roll;
-
+  float fwd;
+  float left;
 };
+
+
+void
+free_cam_update(Free_cam *free_cam_arr, ROA::Object *cam_arr, size_t count);
+
+
+void
+free_cam_apply_controller(Free_cam *free_cam_arr, Controller *controllers, size_t count);
 
 
 #endif // inc guard

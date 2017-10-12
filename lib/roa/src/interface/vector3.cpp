@@ -53,4 +53,11 @@ Vector3::scale(const float scale) const
 }
 
 
+bool
+Vector3::is_zero() const
+{
+  return math::is_near(data[0], 0.f) && math::is_near(data[1], 0.f && math::is_near(data[2], 0.f));
+}
+
+
 } // ns

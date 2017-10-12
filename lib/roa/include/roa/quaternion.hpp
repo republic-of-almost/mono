@@ -35,6 +35,12 @@ public:
   
   inline const float*   get_data() const { return data; }
   inline float*         get_data()       { return data; }
+  
+  
+  // --------------------------------------------------------- [ Operations ] --
+  
+  
+  Quaternion            multiply(const Quaternion &other) const;
 
 
 private:

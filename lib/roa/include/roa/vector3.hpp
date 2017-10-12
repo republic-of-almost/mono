@@ -33,6 +33,8 @@ public:
 
   Vector3             add(const Vector3 &other) const;
   Vector3             scale(const float scale) const;
+  
+  bool                is_zero() const;
 
 private:
 

@@ -21,10 +21,18 @@ class Ray
 {
 public:
 
+
+  explicit            Ray();
   explicit            Ray(const Vector3 &start, const Vector3 &end);
   
-  inline Vector3      get_start() const { return m_start; }
-  inline Vector3      get_end() const   { return m_end; }
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  
+  
+  Vector3             get_start() const;
+  Vector3             get_end() const;
+  bool                is_valid() const;
+  
   
 private:
 

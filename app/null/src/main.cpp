@@ -36,6 +36,7 @@ main()
   struct World_state
   {
     Free_cam    free_cam{};
+    Controller  controllers[1]{};
     ROA::Object obj_camera;
     ROA::Object obj_scene;
     
@@ -78,19 +79,19 @@ main()
       cam.set_clear_color(ROA::Color(0xFF00FFFF));
 
       const ROA::Bounding_box bb = world.obj_scene.get_data<ROA::Bounding_box>();
-
+      
       const math::vec3 a = math::vec3_init(bb.get_min().get_data());
       const math::vec3 b = math::vec3_init(bb.get_max().get_data());
-
+      
       const float y = (math::abs(math::get_y(a)) + math::abs(math::get_y(b))) * 0.7f;
       const float z = (math::abs(math::get_z(a)) + math::abs(math::get_z(b))) * 4.f;
-
+      
       const ROA::Transform transform(
         ROA::Vector3(0.f, 1.f, z),
         ROA::Vector3(1.f, 1.f, 1.f),
         ROA::Quaternion()
       );
-
+      
       world.obj_camera.set_data(transform);
     }
   }
@@ -100,6 +101,13 @@ main()
   app.run(
     [](uintptr_t user_data)
     {
+      ROA::Mouse::set_captured(true); // Bug if you capture before window is created it doens't get set.
+      
+      World_state *world = (World_state*)user_data;
+    
+      controller_update(world->controllers, 1);
+      free_cam_apply_controller(&world->free_cam, world->controllers, 1);
+      free_cam_update(&world->free_cam, &world->obj_camera, 1);
       
     },
     (uintptr_t)&world

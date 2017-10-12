@@ -39,5 +39,20 @@ Quaternion::Quaternion(const float x, const float y, const float z, const float 
 {
 }
 
+// --------------------------------------------------------- [ Attributes ] --
+
+
+// --------------------------------------------------------- [ Operations ] --
+
+
+Quaternion
+Quaternion::multiply(const Quaternion &other) const
+{
+  const math::quat a = math::quat_init(this->get_data());
+  const math::quat b = math::quat_init(other.get_data());
+  
+  return Quaternion(math::quat_multiply(a, b).data);
+}
+
 
 } // ns
