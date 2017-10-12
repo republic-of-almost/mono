@@ -39,13 +39,13 @@ nil_rsrc_load_model_scene(Nil_ctx *ctx, Nil::Node node, const char *filename)
 bool
 nil_rsrc_load_model(Nil_ctx *ctx, const char *filename)
 {
-  nil_rsrc_load_model_scene(ctx, Nil::Node(nullptr), filename);
+  return nil_rsrc_load_model_scene(ctx, Nil::Node(nullptr), filename);
 }
 
 
 bool
 nil_rsrc_load_scene(Nil_ctx *ctx, Nil::Node &node, const char *filename)
 {
-  nil_rsrc_load_model_scene(ctx, node, filename);
+  return nil_rsrc_load_model_scene(ctx, node, filename);
 }
 

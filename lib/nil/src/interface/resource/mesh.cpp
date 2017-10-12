@@ -23,12 +23,6 @@ constexpr char msg_mesh_name_exists[]   = "Mesh with name %s already exists";
 constexpr char msg_mesh_failed[]        = "Failed to add Mesh %s";
 
 
-// ---------------------------------------------------------- [ Identifiers ] --
-
-
-constexpr char mesh_type_name[] = "Mesh";
-
-
 } // anon ns
 
 
@@ -61,7 +55,9 @@ nil_rsrc_mesh_find_by_name(Nil_ctx *ctx, const char *name, Nil_mesh *out)
   
   for(size_t i = 0; i < count; ++i)
   {
-    if(data[i].name && strcmp(data[i].name, name) == 0)
+    const char *this_name = data[i].name;
+  
+    if(this_name && strcmp(this_name, name) == 0)
     {
       if(out)
       {
