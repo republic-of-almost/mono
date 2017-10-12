@@ -106,11 +106,7 @@ main()
   /* Nau Setup */
   {
     nau_initialize(&ctx);
-    
-    nau_register_panel(ctx, "Graph",   ui_graph);
-    nau_register_panel(ctx, "Scene",   ui_scene);
-    nau_register_panel(ctx, "Console", ui_console);
-    
+   
     nau_set_viewport(ctx, init_width, init_height);
   }
   
@@ -123,19 +119,25 @@ main()
 
   while(!glfwWindowShouldClose(window))
   {
-    glClearColor(0.11,0.1,0.1,1);
+    glClearColor(0.87,0.87,0.85,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    nau_new_frame(ctx);
-    nau_create_draw_cmds(ctx);
+            
+    /* toolbar test */
+    {
+      nau_begin(ctx, "Toolbar");
+      
+      nau_end(ctx);
+    }
     
     
     
-    Nau_draw_cmd *cmds;
-    int count;
-    nau_render_data(ctx, &cmds, &count);
     
-    nau_gl3_render(cmds, count);
+    /* render */
+    {
+      nau_new_frame(ctx);
+    }
+    
     
     glfwPollEvents();
     glfwSwapBuffers(window);

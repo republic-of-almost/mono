@@ -11,7 +11,8 @@ struct Nau_ctx;
 struct Nau_draw_cmd
 {
   int clip[4];
-  int count;
+  unsigned int offset;
+  unsigned int count;
 };
 
 
@@ -23,13 +24,15 @@ typedef void(*Nau_panel_callback)(Nau_ctx *ctx);
 
 void      nau_initialize(Nau_ctx **ctx);
 void      nau_destroy(Nau_ctx **ctx);
+void      nau_new_frame(Nau_ctx *ctx);
+
 
 /* -------------------------------------------------------------- [ Data ] -- */
 
 
-void      nau_new_frame(Nau_ctx *ctx);
-void      nau_create_draw_cmds(Nau_ctx *ctx);
-void      nau_render_data(Nau_ctx *ctx, Nau_draw_cmd **renderables, int *count);
+void      nau_get_vbo(Nau_ctx *ctx, const float **vbo, const unsigned int *count);
+void      nau_get_idx(Nau_ctx *ctx, const unsigned int **idx, const unsigned int *count);
+void      nau_get_cmds(Nau_ctx *ctx, const Nau_draw_cmd **cmds, const unsigned int *count);
 
 
 /* ---------------------------------------------------------- [ Settings ] -- */
@@ -38,10 +41,11 @@ void      nau_render_data(Nau_ctx *ctx, Nau_draw_cmd **renderables, int *count);
 void      nau_set_viewport(Nau_ctx *ctx, const int width, const int height);
 
 
-/* ------------------------------------------------------------ [ Panels ] -- */
+/* ------------------------------------------------------------ [ Window ] -- */
 
 
-void      nau_register_panel(Nau_ctx *ctx, const char *name, const Nau_panel_callback cb);
+void      nau_begin(Nau_ctx *ctx, const char *name);
+void      nau_end(Nau_ctx *ctx);
 
 
 /* ----------------------------------------------------------- [ Widgets ] -- */

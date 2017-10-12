@@ -47,7 +47,7 @@ controller_update(Controller *controllers, const size_t count)
     
     if(click)
     {
-      controllers[0].ray = Ray();
+//      controllers[0].ray = Ray();
     }
   }
 }
