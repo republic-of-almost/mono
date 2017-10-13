@@ -69,9 +69,15 @@ glfw_resize(GLFWwindow *win, int width, int height)
 
 
 void
-glfw_ms_button(GLFWwindow *win, int, int, int)
+glfw_ms_button(GLFWwindow *win, int id, int action, int mod)
 {
-  Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);	
+  if (id == GLFW_MOUSE_BUTTON_1)
+  {
+    const int status = action == GLFW_PRESS ? 1 : 0;
+    Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
+    
+    nau_set_pointer_status(*ctx, status);
+  }
 }
 
 
