@@ -42,10 +42,15 @@ struct Nau_theme
 };
 
 
-struct Nau_screen
+struct Nau_device
 {
-  int32_t width;
-  int32_t height;
+  int width;
+  int height;
+  
+  int ptr_x;
+  int ptr_y;
+  
+  int ptr_status; // 0 up 1 down
 };
 
 
@@ -75,10 +80,9 @@ struct Nau_draw_buffers
 struct Nau_ctx
 {
   Nau_draw_buffers  draw_data;
-  Nau_screen        screen;
+  Nau_device        device;
   Nau_theme         theme;
 };
-
 
 
 /* ---------------------------------------------------------- [ Internal ] -- */
@@ -251,7 +255,7 @@ nau_initialize(Nau_ctx **ctx)
   Nau_ctx *new_ctx = NULL;
   {
     new_ctx = (Nau_ctx*)NAU_MALLOC(sizeof(Nau_ctx));
-    memset(new_ctx, 0, sizeof(Nau_ctx));
+    NAU_ZERO_MEM(new_ctx, Nau_ctx);
   }
   
   /* default draw buffer */
@@ -290,6 +294,7 @@ nau_initialize(Nau_ctx **ctx)
 void
 nau_destroy(Nau_ctx **ctx)
 {
+  NAU_LOG("TODO: Must release resources");
 }
 
 
@@ -335,8 +340,8 @@ nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, unsigned int *count)
 void
 nau_get_viewport(Nau_ctx *ctx, int *width, int *height)
 {
-  *width = ctx->screen.width;
-  *height = ctx->screen.height;
+  *width = ctx->device.width;
+  *height = ctx->device.height;
 }
 
 
@@ -351,8 +356,23 @@ nau_set_viewport(Nau_ctx *ctx, const int width, const int height)
     NAU_ASSERT(ctx);
   }
   
-  ctx->screen.width = width;
-  ctx->screen.height = height;
+  ctx->device.width = width;
+  ctx->device.height = height;
+}
+
+
+void
+nau_set_pointer_coords(Nau_ctx *ctx, int x, int y)
+{
+  ctx->device.ptr_x = x;
+  ctx->device.ptr_y = y;
+}
+
+
+void
+nau_set_pointer_status(Nau_ctx *ctx, int status)
+{
+  ctx->device.ptr_status = status;
 }
 
 

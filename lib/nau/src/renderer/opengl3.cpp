@@ -257,10 +257,10 @@ nau_gl3_init(Nau_gl_ctx **gl_ctx, Nau_ctx *ui_ctx)
   {
     GLfloat verts[]
     {
-      10.f, 10.f,   1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-      100.f, 10.f,     1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-      100.f, 100.f,    1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-      10.f, 100.f,  1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+      10.f + 500, 10.f + 500,   1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+      100.f + 500, 10.f + 500,  1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+      100.f + 500, 100.f + 500, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+      10.f + 500, 100.f + 500,  1.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
     };
 
     glGenBuffers(1, &new_gl_ctx->vbo);
@@ -312,6 +312,8 @@ nau_gl3_init(Nau_gl_ctx **gl_ctx, Nau_ctx *ui_ctx)
   }
   
   *gl_ctx = new_gl_ctx;
+  
+  NAU_GL_LOG("NAU GL CTX initalized");
 }
 
 
@@ -328,10 +330,10 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
   {
     const float ortho[16]
     {
-      2.f / (float)width, 0.f,         0.f,   0.f,
-      0.f,          2.f / (float)-height, 0.f,   0.f,
-      0.f,          0.f,         2.f / 10.f,   0.f,
-      -1.f,         1.f,         0.f,   1.f,
+      2.f / (float)width, 0.f,            0.f,          0.f,
+      0.f,          2.f / (float)-height, 0.f,          0.f,
+      0.f,          0.f,                  2.f / 10.f,   0.f,
+      -1.f,         1.f,                  0.f,          1.f,
     };
 
     glUniformMatrix4fv(gl_ctx->wvp_mat, 1, GL_FALSE, ortho);
@@ -441,7 +443,7 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
 void
 nau_gl3_destroy(Nau_gl_ctx **gl_ctx)
 {
-  
+  NAU_GL_LOG("TODO: Release GL Resources");
 }
 
 

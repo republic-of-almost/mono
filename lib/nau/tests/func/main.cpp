@@ -1,16 +1,47 @@
 
-
 #define NAU_LOGGING
 #include <nau/nau.h>
+#define NAU_GL_LOGGING
 #include <nau/renderers/opengl3.h>
-#include <GL/gl3w.h>
+
+#include <GL/gl3w.h> // include before glfw
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
 
+/* -------------------------------------------------- [ Application Vars ] -- */
+
+
 GLFWwindow  *window = NULL;
-Nau_ctx     *ctx = NULL;
+Nau_ctx     *ctx    = NULL;
 Nau_gl_ctx  *gl_ctx = NULL;
+
+
+/* ------------------------------------------------- [ Application Funcs ] -- */
+
+
+void
+test_interface()
+{
+  /* toolbar test */
+  {
+    nau_begin(ctx, "Toolbar");
+    
+    nau_end(ctx);
+  }
+}
+
+
+void
+render_interface()
+{
+  glClearColor(0.87,0.87,0.85,1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  nau_gl3_render(gl_ctx, ctx);
+
+  glfwSwapBuffers(window);
+}
 
 
 /* ---------------------------------------------------- [ GLFW Callbacks ] -- */
@@ -29,7 +60,26 @@ glfw_resize(GLFWwindow *win, int width, int height)
   printf("Resize: %d x %d\n", width, height);
 
   Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
-  nau_set_viewport(*	ctx, width, height);
+  nau_set_viewport(*ctx, width, height);
+  
+  /* re-render interface */
+  glViewport(0,0,width,height);
+  render_interface();
+}
+
+
+void
+glfw_ms_button(GLFWwindow *win, int, int, int)
+{
+  Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);	
+}
+
+
+void
+glfw_ms_move(GLFWwindow *win, double x, double y)
+{
+  Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
+  nau_set_pointer_coords(*ctx, (int)x, (int)y);
 }
 
 
@@ -42,7 +92,7 @@ main()
   const int init_width  = 800;
   const int init_height = 480;
 
-  /* GFLW */
+  /* ------------------------------------------------------ [ GLFW Setup ] -- */
   {
     if(!glfwInit())
     {
@@ -61,17 +111,19 @@ main()
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    window = glfwCreateWindow(init_width, init_height, "NAU Func Tests", NULL, NULL);
+    window = glfwCreateWindow(init_width, init_height, "NAU Tests", NULL, NULL);
     glfwSetWindowUserPointer(window, (void*)&ctx);
     
     glfwSetWindowSizeCallback(window, glfw_resize);
     glfwSetErrorCallback(glfw_err);
+    glfwSetMouseButtonCallback(window, glfw_ms_button);
+    glfwSetCursorPosCallback(window, glfw_ms_move);
     
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
   }
   
-  /* OpenGL */
+  /* ------------------------------------------------------- [ OGL Setup ] -- */
   {
     if(gl3wInit())
     {
@@ -80,7 +132,7 @@ main()
     }
   }
 
-  /* Nau Setup */
+  /* ------------------------------------------------------- [ NAU Setup ] -- */
   {
     nau_initialize(&ctx);
     nau_gl3_init(&gl_ctx, ctx);
@@ -88,33 +140,16 @@ main()
     nau_set_viewport(ctx, init_width, init_height);
   }
 
-  /*  */
+  /* ------------------------------------------------- [ Application Loop] -- */
 
   while(!glfwWindowShouldClose(window))
   {
-    /* new frame */
-    {
-      glClearColor(0.87,0.87,0.85,1);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      nau_new_frame(ctx);
-    }
+    nau_new_frame(ctx);
     
-            
-    /* toolbar test */
-    {
-      nau_begin(ctx, "Toolbar");
-      
-      nau_end(ctx);
-    }
+    test_interface();
     
-    
-    /* render */
-    {
-      nau_gl3_render(gl_ctx, ctx);
-      
-      glfwPollEvents();
-      glfwSwapBuffers(window);
-    }
+    render_interface();
+    glfwPollEvents();
   }
   
   nau_gl3_destroy(&gl_ctx);
