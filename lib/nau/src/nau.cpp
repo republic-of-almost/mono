@@ -301,6 +301,11 @@ nau_destroy(Nau_ctx **ctx)
 void
 nau_new_frame(Nau_ctx *ctx)
 {
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
+  
   /* reset draw cmds */
   {
     ctx->draw_data.vbo_count = 0;
@@ -316,32 +321,72 @@ nau_new_frame(Nau_ctx *ctx)
 void
 nau_get_vbo(Nau_ctx *ctx, float **vbo, unsigned int *count)
 {
-  *vbo = ctx->draw_data.vbo;
-  *count = ctx->draw_data.vbo_count;
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(vbo != NULL);
+    NAU_ASSERT(count != NULL);
+  }
+  
+  /* fetch data */
+  {
+    *vbo = ctx->draw_data.vbo;
+    *count = ctx->draw_data.vbo_count;
+  }
 }
 
 
 void
 nau_get_idx(Nau_ctx *ctx, unsigned int **idx, unsigned int *count)
 {
-  *idx = ctx->draw_data.idx;
-  *count = ctx->draw_data.idx_count;
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(idx != NULL);
+    NAU_ASSERT(count != NULL);
+  }
+
+  /* fetch data */
+  {
+    *idx = ctx->draw_data.idx;
+    *count = ctx->draw_data.idx_count;
+  }
 }
 
 
 void
 nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, unsigned int *count)
 {
-  *cmds = ctx->draw_data.cmds;
-  *count = ctx->draw_data.cmd_count;
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(cmds != NULL);
+    NAU_ASSERT(count != NULL);
+  }
+  
+  /* fetch data */
+  {
+    *cmds = ctx->draw_data.cmds;
+    *count = ctx->draw_data.cmd_count;
+  }
 }
 
 
 void
 nau_get_viewport(Nau_ctx *ctx, int *width, int *height)
 {
-  *width = ctx->device.width;
-  *height = ctx->device.height;
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(width != NULL);
+    NAU_ASSERT(height != NULL);
+  }
+
+  /* fetch data */
+  {
+    *width = ctx->device.width;
+    *height = ctx->device.height;
+  }
 }
 
 
@@ -353,26 +398,45 @@ nau_set_viewport(Nau_ctx *ctx, const int width, const int height)
 {
   /* param check */
   {
-    NAU_ASSERT(ctx);
+    NAU_ASSERT(ctx != NULL);
   }
   
-  ctx->device.width = width;
-  ctx->device.height = height;
+  /* update window size */
+  {
+    ctx->device.width = width;
+    ctx->device.height = height;
+  }
 }
 
 
 void
 nau_set_pointer_coords(Nau_ctx *ctx, int x, int y)
 {
-  ctx->device.ptr_x = x;
-  ctx->device.ptr_y = y;
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
+
+  /* update ptr coords */
+  {
+    ctx->device.ptr_x = x;
+    ctx->device.ptr_y = y;
+  }
 }
 
 
 void
 nau_set_pointer_status(Nau_ctx *ctx, int status)
 {
-  ctx->device.ptr_status = status;
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
+
+  /* update ptr status */
+  {
+    ctx->device.ptr_status = status;
+  }
 }
 
 
