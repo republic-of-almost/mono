@@ -8,8 +8,9 @@
 #include <stdio.h>
 
 
-GLFWwindow *window = NULL;
-Nau_ctx *ctx = NULL;
+GLFWwindow  *window = NULL;
+Nau_ctx     *ctx = NULL;
+Nau_gl_ctx  *gl_ctx = NULL;
 
 
 /* ---------------------------------------------------- [ GLFW Callbacks ] -- */
@@ -27,32 +28,8 @@ glfw_resize(GLFWwindow *win, int width, int height)
 {
   printf("Resize: %d x %d\n", width, height);
 
-  Nau_ctx *ctx = (Nau_ctx*)glfwGetWindowUserPointer(win);
-  nau_set_viewport(ctx, width, height);
-}
-
-
-
-
-/* ------------------------------------------------------ [ UI Callbacks ] -- */
-
-
-void
-ui_graph(Nau_ctx *ctx)
-{
-
-}
-
-
-void
-ui_scene(Nau_ctx *ctx)
-{
-}
-
-
-void
-ui_console(Nau_ctx *ctx)
-{
+  Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
+  nau_set_viewport(*	ctx, width, height);
 }
 
 
@@ -85,7 +62,7 @@ main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     window = glfwCreateWindow(init_width, init_height, "NAU Func Tests", NULL, NULL);
-    glfwSetWindowUserPointer(window, (void*)ctx);
+    glfwSetWindowUserPointer(window, (void*)&ctx);
     
     glfwSetWindowSizeCallback(window, glfw_resize);
     glfwSetErrorCallback(glfw_err);
@@ -106,21 +83,21 @@ main()
   /* Nau Setup */
   {
     nau_initialize(&ctx);
+    nau_gl3_init(&gl_ctx, ctx);
    
     nau_set_viewport(ctx, init_width, init_height);
-  }
-  
-  /* Nau Renderer */
-  {
-    nau_gl3_init();
   }
 
   /*  */
 
   while(!glfwWindowShouldClose(window))
   {
-    glClearColor(0.87,0.87,0.85,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    /* new frame */
+    {
+      glClearColor(0.87,0.87,0.85,1);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      nau_new_frame(ctx);
+    }
     
             
     /* toolbar test */
@@ -131,19 +108,17 @@ main()
     }
     
     
-    
-    
     /* render */
     {
-      nau_new_frame(ctx);
+      nau_gl3_render(gl_ctx, ctx);
+      
+      glfwPollEvents();
+      glfwSwapBuffers(window);
     }
-    
-    
-    glfwPollEvents();
-    glfwSwapBuffers(window);
   }
   
-  nau_gl3_destroy();
+  nau_gl3_destroy(&gl_ctx);
+  nau_destroy(&ctx);
 
 
   return 0;

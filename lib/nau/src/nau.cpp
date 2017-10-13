@@ -1,5 +1,4 @@
 #include <nau/nau.h>
-#include <string.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -20,10 +19,16 @@
 
 
 #ifndef NAU_LOGGING
-#ifndef NAU_LOGGER
+#ifndef NAU_LOG
 #include <stdio.h>
 #define NAU_LOG(str) printf("%s\n", str)
 #endif
+#endif
+
+
+#ifndef NAU_ZERO_MEM
+#include <string.h>
+#define NAU_ZERO_MEM(var, type) memset(var, 0, sizeof(type))
 #endif
 
 
@@ -143,61 +148,63 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
   {
     size_t index = ctx->draw_data.vbo_count;
     
-    /* position/uv/color */
+    /* position / uv / color */
     
     ctx->draw_data.vbo[index++] = area.min[0];
     ctx->draw_data.vbo[index++] = area.min[1];
-    ctx->draw_data.vbo[index++] = 0.f;
-    
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 1.f;
+    
+    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 0.f;
     
     /**/
     
     ctx->draw_data.vbo[index++] = area.max[0];
     ctx->draw_data.vbo[index++] = area.min[1];
-    ctx->draw_data.vbo[index++] = 0.f;
-    
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 1.f;
+    
+    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 0.f;
     
     /**/
     
     ctx->draw_data.vbo[index++] = area.min[0];
     ctx->draw_data.vbo[index++] = area.max[1];
-    ctx->draw_data.vbo[index++] = 0.f;
-    
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 1.f;
+    
+    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 0.f;
     
     /**/
     
     ctx->draw_data.vbo[index++] = area.max[0];
     ctx->draw_data.vbo[index++] = area.max[1];
-    ctx->draw_data.vbo[index++] = 0.f;
-    
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 1.f;
     ctx->draw_data.vbo[index++] = 1.f;
+    
+    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = 0.f;
+    
+    /**/
     
     ctx->draw_data.vbo_count = index;
   }
@@ -212,9 +219,9 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     
     /**/
     
-    ctx->draw_data.idx[index++] = offset + 1;
     ctx->draw_data.idx[index++] = offset + 2;
     ctx->draw_data.idx[index++] = offset + 3;
+    ctx->draw_data.idx[index++] = offset + 0;
   
     ctx->draw_data.idx_count = index;
   }
@@ -226,7 +233,7 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     int cmd_clip[4] { clip.min[0], clip.min[1], clip.max[0], clip.max[1] };
     
     memcpy(&ctx->draw_data.cmds[index].clip, cmd_clip, sizeof(cmd_clip));
-    ctx->draw_data.cmds[index].count = 4;
+    ctx->draw_data.cmds[index].count = 6;
     ctx->draw_data.cmds[index].offset = offset;
     
     ctx->draw_data.cmd_count += 1;
@@ -325,6 +332,14 @@ nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, unsigned int *count)
 }
 
 
+void
+nau_get_viewport(Nau_ctx *ctx, int *width, int *height)
+{
+  *width = ctx->screen.width;
+  *height = ctx->screen.height;
+}
+
+
 /* ---------------------------------------------------------- [ Settings ] -- */
 
 
@@ -376,5 +391,8 @@ nau_end(Nau_ctx *ctx)
 
 /* ------------------------------------------------------------ [ Config ] -- */
 
+
 #undef NAU_MALLOC
 #undef NAU_ASSERT
+#undef NAU_LOGGING
+#undef NAU_ZERO_MEM
