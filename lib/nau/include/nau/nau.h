@@ -27,16 +27,16 @@ void      nau_new_frame(Nau_ctx *ctx);
 /* -------------------------------------------------------------- [ Data ] -- */
 
 
-void      nau_get_vbo(Nau_ctx *ctx, float **vbo, unsigned int *count);
-void      nau_get_idx(Nau_ctx *ctx, unsigned int **idx, unsigned int *count);
-void      nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, unsigned int *count);
+void      nau_get_vbo(Nau_ctx *ctx, float **vbo, int *count);
+void      nau_get_idx(Nau_ctx *ctx, unsigned int **idx, int *count);
+void      nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, int *count);
 void      nau_get_viewport(Nau_ctx *ctx, int *width, int *height);
 
 
 /* ---------------------------------------------------------- [ Settings ] -- */
 
 
-void      nau_set_viewport(Nau_ctx *ctx, const int width, const int height);
+void      nau_set_viewport(Nau_ctx *ctx, int width, int height);
 void      nau_set_pointer_coords(Nau_ctx *ctx, int x, int y);
 void      nau_set_pointer_status(Nau_ctx *ctx, int status);
 

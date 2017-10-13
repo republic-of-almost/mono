@@ -1,6 +1,4 @@
 #include <nau/nau.h>
-#include <stdint.h>
-#include <stddef.h>
 
 
 /* ------------------------------------------------------------ [ Config ] -- */
@@ -37,8 +35,8 @@
 
 struct Nau_theme
 {
-  uint32_t bg_color_ctx;
-  uint32_t bg_color_panel;
+  unsigned int bg_color_ctx;
+  unsigned int bg_color_panel;
 };
 
 
@@ -64,16 +62,16 @@ struct Nau_env
 struct Nau_draw_buffers
 {
   float *vbo;
-  uint32_t vbo_count;
-  uint32_t vbo_capacity;
+  int vbo_count;
+  int vbo_capacity;
   
-  uint32_t *idx;
-  uint32_t idx_count;
-  uint32_t idx_capacity;
+  unsigned int *idx;
+  int idx_count;
+  int idx_capacity;
   
   Nau_draw_cmd *cmds;
-  uint32_t cmd_count;
-  uint32_t cmd_capacity;
+  int cmd_count;
+  int cmd_capacity;
 };
 
 
@@ -89,33 +87,33 @@ struct Nau_ctx
 
 
 // Pulled from Imgui should replace with what imgui recomends
-static uint32_t
-nau_hash(const void *data, const size_t data_size, const uint32_t seed)
+static unsigned int
+nau_hash(const void *data, const size_t data_size, const unsigned int seed)
 {
-  static uint32_t crc32 [256] {0};
+  static unsigned int crc32 [256] {0};
   if(!crc32[1])
   {
-    const uint32_t polynomial = 0xEDB88320;
-    for(uint32_t i = 0; i < 256; ++i)
+    const unsigned int polynomial = 0xEDB88320;
+    for(unsigned int i = 0; i < 256; ++i)
     {
-      uint32_t crc = i;
+      unsigned int crc = i;
 
-      for(uint32_t j = 0; j < 8; j++)
+      for(unsigned int j = 0; j < 8; j++)
       {
-        crc = (crc >> 1) ^ (uint32_t(-int(crc & 1)) & polynomial);
+        crc = (crc >> 1) ^ ((unsigned int)(-int(crc & 1)) & polynomial);
 
         crc32[i] = crc;
       }
     }
   }
 
-  const uint32_t s = ~seed;
-  uint32_t crc = s;
-  const uint8_t *current = (const uint8_t*)data;
+  const unsigned int s = ~seed;
+  unsigned int crc = s;
+  const unsigned char *current = (const unsigned char*)data;
 
   if(data_size == 0)
   {
-    uint32_t count_down = data_size;
+    unsigned int count_down = data_size;
 
     while(count_down--)
     {
@@ -124,7 +122,7 @@ nau_hash(const void *data, const size_t data_size, const uint32_t seed)
   }
   else
   {
-    while(uint8_t c = *current++)
+    while(unsigned char c = *current++)
     {
       crc = (crc >> 8) ^ crc32[(crc & 0xFF) ^ c];
     }
@@ -142,7 +140,7 @@ nau_submit_tris(Nau_ctx *ctx, const float verts[], const float texture_coords[],
 
 
 static void
-nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
+nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
 {
   /* some info */
   const size_t vertex_stride = 3 + 2 + 4;
@@ -232,7 +230,7 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
   
   /* draw cmd */
   {
-    const size_t index = ctx->draw_data.cmd_count;
+    const int index = ctx->draw_data.cmd_count;
     
     int cmd_clip[4] { clip.min[0], clip.min[1], clip.max[0], clip.max[1] };
     
@@ -260,20 +258,20 @@ nau_initialize(Nau_ctx **ctx)
   
   /* default draw buffer */
   {
-    const size_t vbo_count = 1024 * (3 + 3 + 2);
-    const size_t vbo_bytes = sizeof(float) * vbo_count;
+    const int vbo_count = 1024 * (3 + 3 + 2);
+    const int vbo_bytes = sizeof(float) * vbo_count;
     new_ctx->draw_data.vbo = (float*)NAU_MALLOC(vbo_bytes);
     new_ctx->draw_data.vbo_count = 0;
     new_ctx->draw_data.vbo_capacity = vbo_count;
 
-    const size_t idx_count = 1024 * 3;
-    const size_t idx_bytes = sizeof(unsigned int) * idx_count;
+    const int idx_count = 1024 * 3;
+    const int idx_bytes = sizeof(unsigned int) * idx_count;
     new_ctx->draw_data.idx = (unsigned int*)NAU_MALLOC(idx_bytes);
     new_ctx->draw_data.idx_count = 0;
     new_ctx->draw_data.idx_capacity = idx_count;
     
-    const size_t cmd_count = 512;
-    const size_t cmd_bytes = sizeof(Nau_draw_cmd) * cmd_count;
+    const int cmd_count = 512;
+    const int cmd_bytes = sizeof(Nau_draw_cmd) * cmd_count;
     new_ctx->draw_data.cmds = (Nau_draw_cmd*)NAU_MALLOC(cmd_bytes);
     new_ctx->draw_data.cmd_count = 0;
     new_ctx->draw_data.cmd_capacity = cmd_count;
@@ -319,7 +317,7 @@ nau_new_frame(Nau_ctx *ctx)
 
 
 void
-nau_get_vbo(Nau_ctx *ctx, float **vbo, unsigned int *count)
+nau_get_vbo(Nau_ctx *ctx, float **vbo, int *count)
 {
   /* param check */
   {
@@ -337,7 +335,7 @@ nau_get_vbo(Nau_ctx *ctx, float **vbo, unsigned int *count)
 
 
 void
-nau_get_idx(Nau_ctx *ctx, unsigned int **idx, unsigned int *count)
+nau_get_idx(Nau_ctx *ctx, unsigned int **idx, int *count)
 {
   /* param check */
   {
@@ -355,7 +353,7 @@ nau_get_idx(Nau_ctx *ctx, unsigned int **idx, unsigned int *count)
 
 
 void
-nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, unsigned int *count)
+nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, int *count)
 {
   /* param check */
   {
@@ -394,7 +392,7 @@ nau_get_viewport(Nau_ctx *ctx, int *width, int *height)
 
 
 void
-nau_set_viewport(Nau_ctx *ctx, const int width, const int height)
+nau_set_viewport(Nau_ctx *ctx, int width, int height)
 {
   /* param check */
   {
@@ -446,14 +444,21 @@ nau_set_pointer_status(Nau_ctx *ctx, int status)
 void
 nau_begin(Nau_ctx *ctx, const char *name)
 {
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(name != NULL);
+    NAU_ASSERT(strlen(name) > 0);
+  }
+
   /* window id */
-  const uint32_t win_id = nau_hash(name, strlen(name), 0);
+  const unsigned int win_id = nau_hash(name, strlen(name), 0);
   
   /* window body */
   {
     Nau_env area{{10, 10}, {100, 100}};
     Nau_env clip{{10, 10}, {100, 100}};
-    uint32_t color = 0xFF0000FF;
+    unsigned int color = 0xFF0000FF;
   
     nau_submit_cmd(ctx, area, clip, color);
   }
@@ -463,14 +468,20 @@ nau_begin(Nau_ctx *ctx, const char *name)
 void
 nau_end(Nau_ctx *ctx)
 {
-  
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
 }
 
 
 /* ----------------------------------------------------------- [ Widgets ] -- */
 
 
-
+void
+nau_button(Nau_ctx *ctx, const char *name)
+{
+}
 
 
 /* ------------------------------------------------------------ [ Config ] -- */

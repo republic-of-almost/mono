@@ -341,7 +341,7 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
 
   /* -- Vertex -- */
   {
-    unsigned int vert_count = 0;
+    int vert_count = 0;
     float *vert_data = nullptr;
     nau_get_vbo(ui_ctx, &vert_data, &vert_count);
 
@@ -351,7 +351,7 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
 
   /* -- Index -- */
   {
-    unsigned int idx_count = 0;
+    int idx_count = 0;
     unsigned int *idx_data = nullptr;
     nau_get_idx(ui_ctx, &idx_data, &idx_count);
 
@@ -399,7 +399,7 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
     
-    unsigned int cmd_count = 0;
+    int cmd_count = 0;
     Nau_draw_cmd *cmds = nullptr;
     nau_get_cmds(ui_ctx, &cmds, &cmd_count);
     
