@@ -321,16 +321,16 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
 {
   glBindVertexArray(gl_ctx->vao);
   
-  int width;
-  int height;
-  nau_get_viewport(ui_ctx, &width, &height);
+  int vp_width;
+  int vp_height;
+  nau_get_viewport(ui_ctx, &vp_width, &vp_height);
 
   /* -- Projection Matrix -- */
   {
     const float ortho[16]
     {
-      2.f / (float)width, 0.f,            0.f,          0.f,
-      0.f,          2.f / (float)-height, 0.f,          0.f,
+      2.f / (float)vp_width, 0.f,            0.f,          0.f,
+      0.f,          2.f / (float)-vp_height, 0.f,          0.f,
       0.f,          0.f,                  2.f / 10.f,   0.f,
       -1.f,         1.f,                  0.f,          1.f,
     };
@@ -384,49 +384,40 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
 
   /* -- Draw -- */
   {
-    glScissor(0, 0, width, height);
-    glViewport(0,0,width, height);
+    glViewport(0,0,vp_width, vp_height);
+    glScissor(0, 0, vp_width, vp_height);
     
     glClear(GL_DEPTH_BUFFER_BIT);
-//    glEnable(GL_BLEND);
-//    glBlendEquation(GL_FUNC_ADD);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
 //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+//    glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
     
     glDisable(GL_CULL_FACE);
 //    glDepthFunc(GL_EQUAL);
-    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
     
     int cmd_count = 0;
     Nau_draw_cmd *cmds = nullptr;
     nau_get_cmds(ui_ctx, &cmds, &cmd_count);
-    
-    uint32_t *offset = 0;
 
-    //printf("<data>\n");
-
-    //for(size_t i = cmd_count - 1; i != size_t(-1); --i)
     for(size_t i = 0; i < cmd_count; ++i)
     {
-      const GLsizei width  = (cmds[i].clip[2] - cmds[i].clip[0]);
-      const GLsizei height = (cmds[i].clip[3] - cmds[i].clip[1]);
+      const Nau_draw_cmd *cmd = &cmds[i];
+    
+      const GLsizei width  = (cmd->clip[2] - cmd->clip[0]);
+      const GLsizei height = (cmd->clip[3] - cmd->clip[1]);
 
-      const GLint x = cmds[i].clip[0];
-      const GLint y = height - cmds[i].clip[3];
+      const GLint x = cmd->clip[0];
+      const GLint y = vp_height - cmd->clip[1] - (height);
 
-      //printf("--\n");
-      //printf("CLIP: %d %d %d %d\n", x, y, width, height);
-      //printf("IDX: %d, %d\n", cmds[i]->idx_count, cmds[i]->idx_start);
-
-      //glScissor(x, y, width, height);
+      glScissor(x, y, width, height);
       uint32_t *idx_start = 0;
       idx_start += cmds[i].offset;
-      glDrawElements(GL_TRIANGLES, cmds[i].count, GL_UNSIGNED_INT, (void*)idx_start);
+      glDrawElements(GL_TRIANGLES, cmd->count, GL_UNSIGNED_INT, (void*)idx_start);
     }
 
-    //printf("</data>\n");
-    
     // -- Err Check -- //
     {
       auto err = glGetError();

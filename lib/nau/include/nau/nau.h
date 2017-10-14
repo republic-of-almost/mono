@@ -62,4 +62,11 @@ void      nau_end(Nau_ctx *ctx);
 bool      nau_button(Nau_ctx *ctx, const char *name);
 
 
+/* -------------------------------------------------------- [ Formatting ] -- */
+
+
+void      nau_inline(Nau_ctx *ctx);
+void      nau_line_break(Nau_ctx *ctx);
+
+
 #endif // inc guard

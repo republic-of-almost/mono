@@ -15,6 +15,8 @@
 GLFWwindow  *window = NULL;
 Nau_ctx     *ctx    = NULL;
 Nau_gl_ctx  *gl_ctx = NULL;
+int         view_port_width = 800;
+int         view_port_height = 480;
 
 
 /* ------------------------------------------------- [ Application Funcs ] -- */
@@ -27,10 +29,10 @@ test_interface()
   {
     nau_begin(ctx, "Basic Window");
     
-    if(nau_button(ctx, "click me"))
-    {
-      printf("Button clicked\n");
-    }
+//    if(nau_button(ctx, "click me"))
+//    {
+//      printf("Button clicked\n");
+//    }
     
     nau_end(ctx);
   }
@@ -53,6 +55,9 @@ void
 render_interface()
 {
   glfwMakeContextCurrent(window);
+  
+  glViewport(0,0,view_port_width, view_port_height);
+  glScissor(0,0,view_port_width, view_port_height);
   
   glClearColor(0.87,0.87,0.85,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -81,6 +86,9 @@ glfw_resize(GLFWwindow *win, int width, int height)
   Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
   nau_set_viewport(*ctx, width, height);
   
+  view_port_height = height;
+  view_port_width = width;
+  
   /* re-render interface */
   glViewport(0,0,width,height);
   render_interface();
@@ -108,9 +116,6 @@ glfw_ms_move(GLFWwindow *win, double x, double y)
   int vp_x, vp_y;
   nau_get_viewport(*ctx, &vp_x, &vp_y);
   
-  int screen_x = (int)x - (vp_x / 2);
-  int screen_y = (int)y;
-  
   nau_set_pointer_coords(*ctx, x, y);
 }
 
@@ -121,9 +126,6 @@ glfw_ms_move(GLFWwindow *win, double x, double y)
 int
 main()
 {
-  const int init_width  = 800;
-  const int init_height = 480;
-
   /* ------------------------------------------------------ [ GLFW Setup ] -- */
   {
     if(!glfwInit())
@@ -143,7 +145,7 @@ main()
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    window = glfwCreateWindow(init_width, init_height, "NAU Tests", NULL, NULL);
+    window = glfwCreateWindow(view_port_width, view_port_height, "NAU Tests", NULL, NULL);
     glfwSetWindowUserPointer(window, (void*)&ctx);
     
     glfwSetWindowSizeCallback(window, glfw_resize);
@@ -169,7 +171,7 @@ main()
     nau_initialize(&ctx);
     nau_gl3_init(&gl_ctx, ctx);
    
-    nau_set_viewport(ctx, init_width, init_height);
+    nau_set_viewport(ctx, view_port_width, view_port_height);
   }
 
   /* ------------------------------------------------- [ Application Loop] -- */
