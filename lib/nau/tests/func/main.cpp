@@ -75,7 +75,7 @@ glfw_ms_button(GLFWwindow *win, int id, int action, int mod)
 {
   if (id == GLFW_MOUSE_BUTTON_1)
   {
-    const Nau_ptr_status status = action == GLFW_PRESS ? NAU_PTR_STATUS_UP : NAU_PTR_STATUS_DOWN;
+    const Nau_ptr_status status = action == GLFW_PRESS ? NAU_PTR_STATUS_DOWN : NAU_PTR_STATUS_UP;
     Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
     
     nau_set_pointer_status(*ctx, status);

@@ -36,34 +36,64 @@
 /* general types */
 
 
-struct Nau_env
+struct Nau_vec2
 {
-  int min[2];
-  int max[2];
+  float x;
+  float y;
 };
 
 
-struct Nau_vec2
+struct Nau_env
 {
-  float data[2];
+  Nau_vec2 min;
+  Nau_vec2 max;
 };
 
 
 /* math functions */
 
-bool
+static Nau_vec2
+nau_vec2_subtract(Nau_vec2 a, Nau_vec2 b)
+{
+  return Nau_vec2{a.x - b.x, a.y - b.y};
+}
+
+
+static Nau_vec2
+nau_vec2_add(Nau_vec2 a, Nau_vec2 b)
+{
+  return Nau_vec2{a.x + b.x, a.y + b.y};
+}
+
+
+static bool
 nau_scalar_between(float val, float start, float end)
 {
   return val > start && val < end;
 }
 
-bool
+
+static bool
 nau_env_contains(Nau_env env, Nau_vec2 pos)
 {
-  const bool between_x = nau_scalar_between(pos.data[0], env.min[0], env.max[0]);
-  const bool between_y = nau_scalar_between(pos.data[1], env.min[1], env.max[1]);
+  const bool between_x = nau_scalar_between(pos.x, env.min.x, env.max.x);
+  const bool between_y = nau_scalar_between(pos.y, env.min.y, env.max.y);
   
   return between_x && between_y;
+}
+
+
+static Nau_vec2
+nau_env_size(Nau_env env)
+{
+  return Nau_vec2{env.max.x - env.min.x, env.max.y - env.min.y};
+}
+
+
+static Nau_env
+env_from_pos_size(Nau_vec2 pos, Nau_vec2 size)
+{
+  return Nau_env{pos, nau_vec2_add(pos, size)};
 }
 
 
@@ -137,6 +167,9 @@ struct Nau_device_data
   int             height;
   
   Nau_vec2        ptr_pos;
+  Nau_vec2        ptr_last_pos;
+  Nau_vec2        ptr_diff;
+  
   Nau_ptr_status  ptr_status;  // 0 up 1 down
   Nau_ptr_action  ptr_action;  // infered from status
 };
@@ -258,8 +291,8 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     
     /* position / uv / color */
     
-    ctx->draw_data.vbo[index++] = area.min[0];
-    ctx->draw_data.vbo[index++] = area.min[1];
+    ctx->draw_data.vbo[index++] = area.min.x;
+    ctx->draw_data.vbo[index++] = area.min.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
@@ -272,8 +305,8 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     
     /**/
     
-    ctx->draw_data.vbo[index++] = area.max[0];
-    ctx->draw_data.vbo[index++] = area.min[1];
+    ctx->draw_data.vbo[index++] = area.max.x;
+    ctx->draw_data.vbo[index++] = area.min.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
@@ -286,8 +319,8 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     
     /**/
     
-    ctx->draw_data.vbo[index++] = area.min[0];
-    ctx->draw_data.vbo[index++] = area.max[1];
+    ctx->draw_data.vbo[index++] = area.min.x;
+    ctx->draw_data.vbo[index++] = area.max.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
@@ -300,8 +333,8 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     
     /**/
     
-    ctx->draw_data.vbo[index++] = area.max[0];
-    ctx->draw_data.vbo[index++] = area.max[1];
+    ctx->draw_data.vbo[index++] = area.max.x;
+    ctx->draw_data.vbo[index++] = area.max.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = 1.f;
@@ -327,9 +360,9 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     
     /**/
     
+    ctx->draw_data.idx[index++] = offset + 1;
     ctx->draw_data.idx[index++] = offset + 2;
     ctx->draw_data.idx[index++] = offset + 3;
-    ctx->draw_data.idx[index++] = offset + 0;
   
     ctx->draw_data.idx_count = index;
   }
@@ -338,7 +371,7 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
   {
     const int index = ctx->draw_data.cmd_count;
     
-    int cmd_clip[4] { clip.min[0], clip.min[1], clip.max[0], clip.max[1] };
+    int cmd_clip[4] { (int)clip.min.x, (int)clip.min.y, (int)clip.max.x, (int)clip.max.y };
     
     memcpy(&ctx->draw_data.cmds[index].clip, cmd_clip, sizeof(cmd_clip));
     ctx->draw_data.cmds[index].count = 6;
@@ -435,9 +468,13 @@ nau_new_frame(Nau_ctx *ctx)
   
   /* update input */
   {
-    ctx->device.ptr_action = ctx->device.ptr_action == NAU_MS_ACTION_DOWN ? NAU_MS_ACTION_HOLD : ctx->device.ptr_action;
+    ctx->device.ptr_diff = nau_vec2_subtract(ctx->device.ptr_pos, ctx->device.ptr_last_pos);
+    ctx->device.ptr_last_pos = ctx->device.ptr_pos;
+  
     ctx->device.ptr_action = ctx->device.ptr_action == NAU_MS_ACTION_DOWN ? NAU_MS_ACTION_HOLD : ctx->device.ptr_action;
     ctx->device.ptr_action = ctx->device.ptr_action == NAU_MS_ACTION_CLICK ? NAU_MS_ACTION_UP : ctx->device.ptr_action;
+    
+    ctx->stage_data.interacts_coords = ctx->device.ptr_pos;
   }
   
   /* update interactions */
@@ -456,7 +493,6 @@ nau_new_frame(Nau_ctx *ctx)
       {
         if(nau_env_contains(interact[i].env, point))
         {
-          ctx->stage_data.interacts_coords = point;
           ctx->stage_data.interacts_current = interact[i].id;
         }
       }
@@ -574,8 +610,8 @@ nau_set_pointer_coords(Nau_ctx *ctx, int x, int y)
 
   /* update ptr coords */
   {
-    ctx->device.ptr_pos.data[0] = (float)x;
-    ctx->device.ptr_pos.data[1] = (float)y;
+    ctx->device.ptr_pos.x = (float)x;
+    ctx->device.ptr_pos.y = (float)y;
   }
 }
 
@@ -609,8 +645,9 @@ nau_set_pointer_status(Nau_ctx *ctx, Nau_ptr_status status)
     else
     {
       ctx->device.ptr_action = NAU_MS_ACTION_DOWN;
-      ctx->stage_data.interacts_current = 0;
     }
+    
+    ctx->stage_data.interacts_current = 0;
   }
 }
 
@@ -630,16 +667,40 @@ nau_begin(Nau_ctx *ctx, const char *name)
 
   /* window id */
   const uint32_t win_id = nau_hash(name, strlen(name), 0);
+  Nau_window window;
+  bool win_cached = false;
+  window.id = win_id;
+  window.pos = Nau_vec2{10,10};
+  window.size = Nau_vec2{100, 130};
   
-  Nau_env area{{10,10}, {100,100}};
+  /* get window history */
+  {
+    const uint32_t count = ctx->stage_data.win_history_count;
+    const Nau_window *windows = ctx->stage_data.win_history;
+    
+    for(uint32_t i = 0; i < count; ++i)
+    {
+      if(windows[i].id == win_id)
+      {
+        window = windows[i];
+        win_cached = true;
+      }
+    }
+  }
+  
+  Nau_env area = env_from_pos_size(window.pos, window.size);
   
   /* check interacts */
   {
     const uint64_t curr_interact = ctx->stage_data.interacts_current;
-  
-    if(curr_interact == win_id)
+    const uint64_t test = win_id | 0xFF;
+    
+    if(curr_interact == test)
     {
-      int i = 0;
+      window.pos = nau_vec2_add(window.pos, ctx->device.ptr_diff);
+      
+      // Reset area
+      area = env_from_pos_size(window.pos, window.size);
     }
   }
   
@@ -658,8 +719,34 @@ nau_begin(Nau_ctx *ctx, const char *name)
     Nau_interactable *inter = &ctx->stage_data.interacts[index];
     
     inter->id    = win_id | 0xFF;
-    inter->env   = Nau_env{{10, 10}, {100, 100}};
+    inter->env   = area;
     inter->flags = NAU_INTERACT_DRAG;
+  }
+  
+  /* save window */
+  {
+    const uint32_t count = ctx->stage_data.win_history_count;
+    
+    /* udpate cache */
+    if(win_cached)
+    {
+      const uint32_t count = ctx->stage_data.win_history_count;
+      Nau_window *windows = ctx->stage_data.win_history;
+      
+      for(uint32_t i = 0; i < count; ++i)
+      {
+        if(windows[i].id == win_id)
+        {
+          windows[i] = window;
+        }
+      }
+    }
+    /* new window */
+    else
+    {
+      ctx->stage_data.win_history[count] = window;
+      ctx->stage_data.win_history_count += 1;
+    }
   }
 }
 

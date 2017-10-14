@@ -345,8 +345,8 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
     float *vert_data = nullptr;
     nau_get_vbo(ui_ctx, &vert_data, &vert_count);
 
-//    glBindBuffer(GL_ARRAY_BUFFER, gl_ctx->vbo);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vert_count, vert_data, GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, gl_ctx->vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vert_count, vert_data, GL_STREAM_DRAW);
   }
 
   /* -- Index -- */
@@ -355,8 +355,8 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
     unsigned int *idx_data = nullptr;
     nau_get_idx(ui_ctx, &idx_data, &idx_count);
 
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl_ctx->ebo);
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * idx_count, idx_data, GL_STREAM_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl_ctx->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * idx_count, idx_data, GL_STREAM_DRAW);
   }
 
   /* -- Input  -- */
