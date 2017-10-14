@@ -23,9 +23,21 @@ Nau_gl_ctx  *gl_ctx = NULL;
 void
 test_interface()
 {
-  /* toolbar test */
+  /* basic test */
   {
     nau_begin(ctx, "Basic Window");
+    
+    if(nau_button(ctx, "click me"))
+    {
+      printf("Button clicked\n");
+    }
+    
+    nau_end(ctx);
+  }
+  
+  /* toolbar test */
+  {
+    nau_begin(ctx, "Toolbar");
     
     if(nau_button(ctx, "click me"))
     {

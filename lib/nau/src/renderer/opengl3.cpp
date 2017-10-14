@@ -109,9 +109,8 @@ nau_gl3_init(Nau_gl_ctx **gl_ctx, Nau_ctx *ui_ctx)
         discard;
       }
 
-//      fs_out_color = final_color;
-//      fs_out_color.a = 0.8;
-      fs_out_color = vec4(1,1,0,1);
+      fs_out_color = final_color;
+      fs_out_color.a = 0.8;
     }
 
   )GLSL";

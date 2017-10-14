@@ -264,7 +264,7 @@ nau_hash(const void *data, const size_t data_size, const uint32_t seed)
 
 
 static void
-nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
+nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
 {
   /* some info */
   const size_t vertex_stride = 3 + 2 + 4;
@@ -274,16 +274,21 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
   {
     size_t index = ctx->draw_data.vbo_count;
     
+    const float r = ((color >> 24) & 0xFF) / 255.f;
+    const float g = ((color >> 16) & 0xFF) / 255.f;
+    const float b = ((color >> 8) & 0xFF) / 255.f;
+    const float a = ((color >> 0) & 0xFF) / 255.f;
+    
     /* position / uv / color */
     
     ctx->draw_data.vbo[index++] = area.min.x;
     ctx->draw_data.vbo[index++] = area.min.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = r;
+    ctx->draw_data.vbo[index++] = g;
+    ctx->draw_data.vbo[index++] = b;
+    ctx->draw_data.vbo[index++] = a;
     
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 0.f;
@@ -294,10 +299,10 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     ctx->draw_data.vbo[index++] = area.min.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = r;
+    ctx->draw_data.vbo[index++] = g;
+    ctx->draw_data.vbo[index++] = b;
+    ctx->draw_data.vbo[index++] = a;
     
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 0.f;
@@ -308,10 +313,10 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     ctx->draw_data.vbo[index++] = area.max.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = r;
+    ctx->draw_data.vbo[index++] = g;
+    ctx->draw_data.vbo[index++] = b;
+    ctx->draw_data.vbo[index++] = a;
     
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 0.f;
@@ -322,10 +327,10 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     ctx->draw_data.vbo[index++] = area.max.y;
     ctx->draw_data.vbo[index++] = 1.f;
     
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 1.f;
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = r;
+    ctx->draw_data.vbo[index++] = g;
+    ctx->draw_data.vbo[index++] = b;
+    ctx->draw_data.vbo[index++] = a;
     
     ctx->draw_data.vbo[index++] = 0.f;
     ctx->draw_data.vbo[index++] = 0.f;
@@ -360,7 +365,7 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, unsigned int color)
     
     memcpy(&ctx->draw_data.cmds[index].clip, cmd_clip, sizeof(cmd_clip));
     ctx->draw_data.cmds[index].count = 6;
-    ctx->draw_data.cmds[index].offset = offset;
+    ctx->draw_data.cmds[index].offset = ctx->draw_data.idx_count - 6;
     
     ctx->draw_data.cmd_count += 1;
   }
@@ -651,12 +656,10 @@ nau_begin(Nau_ctx *ctx, const char *name)
   }
 
   /* window id */
-  const uint32_t win_id = nau_hash(name, strlen(name), 0);
-  Nau_window window;
   bool win_cached = false;
-  window.id = win_id;
-  window.pos = Nau_vec2{10,10};
-  window.size = Nau_vec2{100, 130};
+  
+  Nau_window window;
+  window.id = nau_hash(name, strlen(name), 0);;
   
   /* get window history */
   {
@@ -665,11 +668,18 @@ nau_begin(Nau_ctx *ctx, const char *name)
     
     for(uint32_t i = 0; i < count; ++i)
     {
-      if(windows[i].id == win_id)
+      if(windows[i].id == window.id)
       {
         window = windows[i];
         win_cached = true;
       }
+    }
+    
+    if(!win_cached)
+    {
+      const float offset = 1.f + (float)count;
+      window.pos = Nau_vec2{10.f * offset, 10.f * offset};
+      window.size = Nau_vec2{100, 130};
     }
   }
   
@@ -678,7 +688,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
   /* check interacts */
   {
     const uint64_t curr_interact = ctx->stage_data.interacts_current;
-    const uint64_t test = win_id | 0xFF;
+    const uint64_t test = window.id | 0xFF;
     
     if(curr_interact == test)
     {
@@ -691,7 +701,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
   
   /* window body */
   {
-    const uint32_t color = 0xFF0000FF;
+    const uint32_t color = 0x009999FF;
   
     nau_submit_cmd(ctx, area, area, color);
   }
@@ -703,7 +713,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
     
     Nau_interactable *inter = &ctx->stage_data.interacts[index];
     
-    inter->id    = win_id | 0xFF;
+    inter->id    = window.id | 0xFF;
     inter->env   = area;
     inter->flags = NAU_INTERACT_DRAG;
   }
@@ -720,7 +730,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
       
       for(uint32_t i = 0; i < count; ++i)
       {
-        if(windows[i].id == win_id)
+        if(windows[i].id == window.id)
         {
           windows[i] = window;
         }
