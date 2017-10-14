@@ -35,6 +35,8 @@ test_interface()
 void
 render_interface()
 {
+  glfwMakeContextCurrent(window);
+  
   glClearColor(0.87,0.87,0.85,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -73,7 +75,7 @@ glfw_ms_button(GLFWwindow *win, int id, int action, int mod)
 {
   if (id == GLFW_MOUSE_BUTTON_1)
   {
-    const int status = action == GLFW_PRESS ? 1 : 0;
+    const Nau_ptr_status status = action == GLFW_PRESS ? NAU_PTR_STATUS_UP : NAU_PTR_STATUS_DOWN;
     Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
     
     nau_set_pointer_status(*ctx, status);
@@ -85,7 +87,14 @@ void
 glfw_ms_move(GLFWwindow *win, double x, double y)
 {
   Nau_ctx **ctx = (Nau_ctx**)glfwGetWindowUserPointer(win);
-  nau_set_pointer_coords(*ctx, (int)x, (int)y);
+  
+  int vp_x, vp_y;
+  nau_get_viewport(*ctx, &vp_x, &vp_y);
+  
+  int screen_x = (int)x - (vp_x / 2);
+  int screen_y = (int)y;
+  
+  nau_set_pointer_coords(*ctx, x, y);
 }
 
 

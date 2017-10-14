@@ -16,6 +16,14 @@ struct Nau_draw_cmd
 };
 
 
+typedef enum {
+  
+  NAU_PTR_STATUS_UP = 0,
+  NAU_PTR_STATUS_DOWN = 1,
+  
+} Nau_ptr_status;
+
+
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
@@ -38,7 +46,7 @@ void      nau_get_viewport(Nau_ctx *ctx, int *width, int *height);
 
 void      nau_set_viewport(Nau_ctx *ctx, int width, int height);
 void      nau_set_pointer_coords(Nau_ctx *ctx, int x, int y);
-void      nau_set_pointer_status(Nau_ctx *ctx, int status);
+void      nau_set_pointer_status(Nau_ctx *ctx, Nau_ptr_status status);
 
 
 /* ------------------------------------------------------------ [ Window ] -- */

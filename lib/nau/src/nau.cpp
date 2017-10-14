@@ -1,4 +1,5 @@
 #include <nau/nau.h>
+#include <stdint.h>
 
 
 /* ------------------------------------------------------------ [ Config ] -- */
@@ -32,24 +33,7 @@
 
 /* ---------------------------------------------------- [ Types and Data ] -- */
 
-
-struct Nau_theme
-{
-  unsigned int bg_color_ctx;
-  unsigned int bg_color_panel;
-};
-
-
-struct Nau_device
-{
-  int width;
-  int height;
-  
-  int ptr_x;
-  int ptr_y;
-  
-  int ptr_status; // 0 up 1 down
-};
+/* general types */
 
 
 struct Nau_env
@@ -59,7 +43,129 @@ struct Nau_env
 };
 
 
-struct Nau_draw_buffers
+struct Nau_vec2
+{
+  float data[2];
+};
+
+
+/* math functions */
+
+bool
+nau_scalar_between(float val, float start, float end)
+{
+  return val > start && val < end;
+}
+
+bool
+nau_env_contains(Nau_env env, Nau_vec2 pos)
+{
+  const bool between_x = nau_scalar_between(pos.data[0], env.min[0], env.max[0]);
+  const bool between_y = nau_scalar_between(pos.data[1], env.min[1], env.max[1]);
+  
+  return between_x && between_y;
+}
+
+
+/*
+  Nau_interactable
+  --
+  The properties of an interactable object.
+*/
+typedef enum
+{
+  NAU_INTERACT_DRAG,
+  NAU_INTERACT_RESIZE,
+  NAU_INTERACT_CLICKABLE,
+  
+} Nau_iteract_flags;
+
+struct Nau_interactable
+{
+  uint64_t id; /* window | field */
+  unsigned int flags;
+  Nau_env env;
+};
+
+
+/*
+  Nau_window
+  --
+  Represents a window on the screen.
+*/
+struct Nau_window
+{
+  uint32_t id;
+  
+  Nau_vec2 pos;
+  Nau_vec2 size;
+};
+
+
+/*** state controllers ***/
+
+/*
+  Nau_theme_data
+  --
+  Holds all the theme data for all the UI elements.
+  this is fully editable.
+*/
+struct Nau_theme_data
+{
+  unsigned int bg_color_ctx;
+  unsigned int bg_color_panel;
+};
+
+
+/*
+  Nau_device_data
+  --
+  Holds any device details, mouse / screen etc.
+*/
+typedef enum {
+  
+  NAU_MS_ACTION_UP    = NAU_PTR_STATUS_UP,
+  NAU_MS_ACTION_DOWN  = NAU_PTR_STATUS_DOWN,
+  NAU_MS_ACTION_HOLD,
+  NAU_MS_ACTION_CLICK,
+  
+} Nau_ptr_action;
+
+struct Nau_device_data
+{
+  int             width;
+  int             height;
+  
+  Nau_vec2        ptr_pos;
+  Nau_ptr_status  ptr_status;  // 0 up 1 down
+  Nau_ptr_action  ptr_action;  // infered from status
+};
+
+
+/*
+  The stage can be considered the area that we are rendering to. This holds
+  active windows, window history and anything that is on the screen and
+  interactable.
+*/
+struct Nau_stage_data
+{
+  Nau_window        *win_history;
+  int                win_history_count;
+  int                win_history_capacity;
+  
+  Nau_interactable  *interacts;
+  int                interacts_count;
+  int                interacts_capacity;
+  
+  uint64_t           interacts_current;
+  Nau_vec2           interacts_coords;
+};
+
+
+/*
+  Holds anything related to the actual GPU drawing side of things.
+*/
+struct Nau_draw_buffer_data
 {
   float *vbo;
   int vbo_count;
@@ -75,11 +181,18 @@ struct Nau_draw_buffers
 };
 
 
+/* ctx */
+
+/*
+  Holds all the state for this context. You may have multiple contexts, the 
+  downside of this means you need to pass in the context for each function.
+*/
 struct Nau_ctx
 {
-  Nau_draw_buffers  draw_data;
-  Nau_device        device;
-  Nau_theme         theme;
+  Nau_draw_buffer_data  draw_data;
+  Nau_device_data       device;
+  Nau_theme_data        theme;
+  Nau_stage_data        stage_data;
 };
 
 
@@ -87,33 +200,33 @@ struct Nau_ctx
 
 
 // Pulled from Imgui should replace with what imgui recomends
-static unsigned int
-nau_hash(const void *data, const size_t data_size, const unsigned int seed)
+static uint32_t
+nau_hash(const void *data, const size_t data_size, const uint32_t seed)
 {
-  static unsigned int crc32 [256] {0};
+  static uint32_t crc32 [256] {0};
   if(!crc32[1])
   {
-    const unsigned int polynomial = 0xEDB88320;
-    for(unsigned int i = 0; i < 256; ++i)
+    const uint32_t polynomial = 0xEDB88320;
+    for(uint32_t i = 0; i < 256; ++i)
     {
-      unsigned int crc = i;
+      uint32_t crc = i;
 
-      for(unsigned int j = 0; j < 8; j++)
+      for(uint32_t j = 0; j < 8; j++)
       {
-        crc = (crc >> 1) ^ ((unsigned int)(-int(crc & 1)) & polynomial);
+        crc = (crc >> 1) ^ ((uint32_t)(-int32_t(crc & 1)) & polynomial);
 
         crc32[i] = crc;
       }
     }
   }
 
-  const unsigned int s = ~seed;
-  unsigned int crc = s;
-  const unsigned char *current = (const unsigned char*)data;
+  const uint32_t s = ~seed;
+  uint32_t crc = s;
+  const uint8_t *current = (const uint8_t*)data;
 
   if(data_size == 0)
   {
-    unsigned int count_down = data_size;
+    uint32_t count_down = data_size;
 
     while(count_down--)
     {
@@ -122,20 +235,13 @@ nau_hash(const void *data, const size_t data_size, const unsigned int seed)
   }
   else
   {
-    while(unsigned char c = *current++)
+    while(uint8_t c = *current++)
     {
       crc = (crc >> 8) ^ crc32[(crc & 0xFF) ^ c];
     }
   }
 
   return ~crc;
-}
-
-
-static void
-nau_submit_tris(Nau_ctx *ctx, const float verts[], const float texture_coords[], unsigned int color, int tri_count, int clip[4])
-{
-
 }
 
 
@@ -283,6 +389,22 @@ nau_initialize(Nau_ctx **ctx)
     new_ctx->theme.bg_color_panel = 0x999999FF;
   }
   
+  /* default stage */
+  {
+    const int win_count = 32;
+    const int win_bytes = sizeof(Nau_window) * win_count;
+    new_ctx->stage_data.win_history = (Nau_window*)NAU_MALLOC(win_bytes);
+    new_ctx->stage_data.win_history_count = 0;
+    new_ctx->stage_data.win_history_capacity = win_count;
+    
+    const int inter_count = 128;
+    const int inter_bytes = sizeof(Nau_interactable) * inter_count;
+    new_ctx->stage_data.interacts = (Nau_interactable*)NAU_MALLOC(inter_bytes);
+    new_ctx->stage_data.interacts_count = 0;
+    new_ctx->stage_data.interacts_capacity = inter_count;
+    new_ctx->stage_data.interacts_current = 0;
+  }
+  
   *ctx = new_ctx;
   
   NAU_LOG("Created NAU CTX");
@@ -309,6 +431,41 @@ nau_new_frame(Nau_ctx *ctx)
     ctx->draw_data.vbo_count = 0;
     ctx->draw_data.idx_count = 0;
     ctx->draw_data.cmd_count = 0;
+  }
+  
+  /* update input */
+  {
+    ctx->device.ptr_action = ctx->device.ptr_action == NAU_MS_ACTION_DOWN ? NAU_MS_ACTION_HOLD : ctx->device.ptr_action;
+    ctx->device.ptr_action = ctx->device.ptr_action == NAU_MS_ACTION_DOWN ? NAU_MS_ACTION_HOLD : ctx->device.ptr_action;
+    ctx->device.ptr_action = ctx->device.ptr_action == NAU_MS_ACTION_CLICK ? NAU_MS_ACTION_UP : ctx->device.ptr_action;
+  }
+  
+  /* update interactions */
+  {
+    const bool is_held  = ctx->device.ptr_action == NAU_MS_ACTION_HOLD;
+    const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
+    const bool no_curr  = ctx->stage_data.interacts_current == 0;
+    
+    if((is_held || is_click) && no_curr)
+    {
+      const uint32_t count = ctx->stage_data.interacts_count;
+      const Nau_interactable *interact = ctx->stage_data.interacts;
+      const Nau_vec2 point = ctx->device.ptr_pos;
+      
+      for(uint32_t i = 0; i < count; ++i)
+      {
+        if(nau_env_contains(interact[i].env, point))
+        {
+          ctx->stage_data.interacts_coords = point;
+          ctx->stage_data.interacts_current = interact[i].id;
+        }
+      }
+    }
+  }
+  
+  /* reset the context */
+  {
+    ctx->stage_data.interacts_count = 0;
   }
 }
 
@@ -417,14 +574,14 @@ nau_set_pointer_coords(Nau_ctx *ctx, int x, int y)
 
   /* update ptr coords */
   {
-    ctx->device.ptr_x = x;
-    ctx->device.ptr_y = y;
+    ctx->device.ptr_pos.data[0] = (float)x;
+    ctx->device.ptr_pos.data[1] = (float)y;
   }
 }
 
 
 void
-nau_set_pointer_status(Nau_ctx *ctx, int status)
+nau_set_pointer_status(Nau_ctx *ctx, Nau_ptr_status status)
 {
   /* param check */
   {
@@ -434,6 +591,26 @@ nau_set_pointer_status(Nau_ctx *ctx, int status)
   /* update ptr status */
   {
     ctx->device.ptr_status = status;
+    
+    if(status == NAU_PTR_STATUS_UP)
+    {
+      const bool is_down = ctx->device.ptr_action == NAU_MS_ACTION_DOWN;
+      const bool is_held = ctx->device.ptr_action == NAU_MS_ACTION_HOLD;
+    
+      if(is_down || is_held)
+      {
+        ctx->device.ptr_action = NAU_MS_ACTION_CLICK;
+      }
+      else
+      {
+        ctx->device.ptr_action = NAU_MS_ACTION_UP;
+      }
+    }
+    else
+    {
+      ctx->device.ptr_action = NAU_MS_ACTION_DOWN;
+      ctx->stage_data.interacts_current = 0;
+    }
   }
 }
 
@@ -452,15 +629,37 @@ nau_begin(Nau_ctx *ctx, const char *name)
   }
 
   /* window id */
-  const unsigned int win_id = nau_hash(name, strlen(name), 0);
+  const uint32_t win_id = nau_hash(name, strlen(name), 0);
+  
+  Nau_env area{{10,10}, {100,100}};
+  
+  /* check interacts */
+  {
+    const uint64_t curr_interact = ctx->stage_data.interacts_current;
+  
+    if(curr_interact == win_id)
+    {
+      int i = 0;
+    }
+  }
   
   /* window body */
   {
-    Nau_env area{{10, 10}, {100, 100}};
-    Nau_env clip{{10, 10}, {100, 100}};
-    unsigned int color = 0xFF0000FF;
+    const uint32_t color = 0xFF0000FF;
   
-    nau_submit_cmd(ctx, area, clip, color);
+    nau_submit_cmd(ctx, area, area, color);
+  }
+  
+  /* submit interactable */
+  {
+    const int index = ctx->stage_data.interacts_count;
+    ++ctx->stage_data.interacts_count;
+    
+    Nau_interactable *inter = &ctx->stage_data.interacts[index];
+    
+    inter->id    = win_id | 0xFF;
+    inter->env   = Nau_env{{10, 10}, {100, 100}};
+    inter->flags = NAU_INTERACT_DRAG;
   }
 }
 
