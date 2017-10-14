@@ -53,24 +53,16 @@ struct Nau_env
 /* math functions */
 
 static Nau_vec2
-nau_vec2_subtract(Nau_vec2 a, Nau_vec2 b)
-{
-  return Nau_vec2{a.x - b.x, a.y - b.y};
-}
-
+nau_vec2_subtract(Nau_vec2 a, Nau_vec2 b) { return Nau_vec2{a.x - b.x, a.y - b.y}; }
 
 static Nau_vec2
-nau_vec2_add(Nau_vec2 a, Nau_vec2 b)
-{
-  return Nau_vec2{a.x + b.x, a.y + b.y};
-}
-
+nau_vec2_add(Nau_vec2 a, Nau_vec2 b) { return Nau_vec2{a.x + b.x, a.y + b.y}; }
 
 static bool
-nau_scalar_between(float val, float start, float end)
-{
-  return val > start && val < end;
-}
+nau_scalar_between(float val, float start, float end) { return val > start && val < end; }
+
+static Nau_env
+env_from_pos_size(Nau_vec2 pos, Nau_vec2 size) { return Nau_env{pos, nau_vec2_add(pos, size)}; }
 
 
 static bool
@@ -80,20 +72,6 @@ nau_env_contains(Nau_env env, Nau_vec2 pos)
   const bool between_y = nau_scalar_between(pos.y, env.min.y, env.max.y);
   
   return between_x && between_y;
-}
-
-
-static Nau_vec2
-nau_env_size(Nau_env env)
-{
-  return Nau_vec2{env.max.x - env.min.x, env.max.y - env.min.y};
-}
-
-
-static Nau_env
-env_from_pos_size(Nau_vec2 pos, Nau_vec2 size)
-{
-  return Nau_env{pos, nau_vec2_add(pos, size)};
 }
 
 
@@ -186,6 +164,8 @@ struct Nau_stage_data
   int                win_history_count;
   int                win_history_capacity;
   
+  Nau_window         active_window;
+  
   Nau_interactable  *interacts;
   int                interacts_count;
   int                interacts_capacity;
@@ -227,6 +207,11 @@ struct Nau_ctx
   Nau_theme_data        theme;
   Nau_stage_data        stage_data;
 };
+
+
+/* helper functions */
+static bool
+nau_has_active_window(Nau_ctx *c) { return c->stage_data.active_window.id > 0; }
 
 
 /* ---------------------------------------------------------- [ Internal ] -- */
@@ -748,6 +733,11 @@ nau_begin(Nau_ctx *ctx, const char *name)
       ctx->stage_data.win_history_count += 1;
     }
   }
+  
+  /* active window */
+  {
+    ctx->stage_data.active_window = window;
+  }
 }
 
 
@@ -757,6 +747,12 @@ nau_end(Nau_ctx *ctx)
   /* param check */
   {
     NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(nau_has_active_window(ctx) == true); // did you miss a begin call
+  }
+  
+  /* end active window */
+  {
+    ctx->stage_data.active_window = Nau_window{};
   }
 }
 
@@ -764,9 +760,16 @@ nau_end(Nau_ctx *ctx)
 /* ----------------------------------------------------------- [ Widgets ] -- */
 
 
-void
+bool
 nau_button(Nau_ctx *ctx, const char *name)
 {
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+    NAU_ASSERT(nau_has_active_window(ctx) == true); // did you miss a begin call
+  }
+  
+  return false;
 }
 
 

@@ -59,4 +59,7 @@ void      nau_end(Nau_ctx *ctx);
 /* ----------------------------------------------------------- [ Widgets ] -- */
 
 
+bool      nau_button(Nau_ctx *ctx, const char *name);
+
+
 #endif // inc guard

@@ -25,7 +25,12 @@ test_interface()
 {
   /* toolbar test */
   {
-    nau_begin(ctx, "Toolbar");
+    nau_begin(ctx, "Basic Window");
+    
+    if(nau_button(ctx, "click me"))
+    {
+      printf("Button clicked\n");
+    }
     
     nau_end(ctx);
   }
