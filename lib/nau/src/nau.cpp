@@ -72,10 +72,19 @@ env_from_pos_size(Nau_vec2 pos, Nau_vec2 size) {
   return Nau_env{pos, nau_vec2_add(pos, size)};
 }
 
+static float
+env_width(Nau_env env) {
+  return env.max.x - env.min.x;
+}
+
+static Nau_env
+env_expand(Nau_env env, int scale) {
+  Nau_vec2 vec{(float)scale, (float)scale};
+  return Nau_env{nau_vec2_subtract(env.min, vec), nau_vec2_add(env.max, vec)};
+}
 
 static bool
-nau_env_contains(Nau_env env, Nau_vec2 pos)
-{
+nau_env_contains(Nau_env env, Nau_vec2 pos) {
   const bool between_x = nau_scalar_between(pos.x, env.min.x, env.max.x);
   const bool between_y = nau_scalar_between(pos.y, env.min.y, env.max.y);
   
@@ -128,8 +137,16 @@ struct Nau_window
 */
 struct Nau_theme_data
 {
-  unsigned int bg_color_ctx;
-  unsigned int bg_color_panel;
+  uint32_t color_border;
+  uint32_t color_win_title;
+  uint32_t color_win_body;
+  uint32_t color_widget_button;
+  uint32_t color_field;
+  
+  int32_t size_border;
+  int32_t size_inner_margin;
+  int32_t size_row_height;
+  int32_t size_row_spacing;
 };
 
 
@@ -180,7 +197,9 @@ struct Nau_stage_data
   Nau_vec2           interacts_coords;
   
   Nau_window         active_window;
-  Nau_vec2           cursor;  
+  Nau_vec2           cursor;
+  float              window_margin;
+  Nau_env            child_env;
 };
 
 
@@ -415,12 +434,6 @@ nau_initialize(Nau_ctx **ctx)
     new_ctx->draw_data.cmd_capacity = cmd_count;
   }
   
-  /* default theme */
-  {
-    new_ctx->theme.bg_color_ctx = 0x333333FF;
-    new_ctx->theme.bg_color_panel = 0x999999FF;
-  }
-  
   /* default stage */
   {
     const int win_count = 32;
@@ -435,6 +448,20 @@ nau_initialize(Nau_ctx **ctx)
     new_ctx->stage_data.interacts_count = 0;
     new_ctx->stage_data.interacts_capacity = inter_count;
     new_ctx->stage_data.interacts_current = 0;
+  }
+  
+  /* default theme */
+  {
+    new_ctx->theme.color_border         = 0x000000FF;
+    new_ctx->theme.color_win_body       = 0xFF0000FF;
+    new_ctx->theme.color_win_title      = 0xFFFF00FF;
+    new_ctx->theme.color_widget_button  = 0x00FFFFFF;
+    new_ctx->theme.color_field          = 0xFFFFFFFF;
+    
+    new_ctx->theme.size_border       = 2;
+    new_ctx->theme.size_inner_margin = 3;
+    new_ctx->theme.size_row_height   = 20;
+    new_ctx->theme.size_row_spacing  = 4;
   }
   
   *ctx = new_ctx;
@@ -717,59 +744,80 @@ nau_begin(Nau_ctx *ctx, const char *name)
     ctx->stage_data.cursor = window.pos;
   }
   
-  /* border */
+  /* main body */
   {
-    const uint32_t color = 0x000000FF;
+    /* border */
+    {
+      const uint32_t color = ctx->theme.color_border;
+      
+      nau_submit_cmd(ctx, area, area, color);
+    }
     
-    nau_submit_cmd(ctx, area, area, color);
+    /* window body */
+    {
+      const Nau_env body_env = env_expand(area, -ctx->theme.size_border);
+      ctx->stage_data.child_env = body_env;
+      const uint32_t color = ctx->theme.color_win_body;
+    
+      nau_submit_cmd(ctx, body_env, body_env, color);
+      
+      ctx->stage_data.cursor = body_env.min;
+    }
+    
+    /* submit drag interactable */
+    {
+      const int index = ctx->stage_data.interacts_count;
+      ++ctx->stage_data.interacts_count;
+      
+      Nau_interactable *inter = &ctx->stage_data.interacts[index];
+      
+      inter->id    = window.id | 0xFF;
+      inter->env   = area;
+      inter->flags = NAU_INTERACT_DRAG;
+    }
   }
   
-  /* title bar */
+  /* title */
   {
-    const Nau_env title_area = env_from_pos_size(
-      ctx->stage_data.cursor,
-      Nau_vec2{window.size.x, 10}
-    );
-  
-    nau_submit_cmd(ctx, title_area, title_area, 0xFF00FFFF);
+    /* name bar */
+    {
+      const Nau_vec2 title_pos = ctx->stage_data.cursor;
+      
+      const float width = env_width(ctx->stage_data.child_env);
+      const float height = (float)ctx->theme.size_row_height;
+      const Nau_vec2 title_size{width, height};
+      
+      const Nau_env title_area = env_from_pos_size(
+        title_pos,
+        title_size
+      );
+      
+      const uint32_t color = ctx->theme.color_win_title;
+    
+      nau_submit_cmd(ctx, title_area, title_area, color);
+    }
+    
+    /* close button */
+    {
+    }
+    
+    /* minimize button */
+    {
+    }
+    
     nau_line_break(ctx);
   }
   
-  /* close button */
-  {
-  }
-  
-  /* minimize button */
-  {
-  }
-  
-  /* window body */
-  {
-    const Nau_env body = env_from_pos_size(ctx->stage_data.cursor, Nau_vec2{10, 20});
-  
-    const uint32_t color = 0x009999FF;
-  
-    nau_submit_cmd(ctx, body, body, color);
-  }
   
   /* footer */
   {
-  }
+    /* handle size change */
+    {
+    }
   
-  /* resize handle */
-  {
-  }
-  
-  /* submit interactable */
-  {
-    const int index = ctx->stage_data.interacts_count;
-    ++ctx->stage_data.interacts_count;
-    
-    Nau_interactable *inter = &ctx->stage_data.interacts[index];
-    
-    inter->id    = window.id | 0xFF;
-    inter->env   = area;
-    inter->flags = NAU_INTERACT_DRAG;
+    /* resize handle */
+    {
+    }
   }
   
   /* save window */
@@ -834,18 +882,18 @@ nau_button(Nau_ctx *ctx, const char *name)
     
     Nau_window window = ctx->stage_data.active_window;
     
-    Nau_vec2 margin = window.pos;
+    Nau_vec2 margin = ctx->stage_data.cursor;
     margin.x += 5;
-    margin.y += 5;
     
     Nau_vec2 size = window.size;
-    size.x += 10;
-    size.y += 30;
+    size.y = ctx->theme.size_row_height;
     
     Nau_env area = env_from_pos_size(margin, size);
     
     nau_submit_cmd(ctx, area, area, color);
   }
+  
+  nau_line_break(ctx);
   
   return false;
 }
@@ -876,7 +924,7 @@ nau_line_break(Nau_ctx *ctx)
   
   /* move cursor down */
   {
-    ctx->stage_data.cursor.y += 10;
+    ctx->stage_data.cursor.y += (ctx->theme.size_row_height + ctx->theme.size_row_spacing);
   }
 }
 

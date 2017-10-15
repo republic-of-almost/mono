@@ -46,6 +46,11 @@ test_interface()
       printf("Button clicked\n");
     }
     
+    if(nau_button(ctx, "click me too"))
+    {
+      printf("Other button clicked\n");
+    }
+    
     nau_end(ctx);
   }
 }
