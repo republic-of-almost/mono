@@ -128,6 +128,7 @@ typedef enum
   NAU_INTERACT_DRAG      = 1 << 0,
   NAU_INTERACT_RESIZE    = 1 << 1,
   NAU_INTERACT_CLICKABLE = 1 << 2,
+  NAU_INTERACT_HOLDABLE  = 1 << 3,
   
 } Nau_iteract_flags;
 
@@ -557,12 +558,16 @@ nau_new_frame(Nau_ctx *ctx)
   
   /* update interactions */
   {
-    ctx->stage_data.interacts_current = 0;
-    ctx->stage_data.interacts_type = NAU_INTERACT_NONE;
-  
     const bool is_held  = ctx->device.ptr_action == NAU_MS_ACTION_HOLD;
     const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
     const bool no_curr  = ctx->stage_data.interacts_current == 0;
+    
+    /* drag and resize need to continue to be active */
+    if(!is_held)
+    {
+      ctx->stage_data.interacts_current = 0;
+      ctx->stage_data.interacts_type = NAU_INTERACT_NONE;
+    }
     
     if((is_held || is_click) && no_curr)
     {
@@ -578,20 +583,24 @@ nau_new_frame(Nau_ctx *ctx)
           {
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_CLICKABLE;
-            break;
           }
           else if(is_held && (interact[i].flags & NAU_INTERACT_DRAG))
           {
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_DRAG;
-            break;
           }
           else if(is_held && (interact[i].flags & NAU_INTERACT_RESIZE))
           {
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_RESIZE;
-            break;
           }
+          else if(is_held && (interact[i].flags & NAU_INTERACT_HOLDABLE))
+          {
+            ctx->stage_data.interacts_current = interact[i].id;
+            ctx->stage_data.interacts_type = NAU_INTERACT_HOLDABLE;
+          }
+          
+          break;
         }
       }
     }
@@ -873,7 +882,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
   }
   
   /* active window */
-  {
+  {	
     ctx->stage_data.active_window = window;
     ctx->stage_data.cursor = window.pos;
   }
@@ -1065,7 +1074,7 @@ nau_button(Nau_ctx *ctx, const char *name)
       
       inter->id    = interact_id;
       inter->env   = area;
-      inter->flags = NAU_INTERACT_CLICKABLE;
+      inter->flags = NAU_INTERACT_CLICKABLE | NAU_INTERACT_HOLDABLE;
     }
     
     nau_line_break(ctx);
@@ -1073,7 +1082,10 @@ nau_button(Nau_ctx *ctx, const char *name)
   
   /* check was clicked on */
   {
-    if(ctx->stage_data.interacts_current == interact_id)
+    const bool id_match = ctx->stage_data.interacts_current == interact_id;
+    const bool is_clicked = ctx->stage_data.interacts_type == NAU_INTERACT_CLICKABLE;
+  
+    if(id_match && is_clicked)
     {
       return true;
     }
