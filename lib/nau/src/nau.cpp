@@ -442,6 +442,17 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
 }
 
 
+static void
+nau_default_hints(Nau_ctx *ctx)
+{
+  ctx->window_hints.flags = 0;
+  ctx->window_hints.size[0] = 100.f;
+  ctx->window_hints.size[1] = 150.f;
+  ctx->window_hints.position[0] = 10.f * ctx->stage_data.win_history_count;
+  ctx->window_hints.position[1] = 10.f * ctx->stage_data.win_history_count;
+}
+
+
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
@@ -507,6 +518,11 @@ nau_initialize(Nau_ctx **ctx)
     new_ctx->theme.size_inner_margin = 3;
     new_ctx->theme.size_row_height   = 20;
     new_ctx->theme.size_row_spacing  = 4;
+  }
+  
+  /* hints */
+  {
+    nau_default_hints(new_ctx);
   }
   
   *ctx = new_ctx;
@@ -812,8 +828,12 @@ nau_begin(Nau_ctx *ctx, const char *name)
     if(!win_cached)
     {
       const float offset = 1.f + (float)count;
-      window.pos = Nau_vec2{10.f * offset, 10.f * offset};
-      window.size = Nau_vec2{100, 130};
+      
+      window.pos.x = ctx->window_hints.position[0];
+      window.pos.y = ctx->window_hints.position[1];
+      
+      window.size.x = ctx->window_hints.size[0];
+      window.size.y = ctx->window_hints.size[1];
     }
   }
   
@@ -957,12 +977,8 @@ nau_end(Nau_ctx *ctx)
   
   /* end active window */
   {
+    nau_default_hints(ctx);
     ctx->stage_data.active_window = Nau_window{};
-    ctx->window_hints.flags = 0;
-    ctx->window_hints.size[0] = 100.f;
-    ctx->window_hints.size[1] = 150.f;
-    ctx->window_hints.position[0] = 10.f * ctx->stage_data.win_history_count;
-    ctx->window_hints.position[1] = 10.f * ctx->stage_data.win_history_count;
   }
 }
 

@@ -40,6 +40,13 @@ test_interface()
   /* toolbar test */
   {
     nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG);
+    
+    float size[2] {120, (float)view_port_height};
+    nau_win_prop_size(ctx, size);
+    
+    float pos[2]{view_port_width - size[0], 0.f};
+    nau_win_prop_position(ctx, pos);
+    
     nau_begin(ctx, "Toolbar");
     
     if(nau_button(ctx, "click me"))
