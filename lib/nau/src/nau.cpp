@@ -570,24 +570,27 @@ nau_new_frame(Nau_ctx *ctx)
       const Nau_interactable *interact = ctx->stage_data.interacts;
       const Nau_vec2 point = ctx->device.ptr_pos;
       
-      for(uint32_t i = 0; i < count; ++i)
+      for(int32_t i = count - 1; i > -1; --i)
       {
         if(nau_env_contains(interact[i].env, point))
         {
-          if(is_click && ((interact[i].flags & NAU_INTERACT_CLICKABLE)))
+          if(is_click && (interact[i].flags & NAU_INTERACT_CLICKABLE))
           {
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_CLICKABLE;
+            break;
           }
-          else if(is_held && ((interact[i].flags & NAU_INTERACT_DRAG)))
+          else if(is_held && (interact[i].flags & NAU_INTERACT_DRAG))
           {
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_DRAG;
+            break;
           }
-          else if(is_held && ((interact[i].flags & NAU_INTERACT_RESIZE)))
+          else if(is_held && (interact[i].flags & NAU_INTERACT_RESIZE))
           {
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_RESIZE;
+            break;
           }
         }
       }
@@ -837,8 +840,6 @@ nau_begin(Nau_ctx *ctx, const char *name)
     
     if(!win_cached)
     {
-      const float offset = 1.f + (float)count;
-      
       window.pos.x = ctx->window_hints.position[0];
       window.pos.y = ctx->window_hints.position[1];
       
@@ -867,7 +868,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
       window.size = nau_vec2_add(window.size, ctx->device.ptr_diff);
       
       // Reset size
-      area = env_from_pos_size(window.size, window.size);
+      area = env_from_pos_size(window.pos, window.size);
     }
   }
   
