@@ -29,17 +29,17 @@ test_interface()
   {
     nau_begin(ctx, "Basic Window");
     
-//    if(nau_button(ctx, "click me"))
-//    {
-//      printf("Button clicked\n");
-//    }
+    if(nau_button(ctx, "click me"))
+    {
+      printf("Button clicked\n");
+    }
     
     nau_end(ctx);
   }
   
   /* toolbar test */
   {
-    nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG);
+    nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG | NAU_WIN_NO_RESIZE);
     
     float size[2] {120, (float)view_port_height};
     nau_win_prop_size(ctx, size);

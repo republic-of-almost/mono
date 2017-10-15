@@ -124,8 +124,9 @@ nau_env_clamp(Nau_env env_to_clamp, Nau_env clamp)
 */
 typedef enum
 {
-  NAU_INTERACT_DRAG = 1 << 0,
-  NAU_INTERACT_RESIZE = 1 << 1,
+  NAU_INTERACT_NONE      = 0,
+  NAU_INTERACT_DRAG      = 1 << 0,
+  NAU_INTERACT_RESIZE    = 1 << 1,
   NAU_INTERACT_CLICKABLE = 1 << 2,
   
 } Nau_iteract_flags;
@@ -235,6 +236,7 @@ struct Nau_stage_data
   int                interacts_capacity;
   
   uint64_t           interacts_current;
+  Nau_iteract_flags  interacts_type;
   Nau_vec2           interacts_coords;
   
   Nau_window         active_window;
@@ -448,8 +450,8 @@ nau_default_hints(Nau_ctx *ctx)
   ctx->window_hints.flags = 0;
   ctx->window_hints.size[0] = 100.f;
   ctx->window_hints.size[1] = 150.f;
-  ctx->window_hints.position[0] = 10.f * ctx->stage_data.win_history_count;
-  ctx->window_hints.position[1] = 10.f * ctx->stage_data.win_history_count;
+  ctx->window_hints.position[0] = 10.f * (ctx->stage_data.win_history_count + 1.f);
+  ctx->window_hints.position[1] = 10.f * (ctx->stage_data.win_history_count + 1.f);
 }
 
 
@@ -556,6 +558,7 @@ nau_new_frame(Nau_ctx *ctx)
   /* update interactions */
   {
     ctx->stage_data.interacts_current = 0;
+    ctx->stage_data.interacts_type = NAU_INTERACT_NONE;
   
     const bool is_held  = ctx->device.ptr_action == NAU_MS_ACTION_HOLD;
     const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
@@ -571,13 +574,20 @@ nau_new_frame(Nau_ctx *ctx)
       {
         if(nau_env_contains(interact[i].env, point))
         {
-          if(is_click && interact[i].flags & NAU_INTERACT_CLICKABLE)
+          if(is_click && ((interact[i].flags & NAU_INTERACT_CLICKABLE)))
           {
             ctx->stage_data.interacts_current = interact[i].id;
+            ctx->stage_data.interacts_type = NAU_INTERACT_CLICKABLE;
           }
-          else if(is_held && interact[i].flags & NAU_INTERACT_DRAG)
+          else if(is_held && ((interact[i].flags & NAU_INTERACT_DRAG)))
           {
             ctx->stage_data.interacts_current = interact[i].id;
+            ctx->stage_data.interacts_type = NAU_INTERACT_DRAG;
+          }
+          else if(is_held && ((interact[i].flags & NAU_INTERACT_RESIZE)))
+          {
+            ctx->stage_data.interacts_current = interact[i].id;
+            ctx->stage_data.interacts_type = NAU_INTERACT_RESIZE;
           }
         }
       }
@@ -842,14 +852,22 @@ nau_begin(Nau_ctx *ctx, const char *name)
   /* check interacts */
   {
     const uint64_t curr_interact = ctx->stage_data.interacts_current;
-    const uint64_t test = window.id | 0xFF;
+    const Nau_iteract_flags curr_interact_type = ctx->stage_data.interacts_type;
+    const uint64_t id = window.id | 0xFF;
     
-    if(curr_interact == test)
+    if(curr_interact == id && curr_interact_type == NAU_INTERACT_DRAG)
     {
       window.pos = nau_vec2_add(window.pos, ctx->device.ptr_diff);
       
       // Reset area
       area = env_from_pos_size(window.pos, window.size);
+    }
+    else if(curr_interact == id && curr_interact_type == NAU_INTERACT_RESIZE)
+    {
+      window.size = nau_vec2_add(window.size, ctx->device.ptr_diff);
+      
+      // Reset size
+      area = env_from_pos_size(window.size, window.size);
     }
   }
   
@@ -935,6 +953,28 @@ nau_begin(Nau_ctx *ctx, const char *name)
   
     /* resize handle */
     {
+      const Nau_vec2 height        = Nau_vec2{0.f, window.size.y - (float)ctx->theme.size_row_height};
+      const Nau_vec2 width         = Nau_vec2{window.size.x - (float)ctx->theme.size_row_height,0.f};
+      const Nau_vec2 footer_corner = nau_vec2_add(width, nau_vec2_add(window.pos, height));
+      
+      const Nau_env drag_handle = env_from_pos_size(
+        footer_corner,
+        Nau_vec2{10, 10}
+      );
+      
+      const uint32_t color = ctx->theme.color_win_title;
+    
+      nau_submit_cmd(ctx, drag_handle, drag_handle, color);
+      
+      /* interactable */
+      const int index = ctx->stage_data.interacts_count;
+      ++ctx->stage_data.interacts_count;
+      
+      Nau_interactable *inter = &ctx->stage_data.interacts[index];
+      
+      inter->id    = window.id | 0xFF;
+      inter->env   = drag_handle;
+      inter->flags = NAU_INTERACT_RESIZE;
     }
   }
   
