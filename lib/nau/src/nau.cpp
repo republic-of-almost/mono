@@ -67,6 +67,16 @@ nau_scalar_between(float val, float start, float end) {
   return val > start && val < end;
 }
 
+static float
+nau_scalar_min(float a, float b) {
+  return a < b ? a : b;
+}
+
+static float
+nau_scalar_max(float a, float b) {
+  return a > b ? a : b;
+}
+
 static Nau_env
 env_from_pos_size(Nau_vec2 pos, Nau_vec2 size) {
   return Nau_env{pos, nau_vec2_add(pos, size)};
@@ -91,6 +101,21 @@ nau_env_contains(Nau_env env, Nau_vec2 pos) {
   return between_x && between_y;
 }
 
+static Nau_env
+nau_env_clamp(Nau_env env_to_clamp, Nau_env clamp)
+{
+  const float min_x = nau_scalar_max(env_to_clamp.min.x, clamp.min.x);
+  const float min_y = nau_scalar_max(env_to_clamp.min.y, clamp.min.y);
+  const float max_x = nau_scalar_min(env_to_clamp.max.x, clamp.max.x);
+  const float max_y = nau_scalar_min(env_to_clamp.max.y, clamp.max.y);
+  
+  if(min_x < 0.f || min_y < 0.f || max_x < 0.f || max_y < 0.f) {
+    return Nau_env{Nau_vec2{0.f, 0.f}, Nau_vec2{0.f, 0.f}};
+  }
+  
+  return Nau_env{Nau_vec2{min_x, min_y}, Nau_vec2{max_x, max_y}};
+}
+
 
 /*
   Nau_interactable
@@ -99,9 +124,9 @@ nau_env_contains(Nau_env env, Nau_vec2 pos) {
 */
 typedef enum
 {
-  NAU_INTERACT_DRAG,
-  NAU_INTERACT_RESIZE,
-  NAU_INTERACT_CLICKABLE,
+  NAU_INTERACT_DRAG = 1 << 0,
+  NAU_INTERACT_RESIZE = 1 << 1,
+  NAU_INTERACT_CLICKABLE = 1 << 2,
   
 } Nau_iteract_flags;
 
@@ -142,6 +167,9 @@ struct Nau_theme_data
   uint32_t color_win_body;
   uint32_t color_widget_button;
   uint32_t color_field;
+  uint32_t color_button;
+  uint32_t color_button_hover;
+  uint32_t color_button_down;
   
   int32_t size_border;
   int32_t size_inner_margin;
@@ -457,6 +485,9 @@ nau_initialize(Nau_ctx **ctx)
     new_ctx->theme.color_win_title      = 0xFFFF00FF;
     new_ctx->theme.color_widget_button  = 0x00FFFFFF;
     new_ctx->theme.color_field          = 0xFFFFFFFF;
+    new_ctx->theme.color_button         = 0xFF0000FF;
+    new_ctx->theme.color_button_hover   = 0xFFFF00FF;
+    new_ctx->theme.color_button_down    = 0xFF00FFFF;
     
     new_ctx->theme.size_border       = 2;
     new_ctx->theme.size_inner_margin = 3;
@@ -492,22 +523,10 @@ nau_new_frame(Nau_ctx *ctx)
     ctx->draw_data.cmd_count = 0;
   }
   
-  /* update input */
-  {
-    ctx->device.ptr_diff = nau_vec2_subtract(ctx->device.ptr_pos, ctx->device.ptr_last_pos);
-    ctx->device.ptr_last_pos = ctx->device.ptr_pos;
-    
-    const bool is_down = ctx->device.ptr_action == NAU_MS_ACTION_DOWN;
-    ctx->device.ptr_action = is_down ? NAU_MS_ACTION_HOLD : ctx->device.ptr_action;
-    
-    const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
-    ctx->device.ptr_action = is_click ? NAU_MS_ACTION_UP : ctx->device.ptr_action;
-    
-    ctx->stage_data.interacts_coords = ctx->device.ptr_pos;
-  }
-  
   /* update interactions */
   {
+    ctx->stage_data.interacts_current = 0;
+  
     const bool is_held  = ctx->device.ptr_action == NAU_MS_ACTION_HOLD;
     const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
     const bool no_curr  = ctx->stage_data.interacts_current == 0;
@@ -522,10 +541,31 @@ nau_new_frame(Nau_ctx *ctx)
       {
         if(nau_env_contains(interact[i].env, point))
         {
-          ctx->stage_data.interacts_current = interact[i].id;
+          if(is_click && interact[i].flags & NAU_INTERACT_CLICKABLE)
+          {
+            ctx->stage_data.interacts_current = interact[i].id;
+          }
+          else if(is_held && interact[i].flags & NAU_INTERACT_DRAG)
+          {
+            ctx->stage_data.interacts_current = interact[i].id;
+          }
         }
       }
     }
+  }
+  
+  /* update input */
+  {
+    ctx->device.ptr_diff = nau_vec2_subtract(ctx->device.ptr_pos, ctx->device.ptr_last_pos);
+    ctx->device.ptr_last_pos = ctx->device.ptr_pos;
+    
+    const bool is_down = ctx->device.ptr_action == NAU_MS_ACTION_DOWN;
+    ctx->device.ptr_action = is_down ? NAU_MS_ACTION_HOLD : ctx->device.ptr_action;
+    
+    const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
+    ctx->device.ptr_action = is_click ? NAU_MS_ACTION_UP : ctx->device.ptr_action;
+    
+    ctx->stage_data.interacts_coords = ctx->device.ptr_pos;
   }
   
   /* reset the context */
@@ -876,11 +916,14 @@ nau_button(Nau_ctx *ctx, const char *name)
     NAU_ASSERT(nau_has_active_window(ctx) == true); // did you miss a begin call
   }
   
+  uint64_t interact_id = 0;
+  
   /* add button */
   {
     const uint32_t color = 0xFFFFFFFF;
     
     Nau_window window = ctx->stage_data.active_window;
+    interact_id = window.id | nau_hash(name, strlen(name), 0);
     
     Nau_vec2 margin = ctx->stage_data.cursor;
     margin.x += 5;
@@ -889,11 +932,32 @@ nau_button(Nau_ctx *ctx, const char *name)
     size.y = ctx->theme.size_row_height;
     
     Nau_env area = env_from_pos_size(margin, size);
+    Nau_env clamped_area = nau_env_clamp(area, ctx->stage_data.child_env);
     
-    nau_submit_cmd(ctx, area, area, color);
+    nau_submit_cmd(ctx, area, clamped_area, color);
+    
+    /* add interactable */
+    {
+      const int index = ctx->stage_data.interacts_count;
+      ++ctx->stage_data.interacts_count;
+      
+      Nau_interactable *inter = &ctx->stage_data.interacts[index];
+      
+      inter->id    = interact_id;
+      inter->env   = area;
+      inter->flags = NAU_INTERACT_CLICKABLE;
+    }
+    
+    nau_line_break(ctx);
   }
   
-  nau_line_break(ctx);
+  /* check was clicked on */
+  {
+    if(ctx->stage_data.interacts_current == interact_id)
+    {
+      return true;
+    }
+  }
   
   return false;
 }
