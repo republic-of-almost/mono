@@ -152,6 +152,19 @@ struct Nau_window
 };
 
 
+/*
+  Nau_window_hints
+  --
+  Set of hints that can be applied to a window.
+*/
+struct Nau_window_hints
+{
+  uint32_t  flags;
+  float     size[2];
+  float     position[2];
+};
+
+
 /*** state controllers ***/
 
 /*
@@ -262,6 +275,7 @@ struct Nau_ctx
   Nau_device_data       device;
   Nau_theme_data        theme;
   Nau_stage_data        stage_data;
+  Nau_window_hints      window_hints;
 };
 
 
@@ -725,6 +739,40 @@ nau_set_pointer_status(Nau_ctx *ctx, Nau_ptr_status status)
 
 
 void
+nau_win_prop_flags(Nau_ctx *ctx, int flags)
+{
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
+  
+  ctx->window_hints.flags = flags;
+}
+
+void
+nau_win_prop_size(Nau_ctx *ctx, float size[2])
+{
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
+  
+  memcpy(ctx->window_hints.size, size, sizeof(ctx->window_hints.size));
+}
+
+void
+nau_win_prop_position(Nau_ctx *ctx, float pos[2])
+{
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL);
+  }
+  
+  memcpy(ctx->window_hints.position, pos, sizeof(ctx->window_hints.position));
+}
+
+
+void
 nau_begin(Nau_ctx *ctx, const char *name)
 {
   /* param check */
@@ -733,6 +781,13 @@ nau_begin(Nau_ctx *ctx, const char *name)
     NAU_ASSERT(name != NULL);
     NAU_ASSERT(strlen(name) > 0);
   }
+
+  /* window properties */
+  const uint32_t flags = ctx->window_hints.flags;
+  
+  const bool can_resize = !(flags & NAU_WIN_NO_RESIZE);
+  const bool can_drag   = !(flags & NAU_WIN_NO_DRAG);
+  const bool can_close  = !(flags & NAU_WIN_NO_CLOSE);
 
   /* window id */
   bool win_cached = false;
@@ -805,6 +860,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
     }
     
     /* submit drag interactable */
+    if(can_drag)
     {
       const int index = ctx->stage_data.interacts_count;
       ++ctx->stage_data.interacts_count;
@@ -838,6 +894,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
     }
     
     /* close button */
+    if(can_close)
     {
     }
     
@@ -850,6 +907,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
   
   
   /* footer */
+  if(can_resize)
   {
     /* handle size change */
     {
@@ -900,6 +958,11 @@ nau_end(Nau_ctx *ctx)
   /* end active window */
   {
     ctx->stage_data.active_window = Nau_window{};
+    ctx->window_hints.flags = 0;
+    ctx->window_hints.size[0] = 100.f;
+    ctx->window_hints.size[1] = 150.f;
+    ctx->window_hints.position[0] = 10.f * ctx->stage_data.win_history_count;
+    ctx->window_hints.position[1] = 10.f * ctx->stage_data.win_history_count;
   }
 }
 

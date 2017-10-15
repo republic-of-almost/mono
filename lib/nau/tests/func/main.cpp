@@ -39,6 +39,7 @@ test_interface()
   
   /* toolbar test */
   {
+    nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG);
     nau_begin(ctx, "Toolbar");
     
     if(nau_button(ctx, "click me"))
