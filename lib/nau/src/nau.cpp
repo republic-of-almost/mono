@@ -1051,6 +1051,18 @@ nau_end(Nau_ctx *ctx)
 /* ----------------------------------------------------------- [ Widgets ] -- */
 
 
+void
+nau_text(Nau_ctx *ctx, const char *text)
+{
+  /* param check */
+  {
+    NAU_ASSERT(ctx != NULL); // valid context
+    NAU_ASSERT(nau_has_active_window(ctx) == true); // did you miss a begin call
+    NAU_ASSERT(text != NULL); // need string to render
+  }
+}
+
+
 bool
 nau_button(Nau_ctx *ctx, const char *name)
 {
@@ -1058,6 +1070,8 @@ nau_button(Nau_ctx *ctx, const char *name)
   {
     NAU_ASSERT(ctx != NULL); // valid context
     NAU_ASSERT(nau_has_active_window(ctx) == true); // did you miss a begin call
+    NAU_ASSERT(name != NULL); // need a name
+    NAU_ASSERT(strlen(name) > 0); // need a name
   }
   
   uint64_t interact_id = 0;
@@ -1070,12 +1084,12 @@ nau_button(Nau_ctx *ctx, const char *name)
   
   /* check was clicked on */
   bool is_clicked = false;
-  bool is_down = false;
-  bool is_hover = false;
+  bool is_down    = false;
+  bool is_hover   = false;
   {
-    const bool id_match = ctx->stage_data.interacts_current == interact_id;
+    const bool id_match    = ctx->stage_data.interacts_current == interact_id;
     const bool is_clicking = ctx->stage_data.interacts_type == NAU_INTERACT_CLICKABLE;
-    const bool is_held = ctx->stage_data.interacts_type == NAU_INTERACT_HOLDABLE;
+    const bool is_held     = ctx->stage_data.interacts_type == NAU_INTERACT_HOLDABLE;
     const bool is_hovering = ctx->stage_data.interacts_type == NAU_INTERACT_HOVER;
   
     if(id_match && is_clicking)
@@ -1139,17 +1153,6 @@ nau_button(Nau_ctx *ctx, const char *name)
 
 
 /* -------------------------------------------------------- [ Formatting ] -- */
-
-
-void
-nau_inline(Nau_ctx *ctx)
-{
-  /* param check */
-  {
-    NAU_ASSERT(ctx != NULL); // valid context
-    NAU_ASSERT(nau_has_active_window(ctx) == true); // forgot a begin?
-  }
-}
 
 
 void

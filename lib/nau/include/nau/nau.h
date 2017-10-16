@@ -90,6 +90,7 @@ void      nau_end(Nau_ctx *ctx);
 */
 
 
+void      nau_text(Nau_ctx *ctx, const char *text);
 bool      nau_button(Nau_ctx *ctx, const char *name);
 
 
@@ -99,7 +100,7 @@ bool      nau_button(Nau_ctx *ctx, const char *name);
   end functions.
 */
 
-void      nau_inline(Nau_ctx *ctx);
+
 void      nau_line_break(Nau_ctx *ctx);
 
 
