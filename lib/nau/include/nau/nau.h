@@ -31,6 +31,7 @@ struct Nau_draw_cmd
   unsigned int count;
 };
 
+
 void      nau_get_vbo(Nau_ctx *ctx, float **vbo, int *count);
 void      nau_get_idx(Nau_ctx *ctx, unsigned int **idx, int *count);
 void      nau_get_cmds(Nau_ctx *ctx, Nau_draw_cmd **cmds, int *count);

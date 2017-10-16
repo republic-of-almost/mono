@@ -109,9 +109,9 @@ nau_env_clamp(Nau_env env_to_clamp, Nau_env clamp)
   const float max_x = nau_scalar_min(env_to_clamp.max.x, clamp.max.x);
   const float max_y = nau_scalar_min(env_to_clamp.max.y, clamp.max.y);
   
-  if(min_x < 0.f || min_y < 0.f || max_x < 0.f || max_y < 0.f) {
-    return Nau_env{Nau_vec2{0.f, 0.f}, Nau_vec2{0.f, 0.f}};
-  }
+//  if(min_x < 0.f || min_y < 0.f || max_x < 0.f || max_y < 0.f) {
+//    return Nau_env{Nau_vec2{0.f, 0.f}, Nau_vec2{0.f, 0.f}};
+//  }
   
   return Nau_env{Nau_vec2{min_x, min_y}, Nau_vec2{max_x, max_y}};
 }
@@ -1122,13 +1122,14 @@ nau_button(Nau_ctx *ctx, const char *name)
       color = ctx->theme.color_button_hover;
     }
   
-    Nau_vec2 margin = ctx->stage_data.cursor;
-    margin.x += 5;
+    Nau_vec2 l_margin = ctx->stage_data.cursor;
+    l_margin.x += ctx->theme.size_inner_margin;
     
     Nau_vec2 size = window.size;
     size.y = ctx->theme.size_row_height;
+    size.x -= ((ctx->theme.size_inner_margin + ctx->theme.size_border) * 2);
     
-    Nau_env area = env_from_pos_size(margin, size);
+    Nau_env area = env_from_pos_size(l_margin, size);
     Nau_env clamped_area = nau_env_clamp(area, ctx->stage_data.child_env);
     
     nau_submit_cmd(ctx, area, clamped_area, color);
