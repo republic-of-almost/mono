@@ -129,6 +129,7 @@ typedef enum
   NAU_INTERACT_RESIZE    = 1 << 1,
   NAU_INTERACT_CLICKABLE = 1 << 2,
   NAU_INTERACT_HOLDABLE  = 1 << 3,
+  NAU_INTERACT_HOVER     = 1 << 4,
   
 } Nau_iteract_flags;
 
@@ -180,7 +181,6 @@ struct Nau_theme_data
   uint32_t color_border;
   uint32_t color_win_title;
   uint32_t color_win_body;
-  uint32_t color_widget_button;
   uint32_t color_field;
   uint32_t color_button;
   uint32_t color_button_hover;
@@ -511,11 +511,10 @@ nau_initialize(Nau_ctx **ctx)
     new_ctx->theme.color_border         = 0x000000FF;
     new_ctx->theme.color_win_body       = 0xFF0000FF;
     new_ctx->theme.color_win_title      = 0xFFFF00FF;
-    new_ctx->theme.color_widget_button  = 0x00FFFFFF;
     new_ctx->theme.color_field          = 0xFFFFFFFF;
-    new_ctx->theme.color_button         = 0xFF0000FF;
+    new_ctx->theme.color_button         = 0xFF00FFFF;
     new_ctx->theme.color_button_hover   = 0xFFFF00FF;
-    new_ctx->theme.color_button_down    = 0xFF00FFFF;
+    new_ctx->theme.color_button_down    = 0xFFFFFFFF;
     
     new_ctx->theme.size_border       = 2;
     new_ctx->theme.size_inner_margin = 3;
@@ -549,18 +548,11 @@ nau_new_frame(Nau_ctx *ctx)
     NAU_ASSERT(ctx != NULL);
   }
   
-  /* reset draw cmds */
-  {
-    ctx->draw_data.vbo_count = 0;
-    ctx->draw_data.idx_count = 0;
-    ctx->draw_data.cmd_count = 0;
-  }
-  
   /* update interactions */
   {
     const bool is_held  = ctx->device.ptr_action == NAU_MS_ACTION_HOLD;
     const bool is_click = ctx->device.ptr_action == NAU_MS_ACTION_CLICK;
-    const bool no_curr  = ctx->stage_data.interacts_current == 0;
+    const bool is_down  = (ctx->device.ptr_action == NAU_MS_ACTION_DOWN) | is_held | is_click;
     
     /* drag and resize need to continue to be active */
     if(!is_held)
@@ -569,7 +561,7 @@ nau_new_frame(Nau_ctx *ctx)
       ctx->stage_data.interacts_type = NAU_INTERACT_NONE;
     }
     
-    if((is_held || is_click) && no_curr)
+    if((is_held || is_click) && ctx->stage_data.interacts_current == 0)
     {
       const uint32_t count = ctx->stage_data.interacts_count;
       const Nau_interactable *interact = ctx->stage_data.interacts;
@@ -604,6 +596,25 @@ nau_new_frame(Nau_ctx *ctx)
         }
       }
     }
+    
+    /* Look for something to hover over */
+    if(!is_down && ctx->stage_data.interacts_current == 0)
+    {
+      const uint32_t count = ctx->stage_data.interacts_count;
+      const Nau_interactable *interact = ctx->stage_data.interacts;
+      const Nau_vec2 point = ctx->device.ptr_pos;
+      
+      for(int32_t i = count - 1; i > -1; --i)
+      {
+        if(nau_env_contains(interact[i].env, point))
+        {
+          ctx->stage_data.interacts_current = interact[i].id;
+          ctx->stage_data.interacts_type = NAU_INTERACT_HOVER;
+          
+          break;
+        }
+      }
+    }
   }
   
   /* update input */
@@ -623,6 +634,10 @@ nau_new_frame(Nau_ctx *ctx)
   /* reset the context */
   {
     ctx->stage_data.interacts_count = 0;
+    
+    ctx->draw_data.vbo_count = 0;
+    ctx->draw_data.idx_count = 0;
+    ctx->draw_data.cmd_count = 0;
   }
 }
 
@@ -1046,14 +1061,53 @@ nau_button(Nau_ctx *ctx, const char *name)
   }
   
   uint64_t interact_id = 0;
+  const Nau_window window = ctx->stage_data.active_window;
+  
+  /* interact id */
+  {
+    interact_id = window.id | nau_hash(name, strlen(name), 0);
+  }
+  
+  /* check was clicked on */
+  bool is_clicked = false;
+  bool is_down = false;
+  bool is_hover = false;
+  {
+    const bool id_match = ctx->stage_data.interacts_current == interact_id;
+    const bool is_clicking = ctx->stage_data.interacts_type == NAU_INTERACT_CLICKABLE;
+    const bool is_held = ctx->stage_data.interacts_type == NAU_INTERACT_HOLDABLE;
+    const bool is_hovering = ctx->stage_data.interacts_type == NAU_INTERACT_HOVER;
+  
+    if(id_match && is_clicking)
+    {
+      is_clicked = true;
+    }
+    else if(id_match && is_held)
+    {
+      is_down = true;
+    }
+    else if(id_match && is_hovering)
+    {
+      is_hover = true;
+    }
+  }
   
   /* add button */
   {
-    const uint32_t color = 0xFFFFFFFF;
-    
-    Nau_window window = ctx->stage_data.active_window;
-    interact_id = window.id | nau_hash(name, strlen(name), 0);
-    
+    uint32_t color = ctx->theme.color_button;
+    if(is_clicked)
+    {
+      color = ctx->theme.color_button_down;
+    }
+    else if(is_down)
+    {
+      color = ctx->theme.color_button_down;
+    }
+    else if(is_hover)
+    {
+      color = ctx->theme.color_button_hover;
+    }
+  
     Nau_vec2 margin = ctx->stage_data.cursor;
     margin.x += 5;
     
@@ -1080,18 +1134,7 @@ nau_button(Nau_ctx *ctx, const char *name)
     nau_line_break(ctx);
   }
   
-  /* check was clicked on */
-  {
-    const bool id_match = ctx->stage_data.interacts_current == interact_id;
-    const bool is_clicked = ctx->stage_data.interacts_type == NAU_INTERACT_CLICKABLE;
-  
-    if(id_match && is_clicked)
-    {
-      return true;
-    }
-  }
-  
-  return false;
+  return is_clicked;
 }
 
 
