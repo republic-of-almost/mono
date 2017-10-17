@@ -243,7 +243,7 @@ glfw_aspect_tick(Nil_ctx *ctx, void *data)
         LIB_ASSERT(self->window);
 
         glfwMakeContextCurrent(self->window);
-        glfwSwapInterval(1);
+//        glfwSwapInterval(1);
         const int err = gl3wInit();
   
         if(err)

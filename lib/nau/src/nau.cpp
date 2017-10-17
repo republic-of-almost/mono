@@ -130,6 +130,7 @@ typedef enum
   NAU_INTERACT_CLICKABLE = 1 << 2,
   NAU_INTERACT_HOLDABLE  = 1 << 3,
   NAU_INTERACT_HOVER     = 1 << 4,
+  NAU_INTERACT_CLOSEABLE = 1 << 5,
   
 } Nau_iteract_flags;
 
@@ -591,6 +592,11 @@ nau_new_frame(Nau_ctx *ctx)
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_HOLDABLE;
           }
+          else if(is_held && (interact[i].flags & NAU_INTERACT_CLOSEABLE))
+          {
+            ctx->stage_data.interacts_current = interact[i].id;
+            ctx->stage_data.interacts_type = NAU_INTERACT_CLOSEABLE;
+          }
           
           break;
         }
@@ -826,7 +832,7 @@ nau_win_prop_position(Nau_ctx *ctx, float pos[2])
 
 
 void
-nau_begin(Nau_ctx *ctx, const char *name)
+nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
 {
   /* param check */
   {
@@ -846,7 +852,7 @@ nau_begin(Nau_ctx *ctx, const char *name)
   bool win_cached = false;
   
   Nau_window window;
-  window.id = nau_hash(name, strlen(name), 0);;
+  window.id = nau_hash(name, strlen(name), 0);
   
   /* get window history */
   {
@@ -893,6 +899,13 @@ nau_begin(Nau_ctx *ctx, const char *name)
       
       // Reset size
       area = env_from_pos_size(window.pos, window.size);
+    }
+    else if(curr_interact == id && curr_interact_type == NAU_INTERACT_CLOSEABLE)
+    {
+      if(close_handle)
+      {
+        *close_handle = false;
+      }
     }
   }
   
@@ -959,6 +972,32 @@ nau_begin(Nau_ctx *ctx, const char *name)
     /* close button */
     if(can_close)
     {
+      const float button_size = 10.f;
+      const float half_button_size = button_size * 0.5f;
+    
+      const Nau_vec2 top_left_corner = ctx->stage_data.cursor;
+      const Nau_vec2 width           = Nau_vec2{window.size.x - button_size,0.f};
+      const Nau_vec2 offset          = Nau_vec2{-half_button_size - half_button_size, (ctx->theme.size_row_height * 0.5f) - half_button_size};
+      const Nau_vec2 header_corner   = nau_vec2_add(nau_vec2_add(width, top_left_corner), offset);
+
+      const Nau_env close_button = env_from_pos_size(
+        header_corner,
+        Nau_vec2{button_size, button_size}
+      );
+
+      const uint32_t color = 0xFF0000FF;
+
+      nau_submit_cmd(ctx, close_button, close_button, color);
+
+      /* interactable */
+      const int index = ctx->stage_data.interacts_count;
+      ++ctx->stage_data.interacts_count;
+
+      Nau_interactable *inter = &ctx->stage_data.interacts[index];
+
+      inter->id    = window.id | 0xFF;
+      inter->env   = close_button;
+      inter->flags = NAU_INTERACT_CLOSEABLE;
     }
     
     /* minimize button */

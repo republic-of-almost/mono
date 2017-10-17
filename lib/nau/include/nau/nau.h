@@ -26,9 +26,9 @@ void      nau_new_frame(Nau_ctx *ctx);
 
 struct Nau_draw_cmd
 {
-  int clip[4];
-  unsigned int offset;
-  unsigned int count;
+  int           clip[4];
+  unsigned int  offset;
+  unsigned int  count;
 };
 
 
@@ -80,7 +80,7 @@ void      nau_win_prop_flags(Nau_ctx *ctx, int flags);
 void      nau_win_prop_size(Nau_ctx *ctx, float size[2]);
 void      nau_win_prop_position(Nau_ctx *ctx, float position[2]);
 
-void      nau_begin(Nau_ctx *ctx, const char *name);
+void      nau_begin(Nau_ctx *ctx, const char *name, bool *close);
 void      nau_end(Nau_ctx *ctx);
 
 
