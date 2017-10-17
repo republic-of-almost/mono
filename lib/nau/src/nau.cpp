@@ -340,7 +340,7 @@ nau_hash(const void *data, const size_t data_size, const uint32_t seed)
 
 
 static void
-nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
+nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_vec2, uint32_t *index, uint32_t vert_count, uint32_t color)
 {
   /* some info */
   const size_t vertex_stride = 3 + 2 + 4;
@@ -357,8 +357,8 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     
     /* position / uv / color */
     
-    ctx->draw_data.vbo[index++] = area.min.x;
-    ctx->draw_data.vbo[index++] = area.min.y;
+    ctx->draw_data.vbo[index++] = pos_vec2[0];
+    ctx->draw_data.vbo[index++] = pos_vec2[1];
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = r;
@@ -366,13 +366,13 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     ctx->draw_data.vbo[index++] = b;
     ctx->draw_data.vbo[index++] = a;
     
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = uv_vec2[0];
+    ctx->draw_data.vbo[index++] = uv_vec2[1];
     
     /**/
     
-    ctx->draw_data.vbo[index++] = area.max.x;
-    ctx->draw_data.vbo[index++] = area.min.y;
+    ctx->draw_data.vbo[index++] = pos_vec2[2];
+    ctx->draw_data.vbo[index++] = pos_vec2[3];
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = r;
@@ -380,13 +380,13 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     ctx->draw_data.vbo[index++] = b;
     ctx->draw_data.vbo[index++] = a;
     
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = uv_vec2[2];
+    ctx->draw_data.vbo[index++] = uv_vec2[3];
     
     /**/
     
-    ctx->draw_data.vbo[index++] = area.min.x;
-    ctx->draw_data.vbo[index++] = area.max.y;
+    ctx->draw_data.vbo[index++] = pos_vec2[4];
+    ctx->draw_data.vbo[index++] = pos_vec2[5];
     ctx->draw_data.vbo[index++] = 1.f;
     
     ctx->draw_data.vbo[index++] = r;
@@ -394,22 +394,23 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     ctx->draw_data.vbo[index++] = b;
     ctx->draw_data.vbo[index++] = a;
     
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    ctx->draw_data.vbo[index++] = uv_vec2[4];
+    ctx->draw_data.vbo[index++] = uv_vec2[5];
     
-    /**/
-    
-    ctx->draw_data.vbo[index++] = area.max.x;
-    ctx->draw_data.vbo[index++] = area.max.y;
-    ctx->draw_data.vbo[index++] = 1.f;
-    
-    ctx->draw_data.vbo[index++] = r;
-    ctx->draw_data.vbo[index++] = g;
-    ctx->draw_data.vbo[index++] = b;
-    ctx->draw_data.vbo[index++] = a;
-    
-    ctx->draw_data.vbo[index++] = 0.f;
-    ctx->draw_data.vbo[index++] = 0.f;
+    if(vert_count > 3) // quad
+    {
+      ctx->draw_data.vbo[index++] = pos_vec2[6];
+      ctx->draw_data.vbo[index++] = pos_vec2[7];
+      ctx->draw_data.vbo[index++] = 1.f;
+      
+      ctx->draw_data.vbo[index++] = r;
+      ctx->draw_data.vbo[index++] = g;
+      ctx->draw_data.vbo[index++] = b;
+      ctx->draw_data.vbo[index++] = a;
+      
+      ctx->draw_data.vbo[index++] = uv_vec2[6];
+      ctx->draw_data.vbo[index++] = uv_vec2[7];
+    }
     
     /**/
     
@@ -417,6 +418,7 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
   }
   
   /* add index information */
+  uint32_t index_count = 0;
   {
     size_t index = ctx->draw_data.idx_count;
     
@@ -424,11 +426,17 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     ctx->draw_data.idx[index++] = offset + 1;
     ctx->draw_data.idx[index++] = offset + 2;
     
-    /**/
-    
-    ctx->draw_data.idx[index++] = offset + 1;
-    ctx->draw_data.idx[index++] = offset + 2;
-    ctx->draw_data.idx[index++] = offset + 3;
+    index_count = 3;
+  
+    if(vert_count > 3) // quad
+    {
+      ctx->draw_data.idx[index++] = offset + 1;
+      ctx->draw_data.idx[index++] = offset + 2;
+      ctx->draw_data.idx[index++] = offset + 3;
+      
+      index_count = 6;
+    }
+  
   
     ctx->draw_data.idx_count = index;
   }
@@ -440,11 +448,39 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     int cmd_clip[4] { (int)clip.min.x, (int)clip.min.y, (int)clip.max.x, (int)clip.max.y };
     
     memcpy(&ctx->draw_data.cmds[index].clip, cmd_clip, sizeof(cmd_clip));
-    ctx->draw_data.cmds[index].count = 6;
-    ctx->draw_data.cmds[index].offset = ctx->draw_data.idx_count - 6;
+    ctx->draw_data.cmds[index].count  = index_count;
+    ctx->draw_data.cmds[index].offset = ctx->draw_data.idx_count - index_count;
     
     ctx->draw_data.cmd_count += 1;
   }
+
+}
+
+
+static void
+nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
+{
+
+  float verts[] {
+    area.min.x, area.min.y,
+    area.max.x, area.min.y,
+    area.min.x, area.max.y,
+    area.max.x, area.max.y,
+  };
+  
+  float uvs[] {
+    0.f, 0.f,
+    0.f, 0.f,
+    0.f, 0.f,
+    0.f, 0.f,
+  };
+  
+  uint32_t index[] {
+    0,1,2,
+    1,2,3,
+  };
+
+  nau_submit_raw_verts_cmd(ctx, clip, verts, uvs, index, 4, color);
 }
 
 
@@ -1021,18 +1057,36 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
   
     /* resize handle */
     {
-      const Nau_vec2 height        = Nau_vec2{0.f, window.size.y - (float)ctx->theme.size_row_height};
-      const Nau_vec2 width         = Nau_vec2{window.size.x - (float)ctx->theme.size_row_height,0.f};
+      const float button_size = 17.f;
+    
+      const Nau_vec2 height        = Nau_vec2{0.f, window.size.y - button_size};
+      const Nau_vec2 width         = Nau_vec2{window.size.x - button_size,0.f};
       const Nau_vec2 footer_corner = nau_vec2_add(width, nau_vec2_add(window.pos, height));
       
       const Nau_env drag_handle = env_from_pos_size(
         footer_corner,
-        Nau_vec2{10, 10}
+        Nau_vec2{button_size, button_size}
       );
       
       const uint32_t color = ctx->theme.color_drag_handle;
-    
-      nau_submit_cmd(ctx, drag_handle, drag_handle, color);
+      
+      float verts[] {
+        drag_handle.max.x, drag_handle.min.y,
+        drag_handle.max.x, drag_handle.max.y,
+        drag_handle.min.x, drag_handle.max.y,
+      };
+      
+      float uvs[] {
+        0.f, 0.f,
+        0.f, 0.f,
+        0.f, 0.f,
+      };
+      
+      uint32_t idx[] {
+        0,1,2,
+      };
+      
+      nau_submit_raw_verts_cmd(ctx, drag_handle, verts, uvs, idx, 3, color);
       
       /* interactable */
       const int index = ctx->stage_data.interacts_count;
