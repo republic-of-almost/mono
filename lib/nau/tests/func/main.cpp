@@ -78,7 +78,7 @@ render_interface()
   glViewport(0,0,view_port_width, view_port_height);
   glScissor(0,0,view_port_width, view_port_height);
   
-  glClearColor(0.87,0.87,0.85,1);
+  glClearColor(0.1,0.1,0.1,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   nau_gl3_render(gl_ctx, ctx);

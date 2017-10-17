@@ -186,6 +186,8 @@ struct Nau_theme_data
   uint32_t color_button;
   uint32_t color_button_hover;
   uint32_t color_button_down;
+  uint32_t color_drag_handle;
+  uint32_t color_close_button;
   
   int32_t size_border;
   int32_t size_inner_margin;
@@ -509,15 +511,17 @@ nau_initialize(Nau_ctx **ctx)
   
   /* default theme */
   {
-    new_ctx->theme.color_border         = 0x000000FF;
-    new_ctx->theme.color_win_body       = 0xFF0000FF;
-    new_ctx->theme.color_win_title      = 0xFFFF00FF;
+    new_ctx->theme.color_border         = 0xE26700FF;
+    new_ctx->theme.color_win_body       = 0x303030FF;
+    new_ctx->theme.color_win_title      = 0x575757FF;
     new_ctx->theme.color_field          = 0xFFFFFFFF;
-    new_ctx->theme.color_button         = 0xFF00FFFF;
-    new_ctx->theme.color_button_hover   = 0xFFFF00FF;
-    new_ctx->theme.color_button_down    = 0xFFFFFFFF;
+    new_ctx->theme.color_button         = 0xE26700FF;
+    new_ctx->theme.color_button_hover   = 0xFF7964FF;
+    new_ctx->theme.color_button_down    = 0xEB3D00FF;
+    new_ctx->theme.color_drag_handle    = 0xE26700FF;
+    new_ctx->theme.color_close_button   = 0xE26700FF;
     
-    new_ctx->theme.size_border       = 2;
+    new_ctx->theme.size_border       = 1;
     new_ctx->theme.size_inner_margin = 3;
     new_ctx->theme.size_row_height   = 20;
     new_ctx->theme.size_row_spacing  = 4;
@@ -985,7 +989,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
         Nau_vec2{button_size, button_size}
       );
 
-      const uint32_t color = 0xFF0000FF;
+      const uint32_t color = ctx->theme.color_close_button;
 
       nau_submit_cmd(ctx, close_button, close_button, color);
 
@@ -1026,7 +1030,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
         Nau_vec2{10, 10}
       );
       
-      const uint32_t color = ctx->theme.color_win_title;
+      const uint32_t color = ctx->theme.color_drag_handle;
     
       nau_submit_cmd(ctx, drag_handle, drag_handle, color);
       
