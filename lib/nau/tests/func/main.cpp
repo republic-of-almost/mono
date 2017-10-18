@@ -25,13 +25,29 @@ int         view_port_height = 480;
 void
 test_interface()
 {
-  static bool basic_test = true;
+  static bool test_01 = true;
+  static bool test_02 = true;
 
-  /* basic test */
+  /* basic test 1 */
   {
-    if(basic_test)
+    if(test_01)
     {
-      nau_begin(ctx, "Basic Window", &basic_test);
+      nau_begin(ctx, "Window 1", &test_01);
+      
+      if(nau_button(ctx, "click me"))
+      {
+        printf("Button clicked\n");
+      }
+      
+      nau_end(ctx);
+    }
+  }
+
+  /* basic test 2 */
+  {
+    if(test_02)
+    {
+      nau_begin(ctx, "Window 2", &test_02);
       
       if(nau_button(ctx, "click me"))
       {
@@ -42,10 +58,10 @@ test_interface()
     }
   }
   
-  
   /* toolbar test */
   {
-    nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG | NAU_WIN_NO_RESIZE | NAU_WIN_NO_CLOSE | NAU_WIN_NO_MIN);
+    const uint32_t flags = NAU_WIN_NO_DRAG | NAU_WIN_NO_RESIZE | NAU_WIN_NO_CLOSE | NAU_WIN_NO_MIN;
+    nau_win_prop_flags(ctx, flags);
     
     float size[2] {120, (float)view_port_height};
     nau_win_prop_size(ctx, size);
@@ -58,12 +74,13 @@ test_interface()
     if(nau_button(ctx, "click me"))
     {
       printf("Button clicked\n");
-      basic_test = true;
+      test_01 = !test_01;
     }
     
     if(nau_button(ctx, "click me too"))
     {
       printf("Other button clicked\n");
+      test_02 = !test_02;
     }
     
     nau_end(ctx);

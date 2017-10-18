@@ -132,6 +132,7 @@ typedef enum
   NAU_INTERACT_HOVER     = 1 << 4,
   NAU_INTERACT_CLOSEABLE = 1 << 5,
   NAU_INTERACT_MINIMIZED = 1 << 6,
+  NAU_INTERACT_MAXIMIZED = 1 << 7,
   
 } Nau_iteract_flags;
 
@@ -154,6 +155,10 @@ struct Nau_window
   
   Nau_vec2 pos;
   Nau_vec2 size;
+  
+  Nau_vec2 target_size;
+  
+  bool is_min;
 };
 
 
@@ -648,10 +653,10 @@ nau_new_frame(Nau_ctx *ctx)
             ctx->stage_data.interacts_current = interact[i].id;
             ctx->stage_data.interacts_type = NAU_INTERACT_MINIMIZED;
           }
-          else if(is_held && (interact[i].flags & NAU_INTERACT_MINIMIZED))
+          else if(is_click && (interact[i].flags & NAU_INTERACT_MAXIMIZED))
           {
             ctx->stage_data.interacts_current = interact[i].id;
-            ctx->stage_data.interacts_type = NAU_INTERACT_NONE;
+            ctx->stage_data.interacts_type = NAU_INTERACT_MAXIMIZED;
           }
           
           break;
@@ -932,12 +937,15 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
       
       window.size.x = ctx->window_hints.size[0];
       window.size.y = ctx->window_hints.size[1];
+      
+      window.is_min = false;
     }
   }
   
   Nau_env area = env_from_pos_size(window.pos, window.size);
   
   /* check interacts */
+  const Nau_iteract_flags curr_interact_type = ctx->stage_data.interacts_type;
   {
     const uint64_t curr_interact = ctx->stage_data.interacts_current;
     const Nau_iteract_flags curr_interact_type = ctx->stage_data.interacts_type;
@@ -966,7 +974,19 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
     }
     else if(curr_interact == id && curr_interact_type == NAU_INTERACT_MINIMIZED)
     {
-      window.size.y = ctx->theme.size_row_height + (ctx->theme.size_border * 2);
+      window.is_min = true;
+    }
+    else if(curr_interact == id && curr_interact_type == NAU_INTERACT_MAXIMIZED)
+    {
+      window.is_min = false;
+    }
+  }
+  
+  /* size window */
+  {
+    if(window.is_min)
+    {
+      area = env_from_pos_size(window.pos, Nau_vec2{window.size.x, (float)ctx->theme.size_row_height + (ctx->theme.size_border * 2)});
     }
   }
   
@@ -1066,7 +1086,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
     {
       const float button_size = 10.f;
       const float half_button_size = button_size * 0.5f;
-    
+      
       const Nau_vec2 top_left_corner = ctx->stage_data.cursor;
       const Nau_vec2 width           = Nau_vec2{window.size.x - button_size,0.f};
       const Nau_vec2 offset          = Nau_vec2{-half_button_size - (half_button_size * 4), (ctx->theme.size_row_height * 0.5f) - half_button_size};
@@ -1089,7 +1109,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
 
       inter->id    = window.id | 0xFF;
       inter->env   = close_button;
-      inter->flags = NAU_INTERACT_MINIMIZED;
+      inter->flags = window.is_min? NAU_INTERACT_MAXIMIZED : NAU_INTERACT_MINIMIZED;
     }
     
     nau_line_break(ctx);
@@ -1097,7 +1117,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
   
   
   /* footer */
-  if(can_resize)
+  if(can_resize && !window.is_min)
   {
     /* handle size change */
     {
