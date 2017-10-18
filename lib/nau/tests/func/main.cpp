@@ -42,9 +42,10 @@ test_interface()
     }
   }
   
+  
   /* toolbar test */
   {
-    nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG | NAU_WIN_NO_RESIZE | NAU_WIN_NO_CLOSE);
+    nau_win_prop_flags(ctx, NAU_WIN_NO_DRAG | NAU_WIN_NO_RESIZE | NAU_WIN_NO_CLOSE | NAU_WIN_NO_MIN);
     
     float size[2] {120, (float)view_port_height};
     nau_win_prop_size(ctx, size);
