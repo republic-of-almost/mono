@@ -1,6 +1,6 @@
 /*
-  Node is a generic object collection, this manages the relationships between
-  nodes and little else.
+  Node is a generic (boo!) object collection, this maintains the relationships
+  between nodes and little else.
 */
 #ifndef NODE_INCLUDED_0930FD16_74FB_464B_919E_C26F83AFFCD9
 #define NODE_INCLUDED_0930FD16_74FB_464B_919E_C26F83AFFCD9
@@ -18,7 +18,13 @@
 
 struct Node_ctx;
 
-void          node_ctx_create(Node_ctx **c);
+struct Node_ctx_hints
+{
+  uint32_t capacity_hint;
+};
+
+
+void          node_ctx_create(Node_ctx **c, const Node_ctx_hints *opt_hints);
 void          node_ctx_destroy(Node_ctx **c);
 
 
@@ -29,19 +35,20 @@ void          node_ctx_destroy(Node_ctx **c);
 */
 
 
-typedef void(node_ctx_log_fn*)(const char *msg);
+typedef void(*node_ctx_log_fn)(const char *msg);
 
 void          node_ctx_info_log_cb(Node_ctx *c, node_ctx_log_fn fn);
 void          node_ctx_warn_log_cb(Node_ctx *c, node_ctx_log_fn fn);
 void          node_ctx_error_log_cb(Node_ctx *c, node_ctx_log_fn fn);
 
 
-struct Node_ctx_stat
+struct Node_ctx_stats
 {
+  uint32_t count;
 };
 
 
-void          node_ctx_get_stats(Node *c, Node_ctx_stat *out_stats);
+void          node_ctx_get_stats(Node_ctx *c, Node_ctx_stats *out_stats);
 
 
 /* ----------------------------------------------------- [ Node Lifetime ] -- */
@@ -51,8 +58,8 @@ void          node_ctx_get_stats(Node *c, Node_ctx_stat *out_stats);
 */
 
 
-uint64_t      node_create(Node_ctx *c);
-void          node_destroy(Node_ctx *c, uint64_t id);
+uint32_t      node_create(Node_ctx *c);
+void          node_destroy(Node_ctx *c, uint32_t id);
 
 
 /* --------------------------------------------------- [ Node Attributes ] -- */
@@ -61,13 +68,16 @@ void          node_destroy(Node_ctx *c, uint64_t id);
 */
 
 
-const char *  node_get_name(Node_ctx *c, uint64_t id);
-void          node_set_name(Node_ctx *c, uint64_t id, const char *name);
+const char *  node_get_name(Node_ctx *c, uint32_t id);
+void          node_set_name(Node_ctx *c, uint32_t id, const char *name);
 
-uint64_t      node_get_parent(Node_ctx *c, uint64_t id);
-void          node_set_parent(Node_ctx *c, uint64_t id, uint64_t parent_id);
+uint64_t      node_get_bitfield(Node_ctx *c, uint32_t id);
+void          node_set_bitfield(Node_ctx *c, uint32_t id, uint64_t field);
 
-uint64_t      node_get_child_count(Node_ctx *c, uint64_t id);
+uint32_t      node_get_parent(Node_ctx *c, uint32_t id);
+void          node_set_parent(Node_ctx *c, uint32_t id, uint32_t parent_id);
+
+uint32_t      node_get_child_count(Node_ctx *c, uint32_t id);
 
 
 #endif // inc guard
