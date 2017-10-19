@@ -331,7 +331,7 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
     {
       2.f / (float)vp_width, 0.f,            0.f,          0.f,
       0.f,          2.f / (float)-vp_height, 0.f,          0.f,
-      0.f,          0.f,                  2.f / 10.f,   0.f,
+      0.f,          0.f,                  2.f / 100.f,   0.f,
       -1.f,         1.f,                  0.f,          1.f,
     };
 
@@ -388,21 +388,22 @@ nau_gl3_render(Nau_gl_ctx *gl_ctx, Nau_ctx *ui_ctx)
     glScissor(0, 0, vp_width, vp_height);
     
     glClear(GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
+//    glEnable(GL_BLEND);
+//    glBlendEquation(GL_FUNC_ADD);
 //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //    glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
     
     glDisable(GL_CULL_FACE);
 //    glDepthFunc(GL_EQUAL);
-//    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
     
     int cmd_count = 0;
     Nau_draw_cmd *cmds = nullptr;
     nau_get_cmds(ui_ctx, &cmds, &cmd_count);
 
-    for(size_t i = 0; i < cmd_count; ++i)
+//    for(size_t i = 0; i < cmd_count; ++i)
+    for(uint32_t i = cmd_count - 1; i != -1; --i)
     {
       const Nau_draw_cmd *cmd = &cmds[i];
     

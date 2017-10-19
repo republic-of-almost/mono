@@ -159,6 +159,7 @@ struct Nau_window
   Nau_vec2 target_size;
   
   bool is_min;
+  uint32_t  depth;
 };
 
 
@@ -346,8 +347,11 @@ nau_hash(const void *data, const size_t data_size, const uint32_t seed)
 
 
 static void
-nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_vec2, uint32_t *index, uint32_t vert_count, uint32_t color)
+nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_vec2, uint32_t *index, uint32_t vert_count, uint32_t color, uint32_t depth)
 {
+
+  const float vert_depth = 4 + (float)depth;
+
   /* some info */
   const size_t vertex_stride = 3 + 2 + 4;
   const size_t offset = ctx->draw_data.vbo_count / vertex_stride;
@@ -365,7 +369,7 @@ nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_
     
     ctx->draw_data.vbo[index++] = pos_vec2[0];
     ctx->draw_data.vbo[index++] = pos_vec2[1];
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = vert_depth;
     
     ctx->draw_data.vbo[index++] = r;
     ctx->draw_data.vbo[index++] = g;
@@ -379,7 +383,7 @@ nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_
     
     ctx->draw_data.vbo[index++] = pos_vec2[2];
     ctx->draw_data.vbo[index++] = pos_vec2[3];
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = vert_depth;
     
     ctx->draw_data.vbo[index++] = r;
     ctx->draw_data.vbo[index++] = g;
@@ -393,7 +397,7 @@ nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_
     
     ctx->draw_data.vbo[index++] = pos_vec2[4];
     ctx->draw_data.vbo[index++] = pos_vec2[5];
-    ctx->draw_data.vbo[index++] = 1.f;
+    ctx->draw_data.vbo[index++] = vert_depth;
     
     ctx->draw_data.vbo[index++] = r;
     ctx->draw_data.vbo[index++] = g;
@@ -407,7 +411,7 @@ nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_
     {
       ctx->draw_data.vbo[index++] = pos_vec2[6];
       ctx->draw_data.vbo[index++] = pos_vec2[7];
-      ctx->draw_data.vbo[index++] = 1.f;
+      ctx->draw_data.vbo[index++] = vert_depth;
       
       ctx->draw_data.vbo[index++] = r;
       ctx->draw_data.vbo[index++] = g;
@@ -464,7 +468,7 @@ nau_submit_raw_verts_cmd(Nau_ctx *ctx, Nau_env clip, float *pos_vec2, float *uv_
 
 
 static void
-nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
+nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color, uint32_t depth)
 {
 
   float verts[] {
@@ -486,7 +490,7 @@ nau_submit_cmd(Nau_ctx *ctx, Nau_env area, Nau_env clip, uint32_t color)
     1,2,3,
   };
 
-  nau_submit_raw_verts_cmd(ctx, clip, verts, uvs, index, 4, color);
+  nau_submit_raw_verts_cmd(ctx, clip, verts, uvs, index, 4, color, depth);
 }
 
 
@@ -939,13 +943,14 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
       window.size.y = ctx->window_hints.size[1];
       
       window.is_min = false;
+      
+      window.depth = ctx->stage_data.win_history_count;
     }
   }
   
   Nau_env area = env_from_pos_size(window.pos, window.size);
   
   /* check interacts */
-  const Nau_iteract_flags curr_interact_type = ctx->stage_data.interacts_type;
   {
     const uint64_t curr_interact = ctx->stage_data.interacts_current;
     const Nau_iteract_flags curr_interact_type = ctx->stage_data.interacts_type;
@@ -957,6 +962,36 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
       
       // Reset area
       area = env_from_pos_size(window.pos, window.size);
+      
+      // Reorder depth
+      {
+        const uint32_t curr_depth = window.depth;
+      
+        const uint32_t count = ctx->stage_data.win_history_count;
+        Nau_window *windows  = ctx->stage_data.win_history;
+        
+        printf("ID %d - ", window.id);
+        
+        for(uint32_t i = 0; i < count; ++i)
+        {
+          if(windows[i].id == window.id)
+          {
+            windows[i].depth = 0;
+            printf("%d,", windows[i].depth);
+          }
+          else if(windows[i].depth < curr_depth)
+          {
+            windows[i].depth += 1;
+            printf("%d,", windows[i].depth);
+          }
+          else
+          {
+            printf("%d,", windows[i].depth);
+          }
+        }
+        
+        printf("\n");
+      }
     }
     else if(curr_interact == id && curr_interact_type == NAU_INTERACT_RESIZE)
     {
@@ -1002,7 +1037,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
     {
       const uint32_t color = ctx->theme.color_border;
       
-      nau_submit_cmd(ctx, area, area, color);
+      nau_submit_cmd(ctx, area, area, color, window.depth);
     }
     
     /* window body */
@@ -1011,7 +1046,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
       ctx->stage_data.child_env = body_env;
       const uint32_t color = ctx->theme.color_win_body;
     
-      nau_submit_cmd(ctx, body_env, body_env, color);
+      nau_submit_cmd(ctx, body_env, body_env, color, window.depth);
       
       ctx->stage_data.cursor = body_env.min;
     }
@@ -1047,7 +1082,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
       
       const uint32_t color = ctx->theme.color_win_title;
     
-      nau_submit_cmd(ctx, title_area, title_area, color);
+      nau_submit_cmd(ctx, title_area, title_area, color, window.depth);
     }
     
     /* close button */
@@ -1068,7 +1103,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
 
       const uint32_t color = ctx->theme.color_close_button;
 
-      nau_submit_cmd(ctx, close_button, close_button, color);
+      nau_submit_cmd(ctx, close_button, close_button, color, window.depth);
 
       /* interactable */
       const int index = ctx->stage_data.interacts_count;
@@ -1099,7 +1134,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
 
       const uint32_t color = ctx->theme.color_close_button;
 
-      nau_submit_cmd(ctx, close_button, close_button, color);
+      nau_submit_cmd(ctx, close_button, close_button, color, window.depth);
 
       /* interactable */
       const int index = ctx->stage_data.interacts_count;
@@ -1154,7 +1189,7 @@ nau_begin(Nau_ctx *ctx, const char *name, bool *close_handle)
         0,1,2,
       };
       
-      nau_submit_raw_verts_cmd(ctx, drag_handle, verts, uvs, idx, 3, color);
+      nau_submit_raw_verts_cmd(ctx, drag_handle, verts, uvs, idx, 3, color, window.depth);
       
       /* interactable */
       const int index = ctx->stage_data.interacts_count;
@@ -1297,7 +1332,7 @@ nau_button(Nau_ctx *ctx, const char *name)
     Nau_env area = env_from_pos_size(l_margin, size);
     Nau_env clamped_area = nau_env_clamp(area, ctx->stage_data.child_env);
     
-    nau_submit_cmd(ctx, area, clamped_area, color);
+    nau_submit_cmd(ctx, area, clamped_area, color, window.depth);
     
     /* add interactable */
     {

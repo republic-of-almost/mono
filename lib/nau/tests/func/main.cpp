@@ -32,6 +32,9 @@ test_interface()
   {
     if(test_01)
     {
+      const uint32_t flags = NAU_WIN_NO_RESIZE;
+      nau_win_prop_flags(ctx, flags);
+    
       nau_begin(ctx, "Window 1", &test_01);
       
       if(nau_button(ctx, "click me"))

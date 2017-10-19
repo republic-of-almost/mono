@@ -4,8 +4,6 @@
 #include <game_code/controller.hpp>
 
 
-
-
 int
 main()
 {
