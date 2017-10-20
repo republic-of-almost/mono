@@ -8,35 +8,11 @@
 #include <component/component_engine.hpp>
 
 
-namespace ROA {
+/* ---------------------------------------------- [ Application Internal ] -- */
 
 
-Application::Application()
-{
-  Nil_ctx *ctx = ROA_detail::get_ctx();
-
-  Nil_ext::load_aspects(ctx);
-
-  Nil::Node app_node = ROA_detail::get_application_node();
-  app_node.set_name("Application");
-
-  Nil::Data::Window win{};
-  constexpr char title[] = "ROA";
-  strcat(win.title, title);
-
-  Nil::Data::set(app_node, win);
-  Nil::Data::set(app_node, Nil::Data::Mouse{});
-  Nil::Data::set(app_node, Nil::Data::Keyboard{});
-}
-
-
-Application::~Application()
-{
-}
-
-
-void
-Application::run(Custom_tick_fn tick, uintptr_t user_data)
+static void
+roa_internal_application_tick(uintptr_t user_data, roa_custom_tick_fn cb)
 {
   Nil_ctx *ctx = ROA_detail::get_ctx();
 
@@ -62,12 +38,53 @@ Application::run(Custom_tick_fn tick, uintptr_t user_data)
       --
       The user may specifiy a callback we do it before we start another frame.
     */
-    if(tick)
+    if(cb)
     {
-      tick(user_data);
+      cb(user_data);
     }
   }
 }
 
 
-} // ns
+/* ---------------------------------------------- [ Application Lifetime ] -- */
+
+
+void
+roa_application_init()
+{
+  Nil_ctx *ctx = ROA_detail::get_ctx();
+
+  Nil_ext::load_aspects(ctx);
+
+  Nil::Node app_node = ROA_detail::get_application_node();
+  app_node.set_name("Application");
+
+  Nil::Data::Window win{};
+  constexpr char title[] = "ROA";
+  strcat(win.title, title);
+
+  Nil::Data::set(app_node, win);
+  Nil::Data::set(app_node, Nil::Data::Mouse{});
+  Nil::Data::set(app_node, Nil::Data::Keyboard{});
+}
+
+
+void
+roa_application_destroy()
+{
+}
+
+
+void
+roa_application_run()
+{
+  roa_internal_application_tick(NULL, NULL);
+}
+
+
+void
+roa_application_run_with_tick(uintptr_t user_data, roa_custom_tick_fn cb)
+{
+  roa_internal_application_tick(user_data, cb);
+}
+

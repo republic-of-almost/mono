@@ -19,7 +19,7 @@ main()
 
   /* ---------------------------------------------------- [ Game Objects ] -- */
   
-  ROA::Application app;
+  roa_application_init();
 
   /* ---------------------------------------------------- [ Setup Assets ] -- */
   
@@ -96,7 +96,8 @@ main()
 
   /* ----------------------------------------------------- [ Application ] -- */
   
-  app.run(
+  roa_application_run_with_tick(
+    (uintptr_t)&world,
     [](uintptr_t user_data)
     {
       ROA::Mouse::set_captured(true); // Bug if you capture before window is created it doens't get set.
@@ -107,8 +108,7 @@ main()
       free_cam_apply_controller(&world->free_cam, world->controllers, 1);
       free_cam_update(&world->free_cam, &world->obj_camera, 1);
       
-    },
-    (uintptr_t)&world
+    }
   );
 
   return 0;

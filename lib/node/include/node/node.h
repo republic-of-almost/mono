@@ -62,10 +62,37 @@ uint32_t      node_create(Node_ctx *c);
 void          node_destroy(Node_ctx *c, uint32_t id);
 
 
+/* ------------------------------------------------ [ Node Relationships ] -- */
+/*
+  Node can be connected to other nodes, this will alter there world transforms.
+*/
+
+
+uint32_t      node_get_parent(Node_ctx *c, uint32_t id);
+void          node_set_parent(Node_ctx *c, uint32_t id, uint32_t parent_id);
+
+uint32_t      node_get_child_count(Node_ctx *c, uint32_t id);
+
+
 /* --------------------------------------------------- [ Node Attributes ] -- */
 /*
-  Nodes can have relationships, and can contain various data such as names etc.
+  Node can be connected to other nodes, this will alter there world transforms.
 */
+
+
+struct Transform
+{
+  float position[3];
+  float scale[3];
+  float roation[4];
+};
+
+
+struct Bounding_box
+{
+  float min[3];
+  float max[3];
+};
 
 
 const char *  node_get_name(Node_ctx *c, uint32_t id);
@@ -74,10 +101,17 @@ void          node_set_name(Node_ctx *c, uint32_t id, const char *name);
 uint64_t      node_get_bitfield(Node_ctx *c, uint32_t id);
 void          node_set_bitfield(Node_ctx *c, uint32_t id, uint64_t field);
 
-uint32_t      node_get_parent(Node_ctx *c, uint32_t id);
-void          node_set_parent(Node_ctx *c, uint32_t id, uint32_t parent_id);
+uintptr_t     node_get_user_data(Node_ctx *c, uint32_t id);
+void          node_set_user_data(Node_ctx *c, uint32_t id, uintptr_t user_data);
 
-uint32_t      node_get_child_count(Node_ctx *c, uint32_t id);
+Transform     node_get_world_transform(Node_ctx *c, uint32_t id);
+void          node_set_world_transform(Node_ctx *c, uint32_t id, Transform *trans);
+
+Transform     node_get_local_transform(Node_ctx *c, uint32_t id);
+void          node_set_local_transform(Node_ctx *c, uint32_t id, Transform *trans);
+
+Bounding_box  node_get_bounding_box(Node_ctx *c, uint32_t id);
+void          node_set_bounding_box(Node_ctx *c, uint32_t id, Bounding_box *box);
 
 
 #endif // inc guard

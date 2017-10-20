@@ -5,29 +5,17 @@
 #include <roa/fundamental.hpp>
 
 
-namespace ROA {
+/* ---------------------------------------------- [ Application Lifetime ] -- */
 
 
-using Custom_tick_fn = void(*)(uintptr_t user_data);
+typedef void(*roa_custom_tick_fn)(uintptr_t user_data);
 
 
-class Application final
-{
-public:
+void      roa_application_init();
+void      roa_application_destroy();
 
-
-  // ----------------------------------------------------------- [ Lifetime ] --
-  
-
-  explicit        Application();
-                  ~Application();
-  
-  void            run(Custom_tick_fn tick = nullptr, uintptr_t user_data = 0);
-  
-};
-
-
-} // ns
+void      roa_application_run();
+void      roa_application_run_with_tick(uintptr_t user_data, roa_custom_tick_fn cb);
 
 
 #endif // inc guard
