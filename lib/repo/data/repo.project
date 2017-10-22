@@ -1,17 +1,19 @@
 #!lua
 
 --[[
-  Json Project Description
+
+  Repo Project Description
+
 ]]--
+
 
 table.insert(
   projects,
   {
-    name            = "Json",
-    kind            = "StaticLib",
-    language        = "C",
-    ignore_defaults = true,
-    location        = make.get_proj_root(),
+    name     = "Repo",
+    kind     = "StaticLib",
+    language = "C++",
+    location = make.get_proj_root(),
 
     src_files = {
       make.add_headers(make.get_proj_root() .. "../include/"),
@@ -19,8 +21,7 @@ table.insert(
       --
       make.add_src(make.get_proj_root() .. "../src/"),
       --
-      make.add_doc(make.get_proj_root() .. "../include/"),
-      make.add_doc(make.get_proj_root() .. "../src/"),
+      make.add_doc(make.get_proj_root() .. "../"),
     },
 
     public_inc_dirs = {
@@ -28,7 +29,13 @@ table.insert(
     },
 
     private_inc_dirs = {
-      make.get_proj_root() .. "../include/json",
+      make.get_proj_root() .. "../src/",
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+
     },
   }
 )

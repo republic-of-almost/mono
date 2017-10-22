@@ -18,11 +18,12 @@ main()
 
   // ------------------------------------------------------- [ Game Objects ] --
   
-  ROA::Application app;
   ROA::Object      obj_camera;
   ROA::Object      obj_scene;
 
   // ------------------------------------------------------- [ Setup Assets ] --
+  
+  roa_application_init();
   
   {
     // Shader //
@@ -117,7 +118,8 @@ main()
 
   // -------------------------------------------------------- [ Application ] --
   
-  app.run(
+  roa_application_run_with_tick(
+    (uintptr_t)&obj_scene,
     [](uintptr_t user_data)
     {
       ROA::Object *obj = reinterpret_cast<ROA::Object*>(user_data);
@@ -136,8 +138,7 @@ main()
 
       ROA::Transform trans = obj->get_data<ROA::Transform>();
       trans.set_rotation(rot);
-    },
-    (uintptr_t)&obj_scene
+    }
   );
 
   return 0;

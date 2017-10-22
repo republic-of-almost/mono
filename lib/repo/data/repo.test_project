@@ -1,0 +1,50 @@
+#!lua
+
+--[[
+
+  Repo Test Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "ROATest",
+    kind     = "ConsoleApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    lang_settings = {
+      exceptions  = true,
+      rtti        = true,
+    },
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../test/"),
+      make.add_src(make.get_proj_root() .. "../test/"),
+      make.add_doc(make.get_proj_root() .. "../test/"),
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "./",
+    },
+
+    defines = {
+
+      -- See roa's build.md for build flags doc
+
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+
+      "NIL",
+      "AspectsControllers",
+
+      -- Third Party --
+
+      "Catch",
+    },
+  }
+)

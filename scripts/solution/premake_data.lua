@@ -137,8 +137,19 @@ make.create_solution(solution_data, project_defaults, projects)
     -- Generate the project data.
     project(proj.name)
     location(proj.location)
-    language(proj.language)
     kind(proj.kind)
+
+    language(proj.language)
+
+    if(proj.language == "C++") then
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c++14");
+      end
+    elseif(proj.language == "C") then
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c99");
+      end
+    end
 
     -- Thie function takes a string that represents a field
     -- to search in the table. it will then append the premakes
@@ -173,7 +184,7 @@ make.create_solution(solution_data, project_defaults, projects)
     if platform_src then files(platform_src) end
 
     -- Excludes
-    if proj.src_excludes then excludes(proj.src_excludes) end
+    if proj.src_files_exclude then excludes(proj.src_files_exclude) end
 
     local platform_exclude = find_table_with_platform(proj, "src_files_exclude")
     if platform_exclude then excludes(platform_exclude) end

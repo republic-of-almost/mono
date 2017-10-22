@@ -2,14 +2,6 @@
 -- Currently only supports buildoptions.
 project_defaults = {
 
-  buildoptions_macosx = {
-    "-std=c++14",
-  },
-
-  buildoptions_linux = {
-    "-std=c++14",
-  },
-
   buildoptions_windows = {
     "/IGNORE:C4577",
   },

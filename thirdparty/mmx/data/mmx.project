@@ -1,13 +1,13 @@
 #!lua
 
 --[[
-  Json Project Description
+  MMX Project Description
 ]]--
 
 table.insert(
   projects,
   {
-    name            = "Json",
+    name            = "MMX",
     kind            = "StaticLib",
     language        = "C",
     ignore_defaults = true,

@@ -3,68 +3,204 @@
 
 
 #include <roa/fundamental.hpp>
+#include <roa/detail/component_interface.hpp>
 
 
-/* --------------------------------------------------- [ Object Lifetime ] -- */
-/*
-  Create and destroy objects.
-  When an object is destroyed its data is also destroyed.
-*/
+namespace ROA {
 
 
-uint64_t      roa_object_create();
-void          roa_object_destroy();
+class Object
+{
+public:
 
 
-/* ------------------------------------------------------ [ Object State ] -- */
-/*
-  Various state checkers for an object.
-*/
+  // ----------------------------------------------------------- [ Lifetime ] --
+  /*
+    Methods that relate to an objects lifetime.
+    To create invalid objects call Object{nullptr}.
+  */
+  
+
+  explicit              Object();
+  explicit              Object(const uint32_t instance_id);
+  explicit              Object(const ROA_nullptr);
+  
+                        Object(const Object &other) noexcept;
+                        Object(Object &&other) noexcept;
+  
+  virtual               ~Object();
+  
+  void                  destroy();
+  
+  
+  // ---------------------------------------------------------- [ Operators ] --
+  /*
+    Various short hand operators.
+  */
+  
+  
+  Object&               operator=(const Object &other) noexcept;
+  Object&               operator=(Object &&other) noexcept;
+  
+                        operator bool() const noexcept;
+                        
+  bool                  operator==(const Object &other) const noexcept;
+  bool                  operator!=(const Object &other) const noexcept;
 
 
-bool          roa_object_is_valid();
-uint32_t      roa_object_instance(uint64_t id);
+  // -------------------------------------------------------------- [ State ] --
+  /*
+    Various state checks.
+  */
 
 
-/* ---------------------------------------------- [ Object Relationships ] -- */
-/*
-  An object is a tree like structure it may have any number of children.
-  Any data returned from _get_children functions is only valid for one frame.
-*/
+  bool                  is_valid() const;
+  bool                  is_ref() const;
+  
+  
+  // ------------------------------------------------------ [ Relationships ] --
+  /*
+    An object can have many children and one parent.
+  */
+  
+  
+  Object                get_parent() const;
+  void                  set_parent(const Object obj);
+  
+  Object                get_child(const size_t child) const;
+  size_t                get_child_count() const;
+  
+  
+  // -------------------------------------------------------- [ Name / Tags ] --
+  /*
+    You can tag and name nodes.
+  */
+  const char*           get_name() const;
+  void                  set_name(const char *name);
+  
+  
+  // --------------------------------------------------------- [ Attributes ] --
+  /*
+    Various attributes of an object
+  */
+  
+  virtual const char*   get_type_name() const;
+  virtual uint32_t      get_type_id() const;
+  uint32_t              get_instance_id() const;
+  
+  uintptr_t             get_user_data() const;
+  void                  set_user_data(uintptr_t user_data);
+  
+  
+  // --------------------------------------------------------- [ Components ] --
+  /*
+    Components are custom bits of logic that can be added to a node.
+    You can add as many components to node as you wish.
+  */
+  
+  
+  template<typename T>
+  bool
+  add_component()
+  {
+    static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
+    const bool has_comp = has_component<T>();
+  
+    if(!has_comp)
+    {
+      T *comp                    = new T{};
+      comp->m_obj                = *this;
+      const uint32_t instance_id = this->get_instance_id();
+      
+      return ROA_detail::add_component(instance_id, comp);
+    }
+    
+    return false;
+  }
+  
+  
+  template<typename T>
+  bool
+  has_component()
+  {
+    static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
+    
+    const uint32_t rtti        = T::get_rtti();
+    const uint32_t instance_id = this->get_instance_id();
+    
+    return ROA_detail::has_component(instance_id, rtti);
+  }
+  
+  
+  template<typename T>
+  T*
+  get_component()
+  {
+    static_assert(T::get_rtti() != 0, "Is this a ROA::Component");
+    
+    const uint32_t rtti        = T::get_rtti();
+    const uint32_t instance_id = this->get_instance_id();
+  
+    return static_cast<T*>(ROA_detail::get_component(instance_id, rtti));
+  }
+  
+  
+  // ---------------------------------------------------- [ Data Components ] --
+  /*
+    Data can be added to a node, you need to first call set before get returns
+    valid data.
+  */
+  
+  template<typename T>
+  void
+  set_data(const T &t)
+  {
+    ROA_detail::set_node_data(*this, t);
+  }
+  
+  template<typename T>
+  void
+  add_data()
+  {
+    T t{};
+    ROA_detail::set_node_data(*this, t);
+  }
+  
+  template<typename T>
+  T
+  get_data()
+  {
+    T t{nullptr};
+    
+    return ROA_detail::get_node_data(*this, t);
+  }
+  
+  template<typename T>
+  const T
+  get_data() const
+  {
+    T t{nullptr};
+    
+    return ROA_detail::get_node_data(*this, t);
+  };
+  
+  template<typename T>
+  bool
+  has_data() const
+  {
+    T t{nullptr};
+    
+    return ROA_detail::has_node_data(*this, t);
+  }
+  
+private:
+
+  mutable uint64_t      m_id;
+  
+}; // ns
 
 
-uint64_t      roa_object_get_parent(uint64_t id);
-void          roa_object_set_parent(uint64_t this_id, uint64_t new_parent);
-
-size_t        roa_object_get_child_count(uint64_t id);
-void          roa_object_get_children(uint64_t id, uint64_t **o_ids, size_t *o_count);
-uint64_t      roa_object_get_child(uint64_t id, size_t index);
-
-
-/* ------------------------------------------------- [ Object Attributes ] -- */
-/*
-  An object may have various settings such as names and user data.
-  Any data returned from _get_children_ functions is only valid for one frame.
-*/
-
-
-const char *  roa_object_get_name(uint64_t id);
-void          roa_object_set_name(uint64_t id, const char *name);
-void          roa_object_get_children_names(uint64_t id, const char **o_names, size_t *o_count);
-
-uintptr_t     roa_object_get_user_data(uint64_t id);
-void          roa_object_set_user_data(uint64_t id, uintptr_t user_data);
-void          roa_object_get_children_user_data(uint64_t id, uintptr_t **o_data, size_t *o_count);
-
-
-/* ------------------------------------------------------- [ Object Data ] -- */
-/*
-  You can attach other valid data to an object.
-*/
-
-void          roa_object_set_data(uint64_t id, uint64_t data);
-uint64_t      roa_object_get_data(uint64_t id, uint32_t data_type);
-void          roa_object_remove_data(uint64_t id, uint32_t data_type);
+} // ns
 
 
 #endif // inc guard

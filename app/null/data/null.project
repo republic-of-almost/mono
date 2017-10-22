@@ -29,7 +29,7 @@ table.insert(
     },
 
     project_dependencies = {
-      "ROA",
+      "Rep",
     },
 
     private_inc_dirs = {
