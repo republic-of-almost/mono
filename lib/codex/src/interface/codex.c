@@ -1,4 +1,5 @@
 #include <codex/codex.h>
+#include <common/array.h>
 
 
 /* ------------------------------------------------------ [ Codex Config ] -- */
@@ -59,9 +60,10 @@ struct Codex_ctx
   uint32_t instance_id_counter;
   uint32_t object_id_counter;
 
-  uint32_t          *instance_ids;
-  struct Codex_object_type *object_types;
-  uint32_t          *object_instances;
+  uint32_t                  *instance_ids;
+  struct Codex_object_type  *object_types;
+  uint32_t                  *object_instances;
+  struct Codex_property     *properties;
 };
 
 
@@ -91,8 +93,13 @@ codex_create(struct Codex_ctx **c)
     }
 
     /* defaults */
-    const size_t instance_count = 1024;
-    const size_t instance_bytes = instance_count * sizeof(uint32_t);
+    {
+      codex_array_create(new_ctx->instance_ids, 1024);
+      codex_array_create(new_ctx->object_types, 64);
+      codex_array_create(new_ctx->object_instances, 1024);
+      codex_array_create(new_ctx->properties, 512);
+    }
+    
 
   }
 
@@ -127,17 +134,39 @@ codex_instance_create(struct Codex_ctx *c)
 
   /* add new instance */
   {
-
+    uint32_t new_instance = ++(c->instance_id_counter);
+    codex_array_push(c->instance_ids, new_instance);
+    
+    return new_instance;
   }
   
   return 0;
 }
 
 
-void
+bool
 codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
 {
+  const size_t count = codex_array_size(c->instance_ids);
+  size_t i;
+  
+  for(i = 0; i < count; ++i)
+  {
+    if(c->instance_ids[i] == inst_id)
+    {
+      codex_array_erase(c->instance_ids, i);
+      return true;
+    }
+  }
+  
+  return false;
+}
 
+
+size_t
+codex_instance_count(const struct Codex_ctx *c)
+{
+  return codex_array_size(c->instance_ids);
 }
 
 
@@ -147,7 +176,7 @@ codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
 uint32_t
 codex_object_type_create(struct Codex_ctx *c, const char *name)
 {
-
+  
 }
 
 
