@@ -23,11 +23,16 @@ extern "C" {
 
 struct Codex_ctx;
 
+typedef int Codex_bool;
+
+#define CODEX_TRUE 1
+#define CODEX_FALSE 0
+
 
 /* ---------------------------------------------------- [ Codex Lifetime ] -- */
 
 
-bool        codex_create(struct Codex_ctx **c);
+Codex_bool  codex_create(struct Codex_ctx **c);
 void        codex_destroy(struct Codex_ctx **c);
 
 
@@ -35,8 +40,10 @@ void        codex_destroy(struct Codex_ctx **c);
 
 
 uint32_t    codex_instance_create(struct Codex_ctx *c);
-bool        codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id);
+Codex_bool  codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id);
 size_t      codex_instance_count(const struct Codex_ctx *c);
+
+void        codex_instance_add_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id);
 
 
 /* ------------------------------------------------ [ Codex Object Type  ] -- */
@@ -50,6 +57,8 @@ size_t      codex_object_type_count(const struct Codex_ctx *c);
 
 
 enum {
+  CODEX_INVALID = 0, // invalid property
+
   CODEX_PROP_BOOL,
   CODEX_PROP_STRING,
   CODEX_BYTE,

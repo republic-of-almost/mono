@@ -40,6 +40,7 @@
 
 struct Codex_property
 {
+  const char *name;
   uint32_t property_id;
 
   uint32_t *instance_id;
@@ -55,15 +56,21 @@ struct Codex_object_type
 };
 
 
+struct Codex_instance
+{
+  const char *name;
+  uint64_t object_ids;
+};
+
+
 struct Codex_ctx
 {
   uint32_t                  instance_id_counter;
+  
   uint32_t                  *instance_ids;
   
-  uint32_t                  object_id_counter;  
+  struct Codex_instance     *instances;
   struct Codex_object_type  *object_types;
-  
-  uint32_t                  *object_instances;
   struct Codex_property     *properties;
 };
 
@@ -71,7 +78,7 @@ struct Codex_ctx
 /* ---------------------------------------------------- [ Codex Lifetime ] -- */
 
 
-bool
+Codex_bool
 codex_create(struct Codex_ctx **c)
 {
   /* param check */
@@ -90,21 +97,21 @@ codex_create(struct Codex_ctx **c)
 
     if(!new_ctx)
     {
-      return false;
+      return CODEX_FALSE;
     }
 
     /* defaults */
     {
       codex_array_create(new_ctx->instance_ids,     1024);
+      codex_array_create(new_ctx->instances,        1024);
       codex_array_create(new_ctx->object_types,     64);
-      codex_array_create(new_ctx->object_instances, 1024);
       codex_array_create(new_ctx->properties,       512);
     }
   }
 
   /* Created instance */
   *c = new_ctx;
-  return true;
+  return CODEX_TRUE;
 }
 
 
@@ -115,8 +122,8 @@ codex_destroy(struct Codex_ctx **c)
   if(*c != NULL)
   {
     codex_array_destroy((*c)->instance_ids);
+    codex_array_destroy((*c)->instances);
     codex_array_destroy((*c)->object_types);
-    codex_array_destroy((*c)->object_instances);
     codex_array_destroy((*c)->properties);
   
     CODEX_FREE((*c));
@@ -132,15 +139,21 @@ codex_destroy(struct Codex_ctx **c)
 uint32_t
 codex_instance_create(struct Codex_ctx *c)
 {
-  /* param check */
+  /* param and state check */
   {
     CODEX_ASSERT(c);
+    CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
   }
 
   /* add new instance */
   {
     uint32_t new_instance = ++(c->instance_id_counter);
     codex_array_push(c->instance_ids, new_instance);
+    
+    struct Codex_instance new_instance_data;
+    CODEX_MEMZERO(&new_instance_data, sizeof(new_instance_data));
+    
+    codex_array_push(c->instances, new_instance_data);
     
     return new_instance;
   }
@@ -149,13 +162,14 @@ codex_instance_create(struct Codex_ctx *c)
 }
 
 
-bool
+Codex_bool
 codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
 {
-  /* param check */
+  /* param and state check */
   {
     CODEX_ASSERT(c);
     CODEX_ASSERT(inst_id);
+    CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
   }
 
   const size_t count = codex_array_size(c->instance_ids);
@@ -166,23 +180,56 @@ codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
     if(c->instance_ids[i] == inst_id)
     {
       codex_array_erase(c->instance_ids, i);
-      return true;
+      codex_array_erase(c->instances, i);
+      
+      CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
+      
+      return CODEX_TRUE;
     }
   }
   
-  return false;
+  return CODEX_FALSE;
 }
 
 
 size_t
 codex_instance_count(const struct Codex_ctx *c)
 {
-  /* param check */
+  /* param and state check */
   {
     CODEX_ASSERT(c);
+    CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
   }
 
   return codex_array_size(c->instance_ids);
+}
+
+
+void
+codex_instance_add_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id)
+{
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+    CODEX_ASSERT(inst_id);
+    CODEX_ASSERT(obj_id);
+  }
+  
+  /* find index and add flag */
+  {
+    const size_t count = codex_array_size(c->instance_ids);
+    size_t i;
+    
+    const uint64_t flag = 1 << obj_id;
+    
+    for(i = 0; i < count; ++i)
+    {
+      if(c->instance_ids[i] == inst_id)
+      {
+        c->instances[i].object_ids |= flag;
+      }
+    }
+  }
 }
 
 
@@ -206,11 +253,11 @@ codex_object_type_create(struct Codex_ctx *c, const char *name)
     
     for(i = 0; i < count; ++i)
     {
-      const bool name_match = strcmp(c->object_types[i].name, name) == 0;
+      const Codex_bool name_match = strcmp(c->object_types[i].name, name) == 0;
     
       if(name_match)
       {
-        CODEX_ASSERT(false); // name exists
+        CODEX_ASSERT(CODEX_FALSE); // name exists
         return 0;
       }
     }
@@ -219,13 +266,15 @@ codex_object_type_create(struct Codex_ctx *c, const char *name)
   /* add new type */
   {
     struct Codex_object_type new_obj;
+    CODEX_MEMZERO(&new_obj, sizeof(new_obj));
     
     char *name_cpy = (char *)CODEX_MALLOC(strlen(name) + 1);
     strcpy(name_cpy, name);
     
     new_obj.name       = name_cpy;
-    new_obj.object_id  = ++(c->object_id_counter);
-    new_obj.properties = NULL;
+    new_obj.object_id  = codex_array_size(c->object_types) + 1;
+    
+    codex_array_create(new_obj.properties, 32);
     
     codex_array_push(c->object_types, new_obj);
     
@@ -254,14 +303,63 @@ codex_object_type_count(const struct Codex_ctx *c)
 uint32_t
 codex_property_create(struct Codex_ctx *c, uint32_t obj_id, uint32_t prop_type, const char *name)
 {
-
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+    CODEX_ASSERT(obj_id);
+    CODEX_ASSERT(prop_type);
+    CODEX_ASSERT(name != NULL);
+    CODEX_ASSERT(strlen(name) > 0);
+  }
+  
+  /* check to see if name exists */
+  {
+    const size_t o_index = obj_id - 1;
+    const uint32_t *prop_ids = c->object_types[o_index].properties;
+    const size_t prop_count = codex_array_size(prop_ids);
+    
+    size_t i = 0;
+    
+    for(i = 0; i < prop_count; ++i)
+    {
+      const size_t p_index = prop_ids[i] - 1;
+      struct Codex_property *prop = &c->properties[p_index];
+      const Codex_bool name_exists = (strcmp(prop->name, name) == 0);
+      
+      if(name_exists)
+      {
+        return 0;
+      }
+    }
+  }
+  
+  /* add new property and to object */
+  {
+    struct Codex_property prop;
+    prop.property_id = codex_array_size(c->properties) + 1;
+    
+    char *prop_name = CODEX_MALLOC(strlen(name) + 1);
+    prop.name = prop_name;
+    strcpy(prop_name, name);
+    
+    codex_array_push(c->properties, prop);
+    
+    const size_t obj_index = obj_id - 1;
+    struct Codex_object_type *obj = &c->object_types[obj_index];
+    
+    codex_array_push(obj->properties, prop.property_id);
+    
+    return codex_array_size(c->properties);
+  }
+  
+  return 0;
 }
 
 
 size_t
 codex_property_count(struct Codex_ctx *c, uint32_t obj_id)
 {
-
+  return codex_array_size(c->properties);
 }
 
 
