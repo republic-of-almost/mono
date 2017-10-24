@@ -43,8 +43,7 @@ size_t      codex_instance_count(const struct Codex_ctx *c);
 
 
 uint32_t    codex_object_type_create(struct Codex_ctx *c, const char *name);
-void        codex_object_type_attach(struct Codex_ctx *c, uint32_t obj_id, uint32_t inst_id);
-void        codex_object_type_detach(struct Codex_ctx *c, uint32_t obj_id, uint32_t inst_id);
+size_t      codex_object_type_count(const struct Codex_ctx *c);
 
 
 /* ------------------------------------- [ Codex Object Type Properties  ] -- */

@@ -34,12 +34,17 @@
 #define codex_array_erase(arr, index) \
   array_erase((void**)&arr, index);
 
+#define codex_array_destroy(arr) \
+  array_destroy((void**)&arr); \
+  arr = NULL
+
 
 /* -------------------------------------------------------- [ Array Impl ] -- */
 /*
   These are internal you shouldn't be calling them directly.
 */
 
+void    array_destroy(void **ptr);
 void    array_grow(void **ptr, uint32_t stride ,uint32_t capacity);
 size_t  array_size(void **ptr);
 size_t  array_capacity(void **ptr);

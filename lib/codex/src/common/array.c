@@ -15,6 +15,19 @@ struct codex_array_internal
 };
 
 
+void
+array_destroy(void **ptr)
+{
+  if(*ptr)
+  {
+    struct codex_array_internal *curr_arr = ((struct codex_array_internal*)*ptr);
+    curr_arr--;
+
+    free(curr_arr);
+  }
+}
+
+
 void array_grow(void **ptr, uint32_t stride ,uint32_t capacity)
 {
   /* increase buffer */

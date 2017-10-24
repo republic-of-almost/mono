@@ -49,19 +49,20 @@ struct Codex_property
 
 struct Codex_object_type
 {
+  const char *name;
   uint32_t object_id;
-
   uint32_t *properties;
 };
 
 
 struct Codex_ctx
 {
-  uint32_t instance_id_counter;
-  uint32_t object_id_counter;
-
+  uint32_t                  instance_id_counter;
   uint32_t                  *instance_ids;
+  
+  uint32_t                  object_id_counter;  
   struct Codex_object_type  *object_types;
+  
   uint32_t                  *object_instances;
   struct Codex_property     *properties;
 };
@@ -94,13 +95,11 @@ codex_create(struct Codex_ctx **c)
 
     /* defaults */
     {
-      codex_array_create(new_ctx->instance_ids, 1024);
-      codex_array_create(new_ctx->object_types, 64);
+      codex_array_create(new_ctx->instance_ids,     1024);
+      codex_array_create(new_ctx->object_types,     64);
       codex_array_create(new_ctx->object_instances, 1024);
-      codex_array_create(new_ctx->properties, 512);
+      codex_array_create(new_ctx->properties,       512);
     }
-    
-
   }
 
   /* Created instance */
@@ -115,8 +114,14 @@ codex_destroy(struct Codex_ctx **c)
   /* free */
   if(*c != NULL)
   {
-
+    codex_array_destroy((*c)->instance_ids);
+    codex_array_destroy((*c)->object_types);
+    codex_array_destroy((*c)->object_instances);
+    codex_array_destroy((*c)->properties);
+  
     CODEX_FREE((*c));
+    
+    *c = NULL;
   }
 }
 
@@ -147,6 +152,12 @@ codex_instance_create(struct Codex_ctx *c)
 bool
 codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
 {
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+    CODEX_ASSERT(inst_id);
+  }
+
   const size_t count = codex_array_size(c->instance_ids);
   size_t i;
   
@@ -166,6 +177,11 @@ codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
 size_t
 codex_instance_count(const struct Codex_ctx *c)
 {
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+  }
+
   return codex_array_size(c->instance_ids);
 }
 
@@ -176,21 +192,59 @@ codex_instance_count(const struct Codex_ctx *c)
 uint32_t
 codex_object_type_create(struct Codex_ctx *c, const char *name)
 {
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+    CODEX_ASSERT(name);
+    CODEX_ASSERT(strlen(name));
+  }
+
+  /* search for names */
+  {
+    size_t count = codex_array_size(c->object_types);
+    size_t i;
+    
+    for(i = 0; i < count; ++i)
+    {
+      const bool name_match = strcmp(c->object_types[i].name, name) == 0;
+    
+      if(name_match)
+      {
+        CODEX_ASSERT(false); // name exists
+        return 0;
+      }
+    }
+  }
   
+  /* add new type */
+  {
+    struct Codex_object_type new_obj;
+    
+    char *name_cpy = (char *)CODEX_MALLOC(strlen(name) + 1);
+    strcpy(name_cpy, name);
+    
+    new_obj.name       = name_cpy;
+    new_obj.object_id  = ++(c->object_id_counter);
+    new_obj.properties = NULL;
+    
+    codex_array_push(c->object_types, new_obj);
+    
+    return new_obj.object_id;
+  }
+  
+  return 0;
 }
 
 
-void
-codex_object_type_attach(struct Codex_ctx *c, uint32_t obj_id, uint32_t inst_id)
+size_t
+codex_object_type_count(const struct Codex_ctx *c)
 {
-
-}
-
-
-void
-codex_object_type_detach(struct Codex_ctx *c, uint32_t obj_id, uint32_t inst_id)
-{
-
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+  }
+  
+  return codex_array_size(c->object_types);
 }
 
 
