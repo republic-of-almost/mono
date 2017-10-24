@@ -6,6 +6,11 @@
 #include <stddef.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* --------------------------------------------------- [ Array Interface ] -- */
 /*
   C is a little awkward for containers, but this is a good balance for arrays.
@@ -28,7 +33,7 @@
 
 #define codex_array_push(arr, item) \
   array_should_grow((void**)&arr);  \
-  arr[array_size((void**)arr)] = item;  \
+  arr[array_size((void**)&arr)] = item;  \
   array_increment((void**)&arr);
 
 #define codex_array_erase(arr, index) \
@@ -51,6 +56,11 @@ size_t  array_capacity(void **ptr);
 void    array_increment(void **ptr);
 void    array_should_grow(void **ptr);
 void    array_erase(void **ptr, size_t index);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* inc guard */
