@@ -142,7 +142,9 @@ codex_instance_create(struct Codex_ctx *c)
   /* param and state check */
   {
     CODEX_ASSERT(c);
-    CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
+    CODEX_ASSERT(
+      codex_array_size(c->instance_ids) == codex_array_size(c->instances)
+    );
   }
 
   /* add new instance */
@@ -169,7 +171,9 @@ codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
   {
     CODEX_ASSERT(c);
     CODEX_ASSERT(inst_id);
-    CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
+    CODEX_ASSERT(
+      codex_array_size(c->instance_ids) == codex_array_size(c->instances)
+    );
   }
 
   const size_t count = codex_array_size(c->instance_ids);
@@ -182,7 +186,9 @@ codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id)
       codex_array_erase(c->instance_ids, i);
       codex_array_erase(c->instances, i);
       
-      CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
+      CODEX_ASSERT(
+        codex_array_size(c->instance_ids) == codex_array_size(c->instances)
+      );
       
       return CODEX_TRUE;
     }
@@ -198,15 +204,20 @@ codex_instance_count(const struct Codex_ctx *c)
   /* param and state check */
   {
     CODEX_ASSERT(c);
-    CODEX_ASSERT(codex_array_size(c->instance_ids) == codex_array_size(c->instances));
+    CODEX_ASSERT(
+      codex_array_size(c->instance_ids) == codex_array_size(c->instances)
+    );
   }
 
   return codex_array_size(c->instance_ids);
 }
 
 
-void
-codex_instance_add_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id)
+Codex_bool
+codex_instance_add_object(
+  struct Codex_ctx *c,
+  uint32_t inst_id,
+  uint32_t obj_id)
 {
   /* param check */
   {
@@ -227,9 +238,45 @@ codex_instance_add_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id
       if(c->instance_ids[i] == inst_id)
       {
         c->instances[i].object_ids |= flag;
+        return CODEX_TRUE;
       }
     }
   }
+  
+  return CODEX_FALSE;
+}
+
+
+Codex_bool
+codex_instance_has_object(
+  struct Codex_ctx *c,
+  uint32_t inst_id,
+  uint32_t obj_id)
+{
+  /* param check */
+  {
+    CODEX_ASSERT(c);
+    CODEX_ASSERT(inst_id);
+    CODEX_ASSERT(obj_id);
+  }
+  
+  /* check to see if instance has object */
+  {
+    const size_t count = codex_array_size(c->instance_ids);
+    size_t i;
+    
+    const uint64_t flag = 1 << obj_id;
+    
+    for(i = 0; i < count; ++i)
+    {
+      if(c->instance_ids[i] == inst_id)
+      {
+        return (c->instances[i].object_ids & flag ? CODEX_TRUE : CODEX_FALSE);
+      }
+    }
+  }
+  
+  return CODEX_FALSE;
 }
 
 
@@ -301,7 +348,11 @@ codex_object_type_count(const struct Codex_ctx *c)
 
 
 uint32_t
-codex_property_create(struct Codex_ctx *c, uint32_t obj_id, uint32_t prop_type, const char *name)
+codex_property_create(
+  struct Codex_ctx *c,
+  uint32_t obj_id,
+  uint32_t prop_type,
+  const char *name)
 {
   /* param check */
   {

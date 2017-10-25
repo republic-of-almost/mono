@@ -9,7 +9,7 @@ TEST_CASE("Codex Objects")
   
   SECTION("Create Objects")
   {
-    const uint32_t id = codex_object_type_create(ctx, "foo");
+    const uint32_t id = codex_object_type_create(ctx, "WORLD_TRANSFORM");
     REQUIRE(id > 0);
     
     const size_t count = codex_object_type_count(ctx);

@@ -43,7 +43,24 @@ uint32_t    codex_instance_create(struct Codex_ctx *c);
 Codex_bool  codex_instance_destroy(struct Codex_ctx *c, uint32_t inst_id);
 size_t      codex_instance_count(const struct Codex_ctx *c);
 
-void        codex_instance_add_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id);
+Codex_bool  codex_instance_add_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id);
+Codex_bool  codex_instance_has_object(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id);
+
+
+/* -------------------------------------------------------- [ Codex Data ] -- */
+
+
+struct Codex_data;
+
+void        codex_data_get(struct Codex_ctx *c, uint32_t inst_id, uint32_t obj_id, Codex_data *out_data);
+
+void        codex_data_getf(struct Codex_data *d, uint32_t type_id, float *out_data);
+void        codex_data_setf(struct Codex_data *d, uint32_t type_id, float *data);
+
+void        codex_data_geti(struct Codex_data *d, uint32_t type_id, int32_t *out_data);
+void        codex_data_seti(struct Codex_data *d, uint32_t type_id, int32_t *data);
+
+void        codex_data_commit(struct Codex_ctx *c, Codex_data *in_data);
 
 
 /* ------------------------------------------------ [ Codex Object Type  ] -- */
