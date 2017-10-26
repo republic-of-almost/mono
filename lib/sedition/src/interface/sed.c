@@ -1,5 +1,6 @@
 #include <sedition/sed.h>
 #include <internal/array.h>
+#include <stdio.h> /* testing */
 
 
 /* ------------------------------------------------------------ [ Config ] -- */
@@ -15,6 +16,10 @@
 
 #include <assert.h>
 #define SED_ASSERT(expr) assert(expr)
+
+
+#include <string.h>
+#define SED_ZEROMEM(ptr, type) memset(ptr, 0, type)
 
 
 /* -------------------------------------------------------------- [ Data ] -- */
@@ -76,6 +81,7 @@ sed_solution_create(const char *name)
     SED_MEMCPY(cpy_name, name, name_bytes);
 
     struct Solution new_solution;
+    SED_ZEROMEM(&new_solution, sizeof(new_solution));
     new_solution.name = cpy_name;
     
     sed_array_create(new_solution.projects, 32);
@@ -130,6 +136,39 @@ sed_solution_add_project(int sol_id, int proj_id)
 void
 sed_solution_add_config(int sol_id, int config_id)
 {
+  /* param check */
+  {
+    SED_ASSERT(sol_id > 0);
+    SED_ASSERT(sol_id <= sed_array_size(solutions));
+    SED_ASSERT(config_id > 0);
+    SED_ASSERT(config_id <= sed_array_size(configs));
+  }
+
+  /* find solution's configs */
+  int *confs = NULL;
+  {
+    const size_t index = sol_id - 1;
+    confs = solutions[index].configs;
+  }
+
+  /* scan to see if it is already added */
+  {
+    int count = sed_array_size(confs);
+    int i;
+
+    for(i = 0; i < count; ++i)
+    {
+      if(confs[i] == config_id)
+      {
+        return;
+      }
+    }
+  }
+
+  /* add config */
+  {
+    sed_array_push(confs, config_id);
+  }
 }
 
 
@@ -158,6 +197,7 @@ sed_config_create(const char *name)
     SED_MEMCPY(cpy_name, name, name_bytes);
 
     struct Config new_config;
+    SED_ZEROMEM(&new_config, sizeof(new_config));
     new_config.name = cpy_name;
 
     sed_array_push(configs, new_config);
@@ -225,6 +265,7 @@ sed_project_create(const char *name)
     SED_MEMCPY(cpy_name, name, name_bytes);
 
     struct Project new_proj;
+    SED_ZEROMEM(&new_proj, sizeof(new_proj));
     new_proj.name = cpy_name;
     
     sed_array_push(projects, new_proj);
@@ -292,8 +333,42 @@ sed_project_add_library_dirs(int proj_id, const char *dir)
 
 
 void
-sed_execute()
+sed_execute(int platform)
 {
+  /* testing */
+  int sol_count = sed_array_size(solutions);
+  int i,j,k;
+ 
+  /* loop through solutions */ 
+  for(i = 0; i < sol_count; ++i)
+  {
+    struct Solution *sol = &solutions[i];
+    int *proj_ids = sol->projects;
+    int *conf_ids = sol->configs;
+
+    /* loop through projects */
+    int proj_count = sed_array_size(sol->projects);
+
+    int conf_count = sed_array_size(sol->configs);
+
+    printf("Solution: %s projs: %d confs: %d\n", sol->name, proj_count, conf_count);
+
+    for(j = 0; j < proj_count; ++j)
+    {
+      struct Project *proj = &projects[proj_ids[j] - 1];
+
+      printf("Project: %s\n", proj->name); 
+    }
+
+    /* loop through configs */
+
+    for(k = 0; k < conf_count; ++k)
+    {
+      struct Config *conf = &configs[conf_ids[k] - 1];
+
+      printf("Config: %s\n", conf->name);
+    }
+  }
 }
 
 
@@ -308,7 +383,10 @@ main()
   int config = sed_config_create("DebugConfig");
   int proj = sed_project_create("BarProj");
 
- 
+  sed_solution_add_config(solution, config);
+  sed_solution_add_project(solution, proj);
+
+  sed_execute(1);
 
   return 0;
 }
