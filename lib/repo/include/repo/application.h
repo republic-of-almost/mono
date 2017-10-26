@@ -19,7 +19,7 @@
  */
 
 
-tyepdef void(*repo_tick_callback)(void *user_data);
+typedef void(*repo_tick_callback)(void *user_data);
 
 
 void      repo_app_init();
