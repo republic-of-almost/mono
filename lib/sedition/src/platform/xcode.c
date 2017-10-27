@@ -31,30 +31,30 @@ void sed_generate_xcode(
           struct Project *proj = &projs[sol->projects[i -1]];
 
           char *dir_name = sed_string(proj->name);
-          printf("dir: %s/n", dir_name);
           
-          const char *ext = ".xcodeproj";
-          dir_name = sed_string_append(dir_name, ext);
+          dir_name = sed_string_append(dir_name, ".xcodeproj");
 
           sed_mkdir(dir_name);
 
-          printf("dir: %s/n", dir_name);
+          sed_string_free(dir_name);
         }
       }
 
       /* workspace */
       {
-        const char *suf = ".xcworkspace";
-        size_t ws_bytes = strlen(sol->name) + strlen(suf) + 1;
-        char *ws_name = (char *)sed_malloc(ws_bytes);
-        memset(ws_name, 0, ws_bytes);
+        char *dir_name = sed_string(sol->name);
+        dir_name = sed_string_append(dir_name, ".xcworkspace");
 
-        strcat(ws_name, sol->name);
-        strcat(ws_name, suf); 
+        sed_mkdir(dir_name);
 
-        sed_mkdir(ws_name);
+        char *work_file = sed_string(dir_name);
+        work_file = sed_string_append(work_file, "/contents.xcworkspacedata");
 
-        
+        sed_file_create(work_file);
+        sed_file_close();
+
+        sed_string_free(work_file);
+        sed_string_free(dir_name);
       }
     } /* generate workspace */
   } /* for solutions */

@@ -58,6 +58,13 @@ sed_string_append(char *str, const char *append)
 }
 
 
+void
+sed_string_free(char *str)
+{
+  free(str);
+}
+
+
 /* -------------------------------------------------------- [ Filesystem ] -- */
 
 

@@ -22,6 +22,7 @@ void          sed_free(void *ptr);
 
 char *        sed_string(const char *str);
 char *        sed_string_append(char *str, const char *append);
+void          sed_string_free(char *str);
 
 
 /* -------------------------------------------------------- [ Filesystem ] -- */
