@@ -61,14 +61,15 @@ int       sed_project_create(const char *name);
 void      sed_project_set_kind(int proj_id, int kind);
 void      sed_project_set_language(int proj_id, int lang);
 void      sed_project_add_file(int proj_id, const char *file);
-void      sed_project_add_include_dirs(int proj_id, const char *dir);
-void      sed_project_add_library_dirs(int proj_id, const char *dir);
+void      sed_project_add_include_dir(int proj_id, const char *dir);
+void      sed_project_add_library_dir(int proj_id, const char *dir);
 
 
 /* ----------------------------------------------------------- [ Execute ] -- */
 
 
 enum {
+  SED_PLAT_OUTPUT_ONLY, /* testing */
   SED_PLAT_XCODE,
   SED_PLAT_VISUAL_STUDIO_2017,
 };

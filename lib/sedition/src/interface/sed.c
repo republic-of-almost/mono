@@ -1,5 +1,6 @@
 #include <sedition/sed.h>
 #include <internal/array.h>
+#include <internal/types.h>
 #include <stdio.h> /* testing */
 
 
@@ -23,32 +24,6 @@
 
 
 /* -------------------------------------------------------------- [ Data ] -- */
-
-
-struct Config
-{
-  const char *name;
-  int symbols;
-  int optim_level;
-};
-
-
-struct Project
-{
-  const char *name;
-  const char *path;
-  int lang;
-  int kind;
-};
-
-
-struct Solution
-{
-  const char *name;
-  const char *path;
-  int *projects;
-  int *configs;
-};
 
 
 struct Solution *solutions = NULL;
@@ -268,6 +243,10 @@ sed_project_create(const char *name)
     SED_ZEROMEM(&new_proj, sizeof(new_proj));
     new_proj.name = cpy_name;
     
+    sed_array_create(new_proj.files, 256);
+    sed_array_create(new_proj.inc_dirs, 32);
+    sed_array_create(new_proj.lib_dirs, 32);
+
     sed_array_push(projects, new_proj);
   }
 }
@@ -314,22 +293,76 @@ sed_project_set_language(int proj_id, int lang)
 void
 sed_project_add_file(int proj_id, const char *file)
 {
+  /* param check */
+  {
+    SED_ASSERT(proj_id > 0);
+    SED_ASSERT(proj_id <= sed_array_size(projects));
+    SED_ASSERT(file);
+    SED_ASSERT(strlen(file));
+  }
+
+  /* add file */
+  {
+    const size_t bytes = strlen(file) + 1;
+    char *cpy_file = (char*)SED_MALLOC(bytes);
+    SED_MEMCPY(cpy_file, file, bytes);
+
+    const size_t index = proj_id - 1;
+    sed_array_push(projects[index].files, cpy_file);
+  } 
 }
 
 
 void
-sed_project_add_include_dirs(int proj_id, const char *dir)
+sed_project_add_include_dir(int proj_id, const char *dir)
 {
+  /* param check */
+  {
+    SED_ASSERT(proj_id > 0);
+    SED_ASSERT(proj_id <= sed_array_size(projects));
+    SED_ASSERT(dir);
+    SED_ASSERT(strlen(dir));
+  }
+
+  /* add inc dir */
+  {
+    const size_t bytes = strlen(dir) + 1;
+    char *cpy_dir = (char*)SED_MALLOC(bytes);
+    SED_MEMCPY(cpy_dir, dir, bytes);
+
+    const size_t index = proj_id - 1;
+    sed_array_push(projects[index].inc_dirs, cpy_dir);
+  }
 }
 
 
 void
-sed_project_add_library_dirs(int proj_id, const char *dir)
+sed_project_add_library_dir(int proj_id, const char *dir)
 {
+  /* param check */
+  {
+    SED_ASSERT(proj_id > 0);
+    SED_ASSERT(proj_id <= sed_array_size(projects));
+    SED_ASSERT(dir);
+    SED_ASSERT(strlen(dir));
+  }
+
+  /* add lib dir */
+  {
+    const size_t bytes = strlen(dir) + 1;
+    char *cpy_dir = (char*)SED_MALLOC(bytes);
+    SED_MEMCPY(cpy_dir, dir, bytes);
+
+    const size_t index = proj_id - 1;
+    sed_array_push(projects[index].lib_dirs, cpy_dir);
+  }
 }
 
 
 /* ----------------------------------------------------------- [ Execute ] -- */
+
+
+#include <platform/xcode.h>
 
 
 void
@@ -357,7 +390,31 @@ sed_execute(int platform)
     {
       struct Project *proj = &projects[proj_ids[j] - 1];
 
-      printf("Project: %s\n", proj->name); 
+      printf("  Project: %s\n", proj->name);
+
+      /* loop through files */
+      int file_count = sed_array_size(proj->files);
+
+      for(k = 0; k < file_count; ++k)
+      {
+        printf("    file: %s\n", proj->files[k]);
+      }
+
+      /* loop through inc dirs */
+      int inc_dir_count = sed_array_size(proj->inc_dirs);
+
+      for(k = 0; k < inc_dir_count; ++k)
+      {
+        printf("    inc dir: %s\n", proj->inc_dirs[k]);
+      }
+
+      /* loop through lib dirs */
+      int lib_dir_count = sed_array_size(proj->lib_dirs);
+
+      for(k = 0; k < lib_dir_count; ++k)
+      {
+        printf("    lib dir: %s\n", proj->lib_dirs[k]);
+      }
     }
 
     /* loop through configs */
@@ -366,27 +423,39 @@ sed_execute(int platform)
     {
       struct Config *conf = &configs[conf_ids[k] - 1];
 
-      printf("Config: %s\n", conf->name);
+      printf("  Config: %s\n", conf->name);
     }
   }
+
+  /* generate platform solution */
+  sed_generate_xcode(solutions, sed_array_size(solutions));
 }
 
 
 /* -------------------------------------------------------------- [ Main ] -- */
 
 
+#ifndef SED_AS_LIB
 int
 main()
 {
   /* testing */
+
   int solution = sed_solution_create("FooSol");
   int config = sed_config_create("DebugConfig");
   int proj = sed_project_create("BarProj");
+  sed_project_set_language(proj, SED_LANG_C89);
+  sed_project_set_kind(proj, SED_KIND_CONSOLE_APP);
+  sed_project_add_file(proj, "foo.c");
+  sed_project_add_file(proj, "foo.h");
+  sed_project_add_include_dir(proj, "./include");
+  sed_project_add_library_dir(proj, "/usr/local");
 
   sed_solution_add_config(solution, config);
   sed_solution_add_project(solution, proj);
 
-  sed_execute(1);
+  sed_execute(SED_PLAT_OUTPUT_ONLY);
 
   return 0;
 }
+#endif
