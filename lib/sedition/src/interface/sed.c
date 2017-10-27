@@ -428,7 +428,7 @@ sed_execute(int platform)
   }
 
   /* generate platform solution */
-  sed_generate_xcode(solutions, sed_array_size(solutions));
+  sed_generate_xcode(solutions, projects, configs); 
 }
 
 

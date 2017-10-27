@@ -11,9 +11,15 @@ extern "C" {
 
 
 struct Solution;
+struct Project;
+struct Config;
 
 
-void sed_generate_xcode(struct Solution *sol, size_t count);
+void sed_generate_xcode(
+  struct Solution *sols,
+  struct Project *projs,
+  struct Config *confs
+);
 
 
 #ifdef __cplusplus
