@@ -2,6 +2,7 @@
 #include <internal/types.h>
 #include <internal/common.h>
 #include <internal/array.h>
+#include <sedition/sed.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -19,9 +20,9 @@ void sed_generate_xcode(
   {
     struct Solution *sol = &sols[i];
 
-    /* generate workspace */
+    /* -------------------------------------------- [ generate workspace ] -- */
     {
-      /* project */
+      /* ----------------------------------------------------- [ project ] -- */
       {
         int proj_count = sed_array_size(sol->projects);
         int j;
@@ -41,6 +42,50 @@ void sed_generate_xcode(
 
           sed_file_create(proj_file);
 
+          /* generate file ids */
+
+          struct XCode_file
+          {
+            char id[25];
+            char ref[25];
+            const char *name;
+            const char *path;
+            int type;
+          };
+
+          int file_count = sed_array_size(proj->files);
+
+          struct XCode_file *xc_files = NULL;
+          sed_array_create(xc_files, file_count);
+
+          const char rand_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          int char_count = sizeof(rand_chars) / sizeof(char);
+          char_count--;
+
+          int k;
+
+          for(k = 0; k < file_count; ++k)
+          {
+            struct XCode_file new_file;
+            memset(&new_file, 0, sizeof(new_file));
+
+            int l;
+
+            for(l = 0; l < 24; ++l)
+            {
+              new_file.id[l] = rand_chars[rand() % char_count];
+              new_file.ref[l] = rand_chars[rand() % char_count];
+            }
+
+            new_file.name = proj->files[k].name;
+            new_file.type = proj->files[k].type;
+            new_file.path = proj->files[k].path;
+
+            sed_array_push(xc_files, new_file);
+          }
+
+          /* ----------------------------------- [ generate project file ] -- */
+
           /* header */
 
           sed_file_append("// !$*UTF8*$!\n");
@@ -54,11 +99,64 @@ void sed_generate_xcode(
           /* files */
 
           sed_file_append("/* Begin PBXBuildFile section */\n");
+
+          for(k = 0; k < file_count; ++k)
+          {
+            if(xc_files[k].type == SED_FILE_TYPE_SOURCE)
+            {
+              sed_file_append("\t\t");
+              sed_file_append(xc_files[k].id);
+              sed_file_append(" /* ");
+              sed_file_append(xc_files[k].name);
+              sed_file_append(" in Sources */ = ");
+              sed_file_append("{isa = PBXBuildFile; fileRef = ");
+              sed_file_append(xc_files[k].ref);
+              sed_file_append(" /* ");
+              sed_file_append(xc_files[k].name);
+              sed_file_append(" */; };");
+              sed_file_append("\n");
+            }
+          }
+
           sed_file_append("/* End PBXBuildFile section */\n\n");
 
           /* file refs */
 
           sed_file_append("/* Begin PBXFileReference section */\n");
+          for(k = 0; k < file_count; ++k)
+          {
+            sed_file_append("\t\t");
+            sed_file_append(xc_files[k].id);
+            sed_file_append(" /* ");
+            sed_file_append(xc_files[k].name);
+            sed_file_append(" */ = {isa = PBXFileReference; ");
+            sed_file_append("lastKnownFileType = ");
+            
+            if(xc_files[k].type == SED_FILE_TYPE_SOURCE)
+            {
+              if(proj->lang < SED_LANG_CPP11)
+              {
+                sed_file_append("sourcecode.c.c; ");
+              }
+              else
+              {
+                sed_file_append("sourcecode.cpp.cpp; ");
+              }
+            }
+            else
+            {
+              sed_file_append("text; ");
+            }
+
+            sed_file_append("name = \""); 
+            sed_file_append(xc_files[k].name);
+            sed_file_append("\"; ");
+            sed_file_append("path = \"");
+            sed_file_append(xc_files[k].path);
+            sed_file_append("\"; sourceTree = \"<group>\"");
+            sed_file_append("\n");
+          }
+
           sed_file_append("/* End PBXFileReference section */\n\n");
 
           /* framework buildphase */
@@ -120,10 +218,11 @@ void sed_generate_xcode(
 
           sed_string_free(proj_file);
           sed_string_free(dir_name);
+          sed_array_destroy(xc_files);
         }
       }
 
-      /* workspace */
+      /* --------------------------------------------------- [ workspace ] -- */
       {
         char *dir_name = sed_string(sol->name);
         dir_name = sed_string_append(dir_name, ".xcworkspace");

@@ -15,11 +15,27 @@ struct Config
 };
 
 
+enum
+{
+  SED_FILE_TYPE_TEXT,
+  SED_FILE_TYPE_HEADER,
+  SED_FILE_TYPE_SOURCE,
+};
+
+
+struct File
+{
+  const char *name;
+  const char *path;
+  int type;
+};
+
+
 struct Project
 {
   const char *name;
   const char *path;
-  const char **files;
+  struct File *files;
   const char **inc_dirs;
   const char **lib_dirs;
   int lang;

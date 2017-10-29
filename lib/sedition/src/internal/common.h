@@ -18,11 +18,15 @@ void          sed_free(void *ptr);
 
 
 /* ------------------------------------------------------------ [ String ] -- */
-
+/*
+ *  TODO: Ownership needs to be clearer here.
+ */
 
 char *        sed_string(const char *str);
 char *        sed_string_append(char *str, const char *append);
 void          sed_string_free(char *str);
+const char *        sed_string_filename_from_path(const char *path);
+const char *        sed_string_ext_from_filename(const char *path);
 
 
 /* -------------------------------------------------------- [ Filesystem ] -- */

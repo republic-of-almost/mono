@@ -65,6 +65,35 @@ sed_string_free(char *str)
 }
 
 
+const char *
+sed_string_filename_from_path(const char *path)
+{
+  const char *ssc;
+  int l = 0;
+
+  ssc = strstr(path, "/");
+  
+  while(ssc)
+  {
+    l = strlen(ssc) + 1;
+    path = &path[strlen(path)-l+2];
+    ssc = strstr(path, "/");
+  };
+
+  return ssc ? ssc : path;
+}
+
+
+const char *
+sed_string_ext_from_filename(const char *filename)
+{
+  const char *dot = strrchr(filename, '.');
+  if(!dot || dot == filename) return "";
+
+  return dot + 1;
+}
+
+
 /* -------------------------------------------------------- [ Filesystem ] -- */
 
 

@@ -1,5 +1,6 @@
 #include <sedition/sed.h>
 #include <internal/array.h>
+#include <internal/common.h>
 #include <internal/types.h>
 #include <stdio.h> /* testing */
 
@@ -26,9 +27,9 @@
 /* -------------------------------------------------------------- [ Data ] -- */
 
 
-struct Solution *solutions = NULL;
-struct Project *projects = NULL;
-struct Config *configs = NULL;
+struct Solution *solutions  = NULL;
+struct Project *projects    = NULL;
+struct Config *configs      = NULL;
 
 
 /* ---------------------------------------------------------- [ Solution ] -- */
@@ -303,12 +304,73 @@ sed_project_add_file(int proj_id, const char *file)
 
   /* add file */
   {
-    const size_t bytes = strlen(file) + 1;
-    char *cpy_file = (char*)SED_MALLOC(bytes);
-    SED_MEMCPY(cpy_file, file, bytes);
+    struct File new_file;
+    memset(&new_file, 0, sizeof(new_file));
+
+    const char *filename = sed_string_filename_from_path(file);
+    const char *ext = sed_string_ext_from_filename(filename);
+    
+    const char *file_extensions[] = {
+      "h",
+      "H",
+      "hh",
+      "HH",
+      "hpp",
+      "HPP",
+
+      "c",
+      "C",
+      "cpp",
+      "CPP",
+      "cc",
+      "CC",
+      "cxx",
+      "CXX",
+      "cp",
+      "CP",
+      "c++",
+      "C++",
+    };
+
+    const int file_type[] = {
+      SED_FILE_TYPE_HEADER,
+      SED_FILE_TYPE_HEADER,
+      SED_FILE_TYPE_HEADER,
+      SED_FILE_TYPE_HEADER,
+      SED_FILE_TYPE_HEADER,
+      SED_FILE_TYPE_HEADER,
+
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+      SED_FILE_TYPE_SOURCE,
+    };
+
+    new_file.name = sed_string(filename);
+    new_file.type = SED_FILE_TYPE_TEXT;
+
+    int ext_count = sizeof(file_extensions) / sizeof(file_extensions[0]);
+
+    int i;
+
+    for(i = 0; i < ext_count; ++i)
+    {
+      if(strcmp(file_extensions[i], ext) == 0)
+      {
+        new_file.type = file_type[i];
+      }
+    }
 
     const size_t index = proj_id - 1;
-    sed_array_push(projects[index].files, cpy_file);
+    sed_array_push(projects[index].files, new_file);
   } 
 }
 
@@ -397,7 +459,8 @@ sed_execute(int platform)
 
       for(k = 0; k < file_count; ++k)
       {
-        printf("    file: %s\n", proj->files[k]);
+        printf("    file: %s\n", proj->files[k].name);
+        printf("    file type: %d\n", proj->files[k].type);
       }
 
       /* loop through inc dirs */
@@ -446,8 +509,8 @@ main()
   int proj = sed_project_create("BarProj");
   sed_project_set_language(proj, SED_LANG_C89);
   sed_project_set_kind(proj, SED_KIND_CONSOLE_APP);
-  sed_project_add_file(proj, "foo.c");
-  sed_project_add_file(proj, "foo.h");
+  sed_project_add_file(proj, "../../src/foo.c");
+  sed_project_add_file(proj, "../../include/foo.h");
   sed_project_add_include_dir(proj, "./include");
   sed_project_add_library_dir(proj, "/usr/local");
 
