@@ -1,0 +1,46 @@
+#!lua
+
+--[[
+
+  Monocle Project Description
+
+]]--
+
+
+table.insert(
+  projects,
+  {
+    name     = "Monocle",
+    kind     = "SharedLib",
+    language = "C",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      --
+      make.add_src(make.get_proj_root() .. "../src/"),
+      --
+      make.add_doc(make.get_proj_root() .. "../"),
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+    private_inc_dirs = {
+      make.get_proj_root() .. "../src/",
+    },
+
+    defines = {
+
+      -- See nil's build.md for build flags doc
+
+    },
+
+    project_dependencies = {
+
+
+    },
+  }
+)

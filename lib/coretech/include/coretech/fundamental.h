@@ -1,0 +1,9 @@
+#ifndef FUNDAMENTAL_INCLUDED_64828E75_5A2F_4883_AD1B_4AF2D5B92988
+#define FUNDAMENTAL_INCLUDED_64828E75_5A2F_4883_AD1B_4AF2D5B92988
+
+
+#include <inttypes.h> 
+#include <stdbool.h>
+
+
+#endif // inc guard
