@@ -6,4 +6,9 @@
 #include <stdbool.h>
 
 
+struct ct_codex;
+struct ct_codex_writer;
+struct ct_codex_reader;
+
+
 #endif // inc guard

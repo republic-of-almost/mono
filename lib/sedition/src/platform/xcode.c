@@ -7,6 +7,23 @@
 #include <stdio.h>
 
 
+/* generates ids for xcode */
+void
+sed_xcode_id(char *id) // ptr to 25 chars
+{
+  const char rand_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  int char_count = sizeof(rand_chars) / sizeof(char);
+  char_count--;
+
+  int i;
+
+  for(i = 0; i < 24; ++i)
+  {
+    id[i] = rand_chars[rand() % char_count];
+  }
+}
+
+
 void sed_generate_xcode(
   struct Solution *sols,
   struct Project *projs,
@@ -58,9 +75,6 @@ void sed_generate_xcode(
           struct XCode_file *xc_files = NULL;
           sed_array_create(xc_files, file_count);
 
-          const char rand_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-          int char_count = sizeof(rand_chars) / sizeof(char);
-          char_count--;
 
           int k;
 
@@ -73,8 +87,8 @@ void sed_generate_xcode(
 
             for(l = 0; l < 24; ++l)
             {
-              new_file.id[l] = rand_chars[rand() % char_count];
-              new_file.ref[l] = rand_chars[rand() % char_count];
+              sed_xcode_id((char*)(new_file.id));
+              sed_xcode_id((char*)(new_file.ref));
             }
 
             new_file.name = proj->files[k].name;

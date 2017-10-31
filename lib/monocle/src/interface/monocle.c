@@ -1,5 +1,10 @@
 #include <monocle/monocle.h>
+#include <coretech/api/window.h>
+#include <GLFW/glfw3.h>
 #include <stdio.h>
+
+
+
 
 
 void
@@ -28,3 +33,4 @@ ct_module_tick()
 {
   printf("Tick Module\n");
 }
+
