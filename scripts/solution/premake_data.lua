@@ -35,6 +35,27 @@ make.add_src(dir)
 end
 
 
+-- Adds source file patterns
+function
+make.add_src(dir)
+  if os.get() == "macosx" then
+    return {
+      dir .. "**.cpp",
+      dir .. "**.cc",
+      dir .. "**.mm",
+      dir .. "**.c",
+      dir .. "**.m",
+    }
+  else
+    return {
+      dir .. "**.cpp",
+      dir .. "**.cc",
+      dir .. "**.c",
+    }
+  end
+end
+
+
 -- Adds header file patterns
 function
 make.add_headers(dir)
@@ -139,13 +160,38 @@ make.create_solution(solution_data, project_defaults, projects)
     location(proj.location)
     kind(proj.kind)
 
-    language(proj.language)
-
     if(proj.language == "C++") then
+      language("C++")
       if os.get() == "macosx" or os.get() == "linux" then
         buildoptions("-std=c++14");
       end
+    elseif(proj.language == "C++11") then
+      language("C++")
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c++11");
+      end
+    elseif(proj.language == "C++14") then
+      language("C++")
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c++14");
+      end
+    elseif(proj.language == "C++17") then
+      language("C++")
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c++17");
+      end
     elseif(proj.language == "C") then
+      language("C")
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c99");
+      end
+    elseif(proj.language == "C89") then
+      language("C")
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c89");
+      end
+    elseif(proj.language == "C99") then
+      language("C")
       if os.get() == "macosx" or os.get() == "linux" then
         buildoptions("-std=c99");
       end
@@ -246,7 +292,7 @@ make.create_solution(solution_data, project_defaults, projects)
                 if other_proj.lang_settings.no_link == true then link = false end
               end
 
-              if link and (orig_proj.kind == "WindowedApp" or orig_proj.kind == "ConsoleApp") then
+              if link and (orig_proj.kind ~= "StaticLib") then
 
                 -- Add this project as a dep
                 links(other_proj.name)
