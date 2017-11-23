@@ -23,6 +23,11 @@ TEST_CASE("Optio Simple")
   
   REQUIRE(ctx);
   
+  SECTION("Do nothing")
+  {
+    /* make sure if we bail instatnly we exit cleanly */
+  }
+  
   SECTION("Single Job")
   {
     int arg{0};

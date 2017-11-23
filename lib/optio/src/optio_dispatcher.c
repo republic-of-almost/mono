@@ -34,6 +34,7 @@ enum {
   FIBER_DISPATCHER_INITIALIZING,
   FIBER_DISPATCHER_READY,
   FIBER_DISPATCHER_RUNNING,
+  FIBER_DISPATCHER_DESTROY,
 };
 
 
@@ -333,6 +334,8 @@ optio_dispatcher_destroy(struct optio_dispatcher_ctx **c)
 {
   /* param assert */
   FIBER_ASSERT(c);
+  
+  (*c)->dispatch_state = FIBER_DISPATCHER_DESTROY;
 
   /* destroy threads */
   {
