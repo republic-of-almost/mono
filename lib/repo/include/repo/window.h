@@ -9,24 +9,25 @@ extern "C" {
 
 #include <inttypes.h>
 
+/* ------------------------------------------------------- [ Window Data ] -- */
 
-/* ------------------------------------------------- [ Window Attributes ] -- */
+struct repo_desc_window
+{
+  uint32_t  width;
+  uint32_t  height;
+  bool      fullscreen;
+};
 
 
-uint64_t      repo_window_create();
-void          repo_window_destroy(uint64_t id);
+/* --------------------------------------------------- [ Window Lifetime ] -- */
 
-uint32_t      repo_window_get_width(uint64_t id);
-void          repo_window_set_width(uint64_t id, int width);
+uint64_t        repo_window_create(struct repo_desc_window *window);
+void            repo_window_destroy(uint64_t win_id);
 
-uint32_t      repo_window_get_height(uint64_t id);
-void          repo_window_set_height(uint64_t id, int height);
 
-int           repo_window_get_fullscreen(uint64_t id);
-void          repo_window_set_fullscreen(uint64_t id, int fullscreen);
+/* ------------------------------------------------------- [ Window Desc ] -- */
 
-const char *  repo_window_get_title(uint64_t id);
-void          repo_window_set_title(uint64_t id, const char *title);
+bool            repo_window_get_desc(uint64_t win_id, struct repo_desc_window *window);
 
 
 #ifdef __cplusplus

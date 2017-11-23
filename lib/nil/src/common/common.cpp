@@ -1,6 +1,6 @@
 #include <common/common.hpp>
 #include <string.h>
-
+#include <deque>
 
 namespace Nil_detail {
 
