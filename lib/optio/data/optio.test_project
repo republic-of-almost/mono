@@ -1,0 +1,90 @@
+#!lua
+
+--[[
+
+  Optio Unit Test
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "OptioUnitTests",
+    kind     = "ConsoleApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    lang_settings = {
+      exceptions  = true,
+      rtti        = true,
+    },
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../test/unit"),
+      make.add_src(make.get_proj_root() .. "../test/unit"),
+      make.add_doc(make.get_proj_root() .. "../test/unit"),
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "./",
+    },
+
+    defines = {
+      -- See build.md
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+
+      "Optio",
+
+      -- Third Party --
+
+      "Catch",
+    },
+  }
+)
+
+
+--[[
+
+  Render 'O' Vision Functional Test Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "ROVFuncTest",
+    kind     = "WindowedApp",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../test/functional"),
+      make.add_src(make.get_proj_root() .. "../test/functional"),
+      make.add_doc(make.get_proj_root() .. "../test/functional"),
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "./",
+    },
+
+    defines = {
+      -- See build.md
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+
+      "ROV",
+
+      -- Third Party --
+
+      "GLFW",
+      "OpenGL",
+    },
+  }
+)
