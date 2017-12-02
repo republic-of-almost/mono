@@ -195,6 +195,11 @@ make.create_solution(solution_data, project_defaults, projects)
       if os.get() == "macosx" or os.get() == "linux" then
         buildoptions("-std=c99");
       end
+    elseif(proj.language == "C11") then
+      language("C")
+      if os.get() == "macosx" or os.get() == "linux" then
+        buildoptions("-std=c11");
+      end
     end
 
     -- Thie function takes a string that represents a field
