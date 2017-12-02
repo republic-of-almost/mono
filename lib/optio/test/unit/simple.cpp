@@ -2,14 +2,22 @@
 #include <catch/catch.hpp>
 
 
+/* job will print out some text */
+/*#define SIMPLE_DEBUG_OUTPUT*/
+
+
 /* --------------------------------------------------------- [ Test Func ] -- */
 
 
 void
-test_job(optio_dispatcher_ctx *ctx, void *arg)
+test_job_01(optio_dispatcher_ctx *ctx, void *arg)
 {
   int *int_arg = reinterpret_cast<int*>(arg);
   *int_arg += 1;
+  
+  #ifdef SIMPLE_DEBUG_OUTPUT
+  printf("job output\n");
+  #endif
 }
 
 
@@ -33,7 +41,7 @@ TEST_CASE("Optio Simple")
     int arg{0};
     
     optio_job_desc desc {
-      test_job,
+      test_job_01,
       (void*)&arg
     };
     
@@ -52,7 +60,7 @@ TEST_CASE("Optio Simple")
     
     for(uint32_t i = 0; i < count; ++i)
     {
-      descs[i].func = test_job;
+      descs[i].func = test_job_01;
       descs[i].arg = &args[i];
     }
     

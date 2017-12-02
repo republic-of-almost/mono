@@ -27,6 +27,7 @@ table.insert(
 
     public_inc_dirs = {
       make.get_proj_root() .. "./",
+      make.get_proj_root() .. "../src/",
     },
 
     defines = {

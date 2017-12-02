@@ -3,6 +3,7 @@
 #include <mutex.h>
 #include <roa_array.h>
 #include <config.h>
+#include <counter.h>
 
 
 /* ----------------------------------------------- [ Fiber Pool Lifetime ] -- */
@@ -12,7 +13,8 @@ void
 optio_fiber_pool_create(
   struct optio_fiber_pool_ctx *ctx,
   void *func,
-  void *arg)
+  void *arg,
+  unsigned fiber_count)
 {
   /* param check */
   FIBER_ASSERT(ctx);
@@ -22,13 +24,15 @@ optio_fiber_pool_create(
 
   optio_mutex_create(&ctx->mutex);
   optio_mutex_lock(ctx->mutex);
-
-  optio_array_create(ctx->fibers,         FIBER_MAX_FIBER_COUNT);
-  optio_array_create(ctx->free_fibers,    FIBER_MAX_FIBER_COUNT);
-  optio_array_create(ctx->blocked_fibers, FIBER_MAX_FIBER_COUNT);
-  optio_array_create(ctx->pending_fibers, FIBER_MAX_FIBER_COUNT);
   
-  for(int i = 0; i < FIBER_MAX_FIBER_COUNT; ++i)
+  const unsigned count = fiber_count ? fiber_count : FIBER_MAX_FIBER_COUNT;
+
+  optio_array_create(ctx->fibers,           count);
+  optio_array_create(ctx->free_fibers,      count);
+  optio_array_create(ctx->blocked_fibers,   count);
+  optio_array_create(ctx->blocked_counters, count);
+  
+  for(int i = 0; i < count; ++i)
   {
     struct optio_fiber *new_fiber = 0;
     optio_fiber_create(&new_fiber, func, arg);
@@ -51,7 +55,9 @@ optio_fiber_pool_destroy(struct optio_fiber_pool_ctx *ctx)
   
   optio_mutex_lock(ctx->mutex);
   
-  for(int i = 0; i < FIBER_MAX_FIBER_COUNT; ++i)
+  size_t count = optio_array_size(ctx->fibers);
+  
+  for(int i = 0; i < count; ++i)
   {
     optio_fiber_destroy(ctx->fibers[i]);
   }
@@ -59,7 +65,7 @@ optio_fiber_pool_destroy(struct optio_fiber_pool_ctx *ctx)
   optio_array_destroy(ctx->fibers);
   optio_array_destroy(ctx->free_fibers);
   optio_array_destroy(ctx->blocked_fibers);
-  optio_array_destroy(ctx->pending_fibers);
+  optio_array_destroy(ctx->blocked_counters);
   
   optio_mutex_unlock(ctx->mutex);
   
@@ -70,7 +76,56 @@ optio_fiber_pool_destroy(struct optio_fiber_pool_ctx *ctx)
 /* --------------------------------------------- [ Fiber Pool Attributes ] -- */
 
 
-int
+unsigned
+optio_fiber_pool_size(struct optio_fiber_pool_ctx *ctx)
+{
+  /* param check */
+  FIBER_ASSERT(ctx);
+  
+  optio_mutex_lock(ctx->mutex);
+  
+  const size_t count = optio_array_size(ctx->fibers);
+  
+  optio_mutex_unlock(ctx->mutex);
+  
+  return (unsigned)count;
+}
+
+
+unsigned
+optio_fiber_pool_in_flight_size(struct optio_fiber_pool_ctx *ctx)
+{
+  /* param check */
+  FIBER_ASSERT(ctx);
+  
+  optio_mutex_lock(ctx->mutex);
+  
+  const size_t total_fibers = optio_array_size(ctx->fibers);
+  const size_t free_fibers = optio_array_size(ctx->free_fibers);
+  
+  optio_mutex_unlock(ctx->mutex);
+  
+  return (unsigned)(total_fibers - free_fibers);
+}
+
+
+unsigned
+optio_fiber_pool_blocked_size(struct optio_fiber_pool_ctx *ctx)
+{
+  /* param check */
+  FIBER_ASSERT(ctx);
+
+  optio_mutex_lock(ctx->mutex);
+  
+  const size_t blocked = optio_array_size(ctx->blocked_fibers);
+  
+  optio_mutex_unlock(ctx->mutex);
+  
+  return (unsigned)blocked;
+}
+
+
+unsigned
 optio_fiber_pool_has_work(struct optio_fiber_pool_ctx *ctx)
 {
   /* param check */
@@ -105,7 +160,7 @@ optio_fiber_pool_next_free(struct optio_fiber_pool_ctx *ctx)
   
   if(count)
   {
-    next = free[count - 1];
+    next = optio_array_back(free);
     
     optio_array_pop(free);
   }
@@ -129,19 +184,26 @@ optio_fiber_pool_next_pending(struct optio_fiber_pool_ctx *ctx)
 
   optio_mutex_lock(ctx->mutex);
 
-  struct optio_fiber **pen_arr = ctx->pending_fibers;
-  struct optio_fiber *next = 0;
-  
-  const size_t count = optio_array_size(pen_arr);
-  
-  if(count)
+  struct optio_fiber *next = NULL;
+
+  /* check blocked fibers for ones that are now ready */
   {
-    next = pen_arr[count - 1];
-    unsigned job_id = optio_fiber_get_user_id(next);
+    const size_t count = optio_array_size(ctx->blocked_counters);
     
-    FIBER_ASSERT(job_id);
-    
-    optio_array_pop(pen_arr);
+    for(int i = 0; i < count; ++i)
+    {
+      const int counter = optio_counter_value(ctx->blocked_counters[i]);
+      
+      if(counter <= 0)
+      {
+        next = ctx->blocked_fibers[i];
+        
+        optio_array_erase(ctx->blocked_fibers, i);
+        optio_array_erase(ctx->blocked_counters, i);
+        
+        break;
+      }
+    }
   }
   
   optio_mutex_unlock(ctx->mutex);
@@ -153,14 +215,17 @@ optio_fiber_pool_next_pending(struct optio_fiber_pool_ctx *ctx)
 void
 optio_fiber_pool_block(
   struct optio_fiber_pool_ctx *ctx,
-  struct optio_fiber *fiber)
+  struct optio_fiber *fiber,
+  struct optio_counter *counter)
 {
   /* param check */
   FIBER_ASSERT(ctx);
   FIBER_ASSERT(fiber);
+  FIBER_ASSERT(counter);
 
   optio_mutex_lock(ctx->mutex);
   
+  optio_array_push(ctx->blocked_counters, counter);
   optio_array_push(ctx->blocked_fibers, fiber);
   
   optio_mutex_unlock(ctx->mutex);
@@ -175,47 +240,11 @@ optio_fiber_pool_done(
   /* param check */
   FIBER_ASSERT(ctx);
   FIBER_ASSERT(fiber);
-
-  optio_mutex_lock(ctx->mutex);
   
-  optio_fiber_set_user_id(fiber, 0);
-  optio_fiber_set_block_id(fiber, 0);
+  optio_mutex_lock(ctx->mutex);
   
   optio_array_push(ctx->free_fibers, fiber);
   
   optio_mutex_unlock(ctx->mutex);
 }
 
-
-void
-optio_fiber_pool_unblock(
-  struct optio_fiber_pool_ctx *ctx,
-  int block_id)
-{
-  /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(block_id);
-
-  optio_mutex_lock(ctx->mutex);
-  
-  struct optio_fiber **blocked = ctx->blocked_fibers;
-  
-  const size_t count = optio_array_size(blocked);
-  
-  for(int i = 0; i < count; ++i)
-  {
-    const unsigned fi_block_id = optio_fiber_get_block_id(blocked[i]);
-  
-    if(fi_block_id == block_id)
-    {      
-      optio_array_push(ctx->pending_fibers, blocked[i]);
-      optio_array_erase(blocked, i);
-      
-      /* todo - in theory there can be only one fiber blocked by a batch,
-         we should maybe check the entire array anyway */
-      break;
-    }
-  }
-  
-  optio_mutex_unlock(ctx->mutex);
-}

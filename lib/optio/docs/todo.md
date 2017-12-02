@@ -5,3 +5,7 @@
   thread. and have idle threads steal work.
   
 - Needs alot more profiling, but want to get other platforms working first.
+
+- Block ID should be set at the same time as blocking thread.
+
+- Stack allocate a counter and pass that instead of block id's

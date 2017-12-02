@@ -1,4 +1,5 @@
 #include <optio/dispatcher.h>
+#include <counter.h>
 #include <job_queue.h>
 #include <fiber_pool.h>
 #include <roa_array.h>
@@ -22,11 +23,13 @@
 */
 struct optio_thread_data
 {
+  /* threads switch between fibers */
   struct optio_fiber *home_fiber;     /* local fiber */
   struct optio_fiber *worker_fiber;   /* fiber to execute */
   
-  void *func;                       /* function to exec on fiber */
-  void *arg;                        /* arg for function */
+  /* function to exec */
+  void *func;                         /* function to exec on fiber */
+  void *arg;                          /* arg for function */
 };
 
 
@@ -193,10 +196,7 @@ optio_internal_fiber_dispatcher(void *arg)
       else
       {
         /* setup for new fiber */
-        tls->func = 0;
-        tls->arg = 0;
-        
-        const int job_id = optio_job_queue_next(
+        const unsigned job_id = optio_job_queue_next(
           &ctx->job_queue,
           &tls->func,
           &tls->arg
@@ -231,13 +231,7 @@ optio_internal_fiber_dispatcher(void *arg)
       const int job_id = optio_fiber_get_user_id(tls->worker_fiber);
       FIBER_ASSERT(job_id);
       
-      const int batch_cleared = optio_job_queue_clear(&ctx->job_queue, job_id);
-      
-      /* batch cleared - unblock any pending */
-      if(batch_cleared)
-      {
-        optio_fiber_pool_unblock(&ctx->fiber_pool, batch_cleared);
-      }
+      optio_job_queue_clear(&ctx->job_queue, job_id);
       
       /* return fiber to pool */
       optio_fiber_pool_done(&ctx->fiber_pool, tls->worker_fiber);
@@ -275,12 +269,13 @@ optio_dispatcher_create(struct optio_dispatcher_ctx **c)
   
   /* create fiber and job pools */
   {
-    optio_job_queue_create(&new_ctx->job_queue);
+    optio_job_queue_create(&new_ctx->job_queue, 0);
     
     optio_fiber_pool_create(
       &new_ctx->fiber_pool,
       optio_internal_fiber_executer,
-      (void*)new_ctx
+      (void*)new_ctx,
+      0
     );
   }
 
@@ -387,7 +382,7 @@ optio_dispatcher_run(
 }
 
 
-int
+unsigned
 optio_dispatcher_add_jobs(
   struct optio_dispatcher_ctx *c,
   struct optio_job_desc *desc,
@@ -407,25 +402,63 @@ optio_dispatcher_add_jobs(
 void
 optio_dispatcher_wait_for_counter(
   struct optio_dispatcher_ctx *ctx,
-  int counter)
+  unsigned marker)
 {
-  struct optio_thread **thds = ctx->raw_threads;
-  const int thds_count = ctx->thread_count;
-  const int thd_index = optio_thread_find_this(thds, thds_count);
-  
-  struct optio_thread_data *tls = &ctx->thread_local_data[thd_index];
-  
-  FIBER_ASSERT(tls);
-  FIBER_ASSERT(tls->worker_fiber);
+  /* param assert */
+  {
+    FIBER_ASSERT(ctx);
+    FIBER_ASSERT(marker);
+  }
 
-  optio_fiber_pool_block(&ctx->fiber_pool, tls->worker_fiber);
+  /* get tls */
+  struct optio_thread_data *tls = NULL;
+  {
+    struct optio_thread **thds = ctx->raw_threads;
+    const int thds_count = ctx->thread_count;
+    const int thd_index = optio_thread_find_this(thds, thds_count);
+    
+    tls = &ctx->thread_local_data[thd_index];
+  }
   
-  struct optio_fiber *worker = tls->worker_fiber;
-  optio_fiber_set_block_id(worker, counter);
+  /* check state */
+  {
+    FIBER_ASSERT(tls);
+    
+    /* if this happens you might have called this from the main thread */
+    /* you need to have the main thread join in the fun with */
+    /* optio_dispatcher_run(...) */
+    FIBER_ASSERT(tls->worker_fiber);
+  }
   
-  tls->worker_fiber = 0;
+  /* block this fiber */
+  struct optio_counter *counter = NULL;
+  {
+    counter = optio_job_queue_batch_block(&ctx->job_queue, marker);
+    
+    if(counter == NULL)
+    {
+      /* batch already finished - continue */
+      return;
+    }
+    
+    counter->has_pending = 1;
+    optio_fiber_pool_block(&ctx->fiber_pool, tls->worker_fiber, counter);
+  }
   
-  optio_fiber_switch(worker, tls->home_fiber);
+  /* switch back to home fiber */
+  {
+    struct optio_fiber *worker = tls->worker_fiber;
+    tls->worker_fiber = 0;
+    optio_fiber_switch(worker, tls->home_fiber);
+  }
+  
+  /* fiber back on thread */
+  {
+    FIBER_ASSERT(counter);
+    FIBER_ASSERT(counter->has_pending == 1);
+    
+    optio_job_queue_batch_unblock(&ctx->job_queue, counter);
+  }
 }
 
 

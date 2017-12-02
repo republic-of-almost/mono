@@ -1,5 +1,6 @@
 #include <fiber.h>
 #include <boost_context/fcontext.h>
+#include <stdatomic.h>
 #include <config.h>
 
 
@@ -114,8 +115,7 @@ struct optio_fiber
   fcontext_t context;
   void *arg;
   
-  int job_id;
-  int block_id;
+  unsigned job_id;
 };
 
 
@@ -190,26 +190,6 @@ optio_fiber_get_user_id(const struct optio_fiber *fiber)
   FIBER_ASSERT(fiber);
   
   return fiber->job_id;
-}
-
-
-void
-optio_fiber_set_block_id(struct optio_fiber *fiber, unsigned block_id)
-{
-  /* param check */
-  FIBER_ASSERT(fiber);
-
-  fiber->block_id = block_id;
-}
-
-
-unsigned
-optio_fiber_get_block_id(const struct optio_fiber *fiber)
-{
-  /* param check */
-  FIBER_ASSERT(fiber);
-  
-  return fiber->block_id;
 }
 
 

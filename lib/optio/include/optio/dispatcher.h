@@ -68,7 +68,8 @@ optio_dispatcher_run(
   struct optio_dispatcher_ctx *c            /* must be a valid context */
 );
 
-int
+
+unsigned /* returns a marker for the job batch */
 optio_dispatcher_add_jobs(
   struct optio_dispatcher_ctx *c,           /* must be a valid context */
   struct optio_job_desc *desc,              /* array of job descriptions */
@@ -79,12 +80,12 @@ optio_dispatcher_add_jobs(
 void
 optio_dispatcher_wait_for_counter(
   struct optio_dispatcher_ctx *c,           /* must be a valid context */
-  int counter                               /* must be a valid counter */
+  unsigned marker                           /* must be a valid marker */
 );
 
 
 #ifdef __cplusplus
-}
+} /* extern "C" */
 #endif
 
 

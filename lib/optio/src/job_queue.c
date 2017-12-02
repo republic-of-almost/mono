@@ -1,15 +1,17 @@
+#include <optio/dispatcher.h>
+#include <counter.h>
 #include <job_queue.h>
 #include <roa_array.h>
 #include <config.h>
 #include <mutex.h>
-#include <optio/dispatcher.h>
+
 
 
 /* ------------------------------------------------------ [ Job Lifetime ] -- */
 
 
 void
-optio_job_queue_create(struct optio_job_queue_ctx *ctx)
+optio_job_queue_create(struct optio_job_queue_ctx *ctx, unsigned queue_hint)
 {
   /* param check */
   FIBER_ASSERT(ctx != 0);
@@ -18,13 +20,25 @@ optio_job_queue_create(struct optio_job_queue_ctx *ctx)
   optio_mutex_create(&ctx->mutex);
   optio_mutex_lock(ctx->mutex);
   
+  const unsigned count = queue_hint > 0 ? queue_hint : FIBER_MAX_JOB_COUNT;
+  
   /* create arrays */
-  optio_array_create(ctx->job_status,     FIBER_MAX_JOB_COUNT);
-  optio_array_create(ctx->job_ids,        FIBER_MAX_JOB_COUNT);
-  optio_array_create(ctx->jobs,           FIBER_MAX_JOB_COUNT);
-  optio_array_create(ctx->job_batch_ids,  FIBER_MAX_JOB_COUNT);
-  optio_array_create(ctx->batches,        FIBER_MAX_JOB_COUNT);
-  optio_array_create(ctx->batch_ids,      FIBER_MAX_JOB_COUNT);
+  optio_array_create(ctx->job_status,     count);
+  optio_array_create(ctx->job_ids,        count);
+  optio_array_create(ctx->jobs,           count);
+  optio_array_create(ctx->job_batch_ids,  count);
+  optio_array_create(ctx->batches,        count);
+  optio_array_create(ctx->batch_ids,      count);
+  
+  /* init to -1 */
+  optio_array_create(ctx->counters, count);
+  optio_array_resize(ctx->counters, count);
+  
+  for(int i = 0; i < count; ++i)
+  {
+    const int value = -1;
+    optio_counter_set(&ctx->counters[i], value, 0);
+  }
   
   optio_mutex_unlock(ctx->mutex);
 }
@@ -172,6 +186,38 @@ optio_job_queue_add_batch(
     struct optio_job_batch batch;
     batch.total_jobs = count;
     batch.pending_jobs = count;
+    batch.is_blocked = 0;
+    
+    /* find a counter */
+    {
+      const size_t count = optio_array_size(ctx->counters);
+      
+      for(int i = 0; i < count; ++i)
+      {
+        int count = optio_counter_value(&ctx->counters[i]);
+        
+        if(count < 0)
+        {
+          batch.counter = &ctx->counters[i];
+          batch.counter->has_pending = 0;
+          
+          break;
+        }
+      }
+      
+      /* create new counter if we ran out */
+      if(batch.counter == NULL)
+      {
+        struct optio_counter new_counter;
+        optio_counter_set(&new_counter, -1, -1);
+        
+        optio_array_push(ctx->counters, new_counter);
+        
+        batch.counter = &(optio_array_back(ctx->counters));
+      }
+    }
+    
+    optio_counter_set(batch.counter, count, new_batch_id);
     
     optio_array_push(ctx->batches, batch);
     optio_array_push(ctx->batch_ids, new_batch_id);
@@ -193,6 +239,85 @@ optio_job_queue_add_batch(
   optio_mutex_unlock(ctx->mutex);
   
   return new_batch_id;
+}
+
+
+struct optio_counter *
+optio_job_queue_batch_block(
+  struct optio_job_queue_ctx *ctx,
+  unsigned batch_id)
+{
+  /* param check */
+  FIBER_ASSERT(ctx);
+  FIBER_ASSERT(batch_id);
+  
+  struct optio_counter *counter = NULL;
+  
+  optio_mutex_lock(ctx->mutex);
+  
+  size_t count = optio_array_size(ctx->batch_ids);
+  
+  for(size_t i = 0; i < count; ++i)
+  {
+    if(ctx->batch_ids[i] == batch_id)
+    {
+      struct optio_job_batch *batch = &ctx->batches[i];
+      batch->is_blocked = 1;
+      
+      FIBER_ASSERT(batch);
+    
+      counter = batch->counter;
+    }
+  }
+  
+  optio_mutex_unlock(ctx->mutex);
+  
+  return counter;
+}
+
+
+void
+optio_job_queue_batch_unblock(
+  struct optio_job_queue_ctx *ctx,
+  struct optio_counter *counter)
+{
+  /* param check */
+  FIBER_ASSERT(ctx);
+  FIBER_ASSERT(counter);
+  
+  optio_mutex_lock(ctx->mutex);
+  
+  /* check should remove batch */
+  if(counter)
+  {
+    counter->has_pending = 0;
+    unsigned batch_id = counter->batch_id;
+  
+    const size_t batch_count = optio_array_size(ctx->batch_ids);
+    
+    for(int i = 0; i < batch_count; ++i)
+    {
+      if(ctx->batch_ids[i] == batch_id)
+      {
+        struct optio_job_batch *batch = &ctx->batches[i];
+      
+        const int has_pending_jobs = batch->pending_jobs > 0 ? 1 : 0;
+        const int has_pending_fiber = batch->counter->has_pending > 0 ? 1 : 0;
+        
+        if(has_pending_jobs == 0 && has_pending_fiber == 0)
+        {
+          optio_counter_set(batch->counter, -1, -1);
+          
+          optio_array_erase(ctx->batch_ids, i);
+          optio_array_erase(ctx->batches, i);
+          
+          break;
+        }
+      }
+    }
+  }
+  
+  optio_mutex_unlock(ctx->mutex);
 }
 
 
@@ -244,9 +369,16 @@ optio_job_queue_clear(
     {
       if(ctx->batch_ids[i] == batch_id)
       {
-        --ctx->batches[i].pending_jobs;
+        struct optio_job_batch *batch = &ctx->batches[i];
+      
+        --batch->pending_jobs;
         
-        if(ctx->batches[i].pending_jobs <= 0)
+        optio_counter_decrement(batch->counter);
+        
+        const int has_pending_jobs = batch->pending_jobs > 0 ? 1 : 0;
+        const int has_pending_fiber = batch->is_blocked > 0 ? 1 : 0;
+        
+        if(has_pending_jobs == 0 && has_pending_fiber == 0)
         {
           optio_array_erase(ctx->batch_ids, i);
           optio_array_erase(ctx->batches, i);
@@ -261,5 +393,7 @@ optio_job_queue_clear(
   
   optio_mutex_unlock(ctx->mutex);
   
+  
   return return_value;
 }
+

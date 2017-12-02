@@ -2,13 +2,13 @@
 #define ARRAY_INCLUDED_EDF3D6C8_9DC0_44A0_B144_A7DF9BACA9BA
 
 
-#include <stdint.h>
-#include <stddef.h>
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+#include <stdint.h>
+#include <stddef.h>
 
 
 /* --------------------------------------------------- [ Array Interface ] -- */

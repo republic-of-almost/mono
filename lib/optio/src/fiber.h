@@ -41,14 +41,6 @@ unsigned
 optio_fiber_get_user_id(const struct optio_fiber *fiber);
 
 
-void
-optio_fiber_set_block_id(struct optio_fiber *fiber, unsigned block_id);
-
-
-unsigned
-optio_fiber_get_block_id(const struct optio_fiber *fiber);
-
-
 /* ----------------------------------------------------- [ Fiber Actions ] -- */
 /*
   Switch from one execution context to another context. Both contexts must be
