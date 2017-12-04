@@ -1,4 +1,4 @@
-#include <thread.h>
+#include <thread.hpp>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <config.h>
@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+
 
 #define SYSCTL_CORE_COUNT   "machdep.cpu.core_count"
 //#define SYSCTL_CORE_COUNT "hw.ncpu"

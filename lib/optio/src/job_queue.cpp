@@ -1,9 +1,9 @@
 #include <optio/dispatcher.h>
-#include <counter.h>
-#include <job_queue.h>
-#include <roa_array.h>
-#include <config.h>
-#include <mutex.h>
+#include <counter.hpp>
+#include <job_queue.hpp>
+#include <roa_array.hpp>
+#include <config.hpp>
+#include <mutex.hpp>
 
 
 
@@ -208,12 +208,26 @@ optio_job_queue_add_batch(
       /* create new counter if we ran out */
       if(batch.counter == NULL)
       {
-        struct optio_counter new_counter;
-        optio_counter_set(&new_counter, -1, -1);
+        /* simple huristic */
+        const size_t old_counter_size = optio_array_size(ctx->counters);
+        const size_t new_counter_size = old_counter_size + 8;
+
+        optio_array_resize(ctx->counters, new_counter_size);
+
+        for(size_t i = old_counter_size; i < new_counter_size; ++i)
+        {
+          const int value = -1;
+          optio_counter_set(&ctx->counters[i], value, 0);
+          ctx->counters[i].has_pending = 0;
+          ctx->counters[i].batch_id = 0;
+        }
+
+        //struct optio_counter new_counter;
+        //optio_counter_set(&new_counter, -1, -1);
         
-        optio_array_push(ctx->counters, new_counter);
+        //optio_array_push(ctx->counters, new_counter);
         
-        batch.counter = &(optio_array_back(ctx->counters));
+        //batch.counter = &(optio_array_back(ctx->counters));
       }
     }
     

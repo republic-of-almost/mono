@@ -1,4 +1,4 @@
-#include <roa_array.h>
+#include <roa_array.hpp>
 #include <stdlib.h>
 #include <string.h>
 

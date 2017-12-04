@@ -2,11 +2,6 @@
 #define ARRAY_INCLUDED_EDF3D6C8_9DC0_44A0_B144_A7DF9BACA9BA
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 #include <stdint.h>
 #include <stddef.h>
 
@@ -68,12 +63,6 @@ void    array_should_grow(void **ptr);
 void    array_erase(void **ptr, size_t index);
 
 void    optio_arr_internal_pop(void **ptr);
-
-
-#ifdef __cplusplus
-}
-#endif
-
 
 
 #endif /* inc guard */

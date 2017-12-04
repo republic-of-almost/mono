@@ -57,8 +57,8 @@ typedef void(*optio_job_func)(struct optio_dispatcher_ctx *c, void *arg);
 
 struct optio_job_desc
 {
-  optio_job_func func;
-  void *arg;
+  optio_job_func func;                      /* valid function */
+  void *arg;                                /* optional - can be on stack */
   struct optio_job_atomic_counter *counter; /* hide this */
 };
 
@@ -69,7 +69,7 @@ optio_dispatcher_run(
 );
 
 
-unsigned /* returns a marker for the job batch */
+unsigned                                    /* returns a marker for the job batch */
 optio_dispatcher_add_jobs(
   struct optio_dispatcher_ctx *c,           /* must be a valid context */
   struct optio_job_desc *desc,              /* array of job descriptions */

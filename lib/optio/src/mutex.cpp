@@ -1,5 +1,5 @@
-#include <mutex.h>
-#include <config.h>
+#include <mutex.hpp>
+#include <config.hpp>
 #include <pthread.h>
 
 

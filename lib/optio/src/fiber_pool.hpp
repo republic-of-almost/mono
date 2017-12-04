@@ -2,11 +2,6 @@
 #define FIBER_POOL_INCLUDED_3A6C2528_FB96_4C14_85EA_C1D60DF71074
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /* ------------------------------------------------ [ Fiber Pool Fwd Dec ] -- */
 
 
@@ -99,11 +94,6 @@ optio_fiber_pool_done(
   struct optio_fiber_pool_ctx *ctx,
   struct optio_fiber *fiber
 );
-
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 
 #endif /* inc guard */
