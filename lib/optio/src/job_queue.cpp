@@ -34,7 +34,7 @@ optio_job_queue_create(struct optio_job_queue_ctx *ctx, unsigned queue_hint)
   optio_array_create(ctx->counters, count);
   optio_array_resize(ctx->counters, count);
   
-  for(int i = 0; i < count; ++i)
+  for(unsigned i = 0; i < count; ++i)
   {
     const int value = -1;
     optio_counter_set(&ctx->counters[i], value, 0);
@@ -144,7 +144,7 @@ optio_job_queue_next(
   
   const size_t job_count = optio_array_size(job_status);
 
-  for(int i = 0; i < job_count; ++i)
+  for(size_t i = 0; i < job_count; ++i)
   {
     const int curr_state = job_status[i];
   
@@ -190,13 +190,13 @@ optio_job_queue_add_batch(
     
     /* find a counter */
     {
-      const size_t count = optio_array_size(ctx->counters);
+      const size_t counter_size = optio_array_size(ctx->counters);
       
-      for(int i = 0; i < count; ++i)
+      for(size_t i = 0; i < counter_size; ++i)
       {
-        int count = optio_counter_value(&ctx->counters[i]);
+        int value = optio_counter_value(&ctx->counters[i]);
         
-        if(count < 0)
+        if(value < 0)
         {
           batch.counter = &ctx->counters[i];
           batch.counter->has_pending = 0;
@@ -225,7 +225,7 @@ optio_job_queue_add_batch(
   
   /* add jobs */
   {
-    for(int i = 0; i < count; ++i)
+    for(unsigned i = 0; i < count; ++i)
     {
       int new_job_id = ++ctx->job_id_counter;
     
@@ -295,7 +295,7 @@ optio_job_queue_batch_unblock(
   
     const size_t batch_count = optio_array_size(ctx->batch_ids);
     
-    for(int i = 0; i < batch_count; ++i)
+    for(size_t i = 0; i < batch_count; ++i)
     {
       if(ctx->batch_ids[i] == batch_id)
       {
@@ -331,7 +331,7 @@ optio_job_queue_clear(
   FIBER_ASSERT(job_id);
   
   int return_value = 0;
-  int batch_id = 0;
+  unsigned batch_id = 0;
   
   optio_mutex_lock(ctx->mutex);
   
@@ -339,7 +339,7 @@ optio_job_queue_clear(
   {
     size_t job_count = optio_array_size(ctx->job_ids);
 
-    for(int i = 0; i < job_count; ++i)
+    for(size_t i = 0; i < job_count; ++i)
     {
       if(ctx->job_ids[i] == job_id)
       {
@@ -365,7 +365,7 @@ optio_job_queue_clear(
   {
     const size_t batch_count = optio_array_size(ctx->batch_ids);
     
-    for(int i = 0; i < batch_count; ++i)
+    for(size_t i = 0; i < batch_count; ++i)
     {
       if(ctx->batch_ids[i] == batch_id)
       {

@@ -11,8 +11,13 @@
 /* ------------------------------------------------- [ Dispatcher Config ] -- */
 
 
+#ifdef _WIN32
+#define FIBER_NO_RETURN
+#define FIBER_UNREACHABLE
+#else
 #define FIBER_NO_RETURN __attribute__ ((noreturn))
 #define FIBER_UNREACHABLE __builtin_unreachable()
+#endif
 
 
 /* -------------------------------------------------- [ Dispatcher Types ] -- */
@@ -99,12 +104,12 @@ optio_internal_fiber_executer(void *arg)
       FIBER_ASSERT(tls->home_fiber);
       
       /* exec job */
-      optio_job_func func = tls->func;
-      void *arg = tls->arg;
+      optio_job_func job_func = tls->func;
+      void *job_arg = tls->arg;
       
-      FIBER_ASSERT(func);
+      FIBER_ASSERT(job_func);
       
-      func(ctx, arg);
+      job_func(ctx, job_arg);
     }
     
     /* switch back - we might be on a different thread */

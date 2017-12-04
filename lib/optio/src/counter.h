@@ -2,12 +2,16 @@
 #define COUNTER_INCLUDED_4C570976_30BE_4E64_BD6F_D1C66A221B99
 
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef _WIN32
+#include <atomic>
+#else
+#include <stdatomic.h>
 #endif
 
 
-#include <stdatomic.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 struct optio_counter

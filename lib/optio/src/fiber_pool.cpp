@@ -32,7 +32,7 @@ optio_fiber_pool_create(
   optio_array_create(ctx->blocked_fibers,   count);
   optio_array_create(ctx->blocked_counters, count);
   
-  for(int i = 0; i < count; ++i)
+  for(unsigned i = 0; i < count; ++i)
   {
     struct optio_fiber *new_fiber = 0;
     optio_fiber_create(&new_fiber, func, arg);
@@ -57,7 +57,7 @@ optio_fiber_pool_destroy(struct optio_fiber_pool_ctx *ctx)
   
   size_t count = optio_array_size(ctx->fibers);
   
-  for(int i = 0; i < count; ++i)
+  for(size_t i = 0; i < count; ++i)
   {
     optio_fiber_destroy(ctx->fibers[i]);
   }
@@ -190,7 +190,7 @@ optio_fiber_pool_next_pending(struct optio_fiber_pool_ctx *ctx)
   {
     const size_t count = optio_array_size(ctx->blocked_counters);
     
-    for(int i = 0; i < count; ++i)
+    for(size_t i = 0; i < count; ++i)
     {
       const int counter = optio_counter_value(ctx->blocked_counters[i]);
       
