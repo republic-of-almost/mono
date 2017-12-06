@@ -1,4 +1,4 @@
-#include <counter.h>
+#include <counter.hpp>
 
 
 /* ----------------------------------------------- [ Lifetime Attributes ] -- */

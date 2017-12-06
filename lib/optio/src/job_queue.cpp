@@ -153,8 +153,8 @@ optio_job_queue_next(
       return_value  = job_ids[i];
       job_status[i] = optio_JOB_STATUS_BUSY;
       
-      *out_func = jobs[i].func;
-      *out_arg  = jobs[i].arg;
+      *out_func = (void*)jobs[i].func;
+      *out_arg  = (void*)jobs[i].arg;
       
       break;
     }

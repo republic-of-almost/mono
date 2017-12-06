@@ -1,7 +1,7 @@
 #include <catch/catch.hpp>
 #include <optio/dispatcher.h>
-#include <fiber_pool.h>
-#include <counter.h>
+#include <fiber_pool.hpp>
+#include <counter.hpp>
 
 
 void

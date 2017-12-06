@@ -35,7 +35,7 @@ optio_fiber_pool_create(
   for(unsigned i = 0; i < count; ++i)
   {
     struct optio_fiber *new_fiber = 0;
-    optio_fiber_create(&new_fiber, func, arg);
+    optio_fiber_create(&new_fiber, (optio_fiber_func)func, arg);
     
     FIBER_ASSERT(new_fiber);
     

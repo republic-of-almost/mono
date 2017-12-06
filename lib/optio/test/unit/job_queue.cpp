@@ -1,7 +1,7 @@
 #include <catch/catch.hpp>
 #include <optio/dispatcher.h>
-#include <job_queue.h>
-#include <counter.h>
+#include <job_queue.hpp>
+#include <counter.hpp>
 
 
 /* -------------------------------------------------------- [ Test Funcs ] -- */

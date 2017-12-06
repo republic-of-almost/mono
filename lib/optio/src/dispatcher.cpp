@@ -1,11 +1,11 @@
 #include <optio/dispatcher.h>
-#include <counter.h>
-#include <job_queue.h>
-#include <fiber_pool.h>
-#include <roa_array.h>
-#include <thread.h>
-#include <fiber.h>
-#include <config.h>
+#include <counter.hpp>
+#include <job_queue.hpp>
+#include <fiber_pool.hpp>
+#include <roa_array.hpp>
+#include <thread.hpp>
+#include <fiber.hpp>
+#include <config.hpp>
 
 
 /* ------------------------------------------------- [ Dispatcher Config ] -- */
@@ -104,7 +104,7 @@ optio_internal_fiber_executer(void *arg)
       FIBER_ASSERT(tls->home_fiber);
       
       /* exec job */
-      optio_job_func job_func = tls->func;
+      optio_job_func job_func = (optio_job_func)tls->func;
       void *job_arg = tls->arg;
       
       FIBER_ASSERT(job_func);
@@ -278,7 +278,7 @@ optio_dispatcher_create(struct optio_dispatcher_ctx **c)
     
     optio_fiber_pool_create(
       &new_ctx->fiber_pool,
-      optio_internal_fiber_executer,
+      (void*)optio_internal_fiber_executer,
       (void*)new_ctx,
       0
     );

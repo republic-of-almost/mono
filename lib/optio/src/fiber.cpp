@@ -1,8 +1,27 @@
-#include <fiber.h>
+#include <fiber.hpp>
 #include <boost_context/fcontext.h>
-#include <stdatomic.h>
-#include <config.h>
+#include <config.hpp>
 
+
+#ifdef __clang__
+#ifdef __x86_64__
+
+#ifdef _APPLE_
+#define APPLE_X64
+#endif
+
+#endif
+
+#elif defined(_MSC_VER)
+
+#ifdef _M_X64
+#define WIN_X64
+#endif
+
+#endif
+
+
+#ifdef APPLE_X64
 
 __asm__(
 ".text\n\t"
@@ -101,6 +120,9 @@ __asm__(
     "call  __exit\n\t"
     "hlt\n\t"
 );
+
+
+#endif
 
 
 
