@@ -1,9 +1,10 @@
 #include <thread.hpp>
+#include <config.hpp>
+
+#ifndef _WIN32
 #include <sys/param.h>
 #include <sys/sysctl.h>
-#include <config.h>
 #include <pthread.h>
-
 #include <sched.h>
 #include <sys/types.h>
 #include <mach/thread_policy.h>
@@ -12,8 +13,25 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#else
+#define WIN_LEAN_AND_MEAN
+#include <windows.h>
+#include <process.h>
+#endif
 
 
+struct optio_thread
+{
+  #ifndef _WIN32
+  pthread_t thread;
+  pthread_attr_t attr;
+  #else
+  HANDLE thread;
+  #endif
+};
+
+
+#ifndef _WIN32
 #define SYSCTL_CORE_COUNT   "machdep.cpu.core_count"
 //#define SYSCTL_CORE_COUNT "hw.ncpu"
 //#define SYSCTL_CORE_COUNT "machdep.cpu.thread_count"
@@ -34,13 +52,6 @@ CPU_SET(int num, cpu_set_t *cs) { cs->count |= (1 << num); }
 
 static int
 CPU_ISSET(int num, cpu_set_t *cs) { return (cs->count & (1 << num)); }
-
-
-struct optio_thread
-{
-  pthread_t thread;
-  pthread_attr_t attr;
-};
 
 
 int sched_getaffinity(pid_t pid, size_t cpu_size, cpu_set_t *cpu_set)
@@ -106,6 +117,10 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpu_size,
   return 0;
 }
 
+#else
+
+#endif
+
 
 /* --------------------------------------------------- [ Thread Lifetime ] -- */
 
@@ -120,6 +135,8 @@ optio_thread_create(struct optio_thread **th, struct optio_thread_desc *desc)
   const size_t bytes = sizeof(struct optio_thread);
   struct optio_thread *new_th = (struct optio_thread*)FIBER_MALLOC(bytes);
 
+  #ifndef _WIN32
+  /* create pthread */
   pthread_attr_init(&new_th->attr);
   pthread_attr_setdetachstate(&new_th->attr, PTHREAD_CREATE_JOINABLE);
 
@@ -152,6 +169,13 @@ optio_thread_create(struct optio_thread **th, struct optio_thread_desc *desc)
   
   CPU_ZERO(&cpuset);
   sched_getaffinity(0, sizeof(coremask), &coremask);
+
+  #else
+  HANDLE handle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 524288, desc->func, desc->arg, CREATE_SUSPENDED, nullptr));
+
+
+
+  #endif
   
   *th = new_th;
 }
