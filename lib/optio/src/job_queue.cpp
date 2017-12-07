@@ -187,6 +187,7 @@ optio_job_queue_add_batch(
     batch.total_jobs = count;
     batch.pending_jobs = count;
     batch.is_blocked = 0;
+    batch.counter = NULL;
     
     /* find a counter */
     {

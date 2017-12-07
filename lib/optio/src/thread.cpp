@@ -27,6 +27,7 @@ struct optio_thread
   pthread_attr_t attr;
   #else
   HANDLE thread;
+  DWORD id;
   #endif
 };
 
@@ -171,9 +172,11 @@ optio_thread_create(struct optio_thread **th, struct optio_thread_desc *desc)
   sched_getaffinity(0, sizeof(coremask), &coremask);
 
   #else
+
   HANDLE handle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 524288, desc->func, desc->arg, CREATE_SUSPENDED, nullptr));
 
-
+  new_th->thread = handle;
+  new_th->id = GetThreadId(handle);
 
   #endif
   
@@ -186,14 +189,20 @@ optio_thread_create_this()
 {
   const size_t bytes = sizeof(struct optio_thread);
   struct optio_thread *new_th = (struct optio_thread*)FIBER_MALLOC(bytes);
-  
-  
+
+  #ifndef _WIN32  
   new_th->thread = pthread_self();
   
   cpu_set_t cpu_set;
   CPU_SET(0, &cpu_set);
   
   pthread_setaffinity_np(new_th->thread, sizeof(cpu_set_t), &cpu_set);
+  #else
+
+  #endif
+
+  new_th->thread = GetCurrentThread();
+  new_th->id = GetCurrentThreadId();
 
   return new_th;
 }
@@ -217,9 +226,10 @@ optio_thread_destroy(struct optio_thread **th)
 int
 optio_thread_find_this(struct optio_thread **th, unsigned count)
 {
+  #ifndef _WIN32
   pthread_t self = pthread_self();
 
-  for(int i = 0; i < count; ++i)
+  for(unsigned i = 0; i < count; ++i)
   {
     int eq = pthread_equal(self, th[i]->thread);
 
@@ -229,6 +239,21 @@ optio_thread_find_this(struct optio_thread **th, unsigned count)
     }
   }
   
+  #else
+
+  DWORD this_id = GetCurrentThreadId();
+
+  for(unsigned i = 0; i < count; ++i)
+  {
+    if(th[i]->id = this_id)
+    {
+      return i;
+    }
+  }
+
+  #endif
+
+  /* failed to find a thread */
   FIBER_ASSERT(0);
   return -1;
 }
@@ -237,18 +262,24 @@ optio_thread_find_this(struct optio_thread **th, unsigned count)
 void
 optio_thread_join(struct optio_thread **th, unsigned count)
 {
-  int i;
-
-  for(i = 0; i < count; ++i)
+  #ifndef _WIN32
+  for(unsigned i = 0; i < count; ++i)
   {
     pthread_join(th[i]->thread, NULL);
   }
+  #else
+  for (unsigned i = 0; i < count; ++i)
+  {
+    WaitForSingleObject(th[i]->thread, INFINITE);
+  }
+  #endif
 }
 
 
 int
 optio_thread_core_count()
 {
+  #ifdef __APPLE__
   int nm[2];
   size_t len = 4;
   int count;
@@ -261,6 +292,13 @@ optio_thread_core_count()
       sysctl(nm, 2, &count, &len, NULL, 0);
       if(count < 1) { count = 1; }
   }
+
+  #elif defined _WIN32
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  const int count = sysinfo.dwNumberOfProcessors;
+
+  #endif
 
   return count;
 }

@@ -5,9 +5,14 @@
 /* ---------------------------------------------------- [ Thread Fwd Dec ] -- */
 
 
-struct optio_thread;
-typedef void*(*thread_func)(void*);
 
+struct optio_thread;
+
+#ifdef _WIN32
+typedef unsigned(__stdcall *thread_func)(void *arg);
+#else
+typedef void*(*thread_func)(void*);
+#endif
 
 /* ------------------------------------------------------ [ Thread Types ] -- */
 
