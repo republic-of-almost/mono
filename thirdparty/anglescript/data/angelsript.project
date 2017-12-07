@@ -1,0 +1,39 @@
+#!lua
+
+--[[
+  Angelscript Project Description
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "Anglescript",
+    kind     = "StaticLib",
+    language = "C++",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      make.add_src(make.get_proj_root() .. "../src/"),
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+    private_inc_dirs = {
+      make.get_proj_root() .. "../include/angelscript/",
+      make.get_proj_root() .. "../src/",
+    },
+
+    project_dependencies = {
+
+    },
+
+    defines = {
+      "AS_NO_EXCEPTIONS",
+    },
+  }
+)
