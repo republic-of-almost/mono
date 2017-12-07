@@ -78,6 +78,7 @@ struct optio_dispatcher_ctx
   Runs a fiber, the fiber should be setup with a job before this has been
   switched to.
 */
+
 void optio_internal_fiber_executer(void *arg) FIBER_NO_RETURN;
 
 void
@@ -134,8 +135,13 @@ optio_internal_fiber_executer(void *arg)
 
 
 /* Dispatcher finds jobs and fibers and kicks them off */
+#ifdef _WIN32
+unsigned __stdcall
+optio_internal_fiber_dispatcher(void *arg)
+#else
 void*
 optio_internal_fiber_dispatcher(void *arg)
+#endif
 {
   /* param check */
   FIBER_ASSERT(arg);

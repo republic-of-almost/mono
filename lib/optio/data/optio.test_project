@@ -11,7 +11,7 @@ table.insert(
   {
     name     = "OptioUnitTests",
     kind     = "ConsoleApp",
-    language = "C++",
+    language = "C++11",
     location = make.get_proj_root(),
 
     lang_settings = {
@@ -20,9 +20,9 @@ table.insert(
     },
 
     src_files = {
-      make.add_headers(make.get_proj_root() .. "../test/unit"),
-      make.add_src(make.get_proj_root() .. "../test/unit"),
-      make.add_doc(make.get_proj_root() .. "../test/unit"),
+      make.add_headers(make.get_proj_root() .. "../test/unit/"),
+      make.add_src(make.get_proj_root() .. "../test/unit/"),
+      make.add_doc(make.get_proj_root() .. "../test/unit/"),
     },
 
     public_inc_dirs = {
