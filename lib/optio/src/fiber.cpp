@@ -4,9 +4,10 @@
 
 
 #ifdef __clang__
+
 #ifdef __x86_64__
 
-#ifdef _APPLE_
+#ifdef __APPLE__
 #define APPLE_X64
 #endif
 
