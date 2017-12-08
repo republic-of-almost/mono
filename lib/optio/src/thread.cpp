@@ -214,7 +214,7 @@ optio_thread_destroy(struct optio_thread **th)
   /* param check */
   FIBER_ASSERT(th);
 
-  optio_thread_join(th, 1);
+  //optio_thread_join(th, 1);
   
   FIBER_FREE(*th);
 }

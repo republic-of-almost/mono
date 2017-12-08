@@ -384,9 +384,11 @@ optio_dispatcher_run(
 
   /* wait for threads to clean up */
   {
-    int th_count = c->thread_count;
-  
-    optio_thread_join(c->raw_threads, th_count);
+    /* exclude first thread as its main thread */
+    optio_thread **ths = &c->raw_threads[1];
+    const unsigned th_count = c->thread_count - 1;
+    
+    //optio_thread_join(ths, th_count);
   }
     
   FIBER_LOG("Dispatch shutdown");
