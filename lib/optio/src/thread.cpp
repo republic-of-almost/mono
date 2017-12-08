@@ -191,18 +191,20 @@ optio_thread_create_this()
   struct optio_thread *new_th = (struct optio_thread*)FIBER_MALLOC(bytes);
 
   #ifndef _WIN32  
+  
   new_th->thread = pthread_self();
   
   cpu_set_t cpu_set;
   CPU_SET(0, &cpu_set);
   
   pthread_setaffinity_np(new_th->thread, sizeof(cpu_set_t), &cpu_set);
+  
   #else
-
-  #endif
 
   new_th->thread = GetCurrentThread();
   new_th->id = GetCurrentThreadId();
+  
+  #endif
 
   return new_th;
 }
@@ -214,7 +216,10 @@ optio_thread_destroy(struct optio_thread **th)
   /* param check */
   FIBER_ASSERT(th);
 
-  //optio_thread_join(th, 1);
+  /* todo - why?? */
+  #ifndef _WIN32
+  optio_thread_join(th, 1);
+  #endif
   
   FIBER_FREE(*th);
 }

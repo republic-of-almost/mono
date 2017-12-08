@@ -2,17 +2,50 @@
 #define JOB_INCLUDED_9D97A248_9945_4B77_B01A_C29B8236DA2B
 
 
-/* --------------------------------------------------------------- [ Job ] -- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef void(*repo_job_func)(int);
+
+/* --------------------------------------------------------- [ Job Types ] -- */
+
+
+typedef void(*repo_job_func)(void *arg);
+
 
 struct repo_job_desc
 {
-  repo_job_func job_func;
+  repo_job_func function;
+  void          *argument;
 };
 
 
-void      repo_job_submit(&repo_job_desc, int count);
+struct repo_job_span
+{
+  repo_job_decs   *desc_array;
+  unsigned        desc_count
+};
+
+
+/* ----------------------------------------------------- [ Job Interface ] -- */
+
+
+unsigned  /* returns your batch number */
+repo_job_submit(struct repo_job_span span);
+
+
+void
+repo_job_submit_and_wait(struct repo_job_span span);
+
+
+void
+repo_job_wait();
+
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 
 #endif /* inc guard */
