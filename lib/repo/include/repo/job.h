@@ -22,8 +22,8 @@ struct repo_job_desc
 
 struct repo_job_span
 {
-  repo_job_decs   *desc_array;
-  unsigned        desc_count
+  repo_job_desc   *desc_array;
+  unsigned        desc_count;
 };
 
 
@@ -39,8 +39,7 @@ repo_job_submit_and_wait(struct repo_job_span span);
 
 
 void
-repo_job_wait();
-
+repo_job_wait(unsigned batch_id);
 
 
 #ifdef __cplusplus

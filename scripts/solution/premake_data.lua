@@ -222,6 +222,8 @@ make.create_solution(solution_data, project_defaults, projects)
       return getfenv(chunk).result_table
     end
 
+    
+
     -- Preprocessor
     if proj.defines then defines(proj.defines); end
 
