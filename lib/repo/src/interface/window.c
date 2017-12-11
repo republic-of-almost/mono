@@ -7,55 +7,55 @@
 int
 repo_window_get_width()
 {
-  return data_get_int(data_ctx, REPO_WINDOW_WIDTH);
+  return 0;
 }
 
 
 void
 repo_window_set_width(int width)
 {
-  data_set_int(data_ctx, REPO_WINDOW_WIDTH, width);
+  return 0;
 }
 
 
 int
 repo_window_get_height()
 {
-  return data_get_int(data_ctx, REPO_WINDOW_HEIGHT);
+  return 0;
 }
 
 
 void
 repo_window_set_height(int height)
 {
-  data_set_int(data_ctx, REPO_WINDOW_HEIGHT, height);
+  return 0;
 }
 
 
 int
 repo_window_get_fullscreen()
 {
-  return data_get_bool(data_ctx, REPO_WINDOW_FULLSCREEN);
+  return 0;
 }
 
 
 void
 repo_window_set_fullscreen(int fullscreen)
 {
-  data_set_bool(data_ctx, REPO_WINDOW_FULLSCREEN, (bool)fullscreen);
+  
 }
 
 
 const char *
 repo_window_get_title()
 {
-  data_get_string(data_ctx, REPO_WINDOW_TITLE);
+  return "";
 }
 
 
 void
 repo_window_set_title(const char *title)
 {
-  data_set_string(data_ctx, REPO_WINDOW_TITLE, title);
+  
 }
 

@@ -10,13 +10,16 @@ extern "C" {
 /* ----------------------------------------------------------- [ Job API ] -- */
 
 
-typedef unsigned(*repo_api_job_submit)(struct repo_job_desc *desc, unsigned count);
-typedef void(*repo_api_wait)(unsigned);
+typedef unsigned(*repo_api_job_submit_fn)(struct repo_job_desc *desc, unsigned count);
+typedef void(*repo_api_job_wait_fn)(unsigned);
+typedef void(*repo_api_dispatcher_start_fn)(unsigned);
+
 
 struct repo_api_job
 {
-  repo_api_job_submit submit;
-  repo_api_job_wait wait;
+  repo_api_job_submit_fn        submit;
+  repo_api_job_wait_fn          wait;
+  repo_api_dispatcher_start_fn  dispatcher_start;
 };
 
 
