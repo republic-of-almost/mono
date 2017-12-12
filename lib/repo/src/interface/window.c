@@ -14,7 +14,7 @@ repo_window_get_width()
 void
 repo_window_set_width(int width)
 {
-  return 0;
+  
 }
 
 
@@ -28,7 +28,7 @@ repo_window_get_height()
 void
 repo_window_set_height(int height)
 {
-  return 0;
+  
 }
 
 

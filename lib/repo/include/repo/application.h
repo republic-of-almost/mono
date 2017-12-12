@@ -19,11 +19,9 @@
  */
 
 
-typedef void(*repo_tick_callback)(void *user_data);
 
 
 void      repo_app_init();
-void      repo_app_tick(void *user_data, repo_tick_callback cb);
 void      repo_app_destroy();
 
 

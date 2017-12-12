@@ -11,7 +11,7 @@ table.insert(
   {
     name     = "RepoJob",
     kind     = "SharedLib",
-    language = "C++",
+    language = "C89",
     location = make.get_proj_root(),
 
     src_files = {
@@ -40,7 +40,7 @@ table.insert(
       -- First Party --
 
       "Optio",
-      "Repo",
+      "RepoAPI",
     },
   }
 )

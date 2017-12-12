@@ -28,8 +28,11 @@ table.insert(
     },
 
     project_dependencies = {
-      "Anglescript",
-      "Optio",
+
+      -- First Party --
+
+      "RepoAPI",
+      "RepoJob",    -- optional dependency --
     },
 
     inc_dirs = {

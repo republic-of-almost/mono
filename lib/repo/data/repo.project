@@ -10,9 +10,9 @@
 table.insert(
   projects,
   {
-    name     = "Repo",
+    name     = "RepoAPI",
     kind     = "StaticLib",
-    language = "C++",
+    language = "C89",
     location = make.get_proj_root(),
 
     src_files = {

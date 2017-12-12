@@ -20,10 +20,25 @@ struct repo_job_desc
 };
 
 
-struct repo_job_span
+typedef unsigned(*repo_api_job_submit_fn)(struct repo_job_desc *desc, unsigned count);
+typedef void(*repo_api_job_wait_fn)(unsigned);
+typedef void(*repo_api_dispatcher_start_fn)(unsigned);
+
+
+struct repo_api_job
 {
-  repo_job_desc   *desc_array;
-  unsigned        desc_count;
+  repo_api_job_submit_fn        submit;
+  repo_api_job_wait_fn          wait;
+  repo_api_dispatcher_start_fn  dispatcher_start;
+  
+  void                          *user_data;
+};
+
+
+
+struct repo_engine
+{
+  struct repo_api_job job_api;
 };
 
 
@@ -31,15 +46,15 @@ struct repo_job_span
 
 
 unsigned  /* returns your batch number */
-repo_job_submit(struct repo_job_span span);
+repo_job_submit(struct repo_engine *engine, struct repo_job_desc *desc_array, unsigned count);
 
 
 void
-repo_job_submit_and_wait(struct repo_job_span span);
+repo_job_submit_and_wait(struct repo_engine *engine, struct repo_job_desc *desc_array, unsigned count);
 
 
 void
-repo_job_wait(unsigned batch_id);
+repo_job_wait(struct repo_engine *engine, unsigned batch_id);
 
 
 #ifdef __cplusplus
