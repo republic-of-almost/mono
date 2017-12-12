@@ -7,14 +7,21 @@ extern "C" {
 #endif
 
 
+#ifdef _WIN32
+#define REPO_API_CALL __cdecl 
+#else
+#define REPO_API_CALL
+#endif
+
+
 /* ------------------------------------------------------ [ Module Hooks ] -- */
 
 
-typedef void(*repo_module_create_fn)();
-typedef void(*repo_module_destroy_fn)();
+typedef void(REPO_API_CALL *repo_module_create_fn)();
+typedef void(REPO_API_CALL *repo_module_destroy_fn)();
 
 typedef void*(*repo_api_loader_fn)(const char *name);
-typedef void(*repo_module_api_loader_fn)(repo_api_loader_fn loader);
+typedef void(REPO_API_CALL *repo_module_api_loader_fn)(repo_api_loader_fn loader);
 
 
 /* --------------------------------------------------- [ Repo Window API ] -- */
@@ -99,22 +106,22 @@ repo_register_job_api_fn repo_register_job_api;
   When the module is loaded up the functions get resolved.
 */
 
-void
+//__declspec(dllexport) void REPO_API_CALL
+//repo_module_api_loader(repo_api_loader_fn loader);
+__declspec(dllexport) void REPO_API_CALL
 repo_module_api_loader(repo_api_loader_fn loader)
 {
   /* window */
-  repo_window_get_desc     = (repo_window_get_desc_fn)loader("repo_window_get_desc");
-  repo_window_set_desc     = (repo_window_set_desc_fn)loader("repo_window_set_desc");
+  repo_window_get_desc = (repo_window_get_desc_fn)loader("repo_window_get_desc");
+  repo_window_set_desc = (repo_window_set_desc_fn)loader("repo_window_set_desc");
   repo_register_window_api = (repo_register_window_api_fn)loader("repo_register_window_api");
 
   /* job */
-  repo_job_submit          = (repo_job_submit_fn)loader("repo_job_submit");
+  repo_job_submit = (repo_job_submit_fn)loader("repo_job_submit");
   repo_job_submit_and_wait = (repo_job_submit_and_wait_fn)loader("repo_job_submit_and_wait");
-  repo_job_wait            = (repo_job_wait_fn)loader("repo_job_wait");
-  repo_register_job_api    = (repo_register_job_api_fn)loader("repo_register_job_api");
+  repo_job_wait = (repo_job_wait_fn)loader("repo_job_wait");
+  repo_register_job_api = (repo_register_job_api_fn)loader("repo_register_job_api");
 }
-
-
 
 
 #ifdef __cplusplus

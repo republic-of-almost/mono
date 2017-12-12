@@ -1,6 +1,6 @@
 #include <repo/repo.h>
 #include <optio/dispatcher.h>
-
+#include <Windows.h>
 
 /* -------------------------------------------------------------- [ Data ] -- */
 
@@ -34,10 +34,34 @@ job_start(unsigned id)
 }
 
 
+BOOL APIENTRY DllMain(HINSTANCE hInst     /* Library instance handle. */,
+  DWORD reason        /* Reason this function is being called. */,
+  LPVOID reserved     /* Not used. */)
+{
+  switch (reason)
+  {
+  case DLL_PROCESS_ATTACH:
+    break;
+
+  case DLL_PROCESS_DETACH:
+    break;
+
+  case DLL_THREAD_ATTACH:
+    break;
+
+  case DLL_THREAD_DETACH:
+    break;
+  }
+
+  /* Returns TRUE on success, FALSE on failure */
+  return TRUE;
+}
+/*  DLL Main  */
+
 /* ------------------------------------------------------ [ Entry Points ] -- */
 
 
-void
+__declspec(dllexport) void REPO_API_CALL
 repo_module_create()
 {
   /* create dispatcher */

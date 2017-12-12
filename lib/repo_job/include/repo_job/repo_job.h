@@ -13,12 +13,12 @@ extern "C" {
 struct repo_engine;
 
 
-void
+__declspec(dllexport) void __cdecl
 repo_module_create();
 
 
 void
-repo_api_destroy();
+repo_module_destroy();
 
 
 #ifdef __cplusplus

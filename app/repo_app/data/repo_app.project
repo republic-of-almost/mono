@@ -32,7 +32,6 @@ table.insert(
       -- First Party --
 
       "RepoAPI",
-      "RepoJob",    -- optional dependency --
     },
 
     inc_dirs = {
