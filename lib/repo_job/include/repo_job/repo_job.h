@@ -7,18 +7,14 @@ extern "C" {
 #endif
 
 
-struct repo_engine;
-
-
 /* ------------------------------------------------------ [ Entry Points ] -- */
 
 
-void
-repo_api_register(struct repo_engine *engine);
+struct repo_engine;
 
 
 void
-repo_api_think();
+repo_module_create();
 
 
 void

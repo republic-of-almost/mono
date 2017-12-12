@@ -1,7 +1,5 @@
-#include <repo_job/repo_job.h>
-#include <repo/api/job.h>
+#include <repo/repo.h>
 #include <optio/dispatcher.h>
-#include <printf.h>
 
 
 /* -------------------------------------------------------------- [ Data ] -- */
@@ -40,7 +38,7 @@ job_start(unsigned id)
 
 
 void
-repo_api_register(struct repo_engine *engine)
+repo_module_create()
 {
   /* create dispatcher */
   dispatcher_ctx = 0;
@@ -54,19 +52,14 @@ repo_api_register(struct repo_engine *engine)
   job_api.dispatcher_start = job_start;
   job_api.user_data        = (void*)dispatcher_ctx;
   
-  repo_register_job_api(engine, job_api);
+  repo_register_job_api(job_api);
 }
 
 
 void
-repo_api_think()
+repo_module_destroy()
 {
-
+  /* destroy dispatcher */
+  optio_dispatcher_destroy(&dispatcher_ctx);
 }
 
-
-void
-repo_api_destroy()
-{
-
-}
