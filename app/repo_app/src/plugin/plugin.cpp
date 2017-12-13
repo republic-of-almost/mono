@@ -25,12 +25,16 @@ using roa_dlib_handle = HINSTANCE;
 
 
 roa_dlib_handle
+#ifndef _WIN32
 roa_dlib_open(const char *name)
+#else
+roa_dlib_open(const TCHAR *name)
+#endif
 {
   #ifndef _WIN32
   return dlopen(name, RTLD_LAZY);
   #else
-  return LoadLibrary(_T(name));
+  return LoadLibrary(name);
   #endif
 }
 
@@ -78,14 +82,26 @@ repo_plugins_load(const char **api_names, void **api_functions, unsigned count)
 
   /* get dylibs from dir */
   tinydir_dir dir;
+  #ifndef _WIN32
   tinydir_open(&dir, "/Users/PhilCK/Desktop/rep_of_a/output/development/");
+  #else
+  tinydir_open(&dir, "C:/Users/SimStim/Developer/mono/output/development/");
+  #endif
 
   while (dir.has_next)
   {
     tinydir_file file;
     tinydir_readfile(&dir, &file);
     
-    if(!file.is_dir && lib::file::has_extension(file.name, "dylib"))
+    #ifdef _WIN32
+    const char *ext = "dll";
+    #elif defined __APPLE__
+    const char *ext = "dylib";
+    #else
+    const char *ext = "so";
+    #endif
+
+    if(!file.is_dir && lib::file::has_extension(file.name, ext))
     {
       printf("file: %s\n", file.name);
     
@@ -93,13 +109,17 @@ repo_plugins_load(const char **api_names, void **api_functions, unsigned count)
       assert(handle);
       
       repo_module_api_loader_fn reg_api = (repo_module_api_loader_fn)roa_dlib_get_address(handle, "repo_module_api_loader");
-      assert(reg_api);
-      
-      repo_module_create_fn create_fn = (repo_module_create_fn)roa_dlib_get_address(handle, "repo_module_create");
-      assert(create_fn);
-      
-      reg_api(repo_api_loader_impl);
-      create_fn();
+
+      if(reg_api)
+      {
+        reg_api(repo_api_loader_impl);
+        repo_module_create_fn create_fn = (repo_module_create_fn)roa_dlib_get_address(handle, "repo_module_create");
+        
+        if(create_fn)
+        {
+          create_fn();
+        }
+      }
     }
     
     tinydir_next(&dir);

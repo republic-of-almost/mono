@@ -29,5 +29,10 @@ table.insert(
     public_inc_dirs = {
       make.get_proj_root() .. "../include/",
     },
+
+    defines_windows = {
+      UNICODE,
+      _UNICODE,
+    },
   }
 )

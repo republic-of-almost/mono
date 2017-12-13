@@ -96,7 +96,7 @@ code_configs = {
   -- no errors on warnings etc.
   {
     name = "development",
-    flags = {"Symbols", "Unicode"},
+    flags = {"Symbols"},
     defines = {"DEBUG", "NIL_DEVELOPMENT", "NIL_PEDANTIC"},
   },
 
@@ -106,7 +106,7 @@ code_configs = {
   -- Debug flags still enabled.
   {
     name = "staging",
-    flags = {"Optimize", "Symbols", "Unicode"},
+    flags = {"Optimize", "Symbols"},
     defines = {"DEBUG", "NIL_STAGE", "NIL_PEDANTIC"},
   },
 
@@ -114,7 +114,7 @@ code_configs = {
   -- Final build.
   {
     name = "release",
-    flags = {"Optimize", "Unicode"},
+    flags = {"Optimize"},
     defines = {"NDEBUG", "NIL_RELEASE", "NIMGUI", "NDEBUGLINES"},
   },
 }
@@ -132,6 +132,7 @@ make.create_solution(solution_data, project_defaults, projects)
 
   solution(solution_data.name)
   location("./")
+  characterset("MBCS")
 
   -- Create Configs --
   local configs = {}
