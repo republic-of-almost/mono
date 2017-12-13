@@ -22,6 +22,10 @@ table.insert(
       make.add_doc(make.get_proj_root() .. "../src/"),
     },
 
+    private_inc_dirs = {
+      make.get_proj_root() .. "../src/",
+    },
+
     assets = {
       -- Generic Assets --
 
@@ -32,6 +36,11 @@ table.insert(
       -- First Party --
 
       "RepoAPI",
+      "Lib",
+      
+      -- Third Party --
+
+      "TinyDIR",  
     },
 
     inc_dirs = {

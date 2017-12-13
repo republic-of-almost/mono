@@ -8,9 +8,11 @@ extern "C" {
 
 
 #ifdef _WIN32
-#define REPO_API_CALL __cdecl 
+#define REPO_API_CALL __cdecl
+#define REPO_DLL_EXPORT __declspec(dllexport)
 #else
 #define REPO_API_CALL
+#define REPO_DLL_EXPORT
 #endif
 
 
@@ -38,8 +40,8 @@ struct repo_window_desc
 typedef void(*repo_window_get_desc_fn)(struct repo_window_desc *desc);
 typedef void(*repo_window_set_desc_fn)(const struct repo_window_desc *desc);
 
-repo_window_get_desc_fn repo_window_get_desc;
-repo_window_set_desc_fn repo_window_set_desc;
+static repo_window_get_desc_fn repo_window_get_desc;
+static repo_window_set_desc_fn repo_window_set_desc;
 
 
 /* ---------------------------------------------- [ Repo Window API Impl ] -- */
@@ -55,7 +57,7 @@ struct repo_api_window
 
 typedef void(*repo_register_window_api_fn)(struct repo_api_window *window);
 
-repo_register_window_api_fn repo_register_window_api;
+static repo_register_window_api_fn repo_register_window_api;
 
 
 /* ------------------------------------------------------ [ Repo Job API ] -- */
@@ -74,9 +76,9 @@ typedef void (*repo_job_submit_and_wait_fn)(struct repo_job_desc *desc_array, un
 typedef void (*repo_job_wait_fn)(unsigned batch_id);
 
 
-repo_job_submit_fn          repo_job_submit;
-repo_job_submit_and_wait_fn repo_job_submit_and_wait;
-repo_job_wait_fn            repo_job_wait;
+static repo_job_submit_fn          repo_job_submit;
+static repo_job_submit_and_wait_fn repo_job_submit_and_wait;
+static repo_job_wait_fn            repo_job_wait;
 
 
 /* ------------------------------------------------- [ Repo Job API Impl ] -- */
@@ -97,7 +99,7 @@ struct repo_api_job
 
 typedef int(*repo_register_job_api_fn)(struct repo_api_job job);
 
-repo_register_job_api_fn repo_register_job_api;
+static repo_register_job_api_fn repo_register_job_api;
 
 
 /* --------------------------------------------------- [ Repo API Loader ] -- */
@@ -105,10 +107,8 @@ repo_register_job_api_fn repo_register_job_api;
   When the module is loaded up the functions get resolved.
 */
 
-//__declspec(dllexport) void REPO_API_CALL
-//repo_module_api_loader(repo_api_loader_fn loader);
-__declspec(dllexport) void REPO_API_CALL
-repo_module_api_loader(repo_api_loader_fn loader)
+REPO_DLL_EXPORT void REPO_API_CALL
+static repo_module_api_loader(repo_api_loader_fn loader)
 {
   /* window */
   repo_window_get_desc     = (repo_window_get_desc_fn)loader("repo_window_get_desc");

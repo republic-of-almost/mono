@@ -1,7 +1,7 @@
 #include <repo/repo.h>
 #include <optio/dispatcher.h>
-#include <Windows.h>
 #include <string.h>
+
 
 /* -------------------------------------------------------------- [ Data ] -- */
 
@@ -22,7 +22,7 @@ struct job_wrapper
 #define JOB_COUNT 2048
 struct job_wrapper jobs[JOB_COUNT];
 
-struct optio_job_desc desc[JOB_COUNT];
+struct optio_job_desc convert_desc[JOB_COUNT];
 
 
 void wrap_func(struct optio_dispatcher_ctx *ctx, void *arg)
@@ -53,15 +53,15 @@ job_submit(struct repo_job_desc *desc, unsigned count)
         jobs[job_index].func = desc[i].function;
         jobs[job_index].argument = desc[i].argument;
 
-        desc[i].function = wrap_func;
-        desc[i].argument = &jobs[job_index];
+        convert_desc[i].func = wrap_func;
+        convert_desc[i].arg = &jobs[job_index];
 
         break;
       }
     }
   }
 
-  return optio_dispatcher_add_jobs(dispatcher_ctx, desc, count);
+  return optio_dispatcher_add_jobs(dispatcher_ctx, convert_desc, count);
 }
 
 
@@ -82,11 +82,12 @@ job_dispatcher_start()
 /* ------------------------------------------------------ [ Entry Points ] -- */
 
 
-__declspec(dllexport) void REPO_API_CALL
+REPO_DLL_EXPORT void REPO_API_CALL
 repo_module_create()
 {
   /* clear data */
   memset(jobs, 0, sizeof(jobs));
+  memset(convert_desc, 0, sizeof(convert_desc));
 
   /* create dispatcher */
   dispatcher_ctx = 0;
