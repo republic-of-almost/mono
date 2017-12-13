@@ -7,7 +7,9 @@
 #ifndef _WIN32
 #include <dlfcn.h>
 #else
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <Windows.h>
 #include <tchar.h>
 #endif
@@ -22,9 +24,9 @@ repo_engine engine{};
 
 
 void
-test_job(void *arg)
+test_job(void *)
 {
-  
+  printf("hi");
 }
 
 
@@ -93,6 +95,8 @@ main()
   };
   
   repo_job_submit_impl(&engine, desc, 2);
+
+  engine.job_api.dispatcher_start();
   
   /* call startup on shared libs */ 
   {
