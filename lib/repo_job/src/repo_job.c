@@ -21,7 +21,6 @@ struct job_wrapper
 
 #define JOB_COUNT 2048
 struct job_wrapper jobs[JOB_COUNT];
-
 struct optio_job_desc convert_desc[JOB_COUNT];
 
 
@@ -41,9 +40,9 @@ unsigned
 job_submit(struct repo_job_desc *desc, unsigned count)
 {
   /* mutex on jobs */
-
+  
   unsigned job_index = 0;
-
+  
   for (unsigned i = 0; i < count; ++i)
   {
     for(; job_index < JOB_COUNT; ++job_index)
@@ -52,15 +51,15 @@ job_submit(struct repo_job_desc *desc, unsigned count)
       {
         jobs[job_index].func = desc[i].function;
         jobs[job_index].argument = desc[i].argument;
-
+        
         convert_desc[i].func = wrap_func;
         convert_desc[i].arg = &jobs[job_index];
-
+        
         break;
       }
     }
   }
-
+  
   return optio_dispatcher_add_jobs(dispatcher_ctx, convert_desc, count);
 }
 
@@ -102,9 +101,6 @@ repo_module_create()
   job_api.user_data        = (void*)dispatcher_ctx;
   
   repo_register_job_api(job_api);
-
-  //repo_api_loader_fn dummy = 0;
-  //repo_module_api_loader(dummy);
 }
 
 

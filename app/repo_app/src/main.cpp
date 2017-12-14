@@ -9,6 +9,7 @@
 struct repo_engine
 {
   repo_api_job job_api;
+  repo_api_window win_api;
 };
 
 repo_engine engine{};
@@ -33,7 +34,15 @@ repo_register_job_api_impl(struct repo_api_job job)
 {
   engine.job_api = job;
   
-  return 0;
+  return 1;
+}
+
+int
+repo_register_window_api_impl(struct repo_api_window win)
+{
+  engine.win_api = win;
+  
+  return 1;
 }
 
 
@@ -42,11 +51,19 @@ typedef void(*repo_loader_fn)(void **fn, unsigned count);
 
 
 const char *api_names[] {
+  /* win */
+  "repo_register_window_api",
+  
+  /* job */
   "repo_job_submit",
   "repo_register_job_api",
 };
 
 void *api_funcs[] {
+  /* win */
+  (void*)repo_register_window_api_impl,
+  
+  /* job */
   (void*)repo_job_submit_impl,
   (void*)repo_register_job_api_impl,
 };
