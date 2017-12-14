@@ -132,7 +132,10 @@ make.create_solution(solution_data, project_defaults, projects)
 
   solution(solution_data.name)
   location("./")
-  characterset("MBCS")
+
+  if(os.get() == "Windows") then
+    characterset("MBCS")
+  end
 
   -- Create Configs --
   local configs = {}

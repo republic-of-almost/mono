@@ -1,17 +1,19 @@
 #include <repo/repo.h>
 
-/* window */
-repo_window_get_desc_fn     repo_window_get_desc;
-repo_window_set_desc_fn     repo_window_set_desc;
 
-repo_register_window_api_fn repo_register_window_api;
+/* window */
+repo_window_get_desc_fn     repo_window_get_desc = 0;
+repo_window_set_desc_fn     repo_window_set_desc = 0;
+
+repo_register_window_api_fn repo_register_window_api = 0;
+
 
 /* jobs */
-repo_job_submit_fn          repo_job_submit;
-repo_job_submit_and_wait_fn repo_job_submit_and_wait;
-repo_job_wait_fn            repo_job_wait;
+repo_job_submit_fn          repo_job_submit = 0;
+repo_job_submit_and_wait_fn repo_job_submit_and_wait = 0;
+repo_job_wait_fn            repo_job_wait = 0;
 
-repo_register_job_api_fn    repo_register_job_api;
+repo_register_job_api_fn    repo_register_job_api = 0;
 
 
 /* loader  */

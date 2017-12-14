@@ -10,7 +10,7 @@ extern "C" {
 #ifdef _WIN32
 #define REPO_API __declspec(dllexport) extern
 #else
-#define REPO_API
+#define REPO_API extern
 #endif
 
 
