@@ -22,9 +22,9 @@ test_job(void *)
 
 
 void
-repo_job_submit_impl(struct repo_engine *e, struct repo_job_desc *desc, unsigned count)
+repo_job_submit_impl(struct repo_job_desc *desc, unsigned count)
 {
-  e->job_api.submit(desc, count);
+    engine.job_api.submit(desc, count);
 }
 
 
@@ -42,12 +42,17 @@ typedef void(*repo_loader_fn)(void **fn, unsigned count);
 
 
 const char *api_names[] {
+  "repo_job_submit",
   "repo_register_job_api",
 };
 
 void *api_funcs[] {
+  (void*)repo_job_submit_impl,
   (void*)repo_register_job_api_impl,
 };
+
+
+#define ARRAY_SIZE(arr) sizeof(arr) / sizeof(arr[0])
 
 
 int
@@ -56,7 +61,7 @@ main()
   /* look for shared libs */
   {
     /* load shared libs */
-    repo_plugins_load(api_names, api_funcs, 1);
+    repo_plugins_load(api_names, api_funcs, ARRAY_SIZE(api_names));
   }
   
   repo_job_desc desc[] = {
@@ -64,7 +69,7 @@ main()
     {test_job, nullptr},
   };
   
-  repo_job_submit_impl(&engine, desc, 2);
+  repo_job_submit(desc, 2);
 
   engine.job_api.dispatcher_start();
   

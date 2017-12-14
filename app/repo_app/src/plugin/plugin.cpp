@@ -80,6 +80,9 @@ repo_plugins_load(const char **api_names, void **api_functions, unsigned count)
   api_func_list = api_functions;
   api_count = count;
 
+  /* load this repo */
+  repo_module_api_loader(repo_api_loader_impl);
+
   /* get dylibs from dir */
   tinydir_dir dir;
   #ifndef _WIN32
@@ -108,7 +111,7 @@ repo_plugins_load(const char **api_names, void **api_functions, unsigned count)
       roa_dlib_handle handle = roa_dlib_open(file.path);
       assert(handle);
       
-      repo_module_api_loader_fn reg_api = (repo_module_api_loader_fn)roa_dlib_get_address(handle, "repo_module_api_loader");
+      repo_module_api_loader_fn reg_api = (repo_module_api_loader_fn)roa_dlib_get_address(handle, "repo_module_api_loader");      
 
       if(reg_api)
       {

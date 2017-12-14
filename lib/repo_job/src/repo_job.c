@@ -82,7 +82,7 @@ job_dispatcher_start()
 /* ------------------------------------------------------ [ Entry Points ] -- */
 
 
-REPO_DLL_EXPORT void REPO_API_CALL
+REPO_API void REPO_API_CALL
 repo_module_create()
 {
   /* clear data */
@@ -102,6 +102,9 @@ repo_module_create()
   job_api.user_data        = (void*)dispatcher_ctx;
   
   repo_register_job_api(job_api);
+
+  //repo_api_loader_fn dummy = 0;
+  //repo_module_api_loader(dummy);
 }
 
 
