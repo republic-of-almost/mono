@@ -46,7 +46,7 @@ struct repo_window_desc
 
 typedef void(*repo_window_get_desc_fn)(struct repo_window_desc *desc);
 typedef void(*repo_window_set_desc_fn)(const struct repo_window_desc *desc);
-typedef void(*repo_window_is_closing_fn)();
+typedef int(*repo_window_is_closing_fn)();
 
 
 REPO_API repo_window_get_desc_fn repo_window_get_desc;

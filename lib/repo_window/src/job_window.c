@@ -36,14 +36,14 @@ glfw_setup()
     /* do something */    
   }
 
-
+  window = glfwCreateWindow(width, height, title, NULL, NULL);
 }
 
 
 void
 glfw_process()
 {
-  window = glfwCreateWindow(width, height, title, NULL, NULL);
+  glfwPollEvents();
 }
 
 
@@ -83,9 +83,14 @@ glfw_get_desc(struct repo_window_desc *out_desc)
 }
 
 
+int
+glfw_is_closing()
+{
+  return glfwWindowShouldClose(window) ? 1 : 0;
+}
+
+
 /* ------------------------------------------------------ [ Entry Points ] -- */
-
-
 
 
 REPO_API void REPO_API_CALL
@@ -105,9 +110,10 @@ repo_module_create()
   struct repo_api_window win_api;
   win_api.window_start_process = glfw_setup;
   win_api.window_process       = glfw_process;
-  win_api.window_start_process = glfw_shutdown;
+  win_api.window_close_process = glfw_shutdown;
   win_api.window_set_desc      = glfw_set_desc;
   win_api.window_get_desc      = glfw_get_desc;
+  win_api.window_is_closing    = glfw_is_closing;
 
   repo_register_window_api(&win_api);
 }

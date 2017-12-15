@@ -6,7 +6,7 @@
 
 
 void
-repo_plugins_load(const char **api_names, void **api_functions, unsigned count);
+repo_plugins_load(const char **api_names, const void **api_functions, unsigned count);
 
 void
 repo_plugins_unload();

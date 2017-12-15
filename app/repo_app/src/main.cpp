@@ -22,10 +22,10 @@ test_job(void *)
 }
 
 
-void
+unsigned
 repo_job_submit_impl(struct repo_job_desc *desc, unsigned count)
 {
-    engine.job_api.submit(desc, count);
+  return engine.job_api.submit(desc, count);
 }
 
 
@@ -39,6 +39,7 @@ repo_register_job_api_impl(struct repo_api_job *job)
 
 /* window */
 
+
 void
 repo_window_get_desc_impl(struct repo_window_desc *out_desc)
 {
@@ -51,10 +52,10 @@ repo_window_set_desc_impl(const struct repo_window_desc *desc)
   engine.win_api.window_set_desc(desc);
 }
 
-void
+int
 repo_window_is_closing_impl()
 {
-  /* dump can't return anything */
+  return engine.win_api.window_is_closing();
 }
 
 int
@@ -65,12 +66,31 @@ repo_register_window_api_impl(struct repo_api_window *win)
   return 1;
 }
 
+void
+frame_job(void *)
+{
+  /* test image */
+  
+  if(!repo_window_is_closing_impl())
+  {
+    engine.win_api.window_process();
+    
+    /* submit another frame job */
+    repo_job_desc desc[] = {
+      {frame_job, nullptr},
+    };
+    
+    repo_job_submit(desc, 1);
+  }
+}
+
 
 typedef void(*repo_loader_fn)(void **fn, unsigned count);
 
 
 
-const char *api_names[] {
+const char *api_names[]
+{
   /* win */
   "repo_window_get_desc",
   "repo_window_set_desc",
@@ -82,7 +102,7 @@ const char *api_names[] {
   "repo_register_job_api",
 };
 
-void *api_funcs[] {
+const void *api_funcs[] {
   /* win */
   (void*)repo_window_get_desc_impl,
   (void*)repo_window_set_desc_impl,
@@ -120,7 +140,7 @@ main()
 
   repo_job_desc desc[] = {
     {test_job, nullptr},
-    {test_job, nullptr},
+    {frame_job, nullptr},
   };
   
   repo_job_submit(desc, 2);
@@ -132,10 +152,6 @@ main()
     /* startup libs */
   }
 
-  /* run application */
-  {
-    
-  }
 
   /* shutdown shared libs */
   {
