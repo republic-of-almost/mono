@@ -133,7 +133,7 @@ make.create_solution(solution_data, project_defaults, projects)
   solution(solution_data.name)
   location("./")
 
-  if(os.get() == "Windows") then
+  if(os.get() == "windows") then
     characterset("MBCS")
   end
 

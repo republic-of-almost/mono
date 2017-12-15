@@ -37,7 +37,7 @@ typedef void(REPO_API_CALL *repo_module_api_loader_fn)(repo_api_loader_fn loader
 
 struct repo_window_desc
 {
-  const char *name;
+  const char *title;
   unsigned width;
   unsigned height;
   unsigned fullscreen;
@@ -65,6 +65,10 @@ struct repo_api_window
   repo_api_window_process_fn window_start_process;
   repo_api_window_process_fn window_process;
   repo_api_window_process_fn window_close_process;
+
+  repo_window_get_desc_fn window_get_desc;
+  repo_window_set_desc_fn window_set_desc;
+  repo_window_is_closing_fn window_is_closing;
 };
 
 
@@ -87,7 +91,7 @@ struct repo_job_desc
 };
 
 
-typedef void (*repo_job_submit_fn)(struct repo_job_desc *desc, unsigned count);
+typedef unsigned (*repo_job_submit_fn)(struct repo_job_desc *desc, unsigned count);
 typedef void (*repo_job_submit_and_wait_fn)(struct repo_job_desc *desc_array, unsigned count);
 typedef void (*repo_job_wait_fn)(unsigned batch_id);
 
@@ -100,22 +104,20 @@ REPO_API repo_job_wait_fn            repo_job_wait;
 /* ------------------------------------------------- [ Repo Job API Impl ] -- */
 
 
-typedef unsigned(*repo_api_job_submit_fn)(struct repo_job_desc *desc, unsigned count);
-typedef void(*repo_api_job_wait_fn)(unsigned);
 typedef void(*repo_api_dispatcher_start_fn)();
 
 
 struct repo_api_job
 {
-  repo_api_job_submit_fn        submit;
-  repo_api_job_wait_fn          wait;
+  repo_job_submit_fn            submit;
+  repo_job_wait_fn              wait;
   repo_api_dispatcher_start_fn  dispatcher_start;
   
   void                          *user_data;
 };
 
 
-typedef int(*repo_register_job_api_fn)(struct repo_api_job job);
+typedef int(*repo_register_job_api_fn)(struct repo_api_job *job);
 
 
 REPO_API repo_register_job_api_fn repo_register_job_api;

@@ -24,7 +24,8 @@ struct job_wrapper jobs[JOB_COUNT];
 struct optio_job_desc convert_desc[JOB_COUNT];
 
 
-void wrap_func(struct optio_dispatcher_ctx *ctx, void *arg)
+void
+wrap_func(struct optio_dispatcher_ctx *ctx, void *arg)
 {
   struct job_wrapper *job = (struct job_wrapper*)arg;
 
@@ -100,7 +101,7 @@ repo_module_create()
   job_api.dispatcher_start = job_dispatcher_start;
   job_api.user_data        = (void*)dispatcher_ctx;
   
-  repo_register_job_api(job_api);
+  repo_register_job_api(&job_api);
 }
 
 

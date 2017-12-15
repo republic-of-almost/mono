@@ -1,5 +1,5 @@
-#ifndef REPO_JOB_INCLUDED_5F6978AB_FEE9_439A_8F3C_6759804BD4BE
-#define REPO_JOB_INCLUDED_5F6978AB_FEE9_439A_8F3C_6759804BD4BE
+#ifndef REPO_WINDOW_INCLUDED_7A4C8EA3_A9FB_46F6_96AD_4502589BA3EB
+#define REPO_WINDOW_INCLUDED_7A4C8EA3_A9FB_46F6_96AD_4502589BA3EB
 
 
 #ifdef __cplusplus
@@ -14,7 +14,7 @@ __declspec(dllexport) void __cdecl
 repo_module_create();
 
 
-void
+__declspec(dllexport) void __cdecl
 repo_module_destroy();
 
 

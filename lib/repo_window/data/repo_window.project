@@ -1,0 +1,44 @@
+#!lua
+
+--[[
+
+  Repo Job Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "RepoWindow",
+    kind     = "SharedLib",
+    language = "C89",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      make.add_src(make.get_proj_root() .. "../src/"),
+      make.add_doc(make.get_proj_root() .. "../"),
+    },
+
+    private_inc_dirs = {
+      make.get_proj_root() .. "../src/",
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+    defines = {
+
+      -- See build.md for build flags doc
+
+    },
+
+    project_dependencies = {
+
+      "GLFW",
+      "RepoAPI",
+    },
+  }
+)
