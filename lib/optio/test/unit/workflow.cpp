@@ -17,7 +17,7 @@
 static int player_pos[] = {0, 1, 2};
 
 void
-job_calc_player(optio_dispatcher_ctx *ctx, void *arg)
+job_calc_player(optio_dispatcher_ctx *, void *arg)
 {
   /* do some cool calculation */
   std::this_thread::sleep_for(
@@ -28,7 +28,7 @@ job_calc_player(optio_dispatcher_ctx *ctx, void *arg)
 }
 
 void
-job_calc_enemies(optio_dispatcher_ctx *ctx, void *arg)
+job_calc_enemies(optio_dispatcher_ctx *, void *)
 {
   /* do some cool calculation */
   std::this_thread::sleep_for(
@@ -37,7 +37,7 @@ job_calc_enemies(optio_dispatcher_ctx *ctx, void *arg)
 }
 
 void
-job_gameplay(optio_dispatcher_ctx *ctx, void *arg)
+job_gameplay(optio_dispatcher_ctx *ctx, void *)
 {
   optio_job_desc enemies_desc[]
   {
@@ -71,7 +71,7 @@ job_gameplay(optio_dispatcher_ctx *ctx, void *arg)
 /* physics */
 
 void
-job_calc_phys_step(optio_dispatcher_ctx *ctx, void *arg)
+job_calc_phys_step(optio_dispatcher_ctx *, void *arg)
 {
   /* do some cool calculation */
   std::this_thread::sleep_for(
@@ -82,7 +82,7 @@ job_calc_phys_step(optio_dispatcher_ctx *ctx, void *arg)
 }
 
 void
-job_calc_phys_collisions(optio_dispatcher_ctx *ctx, void *arg)
+job_calc_phys_collisions(optio_dispatcher_ctx *, void *)
 {
   /* do some cool calculation */
   std::this_thread::sleep_for(
@@ -92,7 +92,7 @@ job_calc_phys_collisions(optio_dispatcher_ctx *ctx, void *arg)
 
 
 void
-job_physics(optio_dispatcher_ctx *ctx, void *arg)
+job_physics(optio_dispatcher_ctx *ctx, void *)
 {
   optio_job_desc phys_desc[]
   {
@@ -127,7 +127,7 @@ job_physics(optio_dispatcher_ctx *ctx, void *arg)
 /* renderer */
 
 void
-job_cull_renderables(optio_dispatcher_ctx *ctx, void *arg)
+job_cull_renderables(optio_dispatcher_ctx *, void *)
 {
   /* do some cool calculation */
   std::this_thread::sleep_for(
@@ -136,7 +136,7 @@ job_cull_renderables(optio_dispatcher_ctx *ctx, void *arg)
 }
 
 void
-job_build_cmd_buffers(optio_dispatcher_ctx *ctx, void *arg)
+job_build_cmd_buffers(optio_dispatcher_ctx *, void *arg)
 {
   /* do some cool calculation */
   std::this_thread::sleep_for(
@@ -147,7 +147,7 @@ job_build_cmd_buffers(optio_dispatcher_ctx *ctx, void *arg)
 }
 
 void
-job_renderer(optio_dispatcher_ctx *ctx, void *arg)
+job_renderer(optio_dispatcher_ctx *ctx, void *)
 {
   optio_job_desc cull_desc[]
   {
@@ -252,7 +252,7 @@ job_frame(optio_dispatcher_ctx *ctx, void *arg)
 TEST_CASE("Optio Workflow")
 {
   optio_dispatcher_ctx *ctx{nullptr};
-  optio_dispatcher_create(&ctx);
+  optio_dispatcher_create(&ctx, NULL);
   
   player_pos[0] = 0;
   player_pos[1] = 1;
@@ -265,7 +265,7 @@ TEST_CASE("Optio Workflow")
       {job_frame, &frames},
     };
     
-    unsigned job = optio_dispatcher_add_jobs(
+    optio_dispatcher_add_jobs(
       ctx,
       frame,
       ARR_COUNT(frame)

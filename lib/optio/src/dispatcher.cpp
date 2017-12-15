@@ -63,6 +63,8 @@ struct optio_dispatcher_ctx
   /* fibers */
   struct optio_fiber_pool_ctx fiber_pool;
 
+  /* config */
+  struct optio_dispatcher_desc desc;
 };
 
 
@@ -264,7 +266,9 @@ optio_internal_fiber_dispatcher(void *arg)
 */
 
 void
-optio_dispatcher_create(struct optio_dispatcher_ctx **c)
+optio_dispatcher_create(
+  struct optio_dispatcher_ctx **c,
+  const struct optio_dispatcher_desc *override_desc)
 {
   /* param assert */
   FIBER_ASSERT(c);
@@ -277,23 +281,53 @@ optio_dispatcher_create(struct optio_dispatcher_ctx **c)
     FIBER_MEMZERO(new_ctx, bytes);
     new_ctx->dispatch_state = FIBER_DISPATCHER_INITIALIZING;
   }
+
+  /* config */
+  {
+    /* default config */
+    new_ctx->desc.free_cores = 1;
+    new_ctx->desc.max_fibers = 128;
+    new_ctx->desc.max_jobs = 1024;
+
+    if (override_desc)
+    {
+      struct optio_dispatcher_desc *this_desc = &new_ctx->desc;
+      
+      this_desc->free_cores = override_desc->free_cores;
+
+      if (override_desc->max_fibers > 0)
+      {
+        this_desc->max_fibers = override_desc->max_fibers;
+      }
+
+      if (override_desc->max_jobs > 0)
+      {
+        this_desc->max_jobs = override_desc->max_jobs;
+      }
+    }
+  }
   
   /* create fiber and job pools */
   {
-    optio_job_queue_create(&new_ctx->job_queue, 0);
+    optio_job_queue_create(&new_ctx->job_queue, new_ctx->desc.max_jobs);
     
     optio_fiber_pool_create(
       &new_ctx->fiber_pool,
       (void*)optio_internal_fiber_executer,
       (void*)new_ctx,
-      0
+      new_ctx->desc.max_fibers
     );
   }
 
   /* init thread data */
   {
     int core_count = optio_thread_core_count();
-    new_ctx->thread_count = core_count - FIBER_FREE_CORES;
+    new_ctx->thread_count = 1;
+
+    if(new_ctx->desc.free_cores >= 0)
+    {
+      new_ctx->thread_count = core_count - new_ctx->desc.free_cores;
+    }
     
     optio_array_create(new_ctx->raw_threads, new_ctx->thread_count);
     optio_array_resize(new_ctx->raw_threads, new_ctx->thread_count);
@@ -385,7 +419,7 @@ optio_dispatcher_run(
   /* wait for threads to clean up */
   {
     /* exclude first thread as its main thread */
-    optio_thread **ths = &c->raw_threads[1];
+    //optio_thread **ths = &c->raw_threads[1];
     const unsigned th_count = c->thread_count - 1;
     
     //optio_thread_join(ths, th_count);

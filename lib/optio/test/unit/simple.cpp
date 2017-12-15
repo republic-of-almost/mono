@@ -10,7 +10,7 @@
 
 
 void
-test_job_01(optio_dispatcher_ctx *ctx, void *arg)
+test_job_01(optio_dispatcher_ctx *, void *arg)
 {
   int *int_arg = reinterpret_cast<int*>(arg);
   *int_arg += 1;
@@ -27,7 +27,7 @@ test_job_01(optio_dispatcher_ctx *ctx, void *arg)
 TEST_CASE("Optio Simple")
 {
   optio_dispatcher_ctx *ctx{nullptr};
-  optio_dispatcher_create(&ctx);
+  optio_dispatcher_create(&ctx, NULL);
   
   REQUIRE(ctx);
   

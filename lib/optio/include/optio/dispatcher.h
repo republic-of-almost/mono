@@ -31,9 +31,17 @@ struct optio_dispatcher_ctx;
   ```
 */
 
+struct optio_dispatcher_desc
+{
+  int free_cores;     /* -1 if you wish it to run on a single core */
+  int max_fibers;     /* number of fibers that should be created */
+  int max_jobs;       /* number of jobs that should be created */
+};
+
 void
 optio_dispatcher_create(
-  struct optio_dispatcher_ctx **c   /* must be a valid pointer */
+  struct optio_dispatcher_ctx **c,          /* must be a valid pointer */
+  const struct optio_dispatcher_desc *desc  /* optional */
 );
   
 void

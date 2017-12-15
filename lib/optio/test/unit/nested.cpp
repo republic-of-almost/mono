@@ -14,7 +14,7 @@
 
 
 void
-inner_addition_call(optio_dispatcher_ctx *ctx, void *arg)
+inner_addition_call(optio_dispatcher_ctx *, void *arg)
 {
   int *int_arg = reinterpret_cast<int*>(arg);
   
@@ -61,7 +61,7 @@ outter_multiplication_call_04(optio_dispatcher_ctx *ctx, void *arg)
 
 
 void
-inner_wait_call_01(optio_dispatcher_ctx *ctx, void *arg)
+inner_wait_call_01(optio_dispatcher_ctx *, void *)
 {
 }
 
@@ -95,7 +95,11 @@ outter_wait_call_01(optio_dispatcher_ctx *ctx, void *arg)
 TEST_CASE("Optio Nested")
 {
   optio_dispatcher_ctx *ctx{nullptr};
-  optio_dispatcher_create(&ctx);
+
+  const optio_dispatcher_desc ctx_desc{
+    -1,   /* free_cores */
+  };
+  optio_dispatcher_create(&ctx, &ctx_desc);
   
   REQUIRE(ctx);
   

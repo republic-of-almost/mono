@@ -11,7 +11,7 @@
 
 
 void
-test_job(optio_dispatcher_ctx *ctx, void *arg)
+test_job(optio_dispatcher_ctx *, void *)
 {
 }
 
@@ -21,8 +21,10 @@ test_job(optio_dispatcher_ctx *ctx, void *arg)
 
 TEST_CASE("Job Queue")
 {
+  constexpr unsigned max_jobs = 10;
+
   optio_job_queue_ctx ctx;
-  optio_job_queue_create(&ctx, 10);
+  optio_job_queue_create(&ctx, max_jobs);
   
   SECTION("Empty on start")
   {
@@ -76,8 +78,8 @@ TEST_CASE("Job Queue")
       const unsigned job_id = optio_job_queue_next(&ctx, &func, &arg);
       REQUIRE(job_id);
       
-      const unsigned batch_id = optio_job_queue_clear(&ctx, job_id);
-      REQUIRE(batch_id == 0);
+      const unsigned clear_batch_id = optio_job_queue_clear(&ctx, job_id);
+      REQUIRE(clear_batch_id == 0);
     }
     
     /* has work */
@@ -104,11 +106,39 @@ TEST_CASE("Job Queue")
       optio_counter *counter = optio_job_queue_batch_block(&ctx, batch_id);
       REQUIRE(counter != nullptr);
       
-      const unsigned batch_id = optio_job_queue_clear(&ctx, job_id);
-      REQUIRE(batch_id == 0);
+      const unsigned clear_batch_id = optio_job_queue_clear(&ctx, job_id);
+      REQUIRE(clear_batch_id == 0);
       
       /* release */
       optio_job_queue_batch_unblock(&ctx, counter);
+    }
+  }
+
+  SECTION("Max Jobs")
+  {
+    for(unsigned i = 0; i < max_jobs * 2; ++i)
+    {
+      /* add work */
+      {
+        optio_job_desc desc[]{
+          { test_job, nullptr },
+        };
+
+        const unsigned batch_id = optio_job_queue_add_batch(
+          &ctx,
+          desc,
+          ARR_COUNT(desc)
+        );
+
+        void *func = 0;
+        void *arg = 0;
+
+        const unsigned job_id = optio_job_queue_next(&ctx, &func, &arg);
+        REQUIRE(job_id);
+
+        const unsigned clear_batch_id = optio_job_queue_clear(&ctx, job_id);
+        REQUIRE(clear_batch_id != 0);
+      }
     }
   }
   

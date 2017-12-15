@@ -25,7 +25,7 @@ optio_fiber_pool_create(
   optio_mutex_create(&ctx->mutex);
   optio_mutex_lock(ctx->mutex);
   
-  const unsigned count = fiber_count ? fiber_count : FIBER_MAX_FIBER_COUNT;
+  const unsigned count = fiber_count;
 
   optio_array_create(ctx->fibers,           count);
   optio_array_create(ctx->free_fibers,      count);

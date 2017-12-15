@@ -115,9 +115,13 @@ repo_plugins_load(const char **api_names, const void **api_functions, unsigned c
       assert(handle);
       
       repo_module_api_loader_fn reg_api = (repo_module_api_loader_fn)roa_dlib_get_address(handle, "repo_module_api_loader");
-      reg_api(repo_api_loader_impl);
+
+      if(reg_api)
+      {
+        reg_api(repo_api_loader_impl);
       
-      handles.emplace_back(handle);
+        handles.emplace_back(handle);
+      }
     }
     
     tinydir_next(&dir);

@@ -90,8 +90,13 @@ repo_module_create()
   memset(convert_desc, 0, sizeof(convert_desc));
 
   /* create dispatcher */
+
+  struct optio_dispatcher_desc dispatch_desc;
+  memset(&dispatch_desc, 0, sizeof(dispatch_desc));
+  dispatch_desc.free_cores = -1;
+
   dispatcher_ctx = 0;
-  optio_dispatcher_create(&dispatcher_ctx);
+  optio_dispatcher_create(&dispatcher_ctx, &dispatch_desc);
   
   /* register with repo api */
   struct repo_api_job job_api;

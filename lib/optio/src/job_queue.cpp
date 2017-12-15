@@ -20,7 +20,7 @@ optio_job_queue_create(struct optio_job_queue_ctx *ctx, unsigned queue_hint)
   optio_mutex_create(&ctx->mutex);
   optio_mutex_lock(ctx->mutex);
   
-  const unsigned count = queue_hint > 0 ? queue_hint : FIBER_MAX_JOB_COUNT;
+  const unsigned count = queue_hint;
   
   /* create arrays */
   optio_array_create(ctx->job_status,     count);
@@ -189,6 +189,9 @@ optio_job_queue_add_batch(
     batch.is_blocked = 0;
     batch.counter = NULL;
     
+    int arr[128]{};
+    memset(arr, -1, sizeof(arr));
+
     /* find a counter */
     {
       const size_t counter_size = optio_array_size(ctx->counters);
@@ -196,7 +199,7 @@ optio_job_queue_add_batch(
       for(size_t i = 0; i < counter_size; ++i)
       {
         int value = optio_counter_value(&ctx->counters[i]);
-        
+        arr[i] = value;
         if(value < 0)
         {
           batch.counter = &ctx->counters[i];
@@ -223,11 +226,10 @@ optio_job_queue_add_batch(
           ctx->counters[i].batch_id = 0;
         }
 
-        //struct optio_counter new_counter;
-        //optio_counter_set(&new_counter, -1, -1);
-        
-        //optio_array_push(ctx->counters, new_counter);
-        
+        /*struct optio_counter new_counter;
+        optio_counter_set(&new_counter, -1, -1);
+        optio_array_push(ctx->counters, new_counter);*/
+
         //batch.counter = &(optio_array_back(ctx->counters));
       }
     }
@@ -397,6 +399,11 @@ optio_job_queue_clear(
         {
           optio_array_erase(ctx->batch_ids, i);
           optio_array_erase(ctx->batches, i);
+
+          if (!batch->is_blocked)
+          {
+            optio_counter_set(batch->counter, -1, -1);
+          }
           
           return_value = batch_id;
           

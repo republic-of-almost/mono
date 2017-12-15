@@ -250,7 +250,7 @@ optio_thread_find_this(struct optio_thread **th, unsigned count)
 
   for(unsigned i = 0; i < count; ++i)
   {
-    if(th[i]->id = this_id)
+    if(th[i]->id == this_id)
     {
       return i;
     }

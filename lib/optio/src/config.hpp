@@ -17,19 +17,6 @@
 #define FIBER_MEMZERO(ptr, bytes) memset(ptr, 0, bytes)
 
 
-/* --------------------------------------------------------- [ Constants ] -- */
-
-
-/* how many pending jobs - this should be dynamic I think */
-#define FIBER_MAX_JOB_COUNT 1024
-
-/* how many cores should be free */
-#define FIBER_FREE_CORES 1
-
-/* how many fibers in the system - should this be dynamic? */
-#define FIBER_MAX_FIBER_COUNT 128
-
-
 /* ----------------------------------------------------------- [ Logging ] -- */
 
 

@@ -5,7 +5,7 @@
 
 
 void
-fiber_func(void *arg)
+fiber_func(void *)
 {
   /* we aren't testing fibers so this should do nothing */
 }
