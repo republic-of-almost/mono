@@ -37,12 +37,14 @@ glfw_setup()
   }
 
   window = glfwCreateWindow(width, height, title, NULL, NULL);
+  glfwMakeContextCurrent(window);
 }
 
 
 void
 glfw_process()
 {
+  glfwSwapBuffers(window);
   glfwPollEvents();
 }
 

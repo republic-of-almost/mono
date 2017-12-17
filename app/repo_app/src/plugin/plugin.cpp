@@ -6,49 +6,7 @@
 #include <lib/string.hpp>
 #include <lib/file.hpp>
 #include <vector>
-
-#ifndef _WIN32
-#include <dlfcn.h>
-#else
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <Windows.h>
-#include <tchar.h>
-#endif
-
-
-#ifndef _WIN32
-using roa_dlib_handle = void*;
-#else
-using roa_dlib_handle = HINSTANCE;
-#endif
-
-
-roa_dlib_handle
-#ifndef _WIN32
-roa_dlib_open(const char *name)
-#else
-roa_dlib_open(const TCHAR *name)
-#endif
-{
-  #ifndef _WIN32
-  return dlopen(name, RTLD_LAZY);
-  #else
-  return LoadLibrary(name);
-  #endif
-}
-
-
-void*
-roa_dlib_get_address(roa_dlib_handle handle, const char *name)
-{
-  #ifndef _WIN32
-  return dlsym(handle, name);
-  #else
-  return GetProcAddress(handle, name);
-  #endif
-}
+#include <roalib/dlib.h>
 
 
 const char **api_name_list = nullptr;
@@ -92,7 +50,7 @@ repo_plugins_load(const char **api_names, const void **api_functions, unsigned c
   tinydir_open(&dir, "C:/Users/SimStim/Developer/mono/output/development/");
   #endif
   
-  std::vector<roa_dlib_handle> handles;
+  std::vector<void*> handles;
   
   while (dir.has_next)
   {
@@ -111,7 +69,7 @@ repo_plugins_load(const char **api_names, const void **api_functions, unsigned c
     {
       printf("file: %s\n", file.name);
     
-      roa_dlib_handle handle = roa_dlib_open(file.path);
+      void *handle = roa_dlib_open(file.path);
       assert(handle);
       
       repo_module_api_loader_fn reg_api = (repo_module_api_loader_fn)roa_dlib_get_address(handle, "repo_module_api_loader");
