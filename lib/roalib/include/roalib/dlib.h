@@ -1,3 +1,10 @@
+/*
+  dlib
+  --
+  Very simple wrapper around dynamic libraries for Windows / Nix platforms
+
+  public domain 2017
+*/
 #ifndef DLIB_INCLUDED_CC96CA25_2327_4042_B491_4CED597F1541
 #define DLIB_INCLUDED_CC96CA25_2327_4042_B491_4CED597F1541
 

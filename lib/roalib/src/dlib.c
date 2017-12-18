@@ -9,19 +9,13 @@
 #endif
 
 
-HMODULE
-roa_internal_dlib_open_window(const TCHAR *name)
-{
-  return LoadLibrary(name);
-}
-
-
 void*
 roa_dlib_open(
   const char *name)
 {
   #ifdef _WIN32
-  return (void*)roa_internal_dlib_open_window(name);
+  const TCHAR *win_char(name);
+  return (void*)LoadLibrary(win_char);
   #else
   dlopen(name, RTLD_LAZY);
   #endif

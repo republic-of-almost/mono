@@ -27,6 +27,7 @@ table.insert(
     },
 
     assets = {
+    
       -- Generic Assets --
 
     },
