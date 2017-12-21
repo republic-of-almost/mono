@@ -29,13 +29,17 @@ typedef void(*edge_job_fn)(void *arg);
 
 struct edge_app_desc
 {
+  edge_job_fn job_entry;
 };
 
 
 int
 edge_app_create(
-  edge_job_fn                           job_entry,
   const struct edge_app_desc            *desc);
+
+
+int
+edge_app_new_frame();
 
 
 int
@@ -68,8 +72,8 @@ edge_window_desc_set(
 
 struct edge_job_desc
 {
-  edge_job_fn function;
-  void        *argument;
+  edge_job_fn   function;
+  void          *argument;
 };
 
 
@@ -163,7 +167,7 @@ edge_world_trasnform_set(
 /* ------------------------------------------------------ [ Bounding box ] -- */
 
 
-struct edge_bounding_box
+struct edge_bounding_box_desc
 {
   float min[3];
   float max[3];
@@ -171,17 +175,41 @@ struct edge_bounding_box
 
 
 int
-edge_bounding_box_get(
+edge_axis_aligned_bounding_box_get(
   const uint64_t                        ids[],
   struct edge_bounding_box_desc         desc[],
   unsigned                              count);
 
 
+/* -------------------------------------------------------------- [ Mesh ] -- */
+
+
+struct edge_mesh_desc
+{
+  float *positions;
+  float *normals;
+  float *texture_coords;
+  unsigned vert_count;
+
+  float *index;
+  unsigned index_count;
+};
+
+
 int
-edge_bounding_box_set(
-  const uint64_t                        ids[],
-  const struct edge_bounding_box_desc   desc[],
-  unsigned                              count);
+edge_mesh_create(
+  uint64_t                            out_ids[],
+  struct edge_mesh_desc               desc[],
+  unsigned                            count);
+
+
+/* ---------------------------------------------------------- [ Material ] -- */
+
+
+struct edge_material_desc
+{
+  int shader_id;
+};
 
 
 /* -------------------------------------------------------- [ Renderable ] -- */
@@ -191,6 +219,8 @@ struct edge_renderable_desc
 {
   const char *mesh;
   const char *material;
+
+  void *renderpass;
 };
 
 
@@ -232,6 +262,9 @@ edge_camera_set(
   const uint64_t                        ids[],
   const struct edge_camera_desc         desc[],
   unsigned                              count);
+
+
+/* -------------------------------------------------------- [ Renderpass ] -- */
 
 
 #ifndef __cplusplus
