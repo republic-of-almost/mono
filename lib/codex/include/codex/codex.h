@@ -22,12 +22,12 @@ typedef int CODEX_BOOL;
 
 void
 codex_create(
-  struct codex_ctx **ctx);
+  struct codex_ctx          **ctx);
 
 
 void
 codex_destroy(
-  struct codex_ctx **ctx);
+  struct codex_ctx          **ctx);
 
 
 /* ------------------------------------------------------ [ Codex Object ] -- */
@@ -49,24 +49,30 @@ struct codex_callbacks
 
 void
 codex_object_callbacks(
-  struct codex_ctx *ctx,
-  struct codex_callbacks *callbacks);
+  struct codex_ctx            *ctx,
+  struct codex_callbacks      *callbacks);
 
 
 unsigned
 codex_object_create(
-  struct codex_ctx *ctx);
+  struct codex_ctx            *ctx);
 
 
 CODEX_BOOL
 codex_object_destroy(
-  struct codex_ctx *ctx,
-  unsigned obj_id);
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id);
 
 
 unsigned
 codex_object_count(
-  struct codex_ctx *ctx);
+  struct codex_ctx            *ctx);
+
+
+CODEX_BOOL
+codex_object_exists(
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id);
 
 
 /* ---------------------------------------- [ Codex Object Relationships ] -- */
@@ -74,16 +80,24 @@ codex_object_count(
 
 CODEX_BOOL
 codex_object_set_parent(
-  struct codex_ctx *ctx,
-  unsigned this_id,
-  unsigned parent_id);
+  struct codex_ctx            *ctx,
+  unsigned                    this_id,
+  unsigned                    parent_id);
 
 
 void
 codex_object_get_children(
-  struct codex_ctx *ctx,
-  unsigned *obj_id,
-  unsigned *count);
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id,
+  unsigned                    *out_child_ids,
+  unsigned                    *out_count);
+
+
+void
+codex_object_get_parent(
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id,
+  unsigned                    *out_parent_id);
 
 
 /* -------------------------------------------------- [ Codex Properties ] -- */

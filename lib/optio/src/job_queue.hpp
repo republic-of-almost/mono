@@ -94,6 +94,7 @@ optio_job_queue_has_work(struct optio_job_queue_ctx *ctx);
 unsigned /* returns the job_id, 0 if none found */
 optio_job_queue_next(
   struct optio_job_queue_ctx *ctx,
+  int th_id,
   void **out_func,
   void **out_arg
 );
@@ -103,7 +104,8 @@ unsigned /* returns the batch id */
 optio_job_queue_add_batch(
   struct optio_job_queue_ctx *ctx,
   struct optio_job_desc *desc,
-  unsigned count
+  unsigned count,
+  int th_id
 );
 
 

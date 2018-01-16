@@ -173,7 +173,7 @@ optio_thread_create(struct optio_thread **th, struct optio_thread_desc *desc)
 
   #else
 
-  HANDLE handle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 524288, desc->func, desc->arg, CREATE_SUSPENDED, nullptr));
+  HANDLE handle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 524288, desc->func, desc->arg, 0, nullptr));
 
   new_th->thread = handle;
   new_th->id = GetThreadId(handle);

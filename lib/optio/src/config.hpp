@@ -20,9 +20,6 @@
 /* ----------------------------------------------------------- [ Logging ] -- */
 
 
-#define FIBER_PEDANTIC_LOGGING
-
-
 #ifndef NFIBER_LOGGING
 #define FIBER_LOG(str) printf("%s\n", str)
 #define FIBER_LOG_NUMBER(str, num) printf("%s : %d\n", str, num)

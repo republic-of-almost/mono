@@ -8,15 +8,21 @@ TEST_CASE("Codex Object")
 
   SECTION("Create/Destroy")
   {
-    unsigned obj_id = codex_object_create(ctx);
+    const CODEX_BOOL should_not_exist = codex_object_exists(ctx, 123);
+    REQUIRE(should_not_exist == CODEX_FALSE);
+
+    const unsigned obj_id = codex_object_create(ctx);
     REQUIRE(obj_id != 0);
     REQUIRE(codex_object_count(ctx) == 1);
 
-    int destroy_real_id = codex_object_destroy(ctx, obj_id);
+    const CODEX_BOOL should_exist = codex_object_exists(ctx, obj_id);
+    REQUIRE(should_exist == CODEX_TRUE);
+
+    const int destroy_real_id = codex_object_destroy(ctx, obj_id);
     REQUIRE(destroy_real_id == CODEX_TRUE);
     REQUIRE(codex_object_count(ctx) == 0);
 
-    int destroy_unknown_id = codex_object_destroy(ctx, 123);
+    const int destroy_unknown_id = codex_object_destroy(ctx, 123);
     REQUIRE(destroy_unknown_id == CODEX_FALSE);
     REQUIRE(codex_object_count(ctx) == 0);
   }

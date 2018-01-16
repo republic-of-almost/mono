@@ -46,7 +46,6 @@ enum {
 };
 
 
-
 struct optio_dispatcher_ctx
 {
   /* general */
@@ -100,7 +99,7 @@ optio_internal_fiber_executer(void *arg)
       struct optio_thread **thds = ctx->raw_threads;
       const int thds_count = ctx->thread_count;
       const int thd_index = optio_thread_find_this(thds, thds_count);
-      
+
       struct optio_thread_data *tls = &ctx->thread_local_data[thd_index];
       
       FIBER_ASSERT(tls->worker_fiber);
@@ -211,6 +210,7 @@ optio_internal_fiber_dispatcher(void *arg)
         /* setup for new fiber */
         const unsigned job_id = optio_job_queue_next(
           &ctx->job_queue,
+          thd_index,
           &tls->func,
           &tls->arg
         );
@@ -442,7 +442,9 @@ optio_dispatcher_add_jobs(
     FIBER_ASSERT(job_count);
   }
 
-  return optio_job_queue_add_batch(&c->job_queue, desc, job_count);
+  const int th_id = optio_thread_find_this(c->raw_threads, c->thread_count);
+
+  return optio_job_queue_add_batch(&c->job_queue, desc, job_count, th_id);
 }
 
 

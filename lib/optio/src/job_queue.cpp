@@ -123,6 +123,7 @@ optio_job_queue_has_work(struct optio_job_queue_ctx *ctx)
 unsigned
 optio_job_queue_next(
   struct optio_job_queue_ctx *ctx,
+  int th_id,
   void **out_func,
   void **out_arg)
 {
@@ -138,8 +139,8 @@ optio_job_queue_next(
 
   optio_mutex_lock(ctx->mutex);
   
-  int                       *job_status = ctx->job_status;
-  const unsigned            *job_ids    = ctx->job_ids;
+  int                         *job_status = ctx->job_status;
+  const unsigned              *job_ids    = ctx->job_ids;
   const struct optio_job_desc *jobs       = ctx->jobs;
   
   const size_t job_count = optio_array_size(job_status);
@@ -150,13 +151,18 @@ optio_job_queue_next(
   
     if(curr_state == optio_JOB_STATUS_PENDING)
     {
-      return_value  = job_ids[i];
-      job_status[i] = optio_JOB_STATUS_BUSY;
+      const int calling_th = jobs[i].keep_on_calling_thread;
+
+      if(calling_th == -1 || calling_th == th_id)
+      {
+        return_value  = job_ids[i];
+        job_status[i] = optio_JOB_STATUS_BUSY;
       
-      *out_func = (void*)jobs[i].func;
-      *out_arg  = (void*)jobs[i].arg;
+        *out_func = (void*)jobs[i].func;
+        *out_arg  = (void*)jobs[i].arg;
       
-      break;
+        break;
+      }
     }
   }
   
@@ -170,7 +176,8 @@ unsigned
 optio_job_queue_add_batch(
   struct optio_job_queue_ctx *ctx,
   struct optio_job_desc *desc,
-  unsigned count)
+  unsigned count,
+  int thread_id)
 {
   /* param check */
   FIBER_ASSERT(ctx != 0);
@@ -188,9 +195,6 @@ optio_job_queue_add_batch(
     batch.pending_jobs = count;
     batch.is_blocked = 0;
     batch.counter = NULL;
-    
-    int arr[128]{};
-    memset(arr, -1, sizeof(arr));
 
     /* find a counter */
     {
@@ -199,7 +203,7 @@ optio_job_queue_add_batch(
       for(size_t i = 0; i < counter_size; ++i)
       {
         int value = optio_counter_value(&ctx->counters[i]);
-        arr[i] = value;
+
         if(value < 0)
         {
           batch.counter = &ctx->counters[i];
@@ -245,7 +249,16 @@ optio_job_queue_add_batch(
     for(unsigned i = 0; i < count; ++i)
     {
       int new_job_id = ++ctx->job_id_counter;
-    
+      
+      if (desc[i].keep_on_calling_thread == 1)
+      {
+        desc[i].keep_on_calling_thread = thread_id;
+      }
+      else
+      {
+        desc[i].keep_on_calling_thread = -1;
+      }
+
       optio_array_push(ctx->jobs, desc[i]);
       optio_array_push(ctx->job_status, optio_JOB_STATUS_PENDING);
       optio_array_push(ctx->job_ids, new_job_id);

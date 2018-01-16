@@ -337,7 +337,7 @@ make.create_solution(solution_data, project_defaults, projects)
 
               -- We also need link dirs
               if proj.kind ~= "StaticLib" then
-                if other_proj.lib_dirs then linkdirs(other_proj.lib_dirs) end
+                if other_proj.lib_dirs then libdirs(other_proj.lib_dirs) end
                 local platform_dep_lib_dirs = find_table_with_platform(other_proj, "lib_dirs")
                 if platform_dep_lib_dirs then libdirs(platform_dep_lib_dirs) end
               end

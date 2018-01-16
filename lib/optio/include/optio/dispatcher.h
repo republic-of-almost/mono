@@ -67,7 +67,7 @@ struct optio_job_desc
 {
   optio_job_func func;                      /* valid function */
   void *arg;                                /* optional - can be on stack */
-  struct optio_job_atomic_counter *counter; /* hide this */
+  int keep_on_calling_thread;               /* 1 / 0 keep on calling thread */
 };
 
 

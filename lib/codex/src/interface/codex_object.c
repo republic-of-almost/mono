@@ -20,7 +20,7 @@ codex_object_callbacks(
   if (callbacks->created)
   {
     struct codex_callback cb;
-    cb.function = callbacks->created;
+    cb.function = (void*)callbacks->created;
     cb.user_data = callbacks->created_user_data;
 
     roa_array_push(ctx->callbacks_created, cb);
@@ -29,7 +29,7 @@ codex_object_callbacks(
   if (callbacks->destroyed)
   {
     struct codex_callback cb;
-    cb.function = callbacks->destroyed;
+    cb.function = (void*)callbacks->destroyed;
     cb.user_data = callbacks->destroyed_user_data;
 
     roa_array_push(ctx->callbacks_destroyed, cb);
@@ -79,13 +79,18 @@ codex_object_destroy(
   assert(ctx);
   assert(obj_id);
 
+  /* find any children and remove parent */
+  {
+    /* todo - build a list of ids to remove */
+  }
+
   /* find ID and return true / false */
   {
     unsigned *obj_ids = ctx->object_ids;
     unsigned *parent_ids = ctx->parent_ids;
-    const unsigned count = roa_array_size(obj_ids);
+    const unsigned obj_count = roa_array_size(obj_ids);
 
-    for (unsigned i = 0; i < count; ++i)
+    for (unsigned i = 0; i < obj_count; ++i)
     {
       if (obj_ids[i] == obj_id)
       {
@@ -95,9 +100,9 @@ codex_object_destroy(
         /* callbacks */
         {
           struct codex_callback *callbacks = ctx->callbacks_destroyed;
-          const unsigned count = roa_array_size(callbacks);
+          const unsigned cb_count = roa_array_size(callbacks);
 
-          for (unsigned j = 0; j < count; ++j)
+          for (unsigned j = 0; j < cb_count; ++j)
           {
             codex_object_created_callback_fn func = (codex_object_created_callback_fn)callbacks[j].function;
             void *user_data = callbacks[j].user_data;
@@ -123,4 +128,30 @@ codex_object_count(
   assert(ctx);
 
   return roa_array_size(ctx->object_ids);
+}
+
+
+CODEX_BOOL
+codex_object_exists(
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id)
+{
+  /* param check */
+  assert(ctx);
+
+  /* loop through and look for the id */
+  {
+    const unsigned *ids = ctx->object_ids;
+    const unsigned count = roa_array_size(ids);
+
+    for (unsigned i = 0; i < count; ++i)
+    {
+      if (ids[i] == obj_id)
+      {
+        return CODEX_TRUE;
+      }
+    }
+  }
+
+  return CODEX_FALSE;
 }

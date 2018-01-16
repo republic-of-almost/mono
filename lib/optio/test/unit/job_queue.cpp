@@ -8,6 +8,7 @@
 
 
 #define ARR_COUNT(arr) sizeof(arr) / sizeof(arr[0])
+#define ARR_DATA(arr) &arr[0]
 
 
 void
@@ -45,14 +46,15 @@ TEST_CASE("Job Queue")
     /* add work */
     {
       optio_job_desc desc[] {
-        {test_job, nullptr},
-        {test_job, nullptr},
+        {test_job, nullptr, 1},
+        {test_job, nullptr, 1},
       };
       
       batch_id = optio_job_queue_add_batch(
         &ctx,
-        desc,
-        ARR_COUNT(desc)
+        ARR_DATA(desc),
+        ARR_COUNT(desc),
+        1
       );
       
       REQUIRE(batch_id > 0);
@@ -74,8 +76,11 @@ TEST_CASE("Job Queue")
     {
       void *func = nullptr;
       void *arg = nullptr;
+
+      const unsigned other_th_job = optio_job_queue_next(&ctx, 123, &func, &arg);
+      REQUIRE(other_th_job == 0);
       
-      const unsigned job_id = optio_job_queue_next(&ctx, &func, &arg);
+      const unsigned job_id = optio_job_queue_next(&ctx, 1, &func, &arg);
       REQUIRE(job_id);
       
       const unsigned clear_batch_id = optio_job_queue_clear(&ctx, job_id);
@@ -99,7 +104,7 @@ TEST_CASE("Job Queue")
       void *func = nullptr;
       void *arg = nullptr;
       
-      const unsigned job_id = optio_job_queue_next(&ctx, &func, &arg);
+      const unsigned job_id = optio_job_queue_next(&ctx, 1, &func, &arg);
       REQUIRE(job_id);
       
       /* hold */
@@ -127,13 +132,14 @@ TEST_CASE("Job Queue")
         const unsigned batch_id = optio_job_queue_add_batch(
           &ctx,
           desc,
-          ARR_COUNT(desc)
+          ARR_COUNT(desc),
+          1
         );
 
         void *func = 0;
         void *arg = 0;
 
-        const unsigned job_id = optio_job_queue_next(&ctx, &func, &arg);
+        const unsigned job_id = optio_job_queue_next(&ctx, 1, &func, &arg);
         REQUIRE(job_id);
 
         const unsigned clear_batch_id = optio_job_queue_clear(&ctx, job_id);
