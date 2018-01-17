@@ -1,6 +1,21 @@
 #include <codex/codex.h>
 #include <catch/catch.hpp>
 
+/*
+unsigned obj_id = codex_create_object();
+codex_object_set_parent(obj_id, other_obj_id);
+
+
+codex_writer *writer = codex_writer(id);
+codex_writer_commit(writer);
+
+
+float position[3];
+codex_read_float(id, L_POSITION_XYZ, position);
+codex_read_float(id, L_SCALE_XYZ, data);
+
+*/
+
 TEST_CASE("Codex Object")
 {
   codex_ctx *ctx = nullptr;

@@ -1,6 +1,6 @@
 #include <codex/codex.h>
 #include <interface/codex_ctx.h>
-#include <roalib/array.h>
+#include <roa_lib/array.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>

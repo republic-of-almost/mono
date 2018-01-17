@@ -1,6 +1,6 @@
 #include <codex/codex.h>
 #include <interface/codex_ctx.h>
-#include <roalib/array.h>
+#include <roa_lib/array.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -57,7 +57,9 @@ codex_object_create(
     struct codex_callback *callbacks = ctx->callbacks_created;
     const unsigned count = roa_array_size(callbacks);
 
-    for (unsigned i = 0; i < count; ++i)
+    unsigned i;
+
+    for (i = 0; i < count; ++i)
     {
       codex_object_created_callback_fn func = (codex_object_created_callback_fn)callbacks[i].function;
       void *user_data = callbacks[i].user_data;
@@ -90,7 +92,9 @@ codex_object_destroy(
     unsigned *parent_ids = ctx->parent_ids;
     const unsigned obj_count = roa_array_size(obj_ids);
 
-    for (unsigned i = 0; i < obj_count; ++i)
+    unsigned i;
+
+    for (i = 0; i < obj_count; ++i)
     {
       if (obj_ids[i] == obj_id)
       {
@@ -102,7 +106,9 @@ codex_object_destroy(
           struct codex_callback *callbacks = ctx->callbacks_destroyed;
           const unsigned cb_count = roa_array_size(callbacks);
 
-          for (unsigned j = 0; j < cb_count; ++j)
+          unsigned j;
+
+          for (j = 0; j < cb_count; ++j)
           {
             codex_object_created_callback_fn func = (codex_object_created_callback_fn)callbacks[j].function;
             void *user_data = callbacks[j].user_data;
@@ -144,7 +150,9 @@ codex_object_exists(
     const unsigned *ids = ctx->object_ids;
     const unsigned count = roa_array_size(ids);
 
-    for (unsigned i = 0; i < count; ++i)
+    unsigned i;
+
+    for (i = 0; i < count; ++i)
     {
       if (ids[i] == obj_id)
       {

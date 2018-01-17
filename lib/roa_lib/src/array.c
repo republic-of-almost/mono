@@ -72,7 +72,7 @@ roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
   }
 }
 
-size_t
+unsigned
 roa_internal_array_size(void **ptr)
 {
   if (*ptr)

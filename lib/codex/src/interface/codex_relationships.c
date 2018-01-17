@@ -1,6 +1,6 @@
 #include <codex/codex.h>
 #include <interface/codex_ctx.h>
-#include <roalib/array.h>
+#include <roa_lib/array.h>
 #include <assert.h>
 
 
@@ -35,7 +35,9 @@ codex_object_set_parent(
       const unsigned *ids = ctx->object_ids;
       const unsigned count = roa_array_size(ids);
 
-      for (unsigned i = 0; i < count; ++i)
+      unsigned i;
+
+      for (i = 0; i < count; ++i)
       {
         if (ids[i] == parent_id)
         {
@@ -56,7 +58,9 @@ codex_object_set_parent(
       unsigned *parent_ids = ctx->parent_ids;
       const unsigned count = roa_array_size(ids);
 
-      for (unsigned i = 0; i < count; ++i)
+      unsigned i;
+
+      for (i = 0; i < count; ++i)
       {
         if (ids[i] == this_id)
         {
@@ -91,7 +95,9 @@ codex_object_get_children(
     const unsigned *parent_ids = ctx->parent_ids;
     const unsigned count = roa_array_size(ctx->parent_ids);
 
-    for (unsigned i = 0; i < count; ++i)
+    unsigned i;
+
+    for (i = 0; i < count; ++i)
     {
       if (parent_ids[i] == obj_id)
       {
@@ -129,7 +135,9 @@ codex_object_get_parent(
       const unsigned *parent_ids = ctx->parent_ids;
       const unsigned obj_count   = roa_array_size(obj_ids);
 
-      for (unsigned i = 0; i < obj_count; ++i)
+      unsigned i;
+
+      for (i = 0; i < obj_count; ++i)
       {
         if (obj_ids[i] == obj_id)
         {
