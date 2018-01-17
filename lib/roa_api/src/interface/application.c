@@ -231,50 +231,57 @@ ROA_BOOL
 roa_application_create(
   const struct roa_application_desc *app_desc)
 {
-  /* optio */
+  ROA_ASSERT(app_desc);
+
+  if(app_desc)
   {
-    struct optio_dispatcher_desc optio_desc =
+    /* optio */
     {
-      1,
-      1 << 7,
-      1 << 10,
-    };
+      struct optio_dispatcher_desc optio_desc =
+      {
+        1,
+        1 << 7,
+        1 << 10,
+      };
 
-    optio_dispatcher_create(&roa_ctx()->optio_ctx, &optio_desc);
+      optio_dispatcher_create(&roa_ctx()->optio_ctx, &optio_desc);
+    }
+
+    /* start up the dispatcher manager */
+    {
+      struct optio_job_desc desc;
+      desc.func = job_app_setup;
+      desc.arg = (void*)app_desc;
+      desc.keep_on_calling_thread = 1;
+
+      optio_dispatcher_add_jobs(
+        roa_ctx()->optio_ctx,
+        &desc,
+        1);
+
+      optio_dispatcher_run(roa_ctx()->optio_ctx);
+    }
+
+    /* destroy application */
+    {
+      struct optio_job_desc desc = {
+        job_app_quit,
+        ROA_NULL,
+        ROA_NULL,
+      };
+
+      optio_dispatcher_add_jobs(
+        roa_ctx()->optio_ctx,
+        &desc,
+        1);
+
+      optio_dispatcher_run(roa_ctx()->optio_ctx);
+    }
+
+    return ROA_TRUE;
   }
 
-  /* start up the dispatcher manager */
-  {
-    struct optio_job_desc desc;
-    desc.func = job_app_setup;
-    desc.arg = (void*)app_desc;
-    desc.keep_on_calling_thread = 1;
-
-    optio_dispatcher_add_jobs(
-      roa_ctx()->optio_ctx,
-      &desc,
-      1);
-
-    optio_dispatcher_run(roa_ctx()->optio_ctx);
-  }
-
-  /* destroy application */
-  {
-    struct optio_job_desc desc = {
-      job_app_quit,
-      ROA_NULL,
-      ROA_NULL,
-    };
-
-    optio_dispatcher_add_jobs(
-      roa_ctx()->optio_ctx,
-      &desc,
-      1);
-
-    optio_dispatcher_run(roa_ctx()->optio_ctx);
-  }
-
-  return ROA_TRUE;
+  return ROA_FALSE;
 }
 
 
@@ -282,7 +289,13 @@ ROA_BOOL
 roa_application_destroy()
 {
   struct roa_context *ctx = roa_ctx();
-  ctx->quit = 1;
 
-  return ROA_TRUE;
+  if(ctx)
+  {
+    ctx->quit = 1;
+
+    return ROA_TRUE;
+  }
+
+  return ROA_FALSE;
 }
