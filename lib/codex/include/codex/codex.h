@@ -16,41 +16,31 @@ typedef int CODEX_BOOL;
 #define CODEX_TRUE 1
 #define CODEX_FALSE 0
 
+typedef enum codex_property {
+
+  LOCAL_POSITION_F3,
+  LOCAL_SCALE_F3,
+  LOCAL_ROTATION_F4,
+
+} codex_property;
+
+typedef struct codex_property_writer codex_property_writer;
+
 
 /* ---------------------------------------------------- [ Codex Lifetime ] -- */
 
 
 void
 codex_create(
-  struct codex_ctx          **ctx);
+  struct codex_ctx            **ctx);
 
 
 void
 codex_destroy(
-  struct codex_ctx          **ctx);
+  struct codex_ctx            **ctx);
 
 
 /* ------------------------------------------------------ [ Codex Object ] -- */
-
-
-typedef void(*codex_object_created_callback_fn)(unsigned obj_ids[], unsigned count, void *user_data);
-typedef void(*codex_object_destroyed_callback_fn)(unsigned obj_ids[], unsigned count, void *user_data);
-
-
-struct codex_callbacks
-{
-  codex_object_created_callback_fn created;
-  void *created_user_data;
-
-  codex_object_destroyed_callback_fn destroyed;
-  void *destroyed_user_data;
-};
-
-
-void
-codex_object_callbacks(
-  struct codex_ctx            *ctx,
-  struct codex_callbacks      *callbacks);
 
 
 unsigned
@@ -75,36 +65,33 @@ codex_object_exists(
   unsigned                    obj_id);
 
 
-/* ---------------------------------------- [ Codex Object Relationships ] -- */
-
-
-CODEX_BOOL
-codex_object_set_parent(
-  struct codex_ctx            *ctx,
-  unsigned                    this_id,
-  unsigned                    parent_id);
-
-
-void
-codex_object_get_children(
-  struct codex_ctx            *ctx,
-  unsigned                    obj_id,
-  unsigned                    *out_child_ids,
-  unsigned                    *out_count);
-
-
-void
-codex_object_get_parent(
-  struct codex_ctx            *ctx,
-  unsigned                    obj_id,
-  unsigned                    *out_parent_id);
-
-
 /* -------------------------------------------------- [ Codex Properties ] -- */
 
 
 void
-codex_property_get();
+codex_property_read_float(
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id,
+  codex_property              property,
+  float                       *out_data);
+
+
+codex_property_writer*
+codex_property_get_writer(
+  struct codex_ctx            *ctx,
+  unsigned                    obj_id);
+
+
+void
+codex_property_write_float(
+  codex_property_writer       *writer,
+  codex_property              property,
+  const float                 *in_data);
+
+
+void
+codex_property_commit_writer(
+  codex_property_writer       *writer);
 
 
 #ifdef __cplusplus

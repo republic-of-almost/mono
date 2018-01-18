@@ -1,40 +1,12 @@
 #include <codex/codex.h>
 #include <interface/codex_ctx.h>
+#include <roa_lib/fundamental.h>
 #include <roa_lib/array.h>
-#include <assert.h>
+#include <roa_lib/assert.h>
 #include <stdlib.h>
 
 
 /* ------------------------------------------------------ [ Codex Object ] -- */
-
-
-void
-codex_object_callbacks(
-  struct codex_ctx *ctx,
-  struct codex_callbacks *callbacks)
-{
-  /* param check */
-  assert(ctx);
-  assert(callbacks);
-
-  if (callbacks->created)
-  {
-    struct codex_callback cb;
-    cb.function = (void*)callbacks->created;
-    cb.user_data = callbacks->created_user_data;
-
-    roa_array_push(ctx->callbacks_created, cb);
-  }
-
-  if (callbacks->destroyed)
-  {
-    struct codex_callback cb;
-    cb.function = (void*)callbacks->destroyed;
-    cb.user_data = callbacks->destroyed_user_data;
-
-    roa_array_push(ctx->callbacks_destroyed, cb);
-  }
-}
 
 
 unsigned
@@ -42,30 +14,19 @@ codex_object_create(
   struct codex_ctx *ctx)
 {
   /* param check */
-  assert(ctx);
+  ROA_ASSERT(ctx);
+
+  if(ctx == ROA_NULL)
+  {
+    return 0;
+  }
 
   /* new obj */
   unsigned new_id = ++ctx->object_instance_counter;
   {
-    assert(new_id != 0);
+    ROA_ASSERT(new_id != 0);
     roa_array_push(ctx->object_ids, new_id);
     roa_array_push(ctx->parent_ids, 0);
-  }
-
-  /* alert callbacks */
-  {
-    struct codex_callback *callbacks = ctx->callbacks_created;
-    const unsigned count = roa_array_size(callbacks);
-
-    unsigned i;
-
-    for (i = 0; i < count; ++i)
-    {
-      codex_object_created_callback_fn func = (codex_object_created_callback_fn)callbacks[i].function;
-      void *user_data = callbacks[i].user_data;
-
-      func(&new_id, 1, user_data);
-    }
   }
 
   return new_id;
@@ -78,12 +39,12 @@ codex_object_destroy(
   unsigned obj_id)
 {
   /* param check */
-  assert(ctx);
-  assert(obj_id);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(obj_id);
 
-  /* find any children and remove parent */
+  if(ctx == ROA_NULL)
   {
-    /* todo - build a list of ids to remove */
+    return CODEX_FALSE;
   }
 
   /* find ID and return true / false */
@@ -101,22 +62,6 @@ codex_object_destroy(
         roa_array_erase(obj_ids, i);
         roa_array_erase(parent_ids, i);
 
-        /* callbacks */
-        {
-          struct codex_callback *callbacks = ctx->callbacks_destroyed;
-          const unsigned cb_count = roa_array_size(callbacks);
-
-          unsigned j;
-
-          for (j = 0; j < cb_count; ++j)
-          {
-            codex_object_created_callback_fn func = (codex_object_created_callback_fn)callbacks[j].function;
-            void *user_data = callbacks[j].user_data;
-
-            func(&obj_id, 1, user_data);
-          }
-        }
-
         return CODEX_TRUE;
       }
     }
@@ -131,7 +76,12 @@ codex_object_count(
   struct codex_ctx *ctx)
 {
   /* param check */
-  assert(ctx);
+  ROA_ASSERT(ctx);
+
+  if(ctx == ROA_NULL)
+  {
+    return 0;
+  }
 
   return roa_array_size(ctx->object_ids);
 }
@@ -143,7 +93,12 @@ codex_object_exists(
   unsigned                    obj_id)
 {
   /* param check */
-  assert(ctx);
+  ROA_ASSERT(ctx);
+
+  if(ctx == ROA_NULL)
+  {
+    return CODEX_FALSE;
+  }
 
   /* loop through and look for the id */
   {

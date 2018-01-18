@@ -24,6 +24,16 @@ extern "C" {
 #endif
 
 
+/* ------------------------------------------------------- [ basic types ] -- */
+
+
+#define ROA_NULL 0
+
+typedef int ROA_BOOL;
+#define ROA_TRUE 1
+#define ROA_FALSE 0
+
+
 /* ----------------------------------------------------- [ array helpers ] -- */
 
 
