@@ -61,13 +61,16 @@ table.insert(
     },
 
     defines = {
-
-      -- See build.md for build flags doc
-
+      -- see build.md for details --
+      "ROA_JOB_SINGLETHREADED=0",
+      "ROA_DISPATCH_MAX_FIBERS=128",
+      "ROA_DISPATCH_MAX_JOBS=1024",
+      "ROA_JOB_FIBER_DYNA=0",
+      "ROA_JOB_BATCH_DYNA=0",
+      "ROA_JOB_BIND_THREAD_TO_CORE=1",
     },
 
     project_dependencies = {
-
       -- First Party --
       "RepublicLib",
     },

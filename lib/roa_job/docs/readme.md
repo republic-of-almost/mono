@@ -1,6 +1,6 @@
-# Optio Readme
+# ROA Job Readme
 
-Optio is my task solution, based on fibers, its writen in C89 and uses Boost
+Optio is my task solution, based on fibers, its writen in C++11 and uses Boost
 for the asm it should be very portable.
 
 ## Current State
