@@ -50,7 +50,7 @@ codex_array_push(array, 123);
   roa_internal_array_internal_pop((void**)&arr); \
 
 #define roa_array_back(arr) \
-  arr[roa_internal_array_size(arr) - 1] \
+  arr[roa_array_size(arr) - 1] \
 
 
 /* -------------------------------------------------------- [ Array Impl ] -- */

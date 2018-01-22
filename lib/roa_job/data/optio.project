@@ -1,0 +1,75 @@
+#!lua
+
+--[[
+
+  Optio Project Description
+
+]]--
+
+table.insert(
+  projects,
+  {
+    name     = "Optio",
+    kind     = "StaticLib",
+    language = "C++11",
+    location = make.get_proj_root(),
+
+    src_files = {
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      make.add_headers(make.get_proj_root() .. "../src/"),
+      make.add_src(make.get_proj_root() .. "../src/"),
+      make.add_doc(make.get_proj_root() .. "../"),
+
+      --make.get_proj_root() .. "../data/",
+
+      -- Boost ASM
+
+      --make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_x86_64_sysv_macho_gas.S",
+      --make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S",
+    },
+
+    -- Assembly files are per compiler per arch --
+
+    src_files_windows = {
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm",
+    },
+
+    src_files_macos = {
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_x86_64_sysv_macho_gas.S",
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S",
+    },
+
+    -- src_files_windows_x86 = {
+    --   make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
+    --   make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm",
+    -- },
+
+    -- src_files_windows_x64 = {
+    --   make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_x86_64_ms_pe_masm.asm",
+    --   make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_x86_64_ms_pe_masm.asm",
+    -- },
+
+    private_inc_dirs = {
+      make.get_proj_root() .. "../src/",
+      make.get_proj_root() .. "../src/thirdparty/boost_context/include",
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm",
+    },
+
+    public_inc_dirs = {
+      make.get_proj_root() .. "../include/",
+    },
+
+    defines = {
+
+      -- See build.md for build flags doc
+
+    },
+
+    project_dependencies = {
+
+      -- First Party --
+      "RepublicLib",
+    },
+  }
+)
