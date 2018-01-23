@@ -10,7 +10,7 @@
 table.insert(
   projects,
   {
-    name     = "RepublicLibUnitTests",
+    name     = "RepublicLibUnitTest",
     kind     = "ConsoleApp",
     language = "C++",
     location = make.get_proj_root(),

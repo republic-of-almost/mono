@@ -3,8 +3,9 @@
 #include <job_queue.hpp>
 #include <fiber_pool.hpp>
 #include <roa_lib/array.h>
-#include <thread.hpp>
-#include <thread.hpp>
+#include <roa_lib/thread.h>
+#include <roa_lib/assert.h>
+#include <roa_lib/fundamental.h>
 #include <fiber.hpp>
 #include <config.hpp>
 
@@ -24,18 +25,28 @@
 /* -------------------------------------------------- [ Dispatcher Types ] -- */
 
 
+struct roa_dispatcher_ctx;
+
+
 /*
 Threads access this data directly.
 */
+struct roa_thread_arg
+{
+  struct roa_dispatcher_ctx *ctx;
+  roa_thread_id *thread_id;
+  ROA_BOOL done;
+};
+
 struct roa_thread_data
 {
   /* threads switch between fibers */
   struct roa_fiber *home_fiber;     /* local fiber */
   struct roa_fiber *worker_fiber;   /* fiber to execute */
 
-                                    /* function to exec */
-  void *func;                         /* function to exec on fiber */
-  void *arg;                          /* arg for function */
+  /* function to exec */
+  void *func;                       /* function to exec on fiber */
+  void *arg;                        /* arg for function */
 };
 
 
@@ -54,8 +65,10 @@ struct roa_dispatcher_ctx
 
   /* threads */
   int thread_count;
+  /* array */ roa_thread_id    *thread_ids;
   /* array */ struct roa_thread_data  *thread_local_data;
-  /* array */ struct roa_thread       *raw_threads;
+  /* array */ roa_thread       *raw_threads;
+
   /* jobs */
   struct roa_job_queue_ctx job_queue;
 
@@ -65,6 +78,32 @@ struct roa_dispatcher_ctx
   /* config */
   struct roa_dispatcher_desc desc;
 };
+
+
+/* -------------------------------------------------- [ Internal Helpers ] -- */
+
+
+/*
+Helper to find thread index
+*/
+int
+roa_internal_find_thread_index(
+  const struct roa_dispatcher_ctx *c)
+{
+  roa_thread_id id = roa_thread_get_current_id();
+
+  for (int i = 0; i < c->thread_count; ++i)
+  {
+    if (c->thread_ids[i] == id)
+    {
+      return i;
+    }
+  }
+
+  ROA_ASSERT(false);
+
+  return -1;
+}
 
 
 /* ---------------------------------------------- [ Internal Dispatchers ] -- */
@@ -94,11 +133,14 @@ roa_internal_fiber_executer(void *arg)
 
   for (;;)
   {
+    if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+    {
+      roa_thread_set_current_name("ROAJob_Fiber");
+    }
+
     /* fiber work - we don't know what thread we are on */
     {
-      struct roa_thread *thds = ctx->raw_threads;
-      const int thds_count = ctx->thread_count;
-      const int thd_index = roa_thread_find_this(thds, thds_count);
+      const int thd_index = roa_internal_find_thread_index(ctx);
 
       struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
 
@@ -116,9 +158,7 @@ roa_internal_fiber_executer(void *arg)
 
     /* switch back - we might be on a different thread */
     {
-      struct roa_thread *thds = ctx->raw_threads;
-      const int thds_count = ctx->thread_count;
-      const int thd_index = roa_thread_find_this(thds, thds_count);
+      const int thd_index = roa_internal_find_thread_index(ctx);
 
       struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
 
@@ -136,28 +176,46 @@ roa_internal_fiber_executer(void *arg)
 
 
 /* Dispatcher finds jobs and fibers and kicks them off */
+/*
 #ifdef _WIN32
 unsigned __stdcall
 roa_internal_fiber_dispatcher(void *arg)
 #else
+*/
 void*
 roa_internal_fiber_dispatcher(void *arg)
-#endif
+/*#endif */
 {
   /* param check */
   FIBER_ASSERT(arg);
 
+  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+  {
+    roa_thread_set_current_name("ROAJob_Loading");
+  }
+
+  struct roa_thread_arg *th_arg = (struct roa_thread_arg*)arg;
+  FIBER_ASSERT(th_arg);
+  FIBER_ASSERT(th_arg->ctx);
+  FIBER_ASSERT(th_arg->thread_id);
+  FIBER_ASSERT(th_arg->done == 0);
+
   /* setup thread */
-  struct roa_dispatcher_ctx *ctx = (struct roa_dispatcher_ctx*)arg;
-  FIBER_ASSERT(ctx);
+  struct roa_dispatcher_ctx *ctx = th_arg->ctx;
+  *th_arg->thread_id = roa_thread_get_current_id();
+
+  th_arg->done = ROA_TRUE;
 
   /* threads can startup before setup has finished */
   while (ctx->dispatch_state <= FIBER_DISPATCHER_INITIALIZING) {}
 
+  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+  {
+    roa_thread_set_current_name("ROAJob_Loaded");
+  }
+
   /* create a fiber for this thread, so we can jump in and out */
-  struct roa_thread *thds = ctx->raw_threads;
-  const int thds_count = ctx->thread_count;
-  const int thd_index = roa_thread_find_this(thds, thds_count);
+  const int thd_index = roa_internal_find_thread_index(ctx);
 
   struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
   FIBER_ASSERT(tls);
@@ -173,6 +231,11 @@ roa_internal_fiber_dispatcher(void *arg)
 
   for (;;)
   {
+    if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+    {
+      roa_thread_set_current_name("ROAJob_Search");
+    }
+
     /* must start in a good state */
     FIBER_ASSERT(tls->worker_fiber == 0);
     FIBER_ASSERT(tls->home_fiber != 0);
@@ -185,6 +248,11 @@ roa_internal_fiber_dispatcher(void *arg)
       /* all done */
       if ((has_pending_fibers + has_pending_jobs) == 0)
       {
+        if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+        {
+          roa_thread_set_current_name("ROAJob_Shutdown");
+        }
+
         break;
       }
     }
@@ -270,6 +338,12 @@ roa_dispatcher_create(
   struct roa_dispatcher_ctx **c,
   const struct roa_dispatcher_desc *override_desc)
 {
+  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+  {
+    roa_thread_set_current_name("ROAJob_Main");
+  }
+
+
   /* param assert */
   FIBER_ASSERT(c);
 
@@ -329,6 +403,8 @@ roa_dispatcher_create(
       new_ctx->thread_count = core_count - new_ctx->desc.free_cores;
     }
 
+    roa_array_create(new_ctx->thread_ids, new_ctx->thread_count);
+
     roa_array_create(new_ctx->raw_threads, new_ctx->thread_count);
     roa_array_resize(new_ctx->raw_threads, new_ctx->thread_count);
 
@@ -336,28 +412,40 @@ roa_dispatcher_create(
     roa_array_resize(new_ctx->thread_local_data, new_ctx->thread_count);
 
     /* setup main thread */
-    struct roa_thread this_thread = roa_thread_create_this();
+    roa_thread this_thread = roa_thread_create_self();
     {
       new_ctx->raw_threads[0] = this_thread;
       new_ctx->thread_local_data[0].worker_fiber = 0;
       new_ctx->raw_threads[0] = this_thread;
+      new_ctx->thread_ids[0] = roa_thread_get_current_id();
     }
 
     /* threads for the other cores */
     for (int i = 1; i < new_ctx->thread_count; ++i)
     {
-      struct roa_thread_desc desc;
-      desc.func = roa_internal_fiber_dispatcher;
-      desc.arg = (void*)new_ctx;
-      desc.affinity = i;
+      struct roa_thread_arg thread_arg;
+      thread_arg.ctx = new_ctx;
+      thread_arg.thread_id = &new_ctx->thread_ids[i];
+      thread_arg.done = ROA_FALSE;
 
-      //new_ctx->raw_threads[i] = roa_thread_create(&desc);
-      roa_thread_create(&new_ctx->raw_threads[i], &desc);
+      roa_thread th = roa_thread_create(
+        roa_internal_fiber_dispatcher,
+        &thread_arg,
+        0,
+        0
+      );
+
+      ROA_ASSERT(th);
+
+      new_ctx->raw_threads[i] = th;
+
+      while (thread_arg.done != ROA_TRUE)
+      {
+        /* wait till this thread is initialized */
+      }
+
+      /* should wait for thread to be initalized */
     }
-
-    /* check */
-    printf("create: ");
-    roa_thread_find_this(new_ctx->raw_threads, new_ctx->thread_count);
 
     /* th logging */
     {
@@ -418,21 +506,24 @@ roa_dispatcher_run(
   {
     c->dispatch_state = FIBER_DISPATCHER_RUNNING;
 
-    roa_internal_fiber_dispatcher(c);
+    struct roa_thread_arg arg;
+    arg.ctx = c;
+    arg.thread_id = &c->thread_ids[0];
+    arg.done = ROA_FALSE;
+
+    roa_internal_fiber_dispatcher(&arg);
+  }
+
+  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
+  {
+    roa_thread_set_current_name("ROAJob_Main");
   }
 
   /* wait for threads to clean up */
   {
     /* exclude first thread as its main thread */
-    //roa_thread **ths = &c->raw_threads[1];
     const unsigned th_count = c->thread_count - 1;
-
-    //roa_thread_join(ths, th_count);
   }
-
-  printf("run: ");
-  roa_thread_find_this(c->raw_threads, c->thread_count);
-
 
   FIBER_LOG("Dispatch shutdown");
 }
@@ -451,7 +542,7 @@ roa_dispatcher_add_jobs(
     FIBER_ASSERT(job_count);
   }
 
-  const int th_id = roa_thread_find_this(c->raw_threads, c->thread_count);
+  const int th_id = roa_internal_find_thread_index(c);
 
   return roa_job_queue_add_batch(&c->job_queue, desc, job_count, th_id);
 }
@@ -471,9 +562,7 @@ roa_dispatcher_wait_for_counter(
   /* get tls */
   struct roa_thread_data *tls = NULL;
   {
-    struct roa_thread *thds = ctx->raw_threads;
-    const int thds_count = ctx->thread_count;
-    const int thd_index = roa_thread_find_this(thds, thds_count);
+    const int thd_index = roa_internal_find_thread_index(ctx);
 
     tls = &ctx->thread_local_data[thd_index];
   }

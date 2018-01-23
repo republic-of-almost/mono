@@ -12,6 +12,23 @@
 #elif defined(__APPLE__)
 #include <pthread.h>
 #elif defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+const DWORD MS_VC_EXCEPTION = 0x406D1388;
+#pragma pack( push, 8 )
+typedef struct tagTHREADNAME_INFO
+{
+  DWORD dwType;
+  LPCSTR szName;
+  DWORD dwThreadID;
+  DWORD dwFlags;
+} THREADNAME_INFO;
+#pragma pack(pop)
 
 #endif
 
@@ -47,12 +64,25 @@ roa_thread_create(
   return (roa_thread)th;
 
   #elif defined(_WIN32)
+  HANDLE handle = (HANDLE)(_beginthreadex(
+    NULL,
+    524288,
+    func,
+    arg,
+    0,
+    NULL)
+  );
+
+  if(handle == 0)
+  {
+    return ROA_NULL;
+  }
+
+  return (roa_thread)handle;
 
   #else
   #error "Unsupported platform"
   #endif
-
-  return ROA_NULL;
 }
 
 
@@ -62,18 +92,18 @@ roa_thread_create_self()
   #if defined(__linux__) || defined(__APPLE__)
   return (roa_thread)pthread_self();
   #elif defined(_WIN32)
-
+  return (roa_thread)GetCurrentThreadId();
   #else
   #error "Unsupported Platform"
   #endif
-
-  return ROA_NULL;
 }
 
 
 void
 roa_thread_destroy(roa_thread *th)
 {
+  ROA_ASSERT(th);
+
   #if defined(__linux__) || defined(__APPLE__)
   int success = pthread_join((pthread_t)*th, ROA_NULL);
 
@@ -84,6 +114,12 @@ roa_thread_destroy(roa_thread *th)
 
   #elif defined(_WIN32)
 
+  HANDLE win_th = (HANDLE)*th;
+
+  WaitForSingleObject(win_th, INFINITE);
+  CloseHandle(win_th);
+
+  *th = ROA_NULL;
   #else
   #error "Unsupported Platform"
   #endif
@@ -100,9 +136,9 @@ void
 roa_thread_join(roa_thread th)
 {
   #if defined(__linux__) || defined(__APPLE__)
-  pthread_join((pthread_t) th, NULL);
+  pthread_join((pthread_t)th, NULL);
   #elif defined(_WIN32)
-
+  WaitForSingleObject((HANDLE)th, INFINITE);
   #else
   #error "Unsupported Platform"
   #endif
@@ -118,7 +154,7 @@ roa_thread_exit_current()
   #if defined(__linux__) || defined(__APPLE__)
   pthread_exit(ROA_NULL);
   #elif defined(_WIN32)
-
+  ExitThread(0);
   #else
   #error "Unsupported Platform";
   #endif
@@ -131,7 +167,7 @@ roa_thread_get_current_id()
   #if defined(__linux__) || defined(__APPLE__)
   return (roa_thread_id)pthread_self();
   #elif defined(_WIN32)
-
+  return (roa_thread_id)GetCurrentThreadId();
   #else
   #error "Unsupported Platform"
   #endif
@@ -148,29 +184,25 @@ roa_thread_set_current_name(const char *name)
   int success = pthread_setname_np(name);
   ROA_ASSERT(success);
   #elif defined(_WIN32)
-  /* windows method */
+  {
+    THREADNAME_INFO info;
+    info.dwType = 0x1000;
+    info.szName = name;
+    info.dwThreadID = GetCurrentThreadId();
+    info.dwFlags = 0;
+
+    __try
+    {
+      RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+    }
+  }
   #else
   #error "Unsupported Platform"
   #endif
 }
-
-
-void
-roa_thread_get_current_name(char *buffer, unsigned buffer_size)
-{
-  #if defined(__linux__)
-  int success = pthread_getname_np(pthread_self(), buffer, buffer_size);
-  ROA_ASSERT(success == 0);
-  #elif defined(__APPLE__)
-  int success = pthread_setname_np(name);
-  ROA_ASSERT(success);
-  #elif defined(_WIN32)
-  /* windows method */
-  #else
-  #error "Unsupported Platform"
-  #endif
-}
-
 
 
 unsigned
@@ -181,12 +213,12 @@ roa_thread_core_count()
   #elif defined(__APPLE__)
 
   #elif defined(_WIN32)
-
+  SYSTEM_INFO sys_info;
+  GetSystemInfo(&sys_info);
+  return sys_info.dwNumberOfProcessors;
   #else
   #error "Unsupported Platform"
   #endif
-
-  return 0;
 }
 
 

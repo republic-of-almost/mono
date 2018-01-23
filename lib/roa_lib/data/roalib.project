@@ -32,7 +32,7 @@ table.insert(
       make.get_proj_root() .. "../src/",
     },
 
-    link_dependencies = {
+    link_dependencies_linux = {
       "pthread",
     },
 
@@ -40,9 +40,18 @@ table.insert(
       "_GNU_SOURCE",
     },
 
+    link_dependencies_windows = {
+      "Kernel32.lib",
+    },
+
     defines_windows = {
       WIN32_LEAN_AND_MEAN,
       NOMINMAX,
     },
+
+    defines = {
+      "ROA_JOB_DEBUG_NAME_THREADS=1",
+    },
+  
   }
 )

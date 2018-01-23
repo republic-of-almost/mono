@@ -68,11 +68,16 @@ table.insert(
       "ROA_JOB_FIBER_DYNA=0",
       "ROA_JOB_BATCH_DYNA=0",
       "ROA_JOB_BIND_THREAD_TO_CORE=1",
+      "ROA_JOB_DEBUG_NAME_THREADS=1",
     },
 
     project_dependencies = {
       -- First Party --
       "RepublicLib",
+    },
+
+    disable_warning_windows = {
+      "4127", -- Warning - Conditional expression is a constant --
     },
   }
 )

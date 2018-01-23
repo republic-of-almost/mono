@@ -270,6 +270,12 @@ make.create_solution(solution_data, project_defaults, projects)
     local platform_link_options = find_table_with_platform(proj, "linkoptions")
     if platform_link_options then linkoptions(platform_link_options) end
 
+    -- Warnings
+    if proj.disable_warning then disablewarnings(proj.disable_warning) end
+
+    local platform_disable_warning = find_table_with_platform(proj, "disable_warning")
+    if platform_disable_warning then disablewarnings(platform_disable_warning) end
+
     -- Links and Link dependencies
     if proj.links then links(proj.links) end
 

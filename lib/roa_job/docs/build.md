@@ -53,3 +53,11 @@ Will create more jobs dynamically if required. Be aware it will not free up reso
 _set to 1 or 0 : default 1_
 
 Where the platform API is available it will bind the thread to the core, or pair of cores. Ignored if ROA_JOB_SINGLETHREADED is 1.
+
+
+### ROA_JOB_DEBUG_NAME_THREADS
+
+_set to 1 or 0 : default 1_
+
+If the platform supports it, the fiber system will rename threads with debug information.
+There could be a performance hit from this.
