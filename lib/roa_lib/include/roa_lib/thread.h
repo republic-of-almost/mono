@@ -24,13 +24,13 @@
 
 struct roa_thread
 {
-#ifndef _WIN32
+  #ifndef _WIN32
   pthread_t thread;
   pthread_attr_t attr;
-#else
+  #else
   HANDLE thread;
   DWORD id;
-#endif
+  #endif
 };
 
 

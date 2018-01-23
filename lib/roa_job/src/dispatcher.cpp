@@ -55,7 +55,7 @@ struct roa_dispatcher_ctx
   /* threads */
   int thread_count;
   /* array */ struct roa_thread_data  *thread_local_data;
-  /* array */ struct roa_thread       **raw_threads;
+  /* array */ struct roa_thread       *raw_threads;
   /* jobs */
   struct roa_job_queue_ctx job_queue;
 
@@ -96,7 +96,7 @@ roa_internal_fiber_executer(void *arg)
   {
     /* fiber work - we don't know what thread we are on */
     {
-      struct roa_thread **thds = ctx->raw_threads;
+      struct roa_thread *thds = ctx->raw_threads;
       const int thds_count = ctx->thread_count;
       const int thd_index = roa_thread_find_this(thds, thds_count);
 
@@ -116,7 +116,7 @@ roa_internal_fiber_executer(void *arg)
 
     /* switch back - we might be on a different thread */
     {
-      struct roa_thread **thds = ctx->raw_threads;
+      struct roa_thread *thds = ctx->raw_threads;
       const int thds_count = ctx->thread_count;
       const int thd_index = roa_thread_find_this(thds, thds_count);
 
@@ -155,7 +155,7 @@ roa_internal_fiber_dispatcher(void *arg)
   while (ctx->dispatch_state <= FIBER_DISPATCHER_INITIALIZING) {}
 
   /* create a fiber for this thread, so we can jump in and out */
-  struct roa_thread **thds = ctx->raw_threads;
+  struct roa_thread *thds = ctx->raw_threads;
   const int thds_count = ctx->thread_count;
   const int thd_index = roa_thread_find_this(thds, thds_count);
 
@@ -336,7 +336,7 @@ roa_dispatcher_create(
     roa_array_resize(new_ctx->thread_local_data, new_ctx->thread_count);
 
     /* setup main thread */
-    struct roa_thread *this_thread = roa_thread_create_this();
+    struct roa_thread this_thread = roa_thread_create_this();
     {
       new_ctx->raw_threads[0] = this_thread;
       new_ctx->thread_local_data[0].worker_fiber = 0;
@@ -385,14 +385,14 @@ roa_dispatcher_destroy(struct roa_dispatcher_ctx **c)
   /* destroy threads */
   {
     int th_count = (*c)->thread_count;
-
+    
     for (int i = 1; i < th_count; ++i)
     {
       roa_thread_destroy(&(*c)->raw_threads[i]);
     }
 
     roa_array_destroy((*c)->thread_local_data);
-    //roa_array_destroy((*c)->raw_threads);
+    roa_array_destroy((*c)->raw_threads);
   }
 
   roa_job_queue_destroy(&(*c)->job_queue);
@@ -471,7 +471,7 @@ roa_dispatcher_wait_for_counter(
   /* get tls */
   struct roa_thread_data *tls = NULL;
   {
-    struct roa_thread **thds = ctx->raw_threads;
+    struct roa_thread *thds = ctx->raw_threads;
     const int thds_count = ctx->thread_count;
     const int thd_index = roa_thread_find_this(thds, thds_count);
 

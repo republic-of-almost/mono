@@ -1,36 +1,6 @@
 #include <thread.hpp>
 #include <config.hpp>
 
-#ifndef _WIN32
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <pthread.h>
-#include <sched.h>
-#include <sys/types.h>
-#include <mach/thread_policy.h>
-#include <mach/thread_act.h>
-#include <sys/sysctl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#else
-#define WIN_LEAN_AND_MEAN
-#include <windows.h>
-#include <process.h>
-#endif
-
-
-struct roa_thread
-{
-#ifndef _WIN32
-  pthread_t thread;
-  pthread_attr_t attr;
-#else
-  HANDLE thread;
-  DWORD id;
-#endif
-};
-
 
 #ifndef _WIN32
 #define SYSCTL_CORE_COUNT   "machdep.cpu.core_count"
@@ -128,14 +98,14 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpu_size,
 
 
 void
-roa_thread_create(struct roa_thread **th, struct roa_thread_desc *desc)
+roa_thread_create(struct roa_thread *th, struct roa_thread_desc *desc)
 {
   /* param check */
   FIBER_ASSERT(th);
   FIBER_ASSERT(desc);
 
-  const size_t bytes = sizeof(struct roa_thread);
-  struct roa_thread *new_th = (struct roa_thread*)FIBER_MALLOC(bytes);
+  //const size_t bytes = sizeof(struct roa_thread);
+  //struct roa_thread *new_th = (struct roa_thread*)FIBER_MALLOC(bytes);
 
 #ifndef _WIN32
   /* create pthread */
@@ -176,20 +146,20 @@ roa_thread_create(struct roa_thread **th, struct roa_thread_desc *desc)
 
   HANDLE handle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 524288, desc->func, desc->arg, 0, nullptr));
 
-  new_th->thread = handle;
-  new_th->id = GetThreadId(handle);
+  th->thread = handle;
+  th->id = GetThreadId(handle);
 
 #endif
 
-  *th = new_th;
+  //*th = new_th;
 }
 
 
-struct roa_thread*
-  roa_thread_create_this()
+struct roa_thread
+roa_thread_create_this()
 {
-  const size_t bytes = sizeof(struct roa_thread);
-  struct roa_thread *new_th = (struct roa_thread*)FIBER_MALLOC(bytes);
+  //const size_t bytes = sizeof(struct roa_thread);
+  //struct roa_thread *new_th = (struct roa_thread*)FIBER_MALLOC(bytes);
 
 #ifndef _WIN32  
 
@@ -202,8 +172,12 @@ struct roa_thread*
 
 #else
 
-  new_th->thread = GetCurrentThread();
-  new_th->id = GetCurrentThreadId();
+  //new_th->thread = GetCurrentThread();
+  //new_th->id = GetCurrentThreadId();
+
+  roa_thread new_th;
+  new_th.thread = GetCurrentThread();
+  new_th.id = GetCurrentThreadId();
 
 #endif
 
@@ -212,7 +186,7 @@ struct roa_thread*
 
 
 void
-roa_thread_destroy(struct roa_thread **th)
+roa_thread_destroy(struct roa_thread *th)
 {
   /* param check */
   FIBER_ASSERT(th);
@@ -222,7 +196,7 @@ roa_thread_destroy(struct roa_thread **th)
   roa_thread_join(th, 1);
 //#endif
 
-  FIBER_FREE(*th);
+  //FIBER_FREE(*th);
 }
 
 
@@ -230,7 +204,7 @@ roa_thread_destroy(struct roa_thread **th)
 
 
 int
-roa_thread_find_this(struct roa_thread **th, unsigned count)
+roa_thread_find_this(struct roa_thread *th, unsigned count)
 {
 #ifndef _WIN32
   pthread_t self = pthread_self();
@@ -256,7 +230,7 @@ roa_thread_find_this(struct roa_thread **th, unsigned count)
 
   for(unsigned i = 0; i < count; ++i)
   {
-    sprintf(&buffer[strlen(buffer)], "%d,", th[i]->id);
+    sprintf(&buffer[strlen(buffer)], "%d,", th[i].id);
   }
 
   sprintf(&buffer[strlen(buffer)], "\n");
@@ -265,10 +239,14 @@ roa_thread_find_this(struct roa_thread **th, unsigned count)
 
   for (unsigned i = 0; i < count; ++i)
   {
-    if (th[i]->id == this_id)
-    {
-      DWORD get_id = GetThreadId(th[i]->thread);
-      assert(get_id == th[i]->id);
+    HANDLE hadnle = GetCurrentThread();
+    DWORD get_id = GetThreadId(th[i].thread);
+    DWORD th_id = th[i].id;
+
+    //if (th[i].id == this_id)
+    if(get_id == this_id)
+    {      
+      assert(get_id == th_id);
 
       return i;
     }
@@ -283,7 +261,7 @@ roa_thread_find_this(struct roa_thread **th, unsigned count)
 
 
 void
-roa_thread_join(struct roa_thread **th, unsigned count)
+roa_thread_join(struct roa_thread *th, unsigned count)
 {
 #ifndef _WIN32
   for (unsigned i = 0; i < count; ++i)
@@ -293,8 +271,8 @@ roa_thread_join(struct roa_thread **th, unsigned count)
 #else
   for (unsigned i = 0; i < count; ++i)
   {
-    WaitForSingleObject(th[i]->thread, INFINITE);
-    CloseHandle((HANDLE)th[i]->thread);
+    WaitForSingleObject(th[i].thread, INFINITE);
+    CloseHandle((HANDLE)th[i].thread);
   }
 #endif
 }
