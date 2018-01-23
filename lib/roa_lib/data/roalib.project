@@ -32,6 +32,14 @@ table.insert(
       make.get_proj_root() .. "../src/",
     },
 
+    link_dependencies = {
+      "pthread",
+    },
+
+    defines_linux = {
+      "_GNU_SOURCE",
+    },
+
     defines_windows = {
       WIN32_LEAN_AND_MEAN,
       NOMINMAX,
