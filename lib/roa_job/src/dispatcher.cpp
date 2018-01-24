@@ -9,6 +9,8 @@
 #include <fiber.hpp>
 #include <config.hpp>
 
+#include <roa_lib/debug.h>
+
 
 /* ------------------------------------------------- [ Dispatcher Config ] -- */
 
@@ -541,6 +543,9 @@ roa_dispatcher_add_jobs(
     FIBER_ASSERT(desc);
     FIBER_ASSERT(job_count);
   }
+
+  char buffer[1024];
+  roa_debug_symbol_name(desc->func, buffer, 1024);
 
   const int th_id = roa_internal_find_thread_index(c);
 

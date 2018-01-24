@@ -66,7 +66,7 @@ typedef void(*roa_job_func)(struct roa_dispatcher_ctx *c, void *arg);
 
 struct roa_job_desc
 {
-  roa_job_func func;                      /* valid function */
+  roa_job_func func;                        /* valid function */
   void *arg;                                /* optional - can be on stack */
   int keep_on_calling_thread;               /* 1 / 0 keep on calling thread */
 };
@@ -74,21 +74,21 @@ struct roa_job_desc
 
 void
 roa_dispatcher_run(
-  struct roa_dispatcher_ctx *c            /* must be a valid context */
+  struct roa_dispatcher_ctx *c              /* must be a valid context */
 );
 
 
 unsigned                                    /* returns a marker for the job batch */
 roa_dispatcher_add_jobs(
-  struct roa_dispatcher_ctx *c,           /* must be a valid context */
-  struct roa_job_desc *desc,              /* array of job descriptions */
+  struct roa_dispatcher_ctx *c,             /* must be a valid context */
+  struct roa_job_desc *desc,                /* array of job descriptions */
   int job_count                             /* number of descriptions */
 );
 
 
 void
 roa_dispatcher_wait_for_counter(
-  struct roa_dispatcher_ctx *c,           /* must be a valid context */
+  struct roa_dispatcher_ctx *c,             /* must be a valid context */
   unsigned marker                           /* must be a valid marker */
 );
 
