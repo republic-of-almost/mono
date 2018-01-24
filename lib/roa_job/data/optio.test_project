@@ -9,7 +9,7 @@
 table.insert(
   projects,
   {
-    name     = "OptioUnitTests",
+    name     = "OptioUnitTest",
     kind     = "ConsoleApp",
     language = "C++11",
     location = make.get_proj_root(),
@@ -31,17 +31,13 @@ table.insert(
     },
 
     defines = {
-      -- See build.md
+      -- See build.md --
     },
 
     project_dependencies = {
-
       -- First Party --
-
       "Optio",
-
       -- Third Party --
-
       "Catch",
     },
   }
@@ -50,22 +46,22 @@ table.insert(
 
 --[[
 
-  Render 'O' Vision Functional Test Project Description
+  Optio Func Test
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "ROVFuncTest",
-    kind     = "WindowedApp",
-    language = "C++",
+    name     = "OptioFuncTest",
+    kind     = "ConsoleApp",
+    language = "C89",
     location = make.get_proj_root(),
 
     src_files = {
-      make.add_headers(make.get_proj_root() .. "../test/functional"),
-      make.add_src(make.get_proj_root() .. "../test/functional"),
-      make.add_doc(make.get_proj_root() .. "../test/functional"),
+      make.add_headers(make.get_proj_root() .. "../test/functional/"),
+      make.add_src(make.get_proj_root() .. "../test/functional/"),
+      make.add_doc(make.get_proj_root() .. "../test/functional/"),
     },
 
     public_inc_dirs = {
@@ -73,19 +69,12 @@ table.insert(
     },
 
     defines = {
-      -- See build.md
+      -- See build.md --
     },
 
     project_dependencies = {
-
       -- First Party --
-
-      "ROV",
-
-      -- Third Party --
-
-      "GLFW",
-      "OpenGL",
+      "Optio",
     },
   }
 )
