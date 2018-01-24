@@ -40,6 +40,11 @@ table.insert(
       make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S",
     },
 
+    src_files_linux = {
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_x86_64_sysv_elf_gas.S",
+      make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_x86_64_sysv_elf_gas.S",
+    },    
+
     -- src_files_windows_x86 = {
     --   make.get_proj_root() .. "../src/thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
     --   make.get_proj_root() .. "../src/thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm",

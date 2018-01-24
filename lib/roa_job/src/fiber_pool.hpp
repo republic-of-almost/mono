@@ -6,8 +6,8 @@
 
 
 struct roa_fiber;
-struct roa_mutex;
 struct roa_counter;
+typedef void* roa_mutex;
 
 
 /* -------------------------------------------------- [ Fiber Pool Types ] -- */
@@ -15,12 +15,12 @@ struct roa_counter;
 
 struct roa_fiber_pool_ctx
 {
-  /* array */ struct roa_fiber       **fibers;
-  /* array */ struct roa_fiber       **free_fibers;
-  /* array */ struct roa_fiber       **blocked_fibers;
-  /* array */ struct roa_counter     **blocked_counters;
+  /* array */ struct roa_fiber        **fibers;
+  /* array */ struct roa_fiber        **free_fibers;
+  /* array */ struct roa_fiber        **blocked_fibers;
+  /* array */ struct roa_counter      **blocked_counters;
   
-  struct roa_mutex                   *mutex;
+  roa_mutex                           mutex;
 };
 
 

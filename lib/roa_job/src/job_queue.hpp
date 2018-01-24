@@ -10,7 +10,7 @@ extern "C" {
 /* ------------------------------------------------------- [ Job Fwd Dec ] -- */
 
 
-struct roa_mutex;
+typedef void* roa_mutex;
 struct roa_job_desc;
 struct roa_counter;
 
@@ -49,7 +49,7 @@ struct roa_job_queue_ctx
   
   /* array */ struct roa_counter    *counters;
   
-  struct roa_mutex                  *mutex;
+  roa_mutex                            mutex;
 };
 
 

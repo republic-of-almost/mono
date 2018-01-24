@@ -3,7 +3,7 @@
 #include <job_queue.hpp>
 #include <roa_lib/array.h>
 #include <config.hpp>
-#include <mutex.hpp>
+#include <roa_lib/mutex.h>
 
 
 /* ------------------------------------------------------ [ Job Lifetime ] -- */
@@ -16,7 +16,7 @@ roa_job_queue_create(struct roa_job_queue_ctx *ctx, unsigned queue_hint)
   FIBER_ASSERT(ctx != 0);
   FIBER_MEMZERO(ctx, sizeof(struct roa_job_queue_ctx));
   
-  roa_mutex_create(&ctx->mutex);
+  ctx->mutex = roa_mutex_create();
   roa_mutex_lock(ctx->mutex);
   
   const unsigned count = queue_hint;

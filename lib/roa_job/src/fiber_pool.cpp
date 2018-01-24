@@ -1,6 +1,6 @@
 #include <fiber_pool.hpp>
 #include <fiber.hpp>
-#include <mutex.hpp>
+#include <roa_lib/mutex.h>
 #include <roa_lib/array.h>
 #include <config.hpp>
 #include <counter.hpp>
@@ -22,7 +22,7 @@ roa_fiber_pool_create(
   
   FIBER_MEMZERO(ctx, sizeof(struct roa_fiber_pool_ctx));
 
-  roa_mutex_create(&ctx->mutex);
+  ctx->mutex = roa_mutex_create();
   roa_mutex_lock(ctx->mutex);
   
   const unsigned count = fiber_count;
@@ -242,7 +242,7 @@ roa_fiber_pool_done(
   FIBER_ASSERT(fiber);
   
   roa_mutex_lock(ctx->mutex);
-  
+ 
   roa_array_push(ctx->free_fibers, fiber);
   
   roa_mutex_unlock(ctx->mutex);

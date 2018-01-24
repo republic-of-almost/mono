@@ -1,9 +1,11 @@
 #include <roa_lib/debug.h>
+
+#if defined(_WIN32)
 #include <windows.h>
 #include <DbgHelp.h>
 
-
 #pragma comment(lib, "Dbghelp.lib")
+#endif
 
 
 void
