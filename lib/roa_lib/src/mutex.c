@@ -17,11 +17,9 @@ roa_mutex
 roa_mutex_create()
 {
 	#if defined(__linux__) || defined(__APPLE__)
-	pthread_mutex_t *m = NULL;
-	m = (pthread_mutex_t*)malloc(sizeof(*m));
-	memset(m, 0, sizeof(pthread_mutex_t));
-
+	pthread_mutex_t *m = malloc(sizeof(*m));
 	pthread_mutex_init(m, NULL);
+	
 	return (roa_mutex)m;
 
 	#elif defined(_WIN32)
@@ -29,13 +27,13 @@ roa_mutex_create()
 	#endif
 }
 
+
 void
 roa_mutex_destroy(roa_mutex *m)
 {
 	#if defined(__linux__) || defined(__APPLE__)
 	pthread_mutex_destroy((pthread_mutex_t*) *m);
 	free(*m);
-	m = NULL;
 	#elif defined(_WIN32)
 	
 	#endif

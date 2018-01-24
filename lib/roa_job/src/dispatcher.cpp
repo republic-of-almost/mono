@@ -521,12 +521,6 @@ roa_dispatcher_run(
     roa_thread_set_current_name("ROAJob_Main");
   }
 
-  /* wait for threads to clean up */
-  {
-    /* exclude first thread as its main thread */
-    const unsigned th_count = c->thread_count - 1;
-  }
-
   FIBER_LOG("Dispatch shutdown");
 }
 
