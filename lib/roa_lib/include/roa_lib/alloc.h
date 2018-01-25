@@ -23,6 +23,7 @@ roa_free(void *addr);
 	Must be built with ROALIB_ALLOC_STATS 1 for these to be recorded.
 */
 
+
 struct roa_alloc_stats
 {
 	unsigned basic_alloc;

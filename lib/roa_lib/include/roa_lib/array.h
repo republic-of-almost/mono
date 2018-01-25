@@ -13,12 +13,12 @@ extern "C" {
 
 /* --------------------------------------------------- [ Array Interface ] -- */
 /*
-C is a little awkward for containers, but this is a good balance for arrays.
-It uses macros unforunatly but it means we have a typesafe buffer.
+  C is a little awkward for containers, but this is a good balance for arrays.
+  It uses macros unforunatly but it means we have a typesafe buffer.
 
-int *array = NULL;
-codex_array_create(array);
-codex_array_push(array, 123);
+  int *array = NULL;
+  codex_array_create(array);
+  codex_array_push(array, 123);
 */
 
 
