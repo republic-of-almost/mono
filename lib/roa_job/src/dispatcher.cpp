@@ -405,30 +405,33 @@ roa_dispatcher_create(
       new_ctx->thread_count = core_count - new_ctx->desc.free_cores;
     }
 
-    roa_array_create(new_ctx->thread_ids, new_ctx->thread_count);
+    int th_count = new_ctx->thread_count;
 
-    roa_array_create(new_ctx->raw_threads, new_ctx->thread_count);
-    roa_array_resize(new_ctx->raw_threads, new_ctx->thread_count);
+    roa_array_create(new_ctx->thread_ids, th_count);
+    roa_array_resize(new_ctx->thread_ids, th_count);
 
-    roa_array_create(new_ctx->thread_local_data, new_ctx->thread_count);
-    roa_array_resize(new_ctx->thread_local_data, new_ctx->thread_count);
+    roa_array_create(new_ctx->raw_threads, th_count);
+    roa_array_resize(new_ctx->raw_threads, th_count);
+
+    roa_array_create(new_ctx->thread_local_data, th_count);
+    roa_array_resize(new_ctx->thread_local_data, th_count);
 
     /* setup main thread */
     roa_thread this_thread = roa_thread_create_self();
     {
-      new_ctx->raw_threads[0] = this_thread;
+      new_ctx->raw_threads[0]                    = this_thread;
       new_ctx->thread_local_data[0].worker_fiber = 0;
-      new_ctx->raw_threads[0] = this_thread;
-      new_ctx->thread_ids[0] = roa_thread_get_current_id();
+      new_ctx->raw_threads[0]                    = this_thread;
+      new_ctx->thread_ids[0]                     = roa_thread_get_current_id();
     }
 
     /* threads for the other cores */
     for (int i = 1; i < new_ctx->thread_count; ++i)
     {
       struct roa_thread_arg thread_arg;
-      thread_arg.ctx = new_ctx;
+      thread_arg.ctx       = new_ctx;
       thread_arg.thread_id = &new_ctx->thread_ids[i];
-      thread_arg.done = ROA_FALSE;
+      thread_arg.done      = ROA_FALSE;
 
       roa_thread th = roa_thread_create(
         roa_internal_fiber_dispatcher,
@@ -532,15 +535,10 @@ roa_dispatcher_add_jobs(
   int job_count)
 {
   /* param assert */
-  {
-    FIBER_ASSERT(c);
-    FIBER_ASSERT(desc);
-    FIBER_ASSERT(job_count);
-  }
-
-  //char buffer[1024];
-  //roa_debug_symbol_name(desc->func, buffer, 1024);
-
+  FIBER_ASSERT(c);
+  FIBER_ASSERT(desc);
+  FIBER_ASSERT(job_count);
+  
   const int th_id = roa_internal_find_thread_index(c);
 
   return roa_job_queue_add_batch(&c->job_queue, desc, job_count, th_id);

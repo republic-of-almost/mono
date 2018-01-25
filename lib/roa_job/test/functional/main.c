@@ -10,7 +10,7 @@
 #define TEST_WITH_OUTPUT 0
 
 #define BATCH_COUNT 100
-#define TICK_COUNT 1000
+#define TICK_COUNT 1000000
 
 int ticks = TICK_COUNT;
 int test_data[BATCH_COUNT];
