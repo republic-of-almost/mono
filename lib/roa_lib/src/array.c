@@ -23,6 +23,7 @@ roa_internal_array_destroy(void **ptr)
     curr_arr--;
 
     free(curr_arr);
+    *ptr = NULL;
   }
 }
 

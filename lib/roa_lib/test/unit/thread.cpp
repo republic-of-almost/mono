@@ -1,20 +1,23 @@
-#ifndef ROALIB_TEST_OUTPUT_SANITY
-/* Set to 1 if you want some console output */
-#define ROALIB_TEST_OUTPUT_SANITY 0
-#endif
-
-
-/* ---------------------------------------------------- [ Test Functions ] -- */
-
 
 #include <roa_lib/thread.h>
 #include <roa_lib/fundamental.h>
 #include <catch/catch.hpp>
 #include <string.h>
 
+
+/* ------------------------------------------------------- [ Test Config ] -- */
+
+
+/* Set to 1 if you want some console output */
+#define ROALIB_TEST_OUTPUT_SANITY 0
+
+
 #ifndef ROALIB_TEST_OUTPUT_SANITY
 #include <stdio.h>
 #endif
+
+
+/* ---------------------------------------------------- [ Test Functions ] -- */
 
 
 void*
@@ -111,3 +114,9 @@ TEST_CASE("Thread Test")
 		}
 	}
 }
+
+
+/* ------------------------------------------------------- [ Test Config ] -- */
+
+
+#undef ROALIB_TEST_OUTPUT_SANITY
