@@ -1,5 +1,10 @@
 #include <roa_lib/atomic.h>
-#include <stdio.h>
+
+
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 
 /* ---------------------------------------------- [ Atomic Int Interface ] -- */
 
@@ -11,7 +16,7 @@ roa_atomic_int_load(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_add(&atomic->val, 0);
 	#elif defined(_WIN32)
-	return InterlockedCompareExchange(&atomic->i, 0, 0);
+	return InterlockedCompareExchange(&atomic->val, 0, 0);
 	#endif
 }
 
@@ -21,8 +26,6 @@ roa_atomic_int_store(
 	roa_atomic_int *atomic,
 	int val)
 {
-	printf("VAL: %d\n", val);
-
 	#if defined(__clang__) || defined(__GNUC__)
 
 	int ai_was = atomic->val;
@@ -42,7 +45,7 @@ roa_atomic_int_inc(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_add(&atomic->val, 1);
 	#elif defined(_WIN32)
-
+  return InterlockedIncrement(&atomic->val);
 	#endif
 }
 
@@ -54,7 +57,7 @@ roa_atomic_int_dec(
 	#if defined(__clang__) || defined(__GNUC__)
 	
 	#elif defined(_WIN32)
-
+  return InterlockedDecrement(&atomic->val);
 	#endif
 }
 
@@ -67,7 +70,7 @@ roa_atomic_int_add(
 	#if defined(__clang__) || defined(__GNUC__)
 	
 	#elif defined(_WIN32)
-
+  return InterlockedExchangeAdd(&atomic->val, add);
 	#endif
 }
 
@@ -80,7 +83,7 @@ roa_atomic_int_sub(
 	#if defined(__clang__) || defined(__GNUC__)
 	
 	#elif defined(_WIN32)
-
+  return InterlockedExchangeAdd(&atomic->val, -sub);
 	#endif
 }
 
@@ -91,9 +94,9 @@ roa_atomic_int_swap(
 	int swap)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	
+  
 	#elif defined(_WIN32)
-
+  return InterlockedExchange(&atomic->val, swap);
 	#endif
 }
 
@@ -107,7 +110,7 @@ roa_atomic_int_compare_and_swap(
 	#if defined(__clang__) || defined(__GNUC__)
 	
 	#elif defined(_WIN32)
-
+  return InterlockedCompareExchange(&atomic->val, old_value, new_value);
 	#endif
 }
 

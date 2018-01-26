@@ -6,6 +6,8 @@
 #include <math.h>
 #elif defined(_WIN32)
 #include <windows.h>
+#include <sys/types.h>
+#include <sys/timeb.h>
 #endif
 
 
@@ -18,7 +20,9 @@ roa_time_get_current_ms()
   return (tv.tv_sec * 1000L) + (tv.tv_usec / 1000L);
 
   #elif defined(_WIN32)
-  
+  struct _timeb timebuffer;
+  _ftime64_s(&timebuffer);
+  return (timebuffer.time * 1000L) + timebuffer.millitm;
   #endif
 }
 

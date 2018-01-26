@@ -26,7 +26,7 @@ TEST_CASE("Atomic")
   	int i = roa_atomic_int_load(&at_int);
 
   	printf("stored %d %d\n", new_val, i);
-  	REQUIRE(new_val == 0);
+  	REQUIRE(new_val == i);
   }
 
   SECTION("Increment")
