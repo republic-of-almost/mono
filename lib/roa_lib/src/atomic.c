@@ -28,9 +28,13 @@ roa_atomic_int_store(
 {
 	#if defined(__clang__) || defined(__GNUC__)
 
+	/*
 	int ai_was = atomic->val;
 	__sync_val_compare_and_swap(&atomic->val, ai_was, val);
+	*/
 
+  __sync_lock_test_and_set(&atomic->val, val);
+	/*__sync_lock_release(&atomic->val);*/
 
 	#elif defined(_WIN32)
 	InterlockedExchange(&atomic->val, val);
@@ -45,7 +49,7 @@ roa_atomic_int_inc(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_add(&atomic->val, 1);
 	#elif defined(_WIN32)
-  return InterlockedIncrement(&atomic->val);
+  return InterlockedIncrement(&atomic->val) - 1;
 	#endif
 }
 
@@ -55,9 +59,9 @@ roa_atomic_int_dec(
 	roa_atomic_int *atomic)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	
+	return (int)__sync_fetch_and_sub(&atomic->val, 1);
 	#elif defined(_WIN32)
-  return InterlockedDecrement(&atomic->val);
+  return InterlockedDecrement(&atomic->val) + 1;
 	#endif
 }
 
@@ -68,7 +72,7 @@ roa_atomic_int_add(
 	int add)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	
+	return (int)__sync_fetch_and_add(&atomic->val, add);
 	#elif defined(_WIN32)
   return InterlockedExchangeAdd(&atomic->val, add);
 	#endif
@@ -81,7 +85,7 @@ roa_atomic_int_sub(
 	int sub)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	
+	return (int)__sync_fetch_and_sub(&atomic->val, sub);
 	#elif defined(_WIN32)
   return InterlockedExchangeAdd(&atomic->val, -sub);
 	#endif
@@ -94,7 +98,9 @@ roa_atomic_int_swap(
 	int swap)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-  
+  int old = (int)__sync_lock_test_and_set(&atomic->val, swap);
+  /*__sync_lock_release(&atomic->val);*/
+	return old;
 	#elif defined(_WIN32)
   return InterlockedExchange(&atomic->val, swap);
 	#endif
@@ -108,7 +114,7 @@ roa_atomic_int_compare_and_swap(
 	int new_value)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	
+	return (int)__sync_val_compare_and_swap(&atomic->val, old_value, new_value);
 	#elif defined(_WIN32)
   return InterlockedCompareExchange(&atomic->val, old_value, new_value);
 	#endif
