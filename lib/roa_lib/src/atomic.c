@@ -5,6 +5,10 @@
 #include <windows.h>
 #endif
 
+#if defined(__clang__) || defined(__GNUC__)
+#warning "Denny use yet"
+#endif
+
 
 /* ---------------------------------------------- [ Atomic Int Interface ] -- */
 
@@ -33,8 +37,13 @@ roa_atomic_int_store(
 	__sync_val_compare_and_swap(&atomic->val, ai_was, val);
 	*/
 
+	/*
   __sync_lock_test_and_set(&atomic->val, val);
-	/*__sync_lock_release(&atomic->val);*/
+	__sync_lock_release(&atomic->val);
+	*/
+
+	/* So aligned writes are atomic right? */
+	atomic->val = val;
 
 	#elif defined(_WIN32)
 	InterlockedExchange(&atomic->val, val);
@@ -98,7 +107,15 @@ roa_atomic_int_swap(
 	int swap)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-  int old = (int)__sync_lock_test_and_set(&atomic->val, swap);
+
+	/* aligned read writes are atomic right */
+	/* this isn't atomic however */
+	int old = atomic->val;
+	atomic->val = swap;	
+
+	return old;
+
+  /*int old = (int)__sync_lock_test_and_set(&atomic->val, swap);*/
   /*__sync_lock_release(&atomic->val);*/
 	return old;
 	#elif defined(_WIN32)
