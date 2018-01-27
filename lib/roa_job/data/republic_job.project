@@ -2,14 +2,14 @@
 
 --[[
 
-  Optio Project Description
+  RepublicJob Project Description
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "Optio",
+    name     = "RepublicJob",
     kind     = "StaticLib",
     language = "C++11",
     location = make.get_proj_root(),

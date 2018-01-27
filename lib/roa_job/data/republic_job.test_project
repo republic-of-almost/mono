@@ -2,14 +2,14 @@
 
 --[[
 
-  Optio Unit Test
+  RepublicJob Unit Test
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "OptioUnitTest",
+    name     = "RepublicJobUnitTest",
     kind     = "ConsoleApp",
     language = "C++11",
     location = make.get_proj_root(),
@@ -36,7 +36,7 @@ table.insert(
 
     project_dependencies = {
       -- First Party --
-      "Optio",
+      "RepublicJob",
       -- Third Party --
       "Catch",
     },
@@ -46,14 +46,14 @@ table.insert(
 
 --[[
 
-  Optio Func Test
+  RepublicJob Func Test
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "OptioFuncTest",
+    name     = "RepublicJobFuncTest",
     kind     = "ConsoleApp",
     language = "C89",
     location = make.get_proj_root(),
@@ -74,7 +74,7 @@ table.insert(
 
     project_dependencies = {
       -- First Party --
-      "Optio",
+      "RepublicJob",
     },
   }
 )
