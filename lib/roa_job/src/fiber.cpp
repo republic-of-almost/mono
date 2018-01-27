@@ -1,6 +1,8 @@
 ﻿#include <fiber.hpp>
 #include <boost_context/fcontext.h>
 #include <config.hpp>
+#include <roa_lib/assert.h>
+#include <roa_lib/alloc.h>
 
 
 #ifdef __clang__
@@ -574,8 +576,7 @@ void
 roa_fiber_create(struct roa_fiber **fiber, roa_fiber_func func, void *arg)
 {
   const int fiber_bytes = sizeof(struct roa_fiber);
-  struct roa_fiber *new_fiber = (struct roa_fiber*)FIBER_MALLOC(fiber_bytes);
-  FIBER_MEMZERO(new_fiber, fiber_bytes);
+  struct roa_fiber *new_fiber = (struct roa_fiber*)roa_zalloc(fiber_bytes);
   
   if(func != 0)
   {
@@ -583,8 +584,7 @@ roa_fiber_create(struct roa_fiber **fiber, roa_fiber_func func, void *arg)
 
     int bytes = stack_size + stack_size + stack_size;
     
-    new_fiber->stack = FIBER_MALLOC(bytes);
-    FIBER_MEMZERO(new_fiber->stack, bytes);
+    new_fiber->stack = roa_zalloc(bytes);
     char *start = ((char*)new_fiber->stack) + stack_size;
     new_fiber->context = make_fcontext(start, stack_size, func);
     
@@ -605,13 +605,13 @@ roa_fiber_destroy(struct roa_fiber *fiber)
 {
   if(fiber->stack)
   {
-    FIBER_FREE(fiber->stack);
+    roa_free(fiber->stack);
     fiber->stack = NULL;
   }
   
   if(fiber)
   {
-    FIBER_FREE(fiber);
+    roa_free(fiber);
   }
   
   fiber->context = NULL;
@@ -625,7 +625,7 @@ void
 roa_fiber_set_user_id(struct roa_fiber *fiber, unsigned user_id)
 {
   /* param check */
-  FIBER_ASSERT(fiber);
+  ROA_ASSERT(fiber);
 
   fiber->job_id = user_id;
 }
@@ -635,7 +635,7 @@ unsigned
 roa_fiber_get_user_id(const struct roa_fiber *fiber)
 {
   /* param check */
-  FIBER_ASSERT(fiber);
+  ROA_ASSERT(fiber);
   
   return fiber->job_id;
 }

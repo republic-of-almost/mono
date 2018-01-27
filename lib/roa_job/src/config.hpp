@@ -8,23 +8,6 @@
 #include <stdlib.h>
 
 
-/* ------------------------------------------------------------ [ Config ] -- */
-
-
-#ifndef ROA_JOB_SINGLE_THREADED
-#define ROA_JOB_SINGLE_THREADED 0
-#endif
-
-
-/* ----------------------------------------------------------- [ Helpers ] -- */
-
-
-#define FIBER_ASSERT(expr) assert(expr)
-#define FIBER_MALLOC(bytes) malloc(bytes)
-#define FIBER_FREE(ptr) free(ptr)
-#define FIBER_MEMZERO(ptr, bytes) memset(ptr, 0, bytes)
-
-
 /* ----------------------------------------------------------- [ Logging ] -- */
 
 

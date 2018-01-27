@@ -5,11 +5,10 @@
 #include <roa_lib/array.h>
 #include <roa_lib/thread.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/alloc.h>
 #include <roa_lib/fundamental.h>
 #include <fiber.hpp>
 #include <config.hpp>
-
-#include <roa_lib/debug.h>
 
 
 /* ------------------------------------------------- [ Dispatcher Config ] -- */
@@ -127,11 +126,11 @@ void
 roa_internal_fiber_executer(void *arg)
 {
   /* param check */
-  FIBER_ASSERT(arg);
+  ROA_ASSERT(arg);
 
   /* get ctx */
   struct roa_dispatcher_ctx *ctx = (struct roa_dispatcher_ctx*)arg;
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
 
   for (;;)
   {
@@ -146,14 +145,14 @@ roa_internal_fiber_executer(void *arg)
 
       struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
 
-      FIBER_ASSERT(tls->worker_fiber);
-      FIBER_ASSERT(tls->home_fiber);
+      ROA_ASSERT(tls->worker_fiber);
+      ROA_ASSERT(tls->home_fiber);
 
       /* exec job */
       roa_job_func job_func = (roa_job_func)tls->func;
       void *job_arg = tls->arg;
 
-      FIBER_ASSERT(job_func);
+      ROA_ASSERT(job_func);
 
       job_func(ctx, job_arg);
     }
@@ -164,8 +163,8 @@ roa_internal_fiber_executer(void *arg)
 
       struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
 
-      FIBER_ASSERT(tls->worker_fiber);
-      FIBER_ASSERT(tls->home_fiber);
+      ROA_ASSERT(tls->worker_fiber);
+      ROA_ASSERT(tls->home_fiber);
 
       /* return to the threads fiber dispatcher */
       roa_fiber_switch(tls->worker_fiber, tls->home_fiber);
@@ -189,7 +188,7 @@ roa_internal_fiber_dispatcher(void *arg)
 /*#endif */
 {
   /* param check */
-  FIBER_ASSERT(arg);
+  ROA_ASSERT(arg);
 
   if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
   {
@@ -197,10 +196,10 @@ roa_internal_fiber_dispatcher(void *arg)
   }
 
   struct roa_thread_arg *th_arg = (struct roa_thread_arg*)arg;
-  FIBER_ASSERT(th_arg);
-  FIBER_ASSERT(th_arg->ctx);
-  FIBER_ASSERT(th_arg->thread_id);
-  FIBER_ASSERT(th_arg->done == 0);
+  ROA_ASSERT(th_arg);
+  ROA_ASSERT(th_arg->ctx);
+  ROA_ASSERT(th_arg->thread_id);
+  ROA_ASSERT(th_arg->done == 0);
 
   /* setup thread */
   struct roa_dispatcher_ctx *ctx = th_arg->ctx;
@@ -220,13 +219,13 @@ roa_internal_fiber_dispatcher(void *arg)
   const int thd_index = roa_internal_find_thread_index(ctx);
 
   struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
-  FIBER_ASSERT(tls);
+  ROA_ASSERT(tls);
 
   tls->home_fiber = 0;
   tls->worker_fiber = 0;
 
   roa_fiber_create(&tls->home_fiber, 0, (void*)0);
-  FIBER_ASSERT(tls->home_fiber);
+  ROA_ASSERT(tls->home_fiber);
 
   /* spin while we are waiting for startup */
   while (ctx->dispatch_state <= FIBER_DISPATCHER_READY) {}
@@ -239,8 +238,8 @@ roa_internal_fiber_dispatcher(void *arg)
     }
 
     /* must start in a good state */
-    FIBER_ASSERT(tls->worker_fiber == 0);
-    FIBER_ASSERT(tls->home_fiber != 0);
+    ROA_ASSERT(tls->worker_fiber == 0);
+    ROA_ASSERT(tls->home_fiber != 0);
 
     /* check we still have work in the system */
     {
@@ -267,8 +266,8 @@ roa_internal_fiber_dispatcher(void *arg)
       if (tls->worker_fiber)
       {
         /* fiber already has function/arg and has alreaded executed call */
-        FIBER_ASSERT(tls->worker_fiber);
-        FIBER_ASSERT(roa_fiber_get_user_id(tls->worker_fiber));
+        ROA_ASSERT(tls->worker_fiber);
+        ROA_ASSERT(roa_fiber_get_user_id(tls->worker_fiber));
 
         /* switch to fiber */
         roa_fiber_switch(tls->home_fiber, tls->worker_fiber);
@@ -295,9 +294,9 @@ roa_internal_fiber_dispatcher(void *arg)
         tls->worker_fiber = roa_fiber_pool_next_free(&ctx->fiber_pool);
 
         /* are we in the right state to switch */
-        FIBER_ASSERT(tls->worker_fiber);
-        FIBER_ASSERT(tls->func);
-        FIBER_ASSERT(job_id);
+        ROA_ASSERT(tls->worker_fiber);
+        ROA_ASSERT(tls->func);
+        ROA_ASSERT(job_id);
 
         roa_fiber_set_user_id(tls->worker_fiber, job_id);
 
@@ -312,7 +311,7 @@ roa_internal_fiber_dispatcher(void *arg)
     if (tls->worker_fiber)
     {
       const int job_id = roa_fiber_get_user_id(tls->worker_fiber);
-      FIBER_ASSERT(job_id);
+      ROA_ASSERT(job_id);
 
       roa_job_queue_clear(&ctx->job_queue, job_id);
 
@@ -347,14 +346,13 @@ roa_dispatcher_create(
 
 
   /* param assert */
-  FIBER_ASSERT(c);
+  ROA_ASSERT(c);
 
   /* init ctx */
   struct roa_dispatcher_ctx *new_ctx = NULL;
   {
     int bytes = sizeof(struct roa_dispatcher_ctx);
-    new_ctx = (struct roa_dispatcher_ctx*)FIBER_MALLOC(bytes);
-    FIBER_MEMZERO(new_ctx, bytes);
+    new_ctx = (struct roa_dispatcher_ctx*)roa_zalloc(bytes);
     new_ctx->dispatch_state = FIBER_DISPATCHER_INITIALIZING;
   }
 
@@ -471,7 +469,7 @@ void
 roa_dispatcher_destroy(struct roa_dispatcher_ctx **c)
 {
   /* param assert */
-  FIBER_ASSERT(c);
+  ROA_ASSERT(c);
 
   (*c)->dispatch_state = FIBER_DISPATCHER_DESTROY;
 
@@ -491,7 +489,7 @@ roa_dispatcher_destroy(struct roa_dispatcher_ctx **c)
   roa_job_queue_destroy(&(*c)->job_queue);
   roa_fiber_pool_destroy(&(*c)->fiber_pool);
 
-  FIBER_FREE(*c);
+  roa_free(*c);
 }
 
 
@@ -504,7 +502,7 @@ roa_dispatcher_run(
 {
   /* param assert */
   {
-    FIBER_ASSERT(c);
+    ROA_ASSERT(c);
   }
 
   /* allow threads to start executing, and have this thread join in the fun */
@@ -535,9 +533,9 @@ roa_dispatcher_add_jobs(
   int job_count)
 {
   /* param assert */
-  FIBER_ASSERT(c);
-  FIBER_ASSERT(desc);
-  FIBER_ASSERT(job_count);
+  ROA_ASSERT(c);
+  ROA_ASSERT(desc);
+  ROA_ASSERT(job_count);
   
   const int th_id = roa_internal_find_thread_index(c);
 
@@ -552,8 +550,8 @@ roa_dispatcher_wait_for_counter(
 {
   /* param assert */
   {
-    FIBER_ASSERT(ctx);
-    FIBER_ASSERT(marker);
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(marker);
   }
 
   /* get tls */
@@ -566,12 +564,12 @@ roa_dispatcher_wait_for_counter(
 
   /* check state */
   {
-    FIBER_ASSERT(tls);
+    ROA_ASSERT(tls);
 
     /* if this happens you might have called this from the main thread */
     /* you need to have the main thread join in the fun with */
     /* roa_dispatcher_run(...) */
-    FIBER_ASSERT(tls->worker_fiber);
+    ROA_ASSERT(tls->worker_fiber);
   }
 
   /* block this fiber */
@@ -598,8 +596,8 @@ roa_dispatcher_wait_for_counter(
 
   /* fiber back on thread */
   {
-    FIBER_ASSERT(counter);
-    FIBER_ASSERT(counter->has_pending == 1);
+    ROA_ASSERT(counter);
+    ROA_ASSERT(counter->has_pending == 1);
 
     roa_job_queue_batch_unblock(&ctx->job_queue, counter);
   }

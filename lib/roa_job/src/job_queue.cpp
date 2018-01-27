@@ -4,6 +4,7 @@
 #include <roa_lib/array.h>
 #include <config.hpp>
 #include <roa_lib/mutex.h>
+#include <roa_lib/assert.h>
 
 
 /* ------------------------------------------------------ [ Job Lifetime ] -- */
@@ -13,8 +14,8 @@ void
 roa_job_queue_create(struct roa_job_queue_ctx *ctx, unsigned queue_hint)
 {
   /* param check */
-  FIBER_ASSERT(ctx != 0);
-  FIBER_MEMZERO(ctx, sizeof(struct roa_job_queue_ctx));
+  ROA_ASSERT(ctx != 0);
+  memset(ctx, 0, sizeof(*ctx));
   
   ctx->mutex = roa_mutex_create();
   roa_mutex_lock(ctx->mutex);
@@ -47,7 +48,7 @@ void
 roa_job_queue_destroy(struct roa_job_queue_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx != 0);
+  ROA_ASSERT(ctx != 0);
   
   roa_mutex_lock(ctx->mutex);
 
@@ -71,7 +72,7 @@ unsigned
 roa_job_queue_batch_size(struct roa_job_queue_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -87,7 +88,7 @@ unsigned
 roa_job_queue_desc_size(struct roa_job_queue_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -103,7 +104,7 @@ int
 roa_job_queue_has_work(struct roa_job_queue_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -127,9 +128,9 @@ roa_job_queue_next(
   void **out_arg)
 {
   /* param check */
-  FIBER_ASSERT(ctx != 0);
-  FIBER_ASSERT(out_func);
-  FIBER_ASSERT(out_arg);
+  ROA_ASSERT(ctx != 0);
+  ROA_ASSERT(out_func);
+  ROA_ASSERT(out_arg);
   
   *out_func = 0;
   *out_arg = 0;
@@ -179,9 +180,9 @@ roa_job_queue_add_batch(
   int thread_id)
 {
   /* param check */
-  FIBER_ASSERT(ctx != 0);
-  FIBER_ASSERT(desc != 0);
-  FIBER_ASSERT(count != 0);
+  ROA_ASSERT(ctx != 0);
+  ROA_ASSERT(desc != 0);
+  ROA_ASSERT(count != 0);
 
   roa_mutex_lock(ctx->mutex);
   
@@ -277,8 +278,8 @@ roa_job_queue_batch_block(
   unsigned batch_id)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(batch_id);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(batch_id);
   
   struct roa_counter *counter = NULL;
   
@@ -293,7 +294,7 @@ roa_job_queue_batch_block(
       struct roa_job_batch *batch = &ctx->batches[i];
       batch->is_blocked = 1;
       
-      FIBER_ASSERT(batch);
+      ROA_ASSERT(batch);
     
       counter = batch->counter;
     }
@@ -311,8 +312,8 @@ roa_job_queue_batch_unblock(
   struct roa_counter *counter)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(counter);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(counter);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -356,8 +357,8 @@ roa_job_queue_clear(
   unsigned job_id)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(job_id);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(job_id);
   
   int return_value = 0;
   unsigned batch_id = 0;
@@ -374,7 +375,7 @@ roa_job_queue_clear(
       {
         batch_id = ctx->job_batch_ids[i];
         
-        FIBER_ASSERT(batch_id);
+        ROA_ASSERT(batch_id);
         
         roa_array_erase(ctx->job_ids, i);
         roa_array_erase(ctx->job_status, i);
@@ -387,7 +388,7 @@ roa_job_queue_clear(
   }
   
   /* shouldn't be able to get here without a batch_id */
-  FIBER_ASSERT(batch_id);
+  ROA_ASSERT(batch_id);
   
   /* check should remove batch */
   if(batch_id)

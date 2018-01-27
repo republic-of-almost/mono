@@ -4,6 +4,7 @@
 #include <roa_lib/array.h>
 #include <config.hpp>
 #include <counter.hpp>
+#include <roa_lib/assert.h>
 
 
 /* ----------------------------------------------- [ Fiber Pool Lifetime ] -- */
@@ -17,10 +18,10 @@ roa_fiber_pool_create(
   unsigned fiber_count)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(func);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(func);
   
-  FIBER_MEMZERO(ctx, sizeof(struct roa_fiber_pool_ctx));
+  memset(ctx, 0, sizeof(*ctx));
 
   ctx->mutex = roa_mutex_create();
   roa_mutex_lock(ctx->mutex);
@@ -37,7 +38,7 @@ roa_fiber_pool_create(
     struct roa_fiber *new_fiber = 0;
     roa_fiber_create(&new_fiber, (roa_fiber_func)func, arg);
     
-    FIBER_ASSERT(new_fiber);
+    ROA_ASSERT(new_fiber);
     
     roa_array_push(ctx->fibers, new_fiber);
     roa_array_push(ctx->free_fibers, new_fiber);
@@ -51,7 +52,7 @@ void
 roa_fiber_pool_destroy(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -80,7 +81,7 @@ unsigned
 roa_fiber_pool_size(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -96,7 +97,7 @@ unsigned
 roa_fiber_pool_in_flight_size(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -113,7 +114,7 @@ unsigned
 roa_fiber_pool_blocked_size(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
 
   roa_mutex_lock(ctx->mutex);
   
@@ -129,7 +130,7 @@ unsigned
 roa_fiber_pool_has_work(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
   
@@ -149,7 +150,7 @@ struct roa_fiber*
 roa_fiber_pool_next_free(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
   
   roa_mutex_lock(ctx->mutex);
 
@@ -167,7 +168,7 @@ roa_fiber_pool_next_free(struct roa_fiber_pool_ctx *ctx)
   else
   {
     /* todo - should we create fibers on the fly? */
-    FIBER_ASSERT(0);
+    ROA_ASSERT(0);
   }
   
   roa_mutex_unlock(ctx->mutex);
@@ -180,7 +181,7 @@ struct roa_fiber*
 roa_fiber_pool_next_pending(struct roa_fiber_pool_ctx *ctx)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
+  ROA_ASSERT(ctx);
 
   roa_mutex_lock(ctx->mutex);
 
@@ -219,9 +220,9 @@ roa_fiber_pool_block(
   struct roa_counter *counter)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(fiber);
-  FIBER_ASSERT(counter);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(fiber);
+  ROA_ASSERT(counter);
 
   roa_mutex_lock(ctx->mutex);
   
@@ -238,8 +239,8 @@ roa_fiber_pool_done(
   struct roa_fiber *fiber)
 {
   /* param check */
-  FIBER_ASSERT(ctx);
-  FIBER_ASSERT(fiber);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(fiber);
   
   roa_mutex_lock(ctx->mutex);
  

@@ -14,6 +14,10 @@ void*
 roa_alloc(unsigned bytes);
 
 
+void*
+roa_zalloc(unsigned bytes);
+
+
 void
 roa_free(void *addr);
 
