@@ -2,31 +2,34 @@
 
 --[[
 
-  Shorts Unit Test
+  ROA Context Test
 
 ]]--
 
 table.insert(
   projects,
   {
-    name     = "AppShorts",
-    kind     = "WindowedApp",
-    language = "C++14",
+    name     = "RepublicCtx",
+    kind     = "StaticLib",
+    language = "C89",
     location = make.get_proj_root(),
 
-    lang_settings = {
-      exceptions  = true,
-      rtti        = true,
-    },
-
     src_files = {
+      -- Inc dir --
+      make.add_headers(make.get_proj_root() .. "../include/"),
+      -- Src dir --
       make.add_headers(make.get_proj_root() .. "../src/"),
       make.add_src(make.get_proj_root() .. "../src/"),
       make.add_doc(make.get_proj_root() .. "../src/"),
+      -- Doc dir --
+      make.add_doc(make.get_proj_root() .. "../doc/"),
     },
 
     public_inc_dirs = {
-      make.get_proj_root() .. "./",
+      make.get_proj_root() .. "../include",
+    },
+
+    private_inc_dirs = {
       make.get_proj_root() .. "../src/",
     },
 
@@ -35,9 +38,8 @@ table.insert(
     },
 
     project_dependencies = {
-      -- First Party --
-      "RepublicJob",
-      "RepublicCtx",
+      -- Thrid Party --
+      "GLFW",
     },
   }
 )

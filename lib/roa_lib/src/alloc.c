@@ -37,7 +37,7 @@ roa_alloc(unsigned bytes)
 void*
 roa_zalloc(unsigned bytes)
 {
-  if (ROA_IS_ENABLED(ROALIB_ALLOC_STATS))
+  if(ROA_IS_ENABLED(ROALIB_ALLOC_STATS))
   {
     g_alloc_counter += 1;
   }
