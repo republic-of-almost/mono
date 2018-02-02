@@ -38,6 +38,8 @@ table.insert(
     },
 
     project_dependencies = {
+      -- First Party --
+      "RepublicLib",
       -- Thrid Party --
       "GLFW",
     },
