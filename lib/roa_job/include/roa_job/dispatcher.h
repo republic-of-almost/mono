@@ -2,6 +2,9 @@
 #define DISPATCHER_INCLUDED_57EB7719_1AB4_4D4A_B8A1_0F2EC4CA6CAE
 
 
+#include <roa_lib/fundamental.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -83,7 +86,7 @@ struct roa_job_desc
 {
   roa_job_func func;                        /* valid function */
   void *arg;                                /* optional - can be on stack */
-  int keep_on_calling_thread;               /* 1 / 0 keep on calling thread */
+  ROA_BOOL keep_on_calling_thread;               /* 1 / 0 keep on calling thread */
 };
 
 

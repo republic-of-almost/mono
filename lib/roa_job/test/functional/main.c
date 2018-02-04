@@ -10,6 +10,7 @@
 
 #define TEST_WITH_OUTPUT 0
 
+
 #define BATCH_COUNT 1 << 10
 #define TICK_COUNT 1 << 19
 
