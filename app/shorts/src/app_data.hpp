@@ -5,8 +5,9 @@
 /* ------------------------------------------------- [ Application Data ] -- */
 
 
-struct roa_ctx *roa_ctx_t;
-struct roa_dispatcher_ctx *roa_dispatcher_ctx_t;
+typedef struct roa_ctx *roa_ctx_t;
+typedef struct roa_dispatcher_ctx *roa_dispatcher_ctx_t;
+
 struct roa_job_desc;
 
 

@@ -11,6 +11,7 @@
 #include <unistd.h>
 #elif defined(__APPLE__)
 #include <pthread.h>
+#include <sys/sysctl.h>
 #elif defined(_WIN32)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -182,7 +183,7 @@ roa_thread_set_current_name(const char *name)
   ROA_ASSERT(success == 0);
   #elif defined(__APPLE__)
   int success = pthread_setname_np(name);
-  ROA_ASSERT(success);
+  ROA_ASSERT(success == 0);
   #elif defined(_WIN32)
   {
     THREADNAME_INFO info;
@@ -211,7 +212,10 @@ roa_thread_core_count()
   #if defined(__linux__)
   return sysconf(_SC_NPROCESSORS_ONLN);
   #elif defined(__APPLE__)
-
+  unsigned count;
+  size_t count_len = sizeof(count);
+  sysctlbyname("hw.logicalcpu", &count, &count_len, NULL, 0);
+  return count;
   #elif defined(_WIN32)
   SYSTEM_INFO sys_info;
   GetSystemInfo(&sys_info);

@@ -14,8 +14,8 @@ ROA_JOB_DECL(app_frame)
 
 
 /*
-  Submits a new frame to keep the dispatcher alive.
-  Must always be at least one in the system or the application will quit.
+  Helper to submit a new frame. There must always be a frame in the system or
+  the dispatcher will quit.
 */
 void
 app_submit_frame(roa_dispatcher_ctx_t job_ctx, app_data *arg)
@@ -45,7 +45,7 @@ app_submit_frame(roa_dispatcher_ctx_t job_ctx, app_data *arg)
   Happens every frame.
   This is the ubiquitous for(;;) game loop contents. 
 */
-ROA_JOB(app_frame, struct app_data *)
+ROA_JOB(app_frame, struct app_data*)
 {
   ROA_ASSERT(arg);
   ROA_ASSERT_PEDANTIC(job_ctx);
@@ -53,28 +53,32 @@ ROA_JOB(app_frame, struct app_data *)
   /* game logic tick */
   {
     const unsigned count = roa_array_size(arg->logic_updates);
-    const roa_job_desc *data = arg->logic_updates;
-
-    const unsigned logic_counter = roa_dispatcher_add_jobs(
-      job_ctx,
-      data,
-      count
-    );
     
-    roa_dispatcher_wait_for_counter(job_ctx, logic_counter);
+    if(count)
+    {
+      const roa_job_desc *data = arg->logic_updates;
+      ROA_ASSERT_PEDANTIC(data);
+      
+      const unsigned logic_counter = roa_dispatcher_add_jobs(
+        job_ctx,
+        data,
+        count
+      );
+      
+      roa_dispatcher_wait_for_counter(job_ctx, logic_counter);
+    }
   }
 
-  /* game system tick */
-  {
-    
-  }
-
-  /* submit the next frame if we still have a context */
+  /* game systems tick */
   {
     const ROA_BOOL new_frame = roa_ctx_new_frame(arg->hw_ctx);
 
     if (new_frame)
     {
+      /* game systems ticks */
+      
+      
+      /* submit the next frame if we still have a context */
       app_submit_frame(arg->dispatcher, arg);
     }
   }
@@ -86,9 +90,27 @@ ROA_JOB(app_frame, struct app_data *)
 */
 ROA_JOB(app_setup, struct app_data *)
 {
-  /* setup things we need */
-
-
+  /* various setup jobs */
+  {
+    roa_job_desc setup_desc[] = {
+      {
+        main_menu_setup,
+        (void*)arg,
+        ROA_FALSE
+      },
+    };
+    
+    /* allow setup to start */
+    const unsigned setup_marker = roa_dispatcher_add_jobs(
+      job_ctx,
+      ROA_ARR_DATA(setup_desc),
+      ROA_ARR_COUNT(setup_desc)
+    );
+    
+    /* wait for setup to complete */
+    roa_dispatcher_wait_for_counter(job_ctx, setup_marker);
+  }
+  
   /* start the game loop */
   app_submit_frame(job_ctx, arg);
 }
@@ -111,7 +133,13 @@ main()
   roa_ctx_create(&data.hw_ctx);
 
   /* create inital frame job - this will self submit */
+  roa_job_desc desc {
+    app_setup,
+    (void*)&data,
+    ROA_TRUE,
+  };
   
+  roa_dispatcher_add_jobs(data.dispatcher, &desc, 1);
   roa_dispatcher_run(data.dispatcher);
 
   /* destroy game systems in reverse */

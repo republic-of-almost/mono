@@ -69,15 +69,15 @@ typedef void(*roa_job_func)(roa_dispatcher_ctx_t c, void *arg);
 void job_name(roa_dispatcher_ctx_t job_ctx, void *void_arg);            \
 
 #define ROA_JOB(job_name, arg_type)                                     \
-void job_wrap_##job_name##(roa_dispatcher_ctx_t job_ctx, arg_type arg); \
+void job_wrap_##job_name(roa_dispatcher_ctx_t job_ctx, arg_type arg);   \
                                                                         \
 void                                                                    \
 job_name(roa_dispatcher_ctx_t job_ctx, void *void_arg)                  \
 {                                                                       \
-  job_wrap_##job_name##(job_ctx, (arg_type)void_arg);                   \
+  job_wrap_##job_name(job_ctx, (arg_type)void_arg);                     \
 }                                                                       \
                                                                         \
-void job_wrap_##job_name##(roa_dispatcher_ctx_t job_ctx, arg_type arg)
+void job_wrap_##job_name(roa_dispatcher_ctx_t job_ctx, arg_type arg)
 
 struct roa_job_desc
 {

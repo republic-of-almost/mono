@@ -16,11 +16,11 @@ roa_internal_assert(
 
 
 #ifdef _WIN32
-#define ROA_ASSERT_PEDANTIC(expr) if(!expr) { roa_internal_assert(#expr, __FILE__, __LINE__, __FUNCTION__); }
-#define ROA_ASSERT(expr) if(!expr) { roa_internal_assert(#expr, __FILE__, __LINE__, __FUNCTION__); }
+#define ROA_ASSERT_PEDANTIC(expr) if(!(expr)) { roa_internal_assert(#expr, __FILE__, __LINE__, __FUNCTION__); }
+#define ROA_ASSERT(expr) if(!(expr)) { roa_internal_assert(#expr, __FILE__, __LINE__, __FUNCTION__); }
 #else
-#define ROA_ASSERT_PEDANTIC(expr) if(!expr) { roa_internal_assert(#expr, __FILE__, __LINE__, __PRETTY_FUNCTION__); }
-#define ROA_ASSERT(expr) if(!expr) { roa_internal_assert(#expr, __FILE__, __LINE__, __PRETTY_FUNCTION__); }
+#define ROA_ASSERT_PEDANTIC(expr) if(!(expr)) { __builtin_trap(); }
+#define ROA_ASSERT(expr) if(!(expr)) { __builtin_trap(); }
 #endif
 
 
