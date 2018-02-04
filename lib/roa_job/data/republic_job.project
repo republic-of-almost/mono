@@ -70,10 +70,7 @@ table.insert(
       "ROA_JOB_SINGLETHREADED=0",
       "ROA_DISPATCH_MAX_FIBERS=128",
       "ROA_DISPATCH_MAX_JOBS=1024",
-      "ROA_JOB_FIBER_DYNA=0",
-      "ROA_JOB_BATCH_DYNA=0",
-      "ROA_JOB_BIND_THREAD_TO_CORE=1",
-      "ROA_JOB_DEBUG_NAME_THREADS=1",
+      "ROA_JOB_DEBUG_NAME_THREADS=0",
     },
 
     project_dependencies = {

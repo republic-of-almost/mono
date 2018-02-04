@@ -1,6 +1,7 @@
 #include <roa_job/dispatcher.h>
 #include <roa_lib/fundamental.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/alloc.h>
 #include <string.h>
 
 
@@ -9,24 +10,24 @@
 
 #define TEST_WITH_OUTPUT 0
 
-#define BATCH_COUNT 100
-#define TICK_COUNT 1000000
+#define BATCH_COUNT 1 << 10
+#define TICK_COUNT 1 << 19
 
 int ticks = TICK_COUNT;
-int test_data[BATCH_COUNT];
+int *test_data;
 
 
 /* --------------------------------------------------------------- [ Fwd ] -- */
 
 
-void submit_tick(struct roa_dispatcher_ctx *ctx);
+void submit_tick(roa_dispatcher_ctx_t ctx);
 
 
 /* --------------------------------------------------------- [ Test Jobs ] -- */
 
 
 void
-calculate(struct roa_dispatcher_ctx *ctx, void *arg)
+calculate(roa_dispatcher_ctx_t ctx, void *arg)
 {
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
@@ -40,7 +41,7 @@ calculate(struct roa_dispatcher_ctx *ctx, void *arg)
 
 
 void
-tick(struct roa_dispatcher_ctx *ctx, void *arg)
+tick(roa_dispatcher_ctx_t ctx, void *arg)
 {
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
@@ -81,7 +82,7 @@ tick(struct roa_dispatcher_ctx *ctx, void *arg)
 
 
 void
-submit_tick(struct roa_dispatcher_ctx *ctx)
+submit_tick(roa_dispatcher_ctx_t ctx)
 {
   struct roa_job_desc desc[1];
   desc[0].func = tick;
@@ -99,10 +100,10 @@ submit_tick(struct roa_dispatcher_ctx *ctx)
 int
 main()
 {
-  memset(test_data, 0, ROA_ARR_COUNT(test_data) * sizeof(test_data[0]));
-
-  struct roa_dispatcher_ctx *ctx = ROA_NULL;
+  roa_dispatcher_ctx_t ctx = ROA_NULL;
   roa_dispatcher_create(&ctx, 0);
+
+  test_data = roa_zalloc(sizeof(test_data[0]) * BATCH_COUNT);
 
   submit_tick(ctx);
   roa_dispatcher_run(ctx);

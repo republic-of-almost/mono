@@ -39,15 +39,15 @@ struct roa_job_queue_ctx
 {
   /* array */ int                     *job_status;
   /* array */ unsigned                *job_ids;
-  /* array */ struct roa_job_desc   *jobs;
+  /* array */ struct roa_job_desc     *jobs;
   /* array */ int                     *job_batch_ids;
   int                                 job_id_counter;
   
   /* array */ unsigned                *batch_ids;
-  /* array */ struct roa_job_batch  *batches;
+  /* array */ struct roa_job_batch    *batches;
   int                                 batch_id_counter;
   
-  /* array */ struct roa_counter    *counters;
+  /* array */ struct roa_counter      *counters;
   
   roa_mutex                            mutex;
 };
@@ -103,7 +103,7 @@ roa_job_queue_next(
 unsigned /* returns the batch id */
 roa_job_queue_add_batch(
   struct roa_job_queue_ctx *ctx,
-  struct roa_job_desc *desc,
+  const struct roa_job_desc *desc,
   unsigned count,
   int th_id
 );

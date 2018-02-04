@@ -7,6 +7,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <roa_lib/fundamental.h>
+#include <roa_job/dispatcher.h>
 #include <fiber.hpp>
 #include <config.hpp>
 
@@ -24,9 +25,6 @@
 
 
 /* -------------------------------------------------- [ Dispatcher Types ] -- */
-
-
-struct roa_dispatcher_ctx;
 
 
 /*
@@ -61,14 +59,15 @@ enum {
 
 struct roa_dispatcher_ctx
 {
+  #if !ROA_JOB_SINGLETHREADED
   /* general */
   int dispatch_state;
 
   /* threads */
   int thread_count;
-  /* array */ roa_thread_id    *thread_ids;
+  /* array */ roa_thread_id           *thread_ids;
   /* array */ struct roa_thread_data  *thread_local_data;
-  /* array */ roa_thread       *raw_threads;
+  /* array */ roa_thread              *raw_threads;
 
   /* jobs */
   struct roa_job_queue_ctx job_queue;
@@ -78,6 +77,9 @@ struct roa_dispatcher_ctx
 
   /* config */
   struct roa_dispatcher_desc desc;
+  #else
+  /* array */ roa_job_desc *pending_jobs;
+  #endif
 };
 
 
@@ -89,7 +91,7 @@ Helper to find thread index
 */
 int
 roa_internal_find_thread_index(
-  const struct roa_dispatcher_ctx *c)
+  const roa_dispatcher_ctx_t c)
 {
   roa_thread_id id = roa_thread_get_current_id();
 
@@ -134,11 +136,6 @@ roa_internal_fiber_executer(void *arg)
 
   for (;;)
   {
-    if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
-    {
-      roa_thread_set_current_name("ROAJob_Fiber");
-    }
-
     /* fiber work - we don't know what thread we are on */
     {
       const int thd_index = roa_internal_find_thread_index(ctx);
@@ -192,7 +189,7 @@ roa_internal_fiber_dispatcher(void *arg)
 
   if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
   {
-    roa_thread_set_current_name("ROAJob_Loading");
+    roa_thread_set_current_name("ROA_JobThread");
   }
 
   struct roa_thread_arg *th_arg = (struct roa_thread_arg*)arg;
@@ -209,11 +206,6 @@ roa_internal_fiber_dispatcher(void *arg)
 
   /* threads can startup before setup has finished */
   while (ctx->dispatch_state <= FIBER_DISPATCHER_INITIALIZING) {}
-
-  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
-  {
-    roa_thread_set_current_name("ROAJob_Loaded");
-  }
 
   /* create a fiber for this thread, so we can jump in and out */
   const int thd_index = roa_internal_find_thread_index(ctx);
@@ -232,11 +224,6 @@ roa_internal_fiber_dispatcher(void *arg)
 
   for (;;)
   {
-    if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
-    {
-      roa_thread_set_current_name("ROAJob_Search");
-    }
-
     /* must start in a good state */
     ROA_ASSERT(tls->worker_fiber == 0);
     ROA_ASSERT(tls->home_fiber != 0);
@@ -249,11 +236,6 @@ roa_internal_fiber_dispatcher(void *arg)
       /* all done */
       if ((has_pending_fibers + has_pending_jobs) == 0)
       {
-        if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
-        {
-          roa_thread_set_current_name("ROAJob_Shutdown");
-        }
-
         break;
       }
     }
@@ -331,20 +313,15 @@ roa_internal_fiber_dispatcher(void *arg)
 
 /* ----------------------------------------------- [ Dispatcher Lifetime ] -- */
 /*
-Functions that deal with the lifetime of the fiber context.
+  Functions that deal with the lifetime of the fiber context.
 */
+
 
 void
 roa_dispatcher_create(
-  struct roa_dispatcher_ctx **c,
+  roa_dispatcher_ctx_t *c,
   const struct roa_dispatcher_desc *override_desc)
 {
-  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
-  {
-    roa_thread_set_current_name("ROAJob_Main");
-  }
-
-
   /* param assert */
   ROA_ASSERT(c);
 
@@ -382,6 +359,7 @@ roa_dispatcher_create(
   }
 
   /* create fiber and job pools */
+  if(!ROA_IS_ENABLED(ROA_JOB_SINGLETHREADED))
   {
     roa_job_queue_create(&new_ctx->job_queue, new_ctx->desc.max_jobs);
 
@@ -394,6 +372,7 @@ roa_dispatcher_create(
   }
 
   /* init thread data */
+  if (!ROA_IS_ENABLED(ROA_JOB_SINGLETHREADED))
   {
     int core_count = roa_thread_core_count();
     new_ctx->thread_count = 1;
@@ -466,7 +445,7 @@ roa_dispatcher_create(
 
 
 void
-roa_dispatcher_destroy(struct roa_dispatcher_ctx **c)
+roa_dispatcher_destroy(roa_dispatcher_ctx_t *c)
 {
   /* param assert */
   ROA_ASSERT(c);
@@ -498,7 +477,7 @@ roa_dispatcher_destroy(struct roa_dispatcher_ctx **c)
 
 void
 roa_dispatcher_run(
-  struct roa_dispatcher_ctx *c)
+  roa_dispatcher_ctx_t c)
 {
   /* param assert */
   {
@@ -517,89 +496,106 @@ roa_dispatcher_run(
     roa_internal_fiber_dispatcher(&arg);
   }
 
-  if (ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
-  {
-    roa_thread_set_current_name("ROAJob_Main");
-  }
-
   FIBER_LOG("Dispatch shutdown");
 }
 
 
 unsigned
 roa_dispatcher_add_jobs(
-  struct roa_dispatcher_ctx *c,
-  struct roa_job_desc *desc,
+  roa_dispatcher_ctx_t c,
+  const struct roa_job_desc *desc,
   int job_count)
 {
   /* param assert */
-  ROA_ASSERT(c);
-  ROA_ASSERT(desc);
-  ROA_ASSERT(job_count);
+  {
+    ROA_ASSERT(c);
+    ROA_ASSERT(desc);
+    ROA_ASSERT(job_count);
+  }
   
-  const int th_id = roa_internal_find_thread_index(c);
+  /* single threaded we just execute the jobs */
+  if (ROA_IS_ENABLED(ROA_JOB_SINGLETHREADED))
+  {
+    for (int i = 0; i < job_count; ++i)
+    {
+      roa_job_func job = (roa_job_func)desc[i].func;
+      job(c, desc[i].arg);
+    }
 
-  return roa_job_queue_add_batch(&c->job_queue, desc, job_count, th_id);
+    return 0; /* nothing to return its all done */
+  }
+  else
+  {
+    const int th_id = roa_internal_find_thread_index(c);
+    return roa_job_queue_add_batch(&c->job_queue, desc, job_count, th_id);
+  }
 }
 
 
 void
 roa_dispatcher_wait_for_counter(
-  struct roa_dispatcher_ctx *ctx,
+  roa_dispatcher_ctx_t ctx,
   unsigned marker)
 {
   /* param assert */
+  ROA_ASSERT(ctx);
+
+  /* single thread has nothing to wait on */
+  if (ROA_IS_ENABLED(ROA_JOB_SINGLETHREADED))
   {
-    ROA_ASSERT(ctx);
+    return;
+  }
+  else
+  {
     ROA_ASSERT(marker);
-  }
 
-  /* get tls */
-  struct roa_thread_data *tls = NULL;
-  {
-    const int thd_index = roa_internal_find_thread_index(ctx);
-
-    tls = &ctx->thread_local_data[thd_index];
-  }
-
-  /* check state */
-  {
-    ROA_ASSERT(tls);
-
-    /* if this happens you might have called this from the main thread */
-    /* you need to have the main thread join in the fun with */
-    /* roa_dispatcher_run(...) */
-    ROA_ASSERT(tls->worker_fiber);
-  }
-
-  /* block this fiber */
-  struct roa_counter *counter = NULL;
-  {
-    counter = roa_job_queue_batch_block(&ctx->job_queue, marker);
-
-    if (counter == NULL)
+    /* get tls */
+    struct roa_thread_data *tls = NULL;
     {
-      /* batch already finished - continue */
-      return;
+      const int thd_index = roa_internal_find_thread_index(ctx);
+
+      tls = &ctx->thread_local_data[thd_index];
     }
 
-    counter->has_pending = 1;
-    roa_fiber_pool_block(&ctx->fiber_pool, tls->worker_fiber, counter);
-  }
+    /* check state */
+    {
+      ROA_ASSERT(tls);
 
-  /* switch back to home fiber */
-  {
-    struct roa_fiber *worker = tls->worker_fiber;
-    tls->worker_fiber = 0;
-    roa_fiber_switch(worker, tls->home_fiber);
-  }
+      /* if this happens you might have called this from the main thread */
+      /* you need to have the main thread join in the fun with */
+      /* roa_dispatcher_run(...) */
+      ROA_ASSERT(tls->worker_fiber);
+    }
 
-  /* fiber back on thread */
-  {
-    ROA_ASSERT(counter);
-    ROA_ASSERT(counter->has_pending == 1);
+    /* block this fiber */
+    struct roa_counter *counter = NULL;
+    {
+      counter = roa_job_queue_batch_block(&ctx->job_queue, marker);
 
-    roa_job_queue_batch_unblock(&ctx->job_queue, counter);
+      if (counter == NULL)
+      {
+        /* batch already finished - continue */
+        return;
+      }
+
+      counter->has_pending = 1;
+      roa_fiber_pool_block(&ctx->fiber_pool, tls->worker_fiber, counter);
+    }
+
+    /* switch back to home fiber */
+    {
+      struct roa_fiber *worker = tls->worker_fiber;
+      tls->worker_fiber = 0;
+      roa_fiber_switch(worker, tls->home_fiber);
+    }
+
+    /* fiber back on thread */
+    {
+      ROA_ASSERT(counter);
+      ROA_ASSERT(counter->has_pending == 1);
+
+      roa_job_queue_batch_unblock(&ctx->job_queue, counter);
+    }
   }
 }
 

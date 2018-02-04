@@ -44,7 +44,7 @@ extern "C" {
 
 #define roa_array_destroy(arr) \
   roa_internal_array_destroy((void**)&arr); \
-  arr = NULL
+  arr = 0
 
 #define roa_array_pop(arr) \
   roa_internal_array_internal_pop((void**)&arr); \

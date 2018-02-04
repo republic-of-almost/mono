@@ -10,7 +10,7 @@ extern "C" {
 /* -------------------------------------------------- [ Dispatcher Types ] -- */
 
 
-struct roa_dispatcher_ctx;
+typedef struct roa_dispatcher_ctx * roa_dispatcher_ctx_t;
 
 
 /* ----------------------------------------------- [ Dispatcher Lifetime ] -- */
@@ -41,13 +41,13 @@ struct roa_dispatcher_desc
 
 void
 roa_dispatcher_create(
-  struct roa_dispatcher_ctx **c,          /* must be a valid pointer */
+  roa_dispatcher_ctx_t *c,          /* must be a valid pointer */
   const struct roa_dispatcher_desc *desc  /* optional */
 );
 
 void
 roa_dispatcher_destroy(
-  struct roa_dispatcher_ctx **c   /* must be a valid object */
+  roa_dispatcher_ctx_t *c   /* must be a valid object */
 );
 
 
@@ -62,7 +62,22 @@ roa_dispatcher_destroy(
   wait on the counter;
 */
 
-typedef void(*roa_job_func)(struct roa_dispatcher_ctx *c, void *arg);
+typedef void(*roa_job_func)(roa_dispatcher_ctx_t c, void *arg);
+
+
+#define ROA_JOB_DECL(job_name)                                \
+void job_name(roa_dispatcher_ctx_t job_ctx, void *void_arg);            \
+
+#define ROA_JOB(job_name, arg_type)                                     \
+void job_wrap_##job_name##(roa_dispatcher_ctx_t job_ctx, arg_type arg); \
+                                                                        \
+void                                                                    \
+job_name(roa_dispatcher_ctx_t job_ctx, void *void_arg)                  \
+{                                                                       \
+  job_wrap_##job_name##(job_ctx, (arg_type)void_arg);                   \
+}                                                                       \
+                                                                        \
+void job_wrap_##job_name##(roa_dispatcher_ctx_t job_ctx, arg_type arg)
 
 struct roa_job_desc
 {
@@ -74,21 +89,21 @@ struct roa_job_desc
 
 void
 roa_dispatcher_run(
-  struct roa_dispatcher_ctx *c              /* must be a valid context */
+  roa_dispatcher_ctx_t c              /* must be a valid context */
 );
 
 
-unsigned                                    /* returns a marker for the job batch */
+unsigned                              /* returns a marker for the job batch */
 roa_dispatcher_add_jobs(
-  struct roa_dispatcher_ctx *c,             /* must be a valid context */
-  struct roa_job_desc *desc,                /* array of job descriptions */
-  int job_count                             /* number of descriptions */
+  roa_dispatcher_ctx_t c,             /* must be a valid context */
+  const struct roa_job_desc *desc,    /* array of job descriptions */
+  int job_count                       /* number of descriptions */
 );
 
 
 void
 roa_dispatcher_wait_for_counter(
-  struct roa_dispatcher_ctx *c,             /* must be a valid context */
+  roa_dispatcher_ctx_t c,             /* must be a valid context */
   unsigned marker                           /* must be a valid marker */
 );
 

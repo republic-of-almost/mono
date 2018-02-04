@@ -19,6 +19,8 @@ _set to 1 or 0 : default 0_
 
 Executes jobs in a singlethreaded environment. Everytime jobs are submitted it will be executed there and then.
 
+WIP
+
 
 ### ROA_DISPATCH_MAX_FIBERS
 
@@ -32,13 +34,6 @@ Set the number of fibers to be constructed on initialization.
 _default 1024_
 
 Set the number of jobs that can be submitted on initialization.
-
-
-### ROA_JOB_BIND_THREAD_TO_CORE
-
-_set to 1 or 0 : default 1_
-
-Where the platform API is available it will bind the thread to the core, or pair of cores. Ignored if ROA_JOB_SINGLETHREADED is 1.
 
 
 ### ROA_JOB_DEBUG_NAME_THREADS

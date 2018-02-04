@@ -175,7 +175,7 @@ roa_job_queue_next(
 unsigned
 roa_job_queue_add_batch(
   struct roa_job_queue_ctx *ctx,
-  struct roa_job_desc *desc,
+  const struct roa_job_desc *desc,
   unsigned count,
   int thread_id)
 {
@@ -249,17 +249,18 @@ roa_job_queue_add_batch(
     for(unsigned i = 0; i < count; ++i)
     {
       int new_job_id = ++ctx->job_id_counter;
-      
-      if (desc[i].keep_on_calling_thread == 1)
+     
+      roa_job_desc new_desc = desc[i];
+      if (new_desc.keep_on_calling_thread == 1)
       {
-        desc[i].keep_on_calling_thread = thread_id;
+        new_desc.keep_on_calling_thread = thread_id;
       }
       else
       {
-        desc[i].keep_on_calling_thread = -1;
+        new_desc.keep_on_calling_thread = -1;
       }
 
-      roa_array_push(ctx->jobs, desc[i]);
+      roa_array_push(ctx->jobs, new_desc);
       roa_array_push(ctx->job_status, roa_JOB_STATUS_PENDING);
       roa_array_push(ctx->job_ids, new_job_id);
       roa_array_push(ctx->job_batch_ids, new_batch_id);
