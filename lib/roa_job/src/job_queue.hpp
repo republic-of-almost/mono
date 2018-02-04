@@ -28,6 +28,14 @@ struct roa_job_batch
 };
 
 
+struct roa_job
+{
+  roa_job_func func;
+  void *arg;
+  int calling_th_id;
+};
+
+
 enum
 {
   roa_JOB_STATUS_PENDING,   /* a job that has not started to be processed */
@@ -39,7 +47,7 @@ struct roa_job_queue_ctx
 {
   /* array */ int                     *job_status;
   /* array */ unsigned                *job_ids;
-  /* array */ struct roa_job_desc     *jobs;
+  /* array */ struct roa_job          *jobs;
   /* array */ int                     *job_batch_ids;
   int                                 job_id_counter;
   
@@ -96,7 +104,8 @@ roa_job_queue_next(
   struct roa_job_queue_ctx *ctx,
   int th_id,
   void **out_func,
-  void **out_arg
+  void **out_arg,
+  ROA_BOOL *out_keep_on_calling_thread
 );
 
 

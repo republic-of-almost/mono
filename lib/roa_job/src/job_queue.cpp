@@ -125,7 +125,8 @@ roa_job_queue_next(
   struct roa_job_queue_ctx *ctx,
   int th_id,
   void **out_func,
-  void **out_arg)
+  void **out_arg,
+  ROA_BOOL *out_thread_locked)
 {
   /* param check */
   ROA_ASSERT(ctx != 0);
@@ -139,9 +140,9 @@ roa_job_queue_next(
 
   roa_mutex_lock(ctx->mutex);
   
-  int                         *job_status = ctx->job_status;
-  const unsigned              *job_ids    = ctx->job_ids;
-  const struct roa_job_desc *jobs       = ctx->jobs;
+  int                  *job_status = ctx->job_status;
+  const unsigned       *job_ids    = ctx->job_ids;
+  const struct roa_job *jobs       = ctx->jobs;
   
   const size_t job_count = roa_array_size(job_status);
 
@@ -151,15 +152,16 @@ roa_job_queue_next(
   
     if(curr_state == roa_JOB_STATUS_PENDING)
     {
-      const int calling_th = jobs[i].keep_on_calling_thread;
+      const int calling_th = jobs[i].calling_th_id;
 
       if(calling_th == -1 || calling_th == th_id)
       {
         return_value  = job_ids[i];
         job_status[i] = roa_JOB_STATUS_BUSY;
       
-        *out_func = (void*)jobs[i].func;
-        *out_arg  = (void*)jobs[i].arg;
+        *out_func          = (void*)jobs[i].func;
+        *out_arg           = (void*)jobs[i].arg;
+        *out_thread_locked = calling_th == -1 ? ROA_FALSE : ROA_TRUE;
       
         break;
       }
@@ -250,14 +252,17 @@ roa_job_queue_add_batch(
     {
       int new_job_id = ++ctx->job_id_counter;
      
-      roa_job_desc new_desc = desc[i];
-      if (new_desc.keep_on_calling_thread == 1)
+      roa_job new_desc;
+      new_desc.func = desc[i].func;
+      new_desc.arg  = desc[i].arg;
+
+      if (desc[i].keep_on_calling_thread == ROA_TRUE)
       {
-        new_desc.keep_on_calling_thread = thread_id;
+        new_desc.calling_th_id = thread_id;
       }
       else
       {
-        new_desc.keep_on_calling_thread = -1;
+        new_desc.calling_th_id = -1;
       }
 
       roa_array_push(ctx->jobs, new_desc);

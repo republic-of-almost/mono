@@ -106,7 +106,7 @@ ROA_JOB(app_setup, struct app_data *)
     );
 
     /* wait for setup to complete */
-    /*roa_dispatcher_wait_for_counter(job_ctx, setup_marker);*/
+    roa_dispatcher_wait_for_counter(job_ctx, setup_marker);
   }
 
   /* start the game loop */

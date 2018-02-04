@@ -9,6 +9,7 @@ struct roa_counter
 {
   int batch_id;
   int has_pending;
+  int thread_id;
   std::atomic_int value;
 };
 

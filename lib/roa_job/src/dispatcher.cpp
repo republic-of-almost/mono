@@ -42,6 +42,7 @@ struct roa_thread_data
   /* threads switch between fibers */
   struct roa_fiber *home_fiber;     /* local fiber */
   struct roa_fiber *worker_fiber;   /* fiber to execute */
+  ROA_BOOL locked_to_thread;
 
   /* function to exec */
   void *func;                       /* function to exec on fiber */
@@ -242,7 +243,7 @@ roa_internal_fiber_dispatcher(void *arg)
 
     /* switch to a fiber - pending or a new job */
     {
-      tls->worker_fiber = roa_fiber_pool_next_pending(&ctx->fiber_pool);
+      tls->worker_fiber = roa_fiber_pool_next_pending(&ctx->fiber_pool, thd_index);
 
       /* pending fiber */
       if (tls->worker_fiber)
@@ -263,7 +264,8 @@ roa_internal_fiber_dispatcher(void *arg)
           &ctx->job_queue,
           thd_index,
           &tls->func,
-          &tls->arg
+          &tls->arg,
+          &tls->locked_to_thread
         );
 
         /* didn't get a job - bail come back later */
@@ -550,12 +552,8 @@ roa_dispatcher_wait_for_counter(
     ROA_ASSERT(marker);
 
     /* get tls */
-    struct roa_thread_data *tls = NULL;
-    {
-      const int thd_index = roa_internal_find_thread_index(ctx);
-
-      tls = &ctx->thread_local_data[thd_index];
-    }
+    const int thd_index = roa_internal_find_thread_index(ctx);
+    struct roa_thread_data *tls = &ctx->thread_local_data[thd_index];
 
     /* check state */
     {
@@ -576,6 +574,15 @@ roa_dispatcher_wait_for_counter(
       {
         /* batch already finished - continue */
         return;
+      }
+
+      if (tls->locked_to_thread == 1)
+      {
+        counter->thread_id = thd_index;
+      }
+      else
+      {
+        counter->thread_id = -1;
       }
 
       counter->has_pending = 1;
