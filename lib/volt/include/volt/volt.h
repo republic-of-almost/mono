@@ -1,5 +1,5 @@
-#ifndef VOLT_INCLUDED_5721633F_D449_48B4_9B7D_3839CEC61DDA
-#define VOLT_INCLUDED_5721633F_D449_48B4_9B7D_3839CEC61DDA
+#ifndef VOLT_INCLUDED_F1E11FF6_C036_4211_A608_BA0DC5DA0259
+#define VOLT_INCLUDED_F1E11FF6_C036_4211_A608_BA0DC5DA0259
 
 
 #ifdef __cplusplus
@@ -7,149 +7,63 @@ extern "C" {
 #endif
 
 
-/* -------------------------------------------------------- [ Volt Types ] -- */
+typedef struct volt_ctx * volt_ctx_t;
+typedef struct volt_renderpass * volt_renderpass_t;
+typedef struct volt_vbo * volt_vbo_t;
+typedef struct volt_ibo * volt_ibo_t;
+typedef struct volt_texture * volt_texture_t;
+typedef struct volt_input * volt_input_t;
 
 
-struct volt_ctx;
-
-typedef int VOLT_BOOL;
-#define VOLT_TRUE 1
-#define VOLT_FALSE 0
-
-
-/* ------------------------------------------------------ [ Volt Liftime ] -- */
-
-
-struct volt_ctx_desc
+struct volt_transform
 {
-  const char **extension_list;
-  unsigned extension_list_count;
 
-  void *window_handle;
 };
 
 
-VOLT_BOOL
-volt_ctx_create(
-  struct volt_ctx         **ctx,
-  struct volt_ctx_desc    *desc);
-
-
-VOLT_BOOL
-volt_ctx_destroy(
-  struct volt_ctx         **ctx);
+/* lifetime */
 
 
 void
-volt_ctx_execute(
-  struct volt_ctx         *ctx);
-
-
-/* --------------------------------------------------- [ Volt Rasterizer ] -- */
-
-
-typedef enum volt_rasterizer {
-
-  VOLT_RASTERIZER_CULLBACK,
-  VOLT_RASTERIZER_CULLFRONT,
-  VOLT_RASTERIZER_WINDING_ORDER_CLOCKWISE,
-  VOLT_RASTERIZER_WINDING_ORDER_ANTI_CLOCKWISE,
-
-} volt_rasterizer;
-
-
-/* ------------------------------------------------------- [ Volt Vertex ] -- */
-
-
-typedef enum volt_vert_attr {
-
-  VOLT_VERTEX_FLOAT1,
-  VOLT_VERTEX_FLOAT2,
-  VOLT_VERTEX_FLOAT3,
-  VOLT_VERTEX_FLOAT4,
-
-} volt_vert_attr;
-
-
-struct volt_vertex_desc
-{
-  volt_vert_attr *attr;
-  unsigned count;
-};
-
-
-unsigned
-volt_vertex_format_create(
-  struct volt_ctx         *ctx,
-  struct volt_vertex_desc *desc);
-
-
-/* ------------------------------------------------------- [ Volt Shader ] -- */
-
-
-/* ------------------------------------------------------ [ Volt Texture ] -- */
-
-
-/* ------------------------------------------------ [ Volt Vertex Buffer ] -- */
-
-
-struct volt_vertex_buffer_desc
-{
-  float *data;
-  unsigned data_count;
-};
-
-
-unsigned
-volt_vertex_buffer_create(
-  struct volt_ctx                *ctx,
-  struct volt_vertex_buffer_desc *desc);
-
-
-/* ------------------------------------------------- [ Volt Index Buffer ] -- */
-
-
-/* ------------------------------------------------- [ Volt Frame Buffer ] -- */
-
-
-/* ----------------------------------------------- [ Volt Comamnd Buffer ] -- */
-
-
-struct volt_cmd_buffer;
+volt_ctx_create(volt_ctx_t *ctx);
 
 
 void
-volt_cmd_draw(struct volt_cmd_buffer cmd);
+volt_ctx_destroy(volt_ctx_t *ctx);
 
 
 void
-volt_cmd_bind_vertex_buffer(struct volt_cmd_buffer cmd, unsigned vert_id);
+volt_ctx_process(volt_ctx_t ctx);
+
+
+/* resources */
+
+
+/* renderpass */
 
 
 void
-volt_cmd_bind_index_buffer(struct void_cmd_buffer cmd, unsigned index_id);
+volt_renderpass_create(volt_renderpass_t *pass);
 
 
 void
-volt_cmd_bind_vertex_input(struct volt_cmd_buffer cmd, unsigned vertex_id);
-
-
-/* --------------------------------------------------- [ Volt Renderpass ] -- */
-
-
-typedef void(*volt_renderpass_execute_fn)(struct volt_cmd_buffer, void *user_data);
-
-
-struct volt_renderpass
-{
-  volt_renderpass_execute_fn execute;
-};
+volt_renderpass_commit(volt_renderpass_t *pass);
 
 
 void
-volt_renderpass_create(
-  struct volt_ctx         **ctx,
-  struct volt_renderpass  pass);
+volt_renderpass_bind_input_format(volt_renderpass_t *pass, volt_input_t);
+
+
+void
+volt_renderpass_bind_vertex_buffer(volt_renderpass_t *pass, volt_vbo_t vbo);
+
+
+void
+volt_renderpass_bind_index_buffer(volt_renderpass_t *pass, volt_ibo_t ibo);
+
+
+void
+volt_renderpass_draw();
 
 
 #ifdef __cplusplus

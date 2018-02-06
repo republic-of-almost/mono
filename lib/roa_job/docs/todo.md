@@ -1,11 +1,27 @@
 # Fiber TODO
 
-- Job Queue in TLS Job Steal
-  Lots of contention and cache line sharing, we should have a job queue per
-  thread. and have idle threads steal work.
-  
-- Needs alot more profiling, but want to get other platforms working first.
+## Performance
 
-- Block ID should be set at the same time as blocking thread.
+There is high contention in this system. It could be simplified by using TLS more. If the TLS held pending jobs (and maybe pending fibers or just thread locked pending fibers), it should simplify the design.
 
-- Stack allocate a counter and pass that instead of block id's
+
+```c
+struct tls
+{
+  /* array */ jobs *pending_jobs;
+  /* array */ jobs *thread_locked_jobs;
+
+  /* array */ fiber *pending_fibers;
+  /* array */ fiber *thread_locked_fibers;
+};
+```
+
+
+Load balancing could be done through job steals. Where idle threads could search other tls's
+
+
+Another possible solution would be to continue to have a single array, but try and have a read/write mechanism to pull jobs out without a mutex. Howver this could lead to high false sharing.
+
+## Singlethreaded
+
+Singlethreaded is meant to a testing version / emscripten friendly version of job system. It is still under development.
