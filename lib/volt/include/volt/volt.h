@@ -15,10 +15,7 @@ typedef struct volt_texture * volt_texture_t;
 typedef struct volt_input * volt_input_t;
 
 
-struct volt_transform
-{
-
-};
+#define VOLT_NULL 0
 
 
 /* lifetime */
@@ -33,10 +30,24 @@ volt_ctx_destroy(volt_ctx_t *ctx);
 
 
 void
-volt_ctx_process(volt_ctx_t ctx);
+volt_ctx_execute(volt_ctx_t ctx);
 
 
 /* resources */
+
+
+struct volt_vbo_desc
+{
+  float *data;
+  unsigned count;
+};
+
+
+void
+volt_vertex_buffer_create(
+  volt_ctx_t ctx,
+  volt_vbo_t *t,
+  struct volt_vbo_desc *desc);
 
 
 /* renderpass */
@@ -51,19 +62,19 @@ volt_renderpass_commit(volt_renderpass_t *pass);
 
 
 void
-volt_renderpass_bind_input_format(volt_renderpass_t *pass, volt_input_t);
+volt_renderpass_bind_input_format(volt_renderpass_t pass, volt_input_t);
 
 
 void
-volt_renderpass_bind_vertex_buffer(volt_renderpass_t *pass, volt_vbo_t vbo);
+volt_renderpass_bind_vertex_buffer(volt_renderpass_t pass, volt_vbo_t vbo);
 
 
 void
-volt_renderpass_bind_index_buffer(volt_renderpass_t *pass, volt_ibo_t ibo);
+volt_renderpass_bind_index_buffer(volt_renderpass_t pass, volt_ibo_t ibo);
 
 
 void
-volt_renderpass_draw();
+volt_renderpass_draw(volt_renderpass_t pass);
 
 
 #ifdef __cplusplus

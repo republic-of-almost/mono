@@ -1,6 +1,4 @@
-#include <vulkan/vulkan.h>
 
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <volt/volt.h>
 
@@ -12,61 +10,55 @@ main()
 {
   glfwInit();
 
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+
   GLFWwindow* window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
+  glfwMakeContextCurrent(window);
 
-  struct volt_ctx *volt_ctx = NULL;
-  struct volt_ctx_desc volt_desc;
-  memset(&volt_desc, 0, sizeof(volt_desc));
-  volt_desc.extension_list = glfwGetRequiredInstanceExtensions(&volt_desc.extension_list_count);
-  volt_desc.window_handle = glfwGetWin32Window(window);
+  volt_ctx_t ctx = VOLT_NULL;
+  volt_ctx_create(&ctx);
 
-  volt_ctx_create(&volt_ctx, &volt_desc);
+  /* create some assets */
+  {
+    float verts[6];
+    verts[0] = 0.f;
+    verts[1] = 0.5f;
+    verts[2] = 0.5f;
+    verts[3] = -0.5f;
+    verts[4] = -0.5f;
+    verts[5] = -0.5f;
 
-  volt_vert_attr vertex[2];
-  vertex[0] = VOLT_VERTEX_FLOAT2;
-  vertex[1] = VOLT_VERTEX_FLOAT3;
+    volt_vbo_t vbo = VOLT_NULL;
+    struct volt_vbo_desc desc;
+    desc.data = verts;
+    desc.count = 6;
 
-  struct volt_vertex_desc vert_desc;
-  vert_desc.attr = vertex;
-  vert_desc.count = 2;
+    volt_vertex_buffer_create(ctx, &vbo, &desc);
 
-  unsigned vertex_input = volt_vertex_create(volt_ctx, &vert_desc);
-
-  float vertex_data[15];
-  vertex_data[0] = +0.0f;
-  vertex_data[1] = -0.5f;
-  vertex_data[2] = +1.0f;
-  vertex_data[3] = +1.0f;
-  vertex_data[4] = +1.0f;
-
-  vertex_data[5] = +0.5f;
-  vertex_data[6] = +0.5f;
-  vertex_data[7] = +0.0f;
-  vertex_data[8] = +1.0f;
-  vertex_data[9] = +0.0f;
-
-  vertex_data[10] = -0.5f;
-  vertex_data[11] = +0.5f;
-  vertex_data[12] = +0.0f;
-  vertex_data[13] = +0.0f;
-  vertex_data[14] = +1.0f;
-
-  struct volt_vertex_buffer_desc vbo_desc;
-  vbo_desc.data = vertex_data;
-  vbo_desc.data_count = 15;
-
-  unsigned vertex_buffer = volt_vertex_buffer_create(volt_ctx, &vbo_desc);
+    volt_ctx_execute(ctx);
+  }
 
   while (!glfwWindowShouldClose(window))
   {
-    glfwPollEvents();
+    /* draw some stuff */
+    {
+      volt_renderpass_t rp;
+      volt_renderpass_create(&rp);
 
-    volt_ctx_execute(volt_ctx);
+      
+
+      volt_renderpass_commit(&rp);
+    }
+
+    volt_ctx_execute(ctx);
+
+    glfwPollEvents();
+    glfwSwapBuffers(window);
   }
 
-  volt_ctx_destroy(&volt_ctx);
+  volt_ctx_destroy(&ctx);
 
   glfwDestroyWindow(window);
   glfwTerminate();
