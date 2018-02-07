@@ -10,7 +10,7 @@
 #include <roa_lib/assert.h>
 
 
-struct volt_shader
+struct volt_program
 {
   GLuint program;
 };
@@ -43,7 +43,8 @@ struct volt_ctx
 {
   GLuint vao;
 
-  /* array */ struct volt_vbo_desc *pending_vbo_desc;
+  /* array */ struct volt_vbo_desc *pending_create_vbo_desc;
+  /* array */ struct volt_program_desc *pending_create_program_desc;
   
   /* array */ volt_renderpass *renderpasses;
 };
@@ -62,8 +63,6 @@ struct volt_draw_call
 
 struct volt_renderpass
 {
-  volt_shader shader;
-
   /* array */ volt_draw_call *draw_calls;
 };
 
@@ -84,7 +83,8 @@ volt_ctx_create(volt_ctx_t *ctx)
   new_ctx = (volt_ctx*)roa_zalloc(sizeof(new_ctx[0]));
 
   roa_array_create(new_ctx->renderpasses, 128);
-  roa_array_create(new_ctx->pending_vbo_desc, 32);
+  roa_array_create(new_ctx->pending_create_vbo_desc, 32);
+  roa_array_create(new_ctx->pending_create_program_desc, 32);
 
   *ctx = new_ctx;
 
@@ -96,7 +96,8 @@ volt_ctx_create(volt_ctx_t *ctx)
 void
 volt_ctx_destroy(volt_ctx_t *ctx)
 {
-  roa_array_destroy((*ctx)->pending_vbo_desc);
+  roa_array_destroy((*ctx)->pending_create_program_desc);
+  roa_array_destroy((*ctx)->pending_create_vbo_desc);
   roa_array_destroy((*ctx)->renderpasses);
 
   roa_free(*ctx);
@@ -115,11 +116,11 @@ volt_ctx_execute(volt_ctx_t ctx)
   {
     /* create vbos */
     {
-      const unsigned vbo_count = roa_array_size(ctx->pending_vbo_desc);
+      const unsigned vbo_count = roa_array_size(ctx->pending_create_vbo_desc);
 
       for (int i = 0; i < vbo_count; ++i)
       {
-        const volt_vbo_desc *vbo_desc = &ctx->pending_vbo_desc[i];
+        const volt_vbo_desc *vbo_desc = &ctx->pending_create_vbo_desc[i];
 
         GLuint vbo{};
         glGenBuffers(1, &vbo);
@@ -132,7 +133,53 @@ volt_ctx_execute(volt_ctx_t ctx)
         ROA_ASSERT_PEDANTIC(vbo > 0);
       }
 
-      roa_array_resize(ctx->pending_vbo_desc, 0);
+      roa_array_resize(ctx->pending_create_vbo_desc, 0);
+    }
+
+    /* create programs */
+    {
+      const unsigned program_count = roa_array_size(ctx->pending_create_program_desc);
+
+      for (int i = 0; i < program_count; ++i)
+      {
+        const volt_program_desc *prog_desc = &ctx->pending_create_program_desc[i];
+
+        GLuint shaders[VOLT_SHD_STAGE_COUNT]{};
+        GLenum shader_enum[VOLT_SHD_STAGE_COUNT]{
+          GL_VERTEX_SHADER,
+          GL_GEOMETRY_SHADER,
+          GL_FRAGMENT_SHADER,
+        }; /* make sure this aligns with volt.h's enum */
+
+        for (int j = 0; j < prog_desc->stage_count; ++j)
+        {
+          const volt_shader_stage stage = prog_desc->shader_stages_type[j];
+
+          shaders[stage] = glCreateShader(shader_enum[stage]);
+          GLchar const *src = prog_desc->shader_stages_src[j];
+          glShaderSource(shaders[stage], 1, &src, NULL);
+
+          /* check for errors */
+        }
+
+        /* link shaders */
+        {
+          GLuint program = glCreateProgram();
+          
+          for (GLuint shd : shaders)
+          {
+            if (shd != 0)
+            {
+              glAttachShader(program, shd);
+            }
+          }
+
+          glBindFragDataLocation(program, 0, "out_color");
+          glLinkProgram(program);
+
+          /* check for errors */
+        }
+      }
     }
   }
 
@@ -176,7 +223,22 @@ volt_vertex_buffer_create(volt_ctx_t ctx, volt_vbo_t *t, struct volt_vbo_desc *d
   ROA_ASSERT(desc);
   
   /* store desc as pending type */
-  roa_array_push(ctx->pending_vbo_desc, *desc);
+  roa_array_push(ctx->pending_create_vbo_desc, *desc);
+}
+
+
+void
+volt_program_create(
+  volt_ctx_t ctx,
+  volt_program_t *program,
+  struct volt_program_desc *desc)
+{
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(*program);
+  ROA_ASSERT(desc);
+  
+  /* store desc as pending type */
+  roa_array_push(ctx->pending_create_program_desc, *desc);
 }
 
 

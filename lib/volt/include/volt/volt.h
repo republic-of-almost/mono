@@ -13,6 +13,7 @@ typedef struct volt_vbo * volt_vbo_t;
 typedef struct volt_ibo * volt_ibo_t;
 typedef struct volt_texture * volt_texture_t;
 typedef struct volt_input * volt_input_t;
+typedef struct volt_program * volt_program_t;
 
 
 #define VOLT_NULL 0
@@ -48,6 +49,30 @@ volt_vertex_buffer_create(
   volt_ctx_t ctx,
   volt_vbo_t *t,
   struct volt_vbo_desc *desc);
+
+
+typedef enum _volt_shader_stage {
+  VOLT_SHD_VERTEX,
+  VOLT_SHD_GEOMETRY,
+  VOLT_SHD_FRAGMENT,
+  VOLT_SHD_STAGE_COUNT,
+} volt_shader_stage;
+
+
+struct volt_program_desc
+{
+  const char **shader_stages_src;
+  volt_shader_stage *shader_stages_type;
+
+  unsigned stage_count;
+};
+
+
+void
+volt_program_create(
+  volt_ctx_t ctx,
+  volt_program_t *program,
+  struct volt_program_desc *desc);
 
 
 /* renderpass */
