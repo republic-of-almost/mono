@@ -8,6 +8,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
+#include <stdio.h>
 
 
 struct volt_program
@@ -39,14 +40,25 @@ struct volt_input
 };
 
 
+/* internal */
+struct volt_pending_vbo {
+  volt_vbo_t vbo;
+  volt_vbo_desc desc;
+};
+
+struct volt_pending_program {
+  volt_program_t program;
+  volt_program_desc desc;
+};
+
 struct volt_ctx
 {
   GLuint vao;
 
-  /* array */ struct volt_vbo_desc *pending_create_vbo_desc;
-  /* array */ struct volt_program_desc *pending_create_program_desc;
+  /* array */ struct volt_pending_vbo *pending_create_vbo_desc;
+  /* array */ struct volt_pending_program *pending_create_program_desc;
   
-  /* array */ volt_renderpass *renderpasses;
+  /* array */ volt_renderpass_t *renderpasses;
 };
 
 
@@ -55,6 +67,7 @@ struct volt_ctx
 
 struct volt_draw_call
 {
+  GLuint program;
   GLuint vbo;
   GLuint ibo;
   GLint texture[3];
@@ -120,17 +133,19 @@ volt_ctx_execute(volt_ctx_t ctx)
 
       for (int i = 0; i < vbo_count; ++i)
       {
-        const volt_vbo_desc *vbo_desc = &ctx->pending_create_vbo_desc[i];
+        const volt_pending_vbo *pending_vbo = &ctx->pending_create_vbo_desc[i];
 
         GLuint vbo{};
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
           GL_ARRAY_BUFFER,
-          sizeof(float) * vbo_desc->count,
-          vbo_desc->data, GL_STATIC_DRAW);
+          sizeof(float) * pending_vbo->desc.count,
+          pending_vbo->desc.data, GL_STATIC_DRAW);
 
         ROA_ASSERT_PEDANTIC(vbo > 0);
+
+        pending_vbo->vbo->vbo = vbo;
       }
 
       roa_array_resize(ctx->pending_create_vbo_desc, 0);
@@ -142,7 +157,7 @@ volt_ctx_execute(volt_ctx_t ctx)
 
       for (int i = 0; i < program_count; ++i)
       {
-        const volt_program_desc *prog_desc = &ctx->pending_create_program_desc[i];
+        const volt_pending_program *pending_prog = &ctx->pending_create_program_desc[i];
 
         GLuint shaders[VOLT_SHD_STAGE_COUNT]{};
         GLenum shader_enum[VOLT_SHD_STAGE_COUNT]{
@@ -151,15 +166,23 @@ volt_ctx_execute(volt_ctx_t ctx)
           GL_FRAGMENT_SHADER,
         }; /* make sure this aligns with volt.h's enum */
 
-        for (int j = 0; j < prog_desc->stage_count; ++j)
+        for (int j = 0; j < pending_prog->desc.stage_count; ++j)
         {
-          const volt_shader_stage stage = prog_desc->shader_stages_type[j];
+          const volt_shader_stage stage = pending_prog->desc.shader_stages_type[j];
 
           shaders[stage] = glCreateShader(shader_enum[stage]);
-          GLchar const *src = prog_desc->shader_stages_src[j];
+          GLchar const *src = pending_prog->desc.shader_stages_src[j];
           glShaderSource(shaders[stage], 1, &src, NULL);
+          glCompileShader(shaders[stage]);
 
           /* check for errors */
+          GLint status = 0;
+          glGetShaderiv(shaders[stage], GL_COMPILE_STATUS, &status);
+          
+          GLchar error[1024] {};
+          glGetShaderInfoLog(shaders[stage], 1024, NULL, error);
+
+          ROA_ASSERT(status == GL_TRUE);
         }
 
         /* link shaders */
@@ -174,26 +197,45 @@ volt_ctx_execute(volt_ctx_t ctx)
             }
           }
 
-          glBindFragDataLocation(program, 0, "out_color");
+          glBindFragDataLocation(program, 0, "outColor");
           glLinkProgram(program);
+
+          GLint status;
+          glGetProgramiv(program, GL_LINK_STATUS, &status);
+          ROA_ASSERT(status == GL_TRUE);
+
+          pending_prog->program->program = program;
 
           /* check for errors */
         }
       }
     }
+
+    {
+      auto err = glGetError();
+      printf("GLErr: %d\n", err);
+    }
   }
 
   /* destroy pending resources */
   {
-
+    
   }
 
   /* process all the renderpasses */
   const unsigned rp_count = roa_array_size(ctx->renderpasses);
 
+  glClearColor(1, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  {
+    auto err = glGetError();
+    printf("GLErr: %d\n", err);
+  }
+
   for (int i = 0; i < rp_count; ++i)
   {
-    const volt_renderpass *rp = &ctx->renderpasses[i];
+    const volt_renderpass_t rp = ctx->renderpasses[i];
 
     /* render all the draw calls */
     const unsigned draw_count = roa_array_size(rp->draw_calls);
@@ -202,12 +244,43 @@ volt_ctx_execute(volt_ctx_t ctx)
     {
       const volt_draw_call *dc = &rp->draw_calls[j];
 
+      glUseProgram(dc->program);
 
+      {
+        auto err = glGetError();
+        printf("GLErr: %d\n", err);
+      }
+
+      // Specify the layout of the vertex data
+      GLint posAttrib = glGetAttribLocation(dc->program, "position");
+      glEnableVertexAttribArray(posAttrib);
+      glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+
+      GLint colAttrib = glGetAttribLocation(dc->program, "color");
+      glEnableVertexAttribArray(colAttrib);
+      glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+      {
+        auto err = glGetError();
+        printf("GLErr: %d\n", err);
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, dc->vbo);
+
+      // Draw a triangle from the 3 vertices
+      glDrawArrays(GL_TRIANGLES, 0, 3);
+
+      {
+        auto err = glGetError();
+        printf("GLErr: %d\n", err);
+      }
     }
+
+    roa_array_destroy(rp->draw_calls);
+    roa_free(rp);
   }
 
-  glClearColor(1,0,0,1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  roa_array_resize(ctx->renderpasses, 0);
 }
 
 
@@ -215,15 +288,25 @@ volt_ctx_execute(volt_ctx_t ctx)
 
 
 void
-volt_vertex_buffer_create(volt_ctx_t ctx, volt_vbo_t *t, struct volt_vbo_desc *desc)
+volt_vertex_buffer_create(volt_ctx_t ctx, volt_vbo_t *vbo, struct volt_vbo_desc *desc)
 {
   /* param check */
   ROA_ASSERT(ctx);
-  ROA_ASSERT(t);
+  ROA_ASSERT(vbo);
   ROA_ASSERT(desc);
-  
+
+  volt_vbo_t new_vbo = (volt_vbo_t)roa_alloc(sizeof(*new_vbo));
+  new_vbo->vbo = 0;
+
+  *vbo = new_vbo;
+
+  volt_pending_vbo pending{
+    new_vbo,
+    *desc,
+  };
+
   /* store desc as pending type */
-  roa_array_push(ctx->pending_create_vbo_desc, *desc);
+  roa_array_push(ctx->pending_create_vbo_desc, pending);
 }
 
 
@@ -234,11 +317,21 @@ volt_program_create(
   struct volt_program_desc *desc)
 {
   ROA_ASSERT(ctx);
-  ROA_ASSERT(*program);
+  ROA_ASSERT(program);
   ROA_ASSERT(desc);
   
+  volt_program_t new_prog = (volt_program_t)roa_alloc(sizeof(*new_prog));
+  new_prog->program = 0;
+
+  *program = new_prog;
+
+  volt_pending_program pending{
+    new_prog,
+    *desc,
+  };
+
   /* store desc as pending type */
-  roa_array_push(ctx->pending_create_program_desc, *desc);
+  roa_array_push(ctx->pending_create_program_desc, pending);
 }
 
 
@@ -246,44 +339,82 @@ volt_program_create(
 
 
 void
-volt_renderpass_create(volt_renderpass_t *pass)
+volt_renderpass_create(
+  volt_ctx_t ctx,
+  volt_renderpass_t *pass)
 {
+  volt_renderpass_t rp = (volt_renderpass_t)roa_zalloc(sizeof(*rp));
 
+  roa_array_create(rp->draw_calls, 128);
+  roa_array_push(rp->draw_calls, volt_draw_call{});
+
+  *pass = rp;
 }
 
 
 void
-volt_renderpass_commit(volt_renderpass_t *pass)
+volt_renderpass_commit(
+  volt_ctx_t ctx,
+  volt_renderpass_t *pass)
 {
+  unsigned size = roa_array_size((*pass)->draw_calls);
 
+  if(size > 0)
+  {
+    roa_array_erase((*pass)->draw_calls, size - 1);
+  }
+
+  roa_array_push(ctx->renderpasses, *pass);
+  *pass = ROA_NULL;
 }
 
 
 void
-volt_renderpass_bind_input_format(volt_renderpass_t pass, volt_input_t)
+volt_renderpass_bind_input_format(
+  volt_renderpass_t pass,
+  volt_input_t)
 {
-
+  
 }
 
 
 void
-volt_renderpass_bind_vertex_buffer(volt_renderpass_t pass, volt_vbo_t vbo)
+volt_renderpass_bind_vertex_buffer(
+  volt_renderpass_t pass,
+  volt_vbo_t vbo)
 {
+  volt_draw_call *dc = roa_array_back(pass->draw_calls);
 
+  dc->vbo = vbo->vbo;
 }
 
 
 void
-volt_renderpass_bind_index_buffer(volt_renderpass_t pass, volt_ibo_t ibo)
+volt_renderpass_bind_index_buffer(
+  volt_renderpass_t pass,
+  volt_ibo_t ibo)
 {
+  volt_draw_call *dc = roa_array_back(pass->draw_calls);
 
+  dc->ibo = ibo->ibo;
+}
+
+
+void
+volt_renderpass_bind_program(
+  volt_renderpass_t pass,
+  volt_program_t program)
+{
+  volt_draw_call *dc = roa_array_back(pass->draw_calls);
+
+  dc->program = program->program;
 }
 
 
 void
 volt_renderpass_draw(volt_renderpass_t pass)
 {
-
+  roa_array_push(pass->draw_calls, volt_draw_call{});
 }
 
 

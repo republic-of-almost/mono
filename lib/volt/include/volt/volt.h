@@ -79,27 +79,44 @@ volt_program_create(
 
 
 void
-volt_renderpass_create(volt_renderpass_t *pass);
+volt_renderpass_create(
+  volt_ctx_t ctx,
+  volt_renderpass_t *pass);
 
 
 void
-volt_renderpass_commit(volt_renderpass_t *pass);
+volt_renderpass_commit(
+  volt_ctx_t ctx,
+  volt_renderpass_t *pass);
 
 
 void
-volt_renderpass_bind_input_format(volt_renderpass_t pass, volt_input_t);
+volt_renderpass_bind_input_format(
+  volt_renderpass_t pass,
+  volt_input_t);
 
 
 void
-volt_renderpass_bind_vertex_buffer(volt_renderpass_t pass, volt_vbo_t vbo);
+volt_renderpass_bind_vertex_buffer(
+  volt_renderpass_t pass,
+  volt_vbo_t vbo);
 
 
 void
-volt_renderpass_bind_index_buffer(volt_renderpass_t pass, volt_ibo_t ibo);
+volt_renderpass_bind_index_buffer(
+  volt_renderpass_t pass,
+  volt_ibo_t ibo);
 
 
 void
-volt_renderpass_draw(volt_renderpass_t pass);
+volt_renderpass_bind_program(
+  volt_renderpass_t pass,
+  volt_program_t program);
+
+
+void
+volt_renderpass_draw(
+  volt_renderpass_t pass);
 
 
 #ifdef __cplusplus
