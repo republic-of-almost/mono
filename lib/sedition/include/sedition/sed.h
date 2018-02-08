@@ -24,6 +24,7 @@ extern "C" {
 int       sed_solution_create(const char *name);
 void      sed_solution_add_project(int sol_id, int proj_id);
 void      sed_solution_add_config(int sol_id, int config_id);
+void      sed_solution_set_path(int sol_id, const char *path);
 
 
 /* ------------------------------------------------------------ [ Config ] -- */
@@ -38,7 +39,7 @@ void      sed_config_set_optimisation_level(int config_id, int optim);
 
 
 enum {
-  SED_LANG_C89,
+  SED_LANG_C89 = 0,
   SED_LANG_C99,
   SED_LANG_C11,
   SED_LANG_C,
@@ -63,6 +64,7 @@ void      sed_project_set_language(int proj_id, int lang);
 void      sed_project_add_file(int proj_id, const char *file);
 void      sed_project_add_include_dir(int proj_id, const char *dir);
 void      sed_project_add_library_dir(int proj_id, const char *dir);
+void	  sed_project_set_path(int proj_id, const char *path);
 
 
 /* ----------------------------------------------------------- [ Execute ] -- */

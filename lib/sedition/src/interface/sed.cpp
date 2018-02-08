@@ -3,34 +3,19 @@
 #include <internal/common.h>
 #include <internal/types.h>
 #include <stdio.h> /* testing */
-
-
-/* ------------------------------------------------------------ [ Config ] -- */
-
-
-#include <stdlib.h>
-#define SED_MALLOC(bytes) malloc(bytes)
-
-
-#include <string.h>
-#define SED_MEMCPY(src, dest, bytes) memcpy(src, dest, bytes)
-
-
+#include <vector>
 #include <assert.h>
-#define SED_ASSERT(expr) assert(expr)
-
-
-#include <string.h>
-#define SED_ZEROMEM(ptr, type) memset(ptr, 0, type)
 
 
 /* -------------------------------------------------------------- [ Data ] -- */
 
 
-struct Solution *solutions  = NULL;
-struct Project *projects    = NULL;
-struct Config *configs      = NULL;
+namespace {
 
+	std::vector<Solution> solutions;
+	std::vector<Project> projects;
+	std::vector<Config> configs;
+}
 
 /* ---------------------------------------------------------- [ Solution ] -- */
 
@@ -38,49 +23,15 @@ struct Config *configs      = NULL;
 int
 sed_solution_create(const char *name)
 {
-  /* param check */
-  {
-    SED_ASSERT(name);
-    SED_ASSERT(strlen(name) > 0);
-  }
+	solutions.emplace_back(Solution{});
 
-  /* create if first */
-  if(solutions == NULL)
-  {
-    sed_array_create(solutions, 4);
-  }
-
-  /* new solution */
-  {
-    const size_t name_bytes = strlen(name) + 1;
-    char *cpy_name = SED_MALLOC(name_bytes);
-    SED_MEMCPY(cpy_name, name, name_bytes);
-
-    struct Solution new_solution;
-    SED_ZEROMEM(&new_solution, sizeof(new_solution));
-    new_solution.name = cpy_name;
-    
-    sed_array_create(new_solution.projects, 32);
-    sed_array_create(new_solution.configs, 4);
-
-    sed_array_push(solutions, new_solution);
-  }
-
-  return sed_array_size(solutions);
+	return solutions.size();
 }
 
 
 void
 sed_solution_add_project(int sol_id, int proj_id)
 {
-  /* param check */
-  {
-    SED_ASSERT(sol_id > 0);
-    SED_ASSERT(sol_id <= sed_array_size(solutions));
-    SED_ASSERT(proj_id > 0);
-    SED_ASSERT(proj_id <= sed_array_size(projects));
-  }
-
   /* find solution's projects */
   int *projs = NULL;
   {
@@ -145,6 +96,35 @@ sed_solution_add_config(int sol_id, int config_id)
   {
     sed_array_push(confs, config_id);
   }
+}
+
+
+void
+sed_solution_set_path(int sol_id, const char *path)
+{
+	/* param check */
+	{
+		SED_ASSERT(sol_id > 0);
+		SED_ASSERT(sol_id <= sed_array_size(solutions));
+		SED_ASSERT(path);
+		SED_ASSERT(strlen(path));
+	}
+
+	/* add lib dir */
+	{
+		const size_t bytes = strlen(path) + 1;
+		char *cpy_path = (char*)SED_MALLOC(bytes);
+		SED_MEMCPY(cpy_path, path, bytes);
+
+		const size_t index = sol_id - 1;
+
+		if (solutions[index].path != NULL)
+		{
+			sed_free(solutions[index].path);
+		}
+
+		solutions[index].path = cpy_path;
+	}
 }
 
 
@@ -243,6 +223,8 @@ sed_project_create(const char *name)
     struct Project new_proj;
     SED_ZEROMEM(&new_proj, sizeof(new_proj));
     new_proj.name = cpy_name;
+
+	new_proj.guid = guid_gen();
     
     sed_array_create(new_proj.files, 256);
     sed_array_create(new_proj.inc_dirs, 32);
@@ -250,6 +232,8 @@ sed_project_create(const char *name)
 
     sed_array_push(projects, new_proj);
   }
+
+  return sed_array_size(projects);
 }
 
 
@@ -421,10 +405,40 @@ sed_project_add_library_dir(int proj_id, const char *dir)
 }
 
 
+void
+sed_project_set_path(int proj_id, const char *path)
+{
+  /* param check */
+  {
+		SED_ASSERT(proj_id > 0);
+		SED_ASSERT(proj_id <= sed_array_size(projects));
+		SED_ASSERT(path);
+		SED_ASSERT(strlen(path));
+  }
+
+  /* add lib dir */
+  {
+	  const size_t bytes = strlen(path) + 1;
+	  char *cpy_path = (char*)SED_MALLOC(bytes);
+	  SED_MEMCPY(cpy_path, path, bytes);
+
+	  const size_t index = proj_id - 1;
+
+	  if (projects[index].path != NULL)
+	  {
+		  sed_free(projects[index].path);
+	  }
+
+	  projects[index].path = cpy_path;
+  }
+}
+
+
 /* ----------------------------------------------------------- [ Execute ] -- */
 
 
 #include <platform/xcode.h>
+#include <platform/vs2017.h>
 
 
 void
@@ -491,7 +505,8 @@ sed_execute(int platform)
   }
 
   /* generate platform solution */
-  sed_generate_xcode(solutions, projects, configs); 
+  /* sed_generate_xcode(solutions, projects, configs); */
+  sed_generate_vs2017(solutions, projects, configs);
 }
 
 
@@ -505,8 +520,12 @@ main()
   /* testing */
 
   int solution = sed_solution_create("FooSol");
+  sed_solution_set_path(solution, "../../../TestSolution/MyTest/");
+
   int config = sed_config_create("DebugConfig");
+
   int proj = sed_project_create("BarProj");
+  sed_project_set_path(proj, "../../../TestSolution/MyTest/BarProj/");
   sed_project_set_language(proj, SED_LANG_C89);
   sed_project_set_kind(proj, SED_KIND_CONSOLE_APP);
   sed_project_add_file(proj, "../../src/foo.c");

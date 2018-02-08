@@ -96,6 +96,7 @@ sed_string_ext_from_filename(const char *filename)
 
 /* -------------------------------------------------------- [ Filesystem ] -- */
 
+#include <Windows.h>
 
 void
 sed_mkdir(const char *path)
@@ -103,7 +104,7 @@ sed_mkdir(const char *path)
   int err = 0;
 
   #ifdef _WIN32
-
+  CreateDirectory(path, NULL);
   #else
   mode_t mode = 0733;
   err = mkdir(path, mode);
