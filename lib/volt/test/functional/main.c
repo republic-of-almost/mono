@@ -1,6 +1,4 @@
-#include <vulkan/vulkan.h>
 
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <volt/volt.h>
 
@@ -12,61 +10,88 @@ main()
 {
   glfwInit();
 
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+
   GLFWwindow* window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
+  glfwMakeContextCurrent(window);
 
-  struct volt_ctx *volt_ctx = NULL;
-  struct volt_ctx_desc volt_desc;
-  memset(&volt_desc, 0, sizeof(volt_desc));
-  volt_desc.extension_list = glfwGetRequiredInstanceExtensions(&volt_desc.extension_list_count);
-  volt_desc.window_handle = glfwGetWin32Window(window);
+  volt_ctx_t ctx = VOLT_NULL;
+  volt_ctx_create(&ctx);
 
-  volt_ctx_create(&volt_ctx, &volt_desc);
+  volt_vbo_t vbo = VOLT_NULL;
+  volt_program_t program = VOLT_NULL;
 
-  volt_vert_attr vertex[2];
-  vertex[0] = VOLT_VERTEX_FLOAT2;
-  vertex[1] = VOLT_VERTEX_FLOAT3;
+  /* create some assets */
+  {
+    /*  */
+    float verts[] = {
+      0.f, 0.5f, 1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f, 0.f, 1.f, 0.f,
+      -0.5f, -0.5f, 0.f, 0.f, 1.f,
+    };
 
-  struct volt_vertex_desc vert_desc;
-  vert_desc.attr = vertex;
-  vert_desc.count = 2;
+    struct volt_vbo_desc desc;
+    desc.data = verts;
+    desc.count = 6;
 
-  unsigned vertex_input = volt_vertex_create(volt_ctx, &vert_desc);
+    volt_vertex_buffer_create(ctx, &vbo, &desc);
 
-  float vertex_data[15];
-  vertex_data[0] = +0.0f;
-  vertex_data[1] = -0.5f;
-  vertex_data[2] = +1.0f;
-  vertex_data[3] = +1.0f;
-  vertex_data[4] = +1.0f;
+    const char *vert_src = ""
+      "#version 150 core\n"
+      "in vec2 position;\n"
+      "in vec3 color;\n"
+      "out vec3 Color;\n"
+      "void main() {\n"
+        "Color = color;\n"
+        "gl_Position = vec4(position, 0.0, 1.0);\n"
+      "}\n";
 
-  vertex_data[5] = +0.5f;
-  vertex_data[6] = +0.5f;
-  vertex_data[7] = +0.0f;
-  vertex_data[8] = +1.0f;
-  vertex_data[9] = +0.0f;
+    const char* frag_src = ""
+      "#version 150 core\n"
+      "in vec3 Color;\n"
+      "out vec4 outColor;\n"
+      "void main()\n"
+      "{\n"
+        "outColor = vec4(Color, 1.0);\n"
+      "}\n";
 
-  vertex_data[10] = -0.5f;
-  vertex_data[11] = +0.5f;
-  vertex_data[12] = +0.0f;
-  vertex_data[13] = +0.0f;
-  vertex_data[14] = +1.0f;
+    const char **stages[2] = {vert_src, frag_src};
+    const volt_shader_stage *stage_types[2] = { VOLT_SHD_VERTEX, VOLT_SHD_FRAGMENT };
 
-  struct volt_vertex_buffer_desc vbo_desc;
-  vbo_desc.data = vertex_data;
-  vbo_desc.data_count = 15;
+    struct volt_program_desc shd_desc;
+    shd_desc.shader_stages_src = stages;
+    shd_desc.shader_stages_type = stage_types;
+    shd_desc.stage_count = 2;
 
-  unsigned vertex_buffer = volt_vertex_buffer_create(volt_ctx, &vbo_desc);
+    volt_program_create(ctx, &program, &shd_desc);
+
+    volt_ctx_execute(ctx);
+  }
 
   while (!glfwWindowShouldClose(window))
   {
-    glfwPollEvents();
+    /* draw some stuff */
+    {
+      volt_renderpass_t rp;
+      volt_renderpass_create(ctx, &rp);
 
-    volt_ctx_execute(volt_ctx);
+      volt_renderpass_bind_vertex_buffer(rp, vbo);
+      volt_renderpass_bind_program(rp, program);
+
+      volt_renderpass_draw(rp);
+
+      volt_renderpass_commit(ctx, &rp);
+    }
+
+    volt_ctx_execute(ctx);
+
+    glfwPollEvents();
+    glfwSwapBuffers(window);
   }
 
-  volt_ctx_destroy(&volt_ctx);
+  volt_ctx_destroy(&ctx);
 
   glfwDestroyWindow(window);
   glfwTerminate();

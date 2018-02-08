@@ -46,7 +46,10 @@ table.insert(
     },    
 
     project_dependencies = {
-      "ROAlib",
+      -- First Party --
+      "RepublicLib",
+      -- Thrid Party --
+      "OpenGL",
     },
   }
 )
