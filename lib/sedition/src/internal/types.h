@@ -8,6 +8,19 @@
 #include <string>
 
 
+struct ID
+{
+	ID()
+	{
+		static int counter = 0;
+		++counter;
+
+		value = counter;
+	}
+	int value;
+};
+
+
 struct GUID
 {
 	char str[40];
@@ -49,6 +62,8 @@ struct Config
   int symbols;
   int optim_level;
   int arch;
+
+  ID id;
 };
 
 
@@ -80,7 +95,7 @@ struct Project
   int lang;
   int kind;
 
-  GUID guid;
+  ID id;
 };
 
 
@@ -89,10 +104,10 @@ struct Solution
   std::string name;
   std::string path;
 
-  std::vector<Project> projects;
-  std::vector<Config> configs;
+  std::vector<int> projects;
+  std::vector<int> configs;
 
-  struct GUID guid;
+  ID id;
 };
 
 

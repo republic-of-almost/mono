@@ -3,22 +3,19 @@
 
 
 #include <stddef.h>
+#include <vector>
+#include <internal/types.h>
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-struct Solution;
-struct Project;
-struct Config;
-
-
+	
 void sed_generate_vs2017(
-  struct Solution *sols,
-  struct Project *projs,
-  struct Config *confs
+	std::vector<Solution> &sols,
+	std::vector<Project> &projs,
+	std::vector<Config> &confs
 );
 
 

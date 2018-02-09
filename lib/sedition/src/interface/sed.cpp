@@ -5,6 +5,7 @@
 #include <stdio.h> /* testing */
 #include <vector>
 #include <assert.h>
+#include <algorithm>
 
 
 /* -------------------------------------------------------------- [ Data ] -- */
@@ -15,6 +16,14 @@ namespace {
 	std::vector<Solution> solutions;
 	std::vector<Project> projects;
 	std::vector<Config> configs;
+
+	auto find_item = [](auto &container, int id_to_find)
+	{
+		return std::find_if(
+			std::begin(container),
+			std::end(container),
+			[id_to_find](auto i) { return i.id.value == id_to_find; });
+	};
 }
 
 /* ---------------------------------------------------------- [ Solution ] -- */
@@ -24,107 +33,76 @@ int
 sed_solution_create(const char *name)
 {
 	solutions.emplace_back(Solution{});
+	solutions.back().name = name;
 
-	return solutions.size();
+	return solutions.back().id.value;
 }
 
 
 void
 sed_solution_add_project(int sol_id, int proj_id)
 {
-  /* find solution's projects */
-  int *projs = NULL;
-  {
-    const size_t index = sol_id - 1;
-    projs = solutions[index].projects;
-  }
+	/* find project */
+	auto &proj_to_add = find_item(projects, proj_id);
+	
+	if (proj_to_add == std::end(projects))
+	{
+		return;
+	}
 
-  /* scan to see if it is already added */
-  {
-    int count = sed_array_size(projs);
-    int i;
+	/* find solution */
+	auto &sol_to_update = find_item(solutions, sol_id);
+	
+	if (sol_to_update == std::end(solutions))
+	{
+		return;
+	}
 
-    for(i = 0; i < count; ++i)
-    {
-      if(projs[i] == proj_id)
-      {
-        return;
-      }
-    }
-  }
+	/* add solution if not added */
+	auto &proj_ids = sol_to_update->projects;
+	auto find_proj = std::find_if(std::begin(proj_ids), std::end(proj_ids), [proj_id](auto id) { return id == proj_id; });
 
-  /* add project */
-  {
-    sed_array_push(projs, proj_id);
-  }
+	if (find_proj == std::end(proj_ids))
+	{
+		proj_ids.emplace_back(proj_id);
+	}
 }
 
 
 void
 sed_solution_add_config(int sol_id, int config_id)
 {
-  /* param check */
-  {
-    SED_ASSERT(sol_id > 0);
-    SED_ASSERT(sol_id <= sed_array_size(solutions));
-    SED_ASSERT(config_id > 0);
-    SED_ASSERT(config_id <= sed_array_size(configs));
-  }
+	/* find project */
+	auto &conf_to_add = find_item(configs, config_id);
 
-  /* find solution's configs */
-  int *confs = NULL;
-  {
-    const size_t index = sol_id - 1;
-    confs = solutions[index].configs;
-  }
+	if (conf_to_add == std::end(configs))
+	{
+		return;
+	}
 
-  /* scan to see if it is already added */
-  {
-    int count = sed_array_size(confs);
-    int i;
+	/* find solution */
+	auto &sol_to_update = find_item(solutions, sol_id);
 
-    for(i = 0; i < count; ++i)
-    {
-      if(confs[i] == config_id)
-      {
-        return;
-      }
-    }
-  }
+	if (sol_to_update == std::end(solutions))
+	{
+		return;
+	}
 
-  /* add config */
-  {
-    sed_array_push(confs, config_id);
-  }
+	/* add solution if not added */
+	auto &config_ids = sol_to_update->configs;
+	auto find_proj = std::find_if(std::begin(config_ids), std::end(config_ids), [config_id](auto id) {return id == config_id; });
+
+	if (find_proj == std::end(config_ids))
+	{
+		config_ids.emplace_back(config_id);
+	}
 }
 
 
 void
 sed_solution_set_path(int sol_id, const char *path)
 {
-	/* param check */
-	{
-		SED_ASSERT(sol_id > 0);
-		SED_ASSERT(sol_id <= sed_array_size(solutions));
-		SED_ASSERT(path);
-		SED_ASSERT(strlen(path));
-	}
 
-	/* add lib dir */
-	{
-		const size_t bytes = strlen(path) + 1;
-		char *cpy_path = (char*)SED_MALLOC(bytes);
-		SED_MEMCPY(cpy_path, path, bytes);
-
-		const size_t index = sol_id - 1;
-
-		if (solutions[index].path != NULL)
-		{
-			sed_free(solutions[index].path);
-		}
-
-		solutions[index].path = cpy_path;
-	}
 }
 
 
@@ -134,66 +112,21 @@ sed_solution_set_path(int sol_id, const char *path)
 int
 sed_config_create(const char *name)
 {
-  /* param check */
-  {
-    SED_ASSERT(name);
-    SED_ASSERT(strlen(name) > 0);
-  }
+	configs.emplace_back(Config{});
 
-  /* create if first */
-  if(configs == NULL)
-  {
-    sed_array_create(configs, 4);
-  }
-
-  /* new config */
-  {
-    const size_t name_bytes = strlen(name) + 1;
-    char *cpy_name = SED_MALLOC(name_bytes);
-    SED_MEMCPY(cpy_name, name, name_bytes);
-
-    struct Config new_config;
-    SED_ZEROMEM(&new_config, sizeof(new_config));
-    new_config.name = cpy_name;
-
-    sed_array_push(configs, new_config);
-  }
-
-  sed_array_size(configs);
+	return configs.back().id.value;
 }
 
 
 void
 sed_config_set_has_debug_symbols(int config_id, int symbols)
 {
-  /* param check */
-  {
-    SED_ASSERT(config_id > 0);
-    SED_ASSERT(config_id <= sed_array_size(configs));
-  }
-
-  /* set symbols */
-  {
-    const size_t index = config_id - 1;
-    configs[index].symbols = symbols;
-  }
 }
 
 
 void
 sed_config_set_optimisation_level(int config_id, int optim)
 {
-  /* param check */
-  {
-    SED_ASSERT(config_id > 0);
-    SED_ASSERT(config_id <= sed_array_size(configs));
-  }
-
-  /* set optim level */
-  {
-    const size_t index = config_id - 1;
-    configs[index].optim_level = optim;
-  }
 }
 
 
@@ -203,234 +136,47 @@ sed_config_set_optimisation_level(int config_id, int optim)
 int
 sed_project_create(const char *name)
 {
-  /* param check */
-  {
-    SED_ASSERT(name);
-    SED_ASSERT(strlen(name) > 0);
-  }
+	projects.emplace_back(Project{});
+	projects.back().name = name;
 
-  /* new project */
-  {
-    if(projects == NULL)
-    {
-      sed_array_create(projects, 32);
-    }
-
-    const size_t name_bytes = strlen(name) + 1;
-    char *cpy_name = SED_MALLOC(name_bytes);
-    SED_MEMCPY(cpy_name, name, name_bytes);
-
-    struct Project new_proj;
-    SED_ZEROMEM(&new_proj, sizeof(new_proj));
-    new_proj.name = cpy_name;
-
-	new_proj.guid = guid_gen();
-    
-    sed_array_create(new_proj.files, 256);
-    sed_array_create(new_proj.inc_dirs, 32);
-    sed_array_create(new_proj.lib_dirs, 32);
-
-    sed_array_push(projects, new_proj);
-  }
-
-  return sed_array_size(projects);
+	return projects.back().id.value;
 }
 
 
 void
 sed_project_set_kind(int proj_id, int kind)
 {
-  /* param check */
-  {
-    SED_ASSERT(proj_id > 0);
-    SED_ASSERT(proj_id <= sed_array_size(projects));
-    SED_ASSERT(kind >= 0);
-    SED_ASSERT(kind <= SED_KIND_DYNAMIC_LIB);
-  }
-
-  /* set project kind */
-  {
-    const size_t index = proj_id - 1;
-    projects[index].kind = kind;
-  }
+	
 }
 
 
 void
 sed_project_set_language(int proj_id, int lang)
 {
-  /* param check */
-  {
-    SED_ASSERT(proj_id > 0);
-    SED_ASSERT(proj_id <= sed_array_size(projects));
-    SED_ASSERT(lang >= 0);
-    SED_ASSERT(lang <= SED_LANG_CPP);
-  }
-
-  /* set project language */
-  {
-    const size_t index = proj_id - 1;
-    projects[index].lang = lang;
-  }
 }
 
 
 void
 sed_project_add_file(int proj_id, const char *file)
 {
-  /* param check */
-  {
-    SED_ASSERT(proj_id > 0);
-    SED_ASSERT(proj_id <= sed_array_size(projects));
-    SED_ASSERT(file);
-    SED_ASSERT(strlen(file));
-  }
-
-  /* add file */
-  {
-    struct File new_file;
-    memset(&new_file, 0, sizeof(new_file));
-
-    const char *filename = sed_string_filename_from_path(file);
-    const char *ext = sed_string_ext_from_filename(filename);
-    
-    const char *file_extensions[] = {
-      "h",
-      "H",
-      "hh",
-      "HH",
-      "hpp",
-      "HPP",
-
-      "c",
-      "C",
-      "cpp",
-      "CPP",
-      "cc",
-      "CC",
-      "cxx",
-      "CXX",
-      "cp",
-      "CP",
-      "c++",
-      "C++",
-    };
-
-    const int file_type[] = {
-      SED_FILE_TYPE_HEADER,
-      SED_FILE_TYPE_HEADER,
-      SED_FILE_TYPE_HEADER,
-      SED_FILE_TYPE_HEADER,
-      SED_FILE_TYPE_HEADER,
-      SED_FILE_TYPE_HEADER,
-
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-      SED_FILE_TYPE_SOURCE,
-    };
-
-    new_file.name = sed_string(filename);
-    new_file.type = SED_FILE_TYPE_TEXT;
-
-    int ext_count = sizeof(file_extensions) / sizeof(file_extensions[0]);
-
-    int i;
-
-    for(i = 0; i < ext_count; ++i)
-    {
-      if(strcmp(file_extensions[i], ext) == 0)
-      {
-        new_file.type = file_type[i];
-      }
-    }
-
-    const size_t index = proj_id - 1;
-    sed_array_push(projects[index].files, new_file);
-  } 
 }
 
 
 void
 sed_project_add_include_dir(int proj_id, const char *dir)
 {
-  /* param check */
-  {
-    SED_ASSERT(proj_id > 0);
-    SED_ASSERT(proj_id <= sed_array_size(projects));
-    SED_ASSERT(dir);
-    SED_ASSERT(strlen(dir));
-  }
-
-  /* add inc dir */
-  {
-    const size_t bytes = strlen(dir) + 1;
-    char *cpy_dir = (char*)SED_MALLOC(bytes);
-    SED_MEMCPY(cpy_dir, dir, bytes);
-
-    const size_t index = proj_id - 1;
-    sed_array_push(projects[index].inc_dirs, cpy_dir);
-  }
 }
 
 
 void
 sed_project_add_library_dir(int proj_id, const char *dir)
 {
-  /* param check */
-  {
-    SED_ASSERT(proj_id > 0);
-    SED_ASSERT(proj_id <= sed_array_size(projects));
-    SED_ASSERT(dir);
-    SED_ASSERT(strlen(dir));
-  }
-
-  /* add lib dir */
-  {
-    const size_t bytes = strlen(dir) + 1;
-    char *cpy_dir = (char*)SED_MALLOC(bytes);
-    SED_MEMCPY(cpy_dir, dir, bytes);
-
-    const size_t index = proj_id - 1;
-    sed_array_push(projects[index].lib_dirs, cpy_dir);
-  }
 }
 
 
 void
 sed_project_set_path(int proj_id, const char *path)
 {
-  /* param check */
-  {
-		SED_ASSERT(proj_id > 0);
-		SED_ASSERT(proj_id <= sed_array_size(projects));
-		SED_ASSERT(path);
-		SED_ASSERT(strlen(path));
-  }
-
-  /* add lib dir */
-  {
-	  const size_t bytes = strlen(path) + 1;
-	  char *cpy_path = (char*)SED_MALLOC(bytes);
-	  SED_MEMCPY(cpy_path, path, bytes);
-
-	  const size_t index = proj_id - 1;
-
-	  if (projects[index].path != NULL)
-	  {
-		  sed_free(projects[index].path);
-	  }
-
-	  projects[index].path = cpy_path;
-  }
 }
 
 
@@ -444,66 +190,6 @@ sed_project_set_path(int proj_id, const char *path)
 void
 sed_execute(int platform)
 {
-  /* testing */
-  int sol_count = sed_array_size(solutions);
-  int i,j,k;
- 
-  /* loop through solutions */ 
-  for(i = 0; i < sol_count; ++i)
-  {
-    struct Solution *sol = &solutions[i];
-    int *proj_ids = sol->projects;
-    int *conf_ids = sol->configs;
-
-    /* loop through projects */
-    int proj_count = sed_array_size(sol->projects);
-
-    int conf_count = sed_array_size(sol->configs);
-
-    printf("Solution: %s projs: %d confs: %d\n", sol->name, proj_count, conf_count);
-
-    for(j = 0; j < proj_count; ++j)
-    {
-      struct Project *proj = &projects[proj_ids[j] - 1];
-
-      printf("  Project: %s\n", proj->name);
-
-      /* loop through files */
-      int file_count = sed_array_size(proj->files);
-
-      for(k = 0; k < file_count; ++k)
-      {
-        printf("    file: %s\n", proj->files[k].name);
-        printf("    file type: %d\n", proj->files[k].type);
-      }
-
-      /* loop through inc dirs */
-      int inc_dir_count = sed_array_size(proj->inc_dirs);
-
-      for(k = 0; k < inc_dir_count; ++k)
-      {
-        printf("    inc dir: %s\n", proj->inc_dirs[k]);
-      }
-
-      /* loop through lib dirs */
-      int lib_dir_count = sed_array_size(proj->lib_dirs);
-
-      for(k = 0; k < lib_dir_count; ++k)
-      {
-        printf("    lib dir: %s\n", proj->lib_dirs[k]);
-      }
-    }
-
-    /* loop through configs */
-
-    for(k = 0; k < conf_count; ++k)
-    {
-      struct Config *conf = &configs[conf_ids[k] - 1];
-
-      printf("  Config: %s\n", conf->name);
-    }
-  }
-
   /* generate platform solution */
   /* sed_generate_xcode(solutions, projects, configs); */
   sed_generate_vs2017(solutions, projects, configs);
