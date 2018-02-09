@@ -1,5 +1,5 @@
 #include <roa_lib/array.h>
-#include <stdlib.h>
+#include <roa_lib/alloc.h>
 #include <string.h>
 
 
@@ -22,7 +22,7 @@ roa_internal_array_destroy(void **ptr)
     struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
     curr_arr--;
 
-    free(curr_arr);
+    roa_free(curr_arr);
     *ptr = NULL;
   }
 }
@@ -64,7 +64,7 @@ roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
   else
   {
     size_t bytes = sizeof(struct roa_array_internal) + (stride * capacity);
-    struct roa_array_internal *new_arr = (struct roa_array_internal*)malloc(bytes);
+    struct roa_array_internal *new_arr = (struct roa_array_internal*)roa_zalloc(bytes);
     new_arr[0].count = 0;
     new_arr[0].capacity = capacity;
     new_arr[0].stride = stride;

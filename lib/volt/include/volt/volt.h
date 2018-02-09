@@ -7,6 +7,9 @@ extern "C" {
 #endif
 
 
+ /* ----------------------------------------------------------- [ types ] -- */
+
+
 typedef struct volt_ctx * volt_ctx_t;
 typedef struct volt_renderpass * volt_renderpass_t;
 typedef struct volt_vbo * volt_vbo_t;
@@ -15,11 +18,10 @@ typedef struct volt_texture * volt_texture_t;
 typedef struct volt_input * volt_input_t;
 typedef struct volt_program * volt_program_t;
 
-
 #define VOLT_NULL 0
 
 
-/* lifetime */
+/* --------------------------------------------------------- [ lifetime ] -- */
 
 
 void
@@ -34,7 +36,44 @@ void
 volt_ctx_execute(volt_ctx_t ctx);
 
 
-/* resources */
+/* -------------------------------------------------------- [ resources ] -- */
+
+
+typedef enum _volt_resource_status {
+  VOLT_RSRC_PENDING_CREATE,
+  VOLT_RSRC_FAILED,
+  VOLT_RSRC_VALID,
+  VOLT_RSRC_PENDING_DESTROY,
+} volt_resource_status;
+
+
+/* ------------------------------------------------------- [ rsrc input ] -- */
+
+
+typedef enum _volt_input_attribute {
+  VOLT_INPUT_FLOAT4,
+  VOLT_INPUT_FLOAT3,
+  VOLT_INPUT_FLOAT2,
+  VOLT_INPUT_FLOAT,
+
+} volt_input_attribute;
+
+
+struct volt_input_desc
+{
+  volt_input_attribute *attributes;
+  unsigned count;
+};
+
+
+void
+volt_input_create(
+  volt_ctx_t ctx,
+  volt_input_t *input,
+  struct volt_input_desc *desc);
+
+
+/* --------------------------------------------------------- [ rsrc vbo ] -- */
 
 
 struct volt_vbo_desc
@@ -49,6 +88,9 @@ volt_vertex_buffer_create(
   volt_ctx_t ctx,
   volt_vbo_t *t,
   struct volt_vbo_desc *desc);
+
+
+/* ----------------------------------------------------- [ rsrc program ] -- */
 
 
 typedef enum _volt_shader_stage {
@@ -75,7 +117,7 @@ volt_program_create(
   struct volt_program_desc *desc);
 
 
-/* renderpass */
+/* ------------------------------------------------------- [ renderpass ] -- */
 
 
 void

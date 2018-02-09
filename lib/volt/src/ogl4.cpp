@@ -11,10 +11,14 @@
 #include <stdio.h>
 
 
+/* ---------------------------------------------- [ internal gl structs ] -- */
+
+
 struct volt_program
 {
   GLuint program;
 };
+
 
 struct volt_vbo
 {
@@ -36,11 +40,13 @@ struct volt_texture
 
 struct volt_input
 {
-
+  unsigned increment_stride[12];
+  unsigned attrib_count[12];
+  unsigned full_stride;
+  unsigned count;
 };
 
 
-/* internal */
 struct volt_pending_vbo {
   volt_vbo_t vbo;
   volt_vbo_desc desc;
@@ -80,7 +86,7 @@ struct volt_renderpass
 };
 
 
-/* lifetime */
+/* --------------------------------------------------------- [ lifetime ] -- */
 
 
 void
@@ -136,12 +142,14 @@ volt_ctx_execute(volt_ctx_t ctx)
         const volt_pending_vbo *pending_vbo = &ctx->pending_create_vbo_desc[i];
 
         GLuint vbo{};
+
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
           GL_ARRAY_BUFFER,
           sizeof(float) * pending_vbo->desc.count,
-          pending_vbo->desc.data, GL_STATIC_DRAW);
+          pending_vbo->desc.data,
+          GL_STATIC_DRAW);
 
         ROA_ASSERT_PEDANTIC(vbo > 0);
 
@@ -209,11 +217,8 @@ volt_ctx_execute(volt_ctx_t ctx)
           /* check for errors */
         }
       }
-    }
 
-    {
-      auto err = glGetError();
-      printf("GLErr: %d\n", err);
+      roa_array_resize(ctx->pending_create_program_desc, 0);
     }
   }
 
@@ -226,12 +231,7 @@ volt_ctx_execute(volt_ctx_t ctx)
   const unsigned rp_count = roa_array_size(ctx->renderpasses);
 
   glClearColor(1, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  {
-    auto err = glGetError();
-    printf("GLErr: %d\n", err);
-  }
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   for (int i = 0; i < rp_count; ++i)
   {
@@ -246,10 +246,7 @@ volt_ctx_execute(volt_ctx_t ctx)
 
       glUseProgram(dc->program);
 
-      {
-        auto err = glGetError();
-        printf("GLErr: %d\n", err);
-      }
+      glBindBuffer(GL_ARRAY_BUFFER, dc->vbo);
 
       // Specify the layout of the vertex data
       GLint posAttrib = glGetAttribLocation(dc->program, "position");
@@ -265,15 +262,9 @@ volt_ctx_execute(volt_ctx_t ctx)
         printf("GLErr: %d\n", err);
       }
 
-      glBindBuffer(GL_ARRAY_BUFFER, dc->vbo);
-
+      
       // Draw a triangle from the 3 vertices
       glDrawArrays(GL_TRIANGLES, 0, 3);
-
-      {
-        auto err = glGetError();
-        printf("GLErr: %d\n", err);
-      }
     }
 
     roa_array_destroy(rp->draw_calls);
@@ -284,11 +275,58 @@ volt_ctx_execute(volt_ctx_t ctx)
 }
 
 
-/* resources */
+/* ------------------------------------------------------- [ rsrc input ] -- */
 
 
 void
-volt_vertex_buffer_create(volt_ctx_t ctx, volt_vbo_t *vbo, struct volt_vbo_desc *desc)
+volt_input_create(
+  volt_ctx_t ctx,
+  volt_input_t *input,
+  struct volt_input_desc *desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(input);
+  ROA_ASSERT(desc);
+
+  volt_input_t new_input = (volt_input_t)roa_alloc(sizeof(*new_input));
+  
+  unsigned max_count = ROA_ARR_COUNT(new_input->increment_stride);
+  unsigned cpy_count = desc->count > max_count ? max_count : desc->count;
+
+  new_input->count = cpy_count;
+  new_input->full_stride = 0;
+
+  for (int i = 0; i < cpy_count; ++i)
+  {
+    unsigned attrib_count;
+
+    switch (desc->attributes[i])
+    {
+      case(VOLT_INPUT_FLOAT4): { attrib_count = 4; break; }
+      case(VOLT_INPUT_FLOAT3): { attrib_count = 3; break; }
+      case(VOLT_INPUT_FLOAT2): { attrib_count = 2; break; }
+      case(VOLT_INPUT_FLOAT):  { attrib_count = 1; break; }
+    }
+
+    new_input->attrib_count[i] = attrib_count;
+    new_input->increment_stride[i] = new_input->full_stride;
+
+    new_input->full_stride += new_input->attrib_count[i] * sizeof(float);
+  }
+
+  *input = new_input;
+}
+
+
+/* --------------------------------------------------------- [ rsrc vbo ] -- */
+
+
+void
+volt_vertex_buffer_create(
+  volt_ctx_t ctx,
+  volt_vbo_t *vbo,
+  struct volt_vbo_desc *desc)
 {
   /* param check */
   ROA_ASSERT(ctx);
@@ -308,6 +346,9 @@ volt_vertex_buffer_create(volt_ctx_t ctx, volt_vbo_t *vbo, struct volt_vbo_desc 
   /* store desc as pending type */
   roa_array_push(ctx->pending_create_vbo_desc, pending);
 }
+
+
+/* ----------------------------------------------------- [ rsrc program ] -- */
 
 
 void
@@ -335,7 +376,7 @@ volt_program_create(
 }
 
 
-/* renderpass */
+/* ------------------------------------------------------- [ renderpass ] -- */
 
 
 void
