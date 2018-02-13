@@ -11,18 +11,6 @@
 #include <stdio.h>
 
 
-/* --------------------------------------------------- [ internal types ] -- */
-
-
-struct volt_draw_call
-{
-  GLuint program;
-  GLuint vbo;
-  GLuint ibo;
-  GLint texture[3];
-};
-
-
 /* ---------------------------------------------- [ internal gl structs ] -- */
 
 
@@ -52,10 +40,21 @@ struct volt_texture
 
 struct volt_input
 {
-  unsigned increment_stride[12];
-  unsigned attrib_count[12];
-  unsigned full_stride;
-  unsigned count;
+  GLuint increment_stride[12];
+  GLint attrib_count[12];
+  GLsizei full_stride;
+  GLuint count;
+};
+
+
+struct volt_draw_call
+{
+  GLuint program;
+  GLuint vbo;
+  GLuint ibo;
+  GLint texture[3];
+
+  volt_input input_fmt;
 };
 
 
@@ -85,10 +84,10 @@ struct volt_ctx
 struct volt_renderpass
 {
   /* cache */
-  volt_vbo curr_vbo;
-  volt_ibo curr_ibo;
-  volt_input curr_input;
-  volt_program curr_program;
+  volt_vbo_t curr_vbo;
+  volt_ibo_t curr_ibo;
+  volt_input_t curr_input;
+  volt_program_t curr_program;
 
   /* array */ volt_draw_call *draw_calls;
 };
@@ -258,14 +257,18 @@ volt_ctx_execute(volt_ctx_t ctx)
 
       glBindBuffer(GL_ARRAY_BUFFER, dc->vbo);
 
-      // Specify the layout of the vertex data
-      GLint posAttrib = glGetAttribLocation(dc->program, "position");
-      glEnableVertexAttribArray(posAttrib);
-      glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+      for (GLuint v = 0; v < dc->input_fmt.count; ++v)
+      {
+        GLuint index = v;
+        GLint size = dc->input_fmt.attrib_count[v];
+        GLenum type = GL_FLOAT;
+        GLboolean normalized = GL_FALSE;
+        GLsizei stride = dc->input_fmt.full_stride;
+        GLuint pointer = dc->input_fmt.increment_stride[v];
 
-      GLint colAttrib = glGetAttribLocation(dc->program, "color");
-      glEnableVertexAttribArray(colAttrib);
-      glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index, size, type, normalized, stride, (GLvoid *)pointer);
+      }
 
       {
         auto err = glGetError();
@@ -424,9 +427,9 @@ volt_renderpass_commit(
 void
 volt_renderpass_bind_input_format(
   volt_renderpass_t pass,
-  volt_input_t)
+  volt_input_t input)
 {
-  
+  pass->curr_input = input;
 }
 
 
@@ -435,9 +438,7 @@ volt_renderpass_bind_vertex_buffer(
   volt_renderpass_t pass,
   volt_vbo_t vbo)
 {
-  volt_draw_call *dc = roa_array_back(pass->draw_calls);
-
-  dc->vbo = vbo->vbo;
+  pass->curr_vbo = vbo;
 }
 
 
@@ -446,9 +447,7 @@ volt_renderpass_bind_index_buffer(
   volt_renderpass_t pass,
   volt_ibo_t ibo)
 {
-  volt_draw_call *dc = roa_array_back(pass->draw_calls);
-
-  dc->ibo = ibo->ibo;
+  pass->curr_ibo = ibo;
 }
 
 
@@ -457,15 +456,41 @@ volt_renderpass_bind_program(
   volt_renderpass_t pass,
   volt_program_t program)
 {
-  volt_draw_call *dc = roa_array_back(pass->draw_calls);
-
-  dc->program = program->program;
+  pass->curr_program = program;
 }
 
 
 void
 volt_renderpass_draw(volt_renderpass_t pass)
 {
+  /* param */
+  ROA_ASSERT(pass);
+
+  /* build the draw call */
+  volt_draw_call *dc = roa_array_back(pass->draw_calls);
+
+  ROA_ASSERT(pass->curr_program);
+
+  if(pass->curr_program)
+  {
+    dc->program = pass->curr_program->program;
+  }
+
+  if(pass->curr_vbo)
+  {
+    ROA_ASSERT(pass->curr_input);
+
+    dc->input_fmt = *pass->curr_input;
+    dc->vbo = pass->curr_vbo->vbo;
+  }
+
+  if(pass->curr_ibo)
+  {
+    ROA_ASSERT(pass->curr_vbo);
+
+    dc->ibo = pass->curr_ibo->ibo;
+  }
+
   roa_array_push(pass->draw_calls, volt_draw_call{});
 }
 

@@ -71,8 +71,8 @@ main()
     volt_program_create(ctx, &program, &shd_desc);
 
     volt_input_attribute input_fmt[] = {
-      VOLT_INPUT_FLOAT3,
       VOLT_INPUT_FLOAT2,
+      VOLT_INPUT_FLOAT3,
     };
 
     struct volt_input_desc input_desc;
