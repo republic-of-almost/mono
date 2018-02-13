@@ -11,6 +11,18 @@
 #include <stdio.h>
 
 
+/* --------------------------------------------------- [ internal types ] -- */
+
+
+struct volt_draw_call
+{
+  GLuint program;
+  GLuint vbo;
+  GLuint ibo;
+  GLint texture[3];
+};
+
+
 /* ---------------------------------------------- [ internal gl structs ] -- */
 
 
@@ -52,10 +64,12 @@ struct volt_pending_vbo {
   volt_vbo_desc desc;
 };
 
+
 struct volt_pending_program {
   volt_program_t program;
   volt_program_desc desc;
 };
+
 
 struct volt_ctx
 {
@@ -68,20 +82,14 @@ struct volt_ctx
 };
 
 
-/* internal */
-
-
-struct volt_draw_call
-{
-  GLuint program;
-  GLuint vbo;
-  GLuint ibo;
-  GLint texture[3];
-};
-
-
 struct volt_renderpass
 {
+  /* cache */
+  volt_vbo curr_vbo;
+  volt_ibo curr_ibo;
+  volt_input curr_input;
+  volt_program curr_program;
+
   /* array */ volt_draw_call *draw_calls;
 };
 
@@ -136,7 +144,7 @@ volt_ctx_execute(volt_ctx_t ctx)
     /* create vbos */
     {
       const unsigned vbo_count = roa_array_size(ctx->pending_create_vbo_desc);
-
+      
       for (int i = 0; i < vbo_count; ++i)
       {
         const volt_pending_vbo *pending_vbo = &ctx->pending_create_vbo_desc[i];
@@ -156,6 +164,7 @@ volt_ctx_execute(volt_ctx_t ctx)
         pending_vbo->vbo->vbo = vbo;
       }
 
+      //roa_array_clear(ctx->pending_create_vbo_desc);
       roa_array_resize(ctx->pending_create_vbo_desc, 0);
     }
 
@@ -218,10 +227,11 @@ volt_ctx_execute(volt_ctx_t ctx)
         }
       }
 
+      //roa_array_clear(ctx->pending_create_program_desc);
       roa_array_resize(ctx->pending_create_program_desc, 0);
     }
   }
-
+  
   /* destroy pending resources */
   {
     
@@ -271,6 +281,7 @@ volt_ctx_execute(volt_ctx_t ctx)
     roa_free(rp);
   }
 
+  //roa_array_clear(ctx->renderpasses);
   roa_array_resize(ctx->renderpasses, 0);
 }
 

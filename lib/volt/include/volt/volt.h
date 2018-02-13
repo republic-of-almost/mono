@@ -18,6 +18,7 @@ typedef struct volt_texture * volt_texture_t;
 typedef struct volt_input * volt_input_t;
 typedef struct volt_program * volt_program_t;
 
+
 #define VOLT_NULL 0
 
 

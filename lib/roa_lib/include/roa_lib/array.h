@@ -53,6 +53,10 @@ extern "C" {
   &arr[roa_array_size(arr) - 1] \
 
 
+#define roa_array_clear(arr) \
+  roa_internal_array_clear((void**)&arr); \
+
+
 /* -------------------------------------------------------- [ Array Impl ] -- */
 /*
 These are internal you shouldn't be calling them directly.
@@ -60,13 +64,14 @@ These are internal you shouldn't be calling them directly.
 
 void      roa_internal_array_resize(void **ptr, unsigned size);
 void      roa_internal_array_destroy(void **ptr);
-void      roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity);
+void*     roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity);
 unsigned  roa_internal_array_size(void **ptr);
 unsigned  roa_internal_array_capacity(void **ptr);
 void      roa_internal_array_increment(void **ptr);
 void      roa_internal_array_should_grow(void **ptr);
 void      roa_internal_array_erase(void **ptr, unsigned index);
 void      roa_internal_array_internal_pop(void **ptr);
+void      roa_internal_array_clear(void**ptr);
 
 
 

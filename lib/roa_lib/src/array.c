@@ -36,13 +36,13 @@ roa_internal_array_resize(void **ptr, unsigned size)
     struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
     curr_arr--;
 
-    roa_internal_array_grow(ptr, curr_arr->stride, size);
+    curr_arr = roa_internal_array_grow(ptr, curr_arr->stride, size);
     curr_arr->count = size;
   }
 }
 
 
-void
+void*
 roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
 {
   /* increase buffer */
@@ -59,6 +59,8 @@ roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
     curr_arr[0].stride = stride;
 
     *ptr = &curr_arr[1];
+
+    return curr_arr;
   }
   /* new */
   else
@@ -70,7 +72,11 @@ roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
     new_arr[0].stride = stride;
 
     *ptr = &new_arr[1];
+
+    return new_arr;
   }
+
+  return 0;
 }
 
 unsigned
@@ -170,3 +176,17 @@ roa_internal_array_internal_pop(void **ptr)
     }
   }
 }
+
+
+void
+roa_internal_array_clear(void**ptr)
+{
+  if (*ptr)
+  {
+    struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
+    curr_arr--;
+
+    curr_arr->count = 0;
+  }
+}
+

@@ -86,6 +86,9 @@ main()
 
   while (!glfwWindowShouldClose(window))
   {
+    static int count = 0;
+    ++count;
+
     /* draw some stuff */
     {
       volt_renderpass_t rp;

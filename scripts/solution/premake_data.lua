@@ -215,16 +215,16 @@ make.create_solution(solution_data, project_defaults, projects)
       local call_str = "result_table = proj." .. string .. "_" .. os.get()
 
       -- Need to watch this - loadstring is depreated, but premake's version of lua is old.
-      --local chunk = loadstring(call_str)
-      --setfenv( chunk, { result_table = result_table, proj = proj } )
-      --chunk()
+      local chunk = loadstring(call_str)
+      setfenv( chunk, { result_table = result_table, proj = proj } )
+      chunk()
 
       -- This is new method, should premake's lua version change.
-      local my_env = { result_table = result_table, proj = proj }
-      load(call_str, nil, nil, my_env)()
+      --local my_env = { result_table = result_table, proj = proj }
+      --load(call_str, nil, nil, my_env)()
 
-      --return getfenv(chunk).result_table
-      return result_table
+      return getfenv(chunk).result_table
+      --return result_table
     end
 
 
