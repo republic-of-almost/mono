@@ -10,7 +10,7 @@
   Anything more and you should re-think design.
 */
 int
-main()
+main(int argc, char *argv[])
 {
   /* create application data */
   app_data data{};

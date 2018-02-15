@@ -2,6 +2,14 @@
 
 make = {} -- namespace
 
+os_target = "unkown"
+
+if os.target ~= nil then
+  os_target = os.target()
+else
+  os_target = os.get()
+end
+
 
 ----------------------------------------------------------------- [ HELPERS ] --
 
@@ -17,7 +25,7 @@ end
 -- Adds source file patterns
 function
 make.add_src(dir)
-  if os.get() == "macosx" then
+  if os_target == "macosx" then
     return {
       dir .. "**.cpp",
       dir .. "**.cc",
@@ -38,7 +46,7 @@ end
 -- Adds source file patterns
 function
 make.add_src(dir)
-  if os.get() == "macosx" then
+  if os_target == "macosx" then
     return {
       dir .. "**.cpp",
       dir .. "**.cc",
@@ -133,7 +141,7 @@ make.create_solution(solution_data, project_defaults, projects)
   solution(solution_data.name)
   location("./")
 
-  if(os.get() == "windows") then
+  if(os_target == "windows") then
     characterset("MBCS")
   end
 
@@ -166,42 +174,42 @@ make.create_solution(solution_data, project_defaults, projects)
 
     if(proj.language == "C++") then
       language("C++")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c++14");
       end
     elseif(proj.language == "C++11") then
       language("C++")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c++11");
       end
     elseif(proj.language == "C++14") then
       language("C++")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c++14");
       end
     elseif(proj.language == "C++17") then
       language("C++")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c++17");
       end
     elseif(proj.language == "C") then
       language("C")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c99");
       end
     elseif(proj.language == "C89") then
       language("C")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c89");
       end
     elseif(proj.language == "C99") then
       language("C")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c99");
       end
     elseif(proj.language == "C11") then
       language("C")
-      if os.get() == "macosx" or os.get() == "linux" then
+      if os_target == "macosx" or os_target == "linux" then
         buildoptions("-std=c11");
       end
     end
@@ -209,22 +217,27 @@ make.create_solution(solution_data, project_defaults, projects)
     -- Thie function takes a string that represents a field
     -- to search in the table. it will then append the premakes
     -- platform name to the end, and search for that field.
+    -- This function can vanish
     function
     find_table_with_platform(proj, string)
       local result_table = {}
-      local call_str = "result_table = proj." .. string .. "_" .. os.get()
+      local call_str = "result_table = proj." .. string .. "_" .. os_target
 
       -- Need to watch this - loadstring is depreated, but premake's version of lua is old.
-      local chunk = loadstring(call_str)
-      setfenv( chunk, { result_table = result_table, proj = proj } )
-      chunk()
+      --local chunk = loadstring(call_str)
+      --setfenv( chunk, { result_table = result_table, proj = proj } )
+      --chunk()
 
       -- This is new method, should premake's lua version change.
-      --local my_env = { result_table = result_table, proj = proj }
-      --load(call_str, nil, nil, my_env)()
+      local my_env = { result_table = result_table, proj = proj }
+      load(call_str, nil, "t", my_env)()
 
-      return getfenv(chunk).result_table
-      --return result_table
+      result_table = proj[string .. "_" .. os_target]
+
+      --dump(result_table)
+
+      --return getfenv(chunk).result_table
+      return result_table
     end
 
 
@@ -399,22 +412,38 @@ make.create_solution(solution_data, project_defaults, projects)
       end
 
       -- RTTI --
-      local rtti = false
+      local enable_rtti = false
       if proj.lang_settings then
-        if proj.lang_settings.rtti then rtti = true end
+        if proj.lang_settings.rtti then enable_rtti = true end
       end
 
-      if rtti ~= true then
+      if rtti ~= nil then
+        val = "On";
+
+        if enable_rtti == false then
+          val = "Off"
+        end
+
+        rtti(val)
+      else
         flags("NoRTTI"); -- deprecated premake5
       end
 
       -- Exceptions --
-      local exceptions = false
+      local enable_exceptions = false
       if proj.lang_settings then
         if proj.lang_settings.exceptions then exceptions = true end
       end
 
-      if exceptions ~= true then
+      if exceptionhandling ~= nil then
+        val = "On"
+
+        if enable_exceptions == false then
+          val = "Off"
+        end
+
+        exceptionhandling(val)
+      else
         flags("NoExceptions") -- deprecated premake5
       end
 
@@ -423,19 +452,19 @@ make.create_solution(solution_data, project_defaults, projects)
       copy_files(src_dir, dest_dir)
 
         -- MacOSX Copy --
-        if os.get() == "macosx" then
+        if os_target == "macosx" then
           if proj.kind == "WindowedApp" then
             postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/");
           elseif proj.kind == "ConsoleApp" then
             postbuildcommands("ditto " .. src_dir .." ${CONFIGURATION_BUILD_DIR}/assets/");
           end
         -- Linux Copy --
-        elseif os.get() == "linux" then
+        elseif os_target == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
             postbuildcommands("cp -rf " .. src_dir .. "* " .. dest_dir .. config.name .. "/assets/" .. " 2>/dev/null || :");
           end
         -- Windows Copy --
-        elseif os.get() == "windows" then
+        elseif os_target == "windows" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
 
             win_src_dir = src_dir

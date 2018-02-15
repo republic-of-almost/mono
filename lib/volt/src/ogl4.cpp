@@ -200,6 +200,8 @@ volt_ctx_create(volt_ctx_t *ctx)
     return;
   }
 
+  gl3wIsSupported(1, 1);
+
   struct volt_ctx *new_ctx = nullptr;
   new_ctx = (volt_ctx*)roa_zalloc(sizeof(new_ctx[0]));
 
@@ -210,7 +212,7 @@ volt_ctx_create(volt_ctx_t *ctx)
 
   *ctx = new_ctx;
 
-  glCreateVertexArrays(1, &new_ctx->vao);
+  glGenVertexArrays(1, &new_ctx->vao);
   glBindVertexArray(new_ctx->vao);
 }
 

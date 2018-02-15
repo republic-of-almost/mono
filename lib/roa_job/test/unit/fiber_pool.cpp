@@ -58,11 +58,11 @@ TEST_CASE("Fiber pool")
     REQUIRE(roa_fiber_pool_in_flight_size(&ctx) == 1);
     REQUIRE(roa_fiber_pool_blocked_size(&ctx) == 1);
     
-    roa_fiber *should_be_null = roa_fiber_pool_next_pending(&ctx);
+    roa_fiber *should_be_null = roa_fiber_pool_next_pending(&ctx, 0);
     REQUIRE(should_be_null == nullptr);
     
     roa_counter_decrement(&counter);
-    roa_fiber *should_exist = roa_fiber_pool_next_pending(&ctx);
+    roa_fiber *should_exist = roa_fiber_pool_next_pending(&ctx, 0);
     REQUIRE(should_exist != nullptr);
   }
   

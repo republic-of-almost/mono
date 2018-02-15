@@ -40,5 +40,9 @@ table.insert(
     link_dependencies_linux = {
       "dl",
     },
+
+    link_dependencies_windows = {
+      "OpenGL32.lib",
+    },
   }
 )

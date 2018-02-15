@@ -77,10 +77,11 @@ TEST_CASE("Job Queue")
       void *func = nullptr;
       void *arg = nullptr;
 
-      const unsigned other_th_job = roa_job_queue_next(&ctx, 123, &func, &arg);
+	  ROA_BOOL out_thread;
+      const unsigned other_th_job = roa_job_queue_next(&ctx, 123, &func, &arg, &out_thread);
       REQUIRE(other_th_job == 0);
       
-      const unsigned job_id = roa_job_queue_next(&ctx, 1, &func, &arg);
+      const unsigned job_id = roa_job_queue_next(&ctx, 1, &func, &arg, &out_thread);
       REQUIRE(job_id);
       
       const unsigned clear_batch_id = roa_job_queue_clear(&ctx, job_id);
@@ -104,7 +105,8 @@ TEST_CASE("Job Queue")
       void *func = nullptr;
       void *arg = nullptr;
       
-      const unsigned job_id = roa_job_queue_next(&ctx, 1, &func, &arg);
+	  ROA_BOOL out_thread;
+      const unsigned job_id = roa_job_queue_next(&ctx, 1, &func, &arg, &out_thread);
       REQUIRE(job_id);
       
       /* hold */
@@ -139,7 +141,8 @@ TEST_CASE("Job Queue")
         void *func = 0;
         void *arg = 0;
 
-        const unsigned job_id = roa_job_queue_next(&ctx, 1, &func, &arg);
+		ROA_BOOL out_thread;
+        const unsigned job_id = roa_job_queue_next(&ctx, 1, &func, &arg, &out_thread);
         REQUIRE(job_id);
 
         const unsigned clear_batch_id = roa_job_queue_clear(&ctx, job_id);

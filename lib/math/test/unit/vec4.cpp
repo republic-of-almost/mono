@@ -30,7 +30,7 @@ TEST_CASE("Vector 4")
 
   SECTION("Export Data")
   {
-    float arr_export[]{};
+    float arr_export[4]{};
     const math::vec4 to_export = math::vec4_one();
     math::vec4_to_array(to_export, arr_export);
     

@@ -119,7 +119,7 @@ table.insert(
     },
 
     link_dependencies_windows = {
-      "opengl32",
+      "OpenGL32.lib",
     },
 
     defines_windows = {
