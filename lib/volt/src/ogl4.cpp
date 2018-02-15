@@ -9,7 +9,91 @@
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
 #include <stdio.h>
+#include <cstdint>
 
+
+/* ------------------------------------------------------ [ gl commands ] -- */
+
+
+enum class volt_gl_cmd_id
+{
+  unknown,
+
+  /* resource */
+
+  create_program,
+  create_buffer_ibo,
+  create_buffer_vbo,
+  create_buffer_input,
+  
+  /* renderpass */
+
+  bind_program,
+  bind_vbo,
+  bind_ibo,
+  bind_input,
+};
+
+
+struct volt_gl_cmd_unknown
+{
+  volt_gl_cmd_id id;
+};
+
+struct volt_gl_program
+{
+  volt_gl_cmd_id id;
+  volt_program_t program;
+  volt_program_desc *desc;
+};
+
+struct volt_gl_cmd_create_vbo
+{
+  volt_gl_cmd_id id;
+  volt_vbo_t vbo;
+  volt_vbo_desc *desc;
+};
+
+struct volt_gl_cmd_create_ibo
+{
+  volt_gl_cmd_id id;
+  volt_ibo_t ibo;
+  volt_ibo_desc *desc;
+};
+
+struct volt_gl_cmd_create_index
+{
+  volt_gl_cmd_id id;
+  volt_input_t input;
+  volt_input_desc *desc;
+};
+
+struct volt_bind_vbo
+{
+  volt_gl_cmd_id id;
+  GLuint vbo;
+};
+
+struct volt_bind_ibo
+{
+  volt_gl_cmd_id id;
+  GLuint ibo;
+};
+
+struct volt_bind_input
+{
+  volt_gl_cmd_id id;
+  GLuint increment_stride;
+  GLint attrib_count;
+  GLsizei full_stride;
+  GLuint count;
+};
+
+struct volt_bind_program
+{
+  volt_gl_cmd_id id;
+  GLuint program;
+};
 
 /* ---------------------------------------------- [ internal gl structs ] -- */
 
@@ -64,6 +148,12 @@ struct volt_pending_vbo {
 };
 
 
+struct volt_pending_ibo {
+  volt_ibo_t ibo;
+  volt_ibo_desc desc;
+};
+
+
 struct volt_pending_program {
   volt_program_t program;
   volt_program_desc desc;
@@ -74,7 +164,12 @@ struct volt_ctx
 {
   GLuint vao;
 
+  /* buffer */ uint8_t *resource_create_stream;
+  /* buffer */ uint8_t *render_stream;
+  /* buffer */ uint8_t *resource_destroy_stream;
+
   /* array */ struct volt_pending_vbo *pending_create_vbo_desc;
+  /* array */ struct volt_pending_ibo *pending_create_ibo_desc;
   /* array */ struct volt_pending_program *pending_create_program_desc;
   
   /* array */ volt_renderpass_t *renderpasses;
@@ -109,6 +204,7 @@ volt_ctx_create(volt_ctx_t *ctx)
   new_ctx = (volt_ctx*)roa_zalloc(sizeof(new_ctx[0]));
 
   roa_array_create(new_ctx->renderpasses, 128);
+  roa_array_create(new_ctx->pending_create_vbo_desc, 32);
   roa_array_create(new_ctx->pending_create_vbo_desc, 32);
   roa_array_create(new_ctx->pending_create_program_desc, 32);
 
@@ -165,6 +261,26 @@ volt_ctx_execute(volt_ctx_t ctx)
 
       //roa_array_clear(ctx->pending_create_vbo_desc);
       roa_array_resize(ctx->pending_create_vbo_desc, 0);
+    }
+
+    /* create ibo */
+    {
+      const unsigned ibo_count = roa_array_size(ctx->pending_create_ibo_desc);
+
+      for (int i = 0; i < ibo_count; ++i)
+      {
+        const volt_pending_ibo *pending_ibo = &ctx->pending_create_ibo_desc[i];
+
+        GLuint ibo{};
+
+        glGenBuffers(1, &ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glBufferData(
+          GL_ELEMENT_ARRAY_BUFFER,
+          sizeof(unsigned int) * pending_ibo->desc.count,
+          pending_ibo->desc.data,
+          GL_STATIC_DRAW);
+      }
     }
 
     /* create programs */
@@ -347,8 +463,7 @@ volt_vertex_buffer_create(
   ROA_ASSERT(vbo);
   ROA_ASSERT(desc);
 
-  volt_vbo_t new_vbo = (volt_vbo_t)roa_alloc(sizeof(*new_vbo));
-  new_vbo->vbo = 0;
+  volt_vbo_t new_vbo = (volt_vbo_t)roa_zalloc(sizeof(*new_vbo));
 
   *vbo = new_vbo;
 
@@ -359,6 +474,33 @@ volt_vertex_buffer_create(
 
   /* store desc as pending type */
   roa_array_push(ctx->pending_create_vbo_desc, pending);
+}
+
+/* --------------------------------------------------------- [ rsrc ibo ] -- */
+
+
+void
+volt_index_buffer_create(
+  volt_ctx_t ctx,
+  volt_ibo_t *ibo,
+  struct volt_ibo_desc *desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(ibo);
+  ROA_ASSERT(desc);
+
+  volt_ibo_t new_ibo = (volt_ibo_t)roa_zalloc(sizeof(*new_ibo));
+  
+  *ibo = new_ibo;
+
+  volt_pending_ibo pending{
+    new_ibo,
+    *desc,
+  };
+
+  /* store desc as pending ibo */
+  roa_array_push(ctx->pending_create_ibo_desc, pending);
 }
 
 

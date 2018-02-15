@@ -91,6 +91,23 @@ volt_vertex_buffer_create(
   struct volt_vbo_desc *desc);
 
 
+/* --------------------------------------------------------- [ rsrc ibo ] -- */
+
+
+struct volt_ibo_desc
+{
+  unsigned int *data;
+  unsigned count;
+};
+
+
+void
+volt_index_buffer_create(
+  volt_ctx_t ctx,
+  volt_ibo_t *t,
+  struct volt_ibo_desc *desc);
+
+
 /* ----------------------------------------------------- [ rsrc program ] -- */
 
 
