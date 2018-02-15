@@ -32,68 +32,115 @@ enum class volt_gl_cmd_id
   bind_vbo,
   bind_ibo,
   bind_input,
+
+  draw_count,
+  draw_indexed,
 };
 
 
 struct volt_gl_cmd_unknown
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::unknown */
 };
 
-struct volt_gl_program
+
+/* ------------------------------------------ [ gl resource cmd structs ] -- */
+
+
+struct volt_gl_cmd_create_program
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_program */
+
   volt_program_t program;
-  volt_program_desc *desc;
+  volt_program_desc desc;
 };
+
 
 struct volt_gl_cmd_create_vbo
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_vbo */
+
   volt_vbo_t vbo;
-  volt_vbo_desc *desc;
+  volt_vbo_desc desc;
 };
+
 
 struct volt_gl_cmd_create_ibo
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_ibo */
+
   volt_ibo_t ibo;
-  volt_ibo_desc *desc;
+  volt_ibo_desc desc;
 };
 
-struct volt_gl_cmd_create_index
+
+struct volt_gl_cmd_create_input
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_input */
+
   volt_input_t input;
-  volt_input_desc *desc;
+  volt_input_desc desc;
 };
+
+
+/* ---------------------------------------- [ gl renderpass cmd structs ] -- */
+
 
 struct volt_bind_vbo
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_vbo */
+
   GLuint vbo;
 };
 
+
 struct volt_bind_ibo
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_ibo */
+
   GLuint ibo;
 };
 
+
 struct volt_bind_input
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_input */
+
   GLuint increment_stride;
   GLint attrib_count;
   GLsizei full_stride;
   GLuint count;
 };
 
+
 struct volt_bind_program
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_program */
+
   GLuint program;
 };
+
+
+struct volt_bind_draw_count
+{
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::draw_count */
+
+  GLenum mode;
+  GLuint start;
+  GLuint count;
+};
+
+
+struct volt_bind_draw_indexed
+{
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::draw_indexed */
+
+  GLenum mode;
+  GLenum type;
+  GLuint count;
+  const GLvoid *indices;
+};
+
 
 /* ---------------------------------------------- [ internal gl structs ] -- */
 
@@ -184,227 +231,8 @@ struct volt_renderpass
   volt_input_t curr_input;
   volt_program_t curr_program;
 
-  /* array */ volt_draw_call *draw_calls;
+  /* array */ uint8_t *render_stream;
 };
-
-
-/* --------------------------------------------------------- [ lifetime ] -- */
-
-
-void
-volt_ctx_create(volt_ctx_t *ctx)
-{
-  if (gl3wInit())
-  {
-    /* fail */
-    return;
-  }
-
-  gl3wIsSupported(1, 1);
-
-  struct volt_ctx *new_ctx = nullptr;
-  new_ctx = (volt_ctx*)roa_zalloc(sizeof(new_ctx[0]));
-
-  roa_array_create(new_ctx->renderpasses, 128);
-  roa_array_create(new_ctx->pending_create_vbo_desc, 32);
-  roa_array_create(new_ctx->pending_create_vbo_desc, 32);
-  roa_array_create(new_ctx->pending_create_program_desc, 32);
-
-  *ctx = new_ctx;
-
-  glGenVertexArrays(1, &new_ctx->vao);
-  glBindVertexArray(new_ctx->vao);
-}
-
-
-void
-volt_ctx_destroy(volt_ctx_t *ctx)
-{
-  roa_array_destroy((*ctx)->pending_create_program_desc);
-  roa_array_destroy((*ctx)->pending_create_vbo_desc);
-  roa_array_destroy((*ctx)->renderpasses);
-
-  roa_free(*ctx);
-}
-
-
-void
-volt_ctx_execute(volt_ctx_t ctx)
-{
-  ROA_ASSERT(ctx);
-
-  /* bind because some thridparty might have */
-  glBindVertexArray(ctx->vao);
-
-  /* create pending resources */
-  {
-    /* create vbos */
-    {
-      const unsigned vbo_count = roa_array_size(ctx->pending_create_vbo_desc);
-      
-      for (int i = 0; i < vbo_count; ++i)
-      {
-        const volt_pending_vbo *pending_vbo = &ctx->pending_create_vbo_desc[i];
-
-        GLuint vbo{};
-
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(
-          GL_ARRAY_BUFFER,
-          sizeof(float) * pending_vbo->desc.count,
-          pending_vbo->desc.data,
-          GL_STATIC_DRAW);
-
-        ROA_ASSERT_PEDANTIC(vbo > 0);
-
-        pending_vbo->vbo->vbo = vbo;
-      }
-
-      //roa_array_clear(ctx->pending_create_vbo_desc);
-      roa_array_resize(ctx->pending_create_vbo_desc, 0);
-    }
-
-    /* create ibo */
-    {
-      const unsigned ibo_count = roa_array_size(ctx->pending_create_ibo_desc);
-
-      for (int i = 0; i < ibo_count; ++i)
-      {
-        const volt_pending_ibo *pending_ibo = &ctx->pending_create_ibo_desc[i];
-
-        GLuint ibo{};
-
-        glGenBuffers(1, &ibo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(
-          GL_ELEMENT_ARRAY_BUFFER,
-          sizeof(unsigned int) * pending_ibo->desc.count,
-          pending_ibo->desc.data,
-          GL_STATIC_DRAW);
-      }
-    }
-
-    /* create programs */
-    {
-      const unsigned program_count = roa_array_size(ctx->pending_create_program_desc);
-
-      for (int i = 0; i < program_count; ++i)
-      {
-        const volt_pending_program *pending_prog = &ctx->pending_create_program_desc[i];
-
-        GLuint shaders[VOLT_SHD_STAGE_COUNT]{};
-        GLenum shader_enum[VOLT_SHD_STAGE_COUNT]{
-          GL_VERTEX_SHADER,
-          GL_GEOMETRY_SHADER,
-          GL_FRAGMENT_SHADER,
-        }; /* make sure this aligns with volt.h's enum */
-
-        for (int j = 0; j < pending_prog->desc.stage_count; ++j)
-        {
-          const volt_shader_stage stage = pending_prog->desc.shader_stages_type[j];
-
-          shaders[stage] = glCreateShader(shader_enum[stage]);
-          GLchar const *src = pending_prog->desc.shader_stages_src[j];
-          glShaderSource(shaders[stage], 1, &src, NULL);
-          glCompileShader(shaders[stage]);
-
-          /* check for errors */
-          GLint status = 0;
-          glGetShaderiv(shaders[stage], GL_COMPILE_STATUS, &status);
-          
-          GLchar error[1024] {};
-          glGetShaderInfoLog(shaders[stage], 1024, NULL, error);
-
-          ROA_ASSERT(status == GL_TRUE);
-        }
-
-        /* link shaders */
-        {
-          GLuint program = glCreateProgram();
-          
-          for (GLuint shd : shaders)
-          {
-            if (shd != 0)
-            {
-              glAttachShader(program, shd);
-            }
-          }
-
-          glBindFragDataLocation(program, 0, "outColor");
-          glLinkProgram(program);
-
-          GLint status;
-          glGetProgramiv(program, GL_LINK_STATUS, &status);
-          ROA_ASSERT(status == GL_TRUE);
-
-          pending_prog->program->program = program;
-
-          /* check for errors */
-        }
-      }
-
-      //roa_array_clear(ctx->pending_create_program_desc);
-      roa_array_resize(ctx->pending_create_program_desc, 0);
-    }
-  }
-  
-  /* destroy pending resources */
-  {
-    
-  }
-
-  /* process all the renderpasses */
-  const unsigned rp_count = roa_array_size(ctx->renderpasses);
-
-  glClearColor(1, 0, 0, 1);
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  for (int i = 0; i < rp_count; ++i)
-  {
-    const volt_renderpass_t rp = ctx->renderpasses[i];
-
-    /* render all the draw calls */
-    const unsigned draw_count = roa_array_size(rp->draw_calls);
-
-    for (int j = 0; j < draw_count; ++j)
-    {
-      const volt_draw_call *dc = &rp->draw_calls[j];
-
-      glUseProgram(dc->program);
-
-      glBindBuffer(GL_ARRAY_BUFFER, dc->vbo);
-
-      for (GLuint v = 0; v < dc->input_fmt.count; ++v)
-      {
-        GLuint index = v;
-        GLint size = dc->input_fmt.attrib_count[v];
-        GLenum type = GL_FLOAT;
-        GLboolean normalized = GL_FALSE;
-        GLsizei stride = dc->input_fmt.full_stride;
-        GLuint pointer = dc->input_fmt.increment_stride[v];
-
-        glEnableVertexAttribArray(index);
-        glVertexAttribPointer(index, size, type, normalized, stride, (GLvoid *)pointer);
-      }
-
-      {
-        auto err = glGetError();
-        printf("GLErr: %d\n", err);
-      }
-
-      
-      // Draw a triangle from the 3 vertices
-      glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-
-    roa_array_destroy(rp->draw_calls);
-    roa_free(rp);
-  }
-
-  //roa_array_clear(ctx->renderpasses);
-  roa_array_resize(ctx->renderpasses, 0);
-}
 
 
 /* ------------------------------------------------------- [ rsrc input ] -- */
@@ -636,6 +464,237 @@ volt_renderpass_draw(volt_renderpass_t pass)
   }
 
   roa_array_push(pass->draw_calls, volt_draw_call{});
+}
+
+/* --------------------------------------------------- [ gl cmd actions ] -- */
+
+
+static void
+volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
+{
+  /* param check */
+  ROA_ASSERT(cmd);
+  ROA_ASSERT(cmd->vbo);
+
+  /* prepare */
+  GLuint vbo{};
+  const GLsizeiptr size = sizeof(float) * cmd->desc.count;
+  const GLvoid *data = cmd->desc.data;
+  const GLenum useage = GL_STATIC_DRAW;
+  const GLenum target = GL_ARRAY_BUFFER;
+
+  /* create vbo */
+  glGenBuffers(1, &vbo);
+  glBindBuffer(target, vbo);
+  glBufferData(target, size, data, useage);
+
+  ROA_ASSERT_PEDANTIC(vbo > 0);
+
+  /* save vbo */
+  cmd->vbo->vbo = vbo;
+}
+
+
+static void
+volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
+{
+  /* param check */
+  ROA_ASSERT(cmd);
+  ROA_ASSERT(cmd->ibo);
+
+  /* prepare */
+  GLuint ibo{};
+  const GLsizeiptr size = sizeof(float) * cmd->desc.count;
+  const GLvoid *data = cmd->desc.data;
+  const GLenum useage = GL_STATIC_DRAW;
+  const GLenum target = GL_ELEMENT_ARRAY_BUFFER;
+
+  /* create vbo */
+  glGenBuffers(1, &ibo);
+  glBindBuffer(target, ibo);
+  glBufferData(target, size, data, useage);
+
+  ROA_ASSERT_PEDANTIC(ibo > 0);
+
+  /* save vbo */
+  cmd->ibo->ibo = ibo;
+}
+
+
+static void
+volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
+{
+  /* param check */
+  ROA_ASSERT(cmd);
+  ROA_ASSERT(cmd->program);
+
+  /* prepare */
+  struct shader_inout
+  {
+    GLenum stage;
+    GLuint gl_id;
+    const GLchar *src;
+  };
+
+  shader_inout shaders[VOLT_SHD_STAGE_COUNT] = {
+    { GL_VERTEX_SHADER , 0, nullptr },
+    { GL_GEOMETRY_SHADER , 0, nullptr },
+    { GL_FRAGMENT_SHADER , 0, nullptr },
+  };
+
+  for (int j = 0; j < cmd->desc.stage_count; ++j)
+  {
+    const volt_program_desc *desc = &cmd->desc;
+
+    const volt_shader_stage stage = desc->shader_stages_type[j];
+    shaders[stage].src = desc->shader_stages_src[j];
+  }
+
+  /* create shader stages */
+  for (shader_inout &new_shd : shaders)
+  {
+    if (new_shd.src == nullptr)
+    {
+      continue;
+    }
+
+    new_shd.gl_id = glCreateShader(new_shd.stage);
+    glShaderSource(new_shd.stage, 1, &new_shd.src, NULL);
+    glCompileShader(new_shd.stage);
+
+    /* check for errors */
+    GLint status = 0;
+    glGetShaderiv(new_shd.stage, GL_COMPILE_STATUS, &status);
+
+    GLchar error[1024]{};
+    glGetShaderInfoLog(new_shd.stage, 1024, NULL, error);
+
+    ROA_ASSERT(status == GL_TRUE);
+  }
+
+  /* create program */
+  GLuint program = glCreateProgram();
+
+  for (const shader_inout &new_shd : shaders)
+  {
+    if (new_shd.gl_id)
+    {
+      glAttachShader(program, new_shd.gl_id);
+    }
+  }
+
+  glBindFragDataLocation(program, 0, "outColor");
+  glLinkProgram(program);
+
+  GLint status;
+  glGetProgramiv(program, GL_LINK_STATUS, &status);
+  ROA_ASSERT(status == GL_TRUE);
+
+  cmd->program->program = program;
+}
+
+
+static void
+volt_gl_create_input(const volt_gl_cmd_create_input *cmd)
+{
+  ROA_ASSERT(cmd);
+}
+
+
+/* --------------------------------------------------------- [ lifetime ] -- */
+
+
+void
+volt_ctx_create(volt_ctx_t *ctx)
+{
+  if (gl3wInit())
+  {
+    /* fail */
+    return;
+  }
+
+  gl3wIsSupported(1, 1);
+
+  struct volt_ctx *new_ctx = nullptr;
+  new_ctx = (volt_ctx*)roa_zalloc(sizeof(new_ctx[0]));
+
+  roa_array_create(new_ctx->renderpasses, 128);
+  roa_array_create(new_ctx->pending_create_vbo_desc, 32);
+  roa_array_create(new_ctx->pending_create_vbo_desc, 32);
+  roa_array_create(new_ctx->pending_create_program_desc, 32);
+
+  *ctx = new_ctx;
+
+  glGenVertexArrays(1, &new_ctx->vao);
+  glBindVertexArray(new_ctx->vao);
+}
+
+
+void
+volt_ctx_destroy(volt_ctx_t *ctx)
+{
+  roa_array_destroy((*ctx)->pending_create_program_desc);
+  roa_array_destroy((*ctx)->pending_create_vbo_desc);
+  roa_array_destroy((*ctx)->renderpasses);
+
+  roa_free(*ctx);
+}
+
+
+void
+volt_ctx_execute(volt_ctx_t ctx)
+{
+  ROA_ASSERT(ctx);
+
+  /* create resource stream  */
+  {
+    const uint8_t *next = ctx->resource_create_stream;
+    const unsigned bytes = roa_array_size(next);
+
+    while(next < next + bytes)
+    {
+      const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)next;
+
+      switch (uk_cmd->id)
+      {
+        case(volt_gl_cmd_id::create_buffer_vbo):
+        {
+          const volt_gl_cmd_create_vbo *cmd = (const volt_gl_cmd_create_vbo*)uk_cmd;
+          next += sizeof(volt_gl_cmd_create_vbo);
+          volt_gl_create_vbo(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::create_buffer_ibo):
+        {
+          const volt_gl_cmd_create_ibo *cmd = (const volt_gl_cmd_create_ibo*)uk_cmd;
+          next += sizeof(volt_gl_cmd_create_ibo);
+          volt_gl_create_ibo(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::create_buffer_input):
+        {
+          const volt_gl_cmd_create_input *cmd = (const volt_gl_cmd_create_input*)uk_cmd;
+          next += sizeof(volt_gl_cmd_create_input);
+          volt_gl_create_input(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::create_program):
+        {
+          const volt_gl_cmd_create_program *cmd = (const volt_gl_cmd_create_program*)uk_cmd;
+          next += sizeof(volt_gl_cmd_create_program);
+          volt_gl_create_program(cmd);
+          break;
+        }
+        default:
+          /* only create cmds should be here */
+          ROA_ASSERT(false);
+      }
+    }
+  }
+
+  /* execute render stream */
+
+  /* destroy resource stream */
 }
 
 
