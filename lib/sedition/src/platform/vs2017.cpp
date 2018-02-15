@@ -6,6 +6,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <experimental/filesystem>
 
 
 struct msvs_config
@@ -19,6 +23,22 @@ struct msvs_config
 };
 
 
+struct msvs_filter
+{
+	GUID guid;
+	std::string path;
+	std::string name;
+};
+
+
+struct msvs_file
+{
+	std::string filter_name;
+	std::string path;
+	std::string filename;
+};
+
+
 struct msvs_project
 {
 	struct GUID guid;
@@ -27,6 +47,8 @@ struct msvs_project
 	std::string filename;
 
 	std::vector<msvs_config> configs;
+	std::vector<msvs_filter> filters;
+	std::vector<msvs_file> files;
 };
 
 
@@ -37,6 +59,7 @@ struct msvs_solution
 	std::string path;
 	std::string filename;
 
+	std::vector<msvs_config> configs;
 	std::vector<msvs_project> projects;
 };
 
@@ -109,258 +132,312 @@ void sed_generate_vs2017(
 		auto &solution = msvs_solutions.back();
 		solution.name = sol.name;
 		solution.filename = sol.name + ".sln";
+		solution.path = sol.path;
 		
-		for (const auto p : sol.projects)
+		/* add solution configs */
+		for(const auto &i : sol.configs)
+		{
+			for (int c = 0; c < confs.size(); ++c)
+			{
+				if (confs[c].id.value == i)
+				{
+					solution.configs.emplace_back(msvs_configs[c]);
+				}
+			}
+		}
+
+		for (auto p : sol.projects)
 		{
 			/* add this project */
 			for (int i = 0; i < projs.size(); ++i)
 			{
 				if (projs[i].id.value == p)
 				{
-					solution.projects.emplace_back(msvs_projects[i]);
-				}
-			}
+					const Project &proj = projs[i];
 
-			for (int i = 0; i < confs.size(); ++i)
-			{
-				
+					solution.projects.emplace_back(msvs_projects[i]);
+
+					msvs_project &msvs_proj = solution.projects.back();
+
+					/* project configs */
+					for(const auto &con : solution.configs)
+					{
+						solution.projects.back().configs.emplace_back(con);
+					}
+
+					/* files */
+					{
+						std::map<std::string, msvs_filter> filters;
+
+						for (auto &f : proj.files)
+						{
+							if (filters.find(f.path) == std::end(filters))
+							{
+								filters[f.path] = msvs_filter{};
+							}
+
+							msvs_file new_file;
+							new_file.filename = f.name;
+							new_file.path = f.path;
+							new_file.filter_name = f.path;
+
+							msvs_proj.files.emplace_back(new_file);
+						}
+					}
+				}
 			}
 		}
 	}
 
+	/* generate files */
+	struct msvs_files
+	{
+		std::string filename;
+		std::string path;
+		std::string contents;
+	};
 
-	/* generate vs2017 */
-	//int sol_count = sed_array_size(sols);
+	std::vector<msvs_files> files;
 
-	//int i;
+	/* create solution files */
+	for (auto &sol : msvs_solutions)
+	{
+		std::string sol_contents;
+		sol_contents.append("Microsoft Visual Studio Solution File, Format Version 12.00\n");
+		sol_contents.append("# Visual Studio 15 - Generated with Sed\n");
+		sol_contents.append("VisualStudioVersion = 15.0.27130.2027\n");
+		sol_contents.append("MinimumVisualStudioVersion = 10.0.40219.1\n");
 
-	//for (i = 0; i < sol_count; ++i)
-	//{
-	//	struct Solution *sol = &sols[i];
+		for (auto &proj : sol.projects)
+		{
+			sol_contents.append("Project(\"{");
+			sol_contents.append(proj.guid.str);
+			sol_contents.append("}\") = \"");
+			sol_contents.append(proj.name);
+			sol_contents.append("\", ");
 
-	//	/* generate solutions */
-	//	{
-	//		char *sol_filename = sed_string(sol->path);
-	//		sol_filename = sed_string_append(sol_filename, sol->name);
-	//		sol_filename = sed_string_append(sol_filename, ".sln");
+			sol_contents.append(proj.path);
+			sol_contents.append("\\");
+			
+			sol_contents.append(proj.name);
+			sol_contents.append(".vcxproj\", {");
+			sol_contents.append(proj.guid.str);
+			sol_contents.append("}\n");
 
-	//		sed_mkdir(sol->path);
+			sol_contents.append("EndProject\n");
+		}
 
-	//		sed_file_create(sol_filename);
+		sol_contents.append("Global\n");
 
-	//		sed_file_append("Microsoft Visual Studio Solution File, Format Version 12.00\n");
-	//		sed_file_append("# Visual Studio 15 - Generated with Sed\n");
-	//		sed_file_append("VisualStudioVersion = 15.0.27130.2027\n");
-	//		sed_file_append("MinimumVisualStudioVersion = 10.0.40219.1\n");
+		/* configs */
+		sol_contents.append("  GlobalSection(SolutionConfigurationPlatforms) = preSolution\n");
 
-	//		/* list projects? */
-	//		int p;
-	//		int proj_count = sed_array_size(projs);
+		for (const auto &conf : sol.configs)
+		{
+			sol_contents.append("    ");
+			sol_contents.append(conf.name);
+			sol_contents.append("|");
+			sol_contents.append(conf.arch_name);
+			sol_contents.append(" = ");
+			sol_contents.append(conf.name);
+			sol_contents.append("|");
+			sol_contents.append(conf.arch_name);
+			sol_contents.append("\n");
+		}
 
-	//		for (p = 0; p < proj_count; ++p)
-	//		{
-	//			struct Project *proj = &projs[p];
+		sol_contents.append("	EndGlobalSection\n");
 
-	//			sed_file_append("Project(\"{");
-	//			sed_file_append(proj->guid.str);
-	//			sed_file_append("}\") = \"");
-	//			sed_file_append(proj->name);
-	//			sed_file_append("\", ");
+		for (const auto &proj : sol.projects)
+		{
+			for (const auto &conf : proj.configs)
+			{
+				sol_contents.append("    {");
+				sol_contents.append(proj.guid.str);
+				sol_contents.append("}.");
+				sol_contents.append(conf.name);
+				sol_contents.append("|");
+				sol_contents.append(".ActiveCfg = ");
+				sol_contents.append(conf.name);
+				sol_contents.append("|");
+				sol_contents.append(conf.display_name);
+				sol_contents.append("\n");
 
-	//			if (proj->path)
-	//			{
-	//				sed_file_append(proj->path);
-	//				sed_file_append("\\");
-	//			}
+				sol_contents.append("    {");
+				sol_contents.append(proj.guid.str);
+				sol_contents.append("}.");
+				sol_contents.append(conf.name);
+				sol_contents.append("|");
+				sol_contents.append(conf.arch_name);
+				sol_contents.append(".Build.0 = ");
+				sol_contents.append(conf.name);
+				sol_contents.append("|");
+				sol_contents.append(conf.display_name);
+				sol_contents.append("\n");
+			}
+		}
 
-	//			sed_file_append(proj->name);
-	//			sed_file_append(".vcxproj\", {");
-	//			sed_file_append(proj->guid.str);
-	//			sed_file_append("}\n");
-	//		}
+		sol_contents.append("  EndGlobalSection\n");
 
-	//		sed_file_append("EndProject\n");
+		sol_contents.append("  GlobalSection(SolutionProperties) = preSolution\n");
+		sol_contents.append("    HideSolutionNode = FALSE\n");
+		sol_contents.append("  EndGlobalSection\n");
 
-	//		sed_file_append("Global\n");
+		sol_contents.append("  GlobalSection(ExtensibilityGlobals) = postSolution\n");
+		sol_contents.append("    SolutionGuid = {");
+		sol_contents.append(sol.guid.str);
+		sol_contents.append("}\n");
+		sol_contents.append("  EndGlobalSection\n");
 
-	//		/* configs */
-	//		sed_file_append("  GlobalSection(SolutionConfigurationPlatforms) = preSolution\n");
-	//		
-	//		int c;
-	//		int conf_count = sed_array_size(confs);
+		sol_contents.append("EndGlobal\n");
 
-	//		for (c = 0; c < conf_count; ++c)
-	//		{
-	//			struct Config *conf = &confs[c];
+		/* create project files */
+		for (auto &proj : sol.projects)
+		{
+			std::string proj_contents;
 
-	//			sed_file_append("    ");
-	//			sed_file_append(conf->name);
-	//			sed_file_append("|x86 = ");
-	//			sed_file_append(conf->name);
-	//			sed_file_append("|x86\n");
-	//		}
+			proj_contents.append("<?xml version=\"1.0\" encoding=\"utf - 8\"?>\n");
+			proj_contents.append("<Project DefaultTargets=\"Build\" ToolsVersion=\"15.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
 
-	//		sed_file_append("  EndGlobalSection\n");
-	//		
-	//		sed_file_append("  GlobalSection(PorjectConfigurationPlatforms) = postSolution\n");
-	//		
-	//		for (p = 0; p < proj_count; ++p)
-	//		{
-	//			const struct Project *proj = &projs[p];
+			proj_contents.append("  <ItemGroup Label=\"ProjectConfigurations\">\n");
 
-	//			for (c = 0; c < conf_count; ++c)
-	//			{
-	//				struct Config *conf = &confs[c];
+			for (auto &conf : proj.configs)
+			{
+				proj_contents.append("		<ProjectConfiguration  Include=\"");
+				proj_contents.append(conf.name);
+				proj_contents.append("|");
+				proj_contents.append(conf.display_name);
+				proj_contents.append("\">\n");
+				proj_contents.append("			<Configuration>");
+				proj_contents.append(conf.name);
+				proj_contents.append("</Configuration>\n");
+				proj_contents.append("			<Platform>");
+				proj_contents.append(conf.display_name);
+				proj_contents.append("</Platform>\n");
+				proj_contents.append("		<ProjectConfiguration>\n");
+			}
 
-	//				sed_file_append("    {");
-	//				sed_file_append(proj->guid.str);
-	//				sed_file_append("}.");
-	//				sed_file_append(conf->name);
-	//				sed_file_append("|x86.ActiveCfg = ");
-	//				sed_file_append(conf->name);
-	//				sed_file_append("|x86\n");
+			proj_contents.append("  </ItemGroup>\n");
 
-	//				sed_file_append("    {");
-	//				sed_file_append(proj->guid.str);
-	//				sed_file_append("}.");
-	//				sed_file_append(conf->name);
-	//				sed_file_append("|x86.Build.0 = ");
-	//				sed_file_append(conf->name);
-	//				sed_file_append("|x86\n");
-	//			}
-	//		}
+			proj_contents.append("  <PropertyGroup Label=\"Globals\">\n");
+			proj_contents.append("    <VCProjectVersion>15.0</VCProjectVersion>\n");
+			proj_contents.append("    <ProjectGuid>{");
+			proj_contents.append(sol.projects.begin()->guid.str);
+			proj_contents.append("}</ProjectGuid>\n");
+			proj_contents.append("    <RootNamespace>");
+			proj_contents.append(sol.projects.begin()->name);
+			proj_contents.append("</RootNamespace>\n");
+			proj_contents.append("	  <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>\n");
+			proj_contents.append("  </PropertyGroup>\n");
 
-	//		sed_file_append("  EndGlobalSection\n");
+			proj_contents.append("<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n");
 
-	//		sed_file_append("  GlobalSection(SolutionProperties) = preSolution\n");
-	//		sed_file_append("    HideSolutionNode = FALSE\n");
-	//		sed_file_append("  EndGlobalSection\n");
+			for (auto &conf : proj.configs)
+			{
+				proj_contents.append("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)' == '");
+				proj_contents.append(conf.name);
+				proj_contents.append("|");
+				proj_contents.append(conf.display_name);
+				proj_contents.append("'\" Label=\"Configuration\">\n");
+				proj_contents.append("    <ConfigurationType>Application</ConfigurationType>\n");
+				proj_contents.append("    <UseDebugLibraries>true</UseDebugLibraries>\n");
+				proj_contents.append("    <PlatformToolset>v141</PlatformToolset>\n");
+				proj_contents.append("    <CharacterSet>MultiByte</CharacterSet>\n");
+				proj_contents.append("  </PropertyGroup>\n");
+			}
 
-	//		sed_file_append("  GlobalSection(ExtensibilityGlobals) = postSolution\n");
-	//		sed_file_append("    SolutionGuid = {");
-	//		sed_file_append(sol->guid.str);
-	//		sed_file_append("}\n");
-	//		sed_file_append("  EndGlobalSection\n");
+			proj_contents.append("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n");
 
-	//		sed_file_append("EndGlobal\n");
+			proj_contents.append("  <ImportGroup Label=\"ExtensionSettings\">\n");
+			proj_contents.append("  </ImportGroup>\n");
 
-	//		sed_file_close();
-	//	}
+			proj_contents.append("  <ImportGroup Label=\"Shared\">\n");
+			proj_contents.append("  </ImportGroup>\n");
 
-	//	/* projects */
-	//	{
-	//		int proj_count = sed_array_size(projs);
-	//		int p;
+			proj_contents.append("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n");
+			proj_contents.append("  <ImportGroup Label=\"ExtensionSettings\">\n");
+			proj_contents.append("  </ImportGroup>\n");
+			proj_contents.append("  <ImportGroup Label=\"Shared\">\n");
+			proj_contents.append("  </ImportGroup>\n");
 
-	//		int conf_count = sed_array_size(confs);
-	//		int c;
+			for (auto &conf : proj.configs)
+			{
+				proj_contents.append("  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)' == '");
+				proj_contents.append(conf.name);
+				proj_contents.append("|");
+				proj_contents.append(conf.display_name);
+				proj_contents.append("'\">\n");
 
-	//		for (p = 0; p < proj_count; ++p)
-	//		{
-	//			struct Project *proj = &projs[p];
+				proj_contents.append("    <Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" />\n");
+				proj_contents.append("  </ImportGroup>\n");
+			}
 
-	//			char *proj_filename = sed_string(proj->path);
-	//			proj_filename = sed_string_append(proj_filename, proj->name);
-	//			proj_filename = sed_string_append(proj_filename, ".vcxproj");
+			proj_contents.append("  <PropertyGroup Label=\"UserMacros\" />\n");
+			proj_contents.append("  <PropertyGroup />\n");
 
-	//			sed_mkdir(proj->path);
+			for (auto &conf : proj.configs)
+			{
+				proj_contents.append("  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)' == '");
+				proj_contents.append(conf.name);
+				proj_contents.append("|");
+				proj_contents.append(conf.display_name);
+				proj_contents.append("'\">\n");
 
-	//			sed_file_create(proj_filename);
+				proj_contents.append("    <ClCompile>\n");
+				proj_contents.append("      <WarningLevel>Level3</WarningLevel>\n");
+				proj_contents.append("      <Optimization>Disabled</Optimization>\n");
+				proj_contents.append("      <SDLCheck>true</SDLCheck>\n");
+				proj_contents.append("      <ConformanceMode>true</ConformanceMode>\n");
+				proj_contents.append("    </ClCompile>\n");
+				proj_contents.append("  <ItemDfinitionGroup>\n");
+			}
 
-	//			sed_file_append("<?xml version=\"1.0\" encoding=\"utf - 8\"?>\n");
-	//			sed_file_append("<Project DefaultTargets=\"Build\" ToolsVersion=\"15.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
+			proj_contents.append("  <ItemGroup>\n");
+			proj_contents.append("  </ItemGroup>\n");
+			proj_contents.append("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n");
+			proj_contents.append("  <ImportGroup Label=\"ExtensionTargets\">\n");
+			proj_contents.append("  </ImportGroup>\n");
 
-	//			/* project configs */
-	//			sed_file_append("  <ItemGroup Label=\"ProjectConfigurations\">\n");
-	//			sed_file_append("  </ItemGroup>\n");
+			proj_contents.append("</Project>\n");
+			proj_contents.append("");
 
-	//			/* globals */
-	//			sed_file_append("  <PropertyGroup Label=\"Globals\">\n");
-	//			sed_file_append("    <VCProjectVersion>15.0</VCProjectVersion>\n");
-	//			sed_file_append("    <ProjectGuid>{");
-	//			sed_file_append(proj->guid.str);
-	//			sed_file_append("}</ProjectGuid>\n");
-	//			sed_file_append("    <RootNamespace>");
-	//			sed_file_append(sol->name);
-	//			sed_file_append("</RootNamespace>\n");
-	//			sed_file_append("    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>\n");
-	//			sed_file_append("  </PropertyGroup>\n");
 
-	//			/* import */
-	//			sed_file_append("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n");
+			files.emplace_back(msvs_files{ proj.filename, proj.path, proj_contents });
+		}
 
-	//			/* configs */
-	//			sed_file_append("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)' == 'Debug|Win32'\" Label=\"Configuration\">\n");
-	//			
-	//			for (c = 0; c < conf_count; ++c)
-	//			{
-	//				sed_file_append("    <ConfigurationType>Application</ConfigurationType>\n");
-	//				sed_file_append("    <UseDebugLibraries>true</UseDebugLibraries>\n");
-	//				sed_file_append("    <PlatformToolset>v141</PlatformToolset>\n");
-	//				sed_file_append("    <CharacterSet>MultiByte</CharacterSet>\n");
-	//			}
+		/* project filters */
+		for (auto &proj : sol.projects)
+		{
+			std::string filter_contents;
 
-	//			sed_file_append("  </PropertyGroup>\n");
+			filter_contents.append("<?xml version=\"1.0\" encoding=\"utf - 8\"?>\n");
+			filter_contents.append("<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
 
-	//			/* globals */
-	//			sed_file_append("  <ItemGroup Label=\"Globals\">\n");
-	//			sed_file_append("  </ItemGroup>\n");
+			
 
-	//			/* import */
-	//			sed_file_append("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n");
+			filter_contents.append("</Project>\n");
+			
+			std::string name = proj.name + ".vcxproj.filters";
 
-	//			/* extension settings */
-	//			sed_file_append("  <ImportGroup Label=\"ExtensionSettings\">\n");
-	//			sed_file_append("  </ImportGroup>\n");
+			files.emplace_back(msvs_files{ name, proj.path, filter_contents });
+		}
 
-	//			/* shared */
-	//			sed_file_append("  <ImportGroup Label=\"Shared\">\n");
-	//			sed_file_append("  </ImportGroup>\n");
+		files.emplace_back(msvs_files{ sol.filename, sol.path, sol_contents });
+	}
 
-	//			/* config prop sheets */
+	/* write out files */
+	for (auto &file : files)
+	{
+		if (!std::experimental::filesystem::exists(file.path)) {
+			std::experimental::filesystem::create_directory(file.path);
+		}
 
-	//			for (c = 0; c < conf_count; ++c)
-	//			{
-	//				sed_file_append("  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)' == 'Debug|Win32'\">\n");
-	//				sed_file_append("    <Import Project=\"$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" />\n");
-	//				sed_file_append("  </ImportGroup>\n");
-	//			}
-	//			/* user macros */
-	//			sed_file_append("  <PropertyGroup Label=\"UserMacros\" />\n");
-	//			sed_file_append("  <PropertyGroup / >\n");
+		std::ofstream out_file;
+		out_file.open(file.path + file.filename);
 
-	//			/* config settings */
-
-	//			for (c = 0; c < conf_count; ++c)
-	//			{
-	//				sed_file_append("  <ItemDefinitionGroup Condition = \"'$(Configuration)|$(Platform)' == 'Debug|Win32'\">\n");
-	//				sed_file_append("    <ClCompile>\n");
-	//				sed_file_append("      <WarningLevel>Level3</WarningLevel>\n");
-	//				sed_file_append("      <Optimization>Disabled</Optimization>\n");
-	//				sed_file_append("      <SDLCheck>true</SDLCheck>\n");
-	//				sed_file_append("      <ConformanceMode>true</ConformanceMode>\n");
-	//				sed_file_append("    </ClCompile>\n");
-	//				sed_file_append("  </ItemDefinitionGroup>\n");
-	//			}
-
-	//			/* compile */
-	//			sed_file_append("  <ItemGroup>\n");
-	//			sed_file_append("    <ClCompile Include=\"main.cpp\" />\n");
-	//			sed_file_append("  </ItemGroup>\n");
-
-	//			/* includes */
-	//			sed_file_append("  <ItemGroup>\n");
-	//			sed_file_append("    <ClInclude Include=\"main.cpp\" />\n");
-	//			sed_file_append("  </ItemGroup>\n");
-
-	//			/* footer */
-	//			sed_file_append("  <Import Project = \"$(VCTargetsPath)\\Microsoft.Cpp.targets\"/>\n");
-	//			sed_file_append("  <ImportGroup Label = \"ExtensionTargets\">\n");
-	//			sed_file_append("  </ImportGroup>\n");
-	//			sed_file_append("</Project>\n");
-
-	//			sed_file_close();
-	//		}
-	//	}
-	//}
+		if (out_file.is_open())
+		{
+			out_file << file.contents;
+		}
+		out_file.close();
+	}
 }

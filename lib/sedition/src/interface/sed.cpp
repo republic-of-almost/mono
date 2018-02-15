@@ -16,6 +16,7 @@ namespace {
 	std::vector<Solution> solutions;
 	std::vector<Project> projects;
 	std::vector<Config> configs;
+	std::vector<File> files;
 
 	auto find_item = [](auto &container, int id_to_find)
 	{
@@ -102,7 +103,12 @@ sed_solution_add_config(int sol_id, int config_id)
 void
 sed_solution_set_path(int sol_id, const char *path)
 {
-
+	auto &sol = find_item(solutions, sol_id);
+	
+	if (sol != std::end(solutions))
+	{
+		sol->path = path;
+	}
 }
 
 
@@ -113,6 +119,7 @@ int
 sed_config_create(const char *name)
 {
 	configs.emplace_back(Config{});
+	configs.back().name = name;
 
 	return configs.back().id.value;
 }
@@ -159,6 +166,17 @@ sed_project_set_language(int proj_id, int lang)
 void
 sed_project_add_file(int proj_id, const char *file)
 {
+	auto &proj = find_item(projects, proj_id);
+
+	if (proj != std::end(projects))
+	{
+		File new_file;
+		new_file.path = file;
+		new_file.path = file;
+		new_file.type = 0;
+
+		/* add file */	
+	}	
 }
 
 
@@ -177,6 +195,12 @@ sed_project_add_library_dir(int proj_id, const char *dir)
 void
 sed_project_set_path(int proj_id, const char *path)
 {
+	auto &proj = find_item(projects, proj_id);
+
+	if (proj != std::end(projects))
+	{
+		proj->path = path;
+	}
 }
 
 
@@ -205,22 +229,34 @@ main()
 {
   /* testing */
 
-  int solution = sed_solution_create("FooSol");
+  int solution = sed_solution_create("TestSolution");
   sed_solution_set_path(solution, "../../../TestSolution/MyTest/");
 
-  int config = sed_config_create("DebugConfig");
+  int debug_config = sed_config_create("DebugConfig");
+  sed_solution_add_config(solution, debug_config);
 
-  int proj = sed_project_create("BarProj");
-  sed_project_set_path(proj, "../../../TestSolution/MyTest/BarProj/");
-  sed_project_set_language(proj, SED_LANG_C89);
-  sed_project_set_kind(proj, SED_KIND_CONSOLE_APP);
-  sed_project_add_file(proj, "../../src/foo.c");
-  sed_project_add_file(proj, "../../include/foo.h");
-  sed_project_add_include_dir(proj, "./include");
-  sed_project_add_library_dir(proj, "/usr/local");
+  int release_config = sed_config_create("ReleaseConfig");
+  sed_solution_add_config(solution, release_config);
 
-  sed_solution_add_config(solution, config);
-  sed_solution_add_project(solution, proj);
+  int first_project = sed_project_create("FirstProject");
+  sed_project_set_path(first_project, "../../../TestSolution/MyTest/BarProj/");
+  sed_project_set_language(first_project, SED_LANG_C89);
+  sed_project_set_kind(first_project, SED_KIND_CONSOLE_APP);
+  sed_project_add_file(first_project, "../../src/foo.c");
+  sed_project_add_file(first_project, "../../include/foo.h");
+  sed_project_add_include_dir(first_project, "./include");
+  sed_project_add_library_dir(first_project, "/usr/local");
+  sed_solution_add_project(solution, first_project);
+
+  int second_project = sed_project_create("SecondProject");
+  sed_project_set_path(second_project, "../../../TestSolution/MyTest/BazProj/");
+  sed_project_set_language(second_project, SED_LANG_C89);
+  sed_project_set_kind(second_project, SED_KIND_CONSOLE_APP);
+  sed_project_add_file(second_project, "../../src/foo.c");
+  sed_project_add_file(second_project, "../../include/foo.h");
+  sed_project_add_include_dir(second_project, "./include");
+  sed_project_add_library_dir(second_project, "/usr/local");
+  sed_solution_add_project(solution, second_project);
 
   sed_execute(SED_PLAT_OUTPUT_ONLY);
 
