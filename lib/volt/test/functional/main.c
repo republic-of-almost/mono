@@ -5,17 +5,17 @@
 #include <string.h>
 
 
+/* app stuff */
+GLFWwindow* window;
+void app_create();
+void app_destroy();
+ROA_BOOL app_tick();
+
+
 int
 main()
 {
-  glfwInit();
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-
-  GLFWwindow* window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
-  glfwMakeContextCurrent(window);
+  app_create();
 
   volt_ctx_t ctx = VOLT_NULL;
   volt_ctx_create(&ctx);
@@ -23,10 +23,10 @@ main()
   volt_vbo_t vbo = VOLT_NULL;
   volt_program_t program = VOLT_NULL;
   volt_input_t vert_input = VOLT_NULL;
+  volt_rasterizer_t rasterizer = VOLT_NULL;
 
   /* create some assets */
   {
-    /*  */
     float verts[] = {
       0.f, 0.5f, 1.0f, 0.0f, 0.0f,
       0.5f, -0.5f, 0.f, 1.f, 0.f,
@@ -84,7 +84,7 @@ main()
     volt_ctx_execute(ctx);
   }
 
-  while (!glfwWindowShouldClose(window))
+  while (app_tick())
   {
     static int count = 0;
     ++count;
@@ -94,6 +94,7 @@ main()
       volt_renderpass_t rp;
       volt_renderpass_create(ctx, &rp);
 
+	    volt_renderpass_bind_rasterizer(rp, rasterizer);
       volt_renderpass_bind_input_format(rp, vert_input);
       volt_renderpass_bind_vertex_buffer(rp, vbo);
       volt_renderpass_bind_program(rp, program);
@@ -104,15 +105,48 @@ main()
     }
 
     volt_ctx_execute(ctx);
-
-    glfwPollEvents();
-    glfwSwapBuffers(window);
   }
 
   volt_ctx_destroy(&ctx);
 
-  glfwDestroyWindow(window);
-  glfwTerminate();
+  app_destroy();
 
   return 0;
+}
+
+
+/* app details */
+
+
+void
+app_create()
+{
+	glfwInit();
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+
+	window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
+	glfwMakeContextCurrent(window);
+}
+
+
+ROA_BOOL
+app_tick()
+{
+	glfwPollEvents();
+	glfwSwapBuffers(window);
+
+	return glfwWindowShouldClose(window) ? ROA_FALSE : ROA_TRUE;
+}
+
+
+void
+app_destroy()
+{
+	glfwDestroyWindow(window);
+	glfwTerminate();
+
+	window = ROA_NULL;
 }

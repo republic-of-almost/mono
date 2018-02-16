@@ -217,13 +217,34 @@ struct volt_pending_program {
 };
 
 
+struct volt_gl_stream
+{
+  uint8_t *stream;
+  unsigned count;
+  unsigned capacity;
+};
+
+
+void*
+volt_gl_stream_alloc(volt_gl_stream *stream, unsigned bytes)
+{
+
+}
+
+void
+volt_gl_stream_clear(volt_gl_stream *stream)
+{
+
+}
+
+
 struct volt_ctx
 {
   GLuint vao;
 
-  /* buffer */ uint8_t *resource_create_stream;
-  /* buffer */ uint8_t *render_stream;
-  /* buffer */ uint8_t *resource_destroy_stream;
+  /* buffer */ volt_gl_stream *resource_create_stream;
+  /* buffer */ volt_gl_stream *render_stream;
+  /* buffer */ volt_gl_stream *resource_destroy_stream;
 
   /* array */ struct volt_pending_vbo *pending_create_vbo_desc;
   /* array */ struct volt_pending_ibo *pending_create_ibo_desc;
@@ -235,11 +256,19 @@ struct volt_ctx
 
 struct volt_renderpass
 {
-  /* cache */
+  /* next to bind */
   volt_vbo_t curr_vbo;
   volt_ibo_t curr_ibo;
   volt_input_t curr_input;
   volt_program_t curr_program;
+  volt_rasterizer_t curr_rasterizer;
+
+  /* last bound */
+  volt_vbo_t last_bound_vbo;
+  volt_ibo_t last_bound_ibo;
+  volt_input_t last_bound_input;
+  volt_program_t last_bound_program;
+  volt_rasterizer_t last_bound_rasterizer;
 
   /* array */ uint8_t *render_stream;
 };
@@ -381,6 +410,7 @@ volt_rasterizer_create(
   volt_rasterizer_t *rasterizer,
   struct volt_rasterizer_desc *desc)
 {
+  /* param check */
   ROA_ASSERT(ctx);
   ROA_ASSERT(rasterizer);
   ROA_ASSERT(desc);
@@ -396,9 +426,7 @@ volt_renderpass_create(
   volt_renderpass_t *pass)
 {
   volt_renderpass_t rp = (volt_renderpass_t)roa_zalloc(sizeof(*rp));
-
-  roa_array_create(rp->draw_calls, 128);
-  roa_array_push(rp->draw_calls, volt_draw_call{});
+  rp->render_stream = ctx->render_stream;
 
   *pass = rp;
 }
@@ -409,14 +437,7 @@ volt_renderpass_commit(
   volt_ctx_t ctx,
   volt_renderpass_t *pass)
 {
-  unsigned size = roa_array_size((*pass)->draw_calls);
-
-  if(size > 0)
-  {
-    roa_array_erase((*pass)->draw_calls, size - 1);
-  }
-
-  roa_array_push(ctx->renderpasses, *pass);
+  roa_free(*pass);
   *pass = ROA_NULL;
 }
 
@@ -426,7 +447,10 @@ volt_renderpass_bind_rasterizer(
   volt_renderpass_t pass,
   volt_rasterizer_t rasterizer)
 {
-
+  if (pass->curr_rasterizer != rasterizer)
+  {
+    pass->curr_rasterizer = rasterizer;
+  }
 }
 
 
@@ -435,7 +459,10 @@ volt_renderpass_bind_input_format(
   volt_renderpass_t pass,
   volt_input_t input)
 {
-  pass->curr_input = input;
+  if (pass->curr_input != input)
+  {
+    pass->curr_input = input;
+  }
 }
 
 
@@ -444,7 +471,11 @@ volt_renderpass_bind_vertex_buffer(
   volt_renderpass_t pass,
   volt_vbo_t vbo)
 {
-  pass->curr_vbo = vbo;
+  if (pass->curr_vbo != vbo)
+  {
+    pass->curr_vbo = vbo;
+    pass->last_bound_input = VOLT_NULL;
+  }
 }
 
 
@@ -453,7 +484,10 @@ volt_renderpass_bind_index_buffer(
   volt_renderpass_t pass,
   volt_ibo_t ibo)
 {
-  pass->curr_ibo = ibo;
+  if (pass->curr_ibo != ibo)
+  {
+    pass->curr_ibo = ibo;
+  }
 }
 
 
@@ -462,7 +496,10 @@ volt_renderpass_bind_program(
   volt_renderpass_t pass,
   volt_program_t program)
 {
-  pass->curr_program = program;
+  if (pass->curr_program != program)
+  {
+    pass->curr_program = program;
+  }
 }
 
 
@@ -472,32 +509,91 @@ volt_renderpass_draw(volt_renderpass_t pass)
   /* param */
   ROA_ASSERT(pass);
 
-  /* build the draw call */
-  volt_draw_call *dc = roa_array_back(pass->draw_calls);
-
-  ROA_ASSERT(pass->curr_program);
-
-  if(pass->curr_program)
+  /* bind any changes that are required */
+  if (pass->curr_vbo != pass->last_bound_vbo)
   {
-    dc->program = pass->curr_program->program;
+    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->vbo : 0;
+
+    volt_gl_cmd_bind_vbo *cmd = ROA_NULL;
+
+    unsigned curr_stream_size = roa_array_size(pass->render_stream);
+    roa_array_resize(pass->render_stream, curr_stream_size += sizeof(*cmd));
+
+    cmd = (volt_gl_cmd_bind_vbo *)pass->render_stream[curr_stream_size];
+  
+    cmd->id = volt_gl_cmd_id::bind_vbo;
+    cmd->vbo = vbo;
+
+    pass->last_bound_vbo = pass->curr_vbo;
   }
 
-  if(pass->curr_vbo)
+  if (pass->curr_ibo != pass->last_bound_ibo)
   {
-    ROA_ASSERT(pass->curr_input);
+    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->ibo : 0;
 
-    dc->input_fmt = *pass->curr_input;
-    dc->vbo = pass->curr_vbo->vbo;
+    volt_gl_cmd_bind_ibo cmd {
+      volt_gl_cmd_id::bind_ibo,
+      ibo,
+    };
+
+    pass->last_bound_ibo = pass->curr_ibo;
+
   }
 
-  if(pass->curr_ibo)
+  if (pass->curr_input != pass->last_bound_input)
   {
-    ROA_ASSERT(pass->curr_vbo);
+    if (pass->curr_input)
+    {
+      int input_count = pass->curr_input->count;
 
-    dc->ibo = pass->curr_ibo->ibo;
+      for (int i = 0; i < input_count; ++i)
+      {
+        GLuint index = i;
+        GLint size = pass->curr_input->attrib_count[i];
+        GLenum type = GL_FLOAT;
+        GLboolean normalized = GL_FALSE;
+        GLsizei stride = pass->curr_input->full_stride;
+        const GLvoid *pointer = &pass->curr_input->increment_stride[i];
+
+        volt_gl_cmd_bind_input cmd{
+          volt_gl_cmd_id::bind_input,
+          index,
+          size,
+          type,
+          normalized,
+          stride,
+          pointer,
+        };
+      }
+    }
+
+    pass->last_bound_input = pass->curr_input;
   }
 
-  roa_array_push(pass->draw_calls, volt_draw_call{});
+  if (pass->curr_program != pass->last_bound_program)
+  {
+    const GLuint program = pass->curr_program ? pass->curr_program->program : 0;
+
+    volt_gl_cmd_bind_program cmd{
+      volt_gl_cmd_id::bind_ibo,
+      program,
+    };
+
+    pass->last_bound_program = pass->curr_program;
+  }
+
+  if (pass->curr_rasterizer != pass->last_bound_rasterizer)
+  {
+
+  }
+
+  volt_gl_cmd_draw_count cmd
+  {
+    volt_gl_cmd_id::draw_count,
+    GL_TRIANGLES,
+    0,
+    3,
+  };
 }
 
 
@@ -632,7 +728,11 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
 static void
 volt_gl_create_input(const volt_gl_cmd_create_input *cmd)
 {
+  /* param check */
   ROA_ASSERT(cmd);
+  ROA_ASSERT(cmd->input);
+
+  /* prepare */
 }
 
 
