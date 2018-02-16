@@ -86,7 +86,7 @@ struct volt_gl_cmd_create_input
 /* ---------------------------------------- [ gl renderpass cmd structs ] -- */
 
 
-struct volt_bind_vbo
+struct volt_gl_cmd_bind_vbo
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_vbo */
 
@@ -94,7 +94,7 @@ struct volt_bind_vbo
 };
 
 
-struct volt_bind_ibo
+struct volt_gl_cmd_bind_ibo
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_ibo */
 
@@ -102,18 +102,20 @@ struct volt_bind_ibo
 };
 
 
-struct volt_bind_input
+struct volt_gl_cmd_bind_input
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_input */
 
-  GLuint increment_stride;
-  GLint attrib_count;
-  GLsizei full_stride;
-  GLuint count;
+  GLuint index;
+  GLint size;
+  GLenum type;
+  GLboolean normalized;
+  GLsizei stride;
+  const GLvoid *pointer;
 };
 
 
-struct volt_bind_program
+struct volt_gl_cmd_bind_program
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::create_program */
 
@@ -121,17 +123,17 @@ struct volt_bind_program
 };
 
 
-struct volt_bind_draw_count
+struct volt_gl_cmd_draw_count
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::draw_count */
 
   GLenum mode;
-  GLuint start;
-  GLuint count;
+  GLint first;
+  GLsizei count;
 };
 
 
-struct volt_bind_draw_indexed
+struct volt_gl_cmd_draw_indexed
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::draw_indexed */
 
@@ -148,6 +150,14 @@ struct volt_bind_draw_indexed
 struct volt_program
 {
   GLuint program;
+};
+
+
+struct volt_rasterizer
+{
+  GLenum prim;
+  GLenum winding_order;
+  GLenum culling_mode;
 };
 
 
@@ -362,6 +372,21 @@ volt_program_create(
 }
 
 
+/* -------------------------------------------------- [ rsrc rasterizer ] -- */
+
+
+void
+volt_rasterizer_create(
+  volt_ctx_t ctx,
+  volt_rasterizer_t *rasterizer,
+  struct volt_rasterizer_desc *desc)
+{
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(rasterizer);
+  ROA_ASSERT(desc);
+}
+
+
 /* ------------------------------------------------------- [ renderpass ] -- */
 
 
@@ -393,6 +418,15 @@ volt_renderpass_commit(
 
   roa_array_push(ctx->renderpasses, *pass);
   *pass = ROA_NULL;
+}
+
+
+void
+volt_renderpass_bind_rasterizer(
+  volt_renderpass_t pass,
+  volt_rasterizer_t rasterizer)
+{
+
 }
 
 
@@ -466,7 +500,8 @@ volt_renderpass_draw(volt_renderpass_t pass)
   roa_array_push(pass->draw_calls, volt_draw_call{});
 }
 
-/* --------------------------------------------------- [ gl cmd actions ] -- */
+
+/* --------------------------------------- [ gl cmd create rsrc actions ] -- */
 
 
 static void
@@ -601,6 +636,95 @@ volt_gl_create_input(const volt_gl_cmd_create_input *cmd)
 }
 
 
+/* ---------------------------------------- [ gl cmd renderpass actions ] -- */
+
+
+static void
+volt_gl_bind_vbo(const volt_gl_cmd_bind_vbo *cmd)
+{
+  ROA_ASSERT_PEDANTIC(cmd);
+  ROA_ASSERT_PEDANTIC(cmd->vbo);
+
+  const GLenum target = GL_ARRAY_BUFFER;
+  const GLuint buffer = cmd->vbo;
+
+  glBindBuffer(target, buffer);
+}
+
+
+static void
+volt_gl_bind_ibo(const volt_gl_cmd_bind_ibo *cmd)
+{
+  ROA_ASSERT_PEDANTIC(cmd);
+  ROA_ASSERT_PEDANTIC(cmd->ibo);
+
+  const GLenum target = GL_ELEMENT_ARRAY_BUFFER;
+  const GLuint buffer = cmd->ibo;
+
+  glBindBuffer(target, buffer);
+}
+
+
+static void
+volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
+{
+  ROA_ASSERT_PEDANTIC(cmd);
+  ROA_ASSERT_PEDANTIC(cmd->program);
+
+  const GLuint program = cmd->program;
+
+  glUseProgram(program);
+}
+
+
+static void
+volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
+{
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  const GLuint index = cmd->index;
+  const GLint size = cmd->size;
+  const GLenum type = cmd->type;
+  const GLboolean normalized = cmd->normalized;
+  const GLsizei stride = cmd->stride;
+  const GLvoid *pointer = cmd->pointer;
+
+  glEnableVertexAttribArray(index);
+  glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+}
+
+
+static void
+volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
+{
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  const GLenum mode = cmd->mode;
+  const GLint first = cmd->first;
+  const GLsizei count = cmd->count;
+
+  glDrawArrays(mode, first, count);
+}
+
+
+static void
+volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
+{
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  const GLenum mode = cmd->mode;
+  const GLsizei count = cmd->count;
+  const GLenum type = cmd->type;
+  const GLvoid *indices = cmd->indices;
+
+  glDrawElements(mode, count, type, indices);
+}
+
+
+/* -------------------------------------- [ gl cmd destroy rsrc actions ] -- */
+
+
+
 /* --------------------------------------------------------- [ lifetime ] -- */
 
 
@@ -651,37 +775,38 @@ volt_ctx_execute(volt_ctx_t ctx)
     const uint8_t *next = ctx->resource_create_stream;
     const unsigned bytes = roa_array_size(next);
 
-    while(next < next + bytes)
+    while (next < next + bytes)
     {
       const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)next;
+      ROA_ASSERT(uk_cmd);
 
       switch (uk_cmd->id)
       {
         case(volt_gl_cmd_id::create_buffer_vbo):
         {
           const volt_gl_cmd_create_vbo *cmd = (const volt_gl_cmd_create_vbo*)uk_cmd;
-          next += sizeof(volt_gl_cmd_create_vbo);
+          next += sizeof(*cmd);
           volt_gl_create_vbo(cmd);
           break;
         }
         case(volt_gl_cmd_id::create_buffer_ibo):
         {
           const volt_gl_cmd_create_ibo *cmd = (const volt_gl_cmd_create_ibo*)uk_cmd;
-          next += sizeof(volt_gl_cmd_create_ibo);
+          next += sizeof(*cmd);
           volt_gl_create_ibo(cmd);
           break;
         }
         case(volt_gl_cmd_id::create_buffer_input):
         {
           const volt_gl_cmd_create_input *cmd = (const volt_gl_cmd_create_input*)uk_cmd;
-          next += sizeof(volt_gl_cmd_create_input);
+          next += sizeof(*cmd);
           volt_gl_create_input(cmd);
           break;
         }
         case(volt_gl_cmd_id::create_program):
         {
           const volt_gl_cmd_create_program *cmd = (const volt_gl_cmd_create_program*)uk_cmd;
-          next += sizeof(volt_gl_cmd_create_program);
+          next += sizeof(*cmd);
           volt_gl_create_program(cmd);
           break;
         }
@@ -693,8 +818,72 @@ volt_ctx_execute(volt_ctx_t ctx)
   }
 
   /* execute render stream */
+  {
+    const uint8_t *next = ctx->render_stream;
+    const unsigned bytes = roa_array_size(next);
+
+    while (next < next + bytes)
+    {
+      const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)next;
+      ROA_ASSERT(uk_cmd);
+
+      switch (uk_cmd->id)
+      {
+        case(volt_gl_cmd_id::bind_vbo):
+        {
+          const volt_gl_cmd_bind_vbo *cmd = (const volt_gl_cmd_bind_vbo*)uk_cmd;
+          next += sizeof(*cmd);
+          volt_gl_bind_vbo(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::bind_ibo):
+        {
+          const volt_gl_cmd_bind_ibo *cmd = (const volt_gl_cmd_bind_ibo*)uk_cmd;
+          next += sizeof(*cmd);
+          volt_gl_bind_ibo(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::bind_program):
+        {
+          const volt_gl_cmd_bind_program *cmd = (const volt_gl_cmd_bind_program*)uk_cmd;
+          next += sizeof(*cmd);
+          volt_gl_bind_program(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::bind_input):
+        {
+          const volt_gl_cmd_bind_input *cmd = (const volt_gl_cmd_bind_input*)uk_cmd;
+          next += sizeof(*cmd);
+          volt_gl_bind_input(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::draw_count):
+        {
+          const volt_gl_cmd_draw_count *cmd = (const volt_gl_cmd_draw_count*)uk_cmd;
+          next += sizeof(*cmd);
+          volt_gl_draw_count(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::draw_indexed):
+        {
+          const volt_gl_cmd_draw_indexed *cmd = (const volt_gl_cmd_draw_indexed*)uk_cmd;
+          next += sizeof(*cmd);
+          volt_gl_draw_indexed(cmd);
+          break;
+        }
+        default:
+          /* only renderpass cmds should be here */
+          ROA_ASSERT(false);
+      }
+    }
+  }
 
   /* destroy resource stream */
+  {
+    const uint8_t *next = ctx->resource_destroy_stream;
+    const unsigned bytes = roa_array_size(next);
+
+  }
 }
 
 

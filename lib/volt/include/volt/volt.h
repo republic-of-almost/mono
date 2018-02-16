@@ -17,6 +17,7 @@ typedef struct volt_ibo * volt_ibo_t;
 typedef struct volt_texture * volt_texture_t;
 typedef struct volt_input * volt_input_t;
 typedef struct volt_program * volt_program_t;
+typedef struct volt_rasterizer * volt_rasterizer_t;
 
 
 #define VOLT_NULL 0
@@ -135,6 +136,42 @@ volt_program_create(
   struct volt_program_desc *desc);
 
 
+/* -------------------------------------------------- [ rsrc rasterizer ] -- */
+
+
+typedef enum _volt_primitive_type {
+  VOLT_PRIM_TRIANGLES,
+  VOLT_PRIM_POINT,
+} volt_primitive_type;
+
+
+typedef enum _volt_winding_order {
+  VOLT_WIND_CCW,
+  VOLT_WIND_CW,
+} volt_winding_order;
+
+
+typedef enum _volt_cull_mode {
+  VOLT_CULL_BACK,
+  VOLT_CULL_FRONT,
+} volt_cull_mode;
+
+
+struct volt_rasterizer_desc
+{
+  volt_primitive_type primitive_type;
+  volt_winding_order winding_order;
+  volt_cull_mode cull_mode;
+};
+
+
+void
+volt_rasterizer_create(
+  volt_ctx_t ctx,
+  volt_rasterizer_t *rasterizer,
+  struct volt_rasterizer_desc *desc);
+
+
 /* ------------------------------------------------------- [ renderpass ] -- */
 
 
@@ -148,6 +185,12 @@ void
 volt_renderpass_commit(
   volt_ctx_t ctx,
   volt_renderpass_t *pass);
+
+
+void
+volt_renderpass_bind_rasterizer(
+  volt_renderpass_t pass,
+  volt_rasterizer_t rasterizer);
 
 
 void
