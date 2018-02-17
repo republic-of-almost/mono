@@ -1,5 +1,6 @@
 
 #include <GLFW/glfw3.h>
+
 #include <volt/volt.h>
 #include <roa_lib/fundamental.h>
 #include <string.h>
@@ -21,25 +22,59 @@ main()
   volt_ctx_create(&ctx);
 
   volt_vbo_t vbo = VOLT_NULL;
+  volt_ibo_t ibo = VOLT_NULL;
+  volt_texture_t texture_1 = VOLT_NULL;
+  volt_texture_t texture_2 = VOLT_NULL;
   volt_program_t program = VOLT_NULL;
   volt_input_t vert_input = VOLT_NULL;
   volt_rasterizer_t rasterizer = VOLT_NULL;
 
   /* create some assets */
   {
+    /* textures */
+    struct volt_texture_desc tex_desc_1;
+    tex_desc_1.dimentions = VOLT_TEXTURE_2D;
+    tex_desc_1.format = VOLT_COLOR_RGB;
+    tex_desc_1.mip_maps = VOLT_FALSE;
+    tex_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
+
+    struct volt_texture_desc tex_desc_2;
+    tex_desc_2.dimentions = VOLT_TEXTURE_2D;
+    tex_desc_2.format = VOLT_COLOR_RGB;
+    tex_desc_2.mip_maps = VOLT_FALSE;
+    tex_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
+
+    volt_texture_create(ctx, &texture_1, &tex_desc_1);
+    volt_texture_create(ctx, &texture_2, &tex_desc_2);
+
+    /* vbo */
     float verts[] = {
-      0.f, 0.5f, 1.0f, 0.0f, 0.0f,
-      0.5f, -0.5f, 0.f, 1.f, 0.f,
-      -0.5f, -0.5f, 0.f, 0.f, 1.f,
+      -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
+      0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
+      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
+      -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // Bottom-left
     };
 
-    struct volt_vbo_desc desc;
-    desc.data = ROA_ARR_DATA(verts);
-    desc.count = ROA_ARR_COUNT(verts);
+    struct volt_vbo_desc vbo_desc;
+    vbo_desc.data = ROA_ARR_DATA(verts);
+    vbo_desc.count = ROA_ARR_COUNT(verts);
 
-    volt_vertex_buffer_create(ctx, &vbo, &desc);
+    volt_vertex_buffer_create(ctx, &vbo, &vbo_desc);
+
+    /* ibo */
+    unsigned index[] = {
+      0,1,2,
+      2,3,0
+    };
+
+    struct volt_ibo_desc ibo_desc;
+    ibo_desc.data = ROA_ARR_DATA(index);
+    ibo_desc.count = ROA_ARR_COUNT(index);
+
+    volt_index_buffer_create(ctx, &ibo, &ibo_desc);
 
     const char *vert_src = ""
+      "/* Vert */\n"
       "#version 400 core\n"
 
       "layout(location=0) in vec2 position;\n"
@@ -52,6 +87,7 @@ main()
       "}\n";
 
     const char* frag_src = ""
+      "/* Frag */\n"
       "#version 400 core\n"
       "in vec3 Color;\n"
       "out vec4 outColor;\n"
@@ -97,6 +133,7 @@ main()
 	    volt_renderpass_bind_rasterizer(rp, rasterizer);
       volt_renderpass_bind_input_format(rp, vert_input);
       volt_renderpass_bind_vertex_buffer(rp, vbo);
+      volt_renderpass_bind_index_buffer(rp, ibo);
       volt_renderpass_bind_program(rp, program);
 
       volt_renderpass_draw(rp);
@@ -129,6 +166,8 @@ app_create()
 
 	window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
 	glfwMakeContextCurrent(window);
+
+  printf("OpenGL version is (%s)\n", glGetString(GL_VERSION));
 }
 
 

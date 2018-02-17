@@ -61,7 +61,10 @@ table.insert(
     },
 
     project_dependencies = {
+      -- First Party --
       "Volt",
+      -- Third Party --
+      "STB",
       "GLFW",
     },
   }

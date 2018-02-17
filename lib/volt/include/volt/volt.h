@@ -18,9 +18,15 @@ typedef struct volt_texture * volt_texture_t;
 typedef struct volt_input * volt_input_t;
 typedef struct volt_program * volt_program_t;
 typedef struct volt_rasterizer * volt_rasterizer_t;
+typedef struct volt_texture * volt_texture_t;
 
 
 #define VOLT_NULL 0
+
+typedef int VOLT_BOOL;
+
+#define VOLT_TRUE 1
+#define VOLT_FALSE 0
 
 
 /* --------------------------------------------------------- [ lifetime ] -- */
@@ -47,6 +53,37 @@ typedef enum _volt_resource_status {
   VOLT_RSRC_VALID,
   VOLT_RSRC_PENDING_DESTROY,
 } volt_resource_status;
+
+
+/* ----------------------------------------------------- [ rsrc texture ] -- */
+
+
+typedef enum _volt_color_format {
+  VOLT_COLOR_RGB,
+} volt_color_format;
+
+
+typedef enum _volt_texture_dimentions {
+  VOLT_TEXTURE_2D,
+} volt_texture_dimentions;
+
+
+typedef enum _volt_texture_sampling {
+  VOLT_SAMPLING_BILINEAR,
+} volt_texture_sampling;
+
+
+struct volt_texture_desc
+{
+  volt_texture_dimentions dimentions;
+  volt_texture_sampling sampling;
+  volt_color_format format;
+  VOLT_BOOL mip_maps;
+
+  void *data;
+  unsigned width;
+  unsigned height;
+};
 
 
 /* ------------------------------------------------------- [ rsrc input ] -- */
