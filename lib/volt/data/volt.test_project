@@ -50,6 +50,10 @@ table.insert(
     language = "C89",
     location = make.get_proj_root(),
 
+    assets = {
+      "../assets/",
+      },
+
     src_files = {
       make.add_headers(make.get_proj_root() .. "../test/functional/"),
       make.add_src(make.get_proj_root() .. "../test/functional/"),

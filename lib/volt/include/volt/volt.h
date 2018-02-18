@@ -60,6 +60,7 @@ typedef enum _volt_resource_status {
 
 typedef enum _volt_color_format {
   VOLT_COLOR_RGB,
+  VOLT_COLOR_RGBA
 } volt_color_format;
 
 
@@ -84,6 +85,13 @@ struct volt_texture_desc
   unsigned width;
   unsigned height;
 };
+
+
+void
+volt_texture_create(
+  volt_ctx_t ctx,
+  volt_texture_t *texture,
+  struct volt_texture_desc *desc);
 
 
 /* ------------------------------------------------------- [ rsrc input ] -- */
@@ -247,6 +255,11 @@ volt_renderpass_bind_index_buffer(
   volt_renderpass_t pass,
   volt_ibo_t ibo);
 
+void
+volt_renderpass_bind_texture_buffer(
+  volt_renderpass_t pass,
+  volt_texture_t texture,
+  const char *location);
 
 void
 volt_renderpass_bind_program(

@@ -486,6 +486,7 @@ make.create_solution(solution_data, project_defaults, projects)
         if(asset_proj.assets) then
           for k, asset_dir in ipairs(asset_proj.assets) do
             if asset_dir then
+              print(asset_dir)
               copy_files(asset_dir, make.get_proj_root() .. "../../output/")
             end
           end

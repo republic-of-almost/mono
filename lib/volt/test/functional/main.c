@@ -1,8 +1,9 @@
 
 #include <GLFW/glfw3.h>
-
+#include <stb/stb_image.h>
 #include <volt/volt.h>
 #include <roa_lib/fundamental.h>
+#include <roa_lib/assert.h>
 #include <string.h>
 
 
@@ -31,28 +32,52 @@ main()
 
   /* create some assets */
   {
+    int x,y,n;
+
     /* textures */
     struct volt_texture_desc tex_desc_1;
     tex_desc_1.dimentions = VOLT_TEXTURE_2D;
-    tex_desc_1.format = VOLT_COLOR_RGB;
     tex_desc_1.mip_maps = VOLT_FALSE;
     tex_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
 
+    tex_desc_1.data = (void*)stbi_load(
+      "C:/Users/SimStim/Developer/mono/lib/volt/assets/volt_func/dev_tex_01.png",
+      &x,
+      &y,
+      &n,
+      0
+    );
+
+    tex_desc_1.width = x;
+    tex_desc_1.height = y;
+    tex_desc_1.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
+
     struct volt_texture_desc tex_desc_2;
     tex_desc_2.dimentions = VOLT_TEXTURE_2D;
-    tex_desc_2.format = VOLT_COLOR_RGB;
     tex_desc_2.mip_maps = VOLT_FALSE;
     tex_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
+
+    tex_desc_2.data = (void*)stbi_load(
+      "C:/Users/SimStim/Developer/mono/lib/volt/assets/volt_func/dev_tex_02.png",
+      &x,
+      &y,
+      &n,
+      0
+    );
+
+    tex_desc_2.width = x;
+    tex_desc_2.height = y;
+    tex_desc_2.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
 
     volt_texture_create(ctx, &texture_1, &tex_desc_1);
     volt_texture_create(ctx, &texture_2, &tex_desc_2);
 
     /* vbo */
     float verts[] = {
-      -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
-      0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
-      -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // Bottom-left
+      -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+      0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
+      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+      -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
     };
 
     struct volt_vbo_desc vbo_desc;
@@ -79,10 +104,14 @@ main()
 
       "layout(location=0) in vec2 position;\n"
       "layout(location=1) in vec3 color;\n"
+      "layout(location=2) in vec2 texcoord;\n"
 
       "out vec3 Color;\n"
+      "out vec2 Texcoord;\n"
+
       "void main() {\n"
         "Color = color;\n"
+        "Texcoord = texcoord;\n"
         "gl_Position = vec4(position, 0.0, 1.0);\n"
       "}\n";
 
@@ -90,10 +119,16 @@ main()
       "/* Frag */\n"
       "#version 400 core\n"
       "in vec3 Color;\n"
+      "in vec2 Texcoord;\n"
+
+      "uniform sampler2D texKitten;\n"
+      "uniform sampler2D texPuppy;\n"
+
       "out vec4 outColor;\n"
+
       "void main()\n"
       "{\n"
-        "outColor = vec4(Color, 1.0);\n"
+        "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5);\n"
       "}\n";
 
     const char **stages[2] = {vert_src, frag_src};
@@ -109,16 +144,25 @@ main()
     volt_input_attribute input_fmt[] = {
       VOLT_INPUT_FLOAT2,
       VOLT_INPUT_FLOAT3,
+      VOLT_INPUT_FLOAT2,
     };
 
     struct volt_input_desc input_desc;
     input_desc.attributes = ROA_ARR_DATA(input_fmt);
-    input_desc.count = ROA_ARR_COUNT(input_fmt);
+    input_desc.count      = ROA_ARR_COUNT(input_fmt);
 
     volt_input_create(ctx, &vert_input, &input_desc);
 
     volt_ctx_execute(ctx);
   }
+
+  /* app check */
+  ROA_ASSERT(vbo);
+  ROA_ASSERT(ibo);
+  ROA_ASSERT(vert_input);
+  ROA_ASSERT(program);
+  ROA_ASSERT(texture_1);
+  ROA_ASSERT(texture_2);
 
   while (app_tick())
   {
@@ -130,12 +174,20 @@ main()
       volt_renderpass_t rp;
       volt_renderpass_create(ctx, &rp);
 
-	    volt_renderpass_bind_rasterizer(rp, rasterizer);
-      volt_renderpass_bind_input_format(rp, vert_input);
-      volt_renderpass_bind_vertex_buffer(rp, vbo);
-      volt_renderpass_bind_index_buffer(rp, ibo);
+      /* bind program */
       volt_renderpass_bind_program(rp, program);
 
+      /* bind buffers */
+      volt_renderpass_bind_vertex_buffer(rp, vbo);
+      volt_renderpass_bind_index_buffer(rp, ibo);
+      volt_renderpass_bind_texture_buffer(rp, texture_1, "texKitten");
+      volt_renderpass_bind_texture_buffer(rp, texture_2, "texPuppy");
+
+      /* bind formatting */
+      volt_renderpass_bind_input_format(rp, vert_input);
+      volt_renderpass_bind_rasterizer(rp, rasterizer);
+
+      /* draw */
       volt_renderpass_draw(rp);
 
       volt_renderpass_commit(ctx, &rp);

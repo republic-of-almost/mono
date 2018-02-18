@@ -12,6 +12,26 @@
 #include <cstdint>
 
 
+/* ----------------------------------------------------------- [ common ] -- */
+
+
+/* https://stackoverflow.com/questions/2535284/how-can-i-hash-a-string-to-an-int-using-c#13487193 */
+/* test this, attributes or remove */
+uint64_t
+hash(const char *name)
+{
+  uint64_t hash = 5381;
+
+  int c;
+  while (c = *name++)
+  {
+    hash = ((hash << 5) + hash) + c;
+  }
+
+  return hash;
+}
+
+
 /* ------------------------------------------------------ [ gl commands ] -- */
 
 
@@ -25,6 +45,7 @@ enum class volt_gl_cmd_id
   create_buffer_ibo,
   create_buffer_vbo,
   create_buffer_input,
+  create_buffer_texture,
   
   /* renderpass */
 
@@ -32,6 +53,7 @@ enum class volt_gl_cmd_id
   bind_vbo,
   bind_ibo,
   bind_input,
+  bind_texture,
 
   draw_count,
   draw_indexed,
@@ -124,6 +146,16 @@ struct volt_gl_cmd_bind_input
 };
 
 
+struct volt_gl_cmd_bind_texture
+{
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_texture */
+  
+  GLuint gl_id;
+  GLint active_texture;
+  GLint sampler_location;
+};
+
+
 struct volt_gl_cmd_bind_program
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::create_program */
@@ -159,6 +191,29 @@ struct volt_gl_cmd_draw_indexed
 struct volt_program
 {
   GLuint program;
+
+  struct volt_program_sampler
+  {
+    GLenum type;
+    GLint size;
+    GLint location;
+  };
+
+  uint64_t sampler_keys[16];
+  volt_program_sampler samplers[16];
+  unsigned sampler_count;
+
+  struct volt_program_uniform
+  {
+    GLenum type;
+    GLint size;
+    GLint location;
+  };
+
+  uint64_t uniform_keys[32];
+  volt_program_uniform uniforms[32];
+  unsigned uniform_count;
+  
 };
 
 
@@ -174,6 +229,7 @@ struct volt_texture
 {
   GLuint gl_id;
   GLenum target;
+  GLenum format;
 };
 
 
@@ -197,35 +253,6 @@ struct volt_input
   GLint attrib_count[12];
   GLsizei full_stride;
   GLuint count;
-};
-
-
-struct volt_draw_call
-{
-  GLuint program;
-  GLuint vbo;
-  GLuint ibo;
-  GLint texture[3];
-
-  volt_input input_fmt;
-};
-
-
-struct volt_pending_vbo {
-  volt_vbo_t vbo;
-  volt_vbo_desc desc;
-};
-
-
-struct volt_pending_ibo {
-  volt_ibo_t ibo;
-  volt_ibo_desc desc;
-};
-
-
-struct volt_pending_program {
-  volt_program_t program;
-  volt_program_desc desc;
 };
 
 
@@ -292,6 +319,10 @@ struct volt_renderpass
   volt_program_t curr_program;
   volt_rasterizer_t curr_rasterizer;
 
+  /* samplers */
+  uint64_t sampler_hash[32];
+  volt_texture_t samplers[32];
+
   /* last bound */
   volt_vbo_t last_bound_vbo;
   volt_ibo_t last_bound_ibo;
@@ -301,6 +332,35 @@ struct volt_renderpass
 
   /* array */ volt_gl_stream *render_stream;
 };
+
+
+/* ----------------------------------------------------- [ rsrc texture ] -- */
+
+
+void
+volt_texture_create(
+  volt_ctx_t ctx,
+  volt_texture_t *texture,
+  volt_texture_desc *desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(texture);
+  ROA_ASSERT(desc);
+
+  /* prepare */
+  volt_texture_t new_texture = (volt_texture_t)roa_zalloc(sizeof(*new_texture));
+
+  *texture = new_texture;
+
+  /* submit cmd */
+  volt_gl_stream *stream = &ctx->resource_create_stream;
+  volt_gl_cmd_create_texture *cmd = (volt_gl_cmd_create_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+  cmd->id      = volt_gl_cmd_id::create_buffer_texture;
+  cmd->desc    = *desc;
+  cmd->texture = *texture;
+}
 
 
 /* ------------------------------------------------------- [ rsrc input ] -- */
@@ -366,18 +426,13 @@ volt_vertex_buffer_create(
 
   *vbo = new_vbo;
 
-  volt_pending_vbo pending{
-    new_vbo,
-    *desc,
-  };
-
   /* submit cmd */
   volt_gl_stream *stream = &ctx->resource_create_stream;
   volt_gl_cmd_create_vbo *cmd = (volt_gl_cmd_create_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
 
-  cmd->id = volt_gl_cmd_id::create_buffer_vbo;
+  cmd->id   = volt_gl_cmd_id::create_buffer_vbo;
   cmd->desc = *desc;
-  cmd->vbo = *vbo;
+  cmd->vbo  = *vbo;
 }
 
 /* --------------------------------------------------------- [ rsrc ibo ] -- */
@@ -398,11 +453,6 @@ volt_index_buffer_create(
   volt_ibo_t new_ibo = (volt_ibo_t)roa_zalloc(sizeof(*new_ibo));
   
   *ibo = new_ibo;
-
-  volt_pending_ibo pending{
-    new_ibo,
-    *desc,
-  };
 
   /* submit cmd */
   volt_gl_stream *stream = &ctx->resource_create_stream;
@@ -429,15 +479,10 @@ volt_program_create(
   ROA_ASSERT(desc);
   
   /* prepare */
-  volt_program_t new_prog = (volt_program_t)roa_alloc(sizeof(*new_prog));
+  volt_program_t new_prog = (volt_program_t)roa_zalloc(sizeof(*new_prog));
   new_prog->program = 0;
 
   *program = new_prog;
-
-  volt_pending_program pending{
-    new_prog,
-    *desc,
-  };
 
   /* submit cmd */
   volt_gl_stream *stream = &ctx->resource_create_stream;
@@ -511,6 +556,44 @@ volt_renderpass_bind_input_format(
   {
     pass->curr_input = input;
   }
+}
+
+
+void
+volt_renderpass_bind_texture_buffer(
+  volt_renderpass_t pass,
+  volt_texture_t texture,
+  const char *sampler_name)
+{
+  const uint64_t hash_name = hash(sampler_name);
+
+  /* check to see if its already bound */
+  const unsigned sampler_slot_count = ROA_ARRAY_COUNT(pass->sampler_hash);
+
+  for (int i = 0; i < sampler_slot_count; ++i)
+  {
+    if (pass->sampler_hash[i] == hash_name)
+    {
+      /* already bound */
+      return;
+    }
+  }
+
+  /* add if not bound */
+  for (int i = 0; i < sampler_slot_count; ++i)
+  {
+    if (pass->sampler_hash[i] == 0)
+    {
+      /* bound */
+      pass->sampler_hash[i] = hash_name;
+      pass->samplers[i] = texture;
+
+      return;
+    }
+  }
+
+  /* all slots bound */
+  ROA_ASSERT(false);
 }
 
 
@@ -639,6 +722,40 @@ volt_renderpass_draw(volt_renderpass_t pass)
   if (pass->curr_rasterizer != pass->last_bound_rasterizer)
   {
 
+  }
+
+  /* textures */
+  {
+    /* todo! don't rebind textures */
+
+    /* check to see if textures have been bound */
+    unsigned sampler_count = pass->curr_program->sampler_count;
+    GLint active_textures = 0;
+
+    for(int i = 0; i < sampler_count; ++i)
+    {
+      const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
+
+      /* check bound textures */
+      for (int j = 0; j < ROA_ARRAY_COUNT(pass->sampler_hash); ++j)
+      {
+        const uint64_t bound_sampler_hash = pass->sampler_hash[j];
+
+        if (bound_sampler_hash == prog_sampler_hash)
+        {
+          /* bind texture */
+          volt_gl_stream *stream = pass->render_stream;
+          volt_gl_cmd_bind_texture *cmd = (volt_gl_cmd_bind_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+          cmd->id = volt_gl_cmd_id::bind_texture;
+          cmd->gl_id = pass->samplers[j]->gl_id;
+          cmd->active_texture = active_textures;
+          cmd->sampler_location = pass->curr_program->samplers[i].location;
+
+          active_textures += 1;
+        }
+      }
+    }
   }
 
   /* cmd */
@@ -815,6 +932,70 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
   }
 
   cmd->program->program = program;
+
+  /* get uniforms and samplers */
+  if (status == GL_TRUE)
+  {
+    GLint uniform_count;
+    glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniform_count);
+
+    /* more uniforms than space*/
+    /* increase space or dynamic allocation */
+    ROA_ASSERT(ROA_ARRAY_COUNT(cmd->program->uniforms) > uniform_count);
+
+    GLint data_count = 0;
+    GLint samp_count = 0;
+
+    GLchar name_buffer[1024];
+
+    for (int i = 0; i < uniform_count; ++i)
+    {
+      memset(name_buffer, 0, sizeof(name_buffer));
+
+      GLint size;
+      GLenum type;
+      GLsizei length;
+
+      glGetActiveUniform(
+        program,
+        i,
+        ROA_ARRAY_COUNT(name_buffer),
+        &length,
+        &size,
+        &type,
+        ROA_ARRAY_PTR(name_buffer));
+
+      /* users text will hash incorrectly */
+      /* increase buffer or dynamic allocations */
+      ROA_ASSERT(ROA_ARRAY_COUNT(name_buffer) > length);
+
+      uint64_t uni_hash = hash(ROA_ARRAY_PTR(name_buffer));
+
+      /* seperate samplers and data */
+      if ((type >= GL_SAMPLER_1D) && (type <= GL_SAMPLER_2D_SHADOW))
+      {
+        cmd->program->sampler_keys[samp_count] = uni_hash;
+        cmd->program->samplers[samp_count].location = i;
+        cmd->program->samplers[samp_count].size = size;
+        cmd->program->samplers[samp_count].type = type;
+
+        samp_count += 1;
+      }
+      else
+      {
+        cmd->program->uniform_keys[data_count] = uni_hash;
+        cmd->program->uniforms[data_count].location = i;
+        cmd->program->uniforms[data_count].size = size;
+        cmd->program->uniforms[data_count].type = type;
+
+        data_count +=1;
+      }
+    }
+
+    /* save count */
+    cmd->program->sampler_count = samp_count;
+    cmd->program->uniform_count = data_count;
+  }
 }
 
 
@@ -838,9 +1019,29 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   const GLuint width    = cmd->desc.width;
   const GLuint height   = cmd->desc.height;
   const GLvoid *data    = cmd->desc.data;
+  const GLint level     = 0;
+  const GLenum type     = GL_UNSIGNED_BYTE;
+  const GLint border    = 0;
+  const GLenum target   = GL_TEXTURE_2D;
+  GLuint texture        = 0;
+  GLint internal_format = GL_RGB;
+  GLenum format         = GL_RGB;
 
-  GLenum target = GL_TEXTURE_2D;
-  GLuint texture  = 0;
+  switch (cmd->desc.format)
+  {
+    case(VOLT_COLOR_RGB):
+    {
+      internal_format = GL_RGB;
+      format          = GL_RGB;
+      break;
+    }
+    case(VOLT_COLOR_RGBA):
+    {
+      internal_format = GL_RGBA;
+      format          = GL_RGBA;
+      break;
+    }
+  }
 
   /* create texture */
   glGenTextures(1, &texture);
@@ -849,13 +1050,13 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   glBindTexture(target, texture);
   glTexImage2D(
     target,
-    0,
-    GL_RGB,
+    level,
+    internal_format,
     width,
     height,
-    0,
-    GL_RGB,
-    GL_UNSIGNED_BYTE,
+    border,
+    format,
+    type,
     data);
 
 
@@ -884,12 +1085,15 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
 static void
 volt_gl_bind_vbo(const volt_gl_cmd_bind_vbo *cmd)
 {
+  /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
   ROA_ASSERT_PEDANTIC(cmd->vbo);
 
+  /* prepare */
   const GLenum target = GL_ARRAY_BUFFER;
   const GLuint buffer = cmd->vbo;
 
+  /* bind */
   glBindBuffer(target, buffer);
 }
 
@@ -897,12 +1101,15 @@ volt_gl_bind_vbo(const volt_gl_cmd_bind_vbo *cmd)
 static void
 volt_gl_bind_ibo(const volt_gl_cmd_bind_ibo *cmd)
 {
+  /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
   ROA_ASSERT_PEDANTIC(cmd->ibo);
 
+  /* prepare */
   const GLenum target = GL_ELEMENT_ARRAY_BUFFER;
   const GLuint buffer = cmd->ibo;
 
+  /* bind */
   glBindBuffer(target, buffer);
 }
 
@@ -910,11 +1117,14 @@ volt_gl_bind_ibo(const volt_gl_cmd_bind_ibo *cmd)
 static void
 volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
 {
+  /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
   ROA_ASSERT_PEDANTIC(cmd->program);
 
+  /* prepare */
   const GLuint program = cmd->program;
 
+  /* bind program */
   glUseProgram(program);
 }
 
@@ -922,29 +1132,55 @@ volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
 static void
 volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
 {
+  /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
 
-  const GLuint index = cmd->index;
-  const GLint size = cmd->size;
-  const GLenum type = cmd->type;
-  const GLboolean normalized = cmd->normalized;
-  const GLsizei stride = cmd->stride;
-  const GLvoid *pointer = (GLvoid*)cmd->pointer;
+  /* prepare */
+  const GLuint index          = cmd->index;
+  const GLint size            = cmd->size;
+  const GLenum type           = cmd->type;
+  const GLboolean normalized  = cmd->normalized;
+  const GLsizei stride        = cmd->stride;
+  const GLvoid *pointer       = (GLvoid*)cmd->pointer;
 
+  /* enable vertex attribute */
   glEnableVertexAttribArray(index);
   glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 }
 
 
 static void
-volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
+volt_gl_bind_texture(const volt_gl_cmd_bind_texture *cmd)
 {
+  /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
 
-  const GLenum mode = cmd->mode;
-  const GLint first = cmd->first;
+  /* prepare */
+  const GLenum gl_id          = cmd->gl_id;
+  const GLuint texture_offset = cmd->active_texture;
+  const GLenum texture_slot   = GL_TEXTURE0 + texture_offset;
+  const GLenum target         = GL_TEXTURE_2D;
+  const GLint location        = cmd->sampler_location;
+
+  /* bind */
+  glActiveTexture(texture_slot);
+  glBindTexture(target, gl_id);
+  glUniform1i(location, texture_offset);
+}
+
+
+static void
+volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
+{
+  /* param check */
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  /* prepare */
+  const GLenum mode   = cmd->mode;
+  const GLint first   = cmd->first;
   const GLsizei count = cmd->count;
 
+  /* draw */
   glDrawArrays(mode, first, count);
 }
 
@@ -952,13 +1188,16 @@ volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
 static void
 volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
 {
+  /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
 
-  const GLenum mode = cmd->mode;
-  const GLsizei count = cmd->count;
-  const GLenum type = cmd->type;
+  /* prepare */
+  const GLenum mode     = cmd->mode;
+  const GLsizei count   = cmd->count;
+  const GLenum type     = cmd->type;
   const GLvoid *indices = cmd->indices;
 
+  /* draw */
   glDrawElements(mode, count, type, 0);
 }
 
@@ -1057,6 +1296,13 @@ volt_ctx_execute(volt_ctx_t ctx)
           volt_gl_create_program(cmd);
           break;
         }
+        case(volt_gl_cmd_id::create_buffer_texture):
+        {
+          const volt_gl_cmd_create_texture *cmd = (const volt_gl_cmd_create_texture*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_create_texture(cmd);
+          break;
+        }
         default:
           /* only create cmds should be here */
           ROA_ASSERT(false);
@@ -1105,6 +1351,13 @@ volt_ctx_execute(volt_ctx_t ctx)
           const volt_gl_cmd_bind_input *cmd = (const volt_gl_cmd_bind_input*)uk_cmd;
           data += sizeof(*cmd);
           volt_gl_bind_input(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::bind_texture):
+        {
+          const volt_gl_cmd_bind_texture *cmd = (const volt_gl_cmd_bind_texture*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_bind_texture(cmd);
           break;
         }
         case(volt_gl_cmd_id::draw_count):
