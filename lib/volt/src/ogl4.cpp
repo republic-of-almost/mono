@@ -16,7 +16,7 @@
 
 
 /* https://stackoverflow.com/questions/2535284/how-can-i-hash-a-string-to-an-int-using-c#13487193 */
-/* test this, attributes or remove */
+/* test this, attribute or remove */
 uint64_t
 hash(const char *name)
 {
@@ -233,6 +233,13 @@ struct volt_texture
 };
 
 
+struct volt_data
+{
+  uint8_t *data;
+  unsigned size;
+};
+
+
 struct volt_vbo
 {
   GLuint vbo;
@@ -322,6 +329,9 @@ struct volt_renderpass
   /* samplers */
   uint64_t sampler_hash[32];
   volt_texture_t samplers[32];
+
+  uint64_t data_hash[32];
+  volt_data_t data[32];
 
   /* last bound */
   volt_vbo_t last_bound_vbo;
@@ -631,6 +641,27 @@ volt_renderpass_bind_program(
   {
     pass->curr_program = program;
   }
+}
+
+
+void
+volt_renderpass_bind_data_f(
+  volt_renderpass_t pass,
+  const char *data_name,
+  const float *data,
+  unsigned count)
+{
+  
+}
+
+void
+volt_renderpass_bind_data_i(
+  volt_renderpass_t pass,
+  const char *data_name,
+  const float *data,
+  unsigned count)
+{
+  
 }
 
 
@@ -1390,7 +1421,6 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   }
 }
-
 
 
 #endif

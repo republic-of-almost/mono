@@ -10,15 +10,16 @@ extern "C" {
  /* ----------------------------------------------------------- [ types ] -- */
 
 
-typedef struct volt_ctx * volt_ctx_t;
-typedef struct volt_renderpass * volt_renderpass_t;
-typedef struct volt_vbo * volt_vbo_t;
-typedef struct volt_ibo * volt_ibo_t;
-typedef struct volt_texture * volt_texture_t;
-typedef struct volt_input * volt_input_t;
-typedef struct volt_program * volt_program_t;
-typedef struct volt_rasterizer * volt_rasterizer_t;
-typedef struct volt_texture * volt_texture_t;
+typedef struct volt_ctx *         volt_ctx_t;
+typedef struct volt_renderpass *  volt_renderpass_t;
+typedef struct volt_vbo *         volt_vbo_t;
+typedef struct volt_ibo *         volt_ibo_t;
+typedef struct volt_texture *     volt_texture_t;
+typedef struct volt_input *       volt_input_t;
+typedef struct volt_program *     volt_program_t;
+typedef struct volt_rasterizer *  volt_rasterizer_t;
+typedef struct volt_texture *     volt_texture_t;
+typedef struct volt_data *        volt_data_t;
 
 
 #define VOLT_NULL 0
@@ -255,16 +256,34 @@ volt_renderpass_bind_index_buffer(
   volt_renderpass_t pass,
   volt_ibo_t ibo);
 
+
 void
 volt_renderpass_bind_texture_buffer(
   volt_renderpass_t pass,
   volt_texture_t texture,
   const char *location);
 
+
 void
 volt_renderpass_bind_program(
   volt_renderpass_t pass,
   volt_program_t program);
+
+
+void
+volt_renderpass_bind_data_f(
+  volt_renderpass_t pass,
+  const char *data_name,
+  const float *data,
+  unsigned count);
+
+
+void
+volt_renderpass_bind_data_i(
+  volt_renderpass_t pass,
+  const char *data_name,
+  const float *data,
+  unsigned count);
 
 
 void
