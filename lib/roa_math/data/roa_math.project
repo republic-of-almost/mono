@@ -24,6 +24,8 @@ table.insert(
       make.add_inlines(make.get_proj_root() .. "../include/"),
       --
       make.add_doc(make.get_proj_root() .. "../"),
+      --
+      make.add_src(make.get_proj_root() .. "../src/"),
     },
 
     public_inc_dirs = {
