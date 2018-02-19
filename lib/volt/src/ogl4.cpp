@@ -181,7 +181,7 @@ struct volt_gl_cmd_draw_indexed
   GLenum mode;
   GLenum type;
   GLuint count;
-  const GLvoid *indices;
+  GLuint indices;
 };
 
 
@@ -395,7 +395,7 @@ volt_input_create(
   new_input->count = cpy_count;
   new_input->full_stride = 0;
 
-  for (int i = 0; i < cpy_count; ++i)
+  for (unsigned i = 0; i < cpy_count; ++i)
   {
     unsigned attrib_count;
 
@@ -405,6 +405,12 @@ volt_input_create(
       case(VOLT_INPUT_FLOAT3): { attrib_count = 3; break; }
       case(VOLT_INPUT_FLOAT2): { attrib_count = 2; break; }
       case(VOLT_INPUT_FLOAT):  { attrib_count = 1; break; }
+
+      default:
+      {
+        ROA_ASSERT(false);
+        attrib_count = 1;
+      }
     }
 
     new_input->attrib_count[i] = attrib_count;
@@ -540,6 +546,11 @@ volt_renderpass_commit(
   volt_ctx_t ctx,
   volt_renderpass_t *pass)
 {
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(pass);
+
+  /* free */
   roa_free(*pass);
   *pass = ROA_NULL;
 }
@@ -763,7 +774,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
     unsigned sampler_count = pass->curr_program->sampler_count;
     GLint active_textures = 0;
 
-    for(int i = 0; i < sampler_count; ++i)
+    for(unsigned i = 0; i < sampler_count; ++i)
     {
       const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
 
@@ -893,7 +904,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
     { GL_FRAGMENT_SHADER , 0, nullptr },
   };
 
-  for (int j = 0; j < cmd->desc.stage_count; ++j)
+  for (unsigned j = 0; j < cmd->desc.stage_count; ++j)
   {
     const volt_program_desc *desc = &cmd->desc;
 
@@ -1226,10 +1237,10 @@ volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
   const GLenum mode     = cmd->mode;
   const GLsizei count   = cmd->count;
   const GLenum type     = cmd->type;
-  const GLvoid *indices = cmd->indices;
+  const GLuint indices  = cmd->indices;
 
   /* draw */
-  glDrawElements(mode, count, type, 0);
+  glDrawElements(mode, count, type, (GLvoid*)indices);
 }
 
 

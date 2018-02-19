@@ -3,6 +3,7 @@
 #include <stb/stb_image.h>
 #include <volt/volt.h>
 #include <roa_lib/fundamental.h>
+#include <roa_lib/dir.h>
 #include <roa_lib/assert.h>
 #include <string.h>
 
@@ -40,8 +41,13 @@ main()
     tex_desc_1.mip_maps = VOLT_FALSE;
     tex_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
 
+    char file_path_01[2048];
+    memset(file_path_01, 0, sizeof(file_path_01));
+    strcat(file_path_01, roa_exe_path());
+    strcat(file_path_01, "assets/volt_func/dev_tex_01.png");
+
     tex_desc_1.data = (void*)stbi_load(
-      "C:/Users/SimStim/Developer/mono/lib/volt/assets/volt_func/dev_tex_01.png",
+      file_path_01,
       &x,
       &y,
       &n,
@@ -57,14 +63,19 @@ main()
     tex_desc_2.mip_maps = VOLT_FALSE;
     tex_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
 
+    char file_path_02[2048];
+    memset(file_path_02, 0, sizeof(file_path_02));
+    strcat(file_path_02, roa_exe_path());
+    strcat(file_path_02, "assets/volt_func/dev_tex_02.png");
+
     tex_desc_2.data = (void*)stbi_load(
-      "C:/Users/SimStim/Developer/mono/lib/volt/assets/volt_func/dev_tex_02.png",
+      file_path_02,
       &x,
       &y,
       &n,
       0
     );
-
+    
     tex_desc_2.width = x;
     tex_desc_2.height = y;
     tex_desc_2.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
@@ -131,8 +142,13 @@ main()
         "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5);\n"
       "}\n";
 
-    const char **stages[2] = {vert_src, frag_src};
-    const volt_shader_stage *stage_types[2] = { VOLT_SHD_VERTEX, VOLT_SHD_FRAGMENT };
+    const char *stages[2];
+    stages[0] = vert_src;
+    stages[1] = frag_src;
+
+    volt_shader_stage stage_types[2];
+    stage_types[0] = VOLT_SHD_VERTEX;
+    stage_types[1] = VOLT_SHD_FRAGMENT;
 
     struct volt_program_desc shd_desc;
     shd_desc.shader_stages_src = stages;
@@ -141,7 +157,7 @@ main()
 
     volt_program_create(ctx, &program, &shd_desc);
 
-    volt_input_attribute input_fmt[] = {
+    const volt_input_attribute input_fmt[] = {
       VOLT_INPUT_FLOAT2,
       VOLT_INPUT_FLOAT3,
       VOLT_INPUT_FLOAT2,
