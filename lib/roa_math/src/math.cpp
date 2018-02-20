@@ -224,6 +224,8 @@ roa_mat4_fill_with_value(roa_mat4 *out, float val)
 void
 roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane, float aspect_ratio)
 {
+  assert(out);
+
   const float one_over_tan_half_fov = 1.f / roa_tan(fov * 0.5f);
   const float plane_diff = far_plane - near_plane;
 
@@ -269,6 +271,10 @@ roa_mat4_lookat(roa_mat4 *out, roa_float3 from, roa_float3 to, roa_float3 up)
 void
 roa_mat4_multiply(roa_mat4 *out, roa_mat4 *a, roa_mat4 *b)
 {
+  assert(out);
+  assert(a);
+  assert(b);
+
   for (int i = 0; i < MATH_ARR_COUNT(out->data); ++i)
   {
     /* need dot products */

@@ -209,6 +209,13 @@ volt_uniform_create(
   struct volt_uniform_desc *desc);
 
 
+void
+volt_uniform_update(
+  volt_ctx_t ctx,
+  volt_uniform_t uniform,
+  void *data);
+
+
 /* -------------------------------------------------- [ rsrc rasterizer ] -- */
 
 

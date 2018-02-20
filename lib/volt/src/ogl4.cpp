@@ -32,6 +32,9 @@ hash(const char *name)
 }
 
 
+#define GL_ASSERT ROA_ASSERT(glGetError() == 0)
+
+
 /* ------------------------------------------------------ [ gl commands ] -- */
 
 
@@ -563,6 +566,16 @@ volt_uniform_create(
 }
 
 
+void
+volt_uniform_update(
+  volt_ctx_t ctx,
+  volt_uniform_t uniform,
+  void *data)
+{
+  uniform->value = data;
+}
+
+
 /* -------------------------------------------------- [ rsrc rasterizer ] -- */
 
 
@@ -881,7 +894,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
     {
       const uint64_t prog_uniform_hash = pass->curr_program->uniform_keys[i];
 
-      /* check bound textures */
+      /* check bound uniforms */
       for (int j = 0; j < ROA_ARRAY_COUNT(pass->uniform_hash); ++j)
       {
         const uint64_t bound_hash = pass->uniform_hash[j];
@@ -909,8 +922,10 @@ volt_renderpass_draw(volt_renderpass_t pass)
     volt_gl_stream *stream = pass->render_stream;
     volt_gl_cmd_draw_count *cmd = (volt_gl_cmd_draw_count*)volt_gl_stream_alloc(stream, sizeof(*cmd));
 
-    GLuint count = pass->curr_input->full_stride / pass->curr_vbo->element_count;
-
+    GLuint stride = pass->curr_input->full_stride;
+    GLuint ele_count = pass->curr_vbo->element_count;
+    GLuint count = 36;// ele_count / stride;
+    /* todo this is not calculating the count correctly */
     cmd->id     = volt_gl_cmd_id::draw_count;
     cmd->first  = 0;
     cmd->count  = count;
@@ -956,6 +971,8 @@ volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
   /* save vbo */
   cmd->vbo->vbo = vbo;
   cmd->vbo->element_count = cmd->desc.count;
+  
+  GL_ASSERT;
 }
 
 
@@ -983,6 +1000,8 @@ volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
   /* save vbo */
   cmd->ibo->ibo = ibo;
   cmd->ibo->element_count = cmd->desc.count;
+
+  GL_ASSERT;
 }
 
 
@@ -1141,6 +1160,8 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
     cmd->program->sampler_count = samp_count;
     cmd->program->uniform_count = data_count;
   }
+
+  GL_ASSERT;
 }
 
 
@@ -1150,6 +1171,8 @@ volt_gl_create_input(const volt_gl_cmd_create_input *cmd)
   /* param check */
   ROA_ASSERT(cmd);
   ROA_ASSERT(cmd->input);
+
+  GL_ASSERT;
 }
 
 
@@ -1221,13 +1244,37 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   /* save texture */
   cmd->texture->gl_id = texture;
   cmd->texture->target = target;
+
+  GL_ASSERT;
 }
 
 
 static void
 volt_gl_create_uniform(const volt_gl_cmd_create_uniform *cmd)
 {
-  
+  /* param check */
+  ROA_ASSERT(cmd);
+
+  GLenum type = 0;
+
+  switch (cmd->desc.data_type)
+  {
+    case(VOLT_DATA_FLOAT): type = GL_FLOAT; break;
+    case(VOLT_DATA_FLOAT2): type = GL_FLOAT_VEC2; break;
+    case(VOLT_DATA_FLOAT3): type = GL_FLOAT_VEC3; break;
+    case(VOLT_DATA_FLOAT4): type = GL_FLOAT_VEC4; break;
+    case(VOLT_DATA_MAT2): type = GL_FLOAT_MAT2; break;
+    case(VOLT_DATA_MAT3): type = GL_FLOAT_MAT3; break;
+    case(VOLT_DATA_MAT4): type = GL_FLOAT_MAT4; break;
+    default:
+      ROA_ASSERT(false);
+  }
+
+  cmd->uniform->value = NULL;
+  cmd->uniform->type = type;
+  cmd->uniform->count = (GLuint)cmd->desc.count;
+
+  GL_ASSERT;
 }
 
 
@@ -1247,6 +1294,8 @@ volt_gl_bind_vbo(const volt_gl_cmd_bind_vbo *cmd)
 
   /* bind */
   glBindBuffer(target, buffer);
+
+  GL_ASSERT;
 }
 
 
@@ -1263,6 +1312,8 @@ volt_gl_bind_ibo(const volt_gl_cmd_bind_ibo *cmd)
 
   /* bind */
   glBindBuffer(target, buffer);
+
+  GL_ASSERT;
 }
 
 
@@ -1278,6 +1329,8 @@ volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
 
   /* bind program */
   glUseProgram(program);
+
+  GL_ASSERT;
 }
 
 
@@ -1298,6 +1351,8 @@ volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
   /* enable vertex attribute */
   glEnableVertexAttribArray(index);
   glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+
+  GL_ASSERT;
 }
 
 
@@ -1318,6 +1373,8 @@ volt_gl_bind_texture(const volt_gl_cmd_bind_texture *cmd)
   glActiveTexture(texture_slot);
   glBindTexture(target, gl_id);
   glUniform1i(location, texture_offset);
+
+  GL_ASSERT;
 }
 
 
@@ -1328,10 +1385,10 @@ volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
   ROA_ASSERT_PEDANTIC(cmd);
 
   /* prepare */
-  const GLenum location     = 0;
-  const GLenum data_type    = GL_FLOAT_VEC2;
-  const GLsizei count       = 0;
-  const GLvoid *value       = NULL;
+  const GLenum location     = cmd->location;
+  const GLenum data_type    = cmd->type;
+  const GLsizei count       = cmd->count;
+  const GLvoid *value       = cmd->value;
   const GLboolean transpose = GL_FALSE;
 
   /* bind */
@@ -1345,12 +1402,14 @@ volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
     case(GL_FLOAT_MAT2): glUniformMatrix2fv(location, 1, transpose, (GLfloat*)value); break;
     case(GL_FLOAT_MAT3): glUniformMatrix3fv(location, 1, transpose, (GLfloat*)value); break;
     case(GL_FLOAT_MAT4): glUniformMatrix4fv(location, 1, transpose, (GLfloat*)value); break;
-
+      
     case(GL_INT): glUniform1iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC2): glUniform2iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC3): glUniform3iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC4): glUniform4iv(location, count, (GLint*)value); break;
   }
+
+  GL_ASSERT;
 }
 
 
@@ -1367,6 +1426,8 @@ volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
 
   /* draw */
   glDrawArrays(mode, first, count);
+
+  GL_ASSERT;
 }
 
 
@@ -1384,6 +1445,8 @@ volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
 
   /* draw */
   glDrawElements(mode, count, type, (GLvoid*)indices);
+
+  GL_ASSERT;
 }
 
 
@@ -1439,6 +1502,15 @@ void
 volt_ctx_execute(volt_ctx_t ctx)
 {
   ROA_ASSERT(ctx);
+  
+  glGetError(); /* clear msgs */
+
+  glClearColor(1, 1, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+  glViewport(0, 0, 800, 480);
+  //glCullFace(GL_FRONT);
+  //glFrontFace(GL_CW);
 
   /* create resource stream  */
   {

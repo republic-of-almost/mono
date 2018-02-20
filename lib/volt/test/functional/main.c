@@ -66,11 +66,11 @@ main()
 
   /* create mats */
   {
-    roa_mat4_projection(&proj, ROA_QUART_TAU / 0.5f, 0.1f, 100.f, 800.f / 480.f);
+    roa_mat4_projection(&proj, ROA_QUART_TAU, 0.1f, 10.f, 800.f / 480.f);
 
-    roa_float3 from = roa_float3_set_with_values(1.5f, 1.5f, 1.5f);
-    roa_float3 at = roa_float3_fill_with_value(0.f);
-    roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
+    roa_float3 from = roa_float3_set_with_values(2.5f, 2.0f, 2.5f);
+    roa_float3 at   = roa_float3_fill_with_value(0.f);
+    roa_float3 up   = roa_float3_set_with_values(0.f, 1.f, 0.f);
 
     roa_mat4_lookat(&view, from, at, up);
 
@@ -226,7 +226,7 @@ main()
 
       "void main()\n"
       "{\n"
-        "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5);\n"
+        "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5); outColor.r = Color.r;\n"
       "}\n";
 
     const char *stages[2];
@@ -272,6 +272,10 @@ main()
     static int count = 0;
     ++count;
 
+    volt_uniform_update(ctx, view_data, view.data);
+    volt_uniform_update(ctx, proj_data, proj.data);
+    volt_uniform_update(ctx, world_data, world.data);
+
     /* draw some stuff */
     {
       volt_renderpass_t rp;
@@ -285,6 +289,9 @@ main()
       /*volt_renderpass_bind_index_buffer(rp, ibo);*/
       volt_renderpass_bind_texture_buffer(rp, texture_1, "texKitten");
       volt_renderpass_bind_texture_buffer(rp, texture_2, "texPuppy");
+      volt_renderpass_bind_uniform(rp, view_data, "view");
+      volt_renderpass_bind_uniform(rp, proj_data, "proj");
+      volt_renderpass_bind_uniform(rp, world_data, "model");
 
       /* bind formatting */
       volt_renderpass_bind_input_format(rp, vert_input);
