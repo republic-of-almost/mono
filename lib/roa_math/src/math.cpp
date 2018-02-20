@@ -20,6 +20,13 @@ roa_tan(float a)
 }
 
 
+float
+roa_sqrt(float a)
+{
+  return sqrtf(a);
+}
+
+
 /* ----------------------------------------------------------- [ float2 ] -- */
 /* ----------------------------------------------------------- [ float3 ] -- */
 
@@ -41,7 +48,7 @@ roa_float3_zero_zero_one()
 
 
 roa_float3
-roa_float3_init_with_value(float v)
+roa_float3_fill_with_value(float v)
 {
   roa_float3 ret{ v, v, v };
   return ret;
@@ -49,10 +56,31 @@ roa_float3_init_with_value(float v)
 
 
 roa_float3
-roa_float3_init_with_values(float x, float y, float z)
+roa_float3_set_with_values(float x, float y, float z)
 {
   roa_float3 ret{ x, y, z };
   return ret;
+}
+
+
+float
+roa_float3_get_x(roa_float3 a)
+{
+  return a.x;
+}
+
+
+float
+roa_float3_get_y(roa_float3 a)
+{
+  return a.y;
+}
+
+
+float
+roa_float3_get_z(roa_float3 a)
+{
+  return a.z;
 }
 
 
@@ -95,17 +123,51 @@ roa_float3_multiply(roa_float3 a, roa_float3 b)
 }
 
 
+float
+roa_float3_length(roa_float3 a)
+{
+  const float len = a.x * a.x + a.y * a.y + a.z * a.z;
+
+  return roa_sqrt(len);
+}
+
+
 roa_float3
+roa_float3_normalize(roa_float3 a)
+{
+  const float length = roa_float3_length(a);
+
+  assert(length != 0); // Don't pass zero vectors. (0,0,0);
+
+  return roa_float3_scale(a, (1.f / length));
+}
+
+
+float
 roa_float3_dot(roa_float3 a, roa_float3 b)
 {
-
+  return (roa_float3_get_x(a) * roa_float3_get_x(b)) +
+    (roa_float3_get_y(a) * roa_float3_get_y(b)) +
+    (roa_float3_get_z(a) * roa_float3_get_z(b));
 }
 
 
 roa_float3
 roa_float3_cross(roa_float3 a, roa_float3 b)
 {
+  const float x = (roa_float3_get_y(a) * roa_float3_get_y(b)) - (roa_float3_get_z(a) * roa_float3_get_y(b));
+  const float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_x(b));
+  const float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - (roa_float3_get_y(a) * roa_float3_get_x(b));
 
+  return roa_float3_set_with_values(x, -y, z);
+}
+
+
+roa_float3
+roa_float3_scale(roa_float3 a, float scale)
+{
+  const roa_float3 scale_vec = roa_float3_fill_with_value(scale);
+  return roa_float3_multiply(a, scale_vec);
 }
 
 
@@ -160,9 +222,8 @@ roa_mat4_fill_with_value(roa_mat4 *out, float val)
 
 
 void
-roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane, float width, float height)
+roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane, float aspect_ratio)
 {
-  const float aspect_ratio = width / height;
   const float one_over_tan_half_fov = 1.f / roa_tan(fov * 0.5f);
   const float plane_diff = far_plane - near_plane;
 
@@ -173,6 +234,35 @@ roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane,
   out->data[10] = -(far_plane + near_plane) / plane_diff;
   out->data[11] = -1.f;
   out->data[14] = -(2.f * far_plane * near_plane) / plane_diff;
+}
+
+
+void
+roa_mat4_lookat(roa_mat4 *out, roa_float3 from, roa_float3 to, roa_float3 up)
+{
+  const roa_float3 z_axis = roa_float3_normalize(roa_float3_subtract(from, to));
+  const roa_float3 x_axis = roa_float3_normalize(roa_float3_cross(up, z_axis));
+  const roa_float3 y_axis = roa_float3_cross(z_axis, x_axis);
+
+  out->data[0] = +roa_float3_get_x(x_axis);
+  out->data[1] = +roa_float3_get_x(y_axis);
+  out->data[2] = +roa_float3_get_x(z_axis);
+  out->data[3] = 0.f;
+
+  out->data[4] = +roa_float3_get_y(x_axis);
+  out->data[5] = +roa_float3_get_y(y_axis);
+  out->data[6] = +roa_float3_get_y(z_axis);
+  out->data[7] = 0.f;
+
+  out->data[8]  = +roa_float3_get_z(x_axis);
+  out->data[9]  = +roa_float3_get_z(y_axis);
+  out->data[10] = +roa_float3_get_z(z_axis);
+  out->data[11] = 0.f;
+
+  out->data[12] = -roa_float3_dot(x_axis, from);
+  out->data[13] = -roa_float3_dot(y_axis, from);
+  out->data[14] = -roa_float3_dot(z_axis, from);
+  out->data[15] = 1.f;
 }
 
 
