@@ -66,9 +66,9 @@ main()
 
   /* create mats */
   {
-    roa_mat4_projection(&proj, ROA_QUART_TAU, 0.1f, 10.f, 800.f / 480.f);
+    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.75, 0.1f, 10.f, 800.f / 480.f);
 
-    roa_float3 from = roa_float3_set_with_values(2.5f, 2.0f, 2.5f);
+    roa_float3 from = roa_float3_set_with_values(1.5f, 1.0f, 1.5f);
     roa_float3 at   = roa_float3_fill_with_value(0.f);
     roa_float3 up   = roa_float3_set_with_values(0.f, 0.f, 1.f);
 
@@ -227,7 +227,7 @@ main()
 
       "void main()\n"
       "{\n"
-      "outColor = vec4(1,0,0,1);//mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5); outColor.r = Color.r;\n"
+      "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.95);\n"
       "}\n";
 
     const char *stages[2];
@@ -325,7 +325,7 @@ app_create()
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
 	glfwMakeContextCurrent(window);

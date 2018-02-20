@@ -71,6 +71,7 @@ table.insert(
       -- Third Party --
       "STB",
       "GLFW",
+      "MMX",
     },
   }
 )
