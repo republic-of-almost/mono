@@ -18,8 +18,7 @@ typedef struct volt_texture *     volt_texture_t;
 typedef struct volt_input *       volt_input_t;
 typedef struct volt_program *     volt_program_t;
 typedef struct volt_rasterizer *  volt_rasterizer_t;
-typedef struct volt_texture *     volt_texture_t;
-typedef struct volt_data *        volt_data_t;
+typedef struct volt_uniform *     volt_uniform_t;
 
 
 #define VOLT_NULL 0
@@ -182,6 +181,34 @@ volt_program_create(
   struct volt_program_desc *desc);
 
 
+/* ----------------------------------------------------- [ rsrc uniform ] -- */
+
+
+typedef enum _volt_data_type {
+  VOLT_DATA_FLOAT,
+  VOLT_DATA_FLOAT2,
+  VOLT_DATA_FLOAT3,
+  VOLT_DATA_FLOAT4,
+  VOLT_DATA_MAT2,
+  VOLT_DATA_MAT3,
+  VOLT_DATA_MAT4,
+} volt_data_type;
+
+
+struct volt_uniform_desc
+{
+  const char *name;
+  volt_data_type data_type;
+};
+
+
+void
+volt_uniform_create(
+  volt_ctx_t ctx,
+  volt_uniform_t *uniform,
+  struct volt_uniform_desc *desc);
+
+
 /* -------------------------------------------------- [ rsrc rasterizer ] -- */
 
 
@@ -271,19 +298,10 @@ volt_renderpass_bind_program(
 
 
 void
-volt_renderpass_bind_data_f(
+volt_renderpass_bind_uniform(
   volt_renderpass_t pass,
-  const char *data_name,
-  const float *data,
-  unsigned count);
-
-
-void
-volt_renderpass_bind_data_i(
-  volt_renderpass_t pass,
-  const char *data_name,
-  const float *data,
-  unsigned count);
+  volt_uniform_t uniform,
+  const char *location);
 
 
 void

@@ -5,6 +5,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_lib/dir.h>
 #include <roa_lib/assert.h>
+#include <roa_math/math.h>
 #include <string.h>
 
 
@@ -23,13 +24,34 @@ main()
   volt_ctx_t ctx = VOLT_NULL;
   volt_ctx_create(&ctx);
 
-  volt_vbo_t vbo = VOLT_NULL;
-  volt_ibo_t ibo = VOLT_NULL;
-  volt_texture_t texture_1 = VOLT_NULL;
-  volt_texture_t texture_2 = VOLT_NULL;
-  volt_program_t program = VOLT_NULL;
-  volt_input_t vert_input = VOLT_NULL;
-  volt_rasterizer_t rasterizer = VOLT_NULL;
+  volt_vbo_t vbo                = VOLT_NULL;
+  volt_ibo_t ibo                = VOLT_NULL;
+  volt_texture_t texture_1      = VOLT_NULL;
+  volt_texture_t texture_2      = VOLT_NULL;
+  volt_program_t program        = VOLT_NULL;
+  volt_input_t vert_input       = VOLT_NULL;
+  volt_rasterizer_t rasterizer  = VOLT_NULL;
+
+  volt_uniform_t proj_data      = VOLT_NULL;
+  volt_uniform_t view_data      = VOLT_NULL;
+  volt_uniform_t world_data     = VOLT_NULL;
+
+  roa_mat4 world;
+  roa_mat4 view;
+  roa_mat4 proj;
+
+  /* create mats */
+  {
+    roa_mat4_projection(&proj, ROA_QUART_TAU / 0.5f, 0.1f, 100.f, 800.f / 480.f);
+
+    roa_float3 from = roa_float3_set_with_values(1.5f, 1.5f, 1.5f);
+    roa_float3 at = roa_float3_fill_with_value(0.f);
+    roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
+
+    roa_mat4_lookat(&view, from, at, up);
+
+    roa_mat4_id(&world);
+  }
 
   /* create some assets */
   {
@@ -85,10 +107,47 @@ main()
 
     /* vbo */
     float verts[] = {
-      -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
-      0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
-      -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
+      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+
+      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+
+      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
     };
 
     struct volt_vbo_desc vbo_desc;
@@ -113,9 +172,13 @@ main()
       "/* Vert */\n"
       "#version 400 core\n"
 
-      "layout(location=0) in vec2 position;\n"
+      "layout(location=0) in vec3 position;\n"
       "layout(location=1) in vec3 color;\n"
       "layout(location=2) in vec2 texcoord;\n"
+
+      "uniform mat4 model;\n"
+      "uniform mat4 view;\n"
+      "uniform mat4 proj;\n"
 
       "out vec3 Color;\n"
       "out vec2 Texcoord;\n"
@@ -123,7 +186,7 @@ main()
       "void main() {\n"
         "Color = color;\n"
         "Texcoord = texcoord;\n"
-        "gl_Position = vec4(position, 0.0, 1.0);\n"
+        "gl_Position = proj * view * model * vec4(position, 1.0);\n"
       "}\n";
 
     const char* frag_src = ""
@@ -158,9 +221,9 @@ main()
     volt_program_create(ctx, &program, &shd_desc);
 
     const volt_input_attribute input_fmt[] = {
-      VOLT_INPUT_FLOAT2,
-      VOLT_INPUT_FLOAT3,
-      VOLT_INPUT_FLOAT2,
+      VOLT_INPUT_FLOAT3, /* pos */
+      VOLT_INPUT_FLOAT3, /* color */
+      VOLT_INPUT_FLOAT2, /* tex c */
     };
 
     struct volt_input_desc input_desc;
@@ -195,7 +258,7 @@ main()
 
       /* bind buffers */
       volt_renderpass_bind_vertex_buffer(rp, vbo);
-      volt_renderpass_bind_index_buffer(rp, ibo);
+      /*volt_renderpass_bind_index_buffer(rp, ibo);*/
       volt_renderpass_bind_texture_buffer(rp, texture_1, "texKitten");
       volt_renderpass_bind_texture_buffer(rp, texture_2, "texPuppy");
 

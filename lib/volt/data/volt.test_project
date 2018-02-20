@@ -67,6 +67,7 @@ table.insert(
     project_dependencies = {
       -- First Party --
       "Volt",
+      "RepublicMath",
       -- Third Party --
       "STB",
       "GLFW",
