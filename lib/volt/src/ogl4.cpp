@@ -547,7 +547,6 @@ volt_uniform_create(
   ROA_ASSERT(ctx);
   ROA_ASSERT(uniform);
   ROA_ASSERT(desc);
-  ROA_ASSERT(desc->name);
   
   /* prepare */
   volt_uniform_t new_rsrc = (volt_uniform_t)roa_zalloc(sizeof(*new_rsrc));
@@ -1225,6 +1224,13 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
 }
 
 
+static void
+volt_gl_create_uniform(const volt_gl_cmd_create_uniform *cmd)
+{
+  
+}
+
+
 /* ---------------------------------------- [ gl cmd renderpass actions ] -- */
 
 
@@ -1480,6 +1486,13 @@ volt_ctx_execute(volt_ctx_t ctx)
           const volt_gl_cmd_create_texture *cmd = (const volt_gl_cmd_create_texture*)uk_cmd;
           data += sizeof(*cmd);
           volt_gl_create_texture(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::create_uniform):
+        {
+          const volt_gl_cmd_create_uniform *cmd = (const volt_gl_cmd_create_uniform*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_create_uniform(cmd);
           break;
         }
         default:

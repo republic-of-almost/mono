@@ -197,8 +197,8 @@ typedef enum _volt_data_type {
 
 struct volt_uniform_desc
 {
-  const char *name;
   volt_data_type data_type;
+  unsigned count;
 };
 
 

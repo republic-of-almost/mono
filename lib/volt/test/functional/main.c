@@ -40,6 +40,30 @@ main()
   roa_mat4 view;
   roa_mat4 proj;
 
+  /* create uniforms */
+  {
+    struct volt_uniform_desc uni_desc_1;
+    uni_desc_1.data_type = VOLT_DATA_MAT4;
+    uni_desc_1.count = 1;
+
+    volt_uniform_create(ctx, &proj_data, &uni_desc_1);
+    ROA_ASSERT(proj_data);
+
+    struct volt_uniform_desc uni_desc_2;
+    uni_desc_2.data_type = VOLT_DATA_MAT4;
+    uni_desc_2.count = 1;
+    
+    volt_uniform_create(ctx, &view_data, &uni_desc_2);
+    ROA_ASSERT(view_data);
+
+    struct volt_uniform_desc uni_desc_3;
+    uni_desc_3.data_type = VOLT_DATA_MAT4;
+    uni_desc_3.count = 1;
+    
+    volt_uniform_create(ctx, &world_data, &uni_desc_2);
+    ROA_ASSERT(world_data);
+  }
+
   /* create mats */
   {
     roa_mat4_projection(&proj, ROA_QUART_TAU / 0.5f, 0.1f, 100.f, 800.f / 480.f);
