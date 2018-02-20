@@ -70,7 +70,7 @@ main()
 
     roa_float3 from = roa_float3_set_with_values(2.5f, 2.0f, 2.5f);
     roa_float3 at   = roa_float3_fill_with_value(0.f);
-    roa_float3 up   = roa_float3_set_with_values(0.f, 1.f, 0.f);
+    roa_float3 up   = roa_float3_set_with_values(0.f, 0.f, 1.f);
 
     roa_mat4_lookat(&view, from, at, up);
 
@@ -210,7 +210,8 @@ main()
       "void main() {\n"
         "Color = color;\n"
         "Texcoord = texcoord;\n"
-        "gl_Position = proj * view * model * vec4(position, 1.0);\n"
+        "mat4 wvp = proj * view * model;\n"
+        "gl_Position = wvp * vec4(position, 1.0);\n"
       "}\n";
 
     const char* frag_src = ""
@@ -226,7 +227,7 @@ main()
 
       "void main()\n"
       "{\n"
-        "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5); outColor.r = Color.r;\n"
+      "outColor = vec4(1,0,0,1);//mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5); outColor.r = Color.r;\n"
       "}\n";
 
     const char *stages[2];

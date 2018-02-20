@@ -765,6 +765,54 @@ volt_renderpass_draw(volt_renderpass_t pass)
   /* param */
   ROA_ASSERT(pass);
 
+  if (pass->curr_program != pass->last_bound_program)
+  {
+    /* prepare */
+    const GLuint program = pass->curr_program ? pass->curr_program->program : 0;
+
+    /* cmd */
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_bind_program *cmd = (volt_gl_cmd_bind_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_program;
+    cmd->program = program;
+
+    pass->last_bound_program = pass->curr_program;
+  }
+
+  if (pass->curr_input != pass->last_bound_input)
+  {
+    if (pass->curr_input)
+    {
+      int input_count = pass->curr_input->count;
+
+      for (int i = 0; i < input_count; ++i)
+      {
+        /* prepare */
+        GLuint index = i;
+        GLint size = pass->curr_input->attrib_count[i];
+        GLenum type = GL_FLOAT;
+        GLboolean normalized = GL_FALSE;
+        GLsizei stride = pass->curr_input->full_stride;
+        GLuint pointer = pass->curr_input->increment_stride[i];
+
+        /* cmd */
+        volt_gl_stream *stream = pass->render_stream;
+        volt_gl_cmd_bind_input *cmd = (volt_gl_cmd_bind_input*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+        cmd->id = volt_gl_cmd_id::bind_input;
+        cmd->index      = index;
+        cmd->size       = size;
+        cmd->type       = type;
+        cmd->normalized = normalized;
+        cmd->stride     = stride;
+        cmd->pointer    = pointer;
+      }
+    }
+
+    pass->last_bound_input = pass->curr_input;
+  }
+
   /* bind any changes that are required */
   if (pass->curr_vbo != pass->last_bound_vbo)
   {
@@ -794,54 +842,6 @@ volt_renderpass_draw(volt_renderpass_t pass)
     cmd->ibo = ibo;
 
     pass->last_bound_ibo = pass->curr_ibo;
-  }
-
-  if (pass->curr_input != pass->last_bound_input)
-  {
-    if (pass->curr_input)
-    {
-      int input_count = pass->curr_input->count;
-
-      for (int i = 0; i < input_count; ++i)
-      {
-        /* prepare */
-        GLuint index          = i;
-        GLint size            = pass->curr_input->attrib_count[i];
-        GLenum type           = GL_FLOAT;
-        GLboolean normalized  = GL_FALSE;
-        GLsizei stride        = pass->curr_input->full_stride;
-        GLuint pointer        = pass->curr_input->increment_stride[i];
-
-        /* cmd */
-        volt_gl_stream *stream = pass->render_stream;
-        volt_gl_cmd_bind_input *cmd = (volt_gl_cmd_bind_input*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-        cmd->id         = volt_gl_cmd_id::bind_input;
-        cmd->index      = index;
-        cmd->size       = size;
-        cmd->type       = type;
-        cmd->normalized = normalized;
-        cmd->stride     = stride;
-        cmd->pointer    = pointer;
-      }
-    }
-
-    pass->last_bound_input = pass->curr_input;
-  }
-
-  if (pass->curr_program != pass->last_bound_program)
-  {
-    /* prepare */
-    const GLuint program = pass->curr_program ? pass->curr_program->program : 0;
-
-    /* cmd */
-    volt_gl_stream *stream        = pass->render_stream;
-    volt_gl_cmd_bind_program *cmd = (volt_gl_cmd_bind_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id      = volt_gl_cmd_id::bind_program;
-    cmd->program = program;
-
-    pass->last_bound_program = pass->curr_program;
   }
 
   if (pass->curr_rasterizer != pass->last_bound_rasterizer)
@@ -1505,9 +1505,9 @@ volt_ctx_execute(volt_ctx_t ctx)
   
   glGetError(); /* clear msgs */
 
-  glClearColor(1, 1, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
+  //glClearColor(1, 1, 0, 1);
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //glEnable(GL_DEPTH_TEST);
   glViewport(0, 0, 800, 480);
   //glCullFace(GL_FRONT);
   //glFrontFace(GL_CW);
