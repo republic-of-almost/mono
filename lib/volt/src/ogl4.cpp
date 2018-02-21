@@ -284,7 +284,8 @@ struct volt_input
 {
   GLuint increment_stride[12];
   GLint attrib_count[12];
-  GLsizei full_stride;
+  GLsizei byte_stride;
+  GLuint element_stride;
   GLuint count;
 };
 
@@ -420,7 +421,8 @@ volt_input_create(
   unsigned cpy_count = desc->count > max_count ? max_count : desc->count;
 
   new_input->count = cpy_count;
-  new_input->full_stride = 0;
+  new_input->byte_stride = 0;
+  new_input->element_stride = 0;
 
   for (unsigned i = 0; i < cpy_count; ++i)
   {
@@ -441,9 +443,10 @@ volt_input_create(
     }
 
     new_input->attrib_count[i] = attrib_count;
-    new_input->increment_stride[i] = new_input->full_stride;
+    new_input->increment_stride[i] = new_input->byte_stride;
 
-    new_input->full_stride += new_input->attrib_count[i] * sizeof(float);
+    new_input->byte_stride += new_input->attrib_count[i] * sizeof(float);
+    new_input->element_stride += new_input->attrib_count[i];
   }
 
   *input = new_input;
@@ -793,7 +796,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
         GLint size = pass->curr_input->attrib_count[i];
         GLenum type = GL_FLOAT;
         GLboolean normalized = GL_FALSE;
-        GLsizei stride = pass->curr_input->full_stride;
+        GLsizei stride = pass->curr_input->byte_stride;
         GLuint pointer = pass->curr_input->increment_stride[i];
 
         /* cmd */
@@ -922,9 +925,9 @@ volt_renderpass_draw(volt_renderpass_t pass)
     volt_gl_stream *stream = pass->render_stream;
     volt_gl_cmd_draw_count *cmd = (volt_gl_cmd_draw_count*)volt_gl_stream_alloc(stream, sizeof(*cmd));
 
-    GLuint stride = pass->curr_input->full_stride;
+    GLuint stride = pass->curr_input->element_stride;
     GLuint ele_count = pass->curr_vbo->element_count;
-    GLuint count = 36;// ele_count / stride;
+    GLuint count = ele_count / stride;
     /* todo this is not calculating the count correctly */
     cmd->id     = volt_gl_cmd_id::draw_count;
     cmd->first  = 0;
