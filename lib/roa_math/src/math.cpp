@@ -21,6 +21,20 @@ roa_tan(float a)
 
 
 float
+roa_sin(float a)
+{
+  return sinf(a);
+}
+
+
+float
+roa_cos(float a)
+{
+  return cosf(a);
+}
+
+
+float
 roa_sqrt(float a)
 {
   return sqrtf(a);

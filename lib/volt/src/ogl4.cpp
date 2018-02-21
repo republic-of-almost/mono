@@ -1486,6 +1486,13 @@ volt_ctx_create(volt_ctx_t *ctx)
 
   glGenVertexArrays(1, &new_ctx->vao);
   glBindVertexArray(new_ctx->vao);
+
+  const GLubyte *version  = glGetString(GL_VERSION);
+  const GLubyte *vendor   = glGetString(GL_VENDOR);
+  const GLubyte *renderer = glGetString(GL_RENDERER);
+  const GLubyte *glsl_ver = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+  printf("GL: %s , %s, %s, %s\n", (const char*)version, (const char*)vendor, (const char *)renderer, (const char *)glsl_ver);
 }
 
 

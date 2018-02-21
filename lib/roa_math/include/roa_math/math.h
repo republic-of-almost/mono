@@ -39,6 +39,8 @@ typedef struct roa_ray { roa_float3 origin; roa_float3 dir; } roa_ray;
 
 
 float         roa_tan(float a);
+float         roa_sin(float a);
+float         roa_cos(float a);
 
 float         roa_sqrt(float a);
 
