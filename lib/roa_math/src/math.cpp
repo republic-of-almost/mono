@@ -169,7 +169,7 @@ roa_float3_dot(roa_float3 a, roa_float3 b)
 roa_float3
 roa_float3_cross(roa_float3 a, roa_float3 b)
 {
-  const float x = (roa_float3_get_y(a) * roa_float3_get_y(b)) - (roa_float3_get_z(a) * roa_float3_get_y(b));
+  const float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_y(b));
   const float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_x(b));
   const float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - (roa_float3_get_y(a) * roa_float3_get_x(b));
 
