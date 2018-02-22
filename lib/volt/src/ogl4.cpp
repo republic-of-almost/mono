@@ -1521,7 +1521,7 @@ volt_ctx_execute(volt_ctx_t ctx)
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_SCISSOR_TEST);
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  
+  glDisable(GL_CULL_FACE);
   
   glViewport(0, 0, 800, 480);
   glScissor(0, 0, 800, 480);

@@ -240,16 +240,39 @@ roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane,
 {
   assert(out);
 
-  const float one_over_tan_half_fov = 1.f / roa_tan(fov * 0.5f);
-  const float plane_diff = far_plane - near_plane;
+  const float xy_max = near_plane * roa_tan(fov);
+  const float y_min = -xy_max;
+  const float x_min = -xy_max;
+
+  const float width = xy_max - x_min;
+  const float height = xy_max - y_min;
+
+  float depth = far_plane - near_plane;
+  float q = -(far_plane + near_plane) / depth;
+  float qn = -2 * (far_plane * near_plane) / depth;
+
+  float w = 2 * near_plane / width;
+  w = w / aspect_ratio;
+  float h = 2 * near_plane / height;
 
   roa_mat4_zero(out);
 
-  out->data[0] = one_over_tan_half_fov / aspect_ratio;
-  out->data[5] = one_over_tan_half_fov;
-  out->data[10] = -(far_plane + near_plane) / plane_diff;
-  out->data[11] = -1.f;
-  out->data[14] = -(2.f * far_plane * near_plane) / plane_diff;
+  out->data[0] = w;
+  out->data[5] = h;
+  out->data[10] = q;
+  out->data[11] = -1;
+  out->data[14] = qn;
+
+  //const float one_over_tan_half_fov = 1.f / roa_tan(fov * 0.5f);
+  //const float plane_diff = far_plane - near_plane;
+
+  //roa_mat4_zero(out);
+
+  //out->data[0] = one_over_tan_half_fov / aspect_ratio;
+  //out->data[5] = one_over_tan_half_fov;
+  //out->data[10] = -(far_plane + near_plane) / plane_diff;
+  //out->data[11] = -1.f;
+  //out->data[14] = -(2.f * far_plane * near_plane) / plane_diff;
 }
 
 

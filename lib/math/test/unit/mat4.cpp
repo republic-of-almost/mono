@@ -150,6 +150,14 @@ TEST_CASE("Matrix 4x4")
     /*
       Need some valid test data for this.
     */
+
+    const math::mat4 lookat = math::mat4_lookat(
+      math::vec3_init(0,0,1),
+      math::vec3_init(0,0,0),
+      math::vec3_init(0,1,0)
+    );
+
+    int i = 0;
   }
   
   SECTION("Perspective")
@@ -157,6 +165,10 @@ TEST_CASE("Matrix 4x4")
     /*
       Need some valid test data for this.
     */
+
+    const math::mat4 proj = math::mat4_perspective(800, 480, 0.1, 100.f, math::quart_tau() * 0.75);
+
+    int i = 0;
   }
   
   SECTION("Orthographic")
