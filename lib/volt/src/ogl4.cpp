@@ -925,10 +925,10 @@ volt_renderpass_draw(volt_renderpass_t pass)
     volt_gl_stream *stream = pass->render_stream;
     volt_gl_cmd_draw_count *cmd = (volt_gl_cmd_draw_count*)volt_gl_stream_alloc(stream, sizeof(*cmd));
 
-    GLuint stride = pass->curr_input->element_stride;
-    GLuint ele_count = pass->curr_vbo->element_count;
-    GLuint count = ele_count / stride;
-    /* todo this is not calculating the count correctly */
+    const GLuint stride     = pass->curr_input->element_stride;
+    const GLuint ele_count  = pass->curr_vbo->element_count;
+    const GLuint count      = ele_count / stride;
+
     cmd->id     = volt_gl_cmd_id::draw_count;
     cmd->first  = 0;
     cmd->count  = count;
@@ -960,9 +960,9 @@ volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
   /* prepare */
   GLuint vbo{};
   const GLsizeiptr size = sizeof(float) * cmd->desc.count;
-  const GLvoid *data = cmd->desc.data;
-  const GLenum useage = GL_STATIC_DRAW;
-  const GLenum target = GL_ARRAY_BUFFER;
+  const GLvoid *data    = cmd->desc.data;
+  const GLenum useage   = GL_STATIC_DRAW;
+  const GLenum target   = GL_ARRAY_BUFFER;
 
   /* create vbo */
   glGenBuffers(1, &vbo);
@@ -989,9 +989,9 @@ volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
   /* prepare */
   GLuint ibo{};
   const GLsizeiptr size = sizeof(float) * cmd->desc.count;
-  const GLvoid *data = cmd->desc.data;
-  const GLenum useage = GL_STATIC_DRAW;
-  const GLenum target = GL_ELEMENT_ARRAY_BUFFER;
+  const GLvoid *data    = cmd->desc.data;
+  const GLenum useage   = GL_STATIC_DRAW;
+  const GLenum target   = GL_ELEMENT_ARRAY_BUFFER;
 
   /* create vbo */
   glGenBuffers(1, &ibo);
@@ -1520,7 +1520,7 @@ volt_ctx_execute(volt_ctx_t ctx)
   glEnable(GL_DEPTH_TEST);
   glViewport(0, 0, 800, 480);
   glFrontFace(GL_CCW);
-  //glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
   //glCullFace(GL_NONE);
 
   /* create resource stream  */
