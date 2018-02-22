@@ -57,9 +57,9 @@ table.insert(
     location = make.get_proj_root(),
 
     src_files = {
-      make.add_headers(make.get_proj_root() .. "../tests/func"),
-      make.add_src(make.get_proj_root() .. "../tests/func"),
-      make.add_doc(make.get_proj_root() .. "../tests/func"),
+      make.add_headers(make.get_proj_root() .. "../tests/func/"),
+      make.add_src(make.get_proj_root() .. "../tests/func/"),
+      make.add_doc(make.get_proj_root() .. "../tests/func/"),
     },
 
     public_inc_dirs = {

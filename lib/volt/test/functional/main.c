@@ -180,6 +180,7 @@ main()
     volt_index_buffer_create(ctx, &ibo, &ibo_desc);
 
     const char *vert_src = ""
+
       "/* Vert */\n"
       "#version 400 core\n"
 
@@ -214,7 +215,8 @@ main()
 
       "void main()\n"
       "{\n"
-      "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.01);\n"
+      "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), Color.r);\n"
+      //"outColor = vec4(1,1,0,1);"
       "}\n";
 
     const char *stages[2];
@@ -271,7 +273,7 @@ main()
       float x = roa_sin(time) * radius;
       float y = roa_cos(time) * radius;
 
-      roa_float3 from = roa_float3_set_with_values(x, 1.f, y);
+      roa_float3 from = roa_float3_set_with_values(x, 2.f, y);
       roa_float3 at = roa_float3_fill_with_value(0.f);
       roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
 
@@ -331,11 +333,13 @@ app_create()
   glfwInit();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
   glfwMakeContextCurrent(window);
+
+  glfwSwapInterval(GLFW_TRUE);
 
   printf("OpenGL version is (%s)\n", glGetString(GL_VERSION));
 }

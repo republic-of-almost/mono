@@ -1513,14 +1513,20 @@ volt_ctx_execute(volt_ctx_t ctx)
 {
   ROA_ASSERT(ctx);
   
-  glGetError(); /* clear msgs */
+  auto err = glGetError(); /* clear msgs */
+  ROA_ASSERT(err == 0);
 
-  //glClearColor(1, 1, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearColor(0.5, 0, 0, 1);
+
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_SCISSOR_TEST);
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  
+  
   glViewport(0, 0, 800, 480);
-  glFrontFace(GL_CCW);
-  glEnable(GL_CULL_FACE);
+  glScissor(0, 0, 800, 480);
+  //glFrontFace(GL_CCW);
+  //glEnable(GL_CULL_FACE);
   //glCullFace(GL_NONE);
 
   /* create resource stream  */

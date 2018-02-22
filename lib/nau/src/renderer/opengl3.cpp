@@ -1,6 +1,6 @@
 #include <nau/renderers/opengl3.h>
 #include <GL/gl3w.h>
-
+#include <stdint.h>
 
 /* ------------------------------------------------------------ [ Config ] -- */
 
