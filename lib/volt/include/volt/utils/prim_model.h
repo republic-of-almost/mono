@@ -9,8 +9,7 @@ extern "C" {
 
 typedef enum _volt_vert_desc {
 
-  VOLT_VERT_POS3,
-  VOLT_VERT_POS2,
+  VOLT_VERT_POSITION,
   VOLT_NORMAL,
   VOLT_UV,
 
@@ -18,16 +17,14 @@ typedef enum _volt_vert_desc {
 
 
 void
-volt_util_generate_plane(
+volt_util_generate_cube(
   volt_vert_desc *desc,
   unsigned desc_count,
-  unsigned x_size,
-  unsigned y_size,
-  unsigned subdivisions,
-  float **out_verts,
-  unsigned *out_vert_count,
-  float **out_index,
-  unsigned *out_index_count);
+  unsigned x_scale,
+  unsigned y_scale,
+  unsigned z_scale,
+  float *out_verts,
+  unsigned *out_element_count);
 
 
 #ifdef __cplusplus

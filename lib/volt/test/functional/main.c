@@ -6,6 +6,7 @@
 #include <roa_lib/dir.h>
 #include <roa_lib/assert.h>
 #include <roa_math/math.h>
+#include <volt/utils/prim_model.h>
 #include <string.h>
 
 
@@ -117,53 +118,26 @@ main()
     volt_texture_create(ctx, &texture_2, &tex_desc_2);
 
     /* vbo */
-    const float verts[] = {
-      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-
-      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-
-      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-      -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-
-      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-      0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-      -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-      -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
+    volt_vert_desc vert_desc[] = {
+      VOLT_VERT_POSITION, VOLT_NORMAL, VOLT_UV,
     };
+
+    float verts[1024];
+    unsigned vert_count = 0;
+
+    volt_util_generate_cube(
+      ROA_ARR_DATA(vert_desc),
+      ROA_ARR_COUNT(vert_desc),
+      1,
+      1,
+      1,
+      ROA_ARR_DATA(verts),
+      &vert_count
+    );
 
     struct volt_vbo_desc vbo_desc;
     vbo_desc.data = ROA_ARR_DATA(verts);
-    vbo_desc.count = ROA_ARR_COUNT(verts);
+    vbo_desc.count = vert_count;
 
     volt_vertex_buffer_create(ctx, &vbo, &vbo_desc);
 
@@ -268,12 +242,13 @@ main()
       time += 0.01f;
       float radius = 3.f;
 
-      roa_mat4_projection(&proj, ROA_QUART_TAU * 0.75, 0.1f, 10.f, 800.f / 480.f);
+      roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, 800.f / 480.f);
 
       float x = roa_sin(time) * radius;
-      float y = roa_cos(time) * radius;
+      float y = radius - (radius / ROA_G_RATIO);
+      float z = roa_cos(time) * radius;
 
-      roa_float3 from = roa_float3_set_with_values(x, 0, y);
+      roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at = roa_float3_fill_with_value(0.f);
       roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
 
