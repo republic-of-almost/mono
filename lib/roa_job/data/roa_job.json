@@ -1,0 +1,53 @@
+{
+  "name": "RepublicJob",
+  "kind": "StaticLib",
+  "language": "C++11",
+  "location": "./",
+
+  "src_files": [
+    "../src/**.cpp",
+    "../src/**.hpp",
+    "../docs/**.md",
+    "../include/**.h"
+  ],
+
+  "src_files_windows" : [
+    "../thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
+    "../thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm"
+  ],
+
+  "src_files_macos" : [
+    "../thirdparty/boost_context/asm/jump_x86_64_sysv_macho_gas.S",
+    "../thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S"
+  ],
+
+  "src_files_linux" : [
+    "../thirdparty/boost_context/asm/jump_x86_64_sysv_elf_gas.S",
+    "../thirdparty/boost_context/asm/make_x86_64_sysv_elf_gas.S"
+  ],    
+
+  "private_inc_dirs" : [
+    "../src/",
+    "../include/",
+    "../thirdparty/boost_context/include/"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/"
+  ],
+
+  "defines": [
+    "ROA_JOB_SINGLETHREADED=0",
+    "ROA_DISPATCH_MAX_FIBERS=128",
+    "ROA_DISPATCH_MAX_JOBS=1024",
+    "ROA_JOB_DEBUG_NAME_THREADS=0"
+  ],
+
+  "project_dependencies" : [
+    "RepublicLib"
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
+  ]
+}

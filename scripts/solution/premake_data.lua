@@ -169,7 +169,7 @@ make.create_solution(solution_data, project_defaults, projects)
 
     -- Generate the project data.
     project(proj.name)
-    location(proj.location)
+    location(proj.base_location .. proj.location)
     kind(proj.kind)
 
     if(proj.language == "C++") then
@@ -249,10 +249,17 @@ make.create_solution(solution_data, project_defaults, projects)
     if platform_defines then defines(platform_defines) end
 
     -- Src files
-    if proj.src_files then files(proj.src_files) end
+    local _files = {};
+    table.insert(_files, proj.src_files)
+    table.insert(_files, find_table_with_platform(proj, "src_files"))
+    _files = table.flatten(_files)
 
-    local platform_src = find_table_with_platform(proj, "src_files")
-    if platform_src then files(platform_src) end
+    for i,v in ipairs(_files) do
+      _files[i] = proj.base_location .. "/" .. v
+      print("FILE: " .. proj.base_location .. "/" .. v)
+    end
+    
+    if _files then files(_files) end
 
     -- Excludes
     if proj.src_files_exclude then excludes(proj.src_files_exclude) end
@@ -260,17 +267,22 @@ make.create_solution(solution_data, project_defaults, projects)
     local platform_exclude = find_table_with_platform(proj, "src_files_exclude")
     if platform_exclude then excludes(platform_exclude) end
 
-    -- Public include dirs
-    if proj.public_inc_dirs then includedirs(proj.public_inc_dirs) end
+    -- include dirs (pub and private)
+    local _inc_dirs = {};
+    table.insert(_inc_dirs, proj.public_inc_dirs)
+    table.insert(_inc_dirs, find_table_with_platform(proj, "public_inc_dirs"))
+    table.insert(_inc_dirs, proj.private_inc_dirs)
+    table.insert(_inc_dirs, find_table_with_platform(proj, "private_inc_dirs"))
 
-    local platform_inc_dirs = find_table_with_platform(proj, "public_inc_dirs")
-    if platform_inc_dirs then includedirs(platform_inc_dirs) end
+    _inc_dirs = table.flatten(_inc_dirs)
 
-    -- Private include dirs
-    if proj.private_inc_dirs then includedirs(proj.private_inc_dirs) end
+    if _inc_dirs then 
+      for i,v in ipairs(_inc_dirs) do
+        _inc_dirs[i] = proj.base_location .. "/" .. v
+      end    
 
-    local platform_inc_dirs = find_table_with_platform(proj, "private_inc_dirs")
-    if platform_inc_dirs then includedirs(platform_inc_dirs) end
+      includedirs(_inc_dirs)
+    end
 
     -- Library directories
     if proj.lib_dirs then libdirs(proj.lib_dirs) end
@@ -351,6 +363,20 @@ make.create_solution(solution_data, project_defaults, projects)
               end
 
               -- Include dirs
+              local _dep_inc_dirs = {}
+              table.insert(_dep_inc_dirs, other_proj.public_inc_dirs)
+              table.insert(_dep_inc_dirs, find_table_with_platform(other_proj, "public_inc_dirs"))
+              _dep_inc_dirs = table.flatten(_dep_inc_dirs)
+
+              if _dep_inc_dirs then 
+                for i,v in ipairs(_dep_inc_dirs) do
+                  _dep_inc_dirs[i] = other_proj.base_location .. "/" .. v
+                end    
+
+                includedirs(_dep_inc_dirs)
+              end
+
+
               if other_proj.public_inc_dirs then includedirs(other_proj.public_inc_dirs) end
               local platform_inc_dirs = find_table_with_platform(other_proj, "public_inc_dirs")
               if platform_inc_dirs then includedirs(platform_inc_dirs) end

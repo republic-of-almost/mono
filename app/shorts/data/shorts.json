@@ -1,0 +1,26 @@
+{
+  "name": "AppShorts",
+  "kind": "ConsoleApp",
+  "language": "C++14",
+  "location": "./",
+
+  "lang_settings": {
+    "exceptions": true,
+    "rtti": true
+  },
+
+  "src_files": [
+    "../src/**.cpp",
+    "../src/**.hpp",
+    "../docs/**.md"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "project_dependencies": [
+    "RepublicJob",
+    "RepublicCtx"
+  ]
+}

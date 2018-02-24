@@ -80,6 +80,8 @@ main()
     strcat(file_path_01, roa_exe_path());
     strcat(file_path_01, "assets/volt_func/dev_tex_01.png");
 
+    stbi_set_flip_vertically_on_load(1);
+
     tex_desc_1.data = (void*)stbi_load(
       file_path_01,
       &x,
@@ -189,7 +191,7 @@ main()
 
       "void main()\n"
       "{\n"
-      "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), Color.r);\n"
+      "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.05);\n"
       //"outColor = vec4(1,1,0,1);"
       "}\n";
 
@@ -311,7 +313,7 @@ app_create()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  window = glfwCreateWindow(800, 480, "My Title", NULL, NULL);
+  window = glfwCreateWindow(800, 480, "Volt Func Test", NULL, NULL);
   glfwMakeContextCurrent(window);
 
   glfwSwapInterval(GLFW_TRUE);

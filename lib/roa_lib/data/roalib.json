@@ -1,0 +1,36 @@
+{
+  "name": "RepublicLib",
+  "kind": "StaticLib",
+  "language": "C89",
+  "location": "./",
+
+  "src_files" : [
+    "../include/**.h",
+    "../src/**.c"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/"
+  ],
+
+  "link_dependencies_linux": [
+    "pthread"
+  ],
+
+  "defines_linux" : [
+    "_GNU_SOURCE"
+  ],
+
+  "link_dependencies_windows" : [
+    "Kernel32.lib"
+  ],
+
+  "defines_windows" : [
+    "WIN32_LEAN_AND_MEAN",
+    "NOMINMAX"
+  ],
+
+  "defines" : [
+    "ROA_JOB_DEBUG_NAME_THREADS=1"
+  ]
+}
