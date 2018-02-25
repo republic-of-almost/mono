@@ -1,0 +1,20 @@
+{
+  "name": "RepublicMathUnitTest",
+  "kind": "ConsoleApp",
+  "language": "C++",
+  "location": "./",
+
+  "lang_settings": {
+    "exceptions": true,
+    "rtti": true
+  },
+
+  "src_files" : [
+    "../test/unit/*.cpp"
+  ],
+
+  "project_dependencies" : [
+    "RepublicMath",
+    "Catch"
+  ]
+}

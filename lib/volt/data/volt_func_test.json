@@ -1,0 +1,27 @@
+{
+  "name": "VoltFunctionalTests",
+  "kind": "ConsoleApp",
+  "language": "C89",
+  "location": "./",
+
+  "assets": [
+    "../assets/"
+    ],
+
+  "src_files": [
+    "../test/functional/**.c",
+    "../test/functional/**.h"
+  ],
+
+  "public_inc_dirs" : [
+    "../"
+  ],
+
+  "project_dependencies" : [
+    "Volt",
+    "RepublicMath",
+    "STB",
+    "GLFW",
+    "MMX"
+  ]
+}

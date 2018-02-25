@@ -36,7 +36,7 @@ TEST_CASE("Time")
   	roa_sleep_ms(sleep_time);
   	unsigned long ms2 = roa_time_get_current_ms();
 
-		unsigned long delta = ms2 - ms1;
+    unsigned long delta = ms2 - ms1;
 
   	if(ROA_IS_ENABLED(ROALIB_TEST_OUTPUT_SANITY))
   	{
@@ -46,8 +46,8 @@ TEST_CASE("Time")
   	long error_upper = sleep_time + 4;
   	long error_lower = sleep_time - 4;
 
-  	REQUIRE(delta < error_upper);
-  	REQUIRE(delta > error_lower);
+  	REQUIRE((long)delta < error_upper);
+  	REQUIRE((long)delta > error_lower);
   }
 }
 

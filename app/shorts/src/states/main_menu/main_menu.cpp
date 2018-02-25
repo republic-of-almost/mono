@@ -5,12 +5,14 @@
 namespace {
 
 
-
 };
 
 
 ROA_JOB(main_menu_setup, app_data*)
 {
+  ROA_UNUSED(arg);
+  ROA_UNUSED(job_ctx);
+
   /* setup menu stuff */
   
 
@@ -23,6 +25,9 @@ ROA_JOB(main_menu_setup, app_data*)
 
 ROA_JOB(main_menu_tick, app_data*)
 {
+  ROA_UNUSED(arg);
+  ROA_UNUSED(job_ctx);
+
   /* tick menu stuff */
 
   /* do stuff submit to renderer */
@@ -34,6 +39,9 @@ ROA_JOB(main_menu_tick, app_data*)
 
 ROA_JOB(main_menu_shutdown, app_data*)
 {
+  ROA_UNUSED(arg);
+  ROA_UNUSED(job_ctx);
+
   /* shutdown menu stuff */
   
 }

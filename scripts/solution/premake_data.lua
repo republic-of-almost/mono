@@ -438,40 +438,20 @@ make.create_solution(solution_data, project_defaults, projects)
       end
 
       -- RTTI --
-      local enable_rtti = false
+      local _enable_rtti = "Off"
       if proj.lang_settings then
-        if proj.lang_settings.rtti then enable_rtti = true end
+        if proj.lang_settings.rtti then _enable_rtti = "On" end
       end
 
-      if rtti ~= nil then
-        val = "On";
-
-        if enable_rtti == false then
-          val = "Off"
-        end
-
-        rtti(val)
-      else
-        flags("NoRTTI"); -- deprecated premake5
-      end
+      rtti(_enable_rtti)
 
       -- Exceptions --
-      local enable_exceptions = false
+      local _enable_exceptions = "Off"
       if proj.lang_settings then
-        if proj.lang_settings.exceptions then exceptions = true end
+        if proj.lang_settings.exceptions then _enable_exceptions = "On" end
       end
 
-      if exceptionhandling ~= nil then
-        val = "On"
-
-        if enable_exceptions == false then
-          val = "Off"
-        end
-
-        exceptionhandling(val)
-      else
-        flags("NoExceptions") -- deprecated premake5
-      end
+      exceptionhandling(_enable_exceptions)
 
       -- Asset directories get copied to build --
       function

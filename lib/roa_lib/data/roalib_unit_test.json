@@ -1,0 +1,25 @@
+{
+  "name": "RepublicLibUnitTest",
+  "kind": "ConsoleApp",
+  "language": "C++",
+  "location": "./",
+
+  "lang_settings" : {
+    "exceptions": true,
+    "rtti": true
+  },
+
+  "src_files" : [
+    "../test/unit/**.cpp",
+    "../test/unit/**.hpp"
+  ],
+
+  "project_dependencies" : [
+    "RepublicLib",
+    "Catch"
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
+  ]  
+}

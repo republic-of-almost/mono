@@ -1,0 +1,20 @@
+{
+  "name": "Catch",
+  "kind": "StaticLib",
+  "language": "C++",
+  "location": "./",
+
+  "lang_settings" : {
+    "no_link" : true
+  },
+
+  "src_files" : [
+    "../include/**.h",
+    "../include/**.hpp",
+    "../doc/**.md"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/"
+  ]
+}

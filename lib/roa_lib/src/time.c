@@ -22,7 +22,7 @@ roa_time_get_current_ms()
   #elif defined(_WIN32)
   struct _timeb timebuffer;
   _ftime64_s(&timebuffer);
-  return (timebuffer.time * 1000L) + timebuffer.millitm;
+  return (unsigned long)((timebuffer.time * 1000L) + timebuffer.millitm);
   #endif
 }
 

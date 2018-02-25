@@ -1,0 +1,16 @@
+{
+  "name": "RepublicMath",
+  "kind": "StaticLib",
+  "language": "C++",
+  "location": "./",
+
+  "src_files" : [
+    "../include/**.h",
+    "../src/**.cpp",
+    "../docs/**.md"
+  ],
+
+  "public_inc_dirs": [
+    "../include"
+  ]
+}

@@ -14,8 +14,7 @@ roa_dlib_open(
   const char *name)
 {
   #ifdef _WIN32
-  const TCHAR *win_char(name);
-  return (void*)LoadLibrary(win_char);
+  return (void*)LoadLibrary((const TCHAR*)name);
   #else
   dlopen(name, RTLD_LAZY);
   #endif
@@ -28,7 +27,7 @@ roa_dlib_get_address(
   const char *name)
 {
   #ifdef _WIN32
-  return GetProcAddress((HMODULE)handle, name);
+  return (void*)GetProcAddress((HMODULE)handle, (LPCSTR)name);
   #else
   return dlsym(handle, name);
   #endif

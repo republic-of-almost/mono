@@ -2,6 +2,7 @@
 #include <roa_job/dispatcher.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_lib/array.h>
+#include <roa_lib/fundamental.h>
 
 
 /* ----------------------------------------------- [ Shorts Entry Point ] -- */
@@ -12,6 +13,9 @@
 int
 main(int argc, char *argv[])
 {
+  ROA_UNUSED(argc);
+  ROA_UNUSED(argv);
+
   /* create application data */
   app_data data{};
   roa_array_create(data.logic_updates, 16);

@@ -320,9 +320,9 @@ roa_mat4_multiply(roa_mat4 *out, roa_mat4 *a, roa_mat4 *b)
 
 
 void
-roa_mat4_multiply_three(roa_mat4 *out, roa_mat4 *a, roa_mat4 *b, roa_mat4 *c)
+roa_mat4_multiply_three(roa_mat4 *, roa_mat4 *, roa_mat4 *, roa_mat4 *)
 {
-
+  
 }
 
 

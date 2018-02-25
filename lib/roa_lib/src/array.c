@@ -1,6 +1,7 @@
 #include <roa_lib/array.h>
 #include <roa_lib/alloc.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 /* -------------------------------------------------------- [ Array Impl ] -- */
@@ -62,8 +63,8 @@ roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
 
     return curr_arr;
   }
-  /* new */
-  else
+
+  /* else new */
   {
     size_t bytes = sizeof(struct roa_array_internal) + (stride * capacity);
     struct roa_array_internal *new_arr = (struct roa_array_internal*)roa_zalloc(bytes);
@@ -75,8 +76,6 @@ roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
 
     return new_arr;
   }
-
-  return 0;
 }
 
 unsigned

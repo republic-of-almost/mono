@@ -32,5 +32,9 @@
 
   "defines" : [
     "ROA_JOB_DEBUG_NAME_THREADS=1"
-  ]
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
+  ]  
 }

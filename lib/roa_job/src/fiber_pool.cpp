@@ -161,7 +161,7 @@ roa_fiber_pool_next_free(struct roa_fiber_pool_ctx *ctx)
   
   if(count)
   {
-    next = *roa_array_back(free);
+    next = roa_array_back(free);
     
     roa_array_pop(free);
   }

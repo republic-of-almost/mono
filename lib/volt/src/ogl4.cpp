@@ -575,6 +575,8 @@ volt_uniform_update(
   volt_uniform_t uniform,
   void *data)
 {
+  ROA_UNUSED(ctx);
+
   uniform->value = data;
 }
 

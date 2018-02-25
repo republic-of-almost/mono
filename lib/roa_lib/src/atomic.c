@@ -1,4 +1,5 @@
 #include <roa_lib/atomic.h>
+#include <roa_lib/fundamental.h>
 
 
 #if defined(_WIN32)
@@ -21,7 +22,7 @@ roa_atomic_int_load(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_add(&atomic->val, 0);
 	#elif defined(_WIN32)
-	return InterlockedCompareExchange(&atomic->val, 0, 0);
+	return InterlockedCompareExchange((LONG*)&atomic->val, 0, 0);
 	#endif
 }
 
@@ -47,7 +48,7 @@ roa_atomic_int_store(
 	atomic->val = val;
 
 	#elif defined(_WIN32)
-	InterlockedExchange(&atomic->val, val);
+	InterlockedExchange((LONG*)&atomic->val, val);
 	#endif
 }
 
@@ -59,7 +60,7 @@ roa_atomic_int_inc(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_add(&atomic->val, 1);
 	#elif defined(_WIN32)
-  return InterlockedIncrement(&atomic->val) - 1;
+  return InterlockedIncrement((LONG*)&atomic->val) - 1;
 	#endif
 }
 
@@ -71,7 +72,7 @@ roa_atomic_int_dec(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_sub(&atomic->val, 1);
 	#elif defined(_WIN32)
-  return InterlockedDecrement(&atomic->val) + 1;
+  return InterlockedDecrement((LONG*)&atomic->val) + 1;
 	#endif
 }
 
@@ -84,7 +85,7 @@ roa_atomic_int_add(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_add(&atomic->val, add);
 	#elif defined(_WIN32)
-  return InterlockedExchangeAdd(&atomic->val, add);
+  return InterlockedExchangeAdd((LONG*)&atomic->val, add);
 	#endif
 }
 
@@ -97,7 +98,7 @@ roa_atomic_int_sub(
 	#if defined(__clang__) || defined(__GNUC__)
 	return (int)__sync_fetch_and_sub(&atomic->val, sub);
 	#elif defined(_WIN32)
-  return InterlockedExchangeAdd(&atomic->val, -sub);
+  return InterlockedExchangeAdd((LONG*)&atomic->val, -sub);
 	#endif
 }
 
@@ -120,7 +121,7 @@ roa_atomic_int_swap(
   /*__sync_lock_release(&atomic->val);*/
 	return old;
 	#elif defined(_WIN32)
-  return InterlockedExchange(&atomic->val, swap);
+  return InterlockedExchange((LONG*)&atomic->val, swap);
 	#endif
 }
 
@@ -128,13 +129,13 @@ roa_atomic_int_swap(
 int
 roa_atomic_int_compare_and_swap(
 	roa_atomic_int *atomic,
-	int old_value,
+	int compare,
 	int new_value)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	return (int)__sync_val_compare_and_swap(&atomic->val, old_value, new_value);
+	return (int)__sync_val_compare_and_swap(&atomic->val, compare, new_value);
 	#elif defined(_WIN32)
-  return InterlockedCompareExchange(&atomic->val, old_value, new_value);
+  return InterlockedCompareExchange((LONG*)&atomic->val, new_value, compare);
 	#endif
 }
 
@@ -144,12 +145,14 @@ roa_atomic_int_compare_and_swap(
 
 void*
 roa_atomic_ptr_load(
-	roa_atomic_ptr *tomic)
+	roa_atomic_ptr *atomic)
 {
-	#if defined(__clang__) || defined(__GNUC__)
-	
-	#elif defined(_WIN32)
+  ROA_UNUSED(atomic);
 
+	#if defined(__clang__) || defined(__GNUC__)
+  return ROA_NULL;
+	#elif defined(_WIN32)
+  return ROA_NULL;
 	#endif
 }
 
@@ -159,6 +162,9 @@ roa_atomic_ptr_store(
 	roa_atomic_ptr *atomic,
 	void *value)
 {
+  ROA_UNUSED(atomic);
+  ROA_UNUSED(value);
+
 	#if defined(__clang__) || defined(__GNUC__)
 	
 	#elif defined(_WIN32)
@@ -172,10 +178,13 @@ roa_atomic_ptr_swap(
 	roa_atomic_ptr *atomic,
 	void *value)
 {
-	#if defined(__clang__) || defined(__GNUC__)
-	
-	#elif defined(_WIN32)
+  ROA_UNUSED(atomic);
+  ROA_UNUSED(value);
 
+	#if defined(__clang__) || defined(__GNUC__)
+  return ROA_NULL;
+	#elif defined(_WIN32)
+  return ROA_NULL;
 	#endif
 }
 
@@ -186,10 +195,14 @@ roa_atomic_ptr_compare_and_swap(
 	void *old_value,
 	void *new_value)
 {
-	#if defined(__clang__) || defined(__GNUC__)
-	
-	#elif defined(_WIN32)
+  ROA_UNUSED(atomic);
+  ROA_UNUSED(old_value);
+  ROA_UNUSED(new_value);
 
+	#if defined(__clang__) || defined(__GNUC__)
+  return ROA_NULL;
+	#elif defined(_WIN32)
+  return ROA_NULL;
 	#endif
 }
 

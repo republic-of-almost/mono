@@ -64,9 +64,9 @@ volt_util_generate_cube(
   const unsigned index_count = ROA_ARR_COUNT(raw_index);
   ROA_ASSERT(index_count % 3 == 0);
 
-  for (int i = 0; i < index_count; i += 3)
+  for (unsigned i = 0; i < index_count; i += 3)
   {
-    for (int j = 0; j < desc_count; ++j)
+    for (unsigned j = 0; j < desc_count; ++j)
     {
       if (desc[j] == VOLT_VERT_POSITION)
       {
@@ -74,9 +74,9 @@ volt_util_generate_cube(
         
         if(out_verts)
         {
-          out_verts[ele_count + 0] = raw_pos_data[position_index + 0];
-          out_verts[ele_count + 1] = raw_pos_data[position_index + 1];
-          out_verts[ele_count + 2] = raw_pos_data[position_index + 2];
+          out_verts[ele_count + 0] = raw_pos_data[position_index + 0] * x_scale;
+          out_verts[ele_count + 1] = raw_pos_data[position_index + 1] * y_scale;
+          out_verts[ele_count + 2] = raw_pos_data[position_index + 2] * z_scale;
         }
 
         ele_count += 3;

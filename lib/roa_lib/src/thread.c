@@ -20,6 +20,7 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+#include <process.h>
 const DWORD MS_VC_EXCEPTION = 0x406D1388;
 #pragma pack( push, 8 )
 typedef struct tagTHREADNAME_INFO
@@ -65,10 +66,13 @@ roa_thread_create(
   return (roa_thread)th;
 
   #elif defined(_WIN32)
+  ROA_UNUSED(core_affinity);
+  ROA_UNUSED(stack_size);
+
   HANDLE handle = (HANDLE)(_beginthreadex(
     NULL,
     524288,
-    func,
+    (_beginthreadex_proc_type)func,
     arg,
     0,
     NULL)

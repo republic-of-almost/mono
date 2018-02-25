@@ -2,6 +2,7 @@
 #include <roa_lib/alloc.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/log.h>
+#include <roa_lib/fundamental.h>
 #include <GLFW/glfw3.h>
 
 
@@ -14,6 +15,8 @@ struct roa_ctx
 void
 roa_ctx_err_callback(int error, const char *desc)
 {
+  ROA_UNUSED(error);
+
   roa_log(ROA_LOG_ERR, desc);
 }
 
@@ -86,7 +89,8 @@ roa_ctx_get_window_desc(
   roa_ctx_t ctx,
   struct roa_ctx_window_desc *out_desc)
 {
-  
+  ROA_UNUSED(ctx);
+  ROA_UNUSED(out_desc);
 }
 
 
@@ -95,5 +99,6 @@ roa_ctx_set_window_desc(
   roa_ctx_t ctx,
   const struct roa_ctx_window_desc *desc)
 {
-  
+  ROA_UNUSED(ctx);
+  ROA_UNUSED(desc);
 }

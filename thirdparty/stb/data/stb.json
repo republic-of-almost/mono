@@ -1,0 +1,20 @@
+{
+  "name": "STB",
+  "kind": "StaticLib",
+  "language": "C",
+  "location": "./",
+
+  "src_files": [
+    "../include/**.h",
+    "../src/**.c",
+    "../docs/**.md"
+  ],
+
+  "public_inc_dirs": [
+    "../include/"
+  ],
+
+  "defines_windows": [
+    "_CRT_SECURE_NO_WARNINGS"
+  ]
+}

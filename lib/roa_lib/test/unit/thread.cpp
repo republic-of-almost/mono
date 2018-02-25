@@ -23,6 +23,8 @@
 void*
 test(void *arg)
 {
+  ROA_UNUSED(arg);
+
 	if(ROA_IS_ENABLED(ROALIB_TEST_OUTPUT_SANITY))
 	{
 		printf("hi from thread \n");
@@ -35,6 +37,8 @@ test(void *arg)
 void*
 exit_th(void *arg)
 {
+  ROA_UNUSED(arg);
+
 	/* this loop should only happen once */
 	while(true)
 	{
@@ -98,6 +102,8 @@ TEST_CASE("Thread Test")
 			and you should only see one line of output from exit_th func
   	*/
   	roa_thread th = roa_thread_create(exit_th, 0, 0, 0);
+    ROA_UNUSED(th);
+
   	REQUIRE(true);
   }
 

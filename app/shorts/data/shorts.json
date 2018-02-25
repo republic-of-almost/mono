@@ -4,11 +4,6 @@
   "language": "C++14",
   "location": "./",
 
-  "lang_settings": {
-    "exceptions": true,
-    "rtti": true
-  },
-
   "src_files": [
     "../src/**.cpp",
     "../src/**.hpp",

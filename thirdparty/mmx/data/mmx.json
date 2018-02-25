@@ -1,0 +1,21 @@
+{
+  "name": "MMX",
+  "kind": "StaticLib",
+  "language": "C",
+  "ignore_defaults": true,
+  "location": "./",
+
+  "src_files" : [
+    "../include/**.h",
+    "../src/**.c",
+    "../docs/**.md"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/"
+  ],
+
+  "private_inc_dirs" : [
+    "../include/json"
+  ]
+}

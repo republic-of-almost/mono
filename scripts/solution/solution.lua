@@ -20,20 +20,8 @@ solution_data = {
   name = "RepublicOfAlmost",
 }
 
-
 -- Find the projects for the solution and add them --
---proj_matches = os.matchfiles("../../**.project")
---test_matches = os.matchfiles("../../**.test_project")
 project_files = os.matchfiles("../../**.json")
-
--- for i, proj in ipairs(proj_matches) do
---   dofile(proj)
--- end
-
--- for i, proj in ipairs(test_matches) do
---   dofile(proj)
--- end
-
 
 if project_files then
 

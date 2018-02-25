@@ -1,0 +1,40 @@
+{
+  "name": "Volt",
+  "kind": "StaticLib",
+  "language": "C++14",
+  "location": "./",
+
+  "src_files" : [
+    "../include/**.h",
+    "../src/**.hpp",
+    "../src/**.h",
+    "../src/**.cpp",
+    "../docs/**.md"
+  ],
+
+  "public_inc_dirs": [
+    "../include/",
+    "C:/VulkanSDK/1.0.65.1/Include"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "lib_dirs": [
+    "C:/VulkanSDK/1.0.65.1/Lib32"
+  ],
+
+  "defines": [
+    "VOLT_GL4"
+  ],
+
+  "link_dependencies_windows" : [
+    "vulkan-1.lib"
+  ],
+
+  "project_dependencies" : [
+    "RepublicLib",
+    "OpenGL"
+  ]
+}
