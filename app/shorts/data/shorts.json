@@ -1,12 +1,12 @@
 {
   "name": "AppShorts",
   "kind": "ConsoleApp",
-  "language": "C++14",
+  "language": "C89",
   "location": "./",
 
   "src_files": [
-    "../src/**.cpp",
-    "../src/**.hpp",
+    "../src/**.c",
+    "../src/**.h",
     "../docs/**.md"
   ],
 

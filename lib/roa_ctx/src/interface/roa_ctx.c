@@ -99,6 +99,9 @@ roa_ctx_set_window_desc(
   roa_ctx_t ctx,
   const struct roa_ctx_window_desc *desc)
 {
-  ROA_UNUSED(ctx);
-  ROA_UNUSED(desc);
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(ctx->window);
+
+  glfwSetWindowSize(ctx->window, desc->width, desc->height);
+  glfwSetWindowTitle(ctx->window, desc->title);
 }

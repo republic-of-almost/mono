@@ -1,0 +1,11 @@
+#ifndef LOGN_INTERFACE_INCLUDED_93440685_C595_4B40_8439_1E2526DEC88E
+#define LOGN_INTERFACE_INCLUDED_93440685_C595_4B40_8439_1E2526DEC88E
+
+
+#include <roa_job/dispatcher.h>
+
+
+ROA_JOB_DECL(logn_startup);
+
+
+#endif /* inc guard */

@@ -9,7 +9,7 @@
     "../src/**.hpp",
     "../src/**.h",
     "../src/**.cpp",
-    "../docs/**.md"
+    "../doc/**.md"
   ],
 
   "public_inc_dirs": [

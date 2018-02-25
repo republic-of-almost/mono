@@ -4,6 +4,7 @@
 #include <volt/volt.h>
 #include <roa_lib/fundamental.h>
 #include <roa_lib/dir.h>
+#include <roa_lib/dir.h>
 #include <roa_lib/assert.h>
 #include <roa_math/math.h>
 #include <volt/utils/prim_model.h>
@@ -210,7 +211,7 @@ main()
 
     volt_program_create(ctx, &program, &shd_desc);
 
-    const volt_input_attribute input_fmt[] = {
+    volt_input_attribute input_fmt[] = {
       VOLT_INPUT_FLOAT3, /* pos */
       VOLT_INPUT_FLOAT3, /* color */
       VOLT_INPUT_FLOAT2, /* tex c */
@@ -241,7 +242,7 @@ main()
     /* create mats */
     {
       static float time = 0.1f;
-      time += 0.01f;
+      
       float radius = 3.f;
 
       roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, 800.f / 480.f);

@@ -35,7 +35,6 @@ struct roa_ctx_window_desc
 {
   int width;
   int height;
-  ROA_BOOL fullscreen;
   const char *title;
 };
 

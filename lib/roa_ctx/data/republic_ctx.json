@@ -6,8 +6,8 @@
 
   "src_files": [
     "../src/**.c",
-    "../src/*.h",
-    "../include/*.h",
+    "../src/**.h",
+    "../include/**.h",
     "../docs/**.md"
   ],
 

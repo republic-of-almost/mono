@@ -55,6 +55,7 @@ typedef int ROA_BOOL;
 
 
 #define ROA_UNUSED(x) (void)(x)
+#define ROA_MEM_ZERO(var) do { unsigned i; for(i = 0; i < sizeof(var); ++i) {((unsigned char *) &var)[i] = 0;} } while(0)
 
 
 #ifdef __cplusplus
