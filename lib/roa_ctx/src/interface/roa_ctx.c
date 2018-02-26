@@ -42,6 +42,7 @@ roa_ctx_create(roa_ctx_t *ctx)
       new_ctx->window = win;
 
       glfwMakeContextCurrent(win);
+      glfwSwapInterval(1);
 
       *ctx = new_ctx;
     }

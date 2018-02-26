@@ -1516,7 +1516,7 @@ volt_ctx_execute(volt_ctx_t ctx)
   ROA_ASSERT(ctx);
   
   auto err = glGetError(); /* clear msgs */
-  ROA_ASSERT(err == 0);
+  //ROA_ASSERT(err == 0);
 
   glClearColor(0.5, 0, 0, 1);
 

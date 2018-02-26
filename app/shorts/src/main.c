@@ -1,4 +1,5 @@
 #include <roa_lib/fundamental.h>
+#include <roa_lib/array.h>
 #include <roa_job/dispatcher.h>
 #include <common/app_data.h>
 #include <common/app_lifetime.h>
@@ -16,7 +17,11 @@ main(int argc, char **argv)
   struct shorts_app_data app_data;
   ROA_MEM_ZERO(app_data);
 
-  roa_spin_lock_init(&app_data.job_spin_lock);
+  /* initalize app data */
+  roa_spin_lock_init(&app_data.think_lock);
+  roa_spin_lock_init(&app_data.render_lock);
+  roa_array_create(app_data.render_jobs, 32);
+  roa_array_create(app_data.think_jobs, 32);
 
   /* start job dispatcher */
   roa_dispatcher_create(&app_data.dispatcher_ctx, ROA_NULL);

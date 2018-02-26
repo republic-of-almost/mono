@@ -4,9 +4,27 @@
 
 #include <roa_job/dispatcher.h>
 
+struct shorts_app_data;
 
 ROA_JOB_DECL(app_startup);
-ROA_JOB_DECL(app_add_ticker);
+
+
+struct app_thinker_data_arg
+{
+  struct shorts_app_data *app_data;
+  struct roa_job_desc desc;
+};
+
+ROA_JOB_DECL(app_add_thinker);
+
+
+struct app_renderer_data_arg
+{
+  struct shorts_app_data *app_data;
+  struct roa_job_desc desc;
+};
+
+ROA_JOB_DECL(app_add_renderer);
 
 
 #endif /* inc guard */

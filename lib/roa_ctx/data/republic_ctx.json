@@ -21,6 +21,7 @@
 
   "project_dependencies": [
     "RepublicLib",
+    "Volt",
     "GLFW"
   ]
 }
