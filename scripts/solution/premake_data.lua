@@ -258,7 +258,7 @@ make.create_solution(solution_data, project_defaults, projects)
       _files[i] = proj.base_location .. "/" .. v
       print("FILE: " .. proj.base_location .. "/" .. v)
     end
-    
+
     if _files then files(_files) end
 
     -- Excludes
@@ -276,10 +276,10 @@ make.create_solution(solution_data, project_defaults, projects)
 
     _inc_dirs = table.flatten(_inc_dirs)
 
-    if _inc_dirs then 
+    if _inc_dirs then
       for i,v in ipairs(_inc_dirs) do
         _inc_dirs[i] = proj.base_location .. "/" .. v
-      end    
+      end
 
       includedirs(_inc_dirs)
     end
@@ -307,6 +307,9 @@ make.create_solution(solution_data, project_defaults, projects)
 
     -- dependencies --
     -- Helper to allow us to recursivly get the dependencies --
+    asset_dependencies = {}
+    table.insert(asset_dependencies, proj);
+
     function
     get_dependencies(proj, orig_proj, padding)
 
@@ -328,6 +331,8 @@ make.create_solution(solution_data, project_defaults, projects)
 
               -- Projects can be marked no link
               -- But still want to bring in header files etc.
+
+              table.insert(asset_dependencies, dep);
 
               link = true;
               if other_proj.no_link == true then link = false end -- deprecated
@@ -368,10 +373,10 @@ make.create_solution(solution_data, project_defaults, projects)
               table.insert(_dep_inc_dirs, find_table_with_platform(other_proj, "public_inc_dirs"))
               _dep_inc_dirs = table.flatten(_dep_inc_dirs)
 
-              if _dep_inc_dirs then 
+              if _dep_inc_dirs then
                 for i,v in ipairs(_dep_inc_dirs) do
                   _dep_inc_dirs[i] = other_proj.base_location .. "/" .. v
-                end    
+                end
 
                 includedirs(_dep_inc_dirs)
               end
@@ -488,7 +493,7 @@ make.create_solution(solution_data, project_defaults, projects)
 
       end
 
-      for j, asset_proj in ipairs(projects) do
+      for j, asset_proj in ipairs(asset_dependencies) do
         if(asset_proj.assets) then
           for k, asset_dir in ipairs(asset_proj.assets) do
             if asset_dir then
