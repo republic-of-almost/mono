@@ -1,6 +1,4 @@
-#define VOLT_OGL4
-
-#ifdef VOLT_OGL4
+#if defined(VOLT_OGL4) && VOLT_OGL4 == 1
 
 #include <volt/volt.h>
 #include <GL/gl3w.h>
@@ -8,7 +6,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdint>
 
 

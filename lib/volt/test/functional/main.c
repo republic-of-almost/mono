@@ -169,21 +169,22 @@ main()
       "uniform mat4 view;\n"
       "uniform mat4 proj;\n"
 
-      "out vec3 Color;\n"
-      "out vec2 Texcoord;\n"
+      "out vec3 oColor;\n"
+      "out vec2 oTexcoord;\n"
 
       "void main() {\n"
-      "Color = color;\n"
-      "Texcoord = texcoord;\n"
-      "mat4 wvp = proj * view * model;\n"
+      "mat4 world = mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);\n"
+      "mat4 wvp = proj * view * world;\n"
+      "oColor = color;\n"
+      "oTexcoord = texcoord;\n"
       "gl_Position = wvp * vec4(position, 1.0);\n"
       "}\n";
 
     const char* frag_src = ""
       "/* Frag */\n"
       "#version 400 core\n"
-      "in vec3 Color;\n"
-      "in vec2 Texcoord;\n"
+      "in vec3 oColor;\n"
+      "in vec2 oTexcoord;\n"
 
       "uniform sampler2D texKitten;\n"
       "uniform sampler2D texPuppy;\n"
@@ -192,7 +193,7 @@ main()
 
       "void main()\n"
       "{\n"
-      "outColor = mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.05);\n"
+      "outColor = mix(texture(texKitten, oTexcoord), texture(texPuppy, oTexcoord), 0.05);\n"
       //"outColor = vec4(1,1,0,1);"
       "}\n";
 

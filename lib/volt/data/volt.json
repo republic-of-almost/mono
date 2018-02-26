@@ -26,11 +26,7 @@
   ],
 
   "defines": [
-    "VOLT_GL4"
-  ],
-
-  "link_dependencies_windows" : [
-    "vulkan-1.lib"
+    "VOLT_OGL4=1"
   ],
 
   "project_dependencies" : [

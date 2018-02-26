@@ -33,6 +33,10 @@ roa_ctx_create(roa_ctx_t *ctx)
   {
     glfwSetErrorCallback(roa_ctx_err_callback);
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     GLFWwindow *win = glfwCreateWindow(800, 600, "ROA Application", NULL, NULL);
 
     if (win)
@@ -42,7 +46,7 @@ roa_ctx_create(roa_ctx_t *ctx)
       new_ctx->window = win;
 
       glfwMakeContextCurrent(win);
-      glfwSwapInterval(1);
+      glfwSwapInterval(GLFW_TRUE);
 
       *ctx = new_ctx;
     }
