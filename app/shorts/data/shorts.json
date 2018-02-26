@@ -4,6 +4,10 @@
   "language": "C89",
   "location": "./",
 
+  "assets": [
+    "../assets/"
+  ],
+
   "src_files": [
     "../src/**.c",
     "../src/**.h",

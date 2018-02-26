@@ -2,8 +2,6 @@
 #include <roa_lib/fundamental.h>
 #include <common/app_data.h>
 #include <common/app_lifetime.h>
-#include <stdio.h>
-
 
 
 ROA_JOB(logn_think, struct shorts_app_data*)
@@ -11,7 +9,6 @@ ROA_JOB(logn_think, struct shorts_app_data*)
   ROA_UNUSED(job_ctx);
   ROA_UNUSED(arg);
 
-  printf("logn think\n");
 
   /* think about logn */
 }
@@ -22,7 +19,6 @@ ROA_JOB(logn_render, struct shorts_app_data*)
   ROA_UNUSED(job_ctx);
   ROA_UNUSED(arg);
 
-  printf("logn render\n");
 
   /* render data */
 }

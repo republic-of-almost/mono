@@ -88,6 +88,7 @@ ROA_JOB(app_startup, struct shorts_app_data*)
   
   /* start frame and inital state */
   struct roa_job_desc frame_desc[2];
+
   frame_desc[0].arg = (void*)arg;
   frame_desc[0].func = app_frame;
   frame_desc[0].keep_on_calling_thread = ROA_TRUE;
