@@ -1,7 +1,9 @@
 #include <logn/logn_interface.h>
+#include <logn/logn_data/logn_data.h>
 #include <roa_lib/fundamental.h>
 #include <common/app_data.h>
 #include <common/app_lifetime.h>
+#include <roa_lib/alloc.h>
 
 
 ROA_JOB(logn_think, struct shorts_app_data*)
@@ -9,8 +11,8 @@ ROA_JOB(logn_think, struct shorts_app_data*)
   ROA_UNUSED(job_ctx);
   ROA_UNUSED(arg);
 
-
   /* think about logn */
+  
 }
 
 
@@ -19,8 +21,10 @@ ROA_JOB(logn_render, struct shorts_app_data*)
   ROA_UNUSED(job_ctx);
   ROA_UNUSED(arg);
 
-
   /* render data */
+  
+  /* create renderpass */
+  /* loop through cubes and render */
 }
 
 
@@ -31,15 +35,16 @@ ROA_JOB(logn_startup, struct shorts_app_data*)
   ROA_UNUSED(arg);
 
   /* allocate logn_data and assign to the job_desc thinker and renderer */
+  struct logn_data *data = roa_zalloc(sizeof(*data));
 
   /* create descs callbacks */
   struct roa_job_desc submit_callback_desc[2];
 
-  submit_callback_desc[0].arg = arg;
+  submit_callback_desc[0].arg = data;
   submit_callback_desc[0].func = logn_think;
   submit_callback_desc[0].keep_on_calling_thread = ROA_FALSE;
 
-  submit_callback_desc[1].arg = arg;
+  submit_callback_desc[1].arg = data;
   submit_callback_desc[1].func = logn_render;
   submit_callback_desc[1].keep_on_calling_thread = ROA_FALSE;
 
@@ -69,8 +74,4 @@ ROA_JOB(logn_startup, struct shorts_app_data*)
 
   /* need to wait because stack allocated variables */
   roa_dispatcher_wait_for_counter(job_ctx, marker);
-
-  int i = 1;
-
-  int b = 2;
 }
