@@ -78,7 +78,7 @@ main()
 
     char file_path_01[2048];
     memset(file_path_01, 0, sizeof(file_path_01));
-    strcat(file_path_01, roa_exe_path());
+    strcat(file_path_01, roa_exe_dir());
     strcat(file_path_01, "assets/volt_func/dev_tex_01.png");
 
     stbi_set_flip_vertically_on_load(1);
@@ -102,7 +102,7 @@ main()
 
     char file_path_02[2048];
     memset(file_path_02, 0, sizeof(file_path_02));
-    strcat(file_path_02, roa_exe_path());
+    strcat(file_path_02, roa_exe_dir());
     strcat(file_path_02, "assets/volt_func/dev_tex_02.png");
 
     tex_desc_2.data = (void*)stbi_load(
@@ -131,9 +131,9 @@ main()
     volt_util_generate_cube(
       ROA_ARR_DATA(vert_desc),
       ROA_ARR_COUNT(vert_desc),
-      1,
-      1,
-      1,
+      0.5f,
+      0.5f,
+      0.5f,
       ROA_ARR_DATA(verts),
       &vert_count
     );
@@ -173,11 +173,9 @@ main()
       "out vec2 oTexcoord;\n"
 
       "void main() {\n"
-      "mat4 world = mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);\n"
-      "mat4 wvp = proj * view * world;\n"
       "oColor = color;\n"
       "oTexcoord = texcoord;\n"
-      "gl_Position = wvp * vec4(position, 1.0);\n"
+      "gl_Position = proj * view * model * vec4(position, 1.0);\n"
       "}\n";
 
     const char* frag_src = ""
@@ -193,7 +191,7 @@ main()
 
       "void main()\n"
       "{\n"
-      "outColor = mix(texture(texKitten, oTexcoord), texture(texPuppy, oTexcoord), 0.05);\n"
+      "outColor = mix(texture(texKitten, oTexcoord), texture(texPuppy, oTexcoord), length(oColor));\n"
       //"outColor = vec4(1,1,0,1);"
       "}\n";
 
@@ -252,9 +250,9 @@ main()
       float y = radius - (radius / ROA_G_RATIO);
       float z = roa_cos(time) * radius;
 
-      roa_float3 from = roa_float3_set_with_values(x, y, z);
+      roa_float3 from = roa_float3_set_with_values(1.5, 1.5, 1.5);
       roa_float3 at = roa_float3_fill_with_value(0.f);
-      roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
+      roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
 
       roa_mat4_lookat(&view, from, at, up);
 
@@ -278,8 +276,9 @@ main()
       /*volt_renderpass_bind_index_buffer(rp, ibo);*/
       volt_renderpass_bind_texture_buffer(rp, texture_1, "texKitten");
       volt_renderpass_bind_texture_buffer(rp, texture_2, "texPuppy");
-      volt_renderpass_bind_uniform(rp, view_data, "view");
+
       volt_renderpass_bind_uniform(rp, proj_data, "proj");
+      volt_renderpass_bind_uniform(rp, view_data, "view");
       volt_renderpass_bind_uniform(rp, world_data, "model");
 
       /* bind formatting */

@@ -911,9 +911,9 @@ volt_renderpass_draw(volt_renderpass_t pass)
           /* must check types */
           cmd->id         = volt_gl_cmd_id::bind_uniform;
           cmd->location   = pass->curr_program->uniforms[i].location;
-          cmd->value      = pass->uniform[i]->value;
-          cmd->type       = pass->uniform[i]->type;
-          cmd->count      = pass->uniform[i]->count;
+          cmd->value      = pass->uniform[j]->value;
+          cmd->type       = pass->uniform[j]->type;
+          cmd->count      = pass->uniform[j]->count;
         }
       }
     }
@@ -1523,8 +1523,8 @@ volt_ctx_execute(volt_ctx_t ctx)
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glDisable(GL_CULL_FACE);
   
-  glViewport(0, 0, 800, 480);
-  glScissor(0, 0, 800, 480);
+  //glViewport(0, 0, 800, 480);
+  //glScissor(0, 0, 800, 480);
   //glFrontFace(GL_CCW);
   //glEnable(GL_CULL_FACE);
   //glCullFace(GL_NONE);

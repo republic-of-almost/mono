@@ -6,7 +6,7 @@
 #endif
 
 const char*
-roa_exe_path()
+roa_exe_dir()
 {
   #ifdef _WIN32
   static char buffer_path[2048] = "\0";

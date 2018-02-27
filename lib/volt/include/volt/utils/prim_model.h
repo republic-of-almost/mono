@@ -20,9 +20,9 @@ void
 volt_util_generate_cube(
   volt_vert_desc *desc,
   unsigned desc_count,
-  unsigned x_scale,
-  unsigned y_scale,
-  unsigned z_scale,
+  float x_scale,
+  float y_scale,
+  float z_scale,
   float *out_verts,
   unsigned *out_element_count);
 

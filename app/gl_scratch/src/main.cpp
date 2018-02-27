@@ -1,14 +1,18 @@
 #include <roa_ctx/roa_ctx.h>
+#include <roa_math/math.h>
+#include <roa_lib/dir.h>
+#include <stb/stb_image.h>
 #include <GL/gl3w.h>
 #include <chrono>
+#include <string.h>
 
 
 // Shader sources
 const GLchar* vertexSource = R"glsl(
-    #version 150 core
-    in vec3 position;
-    in vec3 color;
-    in vec2 texcoord;
+    #version 400 core
+    layout(location=0) in vec3 position;
+    layout(location=1) in vec3 color;
+    layout(location=2) in vec2 texcoord;
     out vec3 Color;
     out vec2 Texcoord;
     uniform mat4 model;
@@ -135,14 +139,20 @@ int main()
   GLuint textures[2];
   glGenTextures(2, textures);
 
-  int width, height;
+  int width, height, comp;
   unsigned char* image;
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, textures[0]);
-  image = SOIL_load_image("sample.png", &width, &height, 0, SOIL_LOAD_RGB);
+
+  char file1[2048]{};
+  strcat(file1, roa_exe_dir());
+  strcat(file1, "assets/dev01.png");
+
+  image = stbi_load(file1, &width, &height, &comp, 3);
+
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-  SOIL_free_image_data(image);
+  
   glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -152,9 +162,17 @@ int main()
 
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, textures[1]);
-  image = SOIL_load_image("sample2.png", &width, &height, 0, SOIL_LOAD_RGB);
+
+
+  char file2[2048]{};
+  strcat(file2, roa_exe_dir());
+  strcat(file2, "assets/dev01.png");
+
+
+  image = stbi_load(file2, &width, &height, &comp, 3);
+
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-  SOIL_free_image_data(image);
+  
   glUniform1i(glGetUniformLocation(shaderProgram, "texPuppy"), 1);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -164,54 +182,67 @@ int main()
 
   GLint uniModel = glGetUniformLocation(shaderProgram, "model");
 
-  // Set up projection
-  glm::mat4 view = glm::lookAt(
-    glm::vec3(1.5f, 1.5f, 1.5f),
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 0.0f, 1.0f)
-  );
-  GLint uniView = glGetUniformLocation(shaderProgram, "view");
-  glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
-
-  glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 1.0f, 10.0f);
-  GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
-  glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-
-  bool running = true;
-  while (running)
+  while (roa_ctx_new_frame(win_ctx))
   {
-    sf::Event windowEvent;
-    while (window.pollEvent(windowEvent))
-    {
-      switch (windowEvent.type)
-      {
-      case sf::Event::Closed:
-        running = false;
-        break;
-      }
-    }
-
+    
     // Clear the screen to black
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.3f, 0.2f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(shaderProgram);
+
+
+    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+
+    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+    GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+    glEnableVertexAttribArray(texAttrib);
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texPuppy"), 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 1);
+
+    // Set up projection
+    roa_float3 from = roa_float3_fill_with_value(1.5);
+    roa_float3 to = roa_float3_fill_with_value(0);
+    roa_float3 up = roa_float3_set_with_values(0, 0, 1);
+
+    roa_mat4 view;
+    roa_mat4_lookat(&view, from, to, up);
+
+    GLint uniView = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(uniView, 1, GL_FALSE, view.data);
+
+    roa_mat4 proj;
+    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, 800.f / 480.f);
+
+    GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
+    glUniformMatrix4fv(uniProj, 1, GL_FALSE, proj.data);
+
 
     // Calculate transformation
     auto t_now = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(
-      model,
-      time * glm::radians(180.0f),
-      glm::vec3(0.0f, 0.0f, 1.0f)
-    );
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+    roa_mat4 model;
+    roa_mat4_id(&model);
+
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, model.data);
 
     // Draw cube
     glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    // Swap buffers
-    window.display();
   }
 
   glDeleteTextures(2, textures);
@@ -224,7 +255,6 @@ int main()
 
   glDeleteVertexArrays(1, &vao);
 
-  window.close();
 
   return 0;
 }
