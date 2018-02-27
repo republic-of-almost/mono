@@ -1,0 +1,27 @@
+{
+  "name": "GLScratch",
+  "kind": "ConsoleApp",
+  "language": "C++",
+  "location": "./",
+
+  "assets": [
+    "../assets/"
+  ],
+
+  "src_files": [
+    "../src/**.cpp",
+    "../src/**.hpp",
+    "../docs/**.md"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "project_dependencies": [
+    "RepublicCtx",
+    "RepublicMath",
+    "STB",
+    "OpenGL"
+  ]
+}
