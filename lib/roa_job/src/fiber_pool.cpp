@@ -180,7 +180,8 @@ roa_fiber_pool_next_free(struct roa_fiber_pool_ctx *ctx)
 struct roa_fiber*
 roa_fiber_pool_next_pending(
   struct roa_fiber_pool_ctx *ctx,
-  int thread_id)
+  int thread_id,
+  int *is_locked)
 {
   /* param check */
   ROA_ASSERT(ctx);
@@ -188,6 +189,7 @@ roa_fiber_pool_next_pending(
   roa_mutex_lock(ctx->mutex);
 
   struct roa_fiber *next = NULL;
+  int is_th_locked = 0;
 
   /* check blocked fibers for ones that are now ready */
   {
@@ -196,9 +198,12 @@ roa_fiber_pool_next_pending(
     for(size_t i = 0; i < count; ++i)
     {
       struct roa_counter *counter = ctx->blocked_counters[i];
+      is_th_locked = 0;
 
       if (counter->thread_id != -1)
       {
+        is_th_locked = 1;
+
         if (counter->thread_id != thread_id)
         {
           continue;
@@ -210,7 +215,8 @@ roa_fiber_pool_next_pending(
       if(counter_value <= 0)
       {
         next = ctx->blocked_fibers[i];
-        
+        *is_locked = is_th_locked;
+                
         roa_array_erase(ctx->blocked_fibers, i);
         roa_array_erase(ctx->blocked_counters, i);
         

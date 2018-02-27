@@ -48,7 +48,7 @@ TEST_CASE("Fiber pool")
     REQUIRE(roa_fiber_pool_blocked_size(&ctx) == 0);
     
     roa_counter counter;
-    roa_counter_set(&counter, 1, 0);
+    roa_counter_set(&counter, 1, 0, 0);
     
     roa_fiber_pool_block(&ctx, fiber, &counter);
     

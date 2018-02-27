@@ -80,7 +80,8 @@ roa_fiber_pool_next_free(struct roa_fiber_pool_ctx *ctx);
 struct roa_fiber*
 roa_fiber_pool_next_pending(
   struct roa_fiber_pool_ctx *ctx,
-  int thread_id);
+  int thread_id,
+  int *is_locked);
 
 
 void

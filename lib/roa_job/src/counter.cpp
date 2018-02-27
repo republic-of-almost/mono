@@ -5,10 +5,11 @@
 
 
 void
-roa_counter_set(struct roa_counter *counter, int value, int batch_id)
+roa_counter_set(struct roa_counter *counter, int value, int batch_id, int thread_id)
 {
   counter->batch_id = batch_id;
   counter->has_pending = 0;
+  counter->thread_id = thread_id;
   atomic_store(&counter->value, value);
 }
 

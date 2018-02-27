@@ -18,7 +18,7 @@ struct roa_counter
 
 
 void
-roa_counter_set(struct roa_counter *counter, int value, int batch_id);
+roa_counter_set(struct roa_counter *counter, int value, int batch_id, int thread_id);
 
 
 void

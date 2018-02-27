@@ -1,0 +1,25 @@
+{
+  "name": "RepublicJobUnitTest",
+  "kind": "ConsoleApp",
+  "language": "C++11",
+  "location": "./",
+
+  "lang_settings" : {
+    "exceptions": true,
+    "rtti": true
+  },
+
+  "src_files" : [
+    "../test/unit/**.cpp"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/",
+    "../src/"
+  ],
+
+  "project_dependencies" : [
+    "RepublicJob",
+    "Catch"
+  ]
+}

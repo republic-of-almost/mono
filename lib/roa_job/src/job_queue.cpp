@@ -37,7 +37,7 @@ roa_job_queue_create(struct roa_job_queue_ctx *ctx, unsigned queue_hint)
   for(unsigned i = 0; i < count; ++i)
   {
     const int value = -1;
-    roa_counter_set(&ctx->counters[i], value, 0);
+    roa_counter_set(&ctx->counters[i], value, 0, -1);
   }
   
   roa_mutex_unlock(ctx->mutex);
@@ -227,7 +227,7 @@ roa_job_queue_add_batch(
         for(size_t i = old_counter_size; i < new_counter_size; ++i)
         {
           const int value = -1;
-          roa_counter_set(&ctx->counters[i], value, 0);
+          roa_counter_set(&ctx->counters[i], value, 0, thread_id);
           ctx->counters[i].has_pending = 0;
           ctx->counters[i].batch_id = 0;
         }
@@ -240,7 +240,7 @@ roa_job_queue_add_batch(
       }
     }
     
-    roa_counter_set(batch.counter, count, new_batch_id);
+    roa_counter_set(batch.counter, count, new_batch_id, thread_id);
     
     roa_array_push(ctx->batches, batch);
     roa_array_push(ctx->batch_ids, new_batch_id);
@@ -342,7 +342,7 @@ roa_job_queue_batch_unblock(
         
         if(has_pending_jobs == 0 && has_pending_fiber == 0)
         {
-          roa_counter_set(batch->counter, -1, -1);
+          roa_counter_set(batch->counter, -1, -1, -1);
           
           roa_array_erase(ctx->batch_ids, i);
           roa_array_erase(ctx->batches, i);
@@ -421,7 +421,7 @@ roa_job_queue_clear(
 
           if (!batch->is_blocked)
           {
-            roa_counter_set(batch->counter, -1, -1);
+            roa_counter_set(batch->counter, -1, -1, -1);
           }
           
           return_value = batch_id;

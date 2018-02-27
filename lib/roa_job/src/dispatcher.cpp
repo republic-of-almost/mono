@@ -37,6 +37,7 @@ struct roa_thread_arg
   ROA_BOOL done;
 };
 
+
 struct roa_thread_data
 {
   /* threads switch between fibers */
@@ -243,7 +244,8 @@ roa_internal_fiber_dispatcher(void *arg)
 
     /* switch to a fiber - pending or a new job */
     {
-      tls->worker_fiber = roa_fiber_pool_next_pending(&ctx->fiber_pool, thd_index);
+      int is_locked = 0;
+      tls->worker_fiber = roa_fiber_pool_next_pending(&ctx->fiber_pool, thd_index, &is_locked);
 
       /* pending fiber */
       if (tls->worker_fiber)
@@ -251,6 +253,11 @@ roa_internal_fiber_dispatcher(void *arg)
         /* fiber already has function/arg and has alreaded executed call */
         ROA_ASSERT(tls->worker_fiber);
         ROA_ASSERT(roa_fiber_get_user_id(tls->worker_fiber));
+
+        tls->locked_to_thread = is_locked;
+
+        /* is fiber locked */
+        
 
         /* switch to fiber */
         roa_fiber_switch(tls->home_fiber, tls->worker_fiber);
@@ -585,7 +592,7 @@ roa_dispatcher_wait_for_counter(
         counter->thread_id = -1;
       }
 
-      counter->has_pending = 1;
+      counter->has_pending = ROA_TRUE;
       roa_fiber_pool_block(&ctx->fiber_pool, tls->worker_fiber, counter);
     }
 
