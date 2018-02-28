@@ -2,23 +2,15 @@
 #define VOLT_INCLUDED_F1E11FF6_C036_4211_A608_BA0DC5DA0259
 
 
+#include <volt/fwd.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
  /* ----------------------------------------------------------- [ types ] -- */
-
-
-typedef struct volt_ctx *         volt_ctx_t;
-typedef struct volt_renderpass *  volt_renderpass_t;
-typedef struct volt_vbo *         volt_vbo_t;
-typedef struct volt_ibo *         volt_ibo_t;
-typedef struct volt_texture *     volt_texture_t;
-typedef struct volt_input *       volt_input_t;
-typedef struct volt_program *     volt_program_t;
-typedef struct volt_rasterizer *  volt_rasterizer_t;
-typedef struct volt_uniform *     volt_uniform_t;
 
 
 #define VOLT_NULL 0

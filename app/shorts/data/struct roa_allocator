@@ -1,0 +1,32 @@
+struct roa_allocator
+{
+  uint64_t tag;
+  void *block;
+};
+
+
+roa_allocator_t allocator;
+
+
+void*
+roa_alloc(allocator)
+{
+  if(no space new block)
+  {
+
+  };
+
+  return new_memory;
+};
+
+
+roa_clear_tag(tag)
+{
+  for(allocators)
+  {
+    if(allocator.tag == tag)
+    {
+      invalidate memory;
+    }
+  }
+}

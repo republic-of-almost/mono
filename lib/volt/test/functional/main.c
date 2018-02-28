@@ -192,7 +192,7 @@ main()
       "void main()\n"
       "{\n"
       "outColor = mix(texture(texKitten, oTexcoord), texture(texPuppy, oTexcoord), length(oColor));\n"
-      //"outColor = vec4(1,1,0,1);"
+      "outColor = vec4(abs(oColor), 1);"
       "}\n";
 
     const char *stages[2];
@@ -241,16 +241,16 @@ main()
     /* create mats */
     {
       static float time = 0.1f;
-      
+      time += 0.01f;
       float radius = 3.f;
 
       roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, 800.f / 480.f);
 
       float x = roa_sin(time) * radius;
-      float y = radius - (radius / ROA_G_RATIO);
-      float z = roa_cos(time) * radius;
+      float y = roa_cos(time) * radius;
+      float z = radius - (radius / ROA_G_RATIO);
 
-      roa_float3 from = roa_float3_set_with_values(1.5, 1.5, 1.5);
+      roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at = roa_float3_fill_with_value(0.f);
       roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
 

@@ -168,7 +168,6 @@ int main()
   strcat(file2, roa_exe_dir());
   strcat(file2, "assets/dev01.png");
 
-
   image = stbi_load(file2, &width, &height, &comp, 3);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);

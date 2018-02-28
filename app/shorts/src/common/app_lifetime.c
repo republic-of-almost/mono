@@ -5,7 +5,7 @@
 #include <roa_lib/spin_lock.h>
 #include <roa_lib/assert.h>
 #include <volt/volt.h>
-#include <logn/logn_interface.h> /* startup state */
+#include <doors/door_interface.h> /* startup state */
 
 
 ROA_JOB(app_frame, struct shorts_app_data*)
@@ -94,7 +94,7 @@ ROA_JOB(app_startup, struct shorts_app_data*)
   frame_desc[0].keep_on_calling_thread = ROA_TRUE;
 
   frame_desc[1].arg = (void*)arg;
-  frame_desc[1].func = logn_startup;
+  frame_desc[1].func = door_startup;
   frame_desc[1].keep_on_calling_thread = ROA_FALSE;
 
   roa_dispatcher_add_jobs(

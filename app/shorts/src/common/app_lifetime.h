@@ -4,10 +4,13 @@
 
 #include <roa_job/dispatcher.h>
 
+/* -- */
+
 struct shorts_app_data;
 
 ROA_JOB_DECL(app_startup);
 
+/* -- */
 
 struct app_thinker_data_arg
 {
@@ -17,6 +20,7 @@ struct app_thinker_data_arg
 
 ROA_JOB_DECL(app_add_thinker);
 
+/* -- */
 
 struct app_renderer_data_arg
 {

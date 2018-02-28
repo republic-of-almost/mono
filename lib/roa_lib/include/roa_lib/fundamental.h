@@ -51,6 +51,12 @@ typedef int ROA_BOOL;
 #define ROA_IS_ENABLED(expr) ((expr) != 0)
 
 
+/* ------------------------------------------------------- [ conversions ] -- */
+
+
+#define ROA_MB_TO_BYTES(mb) (mb * 1048576)
+
+
 /* ------------------------------------------------------ [ util helpers ] -- */
 
 
