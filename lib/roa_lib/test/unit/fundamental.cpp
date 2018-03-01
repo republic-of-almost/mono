@@ -62,16 +62,33 @@ TEST_CASE("Fundamental")
 
   SECTION("Memcpy")
   {
-    int src[] = {1,2,3};
-    int dst[ROA_ARR_COUNT(src)]{};
-
-    ROA_MEM_CPY(dst, src);
-
-    unsigned count = ROA_ARR_COUNT(src);
-
-    for (unsigned i = 0; i < count; ++i)
     {
-      REQUIRE(src[i] == dst[i]);
+      int src[] = { 1,2,3 };
+      int dst[ROA_ARR_COUNT(src)]{};
+
+      ROA_MEM_CPY(dst, src);
+
+      unsigned count = ROA_ARR_COUNT(src);
+
+      for (unsigned i = 0; i < count; ++i)
+      {
+        REQUIRE(src[i] == dst[i]);
+      }
+    }
+
+    {
+      char src[] = "hello";
+      char dst[ROA_ARR_COUNT(src)]{};
+
+
+      ROA_MEM_CPY(dst, src);
+
+      unsigned count = ROA_ARR_COUNT(src);
+
+      for (unsigned i = 0; i < count; ++i)
+      {
+        REQUIRE(src[i] == dst[i]);
+      }
     }
   }
 
