@@ -2,6 +2,7 @@
 #include <doors/door_data/door_data.h>
 #include <doors/door_renderer/door_renderer.h>
 #include <roa_lib/fundamental.h>
+#include <roa_lib/hash.h>
 #include <common/app_data.h>
 #include <common/app_lifetime.h>
 #include <roa_lib/alloc.h>
@@ -25,6 +26,12 @@ ROA_JOB(door_startup, struct shorts_app_data*)
   /* allocate logn_data and assign to the job_desc thinker and renderer */
   struct door_data *data = roa_zalloc(sizeof(*data));
   data->volt_ctx = arg->volt_ctx;
+
+  uint64_t renderer_hash = roa_hash("renderer");
+
+  roa_tagged_allocator_create(
+    &data->level_data.render_allocator,
+    renderer_hash);
 
   /* allow some things to start */
   {

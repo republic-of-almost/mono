@@ -59,4 +59,33 @@ TEST_CASE("Fundamental")
     REQUIRE(ROA_ARR_COUNT(arr) == 6);
     REQUIRE(ROA_ARR_DATA(arr) == &arr[0]);
   }
+
+  SECTION("Memcpy")
+  {
+    int src[] = {1,2,3};
+    int dst[ROA_ARR_COUNT(src)]{};
+
+    ROA_MEM_CPY(dst, src);
+
+    unsigned count = ROA_ARR_COUNT(src);
+
+    for (unsigned i = 0; i < count; ++i)
+    {
+      REQUIRE(src[i] == dst[i]);
+    }
+  }
+
+  SECTION("Memset")
+  {
+    int src[] = {1,2,3};
+
+    ROA_MEM_ZERO(src);
+
+    unsigned count = ROA_ARR_COUNT(src);
+
+    for (unsigned i = 0; i < count; ++i)
+    {
+      REQUIRE(src[i] == 0);
+    }
+  }
 }

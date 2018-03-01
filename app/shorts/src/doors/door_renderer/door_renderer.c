@@ -54,6 +54,13 @@ ROA_JOB(door_renderer_create, struct door_data*)
       "gl_Position = proj * view * model * vec4(position, 1.0);\n"
       "}\n";
 
+    char *data_vert_src = roa_tagged_allocator_alloc(
+      &arg->level_data.render_allocator,
+      sizeof(vert_src));
+      
+    ROA_MEM_CPY(data_vert_src, vert_src);
+    memcpy(data_vert_src, vert_src, sizeof(vert_src));
+
     const char *frag_src = ""
       "/* Frag */\n"
       "#version 400 core\n"
@@ -71,17 +78,34 @@ ROA_JOB(door_renderer_create, struct door_data*)
       "outColor = vec4(abs(oColor), 1);"
       "}\n";
 
+    char *data_frag_src = roa_tagged_allocator_alloc(
+      &arg->level_data.render_allocator,
+      sizeof(frag_src));
+    ROA_MEM_CPY(data_vert_src, frag_src);
+
     const char *stages[2];
-    stages[0] = vert_src;
-    stages[1] = frag_src;
+    stages[0] = data_vert_src;
+    stages[1] = data_frag_src;
+
+    char *data_stages = roa_tagged_allocator_alloc(
+      &arg->level_data.render_allocator,
+      sizeof(stages));
+
+    ROA_MEM_CPY(data_stages, stages);
 
     volt_shader_stage stage_types[2];
     stage_types[0] = VOLT_SHD_VERTEX;
     stage_types[1] = VOLT_SHD_FRAGMENT;
 
+    volt_shader_stage *data_stage_types = roa_tagged_allocator_alloc(
+      &arg->level_data.render_allocator,
+      sizeof(data_stage_types));
+
+    ROA_MEM_CPY(data_stage_types, stage_types);
+
     struct volt_program_desc shd_desc;
-    shd_desc.shader_stages_src = stages;
-    shd_desc.shader_stages_type = stage_types;
+    shd_desc.shader_stages_src = data_stages;
+    shd_desc.shader_stages_type = data_stage_types;
     shd_desc.stage_count = 2;
 
     volt_program_create(
@@ -98,8 +122,14 @@ ROA_JOB(door_renderer_create, struct door_data*)
       VOLT_INPUT_FLOAT2, /* tex c */
     };
 
+    volt_input_attribute *data_input_fmt = roa_tagged_allocator_alloc(
+      &arg->level_data.render_allocator,
+      sizeof(input_fmt));
+
+    ROA_MEM_CPY(data_input_fmt, input_fmt);
+
     struct volt_input_desc input_desc;
-    input_desc.attributes = ROA_ARR_DATA(input_fmt);
+    input_desc.attributes = data_input_fmt;
     input_desc.count = ROA_ARR_COUNT(input_fmt);
 
     volt_input_create(
@@ -114,7 +144,11 @@ ROA_JOB(door_renderer_create, struct door_data*)
       VOLT_VERT_POSITION, VOLT_NORMAL, VOLT_UV,
     };
 
-    float verts[1024];
+    
+    float *data_verts = roa_tagged_allocator_alloc(
+      &arg->level_data.render_allocator,
+      sizeof(float) * 1024);
+
     unsigned vert_count = 0;
 
     volt_util_generate_cube(
@@ -123,12 +157,12 @@ ROA_JOB(door_renderer_create, struct door_data*)
       1.f,
       1.f,
       1.f,
-      ROA_ARR_DATA(verts),
+      data_verts,
       &vert_count
     );
 
     struct volt_vbo_desc vbo_desc;
-    vbo_desc.data = ROA_ARR_DATA(verts);
+    vbo_desc.data = data_verts;
     vbo_desc.count = vert_count;
 
     volt_vertex_buffer_create(

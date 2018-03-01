@@ -1,6 +1,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_lib/array.h>
 #include <roa_job/dispatcher.h>
+#include <roa_lib/alloc.h>
 #include <common/app_data.h>
 #include <common/app_lifetime.h>
 #include <roa_lib/spin_lock.h>
@@ -12,6 +13,9 @@ main(int argc, char **argv)
   /* command line args */
   ROA_UNUSED(argc);
   ROA_UNUSED(argv);
+
+  /* allocators before anything */
+  roa_tagged_allocator_init();
 
   /* application data */
   struct shorts_app_data app_data;
@@ -41,5 +45,7 @@ main(int argc, char **argv)
   roa_dispatcher_run(app_data.dispatcher_ctx);
 
   /* closing - bye! */
+  roa_tagged_allocator_destroy();
+
   return 0;
 }

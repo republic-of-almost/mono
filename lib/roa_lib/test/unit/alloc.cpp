@@ -16,4 +16,17 @@ TEST_CASE("Alloc")
 
   	REQUIRE(true);
   }
+
+  SECTION("allocator")
+  {
+    roa_tagged_allocator_init();
+
+    roa_tagged_allocator allocator;
+    roa_tagged_allocator_create(&allocator, 1);
+
+    void *alloc = roa_tagged_allocator_alloc(&allocator, 123);
+    REQUIRE(alloc);
+
+    roa_tagged_allocator_destroy();
+  }
 }

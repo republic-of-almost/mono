@@ -28,7 +28,7 @@ roa_free(void *addr);
 /* --------------------------------------------------------- [ Allocator ] -- */
 
 
-struct roa_allocator
+struct roa_tagged_allocator
 {
   uint64_t allocator_tag;
 
@@ -39,27 +39,27 @@ struct roa_allocator
 
 
 void
-roa_allocator_init();
+roa_tagged_allocator_init();
 
 
 void
-roa_allocator_destroy();
+roa_tagged_allocator_destroy();
 
 
 void
-roa_allocator_create(
-  struct roa_allocator *allocator,
+roa_tagged_allocator_create(
+  struct roa_tagged_allocator *allocator,
   uint64_t tag);
 
 
 void*
-roa_allocator_alloc(
-  struct roa_allocator *allocator,
+roa_tagged_allocator_alloc(
+  struct roa_tagged_allocator *allocator,
   unsigned bytes);
 
 
 void
-roa_allocator_free(uint64_t tag);
+roa_tagged_allocator_free(uint64_t tag);
 
 
 #ifdef __cplusplus

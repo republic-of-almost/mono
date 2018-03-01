@@ -74,15 +74,21 @@ struct roa_internal_frame_allocator
 
 
 void
-roa_allocator_init()
+roa_tagged_allocator_init()
 {
   ROA_MEM_ZERO(internal_allocator);
 
   roa_array_create(internal_allocator.block_tag_frame_key, 32);
+  roa_array_resize(internal_allocator.block_tag_frame_key, 32);
+
   roa_array_create(internal_allocator.block_tag_frame_count, 32);
+  roa_array_resize(internal_allocator.block_tag_frame_count, 32);
 
   roa_array_create(internal_allocator.block_tag_keys, 32);
+  roa_array_resize(internal_allocator.block_tag_keys, 32);
+
   roa_array_create(internal_allocator.blocks, 32);
+  roa_array_resize(internal_allocator.blocks, 32);
 
   /* create blocks */
   unsigned count = roa_array_size(internal_allocator.blocks);
@@ -90,13 +96,14 @@ roa_allocator_init()
 
   for (i = 0; i < count; ++i)
   {
+    internal_allocator.block_tag_keys[i] = 0;
     internal_allocator.blocks[i] = roa_alloc(ROA_MB_TO_BYTES(2));
   }
 }
 
 
 void
-roa_allocator_destroy()
+roa_tagged_allocator_destroy()
 {
   roa_array_destroy(internal_allocator.block_tag_frame_key);
   roa_array_destroy(internal_allocator.block_tag_frame_count);
@@ -107,8 +114,8 @@ roa_allocator_destroy()
 
 
 void
-roa_allocator_create(
-  struct roa_allocator *allocator,
+roa_tagged_allocator_create(
+  struct roa_tagged_allocator *allocator,
   uint64_t tag)
 {
   ROA_ASSERT(tag);
@@ -118,8 +125,8 @@ roa_allocator_create(
 
 
 void*
-roa_allocator_alloc(
-  struct roa_allocator *allocator,
+roa_tagged_allocator_alloc(
+  struct roa_tagged_allocator *allocator,
   unsigned bytes)
 {
   unsigned remaining = allocator->block_end - allocator->block_begin;
@@ -139,20 +146,21 @@ roa_allocator_alloc(
         tags[i] = allocator->allocator_tag;
         allocator->block_begin = internal_allocator.blocks[i];
         allocator->block_end = allocator->block_begin + ROA_MB_TO_BYTES(2);
+
+        break;
       }
     }
-
   }
 
   void *alloc = allocator->block_begin;
-  allocator->block_begin += bytes;
+  allocator->block_begin = &allocator->block_begin[bytes];
 
   return alloc;
 }
 
 
 void
-roa_allocator_free(uint64_t tag)
+roa_tagged_allocator_free(uint64_t tag)
 {
   
 }

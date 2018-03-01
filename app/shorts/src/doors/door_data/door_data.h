@@ -4,6 +4,7 @@
 
 #include <volt/fwd.h>
 #include <roa_math/math.h>
+#include <roa_lib/alloc.h>
 
 
 struct level_render_data
@@ -13,6 +14,8 @@ struct level_render_data
   volt_input_t vert_input;
   volt_rasterizer_t rasterizer;
   volt_uniform_t mvp[3];
+
+  struct roa_tagged_allocator render_allocator;
 };
 
 

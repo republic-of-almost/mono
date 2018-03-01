@@ -4,6 +4,7 @@
 #include <GL/gl3w.h>
 #include <roa_lib/alloc.h>
 #include <roa_lib/fundamental.h>
+#include <roa_lib/hash.h>
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
 #include <cstdio>
@@ -11,23 +12,6 @@
 
 
 /* ----------------------------------------------------------- [ common ] -- */
-
-
-/* https://stackoverflow.com/questions/2535284/how-can-i-hash-a-string-to-an-int-using-c#13487193 */
-/* test this, attribute or remove */
-uint64_t
-hash(const char *name)
-{
-  uint64_t hash = 5381;
-
-  int c;
-  while (c = *name++)
-  {
-    hash = ((hash << 5) + hash) + c;
-  }
-
-  return hash;
-}
 
 
 #define GL_ASSERT ROA_ASSERT(glGetError() == 0)
@@ -655,7 +639,7 @@ volt_renderpass_bind_texture_buffer(
   volt_texture_t texture,
   const char *sampler_name)
 {
-  const uint64_t hash_name = hash(sampler_name);
+  const uint64_t hash_name = roa_hash(sampler_name);
 
   /* check to see if its already bound */
   const unsigned sampler_slot_count = ROA_ARRAY_COUNT(pass->sampler_hash);
@@ -730,7 +714,7 @@ volt_renderpass_bind_uniform(
   volt_uniform_t uniform,
   const char *uniform_name)
 {
-  const uint64_t hash_name = hash(uniform_name);
+  const uint64_t hash_name = roa_hash(uniform_name);
 
   /* check to see if its already bound */
   const unsigned uniform_slot_count = ROA_ARRAY_COUNT(pass->uniform_hash);
@@ -1136,7 +1120,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
       /* increase buffer or dynamic allocations */
       ROA_ASSERT(ROA_ARRAY_COUNT(name_buffer) > length);
 
-      uint64_t uni_hash = hash(ROA_ARRAY_PTR(name_buffer));
+      uint64_t uni_hash = roa_hash(ROA_ARRAY_PTR(name_buffer));
 
       /* seperate samplers and data */
       if ((type >= GL_SAMPLER_1D) && (type <= GL_SAMPLER_2D_SHADOW))
