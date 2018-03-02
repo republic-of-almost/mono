@@ -2,6 +2,8 @@
 #include <doors/door_data/door_data.h>
 #include <roa_lib/fundamental.h>
 #include <common/app_data.h>
+#include <roa_ctx/roa_ctx.h>
+#include <roa_lib/assert.h>
 #include <volt/volt.h>
 #include <volt/utils/prim_model.h>
 
@@ -12,13 +14,20 @@
 
 ROA_JOB(door_render, struct door_data*)
 {
+  struct roa_ctx_window_desc win_desc;
+  roa_ctx_get_window_desc(arg->win_ctx, &win_desc);
+
+  ROA_ASSERT(arg->level_data.program);
+  
   struct level_render_data *level_data = &arg->level_data;
   {
     static float time = 0.1f;
     time += 0.01f;
     float radius = 3.f;
 
-    roa_mat4_projection(&arg->projection, ROA_QUART_TAU * 0.25, 0.1f, 10.f, 800.f / 480.f);
+    float aspect = (float)win_desc.width / (float)win_desc.height;
+
+    roa_mat4_projection(&arg->projection, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
 
     float x = roa_sin(time) * radius;
     float y = roa_cos(time) * radius;
@@ -40,7 +49,10 @@ ROA_JOB(door_render, struct door_data*)
   volt_renderpass_t rp = VOLT_NULL;
   volt_renderpass_create(arg->volt_ctx, &rp, ROA_NULL, ROA_NULL);
 
+  volt_renderpass_set_viewport(rp, 0,0, win_desc.width, win_desc.height);
+
   volt_renderpass_bind_program(rp, level_data->program);
+
   volt_renderpass_bind_input_format(rp, level_data->vert_input);
   volt_renderpass_bind_vertex_buffer(rp, level_data->vbo);
   

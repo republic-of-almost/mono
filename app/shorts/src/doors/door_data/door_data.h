@@ -3,6 +3,7 @@
 
 
 #include <volt/fwd.h>
+#include <roa_ctx/roa_ctx.h>
 #include <roa_math/math.h>
 #include <roa_lib/alloc.h>
 
@@ -22,6 +23,7 @@ struct level_render_data
 struct door_data
 {
   volt_ctx_t volt_ctx;
+  roa_ctx_t win_ctx;
 
   roa_mat4 projection;
   roa_mat4 view;

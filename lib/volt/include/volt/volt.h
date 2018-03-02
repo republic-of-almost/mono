@@ -70,6 +70,13 @@ void
 volt_ctx_execute(volt_ctx_t ctx);
 
 
+typedef void(*volt_log_callback_fn)(const char *msg);
+
+
+void
+volt_ctx_logging_callback(volt_ctx_t ctx, volt_log_callback_fn callback);
+
+
 /* -------------------------------------------------------- [ resources ] -- */
 
 

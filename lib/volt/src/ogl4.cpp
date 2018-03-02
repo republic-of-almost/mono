@@ -15,6 +15,7 @@
 
 
 #define GL_ASSERT ROA_ASSERT(glGetError() == 0)
+#define GL_LOG_CMDS 1
 
 
 /* ------------------------------------------------------ [ gl commands ] -- */
@@ -51,6 +52,33 @@ enum class volt_gl_cmd_id
   draw_count,
   draw_indexed,
 };
+
+
+const char*
+volt_gl_cmd_to_string(volt_gl_cmd_id id)
+{
+  switch (id)
+  {
+    case(volt_gl_cmd_id::create_program):               return "create_program";
+    case(volt_gl_cmd_id::create_uniform):               return "create_uniform";
+    case(volt_gl_cmd_id::create_buffer_ibo):            return "create_buffer_ibo";
+    case(volt_gl_cmd_id::create_buffer_vbo):            return "create_buffer_vbo";
+    case(volt_gl_cmd_id::create_buffer_input):          return "create_buffer_input";
+    case(volt_gl_cmd_id::create_buffer_texture):        return "create_buffer_texture";
+    case(volt_gl_cmd_id::create_buffer_framebuffer):    return "create_buffer_framebuffer";
+    case(volt_gl_cmd_id::bind_program):                 return "bind_program";
+    case(volt_gl_cmd_id::bind_vbo):                     return "bind_vbo";
+    case(volt_gl_cmd_id::bind_ibo):                     return "bind_ibo";
+    case(volt_gl_cmd_id::bind_input):                   return "bind_input";
+    case(volt_gl_cmd_id::bind_texture):                 return "bind_texture";
+    case(volt_gl_cmd_id::bind_uniform):                 return "bind_uniform";
+    case(volt_gl_cmd_id::bind_framebuffer):             return "bind_framebuffer";
+    case(volt_gl_cmd_id::set_viewport):                 return "set_viewport";
+    case(volt_gl_cmd_id::draw_count):                   return "draw_count";
+    case(volt_gl_cmd_id::draw_indexed):                 return "draw_indexed";
+    default:                                            return "unknown";
+  }
+}
 
 
 struct volt_gl_cmd_unknown
@@ -370,6 +398,8 @@ struct volt_ctx
   volt_gl_stream resource_destroy_stream;
   
   /* array */ volt_renderpass_t *renderpasses;
+
+  volt_log_callback_fn log_callback;
 };
 
 
@@ -1457,6 +1487,8 @@ volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
 static void
 volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
 {
+  
+
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
 
@@ -1643,6 +1675,17 @@ volt_ctx_destroy(volt_ctx_t *ctx)
 
 
 void
+volt_ctx_logging_callback(volt_ctx_t ctx, volt_log_callback_fn callback)
+{
+  /* param assert */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(callback);
+
+  ctx->log_callback = callback;
+}
+
+
+void
 volt_ctx_execute(volt_ctx_t ctx)
 {
   ROA_ASSERT(ctx);
@@ -1660,6 +1703,17 @@ volt_ctx_execute(volt_ctx_t ctx)
     {      
       const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
       ROA_ASSERT(uk_cmd);
+
+      /* log cmd */
+      if (ROA_IS_ENABLED(GL_LOG_CMDS)) {
+        if (ctx->log_callback) {
+          char buffer[1024]{};
+          strcat(buffer, "CMD: ");
+          strcat(buffer, volt_gl_cmd_to_string(uk_cmd->id));
+          strcat(buffer, "\n");
+          ctx->log_callback(buffer);
+        }
+      }
 
       switch (uk_cmd->id)
       {
@@ -1737,6 +1791,17 @@ volt_ctx_execute(volt_ctx_t ctx)
     {
       const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
       ROA_ASSERT(uk_cmd);
+
+      /* log cmd */
+      if (ROA_IS_ENABLED(GL_LOG_CMDS)) {
+        if (ctx->log_callback) {
+          char buffer[1024]{};
+          strcat(buffer, "CMD: ");
+          strcat(buffer, volt_gl_cmd_to_string(uk_cmd->id));
+          strcat(buffer, "\n");
+          ctx->log_callback(buffer);
+        }
+      }
 
       switch (uk_cmd->id)
       {
@@ -1819,6 +1884,9 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   }
 }
+
+
+#undef GL_LOG_CMDS
 
 
 #endif

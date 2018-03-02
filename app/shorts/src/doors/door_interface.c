@@ -26,6 +26,7 @@ ROA_JOB(door_startup, struct shorts_app_data*)
   /* allocate logn_data and assign to the job_desc thinker and renderer */
   struct door_data *data = roa_zalloc(sizeof(*data));
   data->volt_ctx = arg->volt_ctx;
+  data->win_ctx = arg->device_ctx;
 
   uint64_t renderer_hash = roa_hash("renderer");
 

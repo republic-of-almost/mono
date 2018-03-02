@@ -1,9 +1,11 @@
 #include <common/app_lifetime.h>
 #include <common/app_data.h>
+#include <common/callbacks.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_lib/array.h>
 #include <roa_lib/spin_lock.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/alloc.h>
 #include <volt/volt.h>
 #include <doors/door_interface.h> /* startup state */
 
@@ -53,6 +55,8 @@ ROA_JOB(app_frame, struct shorts_app_data*)
     volt_ctx_execute(arg->volt_ctx);
   }
 
+  
+
   /* submit new frame */
   if (roa_ctx_new_frame(arg->device_ctx))
   {
@@ -85,6 +89,7 @@ ROA_JOB(app_startup, struct shorts_app_data*)
 
   /* setup volt */
   volt_ctx_create(&arg->volt_ctx);
+  volt_ctx_logging_callback(arg->volt_ctx, volt_logging_callback);
   
   /* start frame and inital state */
   struct roa_job_desc frame_desc[2];
