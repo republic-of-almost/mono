@@ -6,13 +6,14 @@
 #include <roa_lib/dir.h>
 #include <roa_lib/dir.h>
 #include <roa_lib/assert.h>
+#include <roa_ctx/roa_ctx.h>
 #include <roa_math/math.h>
 #include <volt/utils/prim_model.h>
 #include <string.h>
 
 
 /* app stuff */
-GLFWwindow* window;
+roa_ctx_t win_ctx;
 void app_create();
 void app_destroy();
 ROA_BOOL app_tick();
@@ -33,6 +34,7 @@ main()
   volt_program_t program = VOLT_NULL;
   volt_input_t vert_input = VOLT_NULL;
   volt_rasterizer_t rasterizer = VOLT_NULL;
+  
 
   volt_uniform_t proj_data = VOLT_NULL;
   volt_uniform_t view_data = VOLT_NULL;
@@ -235,16 +237,20 @@ main()
 
   while (app_tick())
   {
+    struct roa_ctx_window_desc win_desc;
+    roa_ctx_get_window_desc(win_ctx, &win_desc);
+
     static int count = 0;
     ++count;
-
+    
     /* create mats */
     {
       static float time = 0.1f;
       time += 0.01f;
       float radius = 3.f;
 
-      roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, 800.f / 480.f);
+      float aspect = (float)win_desc.width / (float)win_desc.height;
+      roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
 
       float x = roa_sin(time) * radius;
       float y = roa_cos(time) * radius;
@@ -266,7 +272,9 @@ main()
     /* draw some stuff */
     {
       volt_renderpass_t rp;
-      volt_renderpass_create(ctx, &rp);
+      volt_renderpass_create(ctx, &rp, "cube", ROA_NULL);
+
+      volt_renderpass_set_viewport(rp, 0,0,win_desc.width,win_desc.height);
 
       /* bind program */
       volt_renderpass_bind_program(rp, program);
@@ -308,16 +316,7 @@ main()
 void
 app_create()
 {
-  glfwInit();
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  window = glfwCreateWindow(800, 480, "Volt Func Test", NULL, NULL);
-  glfwMakeContextCurrent(window);
-
-  glfwSwapInterval(GLFW_TRUE);
+  roa_ctx_create(&win_ctx);
 
   printf("OpenGL version is (%s)\n", glGetString(GL_VERSION));
 }
@@ -326,18 +325,12 @@ app_create()
 ROA_BOOL
 app_tick()
 {
-  glfwPollEvents();
-  glfwSwapBuffers(window);
-
-  return glfwWindowShouldClose(window) ? ROA_FALSE : ROA_TRUE;
+  return roa_ctx_new_frame(win_ctx);
 }
 
 
 void
 app_destroy()
 {
-  glfwDestroyWindow(window);
-  glfwTerminate();
-
-  window = ROA_NULL;
+  roa_ctx_destroy(&win_ctx);
 }

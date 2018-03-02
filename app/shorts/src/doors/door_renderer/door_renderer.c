@@ -38,7 +38,7 @@ ROA_JOB(door_render, struct door_data*)
   }
 
   volt_renderpass_t rp = VOLT_NULL;
-  volt_renderpass_create(arg->volt_ctx, &rp);
+  volt_renderpass_create(arg->volt_ctx, &rp, ROA_NULL, ROA_NULL);
 
   volt_renderpass_bind_program(rp, level_data->program);
   volt_renderpass_bind_input_format(rp, level_data->vert_input);

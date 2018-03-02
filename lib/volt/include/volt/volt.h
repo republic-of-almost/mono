@@ -21,6 +21,40 @@ typedef int VOLT_BOOL;
 #define VOLT_FALSE 0
 
 
+typedef enum _volt_color_format {
+  VOLT_COLOR_RGB,
+  VOLT_COLOR_RGBA
+} volt_color_format;
+
+
+typedef enum _volt_texture_dimentions {
+  VOLT_TEXTURE_2D,
+} volt_texture_dimentions;
+
+
+typedef enum _volt_texture_sampling {
+  VOLT_SAMPLING_BILINEAR,
+} volt_texture_sampling;
+
+
+typedef enum _volt_input_attribute {
+  VOLT_INPUT_FLOAT4,
+  VOLT_INPUT_FLOAT3,
+  VOLT_INPUT_FLOAT2,
+  VOLT_INPUT_FLOAT,
+
+} volt_input_attribute;
+
+
+typedef enum _volt_shader_stage {
+  VOLT_SHD_VERTEX,
+  VOLT_SHD_GEOMETRY,
+  VOLT_SHD_FRAGMENT,
+  VOLT_SHD_STAGE_COUNT,
+} volt_shader_stage;
+
+
+
 /* --------------------------------------------------------- [ lifetime ] -- */
 
 
@@ -50,22 +84,6 @@ typedef enum _volt_resource_status {
 /* ----------------------------------------------------- [ rsrc texture ] -- */
 
 
-typedef enum _volt_color_format {
-  VOLT_COLOR_RGB,
-  VOLT_COLOR_RGBA
-} volt_color_format;
-
-
-typedef enum _volt_texture_dimentions {
-  VOLT_TEXTURE_2D,
-} volt_texture_dimentions;
-
-
-typedef enum _volt_texture_sampling {
-  VOLT_SAMPLING_BILINEAR,
-} volt_texture_sampling;
-
-
 struct volt_texture_desc
 {
   volt_texture_dimentions dimentions;
@@ -86,16 +104,23 @@ volt_texture_create(
   struct volt_texture_desc *desc);
 
 
+/* ------------------------------------------------- [ rsrc framebuffer ] -- */
+
+
+struct volt_framebuffer_desc
+{
+  volt_texture_t attachment;
+};
+
+
+void
+volt_frame_buffer_create(
+  volt_ctx_t ctx,
+  volt_framebuffer_t *fbo,
+  struct volt_framebuffer_desc *desc);
+
+
 /* ------------------------------------------------------- [ rsrc input ] -- */
-
-
-typedef enum _volt_input_attribute {
-  VOLT_INPUT_FLOAT4,
-  VOLT_INPUT_FLOAT3,
-  VOLT_INPUT_FLOAT2,
-  VOLT_INPUT_FLOAT,
-
-} volt_input_attribute;
 
 
 struct volt_input_desc
@@ -147,14 +172,6 @@ volt_index_buffer_create(
 
 
 /* ----------------------------------------------------- [ rsrc program ] -- */
-
-
-typedef enum _volt_shader_stage {
-  VOLT_SHD_VERTEX,
-  VOLT_SHD_GEOMETRY,
-  VOLT_SHD_FRAGMENT,
-  VOLT_SHD_STAGE_COUNT,
-} volt_shader_stage;
 
 
 struct volt_program_desc
@@ -250,7 +267,9 @@ volt_rasterizer_create(
 void
 volt_renderpass_create(
   volt_ctx_t ctx,
-  volt_renderpass_t *pass);
+  volt_renderpass_t *pass,
+  const char *pass_name,
+  volt_framebuffer_t target);
 
 
 void
@@ -301,6 +320,15 @@ volt_renderpass_bind_uniform(
   volt_renderpass_t pass,
   volt_uniform_t uniform,
   const char *location);
+
+
+void
+volt_renderpass_set_viewport(
+  volt_renderpass_t pass,
+  int x,
+  int y,
+  unsigned width,
+  unsigned height);
 
 
 void

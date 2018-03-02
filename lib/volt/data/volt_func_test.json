@@ -20,8 +20,8 @@
   "project_dependencies" : [
     "Volt",
     "RepublicMath",
+    "RepublicCtx",
     "STB",
-    "GLFW",
     "MMX"
   ]
 }
