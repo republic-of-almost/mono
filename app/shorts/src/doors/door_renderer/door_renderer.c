@@ -8,60 +8,64 @@
 #include <volt/utils/prim_model.h>
 
 
-
 /* ----------------------------------------------------- [ Render Level ] -- */
 
 
 ROA_JOB(door_render, struct door_data*)
-{
-  struct roa_ctx_window_desc win_desc;
-  roa_ctx_get_window_desc(arg->win_ctx, &win_desc);
+{ 
+  VOLT_BOOL pending = volt_ctx_has_pending_rsrcs(arg->volt_ctx);
 
-  ROA_ASSERT(arg->level_data.program);
-  
-  struct level_render_data *level_data = &arg->level_data;
+  if(!pending)
   {
-    static float time = 0.1f;
-    time += 0.01f;
-    float radius = 3.f;
+    struct roa_ctx_window_desc win_desc;
+    roa_ctx_get_window_desc(arg->win_ctx, &win_desc);
 
-    float aspect = (float)win_desc.width / (float)win_desc.height;
-
-    roa_mat4_projection(&arg->projection, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
-
-    float x = roa_sin(time) * radius;
-    float y = roa_cos(time) * radius;
-    float z = radius - (radius / ROA_G_RATIO);
-
-    roa_float3 from = roa_float3_set_with_values(x, y, z);
-    roa_float3 at = roa_float3_fill_with_value(0.f);
-    roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
-
-    roa_mat4_lookat(&arg->view, from, at, up);
-
-    roa_mat4_id(&arg->world);
-
-    volt_uniform_update(arg->volt_ctx, arg->level_data.mvp[1], arg->view.data);
-    volt_uniform_update(arg->volt_ctx, arg->level_data.mvp[2], arg->projection.data);
-    volt_uniform_update(arg->volt_ctx, arg->level_data.mvp[0], arg->world.data);
-  }
-
-  volt_renderpass_t rp = VOLT_NULL;
-  volt_renderpass_create(arg->volt_ctx, &rp, ROA_NULL, ROA_NULL);
-
-  volt_renderpass_set_viewport(rp, 0,0, win_desc.width, win_desc.height);
-
-  volt_renderpass_bind_program(rp, level_data->program);
-
-  volt_renderpass_bind_input_format(rp, level_data->vert_input);
-  volt_renderpass_bind_vertex_buffer(rp, level_data->vbo);
+    ROA_ASSERT(arg->level_data.program);
   
-  volt_renderpass_bind_uniform(rp, arg->level_data.mvp[2], "proj");
-  volt_renderpass_bind_uniform(rp, arg->level_data.mvp[1], "view");
-  volt_renderpass_bind_uniform(rp, arg->level_data.mvp[0], "model");
+    struct level_render_data *level_data = &arg->level_data;
+    {
+      static float time = 0.1f;
+      time += 0.01f;
+      float radius = 3.f;
 
-  volt_renderpass_draw(rp);
-  volt_renderpass_commit(arg->volt_ctx, &rp);
+      float aspect = (float)win_desc.width / (float)win_desc.height;
+
+      roa_mat4_projection(&arg->projection, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
+
+      float x = roa_sin(time) * radius;
+      float y = roa_cos(time) * radius;
+      float z = radius - (radius / ROA_G_RATIO);
+
+      roa_float3 from = roa_float3_set_with_values(x, y, z);
+      roa_float3 at = roa_float3_fill_with_value(0.f);
+      roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
+
+      roa_mat4_lookat(&arg->view, from, at, up);
+
+      roa_mat4_id(&arg->world);
+
+      volt_uniform_update(arg->volt_ctx, arg->level_data.mvp[1], arg->view.data);
+      volt_uniform_update(arg->volt_ctx, arg->level_data.mvp[2], arg->projection.data);
+      volt_uniform_update(arg->volt_ctx, arg->level_data.mvp[0], arg->world.data);
+    }
+
+    volt_renderpass_t rp = VOLT_NULL;
+    volt_renderpass_create(arg->volt_ctx, &rp, ROA_NULL, ROA_NULL);
+
+    volt_renderpass_set_viewport(rp, 0,0, win_desc.width, win_desc.height);
+
+    volt_renderpass_bind_program(rp, level_data->program);
+
+    volt_renderpass_bind_input_format(rp, level_data->vert_input);
+    volt_renderpass_bind_vertex_buffer(rp, level_data->vbo);
+  
+    volt_renderpass_bind_uniform(rp, arg->level_data.mvp[2], "proj");
+    volt_renderpass_bind_uniform(rp, arg->level_data.mvp[1], "view");
+    volt_renderpass_bind_uniform(rp, arg->level_data.mvp[0], "model");
+
+    volt_renderpass_draw(rp);
+    volt_renderpass_commit(arg->volt_ctx, &rp);
+  }
 }
 
 
@@ -189,7 +193,6 @@ ROA_JOB(door_renderer_create, struct door_data*)
       VOLT_VERT_POSITION, VOLT_NORMAL, VOLT_UV,
     };
 
-    
     float *data_verts = roa_tagged_allocator_alloc(
       &arg->level_data.render_allocator,
       sizeof(float) * 1024);

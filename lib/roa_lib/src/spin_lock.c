@@ -3,8 +3,8 @@
 #include <roa_lib/fundamental.h>
 
 
-#define SPIN_LOCKED_ID 0xfead
-#define SPIN_UNLOCKED_ID 0xdead
+#define SPIN_LOCKED_ID 0xdeaf
+#define SPIN_UNLOCKED_ID 0xfeed
 
 
 void
@@ -19,7 +19,7 @@ roa_spin_lock_aquire(roa_atomic_int *lock)
 {
   while (ROA_TRUE)
   {
-    if (roa_atomic_int_compare_and_swap(lock, SPIN_UNLOCKED_ID, SPIN_LOCKED_ID) == SPIN_LOCKED_ID)
+    if (roa_atomic_int_compare_and_swap(lock, SPIN_UNLOCKED_ID, SPIN_LOCKED_ID) == SPIN_UNLOCKED_ID)
     {
       break;
     }

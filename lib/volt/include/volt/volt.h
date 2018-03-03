@@ -70,6 +70,10 @@ void
 volt_ctx_execute(volt_ctx_t ctx);
 
 
+VOLT_BOOL
+volt_ctx_has_pending_rsrcs(volt_ctx_t ctx);
+
+
 typedef void(*volt_log_callback_fn)(const char *msg);
 
 
@@ -82,7 +86,7 @@ volt_ctx_logging_callback(volt_ctx_t ctx, volt_log_callback_fn callback);
 
 typedef enum _volt_resource_status {
   VOLT_RSRC_PENDING_CREATE,
-  VOLT_RSRC_FAILED,
+  VOLT_RSRC_ERROR,
   VOLT_RSRC_VALID,
   VOLT_RSRC_PENDING_DESTROY,
 } volt_resource_status;
@@ -121,10 +125,16 @@ struct volt_framebuffer_desc
 
 
 void
-volt_frame_buffer_create(
+volt_framebuffer_create(
   volt_ctx_t ctx,
   volt_framebuffer_t *fbo,
   struct volt_framebuffer_desc *desc);
+
+
+volt_resource_status
+volt_framebuffer_status(
+  volt_ctx_t ctx,
+  volt_framebuffer_t);
 
 
 /* ------------------------------------------------------- [ rsrc input ] -- */
@@ -144,6 +154,12 @@ volt_input_create(
   struct volt_input_desc *desc);
 
 
+volt_resource_status
+volt_input_status(
+  volt_ctx_t ctx,
+  volt_input_t input);
+
+
 /* --------------------------------------------------------- [ rsrc vbo ] -- */
 
 
@@ -159,6 +175,12 @@ volt_vertex_buffer_create(
   volt_ctx_t ctx,
   volt_vbo_t *t,
   struct volt_vbo_desc *desc);
+
+
+volt_resource_status
+volt_vertex_buffer_status(
+  volt_ctx_t ctx,
+  volt_vbo_t vbo);
 
 
 /* --------------------------------------------------------- [ rsrc ibo ] -- */
@@ -178,6 +200,12 @@ volt_index_buffer_create(
   struct volt_ibo_desc *desc);
 
 
+volt_resource_status
+volt_index_buffer_status(
+  volt_ctx_t ctx,
+  volt_ibo_t ibo);
+
+
 /* ----------------------------------------------------- [ rsrc program ] -- */
 
 
@@ -195,6 +223,12 @@ volt_program_create(
   volt_ctx_t ctx,
   volt_program_t *program,
   struct volt_program_desc *desc);
+
+
+volt_resource_status
+volt_program_buffer_status(
+  volt_ctx_t ctx,
+  volt_program_t program);
 
 
 /* ----------------------------------------------------- [ rsrc uniform ] -- */

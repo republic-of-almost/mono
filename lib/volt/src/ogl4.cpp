@@ -7,15 +7,24 @@
 #include <roa_lib/hash.h>
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/atomic.h>
+#include <roa_lib/spin_lock.h>
 #include <cstdio>
 #include <cstdint>
+
+
+/* ----------------------------------------------------------- [ config ] -- */
+
+
+#define GL_LOG_CMDS 0
+#define GL_ASSERT_ON_ERRORS 0
+#define GL_LOG_EXEC_ERRORS 0
 
 
 /* ----------------------------------------------------------- [ common ] -- */
 
 
 #define GL_ASSERT ROA_ASSERT(glGetError() == 0)
-#define GL_LOG_CMDS 1
 
 
 /* ------------------------------------------------------ [ gl commands ] -- */
@@ -258,7 +267,7 @@ struct volt_gl_cmd_set_viewport
 
 struct volt_program
 {
-  GLuint program;
+  GLuint gl_id;
 
   struct volt_program_sampler
   {
@@ -325,14 +334,14 @@ struct volt_uniform
 
 struct volt_vbo
 {
-  GLuint vbo;
+  GLuint gl_id;
   GLuint element_count;
 };
 
 
 struct volt_ibo
 {
-  GLuint ibo;
+  GLuint gl_id;
   GLuint element_count;
 };
 
@@ -393,10 +402,16 @@ struct volt_ctx
 {
   GLuint vao;
 
+  roa_atomic_int rsrc_create_lock;
   volt_gl_stream resource_create_stream;
+
+  roa_atomic_int rdr_lock;
   volt_gl_stream render_stream;
+
+  roa_atomic_int rsrc_destroy_lock;
   volt_gl_stream resource_destroy_stream;
   
+  roa_atomic_int rp_lock;
   /* array */ volt_renderpass_t *renderpasses;
 
   volt_log_callback_fn log_callback;
@@ -452,12 +467,18 @@ volt_texture_create(
   *texture = new_texture;
 
   /* submit cmd */
-  volt_gl_stream *stream = &ctx->resource_create_stream;
-  volt_gl_cmd_create_texture *cmd = (volt_gl_cmd_create_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
-  cmd->id      = volt_gl_cmd_id::create_buffer_texture;
-  cmd->desc    = *desc;
-  cmd->texture = *texture;
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_create_texture *cmd = (volt_gl_cmd_create_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id      = volt_gl_cmd_id::create_buffer_texture;
+    cmd->desc    = *desc;
+    cmd->texture = *texture;
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
 }
 
 
@@ -465,7 +486,7 @@ volt_texture_create(
 
 
 void
-volt_frame_buffer_create(
+volt_framebuffer_create(
   volt_ctx_t ctx,
   volt_framebuffer_t *fbo,
   struct volt_framebuffer_desc *desc)
@@ -481,12 +502,27 @@ volt_frame_buffer_create(
   *fbo = new_fbo;
 
   /* submit cmd */
-  volt_gl_stream *stream = &ctx->resource_create_stream;
-  volt_gl_cmd_create_framebuffer *cmd = (volt_gl_cmd_create_framebuffer*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
-  cmd->id = volt_gl_cmd_id::create_buffer_framebuffer;
-  cmd->desc = *desc;
-  cmd->framebuffer = *fbo;
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_create_framebuffer *cmd = (volt_gl_cmd_create_framebuffer*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::create_buffer_framebuffer;
+    cmd->desc = *desc;
+    cmd->framebuffer = *fbo;
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
+}
+
+
+volt_resource_status
+volt_framebuffer_status(
+  volt_ctx_t ctx,
+  volt_framebuffer_t)
+{
+  return VOLT_RSRC_ERROR;
 }
 
 
@@ -504,6 +540,7 @@ volt_input_create(
   ROA_ASSERT(input);
   ROA_ASSERT(desc);
 
+  /* prepare */
   volt_input_t new_input = (volt_input_t)roa_alloc(sizeof(*new_input));
   
   unsigned max_count = ROA_ARR_COUNT(new_input->increment_stride);
@@ -513,32 +550,54 @@ volt_input_create(
   new_input->byte_stride = 0;
   new_input->element_stride = 0;
 
-  for (unsigned i = 0; i < cpy_count; ++i)
+  /* create - no cmd needed */
   {
-    unsigned attrib_count;
-
-    switch (desc->attributes[i])
+    for (unsigned i = 0; i < cpy_count; ++i)
     {
-      case(VOLT_INPUT_FLOAT4): { attrib_count = 4; break; }
-      case(VOLT_INPUT_FLOAT3): { attrib_count = 3; break; }
-      case(VOLT_INPUT_FLOAT2): { attrib_count = 2; break; }
-      case(VOLT_INPUT_FLOAT):  { attrib_count = 1; break; }
+      unsigned attrib_count;
 
-      default:
+      switch (desc->attributes[i])
       {
-        ROA_ASSERT(false);
-        attrib_count = 1;
+        case(VOLT_INPUT_FLOAT4): { attrib_count = 4; break; }
+        case(VOLT_INPUT_FLOAT3): { attrib_count = 3; break; }
+        case(VOLT_INPUT_FLOAT2): { attrib_count = 2; break; }
+        case(VOLT_INPUT_FLOAT):  { attrib_count = 1; break; }
+
+        default:
+        {
+          ROA_ASSERT(false);
+          attrib_count = 1;
+        }
       }
+
+      new_input->attrib_count[i] = attrib_count;
+      new_input->increment_stride[i] = new_input->byte_stride;
+
+      new_input->byte_stride += new_input->attrib_count[i] * sizeof(float);
+      new_input->element_stride += new_input->attrib_count[i];
+    }
+  
+    *input = new_input;
+  }
+}
+
+
+volt_resource_status
+volt_input_status(
+  volt_ctx_t ctx,
+  volt_input_t input)
+{
+  if (input)
+  {
+    if (input->count > 0)
+    {
+      return VOLT_RSRC_VALID;
     }
 
-    new_input->attrib_count[i] = attrib_count;
-    new_input->increment_stride[i] = new_input->byte_stride;
-
-    new_input->byte_stride += new_input->attrib_count[i] * sizeof(float);
-    new_input->element_stride += new_input->attrib_count[i];
+    return VOLT_RSRC_PENDING_CREATE;
   }
 
-  *input = new_input;
+  return VOLT_RSRC_ERROR;
 }
 
 
@@ -562,12 +621,37 @@ volt_vertex_buffer_create(
   *vbo = new_vbo;
 
   /* submit cmd */
-  volt_gl_stream *stream = &ctx->resource_create_stream;
-  volt_gl_cmd_create_vbo *cmd = (volt_gl_cmd_create_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
-  cmd->id   = volt_gl_cmd_id::create_buffer_vbo;
-  cmd->desc = *desc;
-  cmd->vbo  = *vbo;
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_create_vbo *cmd = (volt_gl_cmd_create_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id   = volt_gl_cmd_id::create_buffer_vbo;
+    cmd->desc = *desc;
+    cmd->vbo  = *vbo;
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
+}
+
+
+volt_resource_status
+volt_vertex_buffer_status(
+  volt_ctx_t ctx,
+  volt_vbo_t vbo)
+{
+  if (vbo)
+  {
+    if (vbo->gl_id)
+    {
+      return VOLT_RSRC_VALID;
+    }
+
+    return VOLT_RSRC_PENDING_CREATE;
+  }
+
+  return VOLT_RSRC_ERROR;
 }
 
 /* --------------------------------------------------------- [ rsrc ibo ] -- */
@@ -590,12 +674,37 @@ volt_index_buffer_create(
   *ibo = new_ibo;
 
   /* submit cmd */
-  volt_gl_stream *stream = &ctx->resource_create_stream;
-  volt_gl_cmd_create_ibo *cmd = (volt_gl_cmd_create_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
-  cmd->id = volt_gl_cmd_id::create_buffer_ibo;
-  cmd->desc = *desc;
-  cmd->ibo = *ibo;
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_create_ibo *cmd = (volt_gl_cmd_create_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::create_buffer_ibo;
+    cmd->desc = *desc;
+    cmd->ibo = *ibo;
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
+}
+
+
+volt_resource_status
+volt_index_buffer_status(
+  volt_ctx_t ctx,
+  volt_ibo_t ibo)
+{
+  if (ibo)
+  {
+    if (ibo->gl_id)
+    {
+      return VOLT_RSRC_VALID;
+    }
+
+    return VOLT_RSRC_PENDING_CREATE;
+  }
+
+  return VOLT_RSRC_ERROR;
 }
 
 
@@ -615,17 +724,41 @@ volt_program_create(
   
   /* prepare */
   volt_program_t new_prog = (volt_program_t)roa_zalloc(sizeof(*new_prog));
-  new_prog->program = 0;
 
   *program = new_prog;
 
   /* submit cmd */
-  volt_gl_stream *stream = &ctx->resource_create_stream;
-  volt_gl_cmd_create_program *cmd = (volt_gl_cmd_create_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
-  cmd->id = volt_gl_cmd_id::create_program;
-  cmd->desc = *desc;
-  cmd->program = *program;
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_create_program *cmd = (volt_gl_cmd_create_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::create_program;
+    cmd->desc = *desc;
+    cmd->program = *program;
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
+}
+
+
+volt_resource_status
+volt_program_buffer_status(
+  volt_ctx_t ctx,
+  volt_program_t program)
+{
+  if (program)
+  {
+    if (program->gl_id)
+    {
+      return VOLT_RSRC_VALID;
+    }
+
+    return VOLT_RSRC_PENDING_CREATE;
+  }
+
+  return VOLT_RSRC_ERROR;
 }
 
 
@@ -649,12 +782,19 @@ volt_uniform_create(
   *uniform = new_rsrc;
 
   /* submit cmd */
-  volt_gl_stream *stream = &ctx->resource_create_stream;
-  volt_gl_cmd_create_uniform *cmd = (volt_gl_cmd_create_uniform*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
-  cmd->id = volt_gl_cmd_id::create_uniform;
-  cmd->desc = *desc;
-  cmd->uniform = *uniform;
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_create_uniform *cmd = (volt_gl_cmd_create_uniform*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::create_uniform;
+    cmd->desc = *desc;
+    cmd->uniform = *uniform;
+
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
 }
 
 
@@ -897,7 +1037,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
   if (pass->curr_program != pass->last_bound_program)
   {
     /* prepare */
-    const GLuint program = pass->curr_program ? pass->curr_program->program : 0;
+    const GLuint program = pass->curr_program ? pass->curr_program->gl_id : 0;
 
     /* cmd */
     volt_gl_cmd_bind_program *cmd = (volt_gl_cmd_bind_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
@@ -945,7 +1085,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
   if (pass->curr_vbo != pass->last_bound_vbo)
   {
     /* cmd */
-    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->vbo : 0;
+    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
 
     /* prepare */
     volt_gl_stream *stream = pass->render_stream;
@@ -960,7 +1100,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
   if (pass->curr_ibo != pass->last_bound_ibo)
   {
     /* prepare */
-    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->ibo : 0;
+    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
 
     /* cmd */
     volt_gl_stream *stream = pass->render_stream;
@@ -1097,7 +1237,7 @@ volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
   ROA_ASSERT_PEDANTIC(vbo > 0);
 
   /* save vbo */
-  cmd->vbo->vbo = vbo;
+  cmd->vbo->gl_id = vbo;
   cmd->vbo->element_count = cmd->desc.count;
   
   GL_ASSERT;
@@ -1126,7 +1266,7 @@ volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
   ROA_ASSERT_PEDANTIC(ibo > 0);
 
   /* save vbo */
-  cmd->ibo->ibo = ibo;
+  cmd->ibo->gl_id = ibo;
   cmd->ibo->element_count = cmd->desc.count;
 
   GL_ASSERT;
@@ -1223,7 +1363,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
     ROA_ASSERT(false);
   }
 
-  cmd->program->program = program;
+  cmd->program->gl_id = program;
 
   /* get uniforms and samplers */
   if (status == GL_TRUE)
@@ -1487,8 +1627,6 @@ volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
 static void
 volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
 {
-  
-
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
 
@@ -1635,20 +1773,24 @@ volt_ctx_create(volt_ctx_t *ctx)
     return;
   }
 
-  gl3wIsSupported(1, 1);
+  gl3wIsSupported(4, 0);
 
   struct volt_ctx *new_ctx = nullptr;
   new_ctx = (volt_ctx*)roa_zalloc(sizeof(*new_ctx));
 
+  roa_spin_lock_init(&new_ctx->rsrc_create_lock);
   new_ctx->resource_create_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * 1024);
   new_ctx->resource_create_stream.capacity = sizeof(uint8_t) * 1024;
 
+  roa_spin_lock_init(&new_ctx->rsrc_destroy_lock);
   new_ctx->resource_destroy_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * 1024);
   new_ctx->resource_destroy_stream.capacity = sizeof(uint8_t) * 1024;
 
+  roa_spin_lock_init(&new_ctx->rdr_lock);
   new_ctx->render_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * 1024);
   new_ctx->render_stream.capacity = sizeof(uint8_t) * 1024;
 
+  roa_spin_lock_init(&new_ctx->rp_lock);
   roa_array_create(new_ctx->renderpasses, 128);
 
   *ctx = new_ctx;
@@ -1674,6 +1816,23 @@ volt_ctx_destroy(volt_ctx_t *ctx)
 }
 
 
+VOLT_BOOL
+volt_ctx_has_pending_rsrcs(volt_ctx_t ctx)
+{
+  VOLT_BOOL pending = VOLT_FALSE;
+
+  roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+
+  unsigned cmd_count = ctx->resource_create_stream.cmd_count;
+
+  pending = cmd_count ? VOLT_TRUE : VOLT_FALSE;
+
+  roa_spin_lock_release(&ctx->rsrc_create_lock);
+
+  return pending;
+}
+
+
 void
 volt_ctx_logging_callback(volt_ctx_t ctx, volt_log_callback_fn callback)
 {
@@ -1695,6 +1854,8 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   /* create resource stream  */
   {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+
     const uint8_t *data = ctx->resource_create_stream.data;
     const unsigned bytes = roa_array_size(data);
     unsigned cmd_count = ctx->resource_create_stream.cmd_count;
@@ -1763,9 +1924,32 @@ volt_ctx_execute(volt_ctx_t ctx)
           /* only create cmds should be here */
           ROA_ASSERT(false);
       }
+
+      /* log err */
+      if(ROA_IS_ENABLED(GL_LOG_EXEC_ERRORS))
+      {
+        GLint err = glGetError();
+
+        if(err)
+        {
+          if (ctx->log_callback)
+          {
+            char buffer[1024]{};
+            strcat(buffer, "GL CREATE ERR: ");
+            strcat(buffer, "\n");
+            ctx->log_callback(buffer);
+          }
+
+          if (ROA_IS_ENABLED(GL_ASSERT_ON_ERRORS))
+          {
+            ROA_ASSERT(false);
+          }
+        }
+      }
     }
 
     volt_gl_stream_clear(&ctx->resource_create_stream);
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
   }
 
   /* execute render stream */
@@ -1872,6 +2056,29 @@ volt_ctx_execute(volt_ctx_t ctx)
           /* only renderpass cmds should be here */
           ROA_ASSERT(false);
       }
+
+      /* log err */
+      if (ROA_IS_ENABLED(GL_LOG_EXEC_ERRORS))
+      {
+        GLint err = glGetError();
+
+        if(err)
+        {
+          if (ctx->log_callback)
+          {
+            char buffer[1024]{};
+            strcat(buffer, "GL RENDER ERR: ");
+            strcat(buffer, "\n");
+            ctx->log_callback(buffer);
+          }
+      
+
+          if (ROA_IS_ENABLED(GL_ASSERT_ON_ERRORS))
+          {
+            ROA_ASSERT(false);
+          }
+        }
+      }
     }
 
     volt_gl_stream_clear(&ctx->render_stream);
@@ -1887,6 +2094,9 @@ volt_ctx_execute(volt_ctx_t ctx)
 
 
 #undef GL_LOG_CMDS
+#undef GL_ASSERT
+#undef GL_ASSERT_ON_ERRORS
+#undef GL_LOG_EXEC_ERRORS
 
 
 #endif
