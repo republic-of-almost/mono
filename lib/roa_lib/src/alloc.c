@@ -3,6 +3,7 @@
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 /* ------------------------------------------------------ [ Alloc Config ] -- */
@@ -156,6 +157,26 @@ roa_tagged_allocator_alloc(
   allocator->block_begin = &allocator->block_begin[bytes];
 
   return alloc;
+}
+
+
+void*
+roa_tagged_allocator_copy(
+  struct roa_tagged_allocator *allocator,
+  void *src,
+  unsigned bytes)
+{
+  /* param check */
+  ROA_ASSERT(allocator);
+  ROA_ASSERT(src);
+  ROA_ASSERT(bytes);
+
+  /* copy src */
+  void *dst = roa_tagged_allocator_alloc(allocator, bytes);
+
+  memcpy(dst, src, bytes);
+
+  return  dst;
 }
 
 

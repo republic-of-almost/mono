@@ -58,6 +58,13 @@ roa_tagged_allocator_alloc(
   unsigned bytes);
 
 
+void*
+roa_tagged_allocator_copy(
+  struct roa_tagged_allocator *allocator,
+  void *src,
+  unsigned bytes);
+
+
 void
 roa_tagged_allocator_free(uint64_t tag);
 

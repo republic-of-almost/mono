@@ -30,6 +30,9 @@ ROA_JOB(app_frame, struct shorts_app_data*)
       roa_dispatcher_wait_for_counter(job_ctx, ticker_marker);
     }
 
+    const uint64_t game_logic_hash = roa_hash("game_logic");
+    roa_tagged_allocator_free(game_logic_hash);
+
     roa_spin_lock_release(&arg->think_lock);
   }
 
@@ -49,13 +52,14 @@ ROA_JOB(app_frame, struct shorts_app_data*)
       roa_dispatcher_wait_for_counter(job_ctx, render_marker);
     }
 
+    const uint64_t renderer_hash = roa_hash("renderer");
+    roa_tagged_allocator_free(renderer_hash);
+
     roa_spin_lock_release(&arg->render_lock);
 
     /* render cmd lists */
     volt_ctx_execute(arg->volt_ctx);
   }
-
-  
 
   /* submit new frame */
   if (roa_ctx_new_frame(arg->device_ctx))

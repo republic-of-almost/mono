@@ -318,6 +318,13 @@ app_create()
 {
   roa_ctx_create(&win_ctx);
 
+  struct roa_ctx_window_desc win_desc;
+
+  roa_ctx_get_window_desc(win_ctx, &win_desc);
+  win_desc.title = "Volt Functional Test";
+
+  roa_ctx_set_window_desc(win_ctx, &win_desc);
+
   printf("OpenGL version is (%s)\n", glGetString(GL_VERSION));
 }
 
