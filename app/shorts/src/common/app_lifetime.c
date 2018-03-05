@@ -1,6 +1,7 @@
 #include <common/app_lifetime.h>
 #include <common/app_data.h>
 #include <common/callbacks.h>
+#include <renderer/renderer.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_lib/array.h>
 #include <roa_lib/spin_lock.h>
@@ -96,7 +97,7 @@ ROA_JOB(app_startup, struct shorts_app_data*)
   volt_ctx_logging_callback(arg->volt_ctx, volt_logging_callback);
   
   /* start frame and inital state */
-  struct roa_job_desc frame_desc[2];
+  struct roa_job_desc frame_desc[3];
 
   frame_desc[0].arg = (void*)arg;
   frame_desc[0].func = app_frame;
@@ -105,6 +106,10 @@ ROA_JOB(app_startup, struct shorts_app_data*)
   frame_desc[1].arg = (void*)arg;
   frame_desc[1].func = door_startup;
   frame_desc[1].keep_on_calling_thread = ROA_FALSE;
+
+  frame_desc[2].arg = (void*)arg;
+  frame_desc[2].func = renderables_startup;
+  frame_desc[2].keep_on_calling_thread = ROA_FALSE;
 
   roa_dispatcher_add_jobs(
     job_ctx,

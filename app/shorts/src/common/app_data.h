@@ -3,6 +3,7 @@
 
 
 #include <roa_lib/atomic.h>
+#include <renderer/renderer.h>
 
 
 typedef struct roa_ctx * roa_ctx_t;
@@ -16,6 +17,7 @@ struct shorts_app_data
   roa_ctx_t device_ctx;
   roa_dispatcher_ctx_t dispatcher_ctx;
   volt_ctx_t volt_ctx;
+  struct renderer_data rdr_data;
 
   /* application jobs */
   roa_atomic_int think_lock;

@@ -64,7 +64,7 @@ ROA_JOB(door_render, struct door_data*)
 
       volt_renderpass_bind_input_format(rp, level_data->vert_input);
       volt_renderpass_bind_vertex_buffer(rp, level_data->vbo);
-  
+      
       volt_renderpass_bind_uniform(rp, arg->level_data.mvp[2], "proj");
       volt_renderpass_bind_uniform(rp, arg->level_data.mvp[1], "view");
       volt_renderpass_bind_uniform(rp, arg->level_data.mvp[0], "model");
