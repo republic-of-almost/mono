@@ -23,8 +23,8 @@ typedef unsigned __int64 uint64_t;
 #include <stddef.h>
 #endif
 #else
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 #endif
 
 

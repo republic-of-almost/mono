@@ -7,10 +7,17 @@ extern "C" {
 #endif
 
 
-/* --------------------------------------------------- [ Application API ] -- */
+/* ------------------------------------------------------- [ Basic Types ] -- */
 
 
-typedef int uint64_t;
+#ifndef __cplusplus
+#ifdef _MSC_VER
+typedef unsigned __int64 uint64_t;
+#endif
+#else
+#include <cstdint>
+#endif
+
 
 typedef void(*rep_task)(void*);
 
@@ -24,13 +31,22 @@ struct rep_app_desc
   int width;
   int height;
 
-  void *frame_job;
+  rep_task *frame_job;
 };
 
 
 void
 rep_app_create(
-  struct rep_app_desc *desc);
+  struct rep_app_desc * desc);
+
+
+void
+rep_app_get(
+  struct rep_app_desc * out_desc);
+
+
+int
+rep_app_new_frame();
 
 
 void
@@ -42,11 +58,11 @@ rep_app_destroy();
 
 unsigned
 rep_submit_tasks(
-  rep_task *tasks,
+  rep_task * tasks,
   unsigned count);
 
 
-unsigned
+void
 rep_wait_for_tasks(
   unsigned marker);
 
@@ -56,9 +72,7 @@ rep_wait_for_tasks(
 
 struct rep_object_desc
 {
-  int valid;
-
-  const char *name;
+  const char * name;
   uint64_t object_parent;
 };
 
@@ -88,8 +102,6 @@ rep_object_destroy(
 
 struct rep_transform_desc
 {
-  int valid;
-
   float position[3];
   float scale[3];
   float rotation[4];
@@ -99,14 +111,14 @@ struct rep_transform_desc
 void
 rep_transform_set(
   uint64_t * object_ids,
-  struct rep_transform_desc *desc,
+  struct rep_transform_desc * desc,
   unsigned count);
 
 
 void
 rep_transform_get(
   const uint64_t * object_ids,
-  struct rep_transform_desc *desc,
+  struct rep_transform_desc * desc,
   unsigned count);
 
 
@@ -115,8 +127,6 @@ rep_transform_get(
 
 struct rep_camera_desc
 {
-  int valid;
-
   unsigned width;
   unsigned height;
   float fov;
@@ -142,10 +152,8 @@ rep_camera_get(
 
 struct rep_mesh_renderable_desc
 {
-  int valid;
-
-  const char *mesh;
-  const char *material;
+  uint64_t mesh_id;
+  uint64_t material_id;
 };
 
 
@@ -161,6 +169,26 @@ rep_mesh_renderable_get(
   const uint64_t * object_ids,
   struct rep_mesh_renderable_desc * desc,
   unsigned count);
+
+
+/* -------------------------------------------------------------- [ Mesh ] -- */
+
+
+void
+rep_mesh_find(
+  uint64_t * out_mesh_ids,
+  const char ** mesh_names,
+  unsigned mesh_name_count);
+
+
+/* ---------------------------------------------------------- [ Material ] -- */
+
+
+void
+rep_material_find(
+  uint64_t * out_material_ids,
+  const char ** material_names,
+  unsigned material_name_count);
 
 
 #ifdef __cplusplus
