@@ -1,0 +1,15 @@
+{
+  "name"     : "RepublicAPIFuncTest",
+  "kind"     : "ConsoleApp",
+  "language" : "C89",
+  "location" : "./",
+
+  "src_files" : [
+    "../test/functional/**.c",
+    "../test/functional/**.h"
+  ],
+
+  "project_dependencies": [
+    "RepublicAPI"
+  ]
+}

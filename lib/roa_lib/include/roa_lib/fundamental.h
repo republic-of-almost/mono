@@ -2,11 +2,6 @@
 #define FUNDAMENTAL_INCLUDED_C3B2733E_2BD0_47C9_97D8_1EEDD88B1AB5
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /* ---------------------------------------------------- [ fixed integers ] -- */
 
 
@@ -63,11 +58,6 @@ typedef int ROA_BOOL;
 #define ROA_UNUSED(x) (void)(x)
 #define ROA_MEM_ZERO(var) do { unsigned i; for(i = 0; i < sizeof(var); ++i) {((unsigned char *) &var)[i] = 0;} } while(0)
 #define ROA_MEM_CPY(dst, src) do { unsigned i; for(i = 0; i < sizeof(src); ++i) { ((unsigned char*) dst)[i] = ((unsigned char*) src)[i]; } } while(0);
-
-
-#ifdef __cplusplus
-} /* extern */
-#endif
 
 
 #endif /* inc guard */

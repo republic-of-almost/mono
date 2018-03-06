@@ -56,9 +56,16 @@ rep_app_destroy();
 /* -------------------------------------------------------------- [ Task ] -- */
 
 
+struct rep_task_desc
+{
+  rep_task function;
+  void *arg;
+};
+
+
 unsigned
 rep_submit_tasks(
-  rep_task * tasks,
+  struct rep_task_desc * tasks,
   unsigned count);
 
 

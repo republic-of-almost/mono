@@ -1,79 +1,20 @@
-#!lua
+{
+  "name": "RepublicAPIFuncTest",
+  "kind": "WindowedApp",
+  "language": "C89",
+  "location": "./"
+  "src_files" : {
+    make.add_headers(make.get_proj_root() .. "../test/functional/"),
+    make.add_src(make.get_proj_root() .. "../test/functional/"),
+    make.add_doc(make.get_proj_root() .. "../test/functional/"),
+  },
 
---[[
+  "public_inc_dirs" : {
+    make.get_proj_root() .. "./",
+  },
 
-  RepublicAPI Unit Test Project Description
-
-]]--
-
-table.insert(
-  projects,
-  {
-    name     = "RepublicAPIUnitTest",
-    kind     = "ConsoleApp",
-    language = "C++",
-    location = make.get_proj_root(),
-
-    lang_settings = {
-      exceptions  = true,
-      rtti        = true,
-    },
-
-    src_files = {
-      make.add_headers(make.get_proj_root() .. "../test/unit/"),
-      make.add_src(make.get_proj_root() .. "../test/unit/"),
-      make.add_doc(make.get_proj_root() .. "../test/unit/"),
-    },
-
-    public_inc_dirs = {
-      make.get_proj_root() .. "./",
-    },
-
-    defines = {
-      -- See build.md --
-    },
-
-    project_dependencies = {
-      -- First Party --
-      "RepublicAPI",
-      -- Third Party --
-      "Catch",
-    },
-  }
-)
-
-
---[[
-
-  RepublicAPI Functional Test Project Description
-
-]]--
-
-table.insert(
-  projects,
-  {
-    name     = "RepublicAPIFuncTest",
-    kind     = "WindowedApp",
-    language = "C89",
-    location = make.get_proj_root(),
-
-    src_files = {
-      make.add_headers(make.get_proj_root() .. "../test/functional/"),
-      make.add_src(make.get_proj_root() .. "../test/functional/"),
-      make.add_doc(make.get_proj_root() .. "../test/functional/"),
-    },
-
-    public_inc_dirs = {
-      make.get_proj_root() .. "./",
-    },
-
-    defines = {
-      -- See build.md --
-    },
-
-    project_dependencies = {
-      -- First Party --
-      "RepublicAPI",
-    },
-  }
-)
+  "project_dependencies" : {
+    -- First Party --
+    "RepublicAPI",
+  },
+}
