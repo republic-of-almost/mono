@@ -14,9 +14,7 @@ struct renderer_data
 
 struct mesh_renderable
 {
-  volt_program_t program;
   volt_vbo_t vbo;
-  volt_ibo_t ibo;
 };
 
 

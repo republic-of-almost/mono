@@ -7,9 +7,10 @@ ROA_JOB(renderables_startup, void*)
 }
 
 
-ROA_JOB(renderables_submit, void*)
+ROA_JOB(renderables_submit, struct mesh_renderable_arg*)
 {
   /* convert renderables into something drawable */
+
 }
 
 
