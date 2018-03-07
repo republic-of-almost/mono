@@ -3,8 +3,7 @@
 #include <roa_lib/assert.h>
 
 
-uint64_t hash_user;
-uint64_t hash_job;
+uint64_t hash_logic;
 uint64_t hash_rendering;
 uint64_t hash_physics;
 
@@ -13,34 +12,21 @@ void
 rep_config_init()
 {
   /* maybe we could hardcode these values instead */
-  hash_user = roa_hash("user");
-  hash_job = roa_hash("job");
+  hash_logic = roa_hash("logic");
   hash_rendering = roa_hash("rendering");
   hash_physics = roa_hash("physics");
 
   /* check hashses are unique - unlikely but we can afford to */
-  ROA_ASSERT(hash_user != hash_job);
-  ROA_ASSERT(hash_user != hash_rendering);
-  ROA_ASSERT(hash_user != hash_physics);
-
-  ROA_ASSERT(hash_job != hash_rendering);
-  ROA_ASSERT(hash_job != hash_physics);
-
+  ROA_ASSERT(hash_logic != hash_rendering);
+  ROA_ASSERT(hash_logic != hash_physics);
   ROA_ASSERT(hash_rendering != hash_physics);
 }
 
 
 uint64_t
-rep_config_tagged_hash_user()
+rep_config_tagged_hash_logic()
 {
-  return hash_user;
-}
-
-
-uint64_t
-rep_config_tagged_hash_job()
-{
-  return hash_job;
+  return hash_logic;
 }
 
 

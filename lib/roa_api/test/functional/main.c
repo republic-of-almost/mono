@@ -2,10 +2,21 @@
 
 
 void
+rep_func_test_job(void *arg)
+{
+
+}
+
+
+void
 rep_func_test_frame(void *arg)
 {
-  /* quit straight away */
-  rep_app_close();
+  struct rep_task_desc desc[1];
+  
+  desc[0].arg = 0;
+  desc[0].function = rep_func_test_job;
+
+  rep_task_submit(&desc[0], 1);
 }
 
 

@@ -1,7 +1,11 @@
 #include <rep/rep_api.h>
 #include <data/engine_data.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/alloc.h>
 #include <roa_job/dispatcher.h>
+
+
+/* --------------------------------------------- [ Internal Task Wrapper ] -- */
 
 
 struct rep_task_wrapper_arg
@@ -11,14 +15,21 @@ struct rep_task_wrapper_arg
 };
 
 
-ROA_JOB(rep_task_wrapper, struct rep_task_wrapper_arg*)
+void
+rep_task_wrapper(roa_dispatcher_ctx_t job_ctx, void *void_arg)
 {
+  ROA_UNUSED(job_ctx);
+
+  struct rep_task_wrapper_arg *arg = (struct rep_task_wrapper_arg*)void_arg;
   arg->task_func(arg->task_arg);
 };
 
 
+/* -------------------------------------------------------------- [ Task ] -- */
+
+
 unsigned
-rep_submit_tasks(
+rep_task_submit(
   struct rep_task_desc *tasks,
   unsigned count)
 {
@@ -27,10 +38,14 @@ rep_submit_tasks(
   ROA_ASSERT(count);
 
   /* allocate space for args */
-  struct rep_task_wrapper_arg *args;
+  struct rep_task_wrapper_arg *args = ROA_NULL;
+  args = roa_tagged_allocator_alloc(rep_data_dispatcher_allocator(), sizeof(*args) * count);
+  ROA_ASSERT(args);
 
   /* allocate space for desc */
-  struct roa_job_desc *wrapped_desc;
+  struct roa_job_desc *wrapped_desc = ROA_NULL;
+  wrapped_desc = roa_tagged_allocator_alloc(rep_data_dispatcher_allocator(), sizeof(*wrapped_desc) * count);
+  ROA_ASSERT(wrapped_desc);
 
   for (unsigned i = 0; i < count; ++i)
   {
@@ -47,7 +62,7 @@ rep_submit_tasks(
 
 
 void
-rep_wait_for_tasks(
+rep_task_wait(
   unsigned marker)
 {
   /* param check */

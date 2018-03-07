@@ -10,11 +10,7 @@ rep_config_init();
 
 
 uint64_t
-rep_config_tagged_hash_user();
-
-
-uint64_t
-rep_config_tagged_hash_job();
+rep_config_tagged_hash_logic();
 
 
 uint64_t

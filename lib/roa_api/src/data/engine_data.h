@@ -4,6 +4,7 @@
 
 typedef struct roa_ctx * roa_ctx_t;
 typedef struct roa_dispatcher_ctx * roa_dispatcher_ctx_t;
+typedef struct volt_ctx * volt_ctx_t;
 
 
 void
@@ -20,6 +21,14 @@ rep_data_ctx();
 
 roa_dispatcher_ctx_t
 rep_data_dispatcher();
+
+
+struct roa_tagged_allocator*
+rep_data_dispatcher_allocator();
+
+
+volt_ctx_t
+rep_data_volt();
 
 
 #endif /* inc guard */

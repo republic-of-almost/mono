@@ -2,11 +2,13 @@
 #include <data/engine_data.h>
 #include <data/config.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/alloc.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_job/dispatcher.h>
+#include <volt/volt.h>
 
 
-ROA_JOB(rep_app_tick, rep_task)
+ROA_JOB(rep_game_loop_tick, rep_task)
 {
   ROA_BOOL new_frame = roa_ctx_new_frame(rep_data_ctx());
 
@@ -17,16 +19,28 @@ ROA_JOB(rep_app_tick, rep_task)
       arg(0); /* test */
     }
 
-    /* engine tasks */
+    roa_tagged_allocator_free(rep_config_tagged_hash_logic());
+
+    /* physics tasks */
     {
       
     }
+
+    roa_tagged_allocator_free(rep_config_tagged_hash_physics());
+
+    /* renderer tasks */
+    {
+      /* render */
+      volt_ctx_execute(rep_data_volt());
+    }
+
+    roa_tagged_allocator_free(rep_config_tagged_hash_rendering());
 
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;
       tick_desc.arg = arg;
-      tick_desc.func = rep_app_tick;
+      tick_desc.func = rep_game_loop_tick;
       tick_desc.keep_on_calling_thread = ROA_TRUE;
 
       roa_dispatcher_add_jobs(rep_data_dispatcher(), &tick_desc, 1);
@@ -43,11 +57,13 @@ rep_app_create(
 {
   ROA_ASSERT(desc);
 
-  rep_config_init();
-  rep_data_init();
-
   if (desc)
   {
+    /* init order is important */
+    roa_tagged_allocator_init();
+    rep_config_init();
+    rep_data_init();
+
     /* window */
     struct roa_ctx_window_desc win_desc;
     win_desc.title = desc->title;
@@ -59,10 +75,16 @@ rep_app_create(
     /* setup job dispatcher */
     struct roa_job_desc tick_desc;
     tick_desc.arg = desc->frame_job;
-    tick_desc.func = rep_app_tick;
+    tick_desc.func = rep_game_loop_tick;
     tick_desc.keep_on_calling_thread = ROA_TRUE;
 
     roa_dispatcher_add_jobs(rep_data_dispatcher(), &tick_desc, 1);
+
+    /* start dispatcher */
+    roa_dispatcher_run(rep_data_dispatcher());
+
+    /* closing */
+    roa_tagged_allocator_destroy();
   }
 }
 

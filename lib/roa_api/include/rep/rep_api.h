@@ -45,10 +45,6 @@ rep_app_get(
   struct rep_app_desc * out_desc);
 
 
-int
-rep_app_new_frame();
-
-
 void
 rep_app_destroy();
 
@@ -64,13 +60,13 @@ struct rep_task_desc
 
 
 unsigned
-rep_submit_tasks(
+rep_task_submit(
   struct rep_task_desc * tasks,
   unsigned count);
 
 
 void
-rep_wait_for_tasks(
+rep_task_wait(
   unsigned marker);
 
 
