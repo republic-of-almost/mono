@@ -58,9 +58,9 @@ roa_atomic_int_inc(
 	roa_atomic_int *atomic)
 {
 	#if defined(__clang__) || defined(__GNUC__)
-	return (int)__sync_fetch_and_add(&atomic->val, 1);
+	return (int)__sync_fetch_and_add(&atomic->val, 1) + 1;
 	#elif defined(_WIN32)
-  return InterlockedIncrement((LONG*)&atomic->val) - 1;
+  return InterlockedIncrement((LONG*)&atomic->val);
 	#endif
 }
 

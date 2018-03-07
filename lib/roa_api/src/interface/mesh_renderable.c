@@ -4,7 +4,7 @@
 
 void
 rep_mesh_renderable_set(
-  uint64_t * object_ids,
+  uint32_t * object_ids,
   struct rep_mesh_renderable_desc * desc,
   unsigned count)
 {
@@ -18,7 +18,7 @@ rep_mesh_renderable_set(
 
 void
 rep_mesh_renderable_get(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   struct rep_mesh_renderable_desc * desc,
   unsigned count)
 {

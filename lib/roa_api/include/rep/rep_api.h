@@ -12,6 +12,7 @@ extern "C" {
 
 #ifndef __cplusplus
 #ifdef _MSC_VER
+typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
 #endif
 #else
@@ -76,27 +77,27 @@ rep_task_wait(
 struct rep_object_desc
 {
   const char * name;
-  uint64_t object_parent;
+  uint32_t object_parent;
 };
 
 
 void
 rep_object_create(
-  uint64_t * out_object_ids,
+  uint32_t * out_object_ids,
   const struct rep_object_desc * desc,
   unsigned count);
 
 
 void
 rep_object_update(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   const struct rep_object_desc * desc,
   unsigned count);
 
 
 void
 rep_object_destroy(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   unsigned count);
 
 
@@ -113,14 +114,14 @@ struct rep_transform_desc
 
 void
 rep_transform_set(
-  uint64_t * object_ids,
+  uint32_t * object_ids,
   struct rep_transform_desc * desc,
   unsigned count);
 
 
 void
 rep_transform_get(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   struct rep_transform_desc * desc,
   unsigned count);
 
@@ -138,14 +139,14 @@ struct rep_camera_desc
 
 void
 rep_camera_set(
-  uint64_t * object_ids,
+  uint32_t * object_ids,
   struct rep_camera_desc * desc,
   unsigned count);
 
 
 void
 rep_camera_get(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   struct rep_camera_desc * desc,
   unsigned count);
 
@@ -162,14 +163,14 @@ struct rep_mesh_renderable_desc
 
 void
 rep_mesh_renderable_set(
-  uint64_t * object_ids,
+  uint32_t * object_ids,
   struct rep_mesh_renderable_desc * desc,
   unsigned count);
 
 
 void
 rep_mesh_renderable_get(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   struct rep_mesh_renderable_desc * desc,
   unsigned count);
 

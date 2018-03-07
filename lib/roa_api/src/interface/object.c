@@ -4,7 +4,7 @@
 
 void
 rep_object_create(
-  uint64_t * out_object_ids,
+  uint32_t * out_object_ids,
   const struct rep_object_desc * desc,
   unsigned count)
 {
@@ -17,7 +17,7 @@ rep_object_create(
 
 void
 rep_object_update(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   const struct rep_object_desc * desc,
   unsigned count)
 {
@@ -30,7 +30,7 @@ rep_object_update(
 
 void
 rep_object_destroy(
-  const uint64_t * object_ids,
+  const uint32_t * object_ids,
   unsigned count)
 {
   ROA_ASSERT(object_ids);

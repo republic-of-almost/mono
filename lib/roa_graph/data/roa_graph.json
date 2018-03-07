@@ -1,0 +1,29 @@
+{
+  "name": "RepublicGraph",
+  "kind": "StaticLib",
+  "language": "C89",
+  "location": "./",
+
+  "src_files" : [
+    "../include/**.h",
+    "../src/**.c",
+    "../src/**.h"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/"
+  ],
+
+  "private_inc_dirs" : [
+    "../src/"
+  ],
+
+  "project_dependencies" : [
+    "RepublicMath",
+    "RepublicLib"
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
+  ]
+}

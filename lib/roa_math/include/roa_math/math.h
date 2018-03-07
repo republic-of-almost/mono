@@ -14,6 +14,7 @@ typedef struct roa_float2 { float x, y; }                     roa_float2;
 typedef struct roa_float3 { float x, y, z; }                  roa_float3;
 typedef struct roa_float4 { float x, y, z, w; }               roa_float4;
 typedef struct roa_quaternion { float x, y, z, w; }           roa_quaternion;
+typedef struct roa_transform { roa_float3 position; roa_float3 scale; roa_quaternion rotation; } roa_transform;
 typedef struct roa_mat3 { float data[9];  }                   roa_mat3;
 typedef struct roa_mat4 { float data[16]; }                   roa_mat4;
 typedef struct roa_aabb { roa_float3 min; roa_float3 max; }   roa_aabb;
@@ -70,6 +71,8 @@ roa_float3    roa_float3_scale(roa_float3 a, float scale);
 
 
 /* ----------------------------------------------------------- [ float4 ] -- */
+/* ------------------------------------------------------- [ quaternion ] -- */
+/* -------------------------------------------------------- [ transform ] -- */
 /* ------------------------------------------------------------- [ mat3 ] -- */
 /* ------------------------------------------------------------- [ mat4 ] -- */
 
