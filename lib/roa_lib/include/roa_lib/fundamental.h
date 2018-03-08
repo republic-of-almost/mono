@@ -52,6 +52,24 @@ typedef int ROA_BOOL;
 #define ROA_MB_TO_BYTES(mb) (mb * 1048576)
 
 
+/* -------------------------------------------------------------- [ bits ] -- */
+
+
+#define ROA_BIT(ui) 1 << ui
+
+#define ROA_UPPER_32_BITS(ui64) ui64 & 0xFFFFFFFF
+#define ROA_LOWER_32_BITS(ui64) ui64 >> 32
+#define ROA_FIRST8_BITS(ui32) ui32 >> 24 & 0xFF
+#define ROA_SECOND8_BITS(ui32) ui32 >> 16 & 0xFF
+#define ROA_THIRD8_BITS(ui32) ui32 >> 8 & 0xFF
+#define ROA_FORTH8_BITS(ui32) ui32 >> & 0xFFFFFF
+#define ROA_UPPER_24_BITS(ui32) ui32 & 0xFFFFFF
+
+#define ROA_PACK3232(ui32a, ui32b) ((uint64_t)ui32a) << 32 | ui32b
+#define ROA_PACK8888(ui8a, ui8b, ui8c, ui8d) (uint32_t)((uint32_t)ui8a << 24) | ((uint32_t)ui8b << 16) | ((uint32_t)ui8c << 8) | ((uint32_t)ui8d << 0))
+#define ROA_PACK824(ui8a, ui32b) (uint32_t)(ui8a << 24) | ui32b
+
+
 /* ------------------------------------------------------ [ util helpers ] -- */
 
 

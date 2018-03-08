@@ -13,38 +13,188 @@ extern "C" {
 typedef struct roa_graph_ctx * roa_graph_ctx_t;
 
 
-/* ---------------------------------------------------------- [ Lifetime ] -- */
+// ------------------------------------------------------------ [ Life time ] --
 
 
 void
-roa_graph_ctx_create(roa_graph_ctx_t *ctx);
+initialize(Data *data);
 
 
 void
-roa_graph_ctx_destroy(roa_graph_ctx_t *ctx);
+think(Data *data);
 
 
-/* ------------------------------------------------------------- [ Nodes ] -- */
+void
+destroy(Data *data);
+
+
+// ----------------------------------------------------------- [ Graph Data ] --
+
+
+uint64_t
+data_register_type(
+  Data *data,
+  const graph_tick_fn &tick_cb,
+  const node_delete_fn &delete_cb,
+  const data_dependecy_alert_fn &dependency_cb,
+  uintptr_t user_data,
+  uint64_t dependency_id
+);
+
+
+bool
+data_unregister_type(
+  Data *data,
+  uint64_t type_id
+);
+
+
+void
+data_updated(const Data *graph, const uint32_t node_id, const uint64_t type_id);
+
+
+// ---------------------------------------------------------------- [ Nodes ] --
+
+
+bool
+node_exists(
+  const Data *data,
+  const uint32_t node_id,
+  size_t *out_index = nullptr);
 
 
 uint32_t
-roa_graph_node_create(roa_graph_ctx_t ctx);
+node_create(Data *data);
 
 
-ROA_BOOL
-roa_graph_node_set_parent(roa_graph_ctx_t ctx, uint32_t node, uint32_t parent_node);
+bool
+node_remove(
+  Data *data,
+  const uint32_t node_id);
+
+
+bool
+node_set_parent(
+  Data *data,
+  const uint32_t parent_id,
+  const uint32_t child_id);
+
+
+size_t
+node_child_count(
+  const Data *data,
+  const uint32_t node_id);
+
+
+size_t
+node_descendants_count(
+  const Data *data,
+  const uint32_t node_id);
 
 
 uint32_t
-roa_graph_node_get_parent(roa_graph_ctx_t ctx, uint32_t node);
+node_get_child(
+  const Data *data,
+  const uint32_t node_id,
+  const size_t child_index);
 
 
-ROA_BOOL
-roa_graph_node_remove(roa_graph_ctx_t ctx, uint32_t node_id);
+uint32_t
+node_get_parent(const Data *data, const uint32_t node_id);
 
 
-unsigned
-roa_graph_node_count(roa_graph_ctx_t ctx);
+// ------------------------------------------------------------ [ Callbacks ] --
+
+
+bool
+callback_graph_tick(Data *data, const graph_tick_fn &cb, uintptr_t user_data);
+
+
+bool
+callback_node_delete(Data *data, const node_delete_fn &cb, uintptr_t user_data);
+
+
+// ----------------------------------------------------------- [ Attributes ] --
+
+
+bool
+node_get_name(
+  const Data *graph,
+  const uint32_t node_id,
+  const char **name);
+
+
+bool
+node_set_name(
+  Data *graph,
+  const uint32_t node_id,
+  const char *name);
+
+
+bool
+node_get_tags(
+  const Data *graph,
+  const uint32_t node_id,
+  uint64_t *tags);
+
+
+bool
+node_set_tags(
+  Data *graph,
+  const uint32_t node_id,
+  const uint64_t tags);
+
+
+bool
+node_get_transform(
+  const Data *data,
+  const uint32_t node_id,
+  math::transform *trans,
+  const bool inherited = false);
+
+
+bool
+node_set_transform(
+  Data *data,
+  const uint32_t node_id,
+  const math::transform *trans);
+
+
+bool
+node_register_type(
+  Data *data,
+  const uint32_t node_id,
+  const uint64_t type_id
+);
+
+
+bool
+node_unregister_type(
+  Data *data,
+  const uint32_t node_id,
+  const uint64_t type_id
+);
+
+
+bool
+node_get_data_type_id(
+  const Data *data,
+  const uint32_t node_id,
+  uint64_t *type_id);
+
+
+bool
+node_get_user_data(
+  const Data *data,
+  const uint32_t node_id,
+  uintptr_t *user_data);
+
+
+bool
+node_set_user_data(
+  Data *data,
+  const uint32_t node_id,
+  const uintptr_t *user_data);
 
 
 #ifdef __cplusplus
