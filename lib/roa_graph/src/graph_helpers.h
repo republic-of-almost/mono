@@ -9,4 +9,8 @@ unsigned
 roa_internal_object_index(uint32_t find, uint32_t *ids, unsigned count);
 
 
+ROA_BOOL
+key_search(uint32_t find, uint32_t *ids, uint32_t count, uint32_t *index);
+
+
 #endif /* inc guard */

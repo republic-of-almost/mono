@@ -186,6 +186,50 @@ roa_float3_scale(roa_float3 a, float scale)
 
 
 /* ----------------------------------------------------------- [ float4 ] -- */
+
+/* ------------------------------------------------------- [ quaternion ] -- */
+
+
+roa_quaternion
+roa_quaternion_init()
+{
+  roa_quaternion quat;
+  quat.x = 0.f;
+  quat.y = 0.f;
+  quat.z = 0.f;
+  quat.w = 1.f;
+
+  return quat;
+}
+
+/* -------------------------------------------------------- [ transform ] -- */
+
+
+void
+roa_transform_init(roa_transform *out)
+{
+  assert(out);
+
+  out->position = roa_float3_fill_with_value(0);
+  out->scale    = roa_float3_fill_with_value(1);
+  out->rotation = roa_quaternion_init();
+}
+
+
+void
+roa_transform_inherited(
+  roa_transform *out,
+  roa_transform *parent,
+  roa_transform *local)
+{
+  assert(out);
+  assert(parent);
+  assert(local);
+
+
+}
+
+
 /* ------------------------------------------------------------- [ mat3 ] -- */
 /* ------------------------------------------------------------- [ mat4 ] -- */
 

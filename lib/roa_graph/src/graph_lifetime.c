@@ -18,12 +18,6 @@ roa_graph_ctx_create(roa_graph_ctx_t *ctx)
 
   if (new_ctx)
   {
-    roa_spin_lock_init(&new_ctx->objects_lock);
-
-    roa_atomic_int_store(&new_ctx->object_counter, 0);
-
-    roa_array_create(new_ctx->objects, 128);
-    roa_array_create(new_ctx->object_ids, 128);
 
     *ctx = new_ctx;
   }
@@ -37,9 +31,6 @@ roa_graph_ctx_destroy(roa_graph_ctx_t *ctx)
   ROA_ASSERT(ctx);
 
   struct roa_graph_ctx *die_ctx = *ctx;
-
-  roa_array_destroy(die_ctx->object_ids);
-  roa_array_destroy(die_ctx->objects);
 
   roa_free(die_ctx);
 }

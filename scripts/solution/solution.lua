@@ -11,7 +11,7 @@
 
 -- Run dependencies --
 package.path = './?.lua;' .. package.path
-dofile("./premake_data.lua")
+dofile("./data_to_premake.lua")
 dofile("./defaults.lua")
 
 
