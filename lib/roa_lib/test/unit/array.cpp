@@ -113,7 +113,7 @@ TEST_CASE("Array")
     REQUIRE(roa_array_capacity(i) == 4);
   }
 
-  SECTION("insert")
+  SECTION("insert middle")
   {
     int *i = nullptr;
     roa_array_create(i);
@@ -121,13 +121,48 @@ TEST_CASE("Array")
     roa_array_push(i, 1);
     roa_array_push(i, 3);
 
-    roa_array_insert(i, 1, 1);
+    roa_array_insert(i, 1, 2);
 
     REQUIRE(i[0] == 1);
     REQUIRE(i[1] == 2);
     REQUIRE(i[2] == 3);
 
     REQUIRE(roa_array_size(i) == 3);
+    REQUIRE(roa_array_capacity(i) == 4);
+  }
+
+  SECTION("insert front")
+  {
+    int *i = nullptr;
+    roa_array_create(i);
+
+    roa_array_insert(i, 0, 3);
+    roa_array_insert(i, 0, 2);
+    roa_array_insert(i, 0, 1);
+
+    REQUIRE(i[0] == 1);
+    REQUIRE(i[1] == 2);
+    REQUIRE(i[2] == 3);
+
+    REQUIRE(roa_array_size(i) == 3);
+    REQUIRE(roa_array_capacity(i) == 4);
+  }
+
+  SECTION("clear")
+  {
+    int *i = nullptr;
+    roa_array_create(i);
+
+    roa_array_push(i, 1);
+    roa_array_push(i, 2);
+    roa_array_push(i, 3);
+
+    REQUIRE(roa_array_size(i) == 3);
+    REQUIRE(roa_array_capacity(i) == 4);
+
+    roa_array_clear(i);
+
+    REQUIRE(roa_array_size(i) == 0);
     REQUIRE(roa_array_capacity(i) == 4);
   }
 }

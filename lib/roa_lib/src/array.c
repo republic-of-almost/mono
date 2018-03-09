@@ -5,21 +5,34 @@
 #include <stdlib.h>
 
 
+/* ------------------------------------------------------ [ Array Config ] -- */
+
+
+#define ROA_ARR_PEDANTIC_CHECKS 1
+
+
+void*       roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity);
+void        roa_internal_array_should_grow(void **ptr, unsigned stride);
+
+
 /* -------------------------------------------------------- [ Array Impl ] -- */
 
 
-struct roa_array_internal
+struct roa_array_header
 {
-  unsigned char * __capacity;
-  unsigned char * __end;
+  unsigned char * capacity;
+  unsigned char * end;
 };
 
 
-void*
+void
 roa_internal_array_create(void **ptr, unsigned stride, unsigned capacity)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr == ROA_NULL);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr == ROA_NULL);
+  }
 
   if (capacity == 0)
   {
@@ -27,30 +40,31 @@ roa_internal_array_create(void **ptr, unsigned stride, unsigned capacity)
   }
 
   unsigned array_bytes = (stride * capacity);
-  unsigned bytes = sizeof(struct roa_array_internal) + array_bytes;
+  unsigned bytes = sizeof(struct roa_array_header) + array_bytes;
 
-  struct roa_array_internal *new_arr = malloc(bytes);
-  unsigned char *__begin = (unsigned char*)&new_arr[1];
+  struct roa_array_header *header = malloc(bytes);
+  unsigned char *begin = (unsigned char*)&header[1];
 
-  new_arr[0].__end = __begin;
-  new_arr[0].__capacity = __begin + array_bytes;
+  header[0].end = begin;
+  header[0].capacity = begin + array_bytes;
 
-  *ptr = new_arr[0].__end;
-
-  return new_arr;
+  *ptr = (void*)begin;
 }
 
 
 void
 roa_internal_array_destroy(void **ptr)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr != ROA_NULL);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr != ROA_NULL);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
-  roa_free(curr_arr);
+  roa_free(header);
   *ptr = NULL;
 }
 
@@ -58,15 +72,18 @@ roa_internal_array_destroy(void **ptr)
 unsigned
 roa_internal_array_size(void **ptr, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
-  ROA_ASSERT(stride);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
-  unsigned char * __begin = ((unsigned char*)*ptr);
-  unsigned count = (curr_arr->__end - __begin) / stride;
+  unsigned char * begin = ((unsigned char*)*ptr);
+  unsigned count = (header->end - begin) / stride;
 
   return count;
 }
@@ -75,41 +92,50 @@ roa_internal_array_size(void **ptr, unsigned stride)
 unsigned
 roa_internal_array_capacity(void **ptr, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
-  ROA_ASSERT(stride);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
-  return (curr_arr->__capacity - ((unsigned char*)*ptr)) / stride;
+  return (header->capacity - ((unsigned char*)*ptr)) / stride;
 }
 
 
 void
 roa_internal_array_resize(void **ptr, unsigned size, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
-  ROA_ASSERT(size);
-  ROA_ASSERT(stride);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+    ROA_ASSERT(size);
+    ROA_ASSERT(stride);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
-  curr_arr = roa_internal_array_grow(ptr, stride, size);
-  curr_arr->__end = curr_arr->__capacity;
+  header = roa_internal_array_grow(ptr, stride, size);
+  header->end = header->capacity;
 }
 
 
 void
 roa_internal_array_erase(void **ptr, unsigned index, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
   unsigned char *dst = &((unsigned char*)(*ptr))[stride * index];
   unsigned char *src = &((unsigned char*)(*ptr))[stride * (index + 1)];
@@ -121,7 +147,7 @@ roa_internal_array_erase(void **ptr, unsigned index, unsigned stride)
     unsigned len = (stride * (count - 1)) - (stride * index);
     memmove(dst, src, len);
 
-    curr_arr->__end -= stride;
+    header->end -= stride;
   }
 }
 
@@ -129,86 +155,97 @@ roa_internal_array_erase(void **ptr, unsigned index, unsigned stride)
 void
 roa_internal_array_pop(void **ptr, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
-
-  unsigned char *__begin = (unsigned char*)*ptr;
-
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
-
-  if (__begin < curr_arr->__end)
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
   {
-    curr_arr->__end -= stride;
-  }  
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+  }
+
+  unsigned char *begin = (unsigned char*)*ptr;
+
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
+
+  if (begin < header->end)
+  {
+    header->end -= stride;
+  }
 }
 
 
 void
 roa_internal_array_clear(void**ptr)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
-  unsigned char *__begin = (unsigned char*)&curr_arr[1];
-  
-  curr_arr->__end = __begin;
+  unsigned char *begin = (unsigned char*)&header[1];
+
+  header->end = begin;
 }
 
 
 void*
 roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
-  ROA_ASSERT(stride);
-  ROA_ASSERT(capacity);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
+    ROA_ASSERT(capacity);
+  }
 
   /* increase buffer */
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
   unsigned count = roa_internal_array_size(ptr, stride);
-  unsigned bytes = (stride * capacity) + sizeof(struct roa_array_internal);
+  unsigned bytes = (stride * capacity) + sizeof(struct roa_array_header);
 
-  curr_arr = (struct roa_array_internal*)realloc(curr_arr, bytes);
+  header = (struct roa_array_header*)realloc(header, bytes);
 
-  unsigned char *__begin = (unsigned char*)&curr_arr[1];
+  unsigned char *begin = (unsigned char*)&header[1];
 
-  curr_arr->__end = __begin + (stride * count);
-  curr_arr->__capacity = __begin + (stride * capacity);
+  header->end = begin + (stride * count);
+  header->capacity = begin + (stride * capacity);
 
-  *ptr = &curr_arr[1];
+  *ptr = &header[1];
 
-  return curr_arr;
+  return header;
 }
 
 
 unsigned
 roa_internal_array_push(void **ptr, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
-  ROA_ASSERT(stride);
-
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
-  curr_arr--;
-
-  if (curr_arr->__end >= curr_arr->__capacity)
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
   {
-    unsigned count = roa_internal_array_size(ptr, stride);
-    curr_arr = (unsigned char *)roa_internal_array_grow(ptr, stride, count * 2);
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
   }
 
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
 
-  unsigned char * __begin = (unsigned char*)(*ptr);
+  if (header->end >= header->capacity)
+  {
+    unsigned count = roa_internal_array_size(ptr, stride);
+    header = (unsigned char *)roa_internal_array_grow(ptr, stride, count * 2);
+  }
+
+  unsigned char * begin = (unsigned char*)(*ptr);
 
   /* increment end */
-  unsigned index = (curr_arr->__end - __begin) / stride;
-  curr_arr->__end += stride;
+  unsigned index = (header->end - begin) / stride;
+  header->end += stride;
 
   return index;
 }
@@ -217,18 +254,44 @@ roa_internal_array_push(void **ptr, unsigned stride)
 unsigned
 roa_internal_array_insert(void **ptr, unsigned index, unsigned stride)
 {
-  ROA_ASSERT(0); /* do insert */
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
+  }
 
-  return 0;
+  /* increase the size to make space */
+  roa_internal_array_push(ptr, stride);
+
+  struct roa_array_header *header = ((struct roa_array_header*)*ptr);
+  header--;
+
+  unsigned count = roa_internal_array_size(ptr, stride);
+
+  unsigned char * begin = (unsigned char*)(*ptr);
+
+  unsigned char *dst = &begin[stride * (index + 1)];
+  unsigned char *src = &begin[stride * index];
+
+  unsigned len = (count - index - 1) * stride;
+
+  memmove(dst, src, len);
+
+  return index;
 }
+
 
 void
 roa_internal_array_should_grow(void **ptr, unsigned stride)
 {
-  ROA_ASSERT(ptr);
-  ROA_ASSERT(*ptr);
+  if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
+  {
+    ROA_ASSERT(ptr);
+    ROA_ASSERT(*ptr);
+  }
 
-  struct roa_array_internal *curr_arr = ((struct roa_array_internal*)*ptr);
+  struct roa_array_header *curr_arr = ((struct roa_array_header*)*ptr);
   curr_arr--;
 
   unsigned count = roa_internal_array_size(ptr, stride) + 1;
@@ -238,3 +301,9 @@ roa_internal_array_should_grow(void **ptr, unsigned stride)
     roa_internal_array_grow(ptr, stride, count * 2);
   }
 }
+
+
+/* ------------------------------------------------------ [ Array Config ] -- */
+
+
+#undef ROA_ARR_PEDANTIC_CHECKS
