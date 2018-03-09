@@ -78,4 +78,19 @@ TEST_CASE("Array")
     REQUIRE(roa_array_size(i) == 2);
     REQUIRE(roa_array_capacity(i) == 32);
   }
+
+  SECTION("insert")
+  {
+    roa_array_push(i, 1);
+    roa_array_push(i, 3);
+
+    roa_array_insert(i, 1, 1);
+
+    REQUIRE(i[0] == 1);
+    REQUIRE(i[1] == 2);
+    REQUIRE(i[2] == 3);
+
+    REQUIRE(roa_array_size(i) == 3);
+    REQUIRE(roa_array_capacity(i) == 32);
+  }
 }

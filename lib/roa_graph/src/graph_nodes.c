@@ -2,6 +2,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
 #include <graph_data.h>
+#include <stdlib.h>
 
 
 /*------------------------------------------------------ [ Config / Data ] -- */
@@ -244,12 +245,9 @@ node_recalc_transform_branch(
     const roa_transform local_transform = graph->local_transform[index];
 
     // Calc new world transform.
-    const roa_transform child_world(
-      roa_transform_inherited(
-        transform_stack.top(),
-        local_transform
-      )
-    );
+    roa_transform child_world;
+    roa_transform transform_top = roa_array_back(transform_stack);
+    roa_transform_inherited(&child_world, &transform_top, &local_transform);
 
     graph->world_transform[index] = child_world;
     last_world_trans = child_world;
@@ -276,10 +274,13 @@ node_set_parent(
   unsigned this_index = 0;
   uint32_t this_depth = 0;
   {
+    uint32_t *ids = graph->node_id;
+    unsigned count = roa_array_size(graph->node_id);
+
     if (!key_search(
       this_id,
-      graph->node_id.data(),
-      graph->node_id.size(),
+      ids,
+      count,
       &this_index))
     {
       return ROA_FALSE;
@@ -291,7 +292,7 @@ node_set_parent(
   /* Find out how many nodes we need to move */
   uint32_t nodes_to_move = 1;
   {
-    const unsigned node_count = graph->node_id.size();
+    const unsigned node_count = roa_array_size(graph->node_id);
     const unsigned start_index = this_index + 1;
 
     for (unsigned i = start_index; i < node_count; ++i, ++nodes_to_move)
@@ -308,35 +309,65 @@ node_set_parent(
   /* Remove nodes, and insert else where in the tree */
   {
     // Save the old data
-    lib::array<uint32_t, stack_hint> move_nodes(
-      graph->node_id.begin() + this_index,
-      graph->node_id.begin() + (this_index + nodes_to_move)
-    );
-    graph->node_id.erase(this_index, nodes_to_move);
+    uint32_t *move_nodes = ROA_NULL;
+    {
+      roa_array_create(move_nodes, nodes_to_move);
+      roa_array_resize(move_nodes, nodes_to_move);
+      memcpy(move_nodes, &graph->node_id[this_index], sizeof(move_nodes[0]) * nodes_to_move);
 
-    lib::array<uint64_t, stack_hint> move_parent_depth_data(
-      graph->parent_depth_data.begin() + this_index,
-      graph->parent_depth_data.begin() + (this_index + nodes_to_move)
-    );
-    graph->parent_depth_data.erase(this_index, nodes_to_move);
+      for (int i = 0; i < nodes_to_move; ++i)
+      {
+        roa_array_erase(graph->node_id, this_index);
+      }
+    }
 
-    lib::array<roa_transform, stack_hint> move_local_transform(
-      graph->local_transform.begin() + this_index,
-      graph->local_transform.begin() + (this_index + nodes_to_move)
-    );
-    graph->local_transform.erase(this_index, nodes_to_move);
+    uint64_t *move_parent_depth_data = ROA_NULL;
+    {
+      roa_array_create(move_nodes, nodes_to_move);
+      roa_array_resize(move_nodes, nodes_to_move);
+      memcpy(move_parent_depth_data, &graph->parent_depth_data[this_index], sizeof(move_parent_depth_data[0]) * nodes_to_move);
 
-    lib::array<roa_transform, stack_hint> move_world_transform(
-      graph->world_transform.begin() + this_index,
-      graph->world_transform.begin() + (this_index + nodes_to_move)
-    );
-    graph->world_transform.erase(this_index, nodes_to_move);
+      for (int i = 0; i < nodes_to_move; ++i)
+      {
+        roa_array_erase(graph->parent_depth_data, this_index);
+      }
+    }
 
-    lib::array<node_data, stack_hint> data_to_move(
-      graph->data.begin() + this_index,
-      graph->data.begin() + (this_index + nodes_to_move)
-    );
-    graph->data.erase(this_index, nodes_to_move);
+    roa_transform *move_local_transform = ROA_NULL;
+    {
+      roa_array_create(move_local_transform, nodes_to_move);
+      roa_array_resize(move_local_transform, nodes_to_move);
+      memcpy(move_local_transform, &graph->local_transform[this_index], sizeof(move_local_transform[0]) * nodes_to_move);
+
+      for (int i = 0; i < nodes_to_move; ++i)
+      {
+        roa_array_erase(graph->local_transform, this_index);
+      }
+    }
+
+    roa_transform *move_world_transform = ROA_NULL;
+    {
+      roa_array_create(move_world_transform, nodes_to_move);
+      roa_array_resize(move_world_transform, nodes_to_move);
+      memcpy(move_world_transform, &graph->world_transform[this_index], sizeof(move_world_transform[0]) * nodes_to_move);
+
+      for (int i = 0; i < nodes_to_move; ++i)
+      {
+        roa_array_erase(graph->world_transform, this_index);
+      }
+    }
+
+    struct node_data *data_to_move = ROA_NULL;
+    {
+      roa_array_create(data_to_move, nodes_to_move);
+      roa_array_resize(data_to_move, nodes_to_move);
+      memcpy(data_to_move, &graph->data[this_index], sizeof(data_to_move[0]) * nodes_to_move);
+
+      for (int i = 0; i < nodes_to_move; ++i)
+      {
+        roa_array_erase(graph->data, this_index);
+      }
+    }
 
 #ifndef NDEBUG
     graph_size_check(graph);
@@ -344,13 +375,13 @@ node_set_parent(
 
     // Find new insert point
     unsigned parent_index = 0;
-    unsigned insert_index = graph->node_id.size();
+    unsigned insert_index = roa_array_size(graph->node_id);
     uint32_t parent_depth = 0;
     {
       if (parent_id > 0)
       {
-        const uint32_t *node_ids = graph->node_id.data();
-        const unsigned node_count = graph->node_id.size();
+        const uint32_t *node_ids = graph->node_id;
+        const unsigned node_count = roa_array_size(graph->node_id);
 
         if (!key_search(
           parent_id,
@@ -367,45 +398,52 @@ node_set_parent(
       }
     }
 
-    // Change the first node to point at the new parent.
+    /* Change the first node to point at the new parent. */
     move_parent_depth_data[0] = set_data(parent_id, get_depth(move_parent_depth_data[0]));
 
     /*
-    Insert the data into the new positions.
+      Insert the data into the new positions.
     */
-    graph->node_id.insert(
-      insert_index,
-      move_nodes.data(),
-      nodes_to_move
-    );
+    {
+      for (int i = 0; i < nodes_to_move)
+      {
+        
+      }
 
-    graph->parent_depth_data.insert(
-      insert_index,
-      move_parent_depth_data.data(),
-      nodes_to_move
-    );
+      graph->node_id.insert(
+        insert_index,
+        move_nodes.data(),
+        nodes_to_move
+      );
 
-    graph->local_transform.insert(
-      insert_index,
-      move_local_transform.data(),
-      nodes_to_move
-    );
+      graph->parent_depth_data.insert(
+        insert_index,
+        move_parent_depth_data.data(),
+        nodes_to_move
+      );
 
-    graph->world_transform.insert(
-      insert_index,
-      move_world_transform.data(),
-      nodes_to_move
-    );
+      graph->local_transform.insert(
+        insert_index,
+        move_local_transform.data(),
+        nodes_to_move
+      );
 
-    graph->data.insert(
-      insert_index,
-      data_to_move.data(),
-      nodes_to_move
-    );
+      graph->world_transform.insert(
+        insert_index,
+        move_world_transform.data(),
+        nodes_to_move
+      );
 
-#ifndef NDEBUG
-    graph_size_check(graph);
-#endif
+      graph->data.insert(
+        insert_index,
+        data_to_move.data(),
+        nodes_to_move
+      );
+
+      #ifndef NDEBUG
+      graph_size_check(graph);
+      #endif
+  }
 
     /*
     Calculate the depth differences between old and new parents.

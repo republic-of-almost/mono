@@ -193,13 +193,34 @@ roa_float3_scale(roa_float3 a, float scale)
 roa_quaternion
 roa_quaternion_init()
 {
-  roa_quaternion quat;
-  quat.x = 0.f;
-  quat.y = 0.f;
-  quat.z = 0.f;
-  quat.w = 1.f;
+  roa_quaternion quat{
+    0.f, 0.f, 0.f, 1.f
+  };
 
   return quat;
+}
+
+
+roa_quaternion
+roa_quaternion_init_with_values(float x, float y, float z, float w)
+{
+  roa_quaternion quat{
+    x, y, z, w
+  };
+
+  return quat;
+}
+
+
+roa_quaternion
+roa_quaternion_multiply(roa_quaternion left, roa_quaternion right)
+{
+  const float w = (left.w * right.w) - (left.x * right.x) - (left.y * right.y) - (left.z * right.z);
+  const float x = (left.w * right.x) + (left.x * right.w) + (left.y * right.z) - (left.z * right.y);
+  const float y = (left.w * right.y) + (left.y * right.w) + (left.z * right.x) - (left.x * right.z);
+  const float z = (left.w * right.z) + (left.z * right.w) + (left.x * right.y) - (left.y * right.x);
+
+  return roa_quaternion_init_with_values(x, y, z, w);
 }
 
 /* -------------------------------------------------------- [ transform ] -- */
@@ -226,6 +247,15 @@ roa_transform_inherited(
   assert(parent);
   assert(local);
 
+  out->scale = roa_float3_multiply(parent->scale, local->scale);
+  out->rotation = roa_quaternion_multiply(parent->rotation, local->rotation);
+  out->position = roa_float3_add(
+    parent->position,
+    roa_float3_multiply(
+      local->position,
+      parent->scale
+    )
+  );
 
 }
 

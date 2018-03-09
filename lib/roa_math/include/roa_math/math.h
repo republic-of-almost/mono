@@ -75,6 +75,8 @@ roa_float3      roa_float3_scale(roa_float3 a, float scale);
 
 
 roa_quaternion  roa_quaternion_init();
+roa_quaternion  roa_quaternion_init_with_values(float x, float y, float z, float w);
+roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion right);
 
 
 /* -------------------------------------------------------- [ transform ] -- */
@@ -82,6 +84,7 @@ roa_quaternion  roa_quaternion_init();
 
 void            roa_transform_init(roa_transform *out);
 void            roa_transform_inherited(roa_transform *out, roa_transform *parent, roa_transform *local);
+
 
 /* ------------------------------------------------------------- [ mat3 ] -- */
 /* ------------------------------------------------------------- [ mat4 ] -- */

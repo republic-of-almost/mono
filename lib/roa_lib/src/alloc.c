@@ -93,7 +93,7 @@ roa_tagged_allocator_init()
 
   /* create blocks */
   unsigned count = roa_array_size(internal_allocator.blocks);
-  int i;
+  unsigned i;
 
   for (i = 0; i < count; ++i)
   {
@@ -183,7 +183,7 @@ roa_tagged_allocator_copy(
 void
 roa_tagged_allocator_free(uint64_t tag)
 {
-  
+  ROA_ASSERT(0); /* finish this */
 }
 
 

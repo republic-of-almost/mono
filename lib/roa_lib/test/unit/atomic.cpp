@@ -36,7 +36,7 @@ TEST_CASE("Atomic")
   	int i = roa_atomic_int_inc(&at_int);
     int j = roa_atomic_int_load(&at_int);
 
-  	REQUIRE(i == init_value);
+  	REQUIRE(i == init_value + 1);
     REQUIRE(j == init_value + 1);
   }
 
