@@ -79,16 +79,16 @@ roa_tagged_allocator_init()
 {
   ROA_MEM_ZERO(internal_allocator);
 
-  roa_array_create(internal_allocator.block_tag_frame_key, 32);
+  roa_array_create(internal_allocator.block_tag_frame_key);
   roa_array_resize(internal_allocator.block_tag_frame_key, 32);
 
-  roa_array_create(internal_allocator.block_tag_frame_count, 32);
+  roa_array_create(internal_allocator.block_tag_frame_count);
   roa_array_resize(internal_allocator.block_tag_frame_count, 32);
 
-  roa_array_create(internal_allocator.block_tag_keys, 32);
+  roa_array_create(internal_allocator.block_tag_keys);
   roa_array_resize(internal_allocator.block_tag_keys, 32);
 
-  roa_array_create(internal_allocator.blocks, 32);
+  roa_array_create(internal_allocator.blocks);
   roa_array_resize(internal_allocator.blocks, 32);
 
   /* create blocks */
@@ -142,7 +142,7 @@ roa_tagged_allocator_alloc(
     {
       if (tags[i] == 0)
       {
-        void **blocks = internal_allocator.blocks;
+        /* void **blocks = internal_allocator.blocks; */
 
         tags[i] = allocator->allocator_tag;
         allocator->block_begin = internal_allocator.blocks[i];
@@ -183,6 +183,7 @@ roa_tagged_allocator_copy(
 void
 roa_tagged_allocator_free(uint64_t tag)
 {
+  ROA_UNUSED(tag);
   ROA_ASSERT(0); /* finish this */
 }
 

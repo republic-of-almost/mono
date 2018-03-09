@@ -8,11 +8,12 @@
 /* ------------------------------------------------------ [ Array Config ] -- */
 
 
-#define ROA_ARR_PEDANTIC_CHECKS 1
+/* turn this on if you suspect something in array */
+#define ROA_ARR_PEDANTIC_CHECKS 0
 
 
-void*       roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity);
-void        roa_internal_array_should_grow(void **ptr, unsigned stride);
+void* roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity);
+void roa_internal_array_should_grow(void **ptr, unsigned stride);
 
 
 /* -------------------------------------------------------- [ Array Impl ] -- */
@@ -39,7 +40,7 @@ roa_internal_array_create(void **ptr, unsigned stride, unsigned capacity)
     capacity = 1;
   }
 
-  unsigned array_bytes = (stride * capacity);
+  unsigned array_bytes = stride * capacity;
   unsigned bytes = sizeof(struct roa_array_header) + array_bytes;
 
   struct roa_array_header *header = malloc(bytes);
@@ -58,7 +59,7 @@ roa_internal_array_destroy(void **ptr)
   if (ROA_IS_ENABLED(ROA_ARR_PEDANTIC_CHECKS))
   {
     ROA_ASSERT(ptr);
-    ROA_ASSERT(*ptr != ROA_NULL);
+    ROA_ASSERT(*ptr);
   }
 
   struct roa_array_header *header = ((struct roa_array_header*)*ptr);
@@ -132,6 +133,7 @@ roa_internal_array_erase(void **ptr, unsigned index, unsigned stride)
   {
     ROA_ASSERT(ptr);
     ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
   }
 
   struct roa_array_header *header = ((struct roa_array_header*)*ptr);
@@ -238,7 +240,11 @@ roa_internal_array_push(void **ptr, unsigned stride)
   if (header->end >= header->capacity)
   {
     unsigned count = roa_internal_array_size(ptr, stride);
-    header = (unsigned char *)roa_internal_array_grow(ptr, stride, count * 2);
+    header = (struct roa_array_header *)roa_internal_array_grow(
+      ptr,
+      stride,
+      count * 2
+    );
   }
 
   unsigned char * begin = (unsigned char*)(*ptr);
@@ -289,6 +295,7 @@ roa_internal_array_should_grow(void **ptr, unsigned stride)
   {
     ROA_ASSERT(ptr);
     ROA_ASSERT(*ptr);
+    ROA_ASSERT(stride);
   }
 
   struct roa_array_header *curr_arr = ((struct roa_array_header*)*ptr);

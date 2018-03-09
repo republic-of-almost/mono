@@ -1,4 +1,3 @@
-
 #include <roa_lib/thread.h>
 #include <roa_lib/fundamental.h>
 #include <catch/catch.hpp>
