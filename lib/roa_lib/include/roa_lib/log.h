@@ -17,11 +17,11 @@ extern "C" {
 #endif
 
 
-// ------------------------------------------------------- [ Logging Config ] --
+/* ---------------------------------------------------- [ Logging Config ] -- */
 
 
 
-// ------------------------------------------------------- [ Logging Macros ] --
+/* ---------------------------------------------------- [ Logging Macros ] -- */
 
 
 #define ROA_LOGGING_FILE_NAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -128,4 +128,5 @@ roa_internal_log_v(const char *prefix,
 #endif
 
 
-#endif // inc guard
+#endif /* inc guard */
+

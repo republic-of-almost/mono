@@ -51,7 +51,7 @@ roa_internal_log(const char *prefix,
 {
   va_list args;
   va_start(args, msg);
-  log_v(prefix, file, func, line, msg, args);
+  roa_internal_log_v(prefix, file, func, line, msg, args);
   va_end(args);
 }
 
@@ -86,7 +86,7 @@ roa_internal_log_v(const char *prefix,
 
   if (logging_outputs & ROA_LOG_OUTPUT_FILE)
   {
-    size_t buffer_used = 5; // start at 5 to account for trailing characters.
+    size_t buffer_used = 5; /* start at 5 to account for trailing characters. */
 
     char buffer[2048];
     memset(buffer, 0, sizeof(buffer));

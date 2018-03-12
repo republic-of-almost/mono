@@ -28,7 +28,11 @@ roa_internal_assert(
 
   _wassert(wmsg, wfile, line);
   #else
-//	__assert_fail (expr, file, line, func);
+	ROA_UNUSED(expr);
+	ROA_UNUSED(file);
+	ROA_UNUSED(line);
+	ROA_UNUSED(func);
+	/*__assert_fail (expr, file, line, func);*/
   abort();
   #endif
 }	

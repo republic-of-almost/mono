@@ -247,7 +247,7 @@ roa_internal_array_push(void **ptr, unsigned stride)
     );
   }
 
-  unsigned char * begin = (unsigned char*)(*ptr);
+  unsigned char * begin = (unsigned char*)(&header[1]);
 
   /* increment end */
   unsigned index = (header->end - begin) / stride;

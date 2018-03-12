@@ -2,6 +2,7 @@ output/
 assets/
 media_masters/
 
+tags
 imgui.ini
 
 # Shaders are stored here

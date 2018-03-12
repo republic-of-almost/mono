@@ -49,6 +49,9 @@ roa_thread_create(
   int core_affinity)
 {
   #if defined(__linux__) || defined(__APPLE__)
+	ROA_UNUSED(stack_size);
+	ROA_UNUSED(core_affinity);
+
   pthread_t th;
 
   int success = pthread_create(
