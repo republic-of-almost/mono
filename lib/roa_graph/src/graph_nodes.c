@@ -152,7 +152,9 @@ roa_graph_node_remove(roa_graph_ctx_t graph, const uint32_t node_id)
     {
       const unsigned decendent_count = roa_graph_node_descendants_count(graph, node_id) + 1;
 
-      for (uint32_t i = 0; i < decendent_count; ++i)
+			uint32_t i;
+
+      for (i = 0; i < decendent_count; ++i)
       {
         roa_array_erase(graph->node_id, index);
         roa_array_erase(graph->parent_depth_data, index);
@@ -220,18 +222,22 @@ roa_graph_node_recalc_transform_branch(
 
   const unsigned nodes_to_calc = roa_graph_node_descendants_count(graph, this_id) + 1;
 
-  for (unsigned i = 0; i < nodes_to_calc; ++i)
+	unsigned i;
+
+  for (i = 0; i < nodes_to_calc; ++i)
   {
     const unsigned   index = this_index + i;
     const uint64_t data = graph->parent_depth_data[index];
     const uint32_t depth = get_depth(data);
 
-    // Pop off all unrequired transforms.
+    /* Pop off all unrequired transforms. */
     if (curr_depth > depth)
     {
       const unsigned to_pop = curr_depth - depth;
 
-      for (unsigned j = 0; j < to_pop; ++j)
+			unsigned j;
+
+      for (j = 0; j < to_pop; ++j)
       {
         roa_array_pop(transform_stack);
       }
@@ -245,7 +251,7 @@ roa_graph_node_recalc_transform_branch(
 
     const roa_transform local_transform = graph->local_transform[index];
 
-    // Calc new world transform.
+    /* Calc new world transform. */
     roa_transform child_world;
     roa_transform transform_top = roa_array_back(transform_stack);
     roa_transform_inherited(&child_world, &transform_top, &local_transform);
@@ -296,7 +302,9 @@ roa_graph_node_set_parent(
     const unsigned roa_graph_node_count = roa_array_size(graph->node_id);
     const unsigned start_index = this_index + 1;
 
-    for (unsigned i = start_index; i < roa_graph_node_count; ++i, ++nodes_to_move)
+		unsigned i;
+
+    for (i = start_index; i < roa_graph_node_count; ++i, ++nodes_to_move)
     {
       const uint32_t curr_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -310,14 +318,16 @@ roa_graph_node_set_parent(
   /* Remove nodes, and insert else where in the tree */
   if(nodes_to_move)
   {
-    // Save the old data
+    /* Save the old data */
     uint32_t *move_nodes = ROA_NULL;
     {
       roa_array_create_with_capacity(move_nodes, nodes_to_move);
       roa_array_resize(move_nodes, nodes_to_move);
       memcpy(move_nodes, &graph->node_id[this_index], sizeof(move_nodes[0]) * nodes_to_move);
 
-      for (unsigned i = 0; i < nodes_to_move; ++i)
+			unsigned i;
+
+      for (i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->node_id, this_index);
       }
@@ -329,7 +339,9 @@ roa_graph_node_set_parent(
       roa_array_resize(move_parent_depth_data, nodes_to_move);
       memcpy(move_parent_depth_data, &graph->parent_depth_data[this_index], sizeof(move_parent_depth_data[0]) * nodes_to_move);
 
-      for (unsigned i = 0; i < nodes_to_move; ++i)
+			unsigned i;
+
+      for (i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->parent_depth_data, this_index);
       }
@@ -341,7 +353,9 @@ roa_graph_node_set_parent(
       roa_array_resize(move_local_transform, nodes_to_move);
       memcpy(move_local_transform, &graph->local_transform[this_index], sizeof(move_local_transform[0]) * nodes_to_move);
 
-      for (unsigned i = 0; i < nodes_to_move; ++i)
+			unsigned i;
+
+      for (i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->local_transform, this_index);
       }
@@ -353,7 +367,9 @@ roa_graph_node_set_parent(
       roa_array_resize(move_world_transform, nodes_to_move);
       memcpy(move_world_transform, &graph->world_transform[this_index], sizeof(move_world_transform[0]) * nodes_to_move);
 
-      for (unsigned i = 0; i < nodes_to_move; ++i)
+			unsigned i;
+
+      for (i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->world_transform, this_index);
       }
@@ -365,7 +381,9 @@ roa_graph_node_set_parent(
       roa_array_resize(data_to_move, nodes_to_move);
       memcpy(data_to_move, &graph->data[this_index], sizeof(data_to_move[0]) * nodes_to_move);
 
-      for (unsigned i = 0; i < nodes_to_move; ++i)
+			unsigned i;
+
+      for (i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->data, this_index);
       }
@@ -376,7 +394,7 @@ roa_graph_node_set_parent(
       graph_size_check(graph);
     }
 
-    // Find new insert point
+    /* Find new insert point */
     unsigned parent_index = 0;
     unsigned insert_index = roa_array_size(graph->node_id);
     uint32_t parent_depth = 0;
@@ -408,7 +426,9 @@ roa_graph_node_set_parent(
     Insert the data into the new positions.
     */
     {
-      for (unsigned i = 0; i < nodes_to_move; ++i)
+			unsigned i;
+
+      for (i = 0; i < nodes_to_move; ++i)
       {
         roa_array_insert(graph->node_id, insert_index + i, move_nodes[i]);
         roa_array_insert(graph->parent_depth_data, insert_index + i, move_parent_depth_data[i]);
@@ -432,8 +452,9 @@ roa_graph_node_set_parent(
     const int32_t parent_diff = parent_depth - old_parent_depth;
     const int32_t depth_diff = parent_diff - (parent_id ? 0 : 1);
 
-    // Update the depth data
-    for (uint32_t i = 0; i < nodes_to_move; ++i)
+    /* Update the depth data */
+		uint32_t i;
+    for (i = 0; i < nodes_to_move; ++i)
     {
       const uint64_t old_data = move_parent_depth_data[i];
       const uint32_t old_depth = get_depth(old_data);
@@ -483,7 +504,7 @@ roa_graph_node_child_count(
     }
   }
 
-  // Calculate children.
+  /* Calculate children. */
   unsigned child_count = 0;
   {
     const int64_t this_depth = node_id ? (int64_t)get_depth(graph->parent_depth_data[index]) : -1;
@@ -491,7 +512,9 @@ roa_graph_node_child_count(
 
     const unsigned count = roa_array_size(graph->node_id);
 
-    for (unsigned i = start_index; i < count; ++i)
+		unsigned i;
+
+    for (i = start_index; i < count; ++i)
     {
       const int64_t that_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -541,14 +564,16 @@ roa_graph_node_descendants_count(
     }
   }
 
-  // Calculate descendants  
+  /* Calculate descendants */
   {
     const int32_t this_depth = node_id ? get_depth(graph->parent_depth_data[index]) : -1;
     const unsigned start = this_depth >= 0 ? index + 1 : 0;
 
     const unsigned id_count = roa_array_size(graph->node_id);
 
-    for (unsigned i = start; i < id_count; ++i)
+		unsigned i;
+
+    for (i = start; i < id_count; ++i)
     {
       const int32_t that_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -596,14 +621,16 @@ roa_graph_node_get_child(
     }
   }
 
-  // Calculate children.
+  /* Calculate children. */
   {
     const int64_t this_depth = node_id ? (uint64_t)get_depth(graph->parent_depth_data[index]) : -1;
     const unsigned start_index = node_id ? index + 1 : 0;
 
     unsigned id_count = roa_array_size(graph->node_id);
 
-    for (unsigned i = start_index; i < id_count; ++i)
+		unsigned i;
+
+    for (i = start_index; i < id_count; ++i)
     {
       const int64_t that_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -873,7 +900,7 @@ ROA_BOOL
 roa_graph_node_get_user_data(
   const roa_graph_ctx_t data,
   const uint32_t node_id,
-  const void **user_data)
+   void **user_data)
 {
   unsigned index = 0;
 

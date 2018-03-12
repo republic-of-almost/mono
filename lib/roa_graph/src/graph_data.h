@@ -25,19 +25,19 @@ struct node_data
 };
 
 
-// ----------------------------------------------------------------- [ Data ] --
+/* -------------------------------------------------------------- [ Data ] -- */
 
 
 struct roa_graph_ctx
 {
-  uint32_t *        node_id;                  // Unique instance IDs.
-  uint64_t *        parent_depth_data;        // Parent ID and Depth.
-  roa_transform * local_transform;          // Local.
-  roa_transform * world_transform;          // World.
-  struct node_data *       data;
+  /* array */ uint32_t					*node_id;
+  /* array */ uint64_t					*parent_depth_data;
+  /* array */ roa_transform			*local_transform;
+  /* array */ roa_transform			*world_transform;
+  /* array */ struct node_data	*data;
 
 
-  // -- Other -- //
+  /* -- Other -- */
   uint32_t                    instance_counter;
 
 };
