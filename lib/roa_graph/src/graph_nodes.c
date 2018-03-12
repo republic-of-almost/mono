@@ -8,22 +8,20 @@
 #include <stdlib.h>
 
 
-/*------------------------------------------------------ [ Config / Data ] -- */
+/* ----------------------------------------------------- [ Config / Data ] -- */
 
 
-#ifndef ROA_GRAPH_INTEGRITY_CHECK
 #define ROA_GRAPH_INTEGRITY_CHECK 1
-#endif
 
 
-/*----------------------------------------------------- [ Error Messages ] -- */
+/* ---------------------------------------------------- [ Error Messages ] -- */
 
 
 const char msg_failed_to_find_node[] = "Failed to find node_id %d";
-const char msg_invalid_params[] = "Invalid paramaters";
+const char msg_invalid_params[]			 = "Invalid paramaters";
 
 
-/*------------------------------------------------------- [ Misc Helpers ] -- */
+/* ------------------------------------------------------ [ Misc Helpers ] -- */
 
 
 static void
@@ -49,7 +47,7 @@ graph_size_check(struct roa_graph_ctx * graph)
 }
 
 
-/*-------------------------------------------------- [ Node Data Helpers ] -- */
+/* ------------------------------------------------- [ Node Data Helpers ] -- */
 
 
 static uint32_t
@@ -73,7 +71,7 @@ set_data(const uint32_t parent, const uint32_t depth)
 }
 
 
-/*-------------------------------------------------------------- [ Nodes ] -- */
+/* ------------------------------------------------------------- [ Nodes ] -- */
 
 
 ROA_BOOL
@@ -519,16 +517,15 @@ roa_graph_node_child_count(
   /* Calculate children. */
   unsigned child_count = 0;
   {
-    const int64_t this_depth = node_id ? (int64_t)get_depth(graph->parent_depth_data[index]) : -1;
-    const unsigned start_index = node_id ? index + 1 : 0;
-
-    const unsigned count = roa_array_size(graph->node_id);
-
+		uint64_t *pd_data = graph->parent_depth_data;
+    int64_t this_depth = node_id ? (int64_t)get_depth(pd_data[index]) : -1;
+    unsigned start_index = node_id ? index + 1 : 0;
+    unsigned count = roa_array_size(graph->node_id);
 		unsigned i;
 
     for (i = start_index; i < count; ++i)
     {
-      const int64_t that_depth = get_depth(graph->parent_depth_data[i]);
+      const int64_t that_depth = get_depth(pd_data[i]);
 
       if (that_depth > this_depth)
       {
@@ -578,16 +575,15 @@ roa_graph_node_descendants_count(
 
   /* Calculate descendants */
   {
-    const int32_t this_depth = node_id ? get_depth(graph->parent_depth_data[index]) : -1;
-    const unsigned start = this_depth >= 0 ? index + 1 : 0;
-
-    const unsigned id_count = roa_array_size(graph->node_id);
-
+		uint64_t pd_data   = graph->parent_depth_data;
+    int32_t this_depth = node_id ? get_depth(pd_data[index]) : -1;
+    unsigned start     = this_depth >= 0 ? index + 1 : 0;
+    unsigned id_count  = roa_array_size(graph->node_id);
 		unsigned i;
 
     for (i = start; i < id_count; ++i)
     {
-      const int32_t that_depth = get_depth(graph->parent_depth_data[i]);
+      const int32_t that_depth = get_depth(graph->pd_data[i]);
 
       if (that_depth > this_depth)
       {
@@ -635,16 +631,15 @@ roa_graph_node_get_child(
 
   /* Calculate children. */
   {
-    const int64_t this_depth = node_id ? (uint64_t)get_depth(graph->parent_depth_data[index]) : -1;
-    const unsigned start_index = node_id ? index + 1 : 0;
-
+		uint64_t *pd_data = graph->parent_depth_data;
+    int64_t this_depth = node_id ? (uint64_t)get_depth(pd_data[index]) : -1;
+    unsigned start_index = node_id ? index + 1 : 0;
     unsigned id_count = roa_array_size(graph->node_id);
-
 		unsigned i;
 
     for (i = start_index; i < id_count; ++i)
     {
-      const int64_t that_depth = get_depth(graph->parent_depth_data[i]);
+      const int64_t that_depth = get_depth(pd_data[i]);
 
       if (that_depth > this_depth)
       {
@@ -682,7 +677,7 @@ roa_graph_node_get_parent(const roa_graph_ctx_t graph, const uint32_t node_id)
 }
 
 
-/*--------------------------------------------------------- [ Attributes ] -- */
+/* -------------------------------------------------------- [ Attributes ] -- */
 
 
 ROA_BOOL
@@ -737,7 +732,6 @@ roa_graph_node_get_tags(
   uint64_t *tags)
 {
   /* param check */
-#ifdef NIL_PEDANTIC
   {
     ROA_ASSERT(graph);
     ROA_ASSERT(node_id);
@@ -749,7 +743,6 @@ roa_graph_node_get_tags(
       return ROA_FALSE;
     }
   }
-#endif
 
   /* Get the Current Tags */
   {
@@ -774,7 +767,6 @@ roa_graph_node_set_tags(
   const uint64_t tags)
 {
   /* param check */
-#ifdef NIL_PEDANTIC
   {
     ROA_ASSERT(graph);
     ROA_ASSERT(node_id);
@@ -785,7 +777,6 @@ roa_graph_node_set_tags(
       return ROA_FALSE;
     }
   }
-#endif
 
   /* Set the Current Tags */
   {
@@ -945,7 +936,7 @@ roa_graph_node_set_user_data(
 
 
 
-/*------------------------------------------------------------- [ Config ] -- */
+/* ------------------------------------------------------------ [ Config ] -- */
 
 
 #undef ROA_GRAPH_INTEGRITY_CHECK
