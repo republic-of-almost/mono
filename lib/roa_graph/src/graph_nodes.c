@@ -1,6 +1,9 @@
 #include <roa_graph/roa_graph.h>
+#include <graph_data.h>
+#include <graph_helpers.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
+#include <roa_lib/log.h>
 #include <graph_data.h>
 #include <stdlib.h>
 
@@ -8,9 +11,7 @@
 /*------------------------------------------------------ [ Config / Data ] -- */
 
 
-#ifndef ROA_GRAPH_TRANSFORM_STACK_HINT
-#define ROA_GRAPH_TRANSFORM_STACK_HINT 32
-#endif
+#define ROA_GRAPH_INTEGRITY_CHECK 1
 
 
 /*----------------------------------------------------- [ Error Messages ] -- */
@@ -26,23 +27,23 @@ const char msg_invalid_params[] = "Invalid paramaters";
 static void
 graph_size_check(struct roa_graph_ctx * graph)
 {
-#ifndef NDEBUG
-  ROA_ASSERT(graph);
+  if (ROA_IS_ENABLED(ROA_GRAPH_INTEGRITY_CHECK))
+  {
+    ROA_ASSERT(graph);
 
-  unsigned node_count = roa_array_size(graph->node_id);
-  unsigned parent_depth_data_count = roa_array_size(graph->parent_depth_data);
-  unsigned local_transform_count = roa_array_size(graph->local_transform);
-  unsigned world_transform_count = roa_array_size(graph->world_transform);
-  unsigned node_data_count = roa_array_size(graph->data);
+    unsigned roa_graph_node_count      = roa_array_size(graph->node_id);
+    unsigned parent_depth_data_count   = roa_array_size(graph->parent_depth_data);
+    unsigned local_transform_count     = roa_array_size(graph->local_transform);
+    unsigned world_transform_count     = roa_array_size(graph->world_transform);
+    unsigned roa_graph_node_data_count = roa_array_size(graph->data);
 
-  ROA_ASSERT(node_count == parent_depth_data_count);
-  ROA_ASSERT(node_count == local_transform_count);
-  ROA_ASSERT(node_count == world_transform_count);
-  ROA_ASSERT(node_count == node_data_count);
+    ROA_ASSERT(roa_graph_node_count == parent_depth_data_count);
+    ROA_ASSERT(roa_graph_node_count == local_transform_count);
+    ROA_ASSERT(roa_graph_node_count == world_transform_count);
+    ROA_ASSERT(roa_graph_node_count == roa_graph_node_data_count);
+  }
 
-#else
   return;
-#endif
 }
 
 
@@ -74,7 +75,7 @@ set_data(const uint32_t parent, const uint32_t depth)
 
 
 ROA_BOOL
-node_exists(
+roa_graph_node_exists(
   const roa_graph_ctx_t graph,
   const uint32_t node_id,
   unsigned *index)
@@ -96,7 +97,7 @@ node_exists(
 
 
 uint32_t
-node_create(const roa_graph_ctx_t graph)
+roa_graph_node_create(roa_graph_ctx_t graph)
 {
   /* param check */
   ROA_ASSERT(graph);
@@ -113,10 +114,11 @@ node_create(const roa_graph_ctx_t graph)
   roa_array_push(graph->parent_depth_data, 0);
 
   roa_transform default_transform;
+  roa_transform_init(&default_transform);
+
   roa_array_push(graph->local_transform, default_transform);
   roa_array_push(graph->world_transform, default_transform);
 
-  
   struct node_data data;
   data.node_type_id = 0;
   data.tags = 0;
@@ -124,45 +126,44 @@ node_create(const roa_graph_ctx_t graph)
 
   roa_array_push(graph->data, data);
 
-  #ifndef NDEBUG
-  graph_size_check(graph);
-  #endif
+  if (ROA_IS_ENABLED(ROA_GRAPH_INTEGRITY_CHECK))
+  {
+    graph_size_check(graph);
+  }
 
   return new_id;
 }
 
 
 ROA_BOOL
-node_remove(roa_graph_ctx_t graph, const uint32_t node_id)
+roa_graph_node_remove(roa_graph_ctx_t graph, const uint32_t node_id)
 {
   /* param check */
   ROA_ASSERT(graph);
   ROA_ASSERT(node_id);
 
   /* Remove The Node */
-  if (node_exists(graph, node_id, ROA_NULL))
+  if (roa_graph_node_exists(graph, node_id, ROA_NULL))
   {
     /* Create Event */
     unsigned index = 0;
 
-    if (node_exists(graph, node_id, &index))
+    if (roa_graph_node_exists(graph, node_id, &index))
     {
-      const unsigned decendent_count = node_descendants_count(graph, node_id) + 1;
+      const unsigned decendent_count = roa_graph_node_descendants_count(graph, node_id) + 1;
 
       for (uint32_t i = 0; i < decendent_count; ++i)
       {
-        const uint32_t this_id = graph->node_id[index];
-        const uint64_t type_id = graph->data[index].node_type_id;
-
         roa_array_erase(graph->node_id, index);
         roa_array_erase(graph->parent_depth_data, index);
         roa_array_erase(graph->local_transform, index);
         roa_array_erase(graph->world_transform, index);
         roa_array_erase(graph->data, index);
 
-        #ifndef NDEBUG
-        graph_size_check(graph);
-        #endif
+        if (ROA_IS_ENABLED(ROA_GRAPH_INTEGRITY_CHECK))
+        {
+          graph_size_check(graph);
+        }
       }
     }
 
@@ -178,16 +179,16 @@ Recalculates the transforms and bounding boxes of a branch that has been
 updated.
 */
 ROA_BOOL
-node_recalc_transform_branch(
+roa_graph_node_recalc_transform_branch(
   roa_graph_ctx_t graph,
   const uint32_t this_id)
 {
   unsigned this_index = 0;
-  const ROA_BOOL exists = node_exists(graph, this_id, &this_index);
+  const ROA_BOOL exists = roa_graph_node_exists(graph, this_id, &this_index);
 
   if (!exists)
   {
-    LOG_FATAL("Graph corrupted");
+    ROA_LOG_FATAL("Graph corrupted");
     return ROA_FALSE;
   }
 
@@ -195,17 +196,17 @@ node_recalc_transform_branch(
   roa_transform last_world_trans;
   roa_transform_init(&last_world_trans);
 
-  const uint32_t parent_id = node_get_parent(graph, this_id);
+  const uint32_t parent_id = roa_graph_node_get_parent(graph, this_id);
 
   if (parent_id)
   {
     unsigned parent_index = 0;
 
-    ROA_BOOL parent_exists = node_exists(graph, parent_id, &parent_index);
+    ROA_BOOL parent_exists = roa_graph_node_exists(graph, parent_id, &parent_index);
 
     if (!parent_exists)
     {
-      LOG_FATAL("Graph corrupted");
+      ROA_LOG_FATAL("Graph corrupted");
       return ROA_FALSE;
     }
 
@@ -213,13 +214,13 @@ node_recalc_transform_branch(
   }
 
   /* root transform */
-  roa_transform *transform_stack;
-  roa_array_create(transform_stack, 32);
+  roa_transform *transform_stack = ROA_NULL;
+  roa_array_create_with_capacity(transform_stack, 32);
   roa_array_push(transform_stack, last_world_trans);
 
-  const unsigned nodes_to_calc = node_descendants_count(graph, this_id) + 1;
+  const unsigned nodes_to_calc = roa_graph_node_descendants_count(graph, this_id) + 1;
 
-  for (uint32_t i = 0; i < nodes_to_calc; ++i)
+  for (unsigned i = 0; i < nodes_to_calc; ++i)
   {
     const unsigned   index = this_index + i;
     const uint64_t data = graph->parent_depth_data[index];
@@ -230,7 +231,7 @@ node_recalc_transform_branch(
     {
       const unsigned to_pop = curr_depth - depth;
 
-      for (uint32_t i = 0; i < to_pop; ++i)
+      for (unsigned j = 0; j < to_pop; ++j)
       {
         roa_array_pop(transform_stack);
       }
@@ -261,10 +262,10 @@ node_recalc_transform_branch(
 
 
 ROA_BOOL
-node_set_parent(
+roa_graph_node_set_parent(
   roa_graph_ctx_t graph,
-  const uint32_t parent_id,
-  const uint32_t this_id)
+  const uint32_t this_id,
+  const uint32_t parent_id)
 {
   /* param check */
   ROA_ASSERT(graph);
@@ -292,10 +293,10 @@ node_set_parent(
   /* Find out how many nodes we need to move */
   uint32_t nodes_to_move = 1;
   {
-    const unsigned node_count = roa_array_size(graph->node_id);
+    const unsigned roa_graph_node_count = roa_array_size(graph->node_id);
     const unsigned start_index = this_index + 1;
 
-    for (unsigned i = start_index; i < node_count; ++i, ++nodes_to_move)
+    for (unsigned i = start_index; i < roa_graph_node_count; ++i, ++nodes_to_move)
     {
       const uint32_t curr_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -307,15 +308,16 @@ node_set_parent(
   }
 
   /* Remove nodes, and insert else where in the tree */
+  if(nodes_to_move)
   {
     // Save the old data
     uint32_t *move_nodes = ROA_NULL;
     {
-      roa_array_create(move_nodes, nodes_to_move);
+      roa_array_create_with_capacity(move_nodes, nodes_to_move);
       roa_array_resize(move_nodes, nodes_to_move);
       memcpy(move_nodes, &graph->node_id[this_index], sizeof(move_nodes[0]) * nodes_to_move);
 
-      for (int i = 0; i < nodes_to_move; ++i)
+      for (unsigned i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->node_id, this_index);
       }
@@ -323,11 +325,11 @@ node_set_parent(
 
     uint64_t *move_parent_depth_data = ROA_NULL;
     {
-      roa_array_create(move_nodes, nodes_to_move);
-      roa_array_resize(move_nodes, nodes_to_move);
+      roa_array_create_with_capacity(move_parent_depth_data, nodes_to_move);
+      roa_array_resize(move_parent_depth_data, nodes_to_move);
       memcpy(move_parent_depth_data, &graph->parent_depth_data[this_index], sizeof(move_parent_depth_data[0]) * nodes_to_move);
 
-      for (int i = 0; i < nodes_to_move; ++i)
+      for (unsigned i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->parent_depth_data, this_index);
       }
@@ -335,11 +337,11 @@ node_set_parent(
 
     roa_transform *move_local_transform = ROA_NULL;
     {
-      roa_array_create(move_local_transform, nodes_to_move);
+      roa_array_create_with_capacity(move_local_transform, nodes_to_move);
       roa_array_resize(move_local_transform, nodes_to_move);
       memcpy(move_local_transform, &graph->local_transform[this_index], sizeof(move_local_transform[0]) * nodes_to_move);
 
-      for (int i = 0; i < nodes_to_move; ++i)
+      for (unsigned i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->local_transform, this_index);
       }
@@ -347,11 +349,11 @@ node_set_parent(
 
     roa_transform *move_world_transform = ROA_NULL;
     {
-      roa_array_create(move_world_transform, nodes_to_move);
+      roa_array_create_with_capacity(move_world_transform, nodes_to_move);
       roa_array_resize(move_world_transform, nodes_to_move);
       memcpy(move_world_transform, &graph->world_transform[this_index], sizeof(move_world_transform[0]) * nodes_to_move);
 
-      for (int i = 0; i < nodes_to_move; ++i)
+      for (unsigned i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->world_transform, this_index);
       }
@@ -359,19 +361,20 @@ node_set_parent(
 
     struct node_data *data_to_move = ROA_NULL;
     {
-      roa_array_create(data_to_move, nodes_to_move);
+      roa_array_create_with_capacity(data_to_move, nodes_to_move);
       roa_array_resize(data_to_move, nodes_to_move);
       memcpy(data_to_move, &graph->data[this_index], sizeof(data_to_move[0]) * nodes_to_move);
 
-      for (int i = 0; i < nodes_to_move; ++i)
+      for (unsigned i = 0; i < nodes_to_move; ++i)
       {
         roa_array_erase(graph->data, this_index);
       }
     }
 
-#ifndef NDEBUG
-    graph_size_check(graph);
-#endif
+    if (ROA_IS_ENABLED(ROA_GRAPH_INTEGRITY_CHECK))
+    {
+      graph_size_check(graph);
+    }
 
     // Find new insert point
     unsigned parent_index = 0;
@@ -381,15 +384,15 @@ node_set_parent(
       if (parent_id > 0)
       {
         const uint32_t *node_ids = graph->node_id;
-        const unsigned node_count = roa_array_size(graph->node_id);
+        const unsigned roa_graph_node_count = roa_array_size(graph->node_id);
 
         if (!key_search(
           parent_id,
           node_ids,
-          node_count,
+          roa_graph_node_count,
           &parent_index))
         {
-          LOG_FATAL("Graph is corrupted");
+          ROA_LOG_FATAL("Graph is corrupted");
           return ROA_FALSE;
         }
 
@@ -402,48 +405,23 @@ node_set_parent(
     move_parent_depth_data[0] = set_data(parent_id, get_depth(move_parent_depth_data[0]));
 
     /*
-      Insert the data into the new positions.
+    Insert the data into the new positions.
     */
     {
-      for (int i = 0; i < nodes_to_move)
+      for (unsigned i = 0; i < nodes_to_move; ++i)
       {
-        
+        roa_array_insert(graph->node_id, insert_index + i, move_nodes[i]);
+        roa_array_insert(graph->parent_depth_data, insert_index + i, move_parent_depth_data[i]);
+        roa_array_insert(graph->local_transform, insert_index + i, move_local_transform[i]);
+        roa_array_insert(graph->world_transform, insert_index + i, move_world_transform[i]);
+        roa_array_insert(graph->data, insert_index + i, data_to_move[i]);
       }
 
-      graph->node_id.insert(
-        insert_index,
-        move_nodes.data(),
-        nodes_to_move
-      );
-
-      graph->parent_depth_data.insert(
-        insert_index,
-        move_parent_depth_data.data(),
-        nodes_to_move
-      );
-
-      graph->local_transform.insert(
-        insert_index,
-        move_local_transform.data(),
-        nodes_to_move
-      );
-
-      graph->world_transform.insert(
-        insert_index,
-        move_world_transform.data(),
-        nodes_to_move
-      );
-
-      graph->data.insert(
-        insert_index,
-        data_to_move.data(),
-        nodes_to_move
-      );
-
-      #ifndef NDEBUG
-      graph_size_check(graph);
-      #endif
-  }
+      if (ROA_IS_ENABLED(ROA_GRAPH_INTEGRITY_CHECK))
+      {
+        graph_size_check(graph);
+      }
+    }
 
     /*
     Calculate the depth differences between old and new parents.
@@ -466,7 +444,7 @@ node_set_parent(
       graph->parent_depth_data[index] = new_data;
     }
 
-    const ROA_BOOL update_transform = node_recalc_transform_branch(
+    const ROA_BOOL update_transform = roa_graph_node_recalc_transform_branch(
       graph,
       this_id
     );
@@ -479,7 +457,7 @@ node_set_parent(
 
 
 unsigned
-node_child_count(
+roa_graph_node_child_count(
   const roa_graph_ctx_t graph,
   const uint32_t node_id)
 {
@@ -491,13 +469,16 @@ node_child_count(
 
   if (node_id > 0)
   {
+    uint32_t *ids = graph->node_id;
+    unsigned count = roa_array_size(graph->node_id);
+
     if (!key_search(
       node_id,
-      graph->node_id.data(),
-      graph->node_id.size(),
+      ids,
+      count,
       &index))
     {
-      LOG_ERROR("Failed to find node");
+      ROA_LOG_ERROR(msg_failed_to_find_node, node_id);
       return 0;
     }
   }
@@ -508,7 +489,7 @@ node_child_count(
     const int64_t this_depth = node_id ? (int64_t)get_depth(graph->parent_depth_data[index]) : -1;
     const unsigned start_index = node_id ? index + 1 : 0;
 
-    const unsigned count = graph->node_id.size();
+    const unsigned count = roa_array_size(graph->node_id);
 
     for (unsigned i = start_index; i < count; ++i)
     {
@@ -533,7 +514,7 @@ node_child_count(
 
 
 unsigned
-node_descendants_count(
+roa_graph_node_descendants_count(
   const roa_graph_ctx_t graph,
   const uint32_t node_id)
 {
@@ -546,13 +527,16 @@ node_descendants_count(
 
   if (node_id > 0)
   {
+    uint32_t *ids = graph->node_id;
+    unsigned count = roa_array_size(graph->node_id);
+
     if (!key_search(
       node_id,
-      graph->node_id.data(),
-      graph->node_id.size(),
+      ids,
+      count,
       &index))
     {
-      LOG_ERROR("Failed to find node");
+      ROA_LOG_ERROR(msg_failed_to_find_node, node_id);
       return 0;
     }
   }
@@ -562,7 +546,9 @@ node_descendants_count(
     const int32_t this_depth = node_id ? get_depth(graph->parent_depth_data[index]) : -1;
     const unsigned start = this_depth >= 0 ? index + 1 : 0;
 
-    for (unsigned i = start; i < graph->node_id.size(); ++i)
+    const unsigned id_count = roa_array_size(graph->node_id);
+
+    for (unsigned i = start; i < id_count; ++i)
     {
       const int32_t that_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -582,7 +568,7 @@ node_descendants_count(
 
 
 uint32_t
-node_get_child(
+roa_graph_node_get_child(
   const roa_graph_ctx_t graph,
   const uint32_t node_id,
   const unsigned child_index)
@@ -596,13 +582,16 @@ node_get_child(
 
   if (node_id > 0)
   {
+    uint32_t *ids = graph->node_id;
+    unsigned id_count = roa_array_size(graph->node_id);
+
     if (!key_search(
       node_id,
-      graph->node_id.data(),
-      graph->node_id.size(),
+      ids,
+      id_count,
       &index))
     {
-      LOG_ERROR("Failed to find node");
+      ROA_LOG_ERROR(msg_failed_to_find_node, node_id);
       return 0;
     }
   }
@@ -612,7 +601,9 @@ node_get_child(
     const int64_t this_depth = node_id ? (uint64_t)get_depth(graph->parent_depth_data[index]) : -1;
     const unsigned start_index = node_id ? index + 1 : 0;
 
-    for (unsigned i = start_index; i < graph->node_id.size(); ++i)
+    unsigned id_count = roa_array_size(graph->node_id);
+
+    for (unsigned i = start_index; i < id_count; ++i)
     {
       const int64_t that_depth = get_depth(graph->parent_depth_data[i]);
 
@@ -639,11 +630,11 @@ node_get_child(
 
 
 uint32_t
-node_get_parent(const roa_graph_ctx_t graph, const uint32_t node_id)
+roa_graph_node_get_parent(const roa_graph_ctx_t graph, const uint32_t node_id)
 {
   unsigned index = 0;
 
-  if (node_exists(graph, node_id, &index))
+  if (roa_graph_node_exists(graph, node_id, &index))
   {
     return get_parent_id(graph->parent_depth_data[index]);
   }
@@ -652,45 +643,18 @@ node_get_parent(const roa_graph_ctx_t graph, const uint32_t node_id)
 }
 
 
-/*---------------------------------------------------------- [ Callbacks ] -- */
-
-
-ROA_BOOL
-callback_graph_tick(roa_graph_ctx_t data, const graph_tick_fn &cb, void user_data)
-{
-  data->frame_tick_callbacks.emplace_back(
-    cb,
-    user_data
-  );
-
-  return ROA_TRUE;
-}
-
-
-ROA_BOOL
-callback_node_delete(roa_graph_ctx_t data, const node_delete_fn &cb, void user_data)
-{
-  data->node_delete_callbacks.emplace_back(
-    cb,
-    user_data
-  );
-
-  return ROA_TRUE;
-}
-
-
 /*--------------------------------------------------------- [ Attributes ] -- */
 
 
 ROA_BOOL
-node_get_name(
+roa_graph_node_get_name(
   const roa_graph_ctx_t data,
   const uint32_t node_id,
   const char **name)
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
     *name = data->data[index].name.data;
     return ROA_TRUE;
@@ -701,7 +665,7 @@ node_get_name(
 
 
 ROA_BOOL
-node_set_name(
+roa_graph_node_set_name(
   roa_graph_ctx_t data,
   const uint32_t node_id,
   const char *name)
@@ -710,14 +674,16 @@ node_set_name(
 
   const unsigned str_len = strlen(name) + 1;
 
-  const unsigned name_size = sizeof(Graph::short_string::data) / sizeof(char);
+  const unsigned name_size = sizeof(struct short_string) / sizeof(char);
 
-  char clipped[name_size]{ 0 };
-  strlcpy(clipped, name, str_len > name_size ? name_size : str_len);
+  char clipped[ROA_GRAPH_SHORT_STRING];
+  ROA_MEM_ZERO(clipped);
 
-  if (node_exists(data, node_id, &index))
+  memcpy(clipped, name, str_len > name_size ? name_size : str_len);
+
+  if (roa_graph_node_exists(data, node_id, &index))
   {
-    strlcpy(data->data[index].name.data, clipped, str_len);
+    memcpy(data->data[index].name.data, clipped, str_len);
     return ROA_TRUE;
   }
 
@@ -726,7 +692,7 @@ node_set_name(
 
 
 ROA_BOOL
-node_get_tags(
+roa_graph_node_get_tags(
   const roa_graph_ctx_t graph,
   const uint32_t node_id,
   uint64_t *tags)
@@ -736,11 +702,11 @@ node_get_tags(
   {
     ROA_ASSERT(graph);
     ROA_ASSERT(node_id);
-    ROA_ASSERT(tags != nullptr);
+    ROA_ASSERT(tags != ROA_NULL);
 
     if (!graph || !node_id || !tags)
     {
-      LOG_ERROR(msg_invalid_params);
+      ROA_LOG_ERROR(msg_invalid_params);
       return ROA_FALSE;
     }
   }
@@ -750,20 +716,20 @@ node_get_tags(
   {
     unsigned index = 0;
 
-    if (node_exists(graph, node_id, &index))
+    if (roa_graph_node_exists(graph, node_id, &index))
     {
       *tags = graph->data[index].tags;
       return ROA_TRUE;
     }
   }
 
-  LOG_ERROR(msg_failed_to_find_node);
+  ROA_LOG_ERROR(msg_failed_to_find_node);
   return ROA_FALSE;
 }
 
 
 ROA_BOOL
-node_set_tags(
+roa_graph_node_set_tags(
   roa_graph_ctx_t graph,
   const uint32_t node_id,
   const uint64_t tags)
@@ -776,7 +742,7 @@ node_set_tags(
 
     if (!graph || !node_id)
     {
-      LOG_ERROR(msg_invalid_params);
+      ROA_LOG_ERROR(msg_invalid_params);
       return ROA_FALSE;
     }
   }
@@ -786,20 +752,20 @@ node_set_tags(
   {
     unsigned index = 0;
 
-    if (node_exists(graph, node_id, &index))
+    if (roa_graph_node_exists(graph, node_id, &index))
     {
       graph->data[index].tags = tags;
       return ROA_TRUE;
     }
   }
 
-  LOG_ERROR(msg_failed_to_find_node);
+  ROA_LOG_ERROR(msg_failed_to_find_node, node_id);
   return ROA_FALSE;
 }
 
 
 ROA_BOOL
-node_get_transform(
+roa_graph_node_get_transform(
   const roa_graph_ctx_t data,
   const uint32_t node_id,
   roa_transform *trans,
@@ -807,7 +773,7 @@ node_get_transform(
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
     if (!inherited)
     {
@@ -825,19 +791,19 @@ node_get_transform(
 
 
 ROA_BOOL
-node_set_transform(
+roa_graph_node_set_transform(
   roa_graph_ctx_t graph,
   const uint32_t node_id,
   const roa_transform *trans)
 {
   unsigned index = 0;
-  const ROA_BOOL found = node_exists(graph, node_id, &index);
+  const ROA_BOOL found = roa_graph_node_exists(graph, node_id, &index);
 
   if (found)
   {
     graph->local_transform[index] = *trans;
 
-    return node_recalc_transform_branch(
+    return roa_graph_node_recalc_transform_branch(
       graph,
       node_id
     );
@@ -848,14 +814,14 @@ node_set_transform(
 
 
 ROA_BOOL
-node_register_type(
+roa_graph_node_register_type(
   roa_graph_ctx_t data,
   const uint32_t node_id,
   const uint64_t type_id)
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
     data->data[index].node_type_id |= type_id;
 
@@ -867,14 +833,14 @@ node_register_type(
 
 
 ROA_BOOL
-node_unregister_type(
+roa_graph_node_unregister_type(
   roa_graph_ctx_t data,
   const uint32_t node_id,
   const uint64_t type_id)
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
     data->data[index].node_type_id &= ~type_id;
 
@@ -886,14 +852,14 @@ node_unregister_type(
 
 
 ROA_BOOL
-node_get_data_type_id(
+roa_graph_node_get_data_type_id(
   const roa_graph_ctx_t data,
   const uint32_t node_id,
   uint64_t *type_id)
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
     *type_id = data->data[index].node_type_id;
     return ROA_TRUE;
@@ -904,14 +870,14 @@ node_get_data_type_id(
 
 
 ROA_BOOL
-node_get_user_data(
+roa_graph_node_get_user_data(
   const roa_graph_ctx_t data,
   const uint32_t node_id,
-  void *user_data)
+  const void **user_data)
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
     *user_data = data->data[index].user_data;
     return ROA_TRUE;
@@ -922,16 +888,16 @@ node_get_user_data(
 
 
 ROA_BOOL
-node_set_user_data(
+roa_graph_node_set_user_data(
   roa_graph_ctx_t data,
   const uint32_t node_id,
   const void *user_data)
 {
   unsigned index = 0;
 
-  if (node_exists(data, node_id, &index))
+  if (roa_graph_node_exists(data, node_id, &index))
   {
-    data->data[index].user_data = *user_data;
+    data->data[index].user_data = user_data;
     return ROA_TRUE;
   }
 
@@ -943,4 +909,4 @@ node_set_user_data(
 /*------------------------------------------------------------- [ Config ] -- */
 
 
-#undef NIL_GRAPH_TRANSFORM_STACK_HINT
+#undef ROA_GRAPH_INTEGRITY_CHECK

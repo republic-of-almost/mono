@@ -240,8 +240,8 @@ roa_transform_init(roa_transform *out)
 void
 roa_transform_inherited(
   roa_transform *out,
-  roa_transform *parent,
-  roa_transform *local)
+  const roa_transform *parent,
+  const roa_transform *local)
 {
   assert(out);
   assert(parent);

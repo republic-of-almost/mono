@@ -83,7 +83,7 @@ roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion righ
 
 
 void            roa_transform_init(roa_transform *out);
-void            roa_transform_inherited(roa_transform *out, roa_transform *parent, roa_transform *local);
+void            roa_transform_inherited(roa_transform *out, const roa_transform *parent, const roa_transform *local);
 
 
 /* ------------------------------------------------------------- [ mat3 ] -- */
