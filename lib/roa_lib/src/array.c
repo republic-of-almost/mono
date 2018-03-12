@@ -9,7 +9,7 @@
 
 
 /* turn this on if you suspect something in array */
-#define ROA_ARR_PEDANTIC_CHECKS 0
+#define ROA_ARR_PEDANTIC_CHECKS 1
 
 
 void* roa_internal_array_grow(void **ptr, unsigned stride, unsigned capacity);

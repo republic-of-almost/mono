@@ -30,6 +30,7 @@ extern "C" {
 #define roa_array_insert(arr, i, item) arr[roa_internal_array_insert((void**)&arr, i, sizeof(arr[0]))] = item
 #define roa_array_back(arr) arr[roa_array_size(arr) - 1]
 #define roa_array_clear(arr) roa_internal_array_clear((void**)&arr)
+#define roa_array_data(arr) arr
 
 
 /* -------------------------------------------------------- [ Array Impl ] -- */
