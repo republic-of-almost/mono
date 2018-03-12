@@ -11,7 +11,9 @@
 /*------------------------------------------------------ [ Config / Data ] -- */
 
 
+#ifndef ROA_GRAPH_INTEGRITY_CHECK
 #define ROA_GRAPH_INTEGRITY_CHECK 1
+#endif
 
 
 /*----------------------------------------------------- [ Error Messages ] -- */
@@ -150,11 +152,11 @@ roa_graph_node_remove(roa_graph_ctx_t graph, const uint32_t node_id)
 
     if (roa_graph_node_exists(graph, node_id, &index))
     {
-      const unsigned decendent_count = roa_graph_node_descendants_count(graph, node_id) + 1;
-
+      unsigned dec_count = roa_graph_node_descendants_count(graph, node_id);
+			unsigned remove_count = dec_count + 1;
 			uint32_t i;
 
-      for (i = 0; i < decendent_count; ++i)
+      for (i = 0; i < remove_count; ++i)
       {
         roa_array_erase(graph->node_id, index);
         roa_array_erase(graph->parent_depth_data, index);
@@ -176,10 +178,6 @@ roa_graph_node_remove(roa_graph_ctx_t graph, const uint32_t node_id)
 }
 
 
-/*
-Recalculates the transforms and bounding boxes of a branch that has been
-updated.
-*/
 ROA_BOOL
 roa_graph_node_recalc_transform_branch(
   roa_graph_ctx_t graph,
@@ -204,7 +202,10 @@ roa_graph_node_recalc_transform_branch(
   {
     unsigned parent_index = 0;
 
-    ROA_BOOL parent_exists = roa_graph_node_exists(graph, parent_id, &parent_index);
+    ROA_BOOL parent_exists = roa_graph_node_exists(
+			graph,
+			parent_id,
+			&parent_index);
 
     if (!parent_exists)
     {
@@ -220,7 +221,8 @@ roa_graph_node_recalc_transform_branch(
   roa_array_create_with_capacity(transform_stack, 32);
   roa_array_push(transform_stack, last_world_trans);
 
-  const unsigned nodes_to_calc = roa_graph_node_descendants_count(graph, this_id) + 1;
+  unsigned dec_count = roa_graph_node_descendants_count(graph, this_id);
+  unsigned nodes_to_calc = dec_count + 1; 
 
 	unsigned i;
 
@@ -323,7 +325,9 @@ roa_graph_node_set_parent(
     {
       roa_array_create_with_capacity(move_nodes, nodes_to_move);
       roa_array_resize(move_nodes, nodes_to_move);
-      memcpy(move_nodes, &graph->node_id[this_index], sizeof(move_nodes[0]) * nodes_to_move);
+
+			unsigned move_bytes = sizeof(move_nodes[0]) * nodes_to_move;
+      memcpy(move_nodes, &graph->node_id[this_index], move_bytes);
 
 			unsigned i;
 
@@ -337,7 +341,9 @@ roa_graph_node_set_parent(
     {
       roa_array_create_with_capacity(move_parent_depth_data, nodes_to_move);
       roa_array_resize(move_parent_depth_data, nodes_to_move);
-      memcpy(move_parent_depth_data, &graph->parent_depth_data[this_index], sizeof(move_parent_depth_data[0]) * nodes_to_move);
+      
+			unsigned move_bytes = sizeof(move_parent_depth_data[0]) * nodes_to_move;
+			memcpy(move_parent_depth_data, &graph->parent_depth_data[this_index], move_bytes);
 
 			unsigned i;
 
@@ -351,7 +357,9 @@ roa_graph_node_set_parent(
     {
       roa_array_create_with_capacity(move_local_transform, nodes_to_move);
       roa_array_resize(move_local_transform, nodes_to_move);
-      memcpy(move_local_transform, &graph->local_transform[this_index], sizeof(move_local_transform[0]) * nodes_to_move);
+
+			unsigned move_bytes = sizeof(move_local_transform[0]) * nodes_to_move;
+      memcpy(move_local_transform, &graph->local_transform[this_index], move_bytes); 
 
 			unsigned i;
 
@@ -365,7 +373,9 @@ roa_graph_node_set_parent(
     {
       roa_array_create_with_capacity(move_world_transform, nodes_to_move);
       roa_array_resize(move_world_transform, nodes_to_move);
-      memcpy(move_world_transform, &graph->world_transform[this_index], sizeof(move_world_transform[0]) * nodes_to_move);
+
+			unsigned move_bytes = sizeof(move_world_transform[0]) * nodes_to_move;
+      memcpy(move_world_transform, &graph->world_transform[this_index], move_bytes);
 
 			unsigned i;
 
@@ -379,7 +389,9 @@ roa_graph_node_set_parent(
     {
       roa_array_create_with_capacity(data_to_move, nodes_to_move);
       roa_array_resize(data_to_move, nodes_to_move);
-      memcpy(data_to_move, &graph->data[this_index], sizeof(data_to_move[0]) * nodes_to_move);
+
+			unsigned move_bytes = sizeof(data_to_move[0]) * nodes_to_move;
+      memcpy(data_to_move, &graph->data[this_index], move_bytes); 
 
 			unsigned i;
 
