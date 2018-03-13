@@ -42,7 +42,7 @@ rep_func_setup(void *arg)
   /* setup application data */
   {
 		/* objects */
-    struct rep_object_desc obj_desc[OBJ_COUNT];
+    struct rep_object_desc obj_desc[ROA_ARR_COUNT(objects)];
     ROA_MEM_ZERO(obj_desc);
 
     rep_object_create(

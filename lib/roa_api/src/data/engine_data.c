@@ -35,6 +35,7 @@ rep_data_init()
 
 	ROA_MEM_ZERO(roa_graph_ctx_data);
 	roa_graph_ctx_create(&roa_graph_ctx_data);
+
 }
 
 
