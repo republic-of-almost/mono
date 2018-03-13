@@ -1,0 +1,30 @@
+{
+  "name"     : "Nuklear",
+  "kind"     : "StaticLib",
+  "language" : "C89",
+  "location" : "./",
+
+  "assets": [
+    "../assets/"
+  ],
+
+  "src_files" : [
+    "../include/**.h",N
+    "../src/**.h",
+    "../src/**.c"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/"
+  ],
+
+  "private_inc_dirs" : [
+    "../include/nuklear/"
+  ],
+
+  "project_dependencies" : [
+    "STB",
+    "OpenGL",
+    "GLFW"
+  ]
+}
