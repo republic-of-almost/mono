@@ -393,13 +393,13 @@ roa_dispatcher_create(
 
     int th_count = new_ctx->thread_count;
 
-    roa_array_create(new_ctx->thread_ids, th_count);
+    roa_array_create_with_capacity(new_ctx->thread_ids, th_count);
     roa_array_resize(new_ctx->thread_ids, th_count);
 
-    roa_array_create(new_ctx->raw_threads, th_count);
+    roa_array_create_with_capacity(new_ctx->raw_threads, th_count);
     roa_array_resize(new_ctx->raw_threads, th_count);
 
-    roa_array_create(new_ctx->thread_local_data, th_count);
+    roa_array_create_with_capacity(new_ctx->thread_local_data, th_count);
     roa_array_resize(new_ctx->thread_local_data, th_count);
 
     /* setup main thread */

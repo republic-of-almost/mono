@@ -34,7 +34,7 @@ struct rep_app_desc
   int width;
   int height;
 
-  rep_task *frame_job;
+  rep_task frame_job;
 };
 
 
@@ -83,7 +83,6 @@ rep_task_wait(
 
 struct rep_object_desc
 {
-  const char * name;
   uint32_t object_parent;
 };
 

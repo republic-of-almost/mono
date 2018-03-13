@@ -9,9 +9,14 @@
 struct roa_ctx
 {
   GLFWwindow *window;
-  int width;
-  int height;
-  ROA_BOOL is_fullscreen;
+
+	/*
+	 * we manually track width / height because querying after set will not give
+	 * correct results until events are processed.
+	 */
+	int width;
+	int height;
+	char title[256];
 };
 
 
@@ -28,9 +33,6 @@ static void
 roa_ctx_win_size_callback(GLFWwindow *win, int width, int height)
 {
   struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
-
-  ctx->width = width;
-  ctx->height = height;
 }
 
 
@@ -50,11 +52,21 @@ roa_ctx_create(roa_ctx_t *ctx)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *win = glfwCreateWindow(800, 480, "ROA Application", NULL, NULL);
+		/* some defaults */
+		int width = 800;
+		int height = 450;
+		const char *title = "ROA Application";
+
+    GLFWwindow *win = glfwCreateWindow(
+			width,
+			height,
+			title,
+			ROA_NULL,
+			ROA_NULL);
 
     if (win)
     {
-      struct roa_ctx *new_ctx = NULL;
+      struct roa_ctx *new_ctx = ROA_NULL;
       new_ctx = roa_zalloc(sizeof(*new_ctx));
       new_ctx->window = win;
 
@@ -63,10 +75,17 @@ roa_ctx_create(roa_ctx_t *ctx)
 
       glfwSetWindowUserPointer(win, new_ctx);
 
-      glfwGetWindowSize(win, &new_ctx->width, &new_ctx->height);
       glfwSetWindowSizeCallback(win, roa_ctx_win_size_callback);
-
+			
+			new_ctx->width = width;
+			new_ctx->height = height;
+			
+			int bytes = strlen(title) + 1 > sizeof(new_ctx->title) - 1 ? sizeof(new_ctx->title) - 1 : strlen(title);
+			memcpy(new_ctx->title, title, bytes);
+			
       *ctx = new_ctx;
+
+			ROA_LOG_INFO("Created Context");
     }
   }
 }
@@ -114,14 +133,12 @@ roa_ctx_get_window_desc(
 {
   /* param check */
   ROA_ASSERT(ctx);
-  ROA_ASSERT_PEDANTIC(ctx->window);
+  ROA_ASSERT(ctx->window);
   ROA_ASSERT(out_desc);
 
-  static const char* title = "Not supported yet";
-
+	out_desc->height = ctx->height;
   out_desc->width = ctx->width;
-  out_desc->height = ctx->height;
-  out_desc->title = title;
+	out_desc->title = ctx->title;
 }
 
 
@@ -132,8 +149,14 @@ roa_ctx_set_window_desc(
 {
   /* param check */
   ROA_ASSERT(ctx);
-  ROA_ASSERT_PEDANTIC(ctx->window);
+  ROA_ASSERT(ctx->window);
   ROA_ASSERT(desc);
+	
+	ctx->width = desc->width;
+	ctx->height = desc->height;
+
+	unsigned bytes = strlen(desc->title) + 1 > sizeof(ctx->title) - 1 ? sizeof(ctx->title) - 1 : strlen(desc->title) + 1;
+	memcpy(ctx->title, desc->title, bytes);
 
   glfwSetWindowSize(ctx->window, desc->width, desc->height);
   glfwSetWindowTitle(ctx->window, desc->title);

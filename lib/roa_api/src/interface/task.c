@@ -47,7 +47,8 @@ rep_task_submit(
   wrapped_desc = roa_tagged_allocator_alloc(rep_data_dispatcher_allocator(), sizeof(*wrapped_desc) * count);
   ROA_ASSERT(wrapped_desc);
 
-  for (unsigned i = 0; i < count; ++i)
+	unsigned i;
+  for (i = 0; i < count; ++i)
   {
     args[i].task_arg = tasks[i].arg;
     args[i].task_func = tasks[i].function;

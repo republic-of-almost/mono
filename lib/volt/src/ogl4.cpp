@@ -12,6 +12,7 @@
 #include <roa_lib/spin_lock.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 
 /* ----------------------------------------------------------- [ config ] -- */
@@ -1383,7 +1384,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
 
     for (int i = 0; i < uniform_count; ++i)
     {
-      memset(name_buffer, 0, sizeof(name_buffer));
+			ROA_MEM_ZERO(name_buffer);
 
       GLint size;
       GLenum type;
@@ -1792,7 +1793,7 @@ volt_ctx_create(volt_ctx_t *ctx)
   new_ctx->render_stream.capacity = sizeof(uint8_t) * 1024;
 
   roa_spin_lock_init(&new_ctx->rp_lock);
-  roa_array_create(new_ctx->renderpasses, 128);
+  roa_array_create_with_capacity(new_ctx->renderpasses, 128);
 
   *ctx = new_ctx;
 

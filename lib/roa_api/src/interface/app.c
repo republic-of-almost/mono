@@ -6,6 +6,7 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_job/dispatcher.h>
 #include <volt/volt.h>
+#include <roa_lib/log.h>
 
 
 rep_task application_frame_func = ROA_NULL;

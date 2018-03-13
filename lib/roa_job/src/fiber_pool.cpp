@@ -28,10 +28,10 @@ roa_fiber_pool_create(
   
   const unsigned count = fiber_count;
 
-  roa_array_create(ctx->fibers,           count);
-  roa_array_create(ctx->free_fibers,      count);
-  roa_array_create(ctx->blocked_fibers,   count);
-  roa_array_create(ctx->blocked_counters, count);
+  roa_array_create_with_capacity(ctx->fibers,           count);
+  roa_array_create_with_capacity(ctx->free_fibers,      count);
+  roa_array_create_with_capacity(ctx->blocked_fibers,   count);
+  roa_array_create_with_capacity(ctx->blocked_counters, count);
   
   for(unsigned i = 0; i < count; ++i)
   {

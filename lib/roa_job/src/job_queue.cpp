@@ -23,15 +23,15 @@ roa_job_queue_create(struct roa_job_queue_ctx *ctx, unsigned queue_hint)
   const unsigned count = queue_hint;
   
   /* create arrays */
-  roa_array_create(ctx->job_status,     count);
-  roa_array_create(ctx->job_ids,        count);
-  roa_array_create(ctx->jobs,           count);
-  roa_array_create(ctx->job_batch_ids,  count);
-  roa_array_create(ctx->batches,        count);
-  roa_array_create(ctx->batch_ids,      count);
+  roa_array_create_with_capacity(ctx->job_status,     count);
+  roa_array_create_with_capacity(ctx->job_ids,        count);
+  roa_array_create_with_capacity(ctx->jobs,           count);
+  roa_array_create_with_capacity(ctx->job_batch_ids,  count);
+  roa_array_create_with_capacity(ctx->batches,        count);
+  roa_array_create_with_capacity(ctx->batch_ids,      count);
   
   /* init to -1 */
-  roa_array_create(ctx->counters, count);
+  roa_array_create_with_capacity(ctx->counters, count);
   roa_array_resize(ctx->counters, count);
   
   for(unsigned i = 0; i < count; ++i)

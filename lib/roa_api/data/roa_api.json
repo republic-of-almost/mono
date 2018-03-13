@@ -23,6 +23,7 @@
     "RepublicLib",
     "RepublicJob",
     "RepublicCtx",
+		"RepublicGraph",
     "RepublicMath"
   ]
 }

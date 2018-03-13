@@ -71,7 +71,8 @@
     "Xext",
     "X11",
     "Xinerama",
-    "Xcursor"
+    "Xcursor",
+		"m"
   ],
 
   "defines_linux" : [
