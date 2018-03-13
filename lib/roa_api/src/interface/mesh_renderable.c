@@ -12,7 +12,10 @@ rep_mesh_renderable_set(
   ROA_ASSERT(desc);
   ROA_ASSERT(count);
 
+	if(object_ids && desc && count)
+	{
 
+	}
 }
 
 
@@ -26,5 +29,8 @@ rep_mesh_renderable_get(
   ROA_ASSERT(desc);
   ROA_ASSERT(count);
 
+	if(object_ids && desc && count)
+	{
 
+	}
 }
