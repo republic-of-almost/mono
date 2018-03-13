@@ -14,30 +14,44 @@
 
 
 float
-roa_tan(float a)
+roa_float_tan(float a)
 {
   return tanf(a);
 }
 
 
 float
-roa_sin(float a)
+roa_float_sin(float a)
 {
   return sinf(a);
 }
 
 
 float
-roa_cos(float a)
+roa_float_cos(float a)
 {
   return cosf(a);
 }
 
 
 float
-roa_sqrt(float a)
+roa_float_sqrt(float a)
 {
   return sqrtf(a);
+}
+
+
+float
+roa_float_abs(float a)
+{
+  return fabs(a);
+}
+
+
+int
+roa_float_is_near(float a, float b, float err)
+{
+  return (roa_float_abs(b) - roa_float_abs(a)) < err ? 1 : 0;
 }
 
 
@@ -48,7 +62,7 @@ roa_sqrt(float a)
 roa_float3
 roa_float3_zero()
 {
-  roa_float3 ret{};
+  roa_float3 ret{ 0.f, 0.f, 0.f };
   return ret;
 }
 
@@ -60,6 +74,13 @@ roa_float3_zero_zero_one()
   return ret;
 }
 
+
+roa_float3
+roa_float3_one()
+{
+  roa_float3 ret{ 1.f, 1.f, 1.f };
+  return ret;
+}
 
 roa_float3
 roa_float3_fill_with_value(float v)
@@ -142,7 +163,7 @@ roa_float3_length(roa_float3 a)
 {
   const float len = a.x * a.x + a.y * a.y + a.z * a.z;
 
-  return roa_sqrt(len);
+  return roa_float_sqrt(len);
 }
 
 
@@ -185,13 +206,24 @@ roa_float3_scale(roa_float3 a, float scale)
 }
 
 
+int
+roa_float3_is_near(roa_float3 a, roa_float3 b, float err)
+{
+  int x_is_near = roa_float_is_near(a.x, b.x, err);
+  int y_is_near = roa_float_is_near(a.y, b.y, err);
+  int z_is_near = roa_float_is_near(a.z, b.z, err);
+
+  return (x_is_near + y_is_near + z_is_near) == 3;
+}
+
+
 /* ----------------------------------------------------------- [ float4 ] -- */
 
 /* ------------------------------------------------------- [ quaternion ] -- */
 
 
 roa_quaternion
-roa_quaternion_init()
+roa_quaternion_default()
 {
   roa_quaternion quat{
     0.f, 0.f, 0.f, 1.f
@@ -202,7 +234,7 @@ roa_quaternion_init()
 
 
 roa_quaternion
-roa_quaternion_init_with_values(float x, float y, float z, float w)
+roa_quaternion_set_with_values(float x, float y, float z, float w)
 {
   roa_quaternion quat{
     x, y, z, w
@@ -220,7 +252,19 @@ roa_quaternion_multiply(roa_quaternion left, roa_quaternion right)
   const float y = (left.w * right.y) + (left.y * right.w) + (left.z * right.x) - (left.x * right.z);
   const float z = (left.w * right.z) + (left.z * right.w) + (left.x * right.y) - (left.y * right.x);
 
-  return roa_quaternion_init_with_values(x, y, z, w);
+  return roa_quaternion_set_with_values(x, y, z, w);
+}
+
+
+int
+roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float err)
+{
+  int x_is_near = roa_float_is_near(a.x, b.x, err);
+  int y_is_near = roa_float_is_near(a.y, b.y, err);
+  int z_is_near = roa_float_is_near(a.z, b.z, err);
+  int w_is_near = roa_float_is_near(a.w, b.w, err);
+
+  return (x_is_near + y_is_near + z_is_near + w_is_near) == 4;
 }
 
 /* -------------------------------------------------------- [ transform ] -- */
@@ -231,9 +275,9 @@ roa_transform_init(roa_transform *out)
 {
   assert(out);
 
-  out->position = roa_float3_fill_with_value(0);
-  out->scale    = roa_float3_fill_with_value(1);
-  out->rotation = roa_quaternion_init();
+  out->position = roa_float3_zero();
+  out->scale    = roa_float3_one();
+  out->rotation = roa_quaternion_default();
 }
 
 
@@ -314,7 +358,7 @@ roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane,
 {
   assert(out);
 
-  const float xy_max = near_plane * roa_tan(fov);
+  const float xy_max = near_plane * roa_float_tan(fov);
   const float y_min = -xy_max;
   const float x_min = -xy_max;
 

@@ -8,6 +8,9 @@
 #include <volt/volt.h>
 
 
+rep_task application_frame_func = ROA_NULL;
+
+
 ROA_JOB(rep_game_loop_tick, rep_task)
 {
   ROA_BOOL new_frame = roa_ctx_new_frame(rep_data_ctx());
@@ -39,7 +42,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;
-      tick_desc.arg = arg;
+      tick_desc.arg = application_frame_func;
       tick_desc.func = rep_game_loop_tick;
       tick_desc.keep_on_calling_thread = ROA_TRUE;
 
@@ -53,7 +56,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 
 void
 rep_app_create(
-  struct rep_app_desc *desc)
+  const struct rep_app_desc *desc)
 {
   ROA_ASSERT(desc);
 
@@ -64,17 +67,12 @@ rep_app_create(
     rep_config_init();
     rep_data_init();
 
-    /* window */
-    struct roa_ctx_window_desc win_desc;
-    win_desc.title = desc->title;
-    win_desc.width = desc->width;
-    win_desc.height = desc->height;
-
-    roa_ctx_set_window_desc(rep_data_ctx(), &win_desc);
+    /* set desc */
+    rep_app_set(desc);
 
     /* setup job dispatcher */
     struct roa_job_desc tick_desc;
-    tick_desc.arg = desc->frame_job;
+    tick_desc.arg = application_frame_func;
     tick_desc.func = rep_game_loop_tick;
     tick_desc.keep_on_calling_thread = ROA_TRUE;
 
@@ -93,7 +91,42 @@ void
 rep_app_get(
   struct rep_app_desc * out_desc)
 {
+  /* param check */
   ROA_ASSERT(out_desc);
+
+  if (out_desc)
+  {
+    struct roa_ctx_window_desc win_desc;
+    roa_ctx_get_window_desc(rep_data_ctx(), &win_desc);
+
+    out_desc->title = win_desc.title;
+    out_desc->width = win_desc.width;
+    out_desc->height = win_desc.height;
+    out_desc->frame_job = application_frame_func;
+  }
+}
+
+
+void
+rep_app_set(
+  const struct rep_app_desc * desc)
+{
+  /* param check */
+  ROA_ASSERT(desc);
+
+  if (desc)
+  {
+    /* window */
+    struct roa_ctx_window_desc win_desc;
+    win_desc.title = desc->title;
+    win_desc.width = desc->width;
+    win_desc.height = desc->height;
+
+    roa_ctx_set_window_desc(rep_data_ctx(), &win_desc);
+
+    /* global application function */
+    application_frame_func = desc->frame_job;
+  }
 }
 
 

@@ -20,7 +20,7 @@ roa_ctx_err_callback(int error, const char *desc)
 {
   ROA_UNUSED(error);
 
-  roa_log(ROA_LOG_ERR, desc);
+  ROA_LOG_ERROR("[glfw] %s", desc);
 }
 
 

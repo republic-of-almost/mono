@@ -14,6 +14,8 @@ extern "C" {
 #ifdef _MSC_VER
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
+#else
+#include <stdint.h>
 #endif
 #else
 #include <cstdint>
@@ -38,12 +40,17 @@ struct rep_app_desc
 
 void
 rep_app_create(
-  struct rep_app_desc * desc);
+  const struct rep_app_desc * desc);
 
 
 void
 rep_app_get(
   struct rep_app_desc * out_desc);
+
+
+void
+rep_app_set(
+  const struct rep_app_desc * desc);
 
 
 void

@@ -183,8 +183,19 @@ roa_tagged_allocator_copy(
 void
 roa_tagged_allocator_free(uint64_t tag)
 {
-  ROA_UNUSED(tag);
-  ROA_ASSERT(0); /* finish this */
+  /* param check */
+  ROA_ASSERT(tag);
+
+  unsigned count = roa_array_size(internal_allocator.blocks);
+  unsigned i;
+
+  for (i = 0; i < count; ++i)
+  {
+    if (internal_allocator.block_tag_keys[i] == tag)
+    {
+      internal_allocator.block_tag_keys[i] = 0;
+    }
+  }
 }
 
 

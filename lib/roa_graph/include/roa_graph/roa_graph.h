@@ -160,7 +160,7 @@ ROA_BOOL
 roa_graph_node_set_user_data(
   roa_graph_ctx_t data,
   const uint32_t node_id,
-  const void *user_data);
+  void *user_data);
 
 
 #ifdef __cplusplus

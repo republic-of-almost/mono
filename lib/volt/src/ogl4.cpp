@@ -896,7 +896,7 @@ volt_renderpass_bind_texture_buffer(
   const uint64_t hash_name = roa_hash(sampler_name);
 
   /* check to see if its already bound */
-  const unsigned sampler_slot_count = ROA_ARRAY_COUNT(pass->sampler_hash);
+  const unsigned sampler_slot_count = ROA_ARR_COUNT(pass->sampler_hash);
 
   for (int i = 0; i < sampler_slot_count; ++i)
   {
@@ -971,7 +971,7 @@ volt_renderpass_bind_uniform(
   const uint64_t hash_name = roa_hash(uniform_name);
 
   /* check to see if its already bound */
-  const unsigned uniform_slot_count = ROA_ARRAY_COUNT(pass->uniform_hash);
+  const unsigned uniform_slot_count = ROA_ARR_COUNT(pass->uniform_hash);
 
   for (int i = 0; i < uniform_slot_count; ++i)
   {
@@ -1131,7 +1131,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
       const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
 
       /* check bound textures */
-      for (int j = 0; j < ROA_ARRAY_COUNT(pass->sampler_hash); ++j)
+      for (int j = 0; j < ROA_ARR_COUNT(pass->sampler_hash); ++j)
       {
         const uint64_t bound_sampler_hash = pass->sampler_hash[j];
 
@@ -1164,7 +1164,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
       const uint64_t prog_uniform_hash = pass->curr_program->uniform_keys[i];
 
       /* check bound uniforms */
-      for (int j = 0; j < ROA_ARRAY_COUNT(pass->uniform_hash); ++j)
+      for (int j = 0; j < ROA_ARR_COUNT(pass->uniform_hash); ++j)
       {
         const uint64_t bound_hash = pass->uniform_hash[j];
 
@@ -1374,7 +1374,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
 
     /* more uniforms than space*/
     /* increase space or dynamic allocation */
-    ROA_ASSERT(ROA_ARRAY_COUNT(cmd->program->uniforms) > uniform_count);
+    ROA_ASSERT(ROA_ARR_COUNT(cmd->program->uniforms) > uniform_count);
 
     GLint data_count = 0;
     GLint samp_count = 0;
@@ -1392,17 +1392,17 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
       glGetActiveUniform(
         program,
         i,
-        ROA_ARRAY_COUNT(name_buffer),
+        ROA_ARR_COUNT(name_buffer),
         &length,
         &size,
         &type,
-        ROA_ARRAY_PTR(name_buffer));
+        ROA_ARR_DATA(name_buffer));
 
       /* users text will hash incorrectly */
       /* increase buffer or dynamic allocations */
-      ROA_ASSERT(ROA_ARRAY_COUNT(name_buffer) > length);
+      ROA_ASSERT(ROA_ARR_COUNT(name_buffer) > length);
 
-      uint64_t uni_hash = roa_hash(ROA_ARRAY_PTR(name_buffer));
+      uint64_t uni_hash = roa_hash(ROA_ARR_DATA(name_buffer));
 
       /* seperate samplers and data */
       if ((type >= GL_SAMPLER_1D) && (type <= GL_SAMPLER_2D_SHADOW))

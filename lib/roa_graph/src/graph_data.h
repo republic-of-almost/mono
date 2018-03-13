@@ -18,7 +18,7 @@ struct short_string
 
 struct node_data
 {
-  const void *user_data;
+  void *user_data;
   uint64_t node_type_id;
   uint64_t tags;
   struct short_string name;
