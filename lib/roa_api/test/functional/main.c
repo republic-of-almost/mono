@@ -1,6 +1,5 @@
 #include <rep/rep_api.h>
 #include <roa_lib/fundamental.h>
-#include <string.h>
 
 
 enum {
@@ -18,7 +17,7 @@ uint32_t objects[OBJ_COUNT];
 void
 rep_job_func(void *arg)
 {
-
+  
 }
 
 
@@ -40,7 +39,7 @@ rep_func_setup(void *arg)
   /* setup application data */
   {
     struct rep_object_desc obj_desc[OBJ_COUNT];
-    memset(obj_desc, 0, sizoef(*obj_desc));
+    ROA_MEM_ZERO(obj_desc);
 
     rep_object_create(&objects, ROA_NULL, OBJ_COUNT);
 
