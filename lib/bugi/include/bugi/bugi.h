@@ -29,7 +29,7 @@ int bugi_checkbox(const char *name, int *checked);
 int bugi_button(const char *name);
 
 
-/* ------------------------------------------------------- [ Environment ] -- */
+/* --------------------------------------------------- [ Render Commands ] -- */
 
 
 struct bugi_draw_cmd
@@ -38,7 +38,7 @@ struct bugi_draw_cmd
 };
 
 
-void bugi_draw_cmnds(bugi_draw_cmds *out_data, int *out_count);
+void bugi_draw_cmds(struct bugi_draw_cmd *out_data, int *out_count);
 
 
 /* ------------------------------------------------------- [ Environment ] -- */
@@ -66,15 +66,26 @@ void bugi_env_pointer_position(int x, int y);
 
 
 #include <stdlib.h>
-#define BUGI_MZERO(obj) memset(&obj, 0, sizeof(obj));
+#define BUGI_MZERO(obj) memset(&obj, 0, sizeof(obj))
+
+
+#include <assert.h>
+#define BUGI_ASSERT(expr) assert(expr)
 
 
 unsigned
 bugi_hash(const char *text)
 {
-  return 0;
-}
+  unsigned hash = 5381;
 
+  int c;
+  while (c = *text++)
+  {
+    hash = ((hash << 5) + hash) + c;
+  }
+
+  return hash;
+}
 
 
 /* ------------------------------------------------------- [ Bugi Buffer ] -- */
@@ -88,42 +99,44 @@ struct bugi_buffer
 };
 
 
-
 /* ------------------------------------------------------- [ State Types ] -- */
 
 
 struct bugi_window
 {
   unsigned window_id;
-  int width;
-  int height;
-  int pos_x;
-  int pos_y;
+  int width, height, pos_x, pos_y;
 };
 
 
 struct bugi_stage_ctx
 {
-  int width;
-  int height;
+  int width, height;
 };
+
+
+typedef enum bugi_ptr_state {
+  bugi_ptr_up,
+  bugi_ptr_up_this_frame,
+  bugi_ptr_down,
+  bugi_ptr_down_this_frame,
+} bugi_ptr_state;
 
 
 struct bugi_input_ctx
 {
-  int ptr_state;
-  int ptr_x;
-  int ptr_y;
+  bugi_ptr_state ptr_state;
+  int pos_x, pos_y;
 };
 
 
 struct bugi_ctx
 {
-  bugi_window *active_windows;
-  bugi_window *window_history;
+  struct bugi_window *active_windows;
+  struct bugi_window *window_history;
 
-  bugi_stage_ctx stage;
-  bugi_input_ctx input;
+  struct bugi_stage_ctx stage;
+  struct bugi_input_ctx input;
 } ctx;
 
 
@@ -132,8 +145,6 @@ struct bugi_ctx
 
 int bugi_init()
 {
-  bugi_destroy(); /* protects against double init's */
-
   BUGI_MZERO(ctx);
 
   return 1;
@@ -157,13 +168,22 @@ int bugi_destroy()
 
 void bugi_begin(const char *win_name)
 {
+  BUGI_ASSERT(win_name); /* name is required */
+  BUGI_ASSERT(0); /* has active window, did you call bugi_end() */
 
+  unsigned win_id = bugi_hash(win_name);
+
+  /* search history */
+
+  /* add window to active windows */
 }
 
 
 void bugi_end()
 {
+  BUGI_ASSERT(0); /* no active window, did you call bugi_begin() */
 
+  /* close off current active window */
 }
 
 
@@ -176,7 +196,46 @@ void bugi_text(const char *text)
 }
 
 
+void bugi_float(const char *name, float *f)
+{
+
+}
+
+
+void bugi_float2(const char *name, float *f2)
+{
+
+}
+
+
 void bugi_float3(const char *name, float *f3)
+{
+
+}
+
+
+void bugi_float4(const char *name, float *f4)
+{
+
+}
+
+
+int bugi_checkbox(const char *name, int *checked)
+{
+  return 0;
+}
+
+
+int bugi_button(const char *name)
+{
+  return 0;
+}
+
+
+/* --------------------------------------------------- [ Render Commands ] -- */
+
+
+void bugi_draw_cmds(struct bugi_draw_cmd *out_data, int *out_count)
 {
 
 }
@@ -187,19 +246,21 @@ void bugi_float3(const char *name, float *f3)
 
 void bugi_env_viewport(int width, int height)
 {
-
+  ctx.stage.width = width;
+  ctx.stage.height = height;
 }
 
 
 void bugi_env_pointer_state(int down)
 {
-
+  ctx.input.ptr_state = down ? bugi_ptr_down_this_frame : bugi_ptr_up_this_frame;
 }
 
 
 void bugi_env_pointer_position(int x, int y)
 {
-
+  ctx.input.pos_x = x;
+  ctx.input.pos_y = y;
 }
 
 
