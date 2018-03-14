@@ -1,0 +1,16 @@
+{
+	"name" : "RepublicRendererFuncTest",
+	"kind" : "ConsoleApp",
+	"language": "C89",
+	"location": "./",
+
+	"src_files" : [
+		"../test/functional/**.h",
+		"../test/functional/**.c"
+	],
+
+	"project_dependencies" : [
+		"GLFW",
+		"RepublicRenderer"
+	]
+}

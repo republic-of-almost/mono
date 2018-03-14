@@ -12,7 +12,9 @@ rep_transform_set(
   ROA_ASSERT(desc);
   ROA_ASSERT(count);
 
-
+	if(object_ids && desc && count)
+	{
+	}
 }
 
 

@@ -1,0 +1,27 @@
+{
+	"name": "RepublicRenderer",
+	"kind": "StaticLib",
+	"language": "C89",
+	"location": "./",
+
+	"src_files" : [
+		"../include/**.h",
+		"../src/**.h",
+		"../src/**.c",
+		"../doc/**.md"
+	],
+
+	"public_inc_dirs" : [
+		"../include/"
+	],
+
+	"private_inc_dirs" : [
+		"../src"
+	],
+
+	"project_dependencies" : [
+		"Volt",
+		"RepublicLib"
+	]
+
+}

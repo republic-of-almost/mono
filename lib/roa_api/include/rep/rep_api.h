@@ -83,7 +83,7 @@ rep_task_wait(
 
 struct rep_object_desc
 {
-  uint32_t object_parent;
+	uint32_t object_parent;
 };
 
 

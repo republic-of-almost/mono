@@ -1,0 +1,16 @@
+{
+	"name" : "RepublicRendererUnitTest",
+	"kind" : "ConsoleApp",
+	"language": "C++",
+	"location": "./",
+
+	"src_files" : [
+		"../test/unit/**.h",
+		"../test/unit/**.c"
+	],
+
+	"project_dependencies" : [
+		"Catch",
+		"RepublicRenderer"
+	]
+}
