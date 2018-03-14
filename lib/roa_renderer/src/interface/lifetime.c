@@ -45,3 +45,5 @@ roa_renderer_ctx_destroy(
 
 	*ctx = ROA_NULL;
 }
+
+
