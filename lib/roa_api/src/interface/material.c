@@ -11,5 +11,4 @@ rep_material_find(
   ROA_ASSERT(out_material_ids);
   ROA_ASSERT(material_names);
   ROA_ASSERT(material_name_count);
-
 }

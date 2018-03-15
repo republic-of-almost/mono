@@ -59,14 +59,14 @@ struct roa_renderer_camera
 
 
 ROA_BOOL
-roa_renderer_set_camera(
+roa_renderer_camera_set(
 	roa_renderer_ctx_t ctx,
-	roa_renderer_camera *camera,
+	struct roa_renderer_camera *camera,
 	uint32_t camera_id);
 
 
 ROA_BOOL
-roa_renderer_clear_camera(
+roa_renderer_camera_clear(
 	roa_renderer_ctx_t ctx,
 	uint32_t camera_id);
 
@@ -76,19 +76,19 @@ roa_renderer_clear_camera(
 
 struct roa_renderer_renderable
 {
-	float world_transform[];
+	float world_transform[16];
 };
 
 
 ROA_BOOL
-roa_renderer_set_renderable(
+roa_renderer_renderable_set(
 	roa_renderer_ctx_t ctx,
-	roa_renderer_renderable *renderable,
+	struct roa_renderer_renderable *renderable,
 	uint32_t renderable_id);
 
 
 ROA_BOOL
-roa_renderer_clear_renderable(
+roa_renderer_renderable_clear(
 	roa_renderer_ctx_t ctx,
 	uint32_t renderable_id);
 

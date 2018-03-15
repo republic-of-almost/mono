@@ -83,9 +83,9 @@ main()
   /* create rep application */
   {
     struct rep_app_desc app_desc;
-    app_desc.title = "Loading ROA Func Test ...";
-    app_desc.width = 1200;
-    app_desc.height = 720;
+    app_desc.title     = "Loading ROA Func Test ...";
+    app_desc.width     = 1200;
+    app_desc.height    = 720;
     app_desc.frame_job = rep_func_setup;
 
     rep_app_create(&app_desc);

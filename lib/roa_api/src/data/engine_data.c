@@ -4,6 +4,7 @@
 #include <roa_graph/roa_graph.h>
 #include <data/config.h>
 #include <volt/volt.h>
+#include <roa_renderer/roa_renderer.h>
 
 
 roa_ctx_t roa_ctx_data;
@@ -15,6 +16,7 @@ roa_graph_ctx_t roa_graph_ctx_data;
 
 volt_ctx_t volt_ctx_data;
 
+roa_renderer_ctx_t roa_renderer_ctx_data;
 
 void
 rep_data_init()
@@ -36,6 +38,8 @@ rep_data_init()
 	ROA_MEM_ZERO(roa_graph_ctx_data);
 	roa_graph_ctx_create(&roa_graph_ctx_data);
 
+  ROA_MEM_ZERO(roa_renderer_ctx_data);
+  roa_renderer_ctx_create(&roa_renderer_ctx_data);
 }
 
 
@@ -78,4 +82,11 @@ roa_graph_ctx_t
 rep_data_graph()
 {
 	return roa_graph_ctx_data;
+}
+
+
+roa_renderer_ctx_t
+rep_data_renderer()
+{
+  return roa_renderer_ctx_data;
 }

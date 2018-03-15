@@ -162,8 +162,7 @@ rep_camera_get(
 
 struct rep_mesh_renderable_desc
 {
-  uint64_t mesh_id;
-  uint64_t material_id;
+  int i;
 };
 
 

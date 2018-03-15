@@ -59,6 +59,8 @@ roa_float3      roa_float3_one();
 roa_float3      roa_float3_fill_with_value(float v);
 roa_float3      roa_float3_set_with_values(float x, float y, float z);
 
+void            roa_float3_export(roa_float3 a, float *out);
+
 float           roa_float3_get_x(roa_float3 a);
 float           roa_float3_get_y(roa_float3 a);
 float           roa_float3_get_z(roa_float3 a);
@@ -77,6 +79,33 @@ int             roa_float3_is_near(roa_float3 a, roa_float3 b, float err);
 
 
 /* ----------------------------------------------------------- [ float4 ] -- */
+
+
+roa_float4      roa_float4_zero();
+roa_float4      roa_float4_zero_zero_zero_one();
+roa_float4      roa_float4_one();
+roa_float4      roa_float4_fill_with_value(float v);
+roa_float4      roa_float4_set_with_values(float x, float y, float z, float w);
+
+void            roa_float4_export(roa_float4 a, float *out);
+
+float           roa_float4_get_x(roa_float4 a);
+float           roa_float4_get_y(roa_float4 a);
+float           roa_float4_get_z(roa_float4 a);
+float           roa_float4_get_w(roa_float4 a);
+
+roa_float4      roa_float4_add(roa_float4 a, roa_float4 b);
+roa_float4      roa_float4_subtract(roa_float4 a, roa_float4 b);
+roa_float4      roa_float4_multiply(roa_float4 a, roa_float4 b);
+
+float           roa_float4_length(roa_float4 a);
+roa_float4      roa_float4_normalize(roa_float4 a);
+float           roa_float4_dot(roa_float4 a, roa_float4 b);
+roa_float4      roa_float4_scale(roa_float4 a, float scale);
+
+int             roa_float4_is_near(roa_float4 a, roa_float4 b, float err);
+
+
 /* ------------------------------------------------------- [ quaternion ] -- */
 
 
@@ -93,6 +122,9 @@ int             roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float
 void            roa_transform_init(roa_transform *out);
 void            roa_transform_inherited(roa_transform *out, const roa_transform *parent, const roa_transform *local);
 
+void            roa_transform_to_mat4(const roa_transform *trans, roa_mat4 *out);
+void            roa_transform_to_lookat_vectors(const roa_transform *trans, roa_float3 *out_pos, roa_float3 *out_dir, roa_float3 *out_up);
+
 
 /* ------------------------------------------------------------- [ mat3 ] -- */
 /* ------------------------------------------------------------- [ mat4 ] -- */
@@ -101,6 +133,11 @@ void            roa_transform_inherited(roa_transform *out, const roa_transform 
 void            roa_mat4_zero(roa_mat4 *out);
 void            roa_mat4_id(roa_mat4 *out);
 void            roa_mat4_import(roa_mat4 *out, float *data);
+void            roa_mat4_export(roa_mat4 *in, float *out);
+
+void            roa_mat4_scale(roa_mat4 *out, roa_float3 scale);
+void            roa_mat4_translate(roa_mat4 *out, roa_float3 translate);
+void            roa_mat4_rotate(roa_mat4 *out, roa_quaternion rotation);
 
 void            roa_mat4_fill_with_value(roa_mat4 *out, float val);
 

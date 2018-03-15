@@ -12,7 +12,7 @@ roa_renderer_ctx_create(
 	roa_renderer_ctx_t *ctx)
 {
 	/* param check */
-	ROA_ASSERT(*ctx);
+	ROA_ASSERT(ctx);
 
 	struct roa_renderer_ctx *new_ctx = roa_zalloc(sizeof(*new_ctx));
 	ROA_ASSERT(new_ctx);
@@ -46,4 +46,17 @@ roa_renderer_ctx_destroy(
 	*ctx = ROA_NULL;
 }
 
+
+void
+roa_renderer_ctx_lock(
+  roa_renderer_ctx_t ctx)
+{
+}
+
+
+void
+roa_renderer_ctx_unlock(
+  roa_renderer_ctx_t ctx)
+{
+}
 
