@@ -14,7 +14,7 @@
 #define NK_GLFW_GL3_H_
 
 
-#include <GL/GL.h>
+#include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
 
