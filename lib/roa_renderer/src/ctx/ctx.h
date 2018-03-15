@@ -3,15 +3,16 @@
 
 
 #include <roa_lib/fundamental.h>
+#include <roa_renderer/roa_renderer.h>
 
 
 struct roa_renderer_ctx
 {
 	/* array */ uint32_t *camera_id;
-	/* array */ int *cameras;
+	/* array */ struct roa_renderer_camera *camera;
 
-	/* array */ uint32_t *renderables_id;
-	/* array */ int *renderables;
+	/* array */ uint32_t *renderable_id;
+	/* array */ struct roa_renderer_renderable *renderable;
 };
 
 

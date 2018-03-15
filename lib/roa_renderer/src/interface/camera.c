@@ -1,5 +1,7 @@
 #include <roa_renderer/roa_renderer.h>
+#include <ctx/ctx.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/array.h>
 
 
 ROA_BOOL
@@ -12,6 +14,10 @@ roa_renderer_camera_set(
   ROA_ASSERT(ctx);
   ROA_ASSERT(camera);
   ROA_ASSERT(camera_id);
+
+	/* push camera */
+	roa_array_push(ctx->camera_id, camera_id);
+	roa_array_push(ctx->camera, *camera);
 }
 
 

@@ -1,6 +1,7 @@
 #include <rep/rep_api.h>
 #include <data/engine_data.h>
 #include <data/config.h>
+#include <roa_renderer/roa_renderer.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <roa_ctx/roa_ctx.h>
@@ -35,6 +36,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* renderer tasks */
     {
       /* render */
+			roa_renderer_ctx_execute(rep_data_renderer());
       volt_ctx_execute(rep_data_volt());
     }
 

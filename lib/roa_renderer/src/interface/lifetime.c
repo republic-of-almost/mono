@@ -2,6 +2,8 @@
 #include <ctx/ctx.h>
 #include <roa_lib/alloc.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/array.h>
+#include <roa_lib/log.h>
 
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
@@ -17,6 +19,11 @@ roa_renderer_ctx_create(
 	struct roa_renderer_ctx *new_ctx = roa_zalloc(sizeof(*new_ctx));
 	ROA_ASSERT(new_ctx);
 
+	roa_array_create_with_capacity(new_ctx->camera_id, 256);
+	roa_array_create_with_capacity(new_ctx->camera, 256);
+	roa_array_create_with_capacity(new_ctx->renderable_id, 256);
+	roa_array_create_with_capacity(new_ctx->renderable, 256);
+
 	*ctx = new_ctx;
 
 	return new_ctx ? ROA_TRUE : ROA_FALSE;
@@ -29,6 +36,9 @@ roa_renderer_ctx_execute(
 {
 	/* param check */
 	ROA_ASSERT(ctx);
+	
+	ROA_LOG_INFO("Camera count %d", roa_array_size(ctx->camera));
+	ROA_LOG_INFO("Renderable count %d", roa_array_size(ctx->renderable));
 }
 
 
@@ -41,6 +51,12 @@ roa_renderer_ctx_destroy(
 	ROA_ASSERT(*ctx);
 	
 	struct roa_renderer_ctx *kill_ctx = *ctx;
+
+	roa_array_destroy(kill_ctx->renderable);
+	roa_array_destroy(kill_ctx->renderable_id);
+	roa_array_destroy(kill_ctx->camera);
+	roa_array_destroy(kill_ctx->camera_id);
+
 	roa_free(kill_ctx);
 
 	*ctx = ROA_NULL;
