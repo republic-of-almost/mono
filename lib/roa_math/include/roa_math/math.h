@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 
-/* ------------------------------------------------------------ [ types ] -- */
+/* ------------------------------------------------------------- [ types ] -- */
 
 
 typedef struct roa_float2 { float x, y; }                     roa_float2;
@@ -21,7 +21,7 @@ typedef struct roa_aabb { roa_float3 min; roa_float3 max; }   roa_aabb;
 typedef struct roa_ray { roa_float3 origin; roa_float3 dir; } roa_ray;
 
 
-/* -------------------------------------------------------- [ constants ] -- */
+/* --------------------------------------------------------- [ constants ] -- */
 
 
 #define         ROA_PI 3.14159265359
@@ -36,7 +36,7 @@ typedef struct roa_ray { roa_float3 origin; roa_float3 dir; } roa_ray;
 #define         ROA_EPSILON 0.000000001
 
 
-/* ---------------------------------------------------------- [ general ] -- */
+/* ----------------------------------------------------------- [ general ] -- */
 
 
 float           roa_float_tan(float a);
@@ -49,8 +49,8 @@ float           roa_float_abs(float a);
 int             roa_float_is_near(float a, float b, float err);
 
 
-/* ----------------------------------------------------------- [ float2 ] -- */
-/* ----------------------------------------------------------- [ float3 ] -- */
+/* ------------------------------------------------------------ [ float2 ] -- */
+/* ------------------------------------------------------------ [ float3 ] -- */
 
 
 roa_float3      roa_float3_zero();
@@ -59,6 +59,7 @@ roa_float3      roa_float3_one();
 roa_float3      roa_float3_fill_with_value(float v);
 roa_float3      roa_float3_set_with_values(float x, float y, float z);
 
+roa_float3			roa_float3_import(const float *in);
 void            roa_float3_export(roa_float3 a, float *out);
 
 float           roa_float3_get_x(roa_float3 a);
@@ -78,7 +79,7 @@ roa_float3      roa_float3_scale(roa_float3 a, float scale);
 int             roa_float3_is_near(roa_float3 a, roa_float3 b, float err);
 
 
-/* ----------------------------------------------------------- [ float4 ] -- */
+/* ------------------------------------------------------------ [ float4 ] -- */
 
 
 roa_float4      roa_float4_zero();
@@ -106,7 +107,7 @@ roa_float4      roa_float4_scale(roa_float4 a, float scale);
 int             roa_float4_is_near(roa_float4 a, roa_float4 b, float err);
 
 
-/* ------------------------------------------------------- [ quaternion ] -- */
+/* -------------------------------------------------------- [ quaternion ] -- */
 
 
 roa_quaternion  roa_quaternion_default();
@@ -115,19 +116,40 @@ roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion righ
 
 int             roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float err);
 
+void						roa_quaternion_get_rotation_matrix(roa_quaternion rotation, roa_mat3 *out);
+roa_float3			roa_quaternion_rotate_vector(roa_quaternion rotation, roa_float3 vector);
 
-/* -------------------------------------------------------- [ transform ] -- */
+
+/* --------------------------------------------------------- [ transform ] -- */
 
 
 void            roa_transform_init(roa_transform *out);
 void            roa_transform_inherited(roa_transform *out, const roa_transform *parent, const roa_transform *local);
 
 void            roa_transform_to_mat4(const roa_transform *trans, roa_mat4 *out);
-void            roa_transform_to_lookat_vectors(const roa_transform *trans, roa_float3 *out_pos, roa_float3 *out_dir, roa_float3 *out_up);
+
+roa_float3			roa_transform_world_fwd();
+roa_float3			roa_transform_local_fwd(const roa_transform *trans);
+
+roa_float3			roa_transform_world_up();
+roa_float3			roa_transform_local_up(const roa_transform *trans);
+
+roa_float3			roa_transform_world_left();
+roa_float3			roa_transform_local_left(const roa_transform *trans);
 
 
-/* ------------------------------------------------------------- [ mat3 ] -- */
-/* ------------------------------------------------------------- [ mat4 ] -- */
+/* -------------------------------------------------------------- [ mat3 ] -- */
+
+
+void						roa_mat3_zero(roa_mat3 *out);
+void						roa_mat3_id(roa_mat3 *out);
+void						roa_mat3_import(roa_mat3 *out, float *in);
+
+void						roa_mat3_multiply(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *rhs);
+roa_float3	  	roa_mat3_multiply_with_float3(roa_float3 lhs, const roa_mat3 *rhs);
+
+
+/* -------------------------------------------------------------- [ mat4 ] -- */
 
 
 void            roa_mat4_zero(roa_mat4 *out);
@@ -144,12 +166,12 @@ void            roa_mat4_fill_with_value(roa_mat4 *out, float val);
 void            roa_mat4_projection(roa_mat4 *out, float fov, float near, float far, float aspect_ratio);
 void            roa_mat4_lookat(roa_mat4 *out, roa_float3 from, roa_float3 to, roa_float3 up);
 
-void            roa_mat4_multiply(roa_mat4 *out, roa_mat4 *a, roa_mat4 *b);
-void            roa_mat4_multiply_three(roa_mat4 *out, roa_mat4 *a, roa_mat4 *b, roa_mat4 *c);
+void            roa_mat4_multiply(roa_mat4 *out, const roa_mat4 *a, const roa_mat4 *b);
+void            roa_mat4_multiply_three(roa_mat4 *out, const roa_mat4 *a, const roa_mat4 *b, const roa_mat4 *c);
 
 
-/* -------------------------------------------------------------- [ ray ] -- */
-/* ------------------------------------------------------------- [ aabb ] -- */
+/* --------------------------------------------------------------- [ ray ] -- */
+/* -------------------------------------------------------------- [ aabb ] -- */
 
 
 #ifdef __cplusplus
@@ -158,3 +180,20 @@ void            roa_mat4_multiply_three(roa_mat4 *out, roa_mat4 *a, roa_mat4 *b,
 
 
 #endif /* inc guard */
+
+
+/* -------------------------------------------------------------------------- */
+/* --------------------------- [ Implementation ] --------------------------- */
+/* -------------------------------------------------------------------------- */
+
+
+#ifdef ROA_MATH_IMPL
+#ifndef ROA_MATH_IMPL_INCLUDED
+#define ROA_MATH_IMPL_INCLUDED
+
+
+/* todo */
+
+
+#endif /* impl guard */
+#endif /* impl request */

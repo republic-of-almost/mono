@@ -118,6 +118,18 @@ roa_float3_set_with_values(float x, float y, float z)
 }
 
 
+roa_float3
+roa_float3_import(float *in)
+{
+	roa_float3 ret;
+	ret.x = in[0];
+	ret.y = in[1];
+	ret.z = in[2];
+
+	return ret;
+}
+
+
 void
 roa_float3_export(roa_float3 a, float *out)
 {
@@ -219,9 +231,9 @@ roa_float3_dot(roa_float3 a, roa_float3 b)
 roa_float3
 roa_float3_cross(roa_float3 a, roa_float3 b)
 {
-  const float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_y(b));
-  const float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_x(b));
-  const float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - (roa_float3_get_y(a) * roa_float3_get_x(b));
+  float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_y(b));
+  float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_x(b));
+  float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - (roa_float3_get_y(a) * roa_float3_get_x(b));
 
   return roa_float3_set_with_values(x, -y, z);
 }
@@ -487,6 +499,43 @@ roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float err)
   return (x_is_near + y_is_near + z_is_near + w_is_near) == 4;
 }
 
+
+void
+roa_quaternion_get_rotation_matrix(roa_quaternion rot, roa_mat3 *out)
+{
+	float x_sq = rot.x * rot.x;
+  float y_sq = rot.y * rot.y;
+  float z_sq = rot.z * rot.z;
+  
+  float mat_data[9]
+	{
+		1 - 2 * y_sq - 2 * z_sq,
+    2 * (rot.x * rot.y) + 2 * (rot.z * rot.w),
+		2 * (rot.x * rot.z) - 2 * (rot.y * rot.w),
+        
+		2 * (rot.x * rot.y) - 2 * (rot.z * rot.w),
+		1 - 2 * x_sq - 2 * z_sq,
+		2 * (rot.y * rot.z) + 2 * (rot.x * rot.w),
+        
+		2 * (rot.x * rot.z) + 2 * (rot.y * rot.w),
+		2 * (rot.y * rot.z) - 2 * (rot.x * rot.w),
+		1 - 2 * x_sq - 2 * y_sq,
+	};
+
+  return roa_mat3_import(out, mat_data);
+
+}
+
+
+roa_float3
+roa_quaternion_rotate_vector(roa_quaternion rotation, roa_float3 vector)
+{
+	roa_mat3 rot_mat;
+	roa_quaternion_get_rotation_matrix(rotation, &rot_mat);
+	return roa_mat3_multiply_with_float3(vector, &rot_mat);
+}
+
+
 /* -------------------------------------------------------- [ transform ] -- */
 
 
@@ -545,21 +594,152 @@ roa_transform_to_mat4(
 }
 
 
-
-void
-roa_transform_to_lookat_vectors(
-  const roa_transform *trans,
-  roa_float3 *out_pos,
-  roa_float3 *out_dir,
-  roa_float3 *out_up)
+roa_float3
+roa_transform_world_fwd()
 {
-  const math::vec3 cam_fwd = math::quat_rotate_point(to_view.rotation, transform_world_fwd());
-  const math::vec3 look_fwd = math::vec3_add(to_view.position, cam_fwd);
-  const math::vec3 look_up = math::quat_rotate_point(to_view.rotation, transform_world_up());
+	return roa_float3_set_with_values(0.f, 0.f, -1.f);
+}
+
+
+roa_float3
+roa_transform_local_fwd(const roa_transform *trans)
+{
+	roa_float3 local_dir = roa_quaternion_rotate_vector(
+		trans->rotation,
+		roa_transform_world_fwd());
+
+	return local_dir;
+}
+
+
+roa_float3
+roa_transform_world_up()
+{
+	return roa_float3_set_with_values(0.f, +1.f, 0.f);
+}
+
+
+roa_float3
+roa_transform_local_up(const roa_transform *trans)
+{
+	roa_float3 local_dir = roa_quaternion_rotate_vector(
+		trans->rotation,
+		roa_transform_world_up());
+
+	return local_dir;
+}
+
+
+roa_float3
+roa_transform_world_left()
+{
+	return roa_float3_set_with_values(+1.f, 0.f, 0.f);
+}
+
+
+roa_float3
+roa_transform_local_left(const roa_transform *trans)
+{
+	roa_float3 local_dir = roa_quaternion_rotate_vector(
+		trans->rotation,
+		roa_transform_world_left());
+
+	return local_dir;
 }
 
 
 /* ------------------------------------------------------------- [ mat3 ] -- */
+
+
+void
+roa_mat3_zero(
+	roa_mat3 *out)
+{
+	assert(out);
+
+	memset((void*)out->data, 0, sizeof(out->data));
+}
+
+
+void
+roa_mat3_id(
+	roa_mat3 *out)
+{
+	assert(out);
+
+	roa_mat3_zero(out);
+
+	out->data[0] = 1.f;
+	out->data[4] = 1.f;
+	out->data[8] = 1.f;
+}
+
+
+void
+roa_mat3_import(
+	roa_mat3 *out,
+	float *in)
+{
+	assert(out);
+	assert(in);
+	
+	memcpy(out->data, in, sizeof(out->data));
+}
+
+
+void
+roa_mat3_multiply(
+	roa_mat3 *out,
+	const roa_mat3 *lhs,
+	const roa_mat3 *rhs)
+{
+  for(int i = 0; i < 9; ++i)
+  {
+    //[0,1,2,3] x [0,4,8,12]
+    int row = (i / 3) * 3;
+    int col = i % 3;
+
+    roa_float3 left_vec = roa_float3_set_with_values(
+      lhs->data[row + 0],
+      lhs->data[row + 1],
+      lhs->data[row + 2]
+    );
+
+    roa_float3 right_vec = roa_float3_set_with_values(
+      rhs->data[col + 0],
+      rhs->data[col + 3],
+      rhs->data[col + 6]
+    );
+
+    float dot = roa_float3_dot(left_vec, right_vec);
+    out->data[i] = dot;
+  }
+}
+
+
+roa_float3
+roa_mat3_multiply_with_float3(
+	roa_float3 lhs,
+	const roa_mat3 *rhs)
+{
+  float vec_data[3];
+	int i;
+
+  for(i = 0; i < 3; ++i)
+  {
+    const roa_float3 dot_vec = roa_float3_set_with_values(
+      rhs->data[i + 0],
+      rhs->data[i + 3],
+      rhs->data[i + 6]
+    );
+
+    vec_data[i] = roa_float3_dot(lhs, dot_vec);
+  }
+
+  return roa_float3_import(vec_data);
+}
+
+
 /* ------------------------------------------------------------- [ mat4 ] -- */
 
 
@@ -728,7 +908,7 @@ roa_mat4_lookat(roa_mat4 *out, roa_float3 from, roa_float3 to, roa_float3 up)
 
 
 void
-roa_mat4_multiply(roa_mat4 *out, roa_mat4 *lhs, roa_mat4 *rhs)
+roa_mat4_multiply(roa_mat4 *out, const roa_mat4 *lhs, const roa_mat4 *rhs)
 {
   assert(out);
   assert(lhs);
@@ -762,9 +942,15 @@ roa_mat4_multiply(roa_mat4 *out, roa_mat4 *lhs, roa_mat4 *rhs)
 
 
 void
-roa_mat4_multiply_three(roa_mat4 *, roa_mat4 *, roa_mat4 *, roa_mat4 *)
+roa_mat4_multiply_three(
+	roa_mat4 *out,
+	const roa_mat4 *a,
+	const roa_mat4 *b,
+	const roa_mat4 *c)
 {
-  
+	roa_mat4 temp;
+  roa_mat4_multiply(&temp, a, b);
+	roa_mat4_multiply(out, &temp, c);
 }
 
 
