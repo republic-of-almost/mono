@@ -70,8 +70,8 @@ rep_func_setup(void *arg)
   {
     struct rep_app_desc app_desc;
     rep_app_get(&app_desc);
-    app_desc.frame_job = rep_frame_func;
-    app_desc.title = "ROA Func Test";
+    app_desc.frame_job	= rep_frame_func;
+    app_desc.title			= "ROA Func Test";
 		rep_app_set(&app_desc);
   }
 }

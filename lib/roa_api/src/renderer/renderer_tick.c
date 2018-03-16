@@ -21,8 +21,8 @@ ROA_JOB(rep_renderer_tick, void*)
 
   unsigned count;
   
-  /* convert all renderer tasks to jobs */
-  while (count = roa_renderer_task_pump(rep_data_renderer(), tasks), count > 0)
+  /* wrap renderer tasks in jobs and execute */
+	while (count = roa_renderer_task_pump(rep_data_renderer(), tasks), count > 0)
   {
     unsigned bytes = sizeof(struct roa_job_desc*) * count;
     struct roa_job_desc *desc = roa_tagged_allocator_alloc(&allocator, bytes);
@@ -39,6 +39,6 @@ ROA_JOB(rep_renderer_tick, void*)
     roa_dispatcher_wait_for_counter(job_ctx, marker);
   }
 
-  /* allow renderer to do some cleanup */
   roa_renderer_ctx_execute(rep_data_renderer());
+	volt_ctx_execute(rep_data_volt());
 }

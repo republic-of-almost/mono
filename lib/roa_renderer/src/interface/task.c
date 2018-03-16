@@ -4,14 +4,20 @@
 unsigned
 roa_renderer_task_pump(
 	roa_renderer_ctx_t ctx,
-	roa_renderer_task_t *tasks)
+	struct roa_renderer_task **tasks)
 {
+	/* tasks per camera */
+	/* if no render target jobs we know we need to do camera passes */
+	{
+		/*  */
+	}
+	
 	return 0;
 }
 
 
 void
 roa_renderer_task_run(
-	roa_renderer_task_t task)
+	struct roa_renderer_task *task)
 {
 }

@@ -4,15 +4,24 @@
 
 #include <roa_lib/fundamental.h>
 #include <roa_renderer/roa_renderer.h>
-
+#include <volt/volt.h> /* temp thing */
 
 struct roa_renderer_ctx
 {
+	/* data */
+
 	/* array */ uint32_t *camera_id;
 	/* array */ struct roa_renderer_camera *camera;
 
 	/* array */ uint32_t *renderable_id;
 	/* array */ struct roa_renderer_renderable *renderable;
+
+	/* job data */
+
+	/* todo: when we start culling etc the data goes here */
+
+	/* temp render data */
+	
 };
 
 

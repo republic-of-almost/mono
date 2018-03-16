@@ -17,6 +17,8 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 {
   ROA_BOOL new_frame = roa_ctx_new_frame(rep_data_ctx());
 
+	ROA_LOG_INFO("frame %d", new_frame);
+
   if (new_frame == ROA_TRUE)
   {
     /* user task */
@@ -28,6 +30,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 
     /* physics tasks */
     {
+			/* physics is undecided atm */
       roa_tagged_allocator_free(rep_config_tagged_hash_physics());
     }
 
@@ -38,7 +41,11 @@ ROA_JOB(rep_game_loop_tick, rep_task)
       renderer_tick.arg = ROA_NULL;
       renderer_tick.keep_on_calling_thread = ROA_TRUE;
 
-      unsigned marker = roa_dispatcher_add_jobs(rep_data_dispatcher(), &renderer_tick, 1);
+      unsigned marker = roa_dispatcher_add_jobs(
+				rep_data_dispatcher(),
+				&renderer_tick,
+				1);
+
       roa_dispatcher_wait_for_counter(rep_data_dispatcher(), marker);
 
       roa_tagged_allocator_free(rep_config_tagged_hash_rendering());
@@ -47,15 +54,13 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;
-      tick_desc.arg = application_frame_func;
-      tick_desc.func = rep_game_loop_tick;
+      tick_desc.arg										 = application_frame_func;
+      tick_desc.func									 = rep_game_loop_tick;
       tick_desc.keep_on_calling_thread = ROA_TRUE;
 
       roa_dispatcher_add_jobs(rep_data_dispatcher(), &tick_desc, 1);
     }
   }
-
-  return 0;
 }
 
 
@@ -77,14 +82,16 @@ rep_app_create(
 
     /* setup job dispatcher */
     struct roa_job_desc tick_desc;
-    tick_desc.arg = application_frame_func;
-    tick_desc.func = rep_game_loop_tick;
+    tick_desc.arg										 = application_frame_func;
+    tick_desc.func									 = rep_game_loop_tick;
     tick_desc.keep_on_calling_thread = ROA_TRUE;
 
     roa_dispatcher_add_jobs(rep_data_dispatcher(), &tick_desc, 1);
 
     /* start dispatcher */
     roa_dispatcher_run(rep_data_dispatcher());
+
+		ROA_LOG_INFO("No Jobs in dispatcher shutting down");
 
     /* closing */
     roa_tagged_allocator_destroy();

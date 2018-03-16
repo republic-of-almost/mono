@@ -39,8 +39,8 @@ roa_renderer_ctx_execute(
 	/* param check */
 	ROA_ASSERT(ctx);
 	
-	ROA_LOG_INFO("Camera count %d", roa_array_size(ctx->camera));
-	ROA_LOG_INFO("Renderable count %d", roa_array_size(ctx->renderable));
+	/* temp render code */
+	
 }
 
 
