@@ -96,18 +96,22 @@ roa_renderer_renderable_clear(
 /* -------------------------------------------------------------- [ Task ] -- */
 
 
-typedef struct roa_renderer_task * roa_renderer_task_t;
+struct roa_renderer_task
+{
+  void *func;
+  void *arg;
+};
 
 
 unsigned
 roa_renderer_task_pump(
 	roa_renderer_ctx_t ctx,
-  roa_renderer_task_t *tasks);
+  roa_renderer_task **tasks);
 
 
 void
 roa_renderer_task_run(
-	roa_renderer_task_t task);
+  roa_renderer_task *task);
 
 
 #ifdef __cpluplus

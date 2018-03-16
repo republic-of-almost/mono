@@ -1,11 +1,11 @@
 #include <rep/rep_api.h>
 #include <data/engine_data.h>
 #include <data/config.h>
-#include <roa_renderer/roa_renderer.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_job/dispatcher.h>
+#include <renderer/renderer_tick.h>
 #include <volt/volt.h>
 #include <roa_lib/log.h>
 
@@ -22,26 +22,28 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* user task */
     {
       arg(0); /* test */
-    }
 
-    roa_tagged_allocator_free(rep_config_tagged_hash_logic());
+      roa_tagged_allocator_free(rep_config_tagged_hash_logic());
+    }
 
     /* physics tasks */
     {
-      
+      roa_tagged_allocator_free(rep_config_tagged_hash_physics());
     }
-
-    roa_tagged_allocator_free(rep_config_tagged_hash_physics());
 
     /* renderer tasks */
     {
-      /* render */
-			roa_renderer_ctx_execute(rep_data_renderer());
-      volt_ctx_execute(rep_data_volt());
+      struct roa_job_desc renderer_tick;
+      renderer_tick.func = rep_renderer_tick;
+      renderer_tick.arg = ROA_NULL;
+      renderer_tick.keep_on_calling_thread = ROA_TRUE;
+
+      unsigned marker = roa_dispatcher_add_jobs(rep_data_dispatcher(), &renderer_tick, 1);
+      roa_dispatcher_wait_for_counter(rep_data_dispatcher(), marker);
+
+      roa_tagged_allocator_free(rep_config_tagged_hash_rendering());
     }
-
-    roa_tagged_allocator_free(rep_config_tagged_hash_rendering());
-
+    
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;

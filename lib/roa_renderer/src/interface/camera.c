@@ -18,6 +18,8 @@ roa_renderer_camera_set(
 	/* push camera */
 	roa_array_push(ctx->camera_id, camera_id);
 	roa_array_push(ctx->camera, *camera);
+
+  return ROA_TRUE;
 }
 
 

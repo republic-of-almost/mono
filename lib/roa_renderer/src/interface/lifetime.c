@@ -19,10 +19,12 @@ roa_renderer_ctx_create(
 	struct roa_renderer_ctx *new_ctx = roa_zalloc(sizeof(*new_ctx));
 	ROA_ASSERT(new_ctx);
 
-	roa_array_create_with_capacity(new_ctx->camera_id, 256);
-	roa_array_create_with_capacity(new_ctx->camera, 256);
-	roa_array_create_with_capacity(new_ctx->renderable_id, 256);
-	roa_array_create_with_capacity(new_ctx->renderable, 256);
+  unsigned count = 1 << 10;
+
+	roa_array_create_with_capacity(new_ctx->camera_id, count);
+	roa_array_create_with_capacity(new_ctx->camera, count);
+	roa_array_create_with_capacity(new_ctx->renderable_id, count);
+	roa_array_create_with_capacity(new_ctx->renderable, count);
 
 	*ctx = new_ctx;
 
