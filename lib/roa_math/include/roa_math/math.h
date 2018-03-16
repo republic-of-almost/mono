@@ -88,6 +88,7 @@ roa_float4      roa_float4_one();
 roa_float4      roa_float4_fill_with_value(float v);
 roa_float4      roa_float4_set_with_values(float x, float y, float z, float w);
 
+roa_float4			roa_float4_import(const float *in);
 void            roa_float4_export(roa_float4 a, float *out);
 
 float           roa_float4_get_x(roa_float4 a);
@@ -99,6 +100,7 @@ roa_float4      roa_float4_add(roa_float4 a, roa_float4 b);
 roa_float4      roa_float4_subtract(roa_float4 a, roa_float4 b);
 roa_float4      roa_float4_multiply(roa_float4 a, roa_float4 b);
 
+roa_float4			roa_float4_lerp(roa_float4 a, roa_float4 b, float t);
 float           roa_float4_length(roa_float4 a);
 roa_float4      roa_float4_normalize(roa_float4 a);
 float           roa_float4_dot(roa_float4 a, roa_float4 b);

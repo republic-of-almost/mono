@@ -325,6 +325,14 @@ roa_float4_set_with_values(float x, float y, float z, float w)
   return ret;
 }
 
+
+roa_float4
+roa_float4_import(float *out)
+{
+	return roa_float4_set_with_values(out[0], out[1], out[2], out[3]);
+}
+
+
 void
 roa_float4_export(roa_float4 a, float *out)
 {
@@ -399,6 +407,13 @@ roa_float4_multiply(roa_float4 a, roa_float4 b)
   ret.w = a.w * b.w;
 
   return ret;
+}
+
+
+roa_float4
+roa_float4_lerp(roa_float4 a, roa_float4 b, float t)
+{
+	return roa_float4_zero();
 }
 
 
