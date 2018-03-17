@@ -26,12 +26,11 @@ extern "C" {
 
 #define ROA_LOGGING_FILE_NAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#if defined __APPLE__ || __linux__
+#if defined __APPLE__ || defined __linux__
 #define ROA_LOGGING_FUNC_STR __PRETTY_FUNCTION__
 #else
 #define ROA_LOGGING_FUNC_STR __FUNCTION__
 #endif
-
 
 #define ROA_LOG_NONE(prefix)
 #define ROA_LOG_ONE(prefix, msg) roa_internal_log(prefix, ROA_LOGGING_FILE_NAME, ROA_LOGGING_FUNC_STR, __LINE__, msg)
@@ -39,8 +38,14 @@ extern "C" {
 
 #define ROA_LOG_GET(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg12, arg13, arg14, arg15, arg16, ...) arg16
 
+
+#if defined __APPLE__ || defined __linux__
 #define ROA_LOG_ARGS(...) ROA_LOG_GET(__VA_ARGS__, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_V, ROA_LOG_ONE, ROA_LOG_NONE, )
 #define ROA_LOGGER(...) ROA_LOG_ARGS(__VA_ARGS__)(__VA_ARGS__)
+#else
+#define TEST(fmt, ...) roa_internal_log("one", "two", "three", 123, fmt, __VA_ARGS__)
+#define ROA_LOGGER(...) TEST(__VA_ARGS__)
+#endif
 
 
 #ifndef ROA_LOG_NO_TODO

@@ -1,5 +1,6 @@
 #include <rep/rep_api.h>
 #include <roa_lib/fundamental.h>
+#include <roa_lib/log.h>
 
 
 enum {
@@ -39,6 +40,9 @@ rep_func_setup(void *arg)
 {
 	ROA_UNUSED(arg);
 
+  ROA_LOG_ERROR("hi");
+  ROA_LOG_INFO("job enter %s", ROA_STRINGIFY(rep_func_setup));
+
   /* setup application data */
   {
 		/* objects */
@@ -76,10 +80,12 @@ rep_func_setup(void *arg)
   }
 }
 
-
 int
 main()
 {
+  roa_logging_set_output(ROA_LOG_OUTPUT_CONSOLE);
+  ROA_LOGGER("Application Entry");
+
   /* create rep application */
   {
     struct rep_app_desc app_desc;

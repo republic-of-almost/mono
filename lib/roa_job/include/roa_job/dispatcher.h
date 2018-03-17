@@ -68,7 +68,7 @@ roa_dispatcher_destroy(
 typedef void(*roa_job_func)(roa_dispatcher_ctx_t c, void *arg);
 
 
-#define ROA_JOB_DECL(job_name)                              \
+#define ROA_JOB_DECL(job_name)                                          \
 void job_name(roa_dispatcher_ctx_t job_ctx, void *void_arg);            \
 
 #define ROA_JOB(job_name, arg_type)                                     \

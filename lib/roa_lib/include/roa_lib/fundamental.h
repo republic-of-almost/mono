@@ -79,6 +79,7 @@ typedef int ROA_BOOL;
 #define ROA_UNUSED(x) (void)(x)
 #define ROA_MEM_ZERO(var) do { unsigned i; for(i = 0; i < sizeof(var); ++i) {((unsigned char *) &var)[i] = 0;} } while(0)
 #define ROA_MEM_CPY(dst, src) do { unsigned i; for(i = 0; i < sizeof(src); ++i) { ((unsigned char*) dst)[i] = ((unsigned char*) src)[i]; } } while(0)
-
+#define ROA_STRINGIFY(a) _ROA_STRINGIFY(a)
+#define _ROA_STRINGIFY(a) #a
 
 #endif /* inc guard */
