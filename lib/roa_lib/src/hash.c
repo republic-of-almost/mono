@@ -9,7 +9,7 @@ roa_hash(const char *name)
   uint64_t hash = 5381;
 
   int c;
-  while (c = *name++)
+  while (c = *name++, c)
   {
     hash = ((hash << 5) + hash) + c;
   }

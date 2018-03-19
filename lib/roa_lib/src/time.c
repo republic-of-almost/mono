@@ -3,6 +3,7 @@
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/time.h>
+#include <time.h>
 #include <math.h>
 #elif defined(_WIN32)
 #include <windows.h>
