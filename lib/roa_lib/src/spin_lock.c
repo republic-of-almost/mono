@@ -27,6 +27,18 @@ roa_spin_lock_aquire(roa_atomic_int *lock)
 }
 
 
+ROA_BOOL
+roa_spin_lock_try_aquire(roa_atomic_int *lock)
+{
+  if (roa_atomic_int_compare_and_swap(lock, SPIN_UNLOCKED_ID, SPIN_LOCKED_ID) == SPIN_UNLOCKED_ID)
+  {
+    return ROA_TRUE;
+  }
+
+  return ROA_FALSE;
+}
+
+
 void
 roa_spin_lock_release(roa_atomic_int *lock)
 {

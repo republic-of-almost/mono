@@ -1,4 +1,4 @@
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 #include <roa_lib/fundamental.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
@@ -21,14 +21,14 @@ int *test_data;
 /* --------------------------------------------------------------- [ Fwd ] -- */
 
 
-void submit_tick(roa_dispatcher_ctx_t ctx);
+void submit_tick(roa_job_dispatcher_ctx_t ctx);
 
 
 /* --------------------------------------------------------- [ Test Jobs ] -- */
 
 
 void
-calculate(roa_dispatcher_ctx_t ctx, void *arg)
+calculate(roa_job_dispatcher_ctx_t ctx, void *arg)
 {
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
@@ -42,7 +42,7 @@ calculate(roa_dispatcher_ctx_t ctx, void *arg)
 
 
 void
-tick(roa_dispatcher_ctx_t ctx, void *arg)
+tick(roa_job_dispatcher_ctx_t ctx, void *arg)
 {
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
@@ -57,18 +57,18 @@ tick(roa_dispatcher_ctx_t ctx, void *arg)
 
     for (i = 0; i < BATCH_COUNT; ++i)
     {
-      batch[i].func = calculate;
-      batch[i].arg = (void*)&test_data[i];
-      batch[i].keep_on_calling_thread = 0;
+      batch[i].job_function = calculate;
+      batch[i].job_arg = (void*)&test_data[i];
+      batch[i].thread_locked = 0;
     }
 
-    unsigned batch_id = roa_dispatcher_add_jobs(
+    unsigned batch_id = roa_job_submit(
       ctx,
       ROA_ARR_DATA(batch),
       ROA_ARR_COUNT(batch)
     );
 
-    roa_dispatcher_wait_for_counter(ctx, batch_id);
+    roa_job_wait(ctx, batch_id);
   }
 
   /* another tick? */
@@ -83,13 +83,14 @@ tick(roa_dispatcher_ctx_t ctx, void *arg)
 
 
 void
-submit_tick(roa_dispatcher_ctx_t ctx)
+submit_tick(roa_job_dispatcher_ctx_t ctx)
 {
   struct roa_job_desc desc[1];
-  desc[0].func = tick;
-  desc[0].arg = (void*)&ticks;
+  desc[0].job_function = tick;
+  desc[0].job_arg = (void*)&ticks;
+  desc[0].thread_locked = ROA_FALSE;
 
-  roa_dispatcher_add_jobs(ctx, ROA_ARR_DATA(desc), ROA_ARR_COUNT(desc));
+  roa_job_submit(ctx, ROA_ARR_DATA(desc), ROA_ARR_COUNT(desc));
 
   ticks -= 1;
 }
@@ -101,16 +102,16 @@ submit_tick(roa_dispatcher_ctx_t ctx)
 int
 main()
 {
-  roa_dispatcher_ctx_t ctx = ROA_NULL;
-  roa_dispatcher_create(&ctx, 0);
+  roa_job_dispatcher_ctx_t ctx = ROA_NULL;
+  roa_job_dispatcher_ctx_create(&ctx, 0);
 
   test_data = roa_zalloc(sizeof(test_data[0]) * BATCH_COUNT);
 
   submit_tick(ctx);
-  roa_dispatcher_run(ctx);
+  roa_job_dispatcher_ctx_run(ctx);
 
   /* back from dispatcher */
-  roa_dispatcher_destroy(&ctx);
+  roa_job_dispatcher_ctx_destroy(&ctx);
 
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {

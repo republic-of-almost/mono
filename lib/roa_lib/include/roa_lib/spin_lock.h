@@ -2,6 +2,9 @@
 #define SPIN_LOCK_INCLUDED_4762A828_13CF_4464_8A84_B22858A52084
 
 
+#include <roa_lib/fundamental.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,6 +22,10 @@ roa_spin_lock_init(roa_atomic_int *lock);
 
 void
 roa_spin_lock_aquire(roa_atomic_int *lock);
+
+
+ROA_BOOL
+roa_spin_lock_try_aquire(roa_atomic_int *lock);
 
 
 void

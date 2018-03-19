@@ -1,0 +1,11 @@
+#ifndef FIBER_INCLUDED_73E8D92D_437A_413B_B003_58296EEEE58B
+#define FIBER_INCLUDED_73E8D92D_437A_413B_B003_58296EEEE58B
+
+
+struct fiber
+{
+  int i;
+};
+
+
+#endif /* inc guard */
