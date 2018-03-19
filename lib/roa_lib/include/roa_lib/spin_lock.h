@@ -3,6 +3,7 @@
 
 
 #include <roa_lib/fundamental.h>
+#include <roa_lib/atomic.h>
 
 
 #ifdef __cplusplus
@@ -11,9 +12,6 @@ extern "C" {
 
 
 /* ------------------------------------------------- [ Spin Lock Actions ] -- */
-
-
-typedef union roa_atomic_int roa_atomic_int;
 
 
 void

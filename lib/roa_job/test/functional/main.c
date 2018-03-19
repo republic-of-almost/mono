@@ -3,6 +3,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <string.h>
+#include <stdio.h>
 
 
 /* -------------------------------------------------------------- [ Vars ] -- */

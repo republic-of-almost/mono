@@ -37,9 +37,6 @@
   ],
 
   "defines": [
-    "ROA_JOB_SINGLETHREADED=0",
-    "ROA_DISPATCH_MAX_FIBERS=128",
-    "ROA_DISPATCH_MAX_JOBS=1024",
     "ROA_JOB_DEBUG_NAME_THREADS=0"
   ],
 

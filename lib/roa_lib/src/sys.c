@@ -2,6 +2,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(__linux__)
+#include <sys/sysinfo.h>
 #endif
 
 
@@ -14,7 +16,10 @@ roa_cpu_count()
   GetSystemInfo(&sysinfo);
   int cpu_count = sysinfo.dwNumberOfProcessors;
   return cpu_count;
-  #else
+  #elif defined(__linux__)
+	int cpu_count = get_nprocs();
+	return cpu_count;
+	#else
   return 0;
   #endif
 }

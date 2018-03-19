@@ -14,15 +14,18 @@ struct thread_local_storage
   roa_atomic_int job_lock;
   /* array */ struct roa_job_desc *pending_jobs;
 
-  /* array */ uint32_t batch_ids;
+  /* array */ uint32_t *batch_ids;
   /* array */ struct job_batch *batches;
-  uint64_t job_counter;
+  uint32_t job_counter;
 
   roa_atomic_int fiber_lock;
   /* array */ struct fiber **free_fiber_pool;
 
-  /* array */ struct uint32_t *blocked_fiber_id;
+  /* array */ uint32_t *blocked_fiber_batch_id;
   /* array */ struct fiber **blocked_fibers;
+
+	struct fiber *executing_fiber;
+	uint32_t executing_batch_id;
 };
 
 

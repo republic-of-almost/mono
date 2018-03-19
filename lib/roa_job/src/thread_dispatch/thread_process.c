@@ -56,19 +56,6 @@ thread_process(void *arg)
 
     tls = &ctx->tls[th_index];
     ROA_ASSERT(tls);
-
-    /* setup tls */
-    if (tls)
-    {
-      roa_spin_lock_init(&tls->job_lock);
-      roa_spin_lock_init(&tls->fiber_lock);
-
-      roa_array_create_with_capacity(tls->batches, 32);
-      roa_array_create_with_capacity(tls->pending_jobs, 128);
-
-      roa_array_create_with_capacity(tls->blocked_fibers, 128);
-      roa_array_create_with_capacity(tls->free_fiber_pool, 128);
-    }
   }
   
   /*
@@ -78,10 +65,29 @@ thread_process(void *arg)
   */
   while (1)
   {
+		/* execute fiber */
+		if(tls->executing_fiber != ROA_NULL)
+		{
+			/* if we have a fiber switch to it */
+			/* switch to */
+
+			/* and we are back */
+		}
+
     /* check pending fibers */
     {
       roa_spin_lock_aquire(&tls->fiber_lock);
+			roa_spin_lock_aquire(&tls->job_lock);
 
+			unsigned blocked_count = roa_array_size(tls->blocked_fiber_batch_ids);
+			unsigned batch_count = roa_array_size(tls->batch_ids);
+
+			unsigned i,j;
+
+			/* if batch no longer exists the fiber is no longer blocked */
+			/* todo - search blocked ids and batch_ids */
+	
+			roa_spin_lock_release(&tls->job_lock);
       roa_spin_lock_release(&tls->fiber_lock);
 
       /* do we have a fiber? execute it */

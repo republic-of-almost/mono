@@ -5,6 +5,7 @@
 #include <roa_lib/log.h>
 #include <roa_lib/thread.h>
 #include <roa_lib/array.h>
+#include <jobs/jobs.h>
 #include <ctx/context.h>
 #include <thread_dispatch/thread_local_storage.h>
 #include <thread_dispatch/thread_process.h>
@@ -43,11 +44,15 @@ roa_job_dispatcher_ctx_create(
 
     if (thread_count < 0)
     {
-      ROA_LOG_INFO("Job Dispatcher has more threads than cores");
       thread_count = 2;
     }
 
     new_ctx->thread_count = thread_count;
+
+		ROA_LOG_INFO(
+			"Job Dispatcher: Core Count %d, Thread Count %d",
+			core_count,
+			thread_count);
 
     /* create threads */
     {
@@ -59,29 +64,53 @@ roa_job_dispatcher_ctx_create(
 
       for (i = 0; i < thread_count; ++i)
       {
-        /* storeage for new thread */
-        struct thread_local_storage new_tls;
-        ROA_MEM_ZERO(new_tls);
-        roa_array_push(new_ctx->tls, new_tls);
+        /* new tls and tls setup */
+				{
+	        struct thread_local_storage new_tls;
+		      ROA_MEM_ZERO(new_tls);
+
+					roa_spin_lock_init(&new_tls.job_lock);
+		      roa_spin_lock_init(&new_tls.fiber_lock);
+		
+				  roa_array_create_with_capacity(new_tls.batches, 32);
+					roa_array_create_with_capacity(new_tls.batch_ids, 32);
+		      roa_array_create_with_capacity(new_tls.pending_jobs, 128);
+
+		      roa_array_create_with_capacity(new_tls.blocked_fibers, 128);
+					roa_array_create_with_capacity(new_tls.blocked_fiber_batch_id, 128);
+		      roa_array_create_with_capacity(new_tls.free_fiber_pool, 128);
+			    
+					roa_array_push(new_ctx->tls, new_tls);
+				}
+
 
         /* thread proc will fill this in */
-        roa_thread_id id;
-        ROA_MEM_ZERO(id);
-        roa_array_push(new_ctx->thread_ids, id);
+				{
+			    roa_thread_id id;
+		      ROA_MEM_ZERO(id);
+	        roa_array_push(new_ctx->thread_ids, id);
+				}
 
         /* create new thread */
-        roa_thread th;
-        ROA_MEM_ZERO(th);
+				{
+		      roa_thread th;
+	        ROA_MEM_ZERO(th);
 
-        /* thread zero is main thread */
-        if (i != 0)
-        {
-          struct thread_arg *arg = roa_zalloc(sizeof(*arg));
-          arg->ctx = new_ctx;
-          arg->roa_thread_id = &new_ctx->thread_ids[i];
-          th = roa_thread_create(thread_process, arg, 1024, i);
-        }
-        roa_array_push(new_ctx->threads, th);
+					/* thread zero is main thread */
+				  if (i != 0)
+			    {
+		        struct thread_arg *arg = roa_zalloc(sizeof(*arg));
+	          arg->ctx = new_ctx;
+						arg->roa_thread_id = &new_ctx->thread_ids[i];
+					  th = roa_thread_create(thread_process, arg, 1024, i);
+				  }
+					else
+					{
+						/* get now so that we can add jobs */
+						new_ctx->thread_ids[0] = roa_thread_get_current_id();		
+					}
+					roa_array_push(new_ctx->threads, th);
+				}
       }
     }
 
@@ -89,7 +118,7 @@ roa_job_dispatcher_ctx_create(
   }
 }
 
-#include <windows.h>
+
 void
 roa_job_dispatcher_ctx_run(
   roa_job_dispatcher_ctx_t ctx)
@@ -98,7 +127,6 @@ roa_job_dispatcher_ctx_run(
   ROA_ASSERT(ctx);
 
   /* signal start */
-
   ctx->threads[0] = roa_thread_create_self();
 
   struct thread_arg *arg = roa_zalloc(sizeof(*arg));
