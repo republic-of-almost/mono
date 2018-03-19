@@ -3,29 +3,37 @@
 
 
 #include <roa_lib/atomic.h>
+#include <jobs/jobs.h>
 
 
-struct fiber;
-struct roa_job_desc;
+struct roa_fiber;
 struct job_batch;
+
+
+struct executing_fiber
+{
+  struct roa_fiber *worker_fiber;
+  struct job_internal desc;
+};
+
 
 struct thread_local_storage
 {
   roa_atomic_int job_lock;
-  /* array */ struct roa_job_desc *pending_jobs;
+  /* array */ struct job_internal *pending_jobs;
 
   /* array */ uint32_t *batch_ids;
   /* array */ struct job_batch *batches;
-  uint32_t job_counter;
+  uint32_t batch_counter;
 
   roa_atomic_int fiber_lock;
-  /* array */ struct fiber **free_fiber_pool;
+  /* array */ struct roa_fiber **free_fiber_pool;
 
-  /* array */ uint32_t *blocked_fiber_batch_id;
-  /* array */ struct fiber **blocked_fibers;
+  /* array */ uint32_t *blocked_fiber_batch_ids;
+  /* array */ struct executing_fiber *blocked_fibers;
 
-	struct fiber *executing_fiber;
-	uint32_t executing_batch_id;
+	struct executing_fiber executing_fiber;
+  struct roa_fiber *home_fiber;
 };
 
 

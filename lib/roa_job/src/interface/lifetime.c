@@ -6,6 +6,7 @@
 #include <roa_lib/thread.h>
 #include <roa_lib/array.h>
 #include <jobs/jobs.h>
+#include <fiber/fiber.h>
 #include <ctx/context.h>
 #include <thread_dispatch/thread_local_storage.h>
 #include <thread_dispatch/thread_process.h>
@@ -72,14 +73,26 @@ roa_job_dispatcher_ctx_create(
 					roa_spin_lock_init(&new_tls.job_lock);
 		      roa_spin_lock_init(&new_tls.fiber_lock);
 		
-				  roa_array_create_with_capacity(new_tls.batches, 32);
-					roa_array_create_with_capacity(new_tls.batch_ids, 32);
-		      roa_array_create_with_capacity(new_tls.pending_jobs, 128);
+				  roa_array_create_with_capacity(new_tls.batches, 64);
+					roa_array_create_with_capacity(new_tls.batch_ids, 64);
+		      roa_array_create_with_capacity(new_tls.pending_jobs, 256);
 
-		      roa_array_create_with_capacity(new_tls.blocked_fibers, 128);
-					roa_array_create_with_capacity(new_tls.blocked_fiber_batch_id, 128);
-		      roa_array_create_with_capacity(new_tls.free_fiber_pool, 128);
+          unsigned fiber_count = 32;
+
+		      roa_array_create_with_capacity(new_tls.blocked_fibers, fiber_count);
+					roa_array_create_with_capacity(new_tls.blocked_fiber_batch_ids, fiber_count);
+		      roa_array_create_with_capacity(new_tls.free_fiber_pool, fiber_count);
 			    
+          unsigned i;
+
+          for (i = 0; i < fiber_count; ++i)
+          {
+            struct fiber *fi;
+            roa_fiber_create(&fi, fiber_process, (void*)new_ctx);
+
+            roa_array_push(new_tls.free_fiber_pool, fi);
+          }
+
 					roa_array_push(new_ctx->tls, new_tls);
 				}
 

@@ -22,4 +22,8 @@ void*
 thread_process(void *arg);
 
 
+int
+job_internal_find_thread_index(struct roa_job_dispatcher_ctx *ctx);
+
+
 #endif /* inc guard */

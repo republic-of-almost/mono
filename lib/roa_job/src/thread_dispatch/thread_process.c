@@ -14,9 +14,48 @@
 void
 fiber_process(void *arg)
 {
-  ROA_UNUSED(arg);
-}
+  /* param check */
+  ROA_ASSERT(arg);
 
+  /* get ctx */
+  struct roa_job_dispatcher_ctx *ctx = (struct roa_job_dispatcher_ctx*)arg;
+  ROA_ASSERT(ctx);
+
+  /* one time tls search */
+  /*
+    if we move to a model where fibers can wake up
+    on different threads this needs to change
+  */
+  int th_index = job_internal_find_thread_index(ctx);
+  struct thread_local_storage *tls = &ctx->tls[th_index];
+
+  ROA_ASSERT(tls->home_fiber);
+
+  while (1)
+  {
+    /* exec job */
+    {
+      struct job_internal job_data = tls->executing_fiber.desc;
+      struct roa_job_desc desc = job_data.desc;
+
+      roa_job_fn job_func = (roa_job_fn)desc.func;
+      void *job_arg = desc.arg;
+
+      job_func(ctx, job_arg);
+    }
+
+    /* swtich back */
+    {
+      struct roa_fiber *worker = tls->executing_fiber.worker_fiber;
+      ROA_ASSERT(worker);
+
+      struct roa_fiber *home = tls->home_fiber;
+      ROA_ASSERT(home);
+
+      roa_fiber_switch(worker, home);
+    }
+  }
+}
 
 void*
 thread_process(void *arg)
@@ -58,6 +97,8 @@ thread_process(void *arg)
     ROA_ASSERT(tls);
   }
   
+  roa_fiber_create(&tls->home_fiber, ROA_NULL, ROA_NULL);
+  
   /*
     first check pending fibers, if found switch to.
     then check pending jobs, if found create pending fiber.
@@ -65,35 +106,69 @@ thread_process(void *arg)
   */
   while (1)
   {
-		/* execute fiber */
-		if(tls->executing_fiber != ROA_NULL)
-		{
-			/* if we have a fiber switch to it */
-			/* switch to */
-
-			/* and we are back */
-		}
-
     /* check pending fibers */
     {
       roa_spin_lock_aquire(&tls->fiber_lock);
-			roa_spin_lock_aquire(&tls->job_lock);
+      roa_spin_lock_aquire(&tls->job_lock);
 
 			unsigned blocked_count = roa_array_size(tls->blocked_fiber_batch_ids);
 			unsigned batch_count = roa_array_size(tls->batch_ids);
 
-			unsigned i,j;
+			unsigned i = 0;
+      unsigned j;
+      int unblocked_fiber_index = -1;
 
-			/* if batch no longer exists the fiber is no longer blocked */
-			/* todo - search blocked ids and batch_ids */
-	
-			roa_spin_lock_release(&tls->job_lock);
-      roa_spin_lock_release(&tls->fiber_lock);
-
-      /* do we have a fiber? execute it */
-      if (0)
+      /* search for some work */
+      for(i = 0; i < blocked_count; ++i)
       {
-        /* start again */
+        uint32_t search_for = tls->blocked_fiber_batch_ids[i];
+
+        for (j = 0; j < batch_count; ++j)
+        {
+          if (tls->batch_ids[j] == search_for)
+          {
+            break;
+          }
+        }
+
+        if (j == batch_count)
+        {
+          unblocked_fiber_index = i;
+          break;
+        }
+      }
+
+      if (unblocked_fiber_index != -1)
+      {
+        tls->executing_fiber = tls->blocked_fibers[i];
+
+        roa_array_erase(tls->blocked_fibers, i);
+        roa_array_erase(tls->blocked_fiber_batch_ids, i);
+      }
+
+      roa_spin_lock_release(&tls->job_lock);
+      roa_spin_lock_release(&tls->fiber_lock);
+	
+      /* do we have a fiber? execute it */
+      if (tls->executing_fiber.worker_fiber)
+      {
+        /* fiber switch */
+        {
+          struct roa_fiber *worker = tls->executing_fiber.worker_fiber;
+          ROA_ASSERT(worker);
+
+          /* switch to worker ... */
+
+          roa_fiber_switch(tls->home_fiber, worker);
+
+          /* ... back from fiber */
+        }
+
+        /* clear executing as its done */
+        {
+
+        }
+
         continue;
       }
     } /* pending fibers */
@@ -118,6 +193,16 @@ thread_process(void *arg)
           struct fiber *new_fiber = roa_array_back(tls->free_fiber_pool);
           roa_array_pop(tls->free_fiber_pool);
 
+          struct job_internal desc = tls->pending_jobs[0];
+          roa_array_erase(tls->pending_jobs, 0);
+
+          struct executing_fiber exec;
+          exec.worker_fiber = new_fiber;
+          exec.desc = desc;
+
+          roa_array_push(tls->blocked_fiber_batch_ids, 0);
+          roa_array_push(tls->blocked_fibers, exec);
+          
           roa_spin_lock_release(&tls->fiber_lock);
           continue;
         }
@@ -160,4 +245,25 @@ thread_process(void *arg)
   } /* while true */
 
   return ROA_NULL;
+}
+
+
+int
+job_internal_find_thread_index(struct roa_job_dispatcher_ctx *ctx)
+{
+  roa_thread_id this_th = roa_thread_get_current_id();
+
+  unsigned i;
+  int th_index = -1;
+
+  for (i = 0; i < ctx->thread_count; ++i)
+  {
+    if (ctx->thread_ids[i] == this_th)
+    {
+      th_index = (int)i;
+      break;
+    }
+  }
+
+  return th_index;
 }

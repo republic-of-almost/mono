@@ -9,11 +9,11 @@
 /* -------------------------------------------------------------- [ Vars ] -- */
 
 
-#define TEST_WITH_OUTPUT 0
+#define TEST_WITH_OUTPUT 1
 
 
-#define BATCH_COUNT 1 << 10
-#define TICK_COUNT 1 << 19
+#define BATCH_COUNT 1 << 3
+#define TICK_COUNT 1 << 3
 
 int ticks = TICK_COUNT;
 int *test_data;
@@ -58,8 +58,8 @@ tick(roa_job_dispatcher_ctx_t ctx, void *arg)
 
     for (i = 0; i < BATCH_COUNT; ++i)
     {
-      batch[i].job_function = calculate;
-      batch[i].job_arg = (void*)&test_data[i];
+      batch[i].func = calculate;
+      batch[i].arg = (void*)&test_data[i];
       batch[i].thread_locked = 0;
     }
 
@@ -87,8 +87,8 @@ void
 submit_tick(roa_job_dispatcher_ctx_t ctx)
 {
   struct roa_job_desc desc[1];
-  desc[0].job_function = tick;
-  desc[0].job_arg = (void*)&ticks;
+  desc[0].func = tick;
+  desc[0].arg = (void*)&ticks;
   desc[0].thread_locked = ROA_FALSE;
 
   roa_job_submit(ctx, ROA_ARR_DATA(desc), ROA_ARR_COUNT(desc));

@@ -57,8 +57,8 @@ typedef void(*roa_job_fn)(roa_job_dispatcher_ctx_t ctx, void *arg);
 
 struct roa_job_desc
 {
-  roa_job_fn  job_function;
-  void*       job_arg;
+  roa_job_fn  func;
+  void*       arg;
   ROA_BOOL    thread_locked;
 };
 
