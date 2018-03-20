@@ -576,7 +576,7 @@ roa_graph_node_descendants_count(
   /* Calculate descendants */
   {
 		uint64_t *pd_data   = graph->parent_depth_data;
-    int32_t this_depth = node_id ? get_depth(pd_data[index]) : -1;
+    int32_t this_depth = node_id ? (int32_t)get_depth(pd_data[index]) : -1;
     unsigned start     = this_depth >= 0 ? index + 1 : 0;
     unsigned id_count  = roa_array_size(graph->node_id);
 		unsigned i;
@@ -632,7 +632,7 @@ roa_graph_node_get_child(
   /* Calculate children. */
   {
 		uint64_t *pd_data = graph->parent_depth_data;
-    int64_t this_depth = node_id ? (uint64_t)get_depth(pd_data[index]) : -1;
+    int64_t this_depth = node_id ? (int64_t)get_depth(pd_data[index]) : (int64_t)-1;
     unsigned start_index = node_id ? index + 1 : 0;
     unsigned id_count = roa_array_size(graph->node_id);
 		unsigned i;
