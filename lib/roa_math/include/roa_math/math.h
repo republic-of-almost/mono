@@ -70,6 +70,7 @@ roa_float3      roa_float3_add(roa_float3 a, roa_float3 b);
 roa_float3      roa_float3_subtract(roa_float3 a, roa_float3 b);
 roa_float3      roa_float3_multiply(roa_float3 a, roa_float3 b);
 
+roa_float3			roa_float3_lerp(roa_float3 a, roa_float3 b, float t);
 float           roa_float3_length(roa_float3 a);
 roa_float3      roa_float3_normalize(roa_float3 a);
 float           roa_float3_dot(roa_float3 a, roa_float3 b);

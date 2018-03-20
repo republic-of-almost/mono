@@ -2,15 +2,16 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 
 
-/* ---------------------------------------------------------- [ helpers ] -- */
+/* ----------------------------------------------------------- [ helpers ] -- */
 
 
 #define MATH_ARR_COUNT(arr) sizeof(arr[0]) / sizeof(arr)
 
 
-/* ---------------------------------------------------------- [ general ] -- */
+/* ----------------------------------------------------------- [ general ] -- */
 
 
 float
@@ -51,21 +52,18 @@ roa_float_abs(float a)
 int
 roa_float_is_near(float a, float b, float err)
 {
-  return (roa_float_abs(b) - roa_float_abs(a)) < err ? 1 : 0;
+  return roa_float_abs(roa_float_abs(b) - roa_float_abs(a)) <= err ? 1 : 0;
 }
 
 
-/* ----------------------------------------------------------- [ float2 ] -- */
-/* ----------------------------------------------------------- [ float3 ] -- */
+/* ------------------------------------------------------------ [ float2 ] -- */
+/* ------------------------------------------------------------ [ float3 ] -- */
 
 
 roa_float3
 roa_float3_zero()
 {
-  roa_float3 ret;
-  ret.x = 0.f;
-  ret.y = 0.f;
-  ret.z = 0.f;
+  roa_float3 ret = {0.f, 0.f, 0.f};
 
   return ret;
 }
@@ -119,7 +117,7 @@ roa_float3_set_with_values(float x, float y, float z)
 
 
 roa_float3
-roa_float3_import(float *in)
+roa_float3_import(const float *in)
 {
 	roa_float3 ret;
 	ret.x = in[0];
@@ -199,6 +197,17 @@ roa_float3_multiply(roa_float3 a, roa_float3 b)
 }
 
 
+roa_float3
+roa_float3_lerp(roa_float3 a, roa_float3 b, float t)
+{
+	roa_float3 c = roa_float3_subtract(b, a);
+	roa_float3 offset = roa_float3_scale(c, t);
+	roa_float3 result = roa_float3_add(a, offset);
+
+	return result;
+}
+
+
 float
 roa_float3_length(roa_float3 a)
 {
@@ -213,7 +222,7 @@ roa_float3_normalize(roa_float3 a)
 {
   float length = roa_float3_length(a);
 
-  assert(length != 0); // Don't pass zero vectors. (0,0,0);
+  assert(length != 0); /* Don't pass zero vectors. (0,0,0); */
 
   return roa_float3_scale(a, (1.f / length));
 }
@@ -231,9 +240,14 @@ roa_float3_dot(roa_float3 a, roa_float3 b)
 roa_float3
 roa_float3_cross(roa_float3 a, roa_float3 b)
 {
-  float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_y(b));
-  float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - (roa_float3_get_z(a) * roa_float3_get_x(b));
-  float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - (roa_float3_get_y(a) * roa_float3_get_x(b));
+  float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) - 
+						(roa_float3_get_z(a) * roa_float3_get_y(b));
+
+  float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - 
+						(roa_float3_get_z(a) * roa_float3_get_x(b));
+
+  float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - 
+						(roa_float3_get_y(a) * roa_float3_get_x(b));
 
   return roa_float3_set_with_values(x, -y, z);
 }
@@ -258,7 +272,7 @@ roa_float3_is_near(roa_float3 a, roa_float3 b, float err)
 }
 
 
-/* ----------------------------------------------------------- [ float4 ] -- */
+/* ------------------------------------------------------------ [ float4 ] -- */
 
 
 roa_float4
@@ -327,7 +341,7 @@ roa_float4_set_with_values(float x, float y, float z, float w)
 
 
 roa_float4
-roa_float4_import(float *out)
+roa_float4_import(const float *out)
 {
 	return roa_float4_set_with_values(out[0], out[1], out[2], out[3]);
 }
@@ -413,17 +427,25 @@ roa_float4_multiply(roa_float4 a, roa_float4 b)
 roa_float4
 roa_float4_lerp(roa_float4 a, roa_float4 b, float t)
 {
-	return roa_float4_zero();
+	roa_float4 c = roa_float4_subtract(b, a);
+	roa_float4 offset = roa_float4_scale(c, t);
+	roa_float4 result = roa_float4_add(a, offset);
+
+	return result;
 }
 
 
 float
 roa_float4_length(roa_float4 a)
 {
-  float len = a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w;
+  float len = (a.x * a.x) + 
+							(a.y * a.y) + 
+							(a.z * a.z) + 
+							(a.w * a.w);
 
-  return roa_float_sqrt(len);
+	float result = roa_float_sqrt(len);
 
+  return result; 
 }
 
 
@@ -432,7 +454,7 @@ roa_float4_normalize(roa_float4 a)
 {
   float length = roa_float4_length(a);
 
-  assert(length != 0); // Don't pass zero vectors. (0,0,0,0);
+  assert(length != 0); /* Don't pass zero vectors. (0,0,0,0); */
 
   return roa_float4_scale(a, (1.f / length));
 
@@ -466,13 +488,13 @@ roa_float4_is_near(roa_float4 a, roa_float4 b, float err)
 }
 
 
-/* ------------------------------------------------------- [ quaternion ] -- */
+/* -------------------------------------------------------- [ quaternion ] -- */
 
 
 roa_quaternion
 roa_quaternion_default()
 {
-  roa_quaternion quat{
+  roa_quaternion quat = {
     0.f, 0.f, 0.f, 1.f
   };
 
@@ -483,7 +505,7 @@ roa_quaternion_default()
 roa_quaternion
 roa_quaternion_set_with_values(float x, float y, float z, float w)
 {
-  roa_quaternion quat{
+  roa_quaternion quat = {
     x, y, z, w
   };
 
@@ -494,10 +516,25 @@ roa_quaternion_set_with_values(float x, float y, float z, float w)
 roa_quaternion
 roa_quaternion_multiply(roa_quaternion left, roa_quaternion right)
 {
-  const float w = (left.w * right.w) - (left.x * right.x) - (left.y * right.y) - (left.z * right.z);
-  const float x = (left.w * right.x) + (left.x * right.w) + (left.y * right.z) - (left.z * right.y);
-  const float y = (left.w * right.y) + (left.y * right.w) + (left.z * right.x) - (left.x * right.z);
-  const float z = (left.w * right.z) + (left.z * right.w) + (left.x * right.y) - (left.y * right.x);
+  float w = (left.w * right.w) -
+						(left.x * right.x) - 
+						(left.y * right.y) - 
+						(left.z * right.z);
+
+  float x = (left.w * right.x) + 
+						(left.x * right.w) + 
+						(left.y * right.z) - 
+						(left.z * right.y);
+
+  float y = (left.w * right.y) + 
+						(left.y * right.w) + 
+						(left.z * right.x) - 
+						(left.x * right.z);
+
+  float z = (left.w * right.z) + 
+						(left.z * right.w) + 
+						(left.x * right.y) - 
+						(left.y * right.x);
 
   return roa_quaternion_set_with_values(x, y, z, w);
 }
@@ -522,7 +559,7 @@ roa_quaternion_get_rotation_matrix(roa_quaternion rot, roa_mat3 *out)
   float y_sq = rot.y * rot.y;
   float z_sq = rot.z * rot.z;
   
-  float mat_data[9]
+  float mat_data[] = 
 	{
 		1 - 2 * y_sq - 2 * z_sq,
     2 * (rot.x * rot.y) + 2 * (rot.z * rot.w),
@@ -538,7 +575,6 @@ roa_quaternion_get_rotation_matrix(roa_quaternion rot, roa_mat3 *out)
 	};
 
   return roa_mat3_import(out, mat_data);
-
 }
 
 
@@ -708,9 +744,10 @@ roa_mat3_multiply(
 	const roa_mat3 *lhs,
 	const roa_mat3 *rhs)
 {
-  for(int i = 0; i < 9; ++i)
+	int i;
+  for(i = 0; i < 9; ++i)
   {
-    //[0,1,2,3] x [0,4,8,12]
+    /* [0,1,2,3] x [0,4,8,12] */
     int row = (i / 3) * 3;
     int col = i % 3;
 
@@ -845,7 +882,8 @@ roa_mat4_fill_with_value(roa_mat4 *out, float val)
 {
   assert(out);
 
-  for (int i = 0; i < MATH_ARR_COUNT(out->data); ++i)
+	int i;
+  for (i = 0; i < 16; ++i)
   {
     out->data[i] = val;
   }
@@ -879,17 +917,6 @@ roa_mat4_projection(roa_mat4 *out, float fov, float near_plane, float far_plane,
   out->data[10] = q;
   out->data[11] = -1;
   out->data[14] = qn;
-
-  //const float one_over_tan_half_fov = 1.f / roa_tan(fov * 0.5f);
-  //const float plane_diff = far_plane - near_plane;
-
-  //roa_mat4_zero(out);
-
-  //out->data[0] = one_over_tan_half_fov / aspect_ratio;
-  //out->data[5] = one_over_tan_half_fov;
-  //out->data[10] = -(far_plane + near_plane) / plane_diff;
-  //out->data[11] = -1.f;
-  //out->data[14] = -(2.f * far_plane * near_plane) / plane_diff;
 }
 
 
@@ -929,9 +956,10 @@ roa_mat4_multiply(roa_mat4 *out, const roa_mat4 *lhs, const roa_mat4 *rhs)
   assert(lhs);
   assert(rhs);
 
-  for (int i = 0; i < MATH_ARR_COUNT(out->data); ++i)
+	int i;
+  for (i = 0; i < 16; ++i)
   {
-    // Starting index for data.
+    /* Starting index for data. */
     unsigned row = (i / 4) * 4;
     unsigned col = (i % 4);
 

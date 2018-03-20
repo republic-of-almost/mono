@@ -1,12 +1,12 @@
 #include <catch/catch.hpp>
-#include <math/mat/mat3.hpp>
 
 
 TEST_CASE("Matrix 3x3")
 {
   // ---------------------------------------------------------- [ Constants ] --
   
-  SECTION("ID Mat")
+  /*
+	SECTION("ID Mat")
   {
     const float mat_data[] {
       1.f, 0.f, 0.f,
@@ -19,7 +19,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat));
   }
+	*/
   
+	/*
   SECTION("Zero Mat")
   {
     const float mat_data[] {
@@ -33,9 +35,11 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat));
   }
+	*/
   
   // --------------------------------------------------------- [ Initialize ] --
   
+	/*
   SECTION("Init with Nothing")
   {
     const math::mat3 mat_default_init = math::mat3_init();
@@ -43,7 +47,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_default_init, id));
   }
+	*/
   
+	/*
   SECTION("Init with Value")
   {
     const float mat_data[] {
@@ -57,7 +63,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat));
   }
+	*/
   
+	/*
   SECTION("Init with Array")
   {
     const float mat_data_1[] {
@@ -78,9 +86,11 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_not_near(mat_a, mat_b));
   }
+	*/
   
   // --------------------------------------------- [ Special Init With Data ] --
   
+	/*
   SECTION("Scale Mat")
   {
     const float expected_mat_data[] {
@@ -94,6 +104,7 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat_scale));
   }
+	*/
   
   SECTION("mat3 pitch from eular")
   {
@@ -118,6 +129,7 @@ TEST_CASE("Matrix 3x3")
   
   // --------------------------------------------------------- [ Operations ] --
   
+	/*
   SECTION("Addition")
   {
     const float mat_a_data[] {
@@ -147,7 +159,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat_result));
   }
+	*/
   
+	/*
   SECTION("Subtraction")
   {
     const float mat_a_data[] {
@@ -177,7 +191,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat_result));
   }
-  
+	*/
+
+	/*
   SECTION("Multiplication (mat * mat)")
   {
     const float mat_a_data[] {
@@ -207,7 +223,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(mat_expected, mat_result));
   }
+	*/
   
+	/*
   SECTION("Multiplication (mat * vec)")
   {
     const float mat_a_data[] {
@@ -224,7 +242,9 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::vec3_is_near(vec_expected, vec_result));
   }
+	*/
   
+	/*
   SECTION("Transpose")
   {
     const float mat_data[] {
@@ -246,6 +266,7 @@ TEST_CASE("Matrix 3x3")
     
     REQUIRE(math::mat3_is_near(transpose, mat_expected));
   }
+	*/
   
   SECTION("Determinant")
   {
@@ -253,6 +274,7 @@ TEST_CASE("Matrix 3x3")
   
   // --------------------------------------------------------------- [ Data ] --
   
+	/*
   SECTION("To Array")
   {
     const float expected_mat_data[] {
@@ -271,7 +293,9 @@ TEST_CASE("Matrix 3x3")
       REQUIRE(expected_mat_data[i] == export_mat[i]);
     }
   }
+	*/
   
+	/*
   SECTION("Data")
   {
     const float expected_mat_data[] {
@@ -289,9 +313,11 @@ TEST_CASE("Matrix 3x3")
       REQUIRE(expected_mat_data[i] == mat_data[i]);
     }
   }
+	*/
   
   // ----------------------------------------------------------- [ Equality ] --
   
+	/*
   SECTION("Equal")
   {
     const float mat_data_a[] {
@@ -314,7 +340,9 @@ TEST_CASE("Matrix 3x3")
     REQUIRE(math::mat3_is_near(mat_a, mat_b) == true);
     REQUIRE(math::mat3_is_not_near(mat_a, mat_b) == false);
   }
+	*/
   
+	/*
   SECTION("Not Equal")
   {
     const float mat_data_a[] {
@@ -336,4 +364,5 @@ TEST_CASE("Matrix 3x3")
     REQUIRE(math::mat3_is_near(mat_a, mat_b) == false);
     REQUIRE(math::mat3_is_not_near(mat_a, mat_b) == true);
   }
+	*/
 }

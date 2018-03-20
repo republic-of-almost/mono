@@ -1,23 +1,11 @@
 #include <catch/catch.hpp>
-#include <math/general/general.hpp>
-
-
-namespace {
-
-struct Math_general_test_data
-{
-  float input;
-  float expected;
-};
-
-
-} // anons ns
 
 
 TEST_CASE("General")
 {
   // --------------------------------------------------------------- [ Trig ] --
-  
+
+	/*
   SECTION("Tan")
   {
     Math_general_test_data test_data[] {
@@ -32,7 +20,9 @@ TEST_CASE("General")
       REQUIRE(math::is_near(actual, td.expected, 0.00001f));
     }
   }
+	*/
   
+	/*
   SECTION("A Tan2")
   {
     Math_general_test_data test_data[] {
@@ -47,7 +37,9 @@ TEST_CASE("General")
       REQUIRE(math::is_near(actual, td.expected, 0.00001f));
     }
   }
+	*/
   
+	/*
   SECTION("Sin")
   {
      Math_general_test_data test_data[] {
@@ -57,12 +49,14 @@ TEST_CASE("General")
     };
     
     for(Math_general_test_data td : test_data)
-    {
+    
       const float actual = math::sin(td.input);
       REQUIRE(math::is_near(actual, td.expected, 0.00001f));
     }
   }
+	*/
   
+	/*
   SECTION("A Sin")
   {
     Math_general_test_data test_data[] {
@@ -77,7 +71,10 @@ TEST_CASE("General")
       REQUIRE(math::is_near(actual, td.expected, 0.00001f));
     }
   }
-  
+	*/
+
+
+  /*
   SECTION("Cos")
   {
      Math_general_test_data test_data[] {
@@ -92,7 +89,9 @@ TEST_CASE("General")
       REQUIRE(math::is_near(actual, td.expected, 0.00001f));
     }
   }
+	*/
   
+	/*
   SECTION("A Cos")
   {
     Math_general_test_data test_data[] {
@@ -107,9 +106,11 @@ TEST_CASE("General")
       REQUIRE(math::is_near(actual, td.expected, 0.00001f));
     }
   }
+	*/
   
   // -------------------------------------------------- [ Degrees / Radians ] --
   
+	/*
   SECTION("Rad/Deg Conversion")
   {
     const float rads = 0.123f;
@@ -121,10 +122,12 @@ TEST_CASE("General")
     REQUIRE(math::is_near(to_degs, 7.0473809f, 0.00001f));
     REQUIRE(math::is_near(to_rads, 2.14675497995f, 0.00001f));
   }
-  
+  */
+
   // ------------------------------------------------------------ [ Casting ] --
   
-  SECTION("Casting")
+	/*
+	SECTION("Casting")
   {
     const uint32_t to_flt_a = 123;
     const float to_flt_a_res = math::to_float(to_flt_a);
@@ -142,24 +145,27 @@ TEST_CASE("General")
     const int32_t to_int_b_res = math::to_int(to_int_b);
     REQUIRE(math::is_near(to_int_b_res, -123));
   }
+	*/
   
   // ------------------------------------------------------------- [ Random ] --
   
+	/*
   SECTION("Random")
   {
-    /*
-      Require data and a choice on how rand will work.
-    */
   }
+	*/
   
   // ---------------------------------------------------------- [ Min / Max ] --
   
-  SECTION("Min/Max float")
+  /*
+	SECTION("Min/Max float")
   {
     REQUIRE(math::min(1.23f, 2.23f) < 2.23f);
     REQUIRE(math::max(1.23f, 2.23f) > 1.23f);
   }
+	*/
   
+	/*
   SECTION("Min/Max int")
   {
     const int32_t a = -32;
@@ -168,7 +174,9 @@ TEST_CASE("General")
     REQUIRE(math::min(a, b) < b);
     REQUIRE(math::max(a, b) > a);
   }
-  
+	*/
+
+	/*  
   SECTION("Min/Max uint")
   {
     const uint32_t a = 32;
@@ -178,7 +186,9 @@ TEST_CASE("General")
     REQUIRE(math::max(a, b) > a);
 
   }
+	*/
   
+	/*
   SECTION("Min/Max uint64")
   {
     const uint64_t a = 32;
@@ -186,7 +196,9 @@ TEST_CASE("General")
     
     REQUIRE(math::min(a, b) < b);
   }
+	*/
   
+	/*
   SECTION("Min/Max In Array")
   {
     constexpr size_t count = 4;
@@ -210,9 +222,11 @@ TEST_CASE("General")
       REQUIRE(out[i] == a[i]);
     }
   }
+	*/
 
   // ----------------------------------------------------------- [ Rounding ] --
   
+	/*
   SECTION("Ceil")
   {
     const float a = 123.3;
@@ -225,7 +239,9 @@ TEST_CASE("General")
     
     REQUIRE(ceil_b == 124.f);
   }
+	*/
 
+	/*
   SECTION("Floor")
   {
     const float a = 123.3;
@@ -238,8 +254,9 @@ TEST_CASE("General")
     
     REQUIRE(floor_b == 123.f);
   }
-
+	*/
   
+	/*
   SECTION("Floor nearest")
   {
     const float a = 123.5f;
@@ -247,9 +264,11 @@ TEST_CASE("General")
     
     REQUIRE(floor == 123.4f);
   }
+	*/
   
   // --------------------------------------------------------- [ Arithmetic ] --
   
+	/*
   SECTION("Sum")
   {
     constexpr size_t count = 4;
@@ -267,9 +286,11 @@ TEST_CASE("General")
       REQUIRE(out[i] == expected[i]);
     }
   }
+	*/
   
   // --------------------------------------------------------------- [ Misc ] --
   
+	/*
   SECTION("Min/Max Length")
   {
     const float a = -100;
@@ -278,23 +299,31 @@ TEST_CASE("General")
     REQUIRE(math::max_length(a, b) == a);
     REQUIRE(math::min_length(a, b) == b);
   }
+	*/
 
+	/*
   SECTION("Abs")
   {
     REQUIRE(math::abs(-123.f) == 123.f);
     REQUIRE(math::abs(123.f) == 123.f);
   }
+	*/
   
+	/*
   SECTION("Sqrt")
   {
   }
+	*/
   
+	/*
   SECTION("Clamp")
   {
     REQUIRE(math::clamp(567.5f, 123.f, 345.f) == 345.f);
     REQUIRE(math::clamp(1.f, 123.f, 345.f) == 123.f);
   }
+	*/
   
+	/*
   SECTION("Sign")
   {
     const float a = -1234.f;
@@ -303,7 +332,9 @@ TEST_CASE("General")
     REQUIRE(math::sign(a) == -1.f);
     REQUIRE(math::sign(b) == +1.f);
   }
+	*/
   
+	/*
   SECTION("Mod")
   {
     const float a = 123.f;
@@ -311,9 +342,11 @@ TEST_CASE("General")
     
     REQUIRE(mod == 23.f);
   }
-  
+  */
+
   // ----------------------------------------------------------- [ Equality ] --
-  
+
+	/*
   SECTION("Is between")
   {
     REQUIRE(math::is_between(0, -1.f, 1.f) == true);
@@ -321,13 +354,17 @@ TEST_CASE("General")
     REQUIRE(math::is_between(3.f, -1.f, 1.f) == false);
     REQUIRE(math::is_between(-8.f, -5.f, 1.f) == false);
   }
+	*/
   
+	/*
   SECTION("Is Near")
   {
     REQUIRE(math::is_near(1.123f, 1.123f) == true);
     REQUIRE(math::is_near(23.34f, 1.123f) == false);
   }
+	*/
   
+	/*
   SECTION("Is POW 2")
   {
     REQUIRE(math::is_pow_two(256) == true);
@@ -335,5 +372,7 @@ TEST_CASE("General")
     REQUIRE(math::is_pow_two(123) == false);
     REQUIRE(math::is_pow_two(456) == false);
   }
-  
+  */
 }
+
+

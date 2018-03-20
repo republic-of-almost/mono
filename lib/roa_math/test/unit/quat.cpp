@@ -1,11 +1,10 @@
 #include <catch/catch.hpp>
-#include <math/quat/quat.hpp>
 #include <array>
 
 
 TEST_CASE("Quat rotations")
 {
-
+	/*
   SECTION("Initialize")
   {
     const math::quat empty = math::quat_init();
@@ -20,11 +19,13 @@ TEST_CASE("Quat rotations")
     REQUIRE(math::get_z(one_two_three_four) == 0.f);
     REQUIRE(math::get_w(one_two_three_four) == 0.f);
   }
+	*/
   
   SECTION("Angle axis")
   {
   }
   
+	/*
   SECTION("Rotation Mat")
   {
     // Pitch
@@ -57,6 +58,7 @@ TEST_CASE("Quat rotations")
       REQUIRE(math::mat3_is_near(mat_from_quat, mat_data));
     }
   }
+	*/
   
   SECTION("Euler")
   {

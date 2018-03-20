@@ -1,3 +1,4 @@
+/*
 #include <catch/catch.hpp>
 #include <math/geometry/aabb.hpp>
 
@@ -144,3 +145,5 @@ TEST_CASE("AABB")
     REQUIRE(math::aabb_intersection_test(box_1, box_3) == false);
   }
 }
+*/
+
