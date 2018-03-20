@@ -184,19 +184,3 @@ void            roa_mat4_multiply_three(roa_mat4 *out, const roa_mat4 *a, const 
 
 #endif /* inc guard */
 
-
-/* -------------------------------------------------------------------------- */
-/* --------------------------- [ Implementation ] --------------------------- */
-/* -------------------------------------------------------------------------- */
-
-
-#ifdef ROA_MATH_IMPL
-#ifndef ROA_MATH_IMPL_INCLUDED
-#define ROA_MATH_IMPL_INCLUDED
-
-
-/* todo */
-
-
-#endif /* impl guard */
-#endif /* impl request */
