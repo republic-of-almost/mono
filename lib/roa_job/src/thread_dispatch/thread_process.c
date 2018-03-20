@@ -166,7 +166,44 @@ thread_process(void *arg)
 
         /* clear executing as its done */
         {
+          /* decrement job count */
+          {
+            unsigned count = roa_array_size(tls->batch_ids);
+            unsigned i;
+            uint32_t batch_to_find = tls->executing_fiber.desc.batch_id;
 
+            roa_spin_lock_aquire(&tls->job_lock);
+
+            for (i = 0; i < count; ++i)
+            {
+              uint32_t batch = tls->batch_ids[i];
+
+              if (batch_to_find == batch)
+              {
+                tls->batches[i].count -= 1;
+
+                if (tls->batches[i].count <= 0)
+                {
+                  roa_array_erase(tls->batch_ids, i);
+                  roa_array_erase(tls->batches, i);
+                }
+
+                break;
+              }
+            }
+
+            roa_spin_lock_release(&tls->job_lock);
+          }
+
+          /* free fiber */
+          {
+            roa_spin_lock_aquire(&tls->fiber_lock);
+          
+            roa_array_push(tls->free_fiber_pool, tls->executing_fiber.worker_fiber);
+            tls->executing_fiber.worker_fiber = ROA_NULL;
+
+            roa_spin_lock_release(&tls->fiber_lock);
+          }
         }
 
         continue;
@@ -190,7 +227,7 @@ thread_process(void *arg)
         if (job_count)
         {
           /* create fiber and push onto the pending list */
-          struct fiber *new_fiber = roa_array_back(tls->free_fiber_pool);
+          struct roa_fiber *new_fiber = roa_array_back(tls->free_fiber_pool);
           roa_array_pop(tls->free_fiber_pool);
 
           struct job_internal desc = tls->pending_jobs[0];
