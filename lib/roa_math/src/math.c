@@ -505,11 +505,14 @@ roa_quaternion_default()
 roa_quaternion
 roa_quaternion_set_with_values(float x, float y, float z, float w)
 {
+	roa_float4 vec = roa_float4_set_with_values(x, y, z, w);
+	roa_float4 norm = roa_float4_normalize(vec);
+
   roa_quaternion quat;
-  quat.x = x;
-  quat.y = y;
-  quat.z = z;
-  quat.w = w;
+  quat.x = norm.x;
+  quat.y = norm.y;
+  quat.z = norm.z;
+  quat.w = norm.w;
 
   return quat;
 }
@@ -584,6 +587,34 @@ roa_quaternion_rotate_vector(roa_quaternion rotation, roa_float3 vector)
 	roa_mat3 rot_mat;
 	roa_quaternion_get_rotation_matrix(rotation, &rot_mat);
 	return roa_mat3_multiply_with_float3(vector, &rot_mat);
+}
+
+
+float
+roa_quaternion_get_x(roa_quaternion a)
+{
+	return a.x;
+}
+
+
+float
+roa_quaternion_get_y(roa_quaternion a)
+{
+	return a.y;
+}
+
+
+float
+roa_quaternion_get_z(roa_quaternion a)
+{
+	return a.z;
+}
+
+
+float
+roa_quaternion_get_w(roa_quaternion a)
+{
+	return a.w;
 }
 
 
@@ -727,14 +758,56 @@ roa_mat3_id(
 
 
 void
+roa_mat3_fill(
+	roa_mat3 *out,
+	float val)
+{
+	int i;
+
+	for(i = 0; i < 9; ++i)
+	{
+		out->data[i] = val;
+	}
+}
+
+
+void
 roa_mat3_import(
 	roa_mat3 *out,
-	float *in)
+	const float *in)
 {
 	assert(out);
 	assert(in);
 	
 	memcpy(out->data, in, sizeof(out->data));
+}
+
+
+void
+roa_mat3_add(
+	roa_mat3 *out,
+	const roa_mat3 *lhs,
+	const roa_mat3 *rhs)
+{
+	int i;
+	for(i = 0; i < 9; ++i)
+	{
+		out->data[i] = lhs->data[i] + rhs->data[i];
+	}
+}
+
+
+void
+roa_mat3_subtract(
+	roa_mat3 *out,
+	const roa_mat3 *lhs,
+	const roa_mat3 *rhs)
+{
+	int i;
+	for(i = 0; i < 9; ++i)
+	{
+		out->data[i] = lhs->data[i] - rhs->data[i];
+	}
 }
 
 
@@ -789,6 +862,24 @@ roa_mat3_multiply_with_float3(
   }
 
   return roa_float3_import(vec_data);
+}
+
+
+int
+roa_mat3_is_near(
+	roa_mat3 *a,
+	roa_mat3 *b,
+	float err)
+{
+	int count = 0;
+
+	int i;
+	for(i = 0; i < 9; ++i)
+	{
+		count += roa_float_is_near(a->data[i], b->data[i], err);
+	}
+
+	return count == 9;
 }
 
 

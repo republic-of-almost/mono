@@ -122,6 +122,10 @@ int             roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float
 void						roa_quaternion_get_rotation_matrix(roa_quaternion rotation, roa_mat3 *out);
 roa_float3			roa_quaternion_rotate_vector(roa_quaternion rotation, roa_float3 vector);
 
+float						roa_quaternion_get_x(roa_quaternion a);
+float						roa_quaternion_get_y(roa_quaternion a);
+float						roa_quaternion_get_z(roa_quaternion a);
+float						roa_quaternion_get_w(roa_quaternion a);
 
 /* --------------------------------------------------------- [ transform ] -- */
 
@@ -146,10 +150,15 @@ roa_float3			roa_transform_local_left(const roa_transform *trans);
 
 void						roa_mat3_zero(roa_mat3 *out);
 void						roa_mat3_id(roa_mat3 *out);
-void						roa_mat3_import(roa_mat3 *out, float *in);
+void						roa_mat3_fill(roa_mat3 *out, float value);
+void						roa_mat3_import(roa_mat3 *out, const float *in);
 
+void						roa_mat3_add(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *right);
+void						roa_mat3_subtract(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *right);
 void						roa_mat3_multiply(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *rhs);
 roa_float3	  	roa_mat3_multiply_with_float3(roa_float3 lhs, const roa_mat3 *rhs);
+
+int							roa_mat3_is_near(roa_mat3 *a, roa_mat3 *b, float error);
 
 
 /* -------------------------------------------------------------- [ mat4 ] -- */

@@ -1,28 +1,30 @@
 #include <catch/catch.hpp>
+#include <roa_math/math.h>
 #include <array>
 
 
 TEST_CASE("Quat rotations")
 {
-	/*
+	
   SECTION("Initialize")
   {
-    const math::quat empty = math::quat_init();
-    REQUIRE(math::get_x(empty) == 0.f);
-    REQUIRE(math::get_y(empty) == 0.f);
-    REQUIRE(math::get_z(empty) == 0.f);
-    REQUIRE(math::get_w(empty) == 1.f);
+    roa_quaternion empty = roa_quaternion_default();
+    REQUIRE(roa_quaternion_get_x(empty) == 0.f);
+    REQUIRE(roa_quaternion_get_y(empty) == 0.f);
+    REQUIRE(roa_quaternion_get_z(empty) == 0.f);
+    REQUIRE(roa_quaternion_get_w(empty) == 1.f);
     
-    const math::quat one_two_three_four = math::quat_init(10, 0, 0, 0);
-//    REQUIRE(math::get_x(one_two_three_four) == 1.f);
-    REQUIRE(math::get_y(one_two_three_four) == 0.f);
-    REQUIRE(math::get_z(one_two_three_four) == 0.f);
-    REQUIRE(math::get_w(one_two_three_four) == 0.f);
+    roa_quaternion norm = roa_quaternion_set_with_values(10.f, 0.f, 0.f, 0.f);
+    REQUIRE(roa_quaternion_get_x(norm) == 1.f);
+    REQUIRE(roa_quaternion_get_y(norm) == 0.f);
+    REQUIRE(roa_quaternion_get_z(norm) == 0.f);
+    REQUIRE(roa_quaternion_get_w(norm) == 0.f);
   }
-	*/
+	
   
   SECTION("Angle axis")
   {
+		/* not test data */
   }
   
 	/*

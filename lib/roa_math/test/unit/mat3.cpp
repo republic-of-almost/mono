@@ -1,11 +1,12 @@
 #include <catch/catch.hpp>
+#include <roa_math/math.h>
 
 
 TEST_CASE("Matrix 3x3")
 {
   // ---------------------------------------------------------- [ Constants ] --
   
-  /*
+  
 	SECTION("ID Mat")
   {
     const float mat_data[] {
@@ -14,14 +15,17 @@ TEST_CASE("Matrix 3x3")
       0.f, 0.f, 1.f,
     };
     
-    const math::mat3 mat_expected = math::mat3_init(mat_data);
-    const math::mat3 mat = math::mat3_id();
+    roa_mat3 expected;
+		roa_mat3_import(&expected, mat_data);
+
+		roa_mat3 mat;
+		roa_mat3_id(&mat);
     
-    REQUIRE(math::mat3_is_near(mat_expected, mat));
+    REQUIRE(roa_mat3_is_near(&expected, &mat, ROA_EPSILON));
   }
-	*/
+	
   
-	/*
+	
   SECTION("Zero Mat")
   {
     const float mat_data[] {
@@ -29,27 +33,20 @@ TEST_CASE("Matrix 3x3")
       0.f, 0.f, 0.f,
       0.f, 0.f, 0.f,
     };
-    
-    const math::mat3 mat_expected = math::mat3_init(mat_data);
-    const math::mat3 mat = math::mat3_zero();
-    
-    REQUIRE(math::mat3_is_near(mat_expected, mat));
+
+		roa_mat3 expected;
+		roa_mat3_import(&expected, mat_data);
+
+		roa_mat3 mat;
+		roa_mat3_zero(&mat);
+
+		REQUIRE(roa_mat3_is_near(&expected, &mat, ROA_EPSILON));
   }
-	*/
+	
   
   // --------------------------------------------------------- [ Initialize ] --
   
-	/*
-  SECTION("Init with Nothing")
-  {
-    const math::mat3 mat_default_init = math::mat3_init();
-    const math::mat3 id = math::mat3_init();
-    
-    REQUIRE(math::mat3_is_near(mat_default_init, id));
-  }
-	*/
   
-	/*
   SECTION("Init with Value")
   {
     const float mat_data[] {
@@ -57,37 +54,17 @@ TEST_CASE("Matrix 3x3")
       3.f, 3.f, 3.f,
       3.f, 3.f, 3.f,
     };
+
+		roa_mat3 expected;
+		roa_mat3_import(&expected, mat_data);
+
+		roa_mat3 mat;
+		roa_mat3_fill(&mat, 3.f);
     
-    const math::mat3 mat_expected = math::mat3_init(mat_data);
-    const math::mat3 mat = math::mat3_init(3.f);
-    
-    REQUIRE(math::mat3_is_near(mat_expected, mat));
+    REQUIRE(roa_mat3_is_near(&expected, &mat, ROA_EPSILON));
   }
-	*/
-  
-	/*
-  SECTION("Init with Array")
-  {
-    const float mat_data_1[] {
-      1.f, 1.f, 1.f,
-      1.f, 1.f, 1.f,
-      1.f, 1.f, 1.f,
-    };
-    
-    const math::mat3 mat_a = math::mat3_init(mat_data_1);
-    
-    const float mat_data_2[] {
-      2.f, 2.f, 2.f,
-      2.f, 2.f, 2.f,
-      2.f, 2.f, 2.f,
-    };
-    
-    const math::mat3 mat_b = math::mat3_init(mat_data_2);
-    
-    REQUIRE(math::mat3_is_not_near(mat_a, mat_b));
-  }
-	*/
-  
+ 
+
   // --------------------------------------------- [ Special Init With Data ] --
   
 	/*
@@ -129,7 +106,6 @@ TEST_CASE("Matrix 3x3")
   
   // --------------------------------------------------------- [ Operations ] --
   
-	/*
   SECTION("Addition")
   {
     const float mat_a_data[] {
@@ -137,8 +113,9 @@ TEST_CASE("Matrix 3x3")
       1.f, 1.f, 1.f,
       1.f, 1.f, 1.f,
     };
-    
-    const math::mat3 mat_a = math::mat3_init(mat_a_data);
+   
+		roa_mat3 mat_a;
+		roa_mat3_import(&mat_a, mat_a_data);
     
     const float mat_b_data[] {
       2.f, 2.f, 2.f,
@@ -146,22 +123,26 @@ TEST_CASE("Matrix 3x3")
       2.f, 2.f, 2.f,
     };
     
-    const math::mat3 mat_b = math::mat3_init(mat_b_data);
-    
+		roa_mat3 mat_b;
+		roa_mat3_import(&mat_b, mat_b_data);
+
     const float mat_c_data[] {
       3.f, 3.f, 3.f,
       3.f, 3.f, 3.f,
       3.f, 3.f, 3.f,
     };
     
-    const math::mat3 mat_expected = math::mat3_init(mat_c_data);
-    const math::mat3 mat_result = math::mat3_add(mat_a, mat_b);
+    roa_mat3 mat_c;
+		roa_mat3_import(&mat_c, mat_c_data);
+
+		roa_mat3 result;
+		roa_mat3_add(&result, &mat_a, &mat_b);
     
-    REQUIRE(math::mat3_is_near(mat_expected, mat_result));
+    REQUIRE(roa_mat3_is_near(&mat_c, &result, ROA_EPSILON));
   }
-	*/
-  
-	/*
+	
+
+	
   SECTION("Subtraction")
   {
     const float mat_a_data[] {
@@ -169,31 +150,35 @@ TEST_CASE("Matrix 3x3")
       1.f, 1.f, 1.f,
       1.f, 1.f, 1.f,
     };
-    
-    const math::mat3 mat_a = math::mat3_init(mat_a_data);
+   
+		roa_mat3 mat_a;
+		roa_mat3_import(&mat_a, mat_a_data);
     
     const float mat_b_data[] {
       2.f, 2.f, 2.f,
       2.f, 2.f, 2.f,
       2.f, 2.f, 2.f,
     };
-    
-    const math::mat3 mat_b = math::mat3_init(mat_b_data);
+   
+		roa_mat3 mat_b;
+		roa_mat3_import(&mat_b, mat_b_data);
     
     const float mat_c_data[] {
       -1.f, -1.f, -1.f,
       -1.f, -1.f, -1.f,
       -1.f, -1.f, -1.f,
     };
-    
-    const math::mat3 mat_expected = math::mat3_init(mat_c_data);
-    const math::mat3 mat_result = math::mat3_subtract(mat_a, mat_b);
-    
-    REQUIRE(math::mat3_is_near(mat_expected, mat_result));
-  }
-	*/
+   
+		roa_mat3 mat_c;
+		roa_mat3_import(&mat_c, mat_c_data);
 
-	/*
+		roa_mat3 result;
+		roa_mat3_subtract(&result, &mat_a, &mat_b);
+    
+    REQUIRE(roa_mat3_is_near(&mat_c, &result, ROA_EPSILON));
+  }
+	
+
   SECTION("Multiplication (mat * mat)")
   {
     const float mat_a_data[] {
@@ -202,7 +187,8 @@ TEST_CASE("Matrix 3x3")
       1.f, 1.f, 1.f,
     };
     
-    const math::mat3 mat_a = math::mat3_init(mat_a_data);
+		roa_mat3 mat_a;
+		roa_mat3_import(&mat_a, mat_a_data);
     
     const float mat_b_data[] {
       2.f, 2.f, 2.f,
@@ -210,7 +196,8 @@ TEST_CASE("Matrix 3x3")
       2.f, 2.f, 2.f,
     };
     
-    const math::mat3 mat_b = math::mat3_init(mat_b_data);
+		roa_mat3 mat_b;
+		roa_mat3_import(&mat_b, mat_b_data);
     
     const float mat_c_data[] {
       6.f, 6.f, 6.f,
@@ -218,12 +205,14 @@ TEST_CASE("Matrix 3x3")
       6.f, 6.f, 6.f,
     };
     
-    const math::mat3 mat_expected = math::mat3_init(mat_c_data);
-    const math::mat3 mat_result = math::mat3_multiply(mat_a, mat_b);
-    
-    REQUIRE(math::mat3_is_near(mat_expected, mat_result));
+		roa_mat3 mat_c;
+		roa_mat3_import(&mat_c, mat_c_data);
+
+		roa_mat3 result;
+		roa_mat3_multiply(&result, &mat_a, &mat_b);
+
+		REQUIRE(roa_mat3_is_near(&mat_c, &result, ROA_EPSILON));
   }
-	*/
   
 	/*
   SECTION("Multiplication (mat * vec)")
