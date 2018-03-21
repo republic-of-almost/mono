@@ -214,7 +214,7 @@ TEST_CASE("Matrix 3x3")
 		REQUIRE(roa_mat3_is_near(&mat_c, &result, ROA_EPSILON));
   }
   
-	/*
+	
   SECTION("Multiplication (mat * vec)")
   {
     const float mat_a_data[] {
@@ -222,16 +222,18 @@ TEST_CASE("Matrix 3x3")
       1.f, 1.f, 1.f,
       1.f, 1.f, 1.f,
     };
-    
-    const math::mat3 mat_a = math::mat3_init(mat_a_data);
-    const math::vec3 vec = math::vec3_init(1.f,2.f,3.f);
-    
-    const math::vec3 vec_expected = math::vec3_init(6.f,6.f,6.f);
-    const math::vec3 vec_result = math::mat3_multiply(vec, mat_a);
-    
-    REQUIRE(math::vec3_is_near(vec_expected, vec_result));
+
+		roa_mat3 mat_a;
+		roa_mat3_import(&mat_a, mat_a_data);
+
+		roa_float3 vec = roa_float3_set_with_values(1.f, 2.f, 3.f);
+		roa_float3 vec_result = roa_mat3_multiply_with_float3(vec, &mat_a);
+
+		roa_float3 expected = roa_float3_set_with_values(6.f, 6.f, 6.f);
+
+		REQUIRE(roa_float3_is_near(expected, vec_result, ROA_EPSILON));
   }
-	*/
+	
   
 	/*
   SECTION("Transpose")
