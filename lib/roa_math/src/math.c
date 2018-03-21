@@ -45,7 +45,7 @@ roa_float_sqrt(float a)
 float
 roa_float_abs(float a)
 {
-  return fabs(a);
+  return fabsf(a);
 }
 
 
@@ -505,9 +505,11 @@ roa_quaternion_default()
 roa_quaternion
 roa_quaternion_set_with_values(float x, float y, float z, float w)
 {
-  roa_quaternion quat = {
-    x, y, z, w
-  };
+  roa_quaternion quat;
+  quat.x = x;
+  quat.y = y;
+  quat.z = z;
+  quat.w = w;
 
   return quat;
 }
@@ -559,22 +561,20 @@ roa_quaternion_get_rotation_matrix(roa_quaternion rot, roa_mat3 *out)
   float y_sq = rot.y * rot.y;
   float z_sq = rot.z * rot.z;
   
-  float mat_data[] = 
-	{
-		1 - 2 * y_sq - 2 * z_sq,
-    2 * (rot.x * rot.y) + 2 * (rot.z * rot.w),
-		2 * (rot.x * rot.z) - 2 * (rot.y * rot.w),
-        
-		2 * (rot.x * rot.y) - 2 * (rot.z * rot.w),
-		1 - 2 * x_sq - 2 * z_sq,
-		2 * (rot.y * rot.z) + 2 * (rot.x * rot.w),
-        
-		2 * (rot.x * rot.z) + 2 * (rot.y * rot.w),
-		2 * (rot.y * rot.z) - 2 * (rot.x * rot.w),
-		1 - 2 * x_sq - 2 * y_sq,
-	};
+  float mat_data[9];
+  mat_data[0] = 1 - 2 * y_sq - 2 * z_sq;
+  mat_data[1] = 2 * (rot.x * rot.y) + 2 * (rot.z * rot.w);
+  mat_data[2] = 2 * (rot.x * rot.z) - 2 * (rot.y * rot.w);
 
-  return roa_mat3_import(out, mat_data);
+  mat_data[3] = 2 * (rot.x * rot.y) - 2 * (rot.z * rot.w);
+  mat_data[4] = 1 - 2 * x_sq - 2 * z_sq;
+  mat_data[5] = 2 * (rot.y * rot.z) + 2 * (rot.x * rot.w);
+        
+  mat_data[6] = 2 * (rot.x * rot.z) + 2 * (rot.y * rot.w);
+  mat_data[7] = 2 * (rot.y * rot.z) - 2 * (rot.x * rot.w);
+  mat_data[8] = 1 - 2 * x_sq - 2 * y_sq;
+
+  roa_mat3_import(out, mat_data);
 }
 
 

@@ -1,26 +1,24 @@
 #include <catch/catch.hpp>
+#include <roa_math/math.h>
 
 
 TEST_CASE("General")
 {
   // --------------------------------------------------------------- [ Trig ] --
 
-	/*
+	
   SECTION("Tan")
   {
-    Math_general_test_data test_data[] {
-      { 0.f, 0.f, },
-      { -10.f, -0.64836082745f, },
-      { 0.5f, 0.54630248984f, },
-    };
-    
-    for(Math_general_test_data td : test_data)
-    {
-      const float actual = math::tan(td.input);
-      REQUIRE(math::is_near(actual, td.expected, 0.00001f));
-    }
+    float res_1 = roa_float_tan(0.f);
+    REQUIRE(roa_float_is_near(res_1, 0.f, ROA_EPSILON));
+
+    float res_2 = roa_float_tan(-10.f);
+    REQUIRE(roa_float_is_near(res_2, -0.64836082745f, ROA_EPSILON));
+
+    float res_3 = roa_float_tan(0.5f);
+    REQUIRE(roa_float_is_near(res_3, 0.54630248984f, ROA_EPSILON));
   }
-	*/
+	
   
 	/*
   SECTION("A Tan2")
@@ -39,22 +37,19 @@ TEST_CASE("General")
   }
 	*/
   
-	/*
+	
   SECTION("Sin")
-  {
-     Math_general_test_data test_data[] {
-      { 0.f, 0.f, },
-      { -10.f, 0.54402111088f, },
-      { 0.5f, 0.4794255386f, },
-    };
-    
-    for(Math_general_test_data td : test_data)
-    
-      const float actual = math::sin(td.input);
-      REQUIRE(math::is_near(actual, td.expected, 0.00001f));
-    }
+  {    
+    float res_1 = roa_float_sin(0.f);
+    REQUIRE(roa_float_is_near(res_1, 0.f, ROA_EPSILON));
+
+    float res_2 = roa_float_sin(-10.f);
+    REQUIRE(roa_float_is_near(res_2, 0.54402111088f, ROA_EPSILON));
+
+    float res_3 = roa_float_sin(0.5f);
+    REQUIRE(roa_float_is_near(res_3, 0.4794255386f, ROA_EPSILON));
   }
-	*/
+	
   
 	/*
   SECTION("A Sin")
@@ -74,22 +69,18 @@ TEST_CASE("General")
 	*/
 
 
-  /*
   SECTION("Cos")
   {
-     Math_general_test_data test_data[] {
-      { 0.f, 1.f, },
-      { -10.f, -0.83907152907f, },
-      { 0.5f, 0.87758256189f, },
-    };
-    
-    for(Math_general_test_data td : test_data)
-    {
-      const float actual = math::cos(td.input);
-      REQUIRE(math::is_near(actual, td.expected, 0.00001f));
-    }
+    float res_1 = roa_float_cos(0.f);
+    REQUIRE(roa_float_is_near(res_1, 1.f, ROA_EPSILON));
+
+    float res_2 = roa_float_cos(-10.f);
+    REQUIRE(roa_float_is_near(res_2, -0.83907152907f, ROA_EPSILON));
+
+    float res_3 = roa_float_cos(0.5f);
+    REQUIRE(roa_float_is_near(res_3, 0.87758256189f, ROA_EPSILON));
   }
-	*/
+	
   
 	/*
   SECTION("A Cos")
@@ -301,19 +292,21 @@ TEST_CASE("General")
   }
 	*/
 
-	/*
+	
   SECTION("Abs")
   {
-    REQUIRE(math::abs(-123.f) == 123.f);
-    REQUIRE(math::abs(123.f) == 123.f);
+    REQUIRE(roa_float_abs(-123.f) == 123.f);
+    REQUIRE(roa_float_abs(123.f) == 123.f);
   }
-	*/
+	
   
-	/*
+	
   SECTION("Sqrt")
   {
+    float res = roa_float_sqrt(123.f);
+    REQUIRE(roa_float_is_near(res, 11.09053650f, ROA_EPSILON));
   }
-	*/
+	
   
 	/*
   SECTION("Clamp")
@@ -356,13 +349,13 @@ TEST_CASE("General")
   }
 	*/
   
-	/*
+	
   SECTION("Is Near")
   {
-    REQUIRE(math::is_near(1.123f, 1.123f) == true);
-    REQUIRE(math::is_near(23.34f, 1.123f) == false);
+    REQUIRE(!!roa_float_is_near(1.123f, 1.123f, ROA_EPSILON) == true);
+    REQUIRE(!!roa_float_is_near(23.34f, 1.123f, ROA_EPSILON) == false);
   }
-	*/
+	
   
 	/*
   SECTION("Is POW 2")
