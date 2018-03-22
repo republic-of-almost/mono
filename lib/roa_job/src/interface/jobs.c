@@ -65,7 +65,7 @@ roa_job_wait(
   uint64_t job_marker)
 {
 	int thread_id = (int)ROA_LOWER_32_BITS(job_marker);
-	uint32_t batch_id = ROA_UPPER_32_BITS(job_marker);
+	uint32_t wait_on_batch_id = ROA_UPPER_32_BITS(job_marker);
 
 	/* todo: good to check but thread_id negates the need to find index */
 
@@ -83,7 +83,7 @@ roa_job_wait(
 		roa_spin_lock_aquire(&tls->fiber_lock);
 
 		roa_array_push(tls->blocked_fibers, tls->executing_fiber);
-		roa_array_push(tls->blocked_fiber_batch_ids, batch_id);
+		roa_array_push(tls->blocked_fiber_batch_ids, wait_on_batch_id);
 
 		tls->executing_fiber.worker_fiber = ROA_NULL;
 

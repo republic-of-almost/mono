@@ -5,6 +5,8 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <roa_lib/array.h>
+#include <roa_lib/signal.h>
+#include <roa_lib/time.h>
 #include <ctx/context.h>
 #include <fiber/fiber.h>
 #include <jobs/jobs.h>
@@ -44,6 +46,40 @@ fiber_process(void *arg)
       job_func(ctx, job_arg);
     }
 
+    /* decrement job counter */
+    /* clear executing as its done */
+    {
+      /* decrement job count */
+      {
+        unsigned count = roa_array_size(tls->batch_ids);
+        unsigned i;
+        uint32_t batch_to_find = tls->executing_fiber.desc.batch_id;
+
+        roa_spin_lock_aquire(&tls->job_lock);
+
+        for (i = 0; i < count; ++i)
+        {
+          uint32_t batch_id = tls->batch_ids[i];
+
+          if (batch_to_find == batch_id)
+          {
+            struct job_batch *batch = &tls->batches[i];
+            batch->count -= 1;
+
+            if (batch->count <= 0)
+            {
+              roa_array_erase(tls->batch_ids, i);
+              roa_array_erase(tls->batches, i);
+            }
+
+            break;
+          }
+        }
+
+        roa_spin_lock_release(&tls->job_lock);
+      }
+    }
+
     /* swtich back */
     {
       struct roa_fiber *worker = tls->executing_fiber.worker_fiber;
@@ -74,6 +110,8 @@ thread_process(void *arg)
     ctx = th_arg->ctx;
     roa_free(arg);
   }
+
+  roa_thread_set_current_name("ROA_Job Thread");
   
   /* find self in thread pool */
   struct thread_local_storage *tls = ROA_NULL;
@@ -104,6 +142,10 @@ thread_process(void *arg)
     then check pending jobs, if found create pending fiber.
     then try steal work from other threads, and create a pending job.
   */
+
+  /* wait until signal */
+  roa_signal_wait(tls->start, 1);
+
   while (1)
   {
     /* check pending fibers */
@@ -164,46 +206,15 @@ thread_process(void *arg)
           /* ... back from fiber */
         }
 
-        /* clear executing as its done */
+        /* free fiber */
+        if(tls->executing_fiber.worker_fiber)
         {
-          /* decrement job count */
-          {
-            unsigned count = roa_array_size(tls->batch_ids);
-            unsigned i;
-            uint32_t batch_to_find = tls->executing_fiber.desc.batch_id;
+          roa_spin_lock_aquire(&tls->fiber_lock);
 
-            roa_spin_lock_aquire(&tls->job_lock);
+          roa_array_push(tls->free_fiber_pool, tls->executing_fiber.worker_fiber);
+          tls->executing_fiber.worker_fiber = ROA_NULL;
 
-            for (i = 0; i < count; ++i)
-            {
-              uint32_t batch = tls->batch_ids[i];
-
-              if (batch_to_find == batch)
-              {
-                tls->batches[i].count -= 1;
-
-                if (tls->batches[i].count <= 0)
-                {
-                  roa_array_erase(tls->batch_ids, i);
-                  roa_array_erase(tls->batches, i);
-                }
-
-                break;
-              }
-            }
-
-            roa_spin_lock_release(&tls->job_lock);
-          }
-
-          /* free fiber */
-          {
-            roa_spin_lock_aquire(&tls->fiber_lock);
-          
-            roa_array_push(tls->free_fiber_pool, tls->executing_fiber.worker_fiber);
-            tls->executing_fiber.worker_fiber = ROA_NULL;
-
-            roa_spin_lock_release(&tls->fiber_lock);
-          }
+          roa_spin_lock_release(&tls->fiber_lock);
         }
 
         continue;
@@ -279,6 +290,9 @@ thread_process(void *arg)
         } /* aquire */
       } /* search threads */
     } /* steal jobs */
+    
+    roa_signal_wait(tls->new_work, 5);
+
   } /* while true */
 
   return ROA_NULL;

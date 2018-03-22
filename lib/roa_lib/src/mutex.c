@@ -3,6 +3,9 @@
 #include <stdlib.h>
 
 
+/* based off https://github.com/mattiasgustavsson/libs/blob/master/thread.h */
+
+
 #if defined(__linux__) || defined(__APPLE__)
 #include <pthread.h>
 #elif defined(_WIN32)

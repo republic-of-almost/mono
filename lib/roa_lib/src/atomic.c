@@ -2,6 +2,9 @@
 #include <roa_lib/fundamental.h>
 
 
+/* based off https://github.com/mattiasgustavsson/libs/blob/master/thread.h */
+
+
 #if defined(_WIN32)
 #include <windows.h>
 #endif

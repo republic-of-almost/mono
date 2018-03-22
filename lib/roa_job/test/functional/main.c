@@ -12,8 +12,8 @@
 #define TEST_WITH_OUTPUT 1
 
 
-#define BATCH_COUNT 1 << 3
-#define TICK_COUNT 1 << 3
+#define BATCH_COUNT (1 << 4)
+#define TICK_COUNT (1 << 3)
 
 int ticks = TICK_COUNT;
 int *test_data;

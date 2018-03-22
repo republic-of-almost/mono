@@ -3,6 +3,7 @@
 
 
 #include <roa_lib/atomic.h>
+#include <roa_lib/signal.h>
 #include <jobs/jobs.h>
 
 
@@ -34,6 +35,9 @@ struct thread_local_storage
 
 	struct executing_fiber executing_fiber;
   struct roa_fiber *home_fiber;
+
+  roa_signal *start;
+  roa_signal *new_work;
 };
 
 
