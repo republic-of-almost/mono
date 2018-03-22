@@ -55,6 +55,10 @@ roa_job_dispatcher_ctx_create(
 			core_count,
 			thread_count);
 
+    /* create signals */
+    new_ctx->signal_start = roa_signal_create();
+    new_ctx->signal_new_work = roa_signal_create();
+
     /* create threads */
     {
       roa_array_create_with_capacity(new_ctx->tls, thread_count);
@@ -167,7 +171,7 @@ roa_job_dispatcher_ctx_destroy(
   {
     /* free threads and data */
     int i;
-    for (i = 0; i < kill_ctx->thread_count; ++i)
+    for (i = 1; i < kill_ctx->thread_count; ++i)
     {
       roa_thread_destroy(kill_ctx->threads[i]);
     }

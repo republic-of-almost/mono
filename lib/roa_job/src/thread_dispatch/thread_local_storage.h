@@ -18,8 +18,20 @@ struct executing_fiber
 };
 
 
+typedef enum _thread_state
+{
+  THREAD_STATE_STARTING,
+  THREAD_STATE_WORKING,
+  THREAD_STATE_SEARCHING,
+  THREAD_STATE_WAITING,
+  THREAD_STATE_SHUTDOWN,
+} thread_state;
+
+
 struct thread_local_storage
 {
+  int thread_status;
+
   roa_atomic_int job_lock;
   /* array */ struct job_internal *pending_jobs;
 
@@ -35,9 +47,6 @@ struct thread_local_storage
 
 	struct executing_fiber executing_fiber;
   struct roa_fiber *home_fiber;
-
-  roa_signal *start;
-  roa_signal *new_work;
 };
 
 

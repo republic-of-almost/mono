@@ -102,7 +102,7 @@ roa_signal_raise(roa_signal *s)
 }
 
 
-void
+int
 roa_signal_wait(roa_signal *s, int timeout_ms)
 {
   struct roa_signal_internal *signal = (struct roa_signal_internal*)s;

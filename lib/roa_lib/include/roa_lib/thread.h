@@ -35,7 +35,7 @@ roa_thread_create_self();
 
 
 void
-roa_thread_destroy(roa_thread *th);
+roa_thread_destroy(roa_thread th);
 
 
 /* ---------------------------------------------------- [ Thread Actions ] -- */

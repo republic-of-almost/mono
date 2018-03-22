@@ -108,26 +108,21 @@ roa_thread_create_self()
 
 
 void
-roa_thread_destroy(roa_thread *th)
+roa_thread_destroy(roa_thread th)
 {
   ROA_ASSERT(th);
 
   #if defined(__linux__) || defined(__APPLE__)
-  int success = pthread_join((pthread_t)*th, ROA_NULL);
-
-  if(success == 0)
-  {
-    *th = ROA_NULL;
-  }
-
+  int success = pthread_join((pthread_t)th, ROA_NULL);
+  
   #elif defined(_WIN32)
 
-  HANDLE win_th = (HANDLE)*th;
+  HANDLE win_th = (HANDLE)th;
 
   WaitForSingleObject(win_th, INFINITE);
   CloseHandle(win_th);
 
-  *th = ROA_NULL;
+  
   #else
   #error "Unsupported Platform"
   #endif

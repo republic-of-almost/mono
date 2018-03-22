@@ -133,6 +133,8 @@ thread_process(void *arg)
 
     tls = &ctx->tls[th_index];
     ROA_ASSERT(tls);
+
+    tls->thread_status = THREAD_STATE_STARTING;
   }
   
   roa_fiber_create(&tls->home_fiber, ROA_NULL, ROA_NULL);
@@ -144,10 +146,20 @@ thread_process(void *arg)
   */
 
   /* wait until signal */
-  roa_signal_wait(tls->start, 1);
+  if(th_index > 0)
+  {
+    roa_signal_wait(ctx->signal_start, 1);
+  }
+  else
+  {
+    roa_signal_raise(ctx->signal_start);
+  }
+
 
   while (1)
   {
+    tls->thread_status = THREAD_STATE_SEARCHING;
+
     /* check pending fibers */
     {
       roa_spin_lock_aquire(&tls->fiber_lock);
@@ -194,6 +206,8 @@ thread_process(void *arg)
       /* do we have a fiber? execute it */
       if (tls->executing_fiber.worker_fiber)
       {
+        tls->thread_status = THREAD_STATE_WORKING;
+
         /* fiber switch */
         {
           struct roa_fiber *worker = tls->executing_fiber.worker_fiber;
@@ -252,6 +266,9 @@ thread_process(void *arg)
           roa_array_push(tls->blocked_fibers, exec);
           
           roa_spin_lock_release(&tls->fiber_lock);
+
+          tls->thread_status = THREAD_STATE_WORKING;
+
           continue;
         }
       }
@@ -291,7 +308,42 @@ thread_process(void *arg)
       } /* search threads */
     } /* steal jobs */
     
-    roa_signal_wait(tls->new_work, 5);
+    tls->thread_status = THREAD_STATE_WAITING;
+
+    if(th_index > 0)
+    {
+      roa_signal_wait(ctx->signal_new_work, 5);
+
+      if (tls->thread_status == THREAD_STATE_SHUTDOWN)
+      {
+        return ROA_NULL;
+      }
+    }
+    else
+    {
+      /* main thread check to see if we are out of work */
+      int j;
+      int waiting = 0;
+
+      for (j = 0; j < ctx->thread_count; ++j)
+      {
+        if (ctx->tls[j].thread_status == THREAD_STATE_WAITING)
+        {
+          waiting += 1;
+        }
+      }
+
+      if (waiting == ctx->thread_count)
+      {
+        int k;
+        for (k = 0; k < ctx->thread_count; ++k)
+        {
+          ctx->tls[k].thread_status = THREAD_STATE_SHUTDOWN;
+        }
+
+        return ROA_NULL;
+      }
+    }
 
   } /* while true */
 
