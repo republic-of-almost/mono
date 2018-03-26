@@ -13,7 +13,7 @@
 
 
 #define BATCH_COUNT (1 << 6)
-#define TICK_COUNT (1 << 5)
+#define TICK_COUNT (1 << 12)
 
 int ticks = TICK_COUNT;
 int *test_data;
@@ -134,7 +134,8 @@ main()
 
     for (i = 0; i < BATCH_COUNT; ++i)
     {
-      ROA_ASSERT(test_data[i] == TICK_COUNT);
+      unsigned expected = TICK_COUNT;
+      ROA_ASSERT(test_data[i] == expected);
     }
   }
 

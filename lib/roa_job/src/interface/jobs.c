@@ -5,6 +5,7 @@
 #include <roa_lib/assert.h>
 #include <ctx/context.h>
 #include <thread_dispatch/thread_local_storage.h>
+#include <roa_lib/alloc.h>
 #include <roa_lib/array.h>
 #include <fiber/fiber.h>
 
@@ -31,7 +32,10 @@ roa_job_submit(
     /* new batch */
     struct job_batch new_batch;
     new_batch.count = count;
-		roa_atomic_int_store(&new_batch.counter, (int)count);
+
+    new_batch.counter = roa_zalloc(sizeof(*new_batch.counter));
+    
+		roa_atomic_int_store(new_batch.counter, (int)count);
 
     uint32_t new_batch_id = ++tls->batch_counter;
 
@@ -47,7 +51,8 @@ roa_job_submit(
     {
 			struct job_internal job;
 			job.desc = desc[j];
-			job.batch_id = new_batch_id;
+			/*job.batch_id = new_batch_id;*/
+      job.counter = new_batch.counter;
 
       roa_array_push(tls->pending_jobs, job);
     }

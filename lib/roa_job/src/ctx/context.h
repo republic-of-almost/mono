@@ -11,8 +11,18 @@ typedef void* roa_thread;
 typedef void* roa_thread_id;
 
 
+typedef enum _dispatch_status
+{
+  DISPATCH_STARTUP,
+  DISPATCH_WORKING,
+  DISPATCH_SHUTDOWN,
+} dispatch_status;
+
+
 struct roa_job_dispatcher_ctx
 {
+  dispatch_status status;
+
   /* array */ struct thread_local_storage *tls;
   /* array */ roa_thread_id *thread_ids;
   /* array */ roa_thread *threads;

@@ -10,14 +10,15 @@
 struct job_batch
 {
   int count;
-	roa_atomic_int counter;
+	roa_atomic_int *counter;
 };
 
 
 struct job_internal
 {
 	struct roa_job_desc desc;
-	uint32_t batch_id;
+	/* uint32_t batch_id; */
+  roa_atomic_int *counter;
 };
 
 

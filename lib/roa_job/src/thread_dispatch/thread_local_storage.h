@@ -20,11 +20,8 @@ struct executing_fiber
 
 typedef enum _thread_state
 {
-  THREAD_STATE_STARTING,
-  THREAD_STATE_WORKING,
-  THREAD_STATE_SEARCHING,
-  THREAD_STATE_WAITING,
-  THREAD_STATE_SHUTDOWN,
+  TLS_RUNNING,
+  TLS_QUIT,
 } thread_state;
 
 
@@ -34,14 +31,13 @@ struct thread_local_storage
 
   roa_atomic_int job_lock;
   /* array */ struct job_internal *pending_jobs;
-
   /* array */ uint32_t *batch_ids;
   /* array */ struct job_batch *batches;
+
   uint32_t batch_counter;
 
   roa_atomic_int fiber_lock;
   /* array */ struct roa_fiber **free_fiber_pool;
-
   /* array */ uint32_t *blocked_fiber_batch_ids;
   /* array */ struct executing_fiber *blocked_fibers;
 
