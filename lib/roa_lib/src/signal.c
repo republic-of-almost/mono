@@ -4,6 +4,7 @@
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <pthread.h>
+#include <errno.h>
 #elif defined(_WIN32)
 #include <windows.h>
 #endif

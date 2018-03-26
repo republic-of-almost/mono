@@ -12,8 +12,8 @@
 #define TEST_WITH_OUTPUT 1
 
 
-#define BATCH_COUNT (1 << 6)
-#define TICK_COUNT (1 << 12)
+#define BATCH_COUNT (1 << 2)
+#define TICK_COUNT (1 << 4)
 
 int ticks = TICK_COUNT;
 int *test_data;
@@ -63,7 +63,7 @@ tick(roa_job_dispatcher_ctx_t ctx, void *arg)
       batch[i].thread_locked = 0;
     }
 
-    unsigned batch_id = roa_job_submit(
+    uint64_t batch_id = roa_job_submit(
       ctx,
       ROA_ARR_DATA(batch),
       ROA_ARR_COUNT(batch)

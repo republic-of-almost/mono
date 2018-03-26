@@ -16,6 +16,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+#define THREAD_PROCESS_DEBUG_OUTPUT 1
+
+
 void
 fiber_process(void *arg)
 {
@@ -113,76 +117,94 @@ thread_internal_run_fiber(
 {
   ROA_BOOL return_val = ROA_FALSE;
 
-  roa_spin_lock_aquire(&tls->fiber_lock);
-  roa_spin_lock_aquire(&tls->job_lock);
+	/* lock jobs to copy batch ids */
+	uint32_t *batch_id = ROA_NULL;
+	unsigned batch_count = 0;
+	{
+		roa_spin_lock_aquire(&tls->job_lock);
+		
+		batch_count = roa_array_size(tls->batch_ids);
 
-  unsigned blocked_count = roa_array_size(tls->blocked_fiber_batch_ids);
-  unsigned batch_count = roa_array_size(tls->batch_ids);
+		unsigned bytes = sizeof(tls->batch_ids[0]) * batch_count;
 
-  unsigned i = 0;
-  unsigned j;
-  int unblocked_fiber_index = -1;
+		batch_id = roa_alloc(bytes);
 
-  /* search for some work */
-  for (i = 0; i < blocked_count; ++i)
-  {
-    uint32_t search_for = tls->blocked_fiber_batch_ids[i];
+		memcpy(batch_id, tls->batch_ids, bytes);
 
-    for (j = 0; j < batch_count; ++j)
-    {
-      if (tls->batch_ids[j] == search_for)
-      {
-        break;
-      }
-    }
+		roa_spin_lock_release(&tls->job_lock);
+	}
 
-    if (j == batch_count)
-    {
-      unblocked_fiber_index = i;
-      break;
-    }
-  }
+	/* lock fiber to check batch ids against */
+	{
+		unsigned blocked_count = roa_array_size(tls->blocked_fiber_batch_ids);
 
-  if (unblocked_fiber_index != -1)
-  {
-    tls->executing_fiber = tls->blocked_fibers[i];
+		unsigned i;
+		unsigned j;
+		int unblocked_fiber_index = -1;
 
-    roa_array_erase(tls->blocked_fibers, i);
-    roa_array_erase(tls->blocked_fiber_batch_ids, i);
-  }
+	  /* search for some work */
+		for (i = 0; i < blocked_count; ++i)
+		{
+			uint32_t search_for = tls->blocked_fiber_batch_ids[i];
 
-  roa_spin_lock_release(&tls->job_lock);
-  roa_spin_lock_release(&tls->fiber_lock);
+	    for (j = 0; j < batch_count; ++j)
+	    {
+		    if (tls->batch_ids[j] == search_for)
+			  {
+				  break;
+	      }
+		  }
 
-  /* do we have a fiber? execute it */
-  if (tls->executing_fiber.worker_fiber)
-  {
-    return_val = ROA_TRUE;
+			if (j == batch_count)
+	    {
+		    unblocked_fiber_index = i;
+			  break;
+	    }
+		}
 
-    /* fiber switch */
-    {
-      struct roa_fiber *worker = tls->executing_fiber.worker_fiber;
-      ROA_ASSERT(worker);
+	  if (unblocked_fiber_index != -1)
+		{
+			tls->executing_fiber = tls->blocked_fibers[i];
 
-      /* switch to worker ... */
+	    roa_array_erase(tls->blocked_fibers, i);
+		  roa_array_erase(tls->blocked_fiber_batch_ids, i);
+		}
 
-      roa_fiber_switch(tls->home_fiber, worker);
+	  /* do we have a fiber? execute it */
+		if (tls->executing_fiber.worker_fiber)
+		{
+			return_val = ROA_TRUE;
 
-      /* ... back from fiber */
-    }
+	    /* fiber switch */
+		  {
+			  struct roa_fiber *worker = tls->executing_fiber.worker_fiber;
+				ROA_ASSERT(worker);
 
-    /* free fiber */
-    if (tls->executing_fiber.worker_fiber)
-    {
-      roa_spin_lock_aquire(&tls->fiber_lock);
+	      /* switch to worker ... */
 
-      roa_array_push(tls->free_fiber_pool, tls->executing_fiber.worker_fiber);
-      tls->executing_fiber.worker_fiber = ROA_NULL;
+		    roa_fiber_switch(tls->home_fiber, worker);
 
-      roa_spin_lock_release(&tls->fiber_lock);
-    }
-  }
+			  /* ... back from fiber */
+	    }
 
+		  /* free fiber */
+			if (tls->executing_fiber.worker_fiber)
+	    {
+		    roa_spin_lock_aquire(&tls->fiber_lock);
+	
+		    roa_array_push(tls->free_fiber_pool, tls->executing_fiber.worker_fiber);
+			  tls->executing_fiber.worker_fiber = ROA_NULL;
+	    }
+		}
+
+		roa_spin_lock_release(&tls->fiber_lock);
+	}
+
+	/* cleanup */
+	{
+		roa_free(batch_id);
+	}
+  
   return return_val;
 }
 
@@ -266,10 +288,6 @@ thread_internal_check_pending(
 }
 
 
-/* 
-  Change this to lock another tls to check and steal.
-  Then lock this tls to apply, rather than locking both.
-*/
 ROA_BOOL
 thread_internal_steal_jobs(
   struct thread_local_storage *tls,
@@ -278,70 +296,74 @@ thread_internal_steal_jobs(
 {
   ROA_BOOL return_val = ROA_FALSE;
 
-  /* short cir for now */
-  return return_val;
+	struct job_internal steal_job;
+	ROA_BOOL stole_a_job = ROA_FALSE;
 
-  int thread_count = ctx->thread_count;
-  int i;
+	/* search for work to steal */
+	{
+		if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
+		{
+			/*printf("Thread %d looking to steal \n", th_index);*/
+		}
 
-  for (i = 0; i < thread_count; ++i)
-  {
-    int search_index = ((th_index + 1) % thread_count);
-    struct thread_local_storage *steal_tls = &ctx->tls[search_index];
+		int th_count = ctx->thread_count;
+		int i;
 
-    if (steal_tls == tls)
-    {
-      continue;
-    }
+		for(i = 0; i < th_count; ++i)
+		{
+			int steal_index = ((th_index + 1 + i) % th_count);
+			struct thread_local_storage *steal_tls = &ctx->tls[steal_index];
 
-    /* if can't aquire mutex move on */
-    if (roa_spin_lock_try_aquire(&steal_tls->job_lock))
-    {
-      if (roa_spin_lock_try_aquire(&tls->job_lock))
-      {
-        /* look for jobs that aren't thread locked */
-        struct job_internal *steal_jobs = steal_tls->pending_jobs;
+			/* shouldn't happen but just incase */
+			if(steal_tls == tls)
+			{
+				continue;
+			}
 
-        unsigned job_count = roa_array_size(steal_jobs);
-        unsigned jobs_to_steal = job_count / 4;
+			/* try and get lock */
+			if(roa_spin_lock_try_aquire(&steal_tls->job_lock))
+			{
+				struct job_internal *steal_jobs = steal_tls->pending_jobs;
+				unsigned job_count = roa_array_size(steal_jobs);
 
-        if (job_count > 1)
-        {
-          /* loop through jobs and steal em */
-          int j;
-          int k = 0;
-          for (j = 0; j < jobs_to_steal; ++j)
-          {
-            struct job_internal steal = steal_jobs[k];
+				int j;
+				for(j = 0; j < job_count; ++j)
+				{
+					struct job_internal steal = steal_jobs[j];
 
-            if (j > job_count)
-            {
-              break;
-            }
+					if(steal.desc.thread_locked == ROA_FALSE)
+					{
+						steal_job = steal;
+						stole_a_job = ROA_TRUE;
+						roa_array_erase(steal_jobs, j);
 
-            if (steal.desc.thread_locked == ROA_FALSE)
-            {
-              steal.desc.thread_locked = ROA_TRUE;
+						if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
+						{
+							printf("Thread %d stole from thread %d \n", th_index, steal_index);
+						}
 
-              printf("th %d stole from th %d\n", th_index, search_index);
+						break;
+					}
+				}
 
-              /*roa_array_push(tls->pending_jobs, steal);*/
-              /*roa_array_erase(steal_jobs, k);*/
+				roa_spin_lock_release(&steal_tls->job_lock);
+			}
+		}
+	}
 
-              return_val = ROA_TRUE;
+	/* lock this tls and apply work */
+	if(stole_a_job)
+	{
+		steal_job.desc.thread_locked = ROA_TRUE;
 
-              continue;
-            }
+		roa_spin_lock_aquire(&tls->job_lock);
 
-            k += 1;
-          }
-        }
-      }
+		roa_array_push(tls->pending_jobs, steal_job);
 
-      roa_spin_lock_release(&tls->job_lock);
-      roa_spin_lock_release(&steal_tls->job_lock);
-    } /* aquire */
-  } /* search threads */
+		roa_spin_lock_release(&tls->job_lock);
+
+		return_val = ROA_TRUE;
+	}
 
   return return_val;
 }
@@ -359,18 +381,49 @@ thread_internal_wait_or_quit(
   if (th_index == 0)
   {
     /* main thread check to see if we are out of work */
-    int j;
+    int i;
+		int th_count = ctx->thread_count;
     ROA_BOOL work = ROA_FALSE;
 
-    for (j = 0; j < ctx->thread_count; ++j)
-    {
-      if (ctx->tls[j].thread_status == TLS_QUIT)
-      {
-        work = ROA_TRUE;
-        break;
-      }
-    }
+		/* lock all thread jobs */
+		for(i = 0; i < th_count; ++i)
+		{
+			roa_spin_lock_aquire(&ctx->tls[i].job_lock);
+		}
+
+		/* check batches */
+		for(i = 0; i < th_count; ++i)
+		{
+			unsigned count = roa_array_size(ctx->tls[i].batches);
+
+			if(count)
+			{
+				work = ROA_TRUE;
+				break;
+			}
+		}
+
+		/* unlock all */
+		for(i = 0; i < th_count; ++i)
+		{
+			roa_spin_lock_release(&ctx->tls[i].job_lock);
+		}
+
+		/* signal quit if required */
+		if(work == ROA_FALSE)
+		{
+			for(i = 0; i < th_count; ++i)
+			{
+				ctx->tls[i].thread_status = TLS_QUIT; 
+			}
+
+			stay_alive = ROA_FALSE;
+		}
   }
+	else if(tls->thread_status == TLS_QUIT)
+	{
+		stay_alive = ROA_FALSE;
+	}
 
   return stay_alive;
 }
@@ -440,7 +493,7 @@ thread_process(void *arg)
   tls->thread_status = TLS_RUNNING;
 
 
-  /* if this loop gets to the bottom it exists */
+  /* if this loop gets to the bottom it exits */
   while (1)
   {
     /* remove completed batches */
@@ -471,6 +524,11 @@ thread_process(void *arg)
     {
       continue;
     }
+
+		if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
+		{
+			printf("Exiting th %d\n", th_index);
+		}
 
     return ROA_NULL;
     

@@ -10,6 +10,9 @@
 #include <fiber/fiber.h>
 
 
+#define JOB_DEBUG_OUTPUT 1
+
+
 uint64_t
 roa_job_submit(
   roa_job_dispatcher_ctx_t ctx,
@@ -43,6 +46,11 @@ roa_job_submit(
 
     roa_array_push(tls->batches, new_batch);
 		roa_array_push(tls->batch_ids, new_batch_id);
+
+		if(ROA_IS_ENABLED(JOB_DEBUG_OUTPUT))
+		{
+			printf("New Marker %d, Thread %d Counter %d \n", marker, th_index, new_batch_id);
+		}
 
     /* push work */
     unsigned j;
