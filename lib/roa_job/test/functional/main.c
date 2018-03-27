@@ -13,7 +13,7 @@
 #define TEST_WITH_OUTPUT 0
 
 
-#define BATCH_COUNT (1 << 4)
+#define BATCH_COUNT (1 << 10)
 #define TICK_COUNT (1 << 16)
 
 
@@ -44,6 +44,11 @@ calculate(roa_job_dispatcher_ctx_t ctx, void *arg)
 
 	roa_atomic_int *int_arg = (roa_atomic_int*)arg;
 	roa_atomic_int_inc(int_arg);
+
+  int expected = (TICK_COUNT - ticks);
+  int data = roa_atomic_int_load(int_arg);
+
+  ROA_ASSERT(data == expected);
 }
 
 
@@ -80,6 +85,18 @@ tick(roa_job_dispatcher_ctx_t ctx, void *arg)
     roa_free(batch);
   }
 
+  /* check test data is correct */
+  {
+    int i;
+
+    for (i = 0; i < BATCH_COUNT; ++i)
+    {
+      int expected = (TICK_COUNT - ticks);
+      int data = roa_atomic_int_load(&test_data[i]);
+      ROA_ASSERT(data == expected);
+    }
+  }
+
   /* another tick? */
   if (ticks > 0)
   {
@@ -111,6 +128,11 @@ submit_tick(roa_job_dispatcher_ctx_t ctx)
 int
 main()
 {
+  /* double check test data */
+  unsigned max_value = (unsigned)-1;
+  unsigned tick = TICK_COUNT;
+  ROA_ASSERT(max_value > tick);
+
   roa_job_dispatcher_ctx_t ctx = ROA_NULL;
   roa_job_dispatcher_ctx_create(&ctx, 0);
 
@@ -142,7 +164,7 @@ main()
 
     for (i = 0; i < BATCH_COUNT; ++i)
     {
-      unsigned expected = TICK_COUNT;
+      int expected = TICK_COUNT;
       ROA_ASSERT(roa_atomic_int_load(&test_data[i]) == expected);
     }
   }

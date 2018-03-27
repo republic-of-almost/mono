@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 
-#define THREAD_PROCESS_DEBUG_OUTPUT 1
+#define THREAD_PROCESS_DEBUG_OUTPUT 0
 
 
 void
@@ -50,7 +50,6 @@ fiber_process(void *arg)
       roa_job_fn job_func = (roa_job_fn)desc.func;
       void *job_arg = desc.arg;
 
-      /*
       if (ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
       {
         char buffer[128];
@@ -59,8 +58,7 @@ fiber_process(void *arg)
         sprintf(buffer, "th: %d - func: %p arg %p", th_index, job_func, job_arg);
         printf("%s\n", buffer);
       }
-      */
-
+      
       job_func(ctx, job_arg);
     }
 
@@ -231,6 +229,7 @@ thread_internal_check_pending(
   ROA_BOOL return_val = ROA_FALSE;
 
   roa_spin_lock_aquire(&tls->fiber_lock);
+
   unsigned fiber_size = roa_array_size(tls->free_fiber_pool);
 
   if (fiber_size)
@@ -255,9 +254,6 @@ thread_internal_check_pending(
 
       roa_array_push(tls->blocked_fiber_batch_ids, 0);
       roa_array_push(tls->blocked_fibers, exec);
-
-      roa_spin_lock_release(&tls->fiber_lock);
-      roa_spin_lock_release(&tls->job_lock);
 
       return_val = ROA_TRUE;
     }
@@ -308,6 +304,11 @@ thread_internal_steal_jobs(
 			/* try and get lock */
 			if(roa_spin_lock_try_aquire(&steal_tls->job_lock))
 			{
+        if (ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
+        {
+          //printf("STEAL LOCK %d\n", steal_index);
+        }
+
 				unsigned job_count = roa_array_size(steal_tls->pending_jobs);
 
 				int j;
@@ -321,16 +322,19 @@ thread_internal_steal_jobs(
 						stole_a_job = ROA_TRUE;
 						roa_array_erase(steal_tls->pending_jobs, j);
 
-            /*
 						if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
 						{
 							printf("Thread %d stole from thread %d \n", th_index, steal_index);
 						}
-            */
-
+            
 						break;
 					}
 				}
+
+        if (ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
+        {
+          //printf("STEAL UNLOCK %d\n", steal_index);
+        }
 
 				roa_spin_lock_release(&steal_tls->job_lock);
 
