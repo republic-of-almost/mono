@@ -44,7 +44,7 @@ fiber_process(void *arg)
   {
     /* exec job */
     {
-      char buffer[1024];
+      char buffer[128];
       ROA_MEM_ZERO(buffer);
 
       struct job_internal job_data = tls->executing_fiber.desc;
@@ -63,38 +63,7 @@ fiber_process(void *arg)
     /* clear executing as its done */
     {
       /* decrement job count */
-      {
-        roa_atomic_int_dec(tls->executing_fiber.desc.counter);
-
-        /*
-        unsigned count = roa_array_size(tls->batch_ids);
-        unsigned i;
-        uint32_t batch_to_find = tls->executing_fiber.desc.batch_id;
-
-        roa_spin_lock_aquire(&tls->job_lock);
-
-        for (i = 0; i < count; ++i)
-        {
-          uint32_t batch_id = tls->batch_ids[i];
-
-          if (batch_to_find == batch_id)
-          {
-            struct job_batch *batch = &tls->batches[i];
-            int count = roa_atomic_int_dec(&batch->counter);
-
-            if (count <= 0)
-            {
-              roa_array_erase(tls->batch_ids, i);
-              roa_array_erase(tls->batches, i);
-            }
-            
-            break;
-          }
-        }
-        */
-
-        /*roa_spin_lock_release(&tls->job_lock);*/
-      }
+      roa_atomic_int_dec(tls->executing_fiber.desc.counter);
     }
 
     /* swtich back */
@@ -125,11 +94,13 @@ thread_internal_run_fiber(
 		
 		batch_count = roa_array_size(tls->batch_ids);
 
-		unsigned bytes = sizeof(tls->batch_ids[0]) * batch_count;
+		if(batch_count)
+		{
+			unsigned bytes = sizeof(tls->batch_ids[0]) * batch_count;
+			batch_id = roa_alloc(bytes);
 
-		batch_id = roa_alloc(bytes);
-
-		memcpy(batch_id, tls->batch_ids, bytes);
+			memcpy(batch_id, tls->batch_ids, bytes);
+		}
 
 		roa_spin_lock_release(&tls->job_lock);
 	}
@@ -201,6 +172,7 @@ thread_internal_run_fiber(
 	}
 
 	/* cleanup */
+	if(batch_id)
 	{
 		roa_free(batch_id);
 	}
@@ -390,6 +362,9 @@ thread_internal_wait_or_quit(
     int i;
 		int th_count = ctx->thread_count;
     ROA_BOOL work = ROA_FALSE;
+
+		/* short cir */
+		return ROA_TRUE;
 
 		/* lock all thread jobs */
 		for(i = 0; i < th_count; ++i)

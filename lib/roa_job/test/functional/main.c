@@ -2,6 +2,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
+#include <roa_lib/atomic.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -17,7 +18,7 @@
 
 
 int ticks = TICK_COUNT;
-int *test_data;
+roa_atomic_int *test_data;
 
 
 /* --------------------------------------------------------------- [ Fwd ] -- */
@@ -37,9 +38,12 @@ calculate(roa_job_dispatcher_ctx_t ctx, void *arg)
     printf("calc job\n");
   }
 
-  int *int_arg = (int*)arg;
+  /*int *int_arg = (int*)arg;*/
 
-  *int_arg += 1;
+  /**int_arg += 1;*/
+
+	roa_atomic_int *int_arg = (roa_atomic_int*)arg;
+	roa_atomic_int_inc(int_arg);
 }
 
 
@@ -139,7 +143,7 @@ main()
     for (i = 0; i < BATCH_COUNT; ++i)
     {
       unsigned expected = TICK_COUNT;
-      ROA_ASSERT(test_data[i] == expected);
+      ROA_ASSERT(roa_atomic_int_load(&test_data[i]) == expected);
     }
   }
 

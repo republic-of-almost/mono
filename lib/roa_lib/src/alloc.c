@@ -45,7 +45,9 @@ roa_zalloc(unsigned bytes)
     g_alloc_counter += 1;
   }
 
-  return calloc(1, bytes);
+  /* return calloc(1, bytes); */
+	void *data = roa_alloc(bytes);
+	memset(data, 0, bytes);
 }
 
 
