@@ -12,8 +12,9 @@
 #define TEST_WITH_OUTPUT 1
 
 
-#define BATCH_COUNT (1 << 2)
-#define TICK_COUNT (1 << 4)
+#define BATCH_COUNT (1 << 9)
+#define TICK_COUNT (1 << 16)
+
 
 int ticks = TICK_COUNT;
 int *test_data;
@@ -54,7 +55,9 @@ tick(roa_job_dispatcher_ctx_t ctx, void *arg)
   {
     int i;
 
-    struct roa_job_desc batch[BATCH_COUNT];
+    struct roa_job_desc *batch = ROA_NULL;
+    unsigned batch_bytes = sizeof(*batch) * BATCH_COUNT;
+    batch = roa_zalloc(batch_bytes);
 
     for (i = 0; i < BATCH_COUNT; ++i)
     {
@@ -65,11 +68,12 @@ tick(roa_job_dispatcher_ctx_t ctx, void *arg)
 
     uint64_t batch_id = roa_job_submit(
       ctx,
-      ROA_ARR_DATA(batch),
-      ROA_ARR_COUNT(batch)
+      batch,
+      BATCH_COUNT
     );
 
     roa_job_wait(ctx, batch_id);
+    roa_free(batch);
   }
 
   /* another tick? */

@@ -219,6 +219,8 @@ thread_internal_remove_cleared_batches(
   unsigned batch_count = roa_array_size(tls->batch_ids);
 
   int i;
+  int err_i = 0;
+
   for (i = 0; i < batch_count; ++i)
   {
     struct job_batch *batch = &tls->batches[i];
@@ -228,10 +230,14 @@ thread_internal_remove_cleared_batches(
     {
       roa_free(batch->counter);
 
-      roa_array_erase(tls->batch_ids, i);
-      roa_array_erase(tls->batches, i);
+      roa_array_erase(tls->batch_ids, err_i);
+      roa_array_erase(tls->batches, err_i);
 
       return_val = ROA_TRUE;
+    }
+    else
+    {
+      err_i += 1;
     }
   }
 
