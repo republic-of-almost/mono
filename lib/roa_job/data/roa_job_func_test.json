@@ -11,5 +11,9 @@
 
   "project_dependencies": [
     "RepublicJob"
-  ]
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
+  ]  
 }

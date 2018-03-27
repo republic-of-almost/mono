@@ -27,7 +27,8 @@
 
   "defines_windows" : [
     "WIN32_LEAN_AND_MEAN",
-    "NOMINMAX"
+    "NOMINMAX",
+    "_CRT_SECURE_NO_WARNINGS"
   ],
 
   "defines" : [

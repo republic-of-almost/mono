@@ -17,9 +17,16 @@
 #include <stdio.h>
 
 
+#ifndef THREAD_PROCESS_DEBUG_OUTPUT
 #define THREAD_PROCESS_DEBUG_OUTPUT 0
+#endif
 
 
+/*
+  Process the fiber.
+  when the fiber is switched to it will execute the function with the arg
+  provided, then switch back to the home fiber.
+*/
 void
 fiber_process(void *arg)
 {
@@ -82,14 +89,17 @@ fiber_process(void *arg)
   }
 }
 
-
+/*
+  Switches to a pending fiber. 
+  returns true if a pending fiber was executed.
+*/
 ROA_BOOL
 thread_internal_run_fiber(
   struct thread_local_storage *tls)
 {
   ROA_BOOL return_val = ROA_FALSE;
 
-	/* lock jobs to copy batch ids */
+  /* get the current batch ids */
 	uint32_t *batch_id = ROA_NULL;
 	unsigned batch_count = 0;
 	{
@@ -108,12 +118,13 @@ thread_internal_run_fiber(
 		roa_spin_lock_release(&tls->job_lock);
 	}
 
-	/* lock fiber to check batch ids against */
+	/* check batch ids against fibers */
 	{
+    roa_spin_lock_aquire(&tls->fiber_lock);
+
 		unsigned blocked_count = roa_array_size(tls->blocked_fiber_batch_ids);
 
-		unsigned i;
-		unsigned j;
+		unsigned i,j;
 		int unblocked_fiber_index = -1;
 
 	  /* search for some work */
@@ -123,12 +134,14 @@ thread_internal_run_fiber(
 
 	    for (j = 0; j < batch_count; ++j)
 	    {
-		    if (tls->batch_ids[j] == search_for)
+		    if (batch_id[j] == search_for)
 			  {
+          /* batch still exists cant execute */
 				  break;
 	      }
 		  }
 
+      /* if we got to the end then its unblocked */
 			if (j == batch_count)
 	    {
 		    unblocked_fiber_index = i;
@@ -136,6 +149,13 @@ thread_internal_run_fiber(
 	    }
 		}
 
+    /* cleanup */
+    if (batch_id)
+    {
+      roa_free(batch_id);
+    }
+
+    /* setup fiber */
 	  if (unblocked_fiber_index != -1)
 		{
 			tls->executing_fiber = tls->blocked_fibers[i];
@@ -156,7 +176,12 @@ thread_internal_run_fiber(
 
 	      /* switch to worker ... */
 
+        /* release because it might call wait */
+        roa_spin_lock_release(&tls->fiber_lock);
+
 		    roa_fiber_switch(tls->home_fiber, worker);
+
+        roa_spin_lock_aquire(&tls->fiber_lock);
 
 			  /* ... back from fiber */
 	    }
@@ -164,8 +189,6 @@ thread_internal_run_fiber(
 		  /* free fiber */
 			if (tls->executing_fiber.worker_fiber)
 	    {
-		    roa_spin_lock_aquire(&tls->fiber_lock);
-	
 		    roa_array_push(tls->free_fiber_pool, tls->executing_fiber.worker_fiber);
 			  tls->executing_fiber.worker_fiber = ROA_NULL;
 	    }
@@ -173,17 +196,17 @@ thread_internal_run_fiber(
 
 		roa_spin_lock_release(&tls->fiber_lock);
 	}
-
-	/* cleanup */
-	if(batch_id)
-	{
-		roa_free(batch_id);
-	}
   
   return return_val;
 }
 
 
+/*
+  Removes any batches that counters are no zero, this unblocks any fibers that
+  are pending on a batch.
+
+  returns true if any batches where removed.
+*/
 ROA_BOOL
 thread_internal_remove_cleared_batches(
   struct thread_local_storage *tls)
@@ -193,8 +216,8 @@ thread_internal_remove_cleared_batches(
   roa_spin_lock_aquire(&tls->job_lock);
   unsigned batch_count = roa_array_size(tls->batch_ids);
 
-  int i;
-  int err_i = 0;
+  unsigned i;
+  unsigned erase_index = 0;
 
   for (i = 0; i < batch_count; ++i)
   {
@@ -205,14 +228,14 @@ thread_internal_remove_cleared_batches(
     {
       roa_free(batch->counter);
 
-      roa_array_erase(tls->batch_ids, err_i);
-      roa_array_erase(tls->batches, err_i);
+      roa_array_erase(tls->batch_ids, erase_index);
+      roa_array_erase(tls->batches, erase_index);
 
       return_val = ROA_TRUE;
     }
     else
     {
-      err_i += 1;
+      erase_index += 1;
     }
   }
 
@@ -222,6 +245,12 @@ thread_internal_remove_cleared_batches(
 }
 
 
+/*
+  Checks the pending list of jobs, if one is found it will place it on the blocked
+  fiber list with no batch, this will get picked up by the process.
+
+  returns true if is pushed a job onto the fiber queue.
+*/
 ROA_BOOL
 thread_internal_check_pending(
   struct thread_local_storage *tls)
@@ -267,6 +296,10 @@ thread_internal_check_pending(
 }
 
 
+/*
+  This will look at the other TLS for work todo. It will steal one job from the queue.
+  returns true if it stole a job.
+*/
 ROA_BOOL
 thread_internal_steal_jobs(
   struct thread_local_storage *tls,
@@ -280,12 +313,10 @@ thread_internal_steal_jobs(
 
 	/* search for work to steal */
 	{
-    /*
 		if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
 		{
 			printf("Thread %d looking to steal \n", th_index);
 		}
-    */
 
 		int th_count = ctx->thread_count;
 		int i;
@@ -304,14 +335,9 @@ thread_internal_steal_jobs(
 			/* try and get lock */
 			if(roa_spin_lock_try_aquire(&steal_tls->job_lock))
 			{
-        if (ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
-        {
-          //printf("STEAL LOCK %d\n", steal_index);
-        }
-
 				unsigned job_count = roa_array_size(steal_tls->pending_jobs);
 
-				int j;
+        unsigned j;
 				for(j = 0; j < job_count; ++j)
 				{
 					struct job_internal steal = steal_tls->pending_jobs[j];
@@ -330,11 +356,6 @@ thread_internal_steal_jobs(
 						break;
 					}
 				}
-
-        if (ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
-        {
-          //printf("STEAL UNLOCK %d\n", steal_index);
-        }
 
 				roa_spin_lock_release(&steal_tls->job_lock);
 
@@ -364,6 +385,13 @@ thread_internal_steal_jobs(
 }
 
 
+/*
+  If this is the main thread it will check the other threads to see if they have work.
+  if not it will signal quit. If this is a worker thread then it will wait until new work
+  signal.
+
+  returns true if dispatcher should keep going.
+*/
 ROA_BOOL
 thread_internal_wait_or_quit(
   struct thread_local_storage *tls,
@@ -424,6 +452,13 @@ thread_internal_wait_or_quit(
 }
 
 
+/*
+  Runs the thread.
+  It will in order check each stage, should any stage complete, it will start again from
+  the begining. 
+
+  if it gets to the end the thread will exit.
+*/
 void*
 thread_process(void *arg)
 {
@@ -449,10 +484,9 @@ thread_process(void *arg)
   int th_index = -1;
   unsigned th_count = ctx->thread_count;
   {
-    int count = ctx->thread_count;
-    int i;
+    unsigned i;
 
-    for (i = 0; i < count; ++i)
+    for (i = 0; i < th_count; ++i)
     {
       roa_thread_id that_id = ctx->thread_ids[i];
       if (that_id == curr_th_id)
@@ -533,6 +567,9 @@ thread_process(void *arg)
 }
 
 
+/*
+  Helper to find where in the tls array the callee is.
+*/
 int
 job_internal_find_thread_index(struct roa_job_dispatcher_ctx *ctx)
 {

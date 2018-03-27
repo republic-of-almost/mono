@@ -13,8 +13,8 @@
 #define TEST_WITH_OUTPUT 0
 
 
-#define BATCH_COUNT (1 << 10)
-#define TICK_COUNT (1 << 16)
+#define BATCH_COUNT (1 << 11)
+#define TICK_COUNT (1 << 17)
 
 
 int ticks = TICK_COUNT;
@@ -33,6 +33,9 @@ void submit_tick(roa_job_dispatcher_ctx_t ctx);
 void
 calculate(roa_job_dispatcher_ctx_t ctx, void *arg)
 {
+  ROA_UNUSED(ctx);
+  ROA_UNUSED(arg);
+
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
     printf("calc job\n");
@@ -55,6 +58,8 @@ calculate(roa_job_dispatcher_ctx_t ctx, void *arg)
 void
 tick(roa_job_dispatcher_ctx_t ctx, void *arg)
 {
+  ROA_UNUSED(arg);
+
   if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
     printf("tick %d\n", TICK_COUNT - ticks);
@@ -152,7 +157,7 @@ main()
 
     for (i = 0; i < BATCH_COUNT; ++i)
     {
-      printf("%d, ", test_data[i]);
+      printf("%d, ", test_data[i].val);
     }
 
     printf("\n");

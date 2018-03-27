@@ -48,6 +48,8 @@ roa_zalloc(unsigned bytes)
   /* return calloc(1, bytes); */
 	void *data = roa_alloc(bytes);
 	memset(data, 0, bytes);
+
+  return data;
 }
 
 

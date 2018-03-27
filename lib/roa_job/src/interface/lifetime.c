@@ -4,6 +4,8 @@
 #include <roa_lib/sys.h>
 #include <roa_lib/log.h>
 #include <roa_lib/thread.h>
+#include <roa_lib/atomic.h>
+#include <roa_lib/spin_lock.h>
 #include <roa_lib/array.h>
 #include <jobs/jobs.h>
 #include <fiber/fiber.h>
@@ -87,11 +89,11 @@ roa_job_dispatcher_ctx_create(
 					roa_array_create_with_capacity(new_tls.blocked_fiber_batch_ids, fiber_count);
 		      roa_array_create_with_capacity(new_tls.free_fiber_pool, fiber_count);
 			    
-          unsigned i;
+          unsigned j;
 
-          for (i = 0; i < fiber_count; ++i)
+          for (j = 0; j < fiber_count; ++j)
           {
-            struct fiber *fi;
+            struct roa_fiber *fi;
             roa_fiber_create(&fi, fiber_process, (void*)new_ctx);
 
             roa_array_push(new_tls.free_fiber_pool, fi);
@@ -99,7 +101,6 @@ roa_job_dispatcher_ctx_create(
 
 					roa_array_push(new_ctx->tls, new_tls);
 				}
-
 
         /* thread proc will fill this in */
 				{
@@ -170,7 +171,7 @@ roa_job_dispatcher_ctx_destroy(
   if(kill_ctx)
   {
     /* free threads and data */
-    int i;
+    unsigned i;
     for (i = 1; i < kill_ctx->thread_count; ++i)
     {
       roa_thread_destroy(kill_ctx->threads[i]);
@@ -191,5 +192,6 @@ roa_job_dispatcher_ctx_get_desc(
   roa_job_dispatcher_ctx_t ctx,
   struct roa_job_dispatcher_desc *desc)
 {
-
+  ROA_UNUSED(ctx);
+  ROA_UNUSED(desc);
 }

@@ -5,12 +5,19 @@
 #include <roa_lib/assert.h>
 #include <ctx/context.h>
 #include <thread_dispatch/thread_local_storage.h>
+#include <thread_dispatch/thread_process.h> /* todo remove this */
 #include <roa_lib/alloc.h>
 #include <roa_lib/array.h>
 #include <fiber/fiber.h>
 
 
+#ifndef JOB_DEBUG_OUTPUT
 #define JOB_DEBUG_OUTPUT 1
+#endif
+
+#ifdef JOB_DEBUG_OUTPUT
+#include <stdio.h>
+#endif
 
 
 uint64_t

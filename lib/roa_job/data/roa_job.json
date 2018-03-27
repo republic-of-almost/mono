@@ -40,6 +40,10 @@
     "ROA_JOB_DEBUG_NAME_THREADS=0"
   ],
 
+  "defines_windows": [
+    "_CRT_SECURE_NO_WARNINGS"
+  ],
+
   "project_dependencies" : [
     "RepublicLib"
   ],
