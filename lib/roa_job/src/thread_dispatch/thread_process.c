@@ -44,17 +44,22 @@ fiber_process(void *arg)
   {
     /* exec job */
     {
-      char buffer[128];
-      ROA_MEM_ZERO(buffer);
-
       struct job_internal job_data = tls->executing_fiber.desc;
       struct roa_job_desc desc = job_data.desc;
 
       roa_job_fn job_func = (roa_job_fn)desc.func;
       void *job_arg = desc.arg;
 
-      sprintf(buffer, "th: %d - func: %p arg %p", th_index, job_func, job_arg);
-      printf("%s\n", buffer);
+      /*
+      if (ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
+      {
+        char buffer[128];
+        ROA_MEM_ZERO(buffer);
+
+        sprintf(buffer, "th: %d - func: %p arg %p", th_index, job_func, job_arg);
+        printf("%s\n", buffer);
+      }
+      */
 
       job_func(ctx, job_arg);
     }
@@ -279,10 +284,12 @@ thread_internal_steal_jobs(
 
 	/* search for work to steal */
 	{
+    /*
 		if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
 		{
-			/*printf("Thread %d looking to steal \n", th_index);*/
+			printf("Thread %d looking to steal \n", th_index);
 		}
+    */
 
 		int th_count = ctx->thread_count;
 		int i;
@@ -301,30 +308,36 @@ thread_internal_steal_jobs(
 			/* try and get lock */
 			if(roa_spin_lock_try_aquire(&steal_tls->job_lock))
 			{
-				struct job_internal *steal_jobs = steal_tls->pending_jobs;
-				unsigned job_count = roa_array_size(steal_jobs);
+				unsigned job_count = roa_array_size(steal_tls->pending_jobs);
 
 				int j;
 				for(j = 0; j < job_count; ++j)
 				{
-					struct job_internal steal = steal_jobs[j];
+					struct job_internal steal = steal_tls->pending_jobs[j];
 
 					if(steal.desc.thread_locked == ROA_FALSE)
 					{
 						steal_job = steal;
 						stole_a_job = ROA_TRUE;
-						roa_array_erase(steal_jobs, j);
+						roa_array_erase(steal_tls->pending_jobs, j);
 
+            /*
 						if(ROA_IS_ENABLED(THREAD_PROCESS_DEBUG_OUTPUT))
 						{
 							printf("Thread %d stole from thread %d \n", th_index, steal_index);
 						}
+            */
 
 						break;
 					}
 				}
 
 				roa_spin_lock_release(&steal_tls->job_lock);
+
+        if (stole_a_job)
+        {
+          break;
+        }
 			}
 		}
 	}
@@ -362,10 +375,7 @@ thread_internal_wait_or_quit(
     int i;
 		int th_count = ctx->thread_count;
     ROA_BOOL work = ROA_FALSE;
-
-		/* short cir */
-		return ROA_TRUE;
-
+    
 		/* lock all thread jobs */
 		for(i = 0; i < th_count; ++i)
 		{

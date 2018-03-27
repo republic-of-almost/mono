@@ -10,10 +10,10 @@
 /* -------------------------------------------------------------- [ Vars ] -- */
 
 
-#define TEST_WITH_OUTPUT 1
+#define TEST_WITH_OUTPUT 0
 
 
-#define BATCH_COUNT (1 << 9)
+#define BATCH_COUNT (1 << 4)
 #define TICK_COUNT (1 << 16)
 
 
@@ -122,7 +122,7 @@ main()
   /* back from dispatcher */
   roa_job_dispatcher_ctx_destroy(&ctx);
 
-  if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
+  //if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
     int i;
 

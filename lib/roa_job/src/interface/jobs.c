@@ -47,10 +47,12 @@ roa_job_submit(
     roa_array_push(tls->batches, new_batch);
 		roa_array_push(tls->batch_ids, new_batch_id);
 
+    /*
 		if(ROA_IS_ENABLED(JOB_DEBUG_OUTPUT))
 		{
 			printf("New Marker %d, Thread %d Counter %d \n", marker, th_index, new_batch_id);
 		}
+    */
 
     /* push work */
     unsigned j;
@@ -63,6 +65,12 @@ roa_job_submit(
       job.counter = new_batch.counter;
 
       roa_array_push(tls->pending_jobs, job);
+    }
+
+    if (ROA_IS_ENABLED(JOB_DEBUG_OUTPUT))
+    {
+      unsigned pending_job_count = roa_array_size(tls->pending_jobs);
+      printf("Pending Jobs %d \n", pending_job_count);
     }
 
     roa_spin_lock_release(&tls->job_lock);
