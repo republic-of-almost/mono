@@ -145,7 +145,7 @@ main()
   /* back from dispatcher */
   roa_job_dispatcher_ctx_destroy(&ctx);
 
-  //if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
+	if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {
     int i;
 
