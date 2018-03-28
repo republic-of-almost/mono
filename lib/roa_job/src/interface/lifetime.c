@@ -14,6 +14,11 @@
 #include <thread_dispatch/thread_process.h>
 
 
+#ifndef ROA_JOB_CPU_AFFINITY
+#define ROA_JOB_CPU_AFFINITY 0
+#endif
+
+
 /* ---------------------------------------------------------- [ lifetime ] -- */
 
 
@@ -120,12 +125,23 @@ roa_job_dispatcher_ctx_create(
 		        struct thread_arg *arg = roa_zalloc(sizeof(*arg));
 	          arg->ctx = new_ctx;
 						arg->roa_thread_id = &new_ctx->thread_ids[i];
+
 					  th = roa_thread_create(thread_process, arg, 1024, i);
+
+            if (ROA_IS_ENABLED(ROA_JOB_CPU_AFFINITY))
+            {
+              /* set */
+            }
 				  }
 					else
 					{
 						/* get now so that we can add jobs */
-						new_ctx->thread_ids[0] = roa_thread_get_current_id();		
+						new_ctx->thread_ids[0] = roa_thread_get_current_id();
+
+            if (ROA_IS_ENABLED(ROA_JOB_CPU_AFFINITY))
+            {
+              /* set */
+            }
 					}
 					roa_array_push(new_ctx->threads, th);
 				}

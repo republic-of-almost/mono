@@ -7,6 +7,11 @@
 #include <jobs/jobs.h>
 
 
+#ifndef ROA_JOB_CACHELINE_PADDING
+#define ROA_JOB_CACHELINE_PADDING 0
+#endif
+
+
 struct roa_fiber;
 struct job_batch;
 
@@ -43,6 +48,10 @@ struct thread_local_storage
 
 	struct executing_fiber executing_fiber;
   struct roa_fiber *home_fiber;
+
+  #if ROA_JOB_CACHELINE_PADDING == 1
+  char padding[64];
+  #endif
 };
 
 

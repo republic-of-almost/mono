@@ -41,10 +41,6 @@ calculate(roa_job_dispatcher_ctx_t ctx, void *arg)
     printf("calc job\n");
   }
 
-  /*int *int_arg = (int*)arg;*/
-
-  /**int_arg += 1;*/
-
 	roa_atomic_int *int_arg = (roa_atomic_int*)arg;
 	roa_atomic_int_inc(int_arg);
 
