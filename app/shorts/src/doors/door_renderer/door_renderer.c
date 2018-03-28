@@ -36,8 +36,8 @@ ROA_JOB(door_render, struct door_data*)
 
       roa_mat4_projection(&arg->projection, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
 
-      float x = roa_sin(time) * radius;
-      float y = roa_cos(time) * radius;
+      float x = roa_float_sin(time) * radius;
+      float y = roa_float_cos(time) * radius;
       float z = radius - (radius / ROA_G_RATIO);
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);

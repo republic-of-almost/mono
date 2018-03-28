@@ -1,5 +1,5 @@
 #include <roa_ctx/roa_ctx.h>
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 #include <roa_lib/alloc.h>
 #include <roa_graph/roa_graph.h>
 #include <data/config.h>
@@ -9,7 +9,7 @@
 
 roa_ctx_t roa_ctx_data;
 
-roa_dispatcher_ctx_t dispatcher;
+roa_job_dispatcher_ctx_t dispatcher;
 struct roa_tagged_allocator dispatcher_allocator;
 
 roa_graph_ctx_t roa_graph_ctx_data;
@@ -27,7 +27,7 @@ rep_data_init()
 
   /* fiber dispatcher */
   ROA_MEM_ZERO(dispatcher);
-  roa_dispatcher_create(&dispatcher, ROA_NULL);
+  roa_job_dispatcher_ctx_create(&dispatcher, ROA_NULL);
 
   ROA_MEM_ZERO(dispatcher_allocator);
   roa_tagged_allocator_create(&dispatcher_allocator, rep_config_tagged_hash_logic());
@@ -57,7 +57,7 @@ rep_data_ctx()
 }
 
 
-roa_dispatcher_ctx_t
+roa_job_dispatcher_ctx_t
 rep_data_dispatcher()
 {
   return dispatcher;

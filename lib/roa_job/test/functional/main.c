@@ -3,6 +3,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <roa_lib/atomic.h>
+#include <roa_lib/time.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -10,11 +11,11 @@
 /* -------------------------------------------------------------- [ Vars ] -- */
 
 
-#define TEST_WITH_OUTPUT 0
+#define TEST_WITH_OUTPUT 1
 
 
-#define BATCH_COUNT (1 << 11)
-#define TICK_COUNT (1 << 17)
+#define BATCH_COUNT (1 << 7)
+#define TICK_COUNT (1 << 7)
 
 
 int ticks = TICK_COUNT;
@@ -139,11 +140,24 @@ main()
 
   test_data = roa_zalloc(sizeof(test_data[0]) * BATCH_COUNT);
 
+  /* start time */
+  unsigned long start = roa_time_get_current_ms();
+
   submit_tick(ctx);
   roa_job_dispatcher_ctx_run(ctx);
 
+  /* time taken */
+  unsigned long end = roa_time_get_current_ms();
+  unsigned long time = end - start;
+
   /* back from dispatcher */
   roa_job_dispatcher_ctx_destroy(&ctx);
+
+
+  if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
+  {
+    printf("Time taken %lu\n", time);
+  }
 
 	if (ROA_IS_ENABLED(TEST_WITH_OUTPUT))
   {

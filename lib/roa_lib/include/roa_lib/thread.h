@@ -45,6 +45,10 @@ roa_thread_destroy(roa_thread th);
 
 
 void
+roa_thread_set_affinity(roa_thread th, int affinity);
+
+
+void
 roa_thread_join(roa_thread th);
 
 

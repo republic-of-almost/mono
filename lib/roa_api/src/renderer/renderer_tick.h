@@ -2,7 +2,7 @@
 #define RENDERER_TICK_INCLUDED_
 
 
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 
 
 ROA_JOB_DECL(rep_renderer_tick);

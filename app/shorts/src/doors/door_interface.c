@@ -39,14 +39,14 @@ ROA_JOB(door_startup, struct shorts_app_data*)
     struct roa_job_desc startup[1];
     startup[0].arg = data;
     startup[0].func = door_renderer_create;
-    startup[0].keep_on_calling_thread = ROA_FALSE;
+    startup[0].thread_locked = ROA_FALSE;
 
-    unsigned startup_marker = roa_dispatcher_add_jobs(
+    uint64_t startup_marker = roa_job_submit(
       job_ctx,
       ROA_ARR_DATA(startup),
       ROA_ARR_COUNT(startup));
 
-    roa_dispatcher_wait_for_counter(job_ctx, startup_marker);
+    roa_job_wait(job_ctx, startup_marker);
   }
 
   /* create descs callbacks */
@@ -55,11 +55,11 @@ ROA_JOB(door_startup, struct shorts_app_data*)
 
     submit_callback_desc[0].arg = data;
     submit_callback_desc[0].func = door_think;
-    submit_callback_desc[0].keep_on_calling_thread = ROA_FALSE;
+    submit_callback_desc[0].thread_locked = ROA_FALSE;
 
     submit_callback_desc[1].arg = data;
     submit_callback_desc[1].func = door_render;
-    submit_callback_desc[1].keep_on_calling_thread = ROA_FALSE;
+    submit_callback_desc[1].thread_locked = ROA_FALSE;
 
     struct roa_job_desc add_logn_desc[2];
 
@@ -69,7 +69,7 @@ ROA_JOB(door_startup, struct shorts_app_data*)
 
     add_logn_desc[0].arg = &thinker_arg;
     add_logn_desc[0].func = app_add_thinker;
-    add_logn_desc[0].keep_on_calling_thread = ROA_FALSE;
+    add_logn_desc[0].thread_locked = ROA_FALSE;
 
     struct app_renderer_data_arg renderer_arg;
     renderer_arg.app_data = arg;
@@ -77,15 +77,15 @@ ROA_JOB(door_startup, struct shorts_app_data*)
 
     add_logn_desc[1].arg = &renderer_arg;
     add_logn_desc[1].func = app_add_renderer;
-    add_logn_desc[1].keep_on_calling_thread = ROA_FALSE;
+    add_logn_desc[1].thread_locked = ROA_FALSE;
 
     /* add thinker and renderer job to application */
-    unsigned marker = roa_dispatcher_add_jobs(
+    uint64_t marker = roa_job_submit(
       job_ctx,
       ROA_ARR_DATA(add_logn_desc),
       ROA_ARR_COUNT(add_logn_desc));
 
     /* need to wait because stack allocated variables */
-    roa_dispatcher_wait_for_counter(job_ctx, marker);
+    roa_job_wait(job_ctx, marker);
   }
 }

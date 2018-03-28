@@ -52,6 +52,21 @@ roa_job_dispatcher_ctx_get_desc(
 /* -------------------------------------------------------------- [ Jobs ] -- */
 
 
+#define ROA_JOB_DECL(job_name)                                            \
+void job_name(roa_job_dispatcher_ctx_t job_ctx, void *void_arg);          \
+
+#define ROA_JOB(job_name, arg_type)                                       \
+void job_wrap_##job_name(roa_job_dispatcher_ctx_t job_ctx, arg_type arg); \
+                                                                          \
+void                                                                      \
+job_name(roa_job_dispatcher_ctx_t job_ctx, void *void_arg)                \
+{                                                                         \
+  job_wrap_##job_name(job_ctx, (arg_type)void_arg);                       \
+}                                                                         \
+                                                                          \
+void job_wrap_##job_name(roa_job_dispatcher_ctx_t job_ctx, arg_type arg)
+
+
 typedef void(*roa_job_fn)(roa_job_dispatcher_ctx_t ctx, void *arg);
 
 

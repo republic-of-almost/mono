@@ -1,4 +1,4 @@
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 #include <roa_renderer/roa_renderer.h>
 #include <volt/volt.h>
 #include <data/engine_data.h>
@@ -32,11 +32,11 @@ ROA_JOB(rep_renderer_tick, void*)
     {
       desc[i].func = rep_renderer_task;
       desc[i].arg = tasks[i];
-      desc[i].keep_on_calling_thread = ROA_FALSE;
+      desc[i].thread_locked = ROA_FALSE;
     }
 
-    unsigned marker = roa_dispatcher_add_jobs(job_ctx, desc, count);
-    roa_dispatcher_wait_for_counter(job_ctx, marker);
+    uint64_t marker = roa_job_submit(job_ctx, desc, count);
+    roa_job_wait(job_ctx, marker);
   }
 
   roa_renderer_ctx_execute(rep_data_renderer());

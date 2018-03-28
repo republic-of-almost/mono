@@ -2,7 +2,7 @@
 #include <data/engine_data.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 
 
 /* --------------------------------------------- [ Internal Task Wrapper ] -- */
@@ -28,7 +28,7 @@ rep_task_wrapper(roa_dispatcher_ctx_t job_ctx, void *void_arg)
 /* -------------------------------------------------------------- [ Task ] -- */
 
 
-unsigned
+uint64_t
 rep_task_submit(
   struct rep_task_desc *tasks,
   unsigned count)
@@ -55,19 +55,19 @@ rep_task_submit(
 
     wrapped_desc[i].arg = &args[i];
     wrapped_desc[i].func = rep_task_wrapper;
-    wrapped_desc[i].keep_on_calling_thread = ROA_FALSE;
+    wrapped_desc[i].thread_locked = ROA_FALSE;
   }
 
-  return roa_dispatcher_add_jobs(rep_data_dispatcher(), wrapped_desc, count);
+  return roa_job_submit(rep_data_dispatcher(), wrapped_desc, count);
 }
 
 
 void
 rep_task_wait(
-  unsigned marker)
+  uint64_t marker)
 {
   /* param check */
   ROA_ASSERT(marker);
 
-  roa_dispatcher_wait_for_counter(rep_data_dispatcher(), marker);
+  roa_job_wait(rep_data_dispatcher(), marker);
 }

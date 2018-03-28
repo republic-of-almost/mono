@@ -130,7 +130,7 @@ roa_job_dispatcher_ctx_create(
 
             if (ROA_IS_ENABLED(ROA_JOB_CPU_AFFINITY))
             {
-              /* set */
+              roa_thread_set_affinity(th, i);
             }
 				  }
 					else
@@ -138,10 +138,6 @@ roa_job_dispatcher_ctx_create(
 						/* get now so that we can add jobs */
 						new_ctx->thread_ids[0] = roa_thread_get_current_id();
 
-            if (ROA_IS_ENABLED(ROA_JOB_CPU_AFFINITY))
-            {
-              /* set */
-            }
 					}
 					roa_array_push(new_ctx->threads, th);
 				}
@@ -162,6 +158,11 @@ roa_job_dispatcher_ctx_run(
 
   /* signal start */
   ctx->threads[0] = roa_thread_create_self();
+
+  if (ROA_IS_ENABLED(ROA_JOB_CPU_AFFINITY))
+  {
+    roa_thread_set_affinity(ctx->threads[0], 0);
+  }
 
   struct thread_arg *arg = roa_zalloc(sizeof(*arg));
   arg->ctx = ctx;

@@ -5,6 +5,7 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_lib/array.h>
 #include <roa_lib/spin_lock.h>
+#include <roa_lib/fundamental.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <volt/volt.h>
@@ -23,12 +24,12 @@ ROA_JOB(app_frame, struct shorts_app_data*)
 
     if (count)
     {
-      unsigned ticker_marker = roa_dispatcher_add_jobs(
+      unsigned ticker_marker = roa_job_submit(
         job_ctx,
         arg->think_jobs,
         count);
 
-      roa_dispatcher_wait_for_counter(job_ctx, ticker_marker);
+      roa_job_wait(job_ctx, ticker_marker);
     }
 
     const uint64_t game_logic_hash = roa_hash("game_logic");
@@ -45,12 +46,12 @@ ROA_JOB(app_frame, struct shorts_app_data*)
 
     if (count)
     {
-      unsigned render_marker = roa_dispatcher_add_jobs(
+      unsigned render_marker = roa_job_submit(
         job_ctx,
         arg->render_jobs,
         count);
 
-      roa_dispatcher_wait_for_counter(job_ctx, render_marker);
+      roa_job_wait(job_ctx, render_marker);
     }
 
     const uint64_t renderer_hash = roa_hash("renderer");
@@ -68,9 +69,9 @@ ROA_JOB(app_frame, struct shorts_app_data*)
     struct roa_job_desc frame_desc;
     frame_desc.arg = (void*)arg;
     frame_desc.func = app_frame;
-    frame_desc.keep_on_calling_thread = ROA_TRUE;
+    frame_desc.thread_locked = ROA_TRUE;
 
-    roa_dispatcher_add_jobs(
+    roa_job_submit(
       job_ctx,
       &frame_desc,
       1);
@@ -101,20 +102,20 @@ ROA_JOB(app_startup, struct shorts_app_data*)
 
   frame_desc[0].arg = (void*)arg;
   frame_desc[0].func = app_frame;
-  frame_desc[0].keep_on_calling_thread = ROA_TRUE;
+  frame_desc[0].thread_locked = ROA_TRUE;
 
   frame_desc[1].arg = (void*)arg;
   frame_desc[1].func = door_startup;
-  frame_desc[1].keep_on_calling_thread = ROA_FALSE;
+  frame_desc[1].thread_locked = ROA_FALSE;
 
   frame_desc[2].arg = (void*)arg;
   frame_desc[2].func = renderables_startup;
-  frame_desc[2].keep_on_calling_thread = ROA_FALSE;
+  frame_desc[2].thread_locked = ROA_FALSE;
 
-  roa_dispatcher_add_jobs(
+  roa_job_submit(
     job_ctx,
-    ROA_ARRAY_PTR(frame_desc),
-    ROA_ARRAY_COUNT(frame_desc));
+    ROA_ARR_DATA(frame_desc),
+    ROA_ARR_COUNT(frame_desc));
 }
 
 

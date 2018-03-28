@@ -2,7 +2,7 @@
 #define APP_LIFETIME_INCLUDED_CAB38F90_5FE6_4594_8846_A36ED4B67D2F
 
 
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 
 /* -- */
 

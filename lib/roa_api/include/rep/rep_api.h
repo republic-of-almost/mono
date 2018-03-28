@@ -67,7 +67,7 @@ struct rep_task_desc
 };
 
 
-unsigned
+uint64_t
 rep_task_submit(
   struct rep_task_desc * tasks,
   unsigned count);
@@ -75,7 +75,7 @@ rep_task_submit(
 
 void
 rep_task_wait(
-  unsigned marker);
+  uint64_t marker);
 
 
 /* ------------------------------------------------------------ [ Object ] -- */

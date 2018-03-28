@@ -4,7 +4,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
 #include <roa_ctx/roa_ctx.h>
-#include <roa_job/dispatcher.h>
+#include <roa_job/roa_job.h>
 #include <renderer/renderer_tick.h>
 #include <volt/volt.h>
 #include <roa_lib/log.h>
@@ -37,16 +37,16 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* renderer tasks */
     {
       struct roa_job_desc renderer_tick;
-      renderer_tick.func = rep_renderer_tick;
-      renderer_tick.arg = ROA_NULL;
-      renderer_tick.keep_on_calling_thread = ROA_TRUE;
+      renderer_tick.func          = rep_renderer_tick;
+      renderer_tick.arg           = ROA_NULL;
+      renderer_tick.thread_locked = ROA_TRUE;
 
-      unsigned marker = roa_dispatcher_add_jobs(
+      uint64_t marker = roa_job_submit(
 				rep_data_dispatcher(),
 				&renderer_tick,
 				1);
 
-      roa_dispatcher_wait_for_counter(rep_data_dispatcher(), marker);
+      roa_job_wait(rep_data_dispatcher(), marker);
 
       roa_tagged_allocator_free(rep_config_tagged_hash_rendering());
     }
@@ -54,11 +54,11 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;
-      tick_desc.arg										 = application_frame_func;
-      tick_desc.func									 = rep_game_loop_tick;
-      tick_desc.keep_on_calling_thread = ROA_TRUE;
+      tick_desc.arg				  	= application_frame_func;
+      tick_desc.func				  = rep_game_loop_tick;
+      tick_desc.thread_locked = ROA_TRUE;
 
-      roa_dispatcher_add_jobs(rep_data_dispatcher(), &tick_desc, 1);
+      roa_job_submit(rep_data_dispatcher(), &tick_desc, 1);
     }
   }
 }
@@ -82,14 +82,14 @@ rep_app_create(
 
     /* setup job dispatcher */
     struct roa_job_desc tick_desc;
-    tick_desc.arg										 = application_frame_func;
-    tick_desc.func									 = rep_game_loop_tick;
-    tick_desc.keep_on_calling_thread = ROA_TRUE;
+    tick_desc.arg						= application_frame_func;
+    tick_desc.func				  = rep_game_loop_tick;
+    tick_desc.thread_locked = ROA_TRUE;
 
-    roa_dispatcher_add_jobs(rep_data_dispatcher(), &tick_desc, 1);
+    roa_job_submit(rep_data_dispatcher(), &tick_desc, 1);
 
     /* start dispatcher */
-    roa_dispatcher_run(rep_data_dispatcher());
+    roa_job_dispatcher_ctx_run(rep_data_dispatcher());
 
 		ROA_LOG_INFO("No Jobs in dispatcher shutting down");
 
