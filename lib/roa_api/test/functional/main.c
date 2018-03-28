@@ -15,28 +15,28 @@ uint32_t objects[OBJ_COUNT];
 
 
 void
-rep_job_func(void *arg)
+test_job(void *arg)
 {
   ROA_UNUSED(arg);
 }
 
 
 void
-rep_frame_func(void *arg)
+app_frame(void *arg)
 {
 	ROA_UNUSED(arg);
 
   struct rep_task_desc desc[1];
 
   desc[0].arg = 0;
-  desc[0].function = rep_job_func;
+  desc[0].function = test_job;
 
-  rep_task_submit(&desc[0], 1);
+  rep_task_submit(ROA_ARR_DATA(desc), ROA_ARR_COUNT(desc));
 }
 
 
 void
-rep_func_setup(void *arg)
+app_setup(void *arg)
 {
 	ROA_UNUSED(arg);
 
@@ -74,7 +74,7 @@ rep_func_setup(void *arg)
   {
     struct rep_app_desc app_desc;
     rep_app_get(&app_desc);
-    app_desc.frame_job	= rep_frame_func;
+    app_desc.frame_job	= app_frame;
     app_desc.title			= "ROA Func Test";
 		rep_app_set(&app_desc);
   }
@@ -92,7 +92,7 @@ main()
     app_desc.title     = "Loading ROA Func Test ...";
     app_desc.width     = 1200;
     app_desc.height    = 720;
-    app_desc.frame_job = rep_func_setup;
+    app_desc.frame_job = app_setup;
 
     rep_app_create(&app_desc);
   }
