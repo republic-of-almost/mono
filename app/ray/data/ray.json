@@ -1,0 +1,23 @@
+{
+  "name": "AppRay",
+  "kind": "ConsoleApp",
+  "language": "C89",
+  "location": "./",
+
+  "src_files": [
+    "../src/**.c",
+    "../src/**.h",
+    "../docs/**.md"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "project_dependencies": [
+    "RepublicJob",
+    "RepublicMath",
+    "RepublicCtx",
+    "Volt"
+  ]
+}

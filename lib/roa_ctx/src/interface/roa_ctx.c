@@ -155,6 +155,9 @@ roa_ctx_set_window_desc(
   ROA_ASSERT(ctx);
   ROA_ASSERT(ctx->window);
   ROA_ASSERT(desc);
+  ROA_ASSERT(desc->width);
+  ROA_ASSERT(desc->title);
+  ROA_ASSERT(desc->height);
 	
 	ctx->width = desc->width;
 	ctx->height = desc->height;
