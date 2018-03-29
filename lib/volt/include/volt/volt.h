@@ -54,6 +54,10 @@ typedef enum _volt_shader_stage {
 } volt_shader_stage;
 
 
+typedef enum _volt_access {
+  VOLT_STREAM,
+  VOLT_STATIC,
+} volt_access;
 
 /* --------------------------------------------------------- [ lifetime ] -- */
 
@@ -101,6 +105,7 @@ struct volt_texture_desc
   volt_texture_sampling sampling;
   volt_color_format format;
   VOLT_BOOL mip_maps;
+  volt_access access;
 
   void *data;
   unsigned width;
@@ -113,6 +118,20 @@ volt_texture_create(
   volt_ctx_t ctx,
   volt_texture_t *texture,
   struct volt_texture_desc *desc);
+
+
+void
+volt_texture_update(
+  volt_ctx_t ctx,
+  volt_texture_t texture,
+  struct volt_texture_desc *desc);
+
+
+void
+volt_texture_get_desc(
+  volt_ctx_t ctx,
+  volt_texture_t texture,
+  struct volt_texture_desc *out_desc);
 
 
 /* ------------------------------------------------- [ rsrc framebuffer ] -- */

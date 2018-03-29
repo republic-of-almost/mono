@@ -42,8 +42,10 @@ enum class volt_gl_cmd_id
   create_uniform,
   create_buffer_ibo,
   create_buffer_vbo,
+  update_buffer_vbo,
   create_buffer_input,
   create_buffer_texture,
+  update_buffer_texture,
   create_buffer_framebuffer,
   
   /* renderpass */
@@ -74,6 +76,7 @@ volt_gl_cmd_to_string(volt_gl_cmd_id id)
     case(volt_gl_cmd_id::create_uniform):               return "create_uniform";
     case(volt_gl_cmd_id::create_buffer_ibo):            return "create_buffer_ibo";
     case(volt_gl_cmd_id::create_buffer_vbo):            return "create_buffer_vbo";
+    case(volt_gl_cmd_id::update_buffer_vbo):            return "update_buffer_vbo";
     case(volt_gl_cmd_id::create_buffer_input):          return "create_buffer_input";
     case(volt_gl_cmd_id::create_buffer_texture):        return "create_buffer_texture";
     case(volt_gl_cmd_id::create_buffer_framebuffer):    return "create_buffer_framebuffer";
@@ -128,6 +131,15 @@ struct volt_gl_cmd_create_vbo
 };
 
 
+struct volt_gl_cmd_update_vbo
+{
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::update_buffer_vbo */
+
+  volt_vbo_t vbo;
+  volt_vbo_desc desc;
+};
+
+
 struct volt_gl_cmd_create_ibo
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_ibo */
@@ -147,6 +159,15 @@ struct volt_gl_cmd_create_input
 
 
 struct volt_gl_cmd_create_texture
+{
+  volt_gl_cmd_id id;
+
+  volt_texture_t texture;
+  volt_texture_desc desc;
+};
+
+
+struct volt_gl_cmd_update_texture
 {
   volt_gl_cmd_id id;
 
@@ -317,6 +338,12 @@ struct volt_texture
   GLuint gl_id;
   GLenum target;
   GLenum format;
+  GLuint width;
+  GLuint height;
+  GLenum sampling;
+  GLenum dimention;
+  GLboolean mips;
+  GLvoid *data;
 };
 
 
@@ -449,6 +476,91 @@ struct volt_renderpass
 };
 
 
+/* ------------------------------------------------------- [ gl to volt ] -- */
+
+
+GLboolean
+convert_volt_boolean_to_gl(VOLT_BOOL boolean)
+{
+  switch (boolean)
+  {
+    case(VOLT_TRUE): return GL_TRUE;
+    case(VOLT_FALSE): return GL_FALSE;
+  }
+
+  ROA_ASSERT(false);
+  return GL_FALSE;
+}
+
+
+VOLT_BOOL
+convert_gl_boolean_to_volt(GLboolean boolean)
+{
+  switch (boolean)
+  {
+    case(GL_TRUE): return VOLT_TRUE;
+    case(GL_FALSE): return VOLT_FALSE;
+  }
+
+  ROA_ASSERT(false);
+  return VOLT_FALSE;
+}
+
+
+GLenum
+convert_volt_format_to_gl(volt_color_format fmt)
+{
+  switch (fmt)
+  {
+    case(VOLT_COLOR_RGB): return GL_RGB;
+    case(VOLT_COLOR_RGBA): return GL_RGBA;
+  }
+
+  ROA_ASSERT(false);
+  return GL_NONE;
+};
+
+
+volt_color_format
+convert_gl_format_to_volt(GLenum fmt)
+{
+  switch (fmt)
+  {
+    case(GL_RGB): return VOLT_COLOR_RGB;
+    case(GL_RGBA): return VOLT_COLOR_RGBA;
+  }
+
+  ROA_ASSERT(false);
+  return VOLT_COLOR_RGBA;
+}
+
+
+GLenum
+convert_volt_tex_dimention_to_gl(volt_texture_dimentions di)
+{
+  switch (di)
+  {
+    case(VOLT_TEXTURE_2D): return GL_TEXTURE_2D;
+  }
+
+  ROA_ASSERT(false);
+  return GL_TEXTURE_2D;
+}
+
+
+volt_texture_dimentions
+convert_gl_dimention_to_volt(GLenum di)
+{
+  switch (di)
+  {
+    case(GL_TEXTURE_2D): return VOLT_TEXTURE_2D;
+  }
+
+  ROA_ASSERT(false);
+  return VOLT_TEXTURE_2D;
+}
+
+
 /* ----------------------------------------------------- [ rsrc texture ] -- */
 
 
@@ -481,6 +593,55 @@ volt_texture_create(
 
     roa_spin_lock_release(&ctx->rsrc_create_lock);
   }
+}
+
+
+void
+volt_texture_update(
+  volt_ctx_t ctx,
+  volt_texture_t texture,
+  volt_texture_desc *desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(texture);
+  ROA_ASSERT(desc);
+
+  /* submit cmd */
+  {
+    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+
+    volt_gl_stream *stream = &ctx->resource_create_stream;
+    volt_gl_cmd_update_texture *cmd = (volt_gl_cmd_update_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::update_buffer_texture;
+    cmd->desc = *desc;
+    cmd->texture = texture;
+
+    roa_spin_lock_release(&ctx->rsrc_create_lock);
+  }
+}
+
+
+void
+volt_texture_get_desc(
+  volt_ctx_t ctx,
+  volt_texture_t texture,
+  struct volt_texture_desc *out_desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(texture);
+  ROA_ASSERT(out_desc);
+
+  out_desc->mip_maps    = convert_gl_boolean_to_volt(texture->mips);
+  out_desc->dimentions  = convert_gl_dimention_to_volt(texture->dimention);
+  out_desc->width       = texture->width;
+  out_desc->height      = texture->height;
+  out_desc->sampling    = VOLT_SAMPLING_BILINEAR;
+  out_desc->data        = texture->data;
+  out_desc->access      = texture->data ? VOLT_STREAM : VOLT_STATIC;
+  out_desc->format      = convert_gl_format_to_volt(texture->format);
 }
 
 
@@ -1247,6 +1408,15 @@ volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
 
 
 static void
+volt_gl_update_vbo(const volt_gl_cmd_update_vbo *cmd)
+{
+  /* param check */
+  ROA_ASSERT(cmd);
+  ROA_ASSERT(cmd->vbo);
+}
+
+
+static void
 volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
 {
   /* param check */
@@ -1456,31 +1626,17 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   /* prepare */
   const GLuint width    = cmd->desc.width;
   const GLuint height   = cmd->desc.height;
-  const GLvoid *data    = cmd->desc.data;
+  GLvoid *data    = cmd->desc.data;
   const GLint level     = 0;
   const GLenum type     = GL_UNSIGNED_BYTE;
   const GLint border    = 0;
-  const GLenum target   = GL_TEXTURE_2D;
+  const GLenum target   = convert_volt_tex_dimention_to_gl(cmd->desc.dimentions);
+  const GLint internal_format = convert_volt_format_to_gl(cmd->desc.format);
+  const GLenum format         = convert_volt_format_to_gl(cmd->desc.format);
+  const GLboolean mips  = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
+
   GLuint texture        = 0;
-  GLint internal_format = GL_RGB;
-  GLenum format         = GL_RGB;
-
-  switch (cmd->desc.format)
-  {
-    case(VOLT_COLOR_RGB):
-    {
-      internal_format = GL_RGB;
-      format          = GL_RGB;
-      break;
-    }
-    case(VOLT_COLOR_RGBA):
-    {
-      internal_format = GL_RGBA;
-      format          = GL_RGBA;
-      break;
-    }
-  }
-
+  
   /* create texture */
   glGenTextures(1, &texture);
 
@@ -1498,7 +1654,7 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
     data);
 
 
-  if (cmd->desc.mip_maps == VOLT_TRUE)
+  if (mips == GL_TRUE)
   {
     glGenerateMipmap(target);
   }
@@ -1512,10 +1668,50 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   /* save texture */
-  cmd->texture->gl_id = texture;
-  cmd->texture->target = target;
+  cmd->texture->gl_id     = texture;
+  cmd->texture->target    = target;
+  cmd->texture->dimention = target;
+  cmd->texture->format    = format;
+  cmd->texture->mips      = mips;
+  cmd->texture->width     = width;
+  cmd->texture->height    = height;
+  cmd->texture->data      = cmd->desc.access == VOLT_STREAM ? data : VOLT_NULL;
 
   GL_ASSERT;
+}
+
+
+static void
+volt_gl_update_texture(const volt_gl_cmd_update_texture *cmd)
+{
+  /* param check */
+  ROA_ASSERT(cmd);
+  ROA_ASSERT(cmd->texture);
+
+  /* prepare */
+  const GLuint width = cmd->desc.width;
+  const GLuint height = cmd->desc.height;
+  const GLint level = 0;
+  const GLint border = 0;
+  GLvoid *data = cmd->desc.data;
+  const GLenum type = GL_UNSIGNED_BYTE;
+  const GLenum target = convert_volt_tex_dimention_to_gl(cmd->desc.dimentions);
+  const GLint internal_format = convert_volt_format_to_gl(cmd->desc.format);
+  const GLenum format = convert_volt_format_to_gl(cmd->desc.format);
+  const GLboolean mips = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
+
+  glBindTexture(target, cmd->texture->gl_id);
+
+  glTexImage2D(
+    target,
+    level,
+    internal_format,
+    width,
+    height,
+    border,
+    format,
+    type,
+    data);
 }
 
 
@@ -1890,6 +2086,12 @@ volt_ctx_execute(volt_ctx_t ctx)
           volt_gl_create_vbo(cmd);
           break;
         }
+        case(volt_gl_cmd_id::update_buffer_vbo):
+        {
+          const volt_gl_cmd_update_vbo *cmd = (const volt_gl_cmd_update_vbo*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_update_vbo(cmd);
+        }
         case(volt_gl_cmd_id::create_buffer_ibo):
         {
           const volt_gl_cmd_create_ibo *cmd = (const volt_gl_cmd_create_ibo*)uk_cmd;
@@ -1916,6 +2118,13 @@ volt_ctx_execute(volt_ctx_t ctx)
           const volt_gl_cmd_create_texture *cmd = (const volt_gl_cmd_create_texture*)uk_cmd;
           data += sizeof(*cmd);
           volt_gl_create_texture(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::update_buffer_texture):
+        {
+          const volt_gl_cmd_update_texture *cmd = (const volt_gl_cmd_update_texture*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_update_texture(cmd);
           break;
         }
         case(volt_gl_cmd_id::create_uniform):

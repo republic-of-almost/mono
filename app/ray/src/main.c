@@ -48,7 +48,25 @@ ROA_JOB(main_frame, void*)
 
   /* update texture */
   {
+    struct volt_texture_desc tex_desc;
+    volt_texture_get_desc(volt_ctx, screen_texture, &tex_desc);
 
+    unsigned i;
+    unsigned char *tex_data = (unsigned char*)tex_desc.data;
+    ROA_ASSERT(tex_data);
+
+    /* fill with random color for now */
+    for (i = 0; i < width * height; ++i)
+    {
+      unsigned index = i * 4;
+      tex_data[index + 0] = rand() % 255;
+      tex_data[index + 1] = rand() % 255;
+      tex_data[index + 2] = rand() % 255;
+      tex_data[index + 3] = 255;
+    }
+
+    tex_desc.data = texture_data;
+    volt_texture_update(volt_ctx, screen_texture, &tex_desc);
   }
 
   /* render scene */
@@ -178,6 +196,7 @@ main(int argc, char **argv)
       tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
       tex_desc.mip_maps   = VOLT_FALSE;
       tex_desc.format     = VOLT_COLOR_RGBA;
+      tex_desc.access     = VOLT_STREAM;
 
       volt_texture_create(volt_ctx, &screen_texture, &tex_desc);
 
