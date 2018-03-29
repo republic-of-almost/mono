@@ -4,7 +4,20 @@
 
 #include <roa_lib/fundamental.h>
 #include <roa_renderer/roa_renderer.h>
-#include <volt/volt.h> /* temp thing */
+#include <volt/volt.h>
+
+
+struct mesh_rendering_data
+{
+  int i;
+};
+
+
+struct mesh_camera_data
+{
+  int i;
+};
+
 
 struct roa_renderer_ctx
 {
@@ -17,11 +30,14 @@ struct roa_renderer_ctx
 	/* array */ struct roa_renderer_renderable *renderable;
 
 	/* job data */
+  
+  /* array */ struct mesh_rendering_data *mesh_rendering_data;
+  /* array */ struct mesh_camera_data *mesh_camera_data;
 
-	/* todo: when we start culling etc the data goes here */
+  /* array */ struct roa_renderer_task *tasks;
 
-	/* temp render data */
-	
+	/* low level renderer */
+  volt_ctx_t volt_ctx;
 };
 
 

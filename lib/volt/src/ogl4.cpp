@@ -1769,6 +1769,9 @@ volt_gl_set_viewport(const volt_gl_cmd_set_viewport *cmd)
 void
 volt_ctx_create(volt_ctx_t *ctx)
 {
+  /* param check */
+  ROA_ASSERT(ctx);
+
   if (gl3wInit())
   {
     /* fail */

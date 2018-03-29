@@ -19,9 +19,16 @@ typedef struct roa_renderer_ctx * roa_renderer_ctx_t;
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
+struct roa_renderer_desc
+{
+  int temp;
+};
+
+
 ROA_BOOL
 roa_renderer_ctx_create(
-	roa_renderer_ctx_t *ctx);
+	roa_renderer_ctx_t *ctx,
+  struct roa_renderer_desc *desc);
 
 
 void
@@ -50,6 +57,7 @@ struct roa_renderer_camera
 {
 	float near_plane;
 	float far_plane;
+
 	float field_of_view;
 
 	float position[3];

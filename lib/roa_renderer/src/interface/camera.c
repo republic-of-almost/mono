@@ -31,5 +31,4 @@ roa_renderer_camera_clear(
   /* param check */
   ROA_ASSERT(ctx);
   ROA_ASSERT(camera_id);
-
 }

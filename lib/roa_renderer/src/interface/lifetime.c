@@ -11,7 +11,8 @@
 
 ROA_BOOL
 roa_renderer_ctx_create(
-	roa_renderer_ctx_t *ctx)
+	roa_renderer_ctx_t *ctx,
+  struct roa_renderer_desc *desc)
 {
 	/* param check */
 	ROA_ASSERT(ctx);
@@ -21,12 +22,17 @@ roa_renderer_ctx_create(
 
   unsigned count = 1 << 10;
 
+  roa_array_create_with_capacity(new_ctx->mesh_camera_data, count);
+  roa_array_create_with_capacity(new_ctx->mesh_rendering_data, count);
 	roa_array_create_with_capacity(new_ctx->camera_id, count);
 	roa_array_create_with_capacity(new_ctx->camera, count);
 	roa_array_create_with_capacity(new_ctx->renderable_id, count);
 	roa_array_create_with_capacity(new_ctx->renderable, count);
+  roa_array_create_with_capacity(new_ctx->tasks, count);
 
 	*ctx = new_ctx;
+
+  volt_ctx_create(&new_ctx->volt_ctx);
 
 	return new_ctx ? ROA_TRUE : ROA_FALSE;
 }
@@ -39,8 +45,7 @@ roa_renderer_ctx_execute(
 	/* param check */
 	ROA_ASSERT(ctx);
 	
-	/* temp render code */
-	
+	volt_ctx_execute(ctx->volt_ctx);
 }
 
 
@@ -54,10 +59,15 @@ roa_renderer_ctx_destroy(
 	
 	struct roa_renderer_ctx *kill_ctx = *ctx;
 
+  roa_array_destroy(kill_ctx->mesh_camera_data);
+  roa_array_destroy(kill_ctx->mesh_rendering_data);
+  roa_array_destroy(kill_ctx->tasks);
 	roa_array_destroy(kill_ctx->renderable);
 	roa_array_destroy(kill_ctx->renderable_id);
 	roa_array_destroy(kill_ctx->camera);
 	roa_array_destroy(kill_ctx->camera_id);
+
+  volt_ctx_destroy(&kill_ctx->volt_ctx);
 
 	roa_free(kill_ctx);
 
@@ -69,6 +79,7 @@ void
 roa_renderer_ctx_lock(
   roa_renderer_ctx_t ctx)
 {
+  ROA_UNUSED(ctx);
 }
 
 
@@ -76,5 +87,6 @@ void
 roa_renderer_ctx_unlock(
   roa_renderer_ctx_t ctx)
 {
+  ROA_UNUSED(ctx);
 }
 
