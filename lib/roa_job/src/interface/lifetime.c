@@ -54,7 +54,7 @@ roa_job_dispatcher_ctx_create(
     {
       thread_count = 2;
     }
-
+    thread_count = 3;
     new_ctx->thread_count = thread_count;
 
 		ROA_LOG_INFO(

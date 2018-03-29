@@ -1,9 +1,11 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
+#include <roa_lib/fundamental.h>
 #include <roa_job/roa_job.h>
 #include <roa_math/math.h>
 #include <volt/volt.h>
+#include <roa_lib/time.h>
 
 
 /* ---------------------------------------------------------- [ Systems ] -- */
@@ -32,9 +34,30 @@ unsigned char *texture_data = ROA_NULL;
 /* ------------------------------------------------------------ [ tasks ] -- */
 
 
-ROA_JOB(worker, void*)
+struct worker_arg
 {
-  
+  unsigned char *pix;
+  unsigned length;
+  unsigned offset;
+  unsigned seed;
+};
+
+
+ROA_JOB(worker, struct worker_arg*)
+{
+  ROA_UNUSED(job_ctx);
+
+  int i;
+  for (i = 0; i < arg->length; ++i)
+  {
+    unsigned index = (arg->offset + i) * 4;
+    unsigned rand_color = roa_rand_xorshift_with_seed(arg->seed * i * i + 2);
+
+    arg->pix[index + 0] = ROA_FIRST8_BITS(rand_color);
+    arg->pix[index + 1] = ROA_SECOND8_BITS(rand_color);
+    arg->pix[index + 2] = ROA_THIRD8_BITS(rand_color);
+    arg->pix[index + 3] = 255;
+  }
 }
 
 ROA_JOB(main_frame, void*)
@@ -42,29 +65,37 @@ ROA_JOB(main_frame, void*)
   ROA_UNUSED(arg);
 
   /* create worker tasks */
+  struct volt_texture_desc tex_desc;
   {
-    
+    volt_texture_get_desc(volt_ctx, screen_texture, &tex_desc);
+
+    struct roa_job_desc desc[128];
+    struct worker_arg arg[ROA_ARR_COUNT(desc)];
+    int i;
+
+    static unsigned long time = 0;
+    time += 1;
+
+    for (i = 0; i < ROA_ARR_COUNT(desc); ++i)
+    {
+      unsigned length = (tex_desc.width * tex_desc.height) / ROA_ARR_COUNT(desc);
+
+      arg[i].length = length;
+      arg[i].offset = length * i;
+      arg[i].pix = tex_desc.data;
+      arg[i].seed = (unsigned)(time + i);
+
+      desc[i].thread_locked = ROA_FALSE;
+      desc[i].arg = &arg[i];
+      desc[i].func = worker;
+    }
+
+    uint64_t marker = roa_job_submit(job_ctx, ROA_ARR_DATA(desc), ROA_ARR_COUNT(desc));
+    roa_job_wait(job_ctx, marker);
   }
 
   /* update texture */
   {
-    struct volt_texture_desc tex_desc;
-    volt_texture_get_desc(volt_ctx, screen_texture, &tex_desc);
-
-    unsigned i;
-    unsigned char *tex_data = (unsigned char*)tex_desc.data;
-    ROA_ASSERT(tex_data);
-
-    /* fill with random color for now */
-    for (i = 0; i < width * height; ++i)
-    {
-      unsigned index = i * 4;
-      tex_data[index + 0] = rand() % 255;
-      tex_data[index + 1] = rand() % 255;
-      tex_data[index + 2] = rand() % 255;
-      tex_data[index + 3] = 255;
-    }
-
     tex_desc.data = texture_data;
     volt_texture_update(volt_ctx, screen_texture, &tex_desc);
   }

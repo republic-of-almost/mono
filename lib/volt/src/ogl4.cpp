@@ -634,6 +634,7 @@ volt_texture_get_desc(
   ROA_ASSERT(texture);
   ROA_ASSERT(out_desc);
 
+  /* convert gl to volt */
   out_desc->mip_maps    = convert_gl_boolean_to_volt(texture->mips);
   out_desc->dimentions  = convert_gl_dimention_to_volt(texture->dimention);
   out_desc->width       = texture->width;
