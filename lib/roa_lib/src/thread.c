@@ -139,8 +139,8 @@ void
 roa_thread_set_affinity(roa_thread th, int affinity)
 {
   #if defined(__linux__) || defined(__APPLE__)
-  ROA_ASSERT(false);
-  #elif defined(_WIN32)
+  
+#elif defined(_WIN32)
   SetThreadIdealProcessor((HANDLE)th, affinity);
   #else
   #error "Unsupported Platform"

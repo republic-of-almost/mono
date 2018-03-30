@@ -199,6 +199,7 @@ main(int argc, char **argv)
       volt_program_create(volt_ctx, &screen_program, &screen_program_desc);
 
       ROA_ASSERT(screen_program != VOLT_NULL);
+			volt_ctx_execute(volt_ctx); /* because shader text will go out of scope */
     }
 
     /* texture */
@@ -250,6 +251,7 @@ main(int argc, char **argv)
       volt_vertex_buffer_create(volt_ctx, &screen_triangle, &vbo_desc);
 
       ROA_ASSERT(screen_triangle != VOLT_NULL);
+			volt_ctx_execute(volt_ctx);
     }
 
     /* input */
@@ -266,14 +268,15 @@ main(int argc, char **argv)
       volt_input_create(volt_ctx, &screen_input_format, &input_desc);
 
       ROA_ASSERT(screen_input_format != VOLT_NULL);
+			volt_ctx_execute(volt_ctx); /* attrs will go out of scope */
     }
 
     /* rasterizer */
     {
       struct volt_rasterizer_desc raster_desc;
-      raster_desc.cull_mode = VOLT_CULL_BACK;
+      raster_desc.cull_mode = VOLT_CULL_FRONT;
       raster_desc.primitive_type = VOLT_PRIM_TRIANGLES;
-      raster_desc.winding_order = VOLT_WIND_CCW;
+      raster_desc.winding_order = VOLT_WIND_CW;
 
       volt_rasterizer_create(volt_ctx, &screen_rasterizer, &raster_desc);
     }
