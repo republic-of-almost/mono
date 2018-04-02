@@ -23,3 +23,4 @@ roa_rand_xorshift()
 
   return x;
 }
+
