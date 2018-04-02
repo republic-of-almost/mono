@@ -15,6 +15,7 @@ typedef struct roa_float3 { float x, y, z; }                  roa_float3;
 typedef struct roa_float4 { float x, y, z, w; }               roa_float4;
 typedef struct roa_quaternion { float x, y, z, w; }           roa_quaternion;
 typedef struct roa_transform { roa_float3 position; roa_float3 scale; roa_quaternion rotation; } roa_transform;
+typedef struct roa_mat2 { float data[4];  }                   roa_mat2;
 typedef struct roa_mat3 { float data[9];  }                   roa_mat3;
 typedef struct roa_mat4 { float data[16]; }                   roa_mat4;
 typedef struct roa_aabb { roa_float3 min; roa_float3 max; }   roa_aabb;
@@ -45,6 +46,12 @@ float           roa_float_cos(float a);
 
 float           roa_float_sqrt(float a);
 
+float           roa_float_fract(float a);
+float           roa_float_round(float a);
+float           roa_float_floor(float a);
+float           roa_float_ceil(float a);
+float           roa_float_lerp(float a, float b, float mix);
+
 float           roa_float_abs(float a);
 int             roa_float_is_near(float a, float b, float err);
 
@@ -59,7 +66,7 @@ roa_float3      roa_float3_one();
 roa_float3      roa_float3_fill_with_value(float v);
 roa_float3      roa_float3_set_with_values(float x, float y, float z);
 
-roa_float3			roa_float3_import(const float *in);
+roa_float3      roa_float3_import(const float *in);
 void            roa_float3_export(roa_float3 a, float *out);
 
 float           roa_float3_get_x(roa_float3 a);
@@ -70,12 +77,19 @@ roa_float3      roa_float3_add(roa_float3 a, roa_float3 b);
 roa_float3      roa_float3_subtract(roa_float3 a, roa_float3 b);
 roa_float3      roa_float3_multiply(roa_float3 a, roa_float3 b);
 
-roa_float3			roa_float3_lerp(roa_float3 a, roa_float3 b, float t);
+roa_float3      roa_float3_lerp(roa_float3 a, roa_float3 b, float t);
+roa_float3      roa_float3_reflect(roa_float3 v, roa_float3 n);
 float           roa_float3_length(roa_float3 a);
+float           roa_float3_squared_length(roa_float3 a);
 roa_float3      roa_float3_normalize(roa_float3 a);
 float           roa_float3_dot(roa_float3 a, roa_float3 b);
 roa_float3      roa_float3_cross(roa_float3 a, roa_float3 b);
 roa_float3      roa_float3_scale(roa_float3 a, float scale);
+
+roa_float3      roa_float3_fract(roa_float3 a);
+roa_float3      roa_float3_floor(roa_float3 a);
+roa_float3      roa_float3_ceil(roa_float3 a);
+
 
 int             roa_float3_is_near(roa_float3 a, roa_float3 b, float err);
 
@@ -144,6 +158,17 @@ roa_float3			roa_transform_local_up(const roa_transform *trans);
 roa_float3			roa_transform_world_left();
 roa_float3			roa_transform_local_left(const roa_transform *trans);
 
+
+/* -------------------------------------------------------------- [ mat2 ] -- */
+
+
+void            roa_mat2_zero(roa_mat2 *out);
+void            roa_mat2_id(roa_mat2 *out);
+void            roa_mat2_fill(roa_mat2 *out, float value);
+void            roa_mat2_import(roa_mat2 *out, float *in);
+
+void            roa_mat2_multiply(roa_mat2 *out, const roa_mat2 *lhs, const roa_mat2 *rhs);
+roa_float2      roa_mat2_multiply_with_float2(roa_float2 lhs, const roa_mat2 *rhs);
 
 /* -------------------------------------------------------------- [ mat3 ] -- */
 

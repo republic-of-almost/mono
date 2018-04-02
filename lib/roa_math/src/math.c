@@ -43,6 +43,41 @@ roa_float_sqrt(float a)
 
 
 float
+roa_float_fract(float a)
+{
+  return a - (long)a;
+}
+
+
+float
+roa_float_round(float a)
+{
+  return (int)(a + 0.5f);
+}
+
+
+float
+roa_float_floor(float a)
+{
+  return roa_float_round(a - 1);
+}
+
+
+float
+roa_float_ceil(float a)
+{
+  return roa_float_round(a + 1);
+}
+
+
+float
+roa_float_lerp(float a, float b, float mix)
+{
+  return a + mix * (b - a);
+}
+
+
+float
 roa_float_abs(float a)
 {
   return fabsf(a);
@@ -208,12 +243,27 @@ roa_float3_lerp(roa_float3 a, roa_float3 b, float t)
 }
 
 
+roa_float3
+roa_float3_reflect(roa_float3 v, roa_float3 n)
+{
+  float scale = 2.f * roa_float3_dot(v, n);
+  roa_float3 scaled = roa_float3_scale(n, scale);
+
+  return roa_float3_subtract(v, scaled);
+}
+
+
 float
 roa_float3_length(roa_float3 a)
 {
-  float len = a.x * a.x + a.y * a.y + a.z * a.z;
+  return roa_float_sqrt(roa_float3_squared_length(a));
+}
 
-  return roa_float_sqrt(len);
+
+float
+roa_float3_squared_length(roa_float3 a)
+{
+  return a.x * a.x + a.y * a.y + a.z * a.z;
 }
 
 
@@ -258,6 +308,36 @@ roa_float3_scale(roa_float3 a, float scale)
 {
   const roa_float3 scale_vec = roa_float3_fill_with_value(scale);
   return roa_float3_multiply(a, scale_vec);
+}
+
+
+roa_float3
+roa_float3_fract(roa_float3 a)
+{
+  return roa_float3_set_with_values(
+    roa_float_fract(a.x),
+    roa_float_fract(a.y),
+    roa_float_fract(a.z));
+}
+
+
+roa_float3
+roa_float3_floor(roa_float3 a)
+{
+  return roa_float3_set_with_values(
+    roa_float_floor(a.x),
+    roa_float_floor(a.y),
+    roa_float_floor(a.z));
+}
+
+
+roa_float3
+roa_float3_ceil(roa_float3 a)
+{
+  return roa_float3_set_with_values(
+    roa_float_ceil(a.x),
+    roa_float_ceil(a.y),
+    roa_float_ceil(a.z));
 }
 
 
