@@ -46,6 +46,7 @@ float           roa_float_cos(float a);
 
 float           roa_float_sqrt(float a);
 
+float						roa_float_sign(float a);
 float           roa_float_fract(float a);
 float           roa_float_round(float a);
 float           roa_float_floor(float a);
@@ -57,6 +58,22 @@ int             roa_float_is_near(float a, float b, float err);
 
 
 /* ------------------------------------------------------------ [ float2 ] -- */
+
+
+roa_float2			roa_float2_zero();
+roa_float2			roa_float2_zero_one();
+roa_float2			roa_float2_one();
+roa_float2			roa_float2_fill_with_value(float v);
+roa_float2			roa_float2_set_with_values(float x, float y);
+roa_float2			roa_float2_import(const float *in);
+void						roa_float2_export(roa_float2 a, float *out);
+
+float						roa_float2_get_x(roa_float2 a);
+float						roa_float2_get_y(roa_float2 a);
+
+float						roa_float2_dot(roa_float2 a, roa_float2 b);
+
+
 /* ------------------------------------------------------------ [ float3 ] -- */
 
 
@@ -165,10 +182,13 @@ roa_float3			roa_transform_local_left(const roa_transform *trans);
 void            roa_mat2_zero(roa_mat2 *out);
 void            roa_mat2_id(roa_mat2 *out);
 void            roa_mat2_fill(roa_mat2 *out, float value);
-void            roa_mat2_import(roa_mat2 *out, float *in);
+void            roa_mat2_import(roa_mat2 *out, const float *in);
 
 void            roa_mat2_multiply(roa_mat2 *out, const roa_mat2 *lhs, const roa_mat2 *rhs);
 roa_float2      roa_mat2_multiply_with_float2(roa_float2 lhs, const roa_mat2 *rhs);
+
+int							roa_mat2_is_near(const roa_mat2 *a, const roa_mat2 *b, float error);
+
 
 /* -------------------------------------------------------------- [ mat3 ] -- */
 

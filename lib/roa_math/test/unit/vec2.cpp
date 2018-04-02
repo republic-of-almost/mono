@@ -1,23 +1,23 @@
 #include <catch/catch.hpp>
+#include <roa_math/math.h>
 #include <array>
 
 
 TEST_CASE("Vector 2")
 {
-  /*
 	// Initialize test data that we will use
-  const math::vec2 one_two = math::vec2_init(1.f, 2.f);
-  REQUIRE(math::vec2_get_x(one_two) == 1.f);
-  REQUIRE(math::vec2_get_y(one_two) == 2.f);
+  roa_float2 one_two = roa_float2_set_with_values(1.f, 2.f);
+  REQUIRE(roa_float2_get_x(one_two) == 1.f);
+  REQUIRE(roa_float2_get_y(one_two) == 2.f);
 
-  const math::vec2 three = math::vec2_init(3.f);
-  REQUIRE(math::vec2_get_x(three) == 3.f);
-  REQUIRE(math::vec2_get_y(three) == 3.f);
+  roa_float2 three = roa_float2_fill_with_value(3.f);
+  REQUIRE(roa_float2_get_x(three) == 3.f);
+  REQUIRE(roa_float2_get_y(three) == 3.f);
 
   const std::array<float, 2> arr_data = {4.f, 5.f};
-  const math::vec2 four_five = math::vec2_init_with_array(&arr_data[0]);
-  REQUIRE(math::vec2_get_x(four_five) == 4.f);
-  REQUIRE(math::vec2_get_y(four_five) == 5.f);
+  const roa_float2 four_five = roa_float2_import(&arr_data[0]);
+  REQUIRE(roa_float2_get_x(four_five) == 4.f);
+  REQUIRE(roa_float2_get_y(four_five) == 5.f);
   
   const float error = 0.0001f; // Error for near tests
   
@@ -25,8 +25,8 @@ TEST_CASE("Vector 2")
   SECTION("Export data")
   {
     std::array<float, 2> arr_export = {0.f, 0.f};
-    const math::vec2 to_export = math::vec2_one();
-    math::vec2_to_array(to_export, arr_export.data());
+    const roa_float2 to_export = roa_float2_one();
+    roa_float2_export(to_export, arr_export.data());
     
     REQUIRE(arr_export.at(0) == 1.f);
     REQUIRE(arr_export.at(1) == 1.f);
@@ -35,20 +35,20 @@ TEST_CASE("Vector 2")
 
 	SECTION("Constants")
 	{
-		const math::vec2 zero = math::vec2_zero();
-    REQUIRE(math::vec2_get_x(zero) == 0.f);
-    REQUIRE(math::vec2_get_y(zero) == 0.f);
+		const roa_float2 zero = roa_float2_zero();
+    REQUIRE(roa_float2_get_x(zero) == 0.f);
+    REQUIRE(roa_float2_get_y(zero) == 0.f);
     
-    const math::vec2 one = math::vec2_one();
-    REQUIRE(math::vec2_get_x(one) == 1.f);
-    REQUIRE(math::vec2_get_y(one) == 1.f);
+    const roa_float2 one = roa_float2_one();
+    REQUIRE(roa_float2_get_x(one) == 1.f);
+    REQUIRE(roa_float2_get_y(one) == 1.f);
     
-    const math::vec2 zero_one = math::vec2_zero_one();
-    REQUIRE(math::vec2_get_x(zero_one) == 0.f);
-    REQUIRE(math::vec2_get_y(zero_one) == 1.f);
+    const roa_float2 zero_one = roa_float2_zero_one();
+    REQUIRE(roa_float2_get_x(zero_one) == 0.f);
+    REQUIRE(roa_float2_get_y(zero_one) == 1.f);
 	}
   
-  
+	/* 
   SECTION("Equality")
   {
     REQUIRE(math::vec2_is_equal(math::vec2_one(), math::vec2_one()));
@@ -115,15 +115,16 @@ TEST_CASE("Vector 2")
     const math::vec2 normalize_vec = math::vec2_normalize(one_two);
     REQUIRE(math::vec2_is_near(normalize_vec, math::vec2_init(0.4472f, 0.89442f), error));
   }
-  
+  */
   
   SECTION("Dot Product")
   {
-    const float dot_prod = math::vec2_dot(math::vec2_init(1.1f, 2.2f), math::vec2_init(2.2f));
-    REQUIRE(math::is_near(dot_prod, 7.26f, error));
+    const float dot_prod = roa_float2_dot(roa_float2_set_with_values(1.1f, 2.2f), roa_float2_fill_with_value(2.2f));
+    REQUIRE(roa_float_is_near(dot_prod, 7.26f, error));
   }
   
   
+	/*
   SECTION("Length")
   {
     const math::vec2 one_two = math::vec2_init(1.1f, 2.2f);

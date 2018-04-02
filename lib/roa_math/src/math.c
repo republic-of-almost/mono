@@ -43,6 +43,13 @@ roa_float_sqrt(float a)
 
 
 float
+roa_float_sign(float a)
+{
+	return a > 0.f ? 1.f : -1.f;
+}
+
+
+float
 roa_float_fract(float a)
 {
   return a - (long)a;
@@ -52,21 +59,21 @@ roa_float_fract(float a)
 float
 roa_float_round(float a)
 {
-  return (int)(a + 0.5f);
+  return (int)(a + (0.5f * roa_float_sign(a)));
 }
 
 
 float
 roa_float_floor(float a)
 {
-  return roa_float_round(a - 1);
+  return roa_float_round(a - 0.5f);
 }
 
 
 float
 roa_float_ceil(float a)
 {
-  return roa_float_round(a + 1);
+  return roa_float_round(a + 0.5f);
 }
 
 
@@ -92,6 +99,84 @@ roa_float_is_near(float a, float b, float err)
 
 
 /* ------------------------------------------------------------ [ float2 ] -- */
+
+
+roa_float2
+roa_float2_zero()
+{
+	return roa_float2_fill_with_value(0.f);
+}
+
+
+roa_float2
+roa_float2_zero_one()
+{
+	return roa_float2_set_with_values(0.f, 1.f);
+}
+
+
+roa_float2
+roa_float2_one()
+{
+	return roa_float2_fill_with_value(1.f);
+}
+
+
+roa_float2
+roa_float2_fill_with_value(float v)
+{
+	return roa_float2_set_with_values(v, v);
+}
+
+
+roa_float2
+roa_float2_set_with_values(float x, float y)
+{
+	roa_float2 vec = {x, y};
+	return vec;
+}
+
+
+roa_float2
+roa_float2_import(const float *in)
+{
+	roa_float2 vec;
+	vec.x = in[0];
+	vec.y = in[1];
+
+	return vec;
+}
+
+
+void
+roa_float2_export(roa_float2 a, float *out)
+{
+	out[0] = a.x;
+	out[1] = a.y;
+}
+
+float
+roa_float2_get_x(roa_float2 a)
+{
+	return a.x;
+}
+
+
+float
+roa_float2_get_y(roa_float2 a)
+{
+	return a.y;
+}
+
+
+float
+roa_float2_dot(roa_float2 a, roa_float2 b)
+{
+  return (roa_float2_get_x(a) * roa_float2_get_x(b)) +
+    (roa_float2_get_y(a) * roa_float2_get_y(b)); 
+}
+
+
 /* ------------------------------------------------------------ [ float3 ] -- */
 
 
@@ -810,7 +895,99 @@ roa_transform_local_left(const roa_transform *trans)
 }
 
 
-/* ------------------------------------------------------------- [ mat3 ] -- */
+/* -------------------------------------------------------------- [ mat2 ] -- */
+
+
+void
+roa_mat2_zero(roa_mat2 *out)
+{
+	assert(out);
+	memset((void*)out->data, 0, sizeof(out->data));
+}
+
+
+void
+roa_mat2_id(roa_mat2 *out)
+{
+	assert(out);
+
+	roa_mat2_zero(out);
+
+	out->data[0] = 1.f;
+	out->data[3] = 1.f;
+}
+
+
+void
+roa_mat2_fill(roa_mat2 *out, float value)
+{
+	assert(out);
+
+	out->data[0] = value;
+	out->data[1] = value;
+	out->data[2] = value;
+	out->data[3] = value;
+}
+
+
+void
+roa_mat2_import(roa_mat2 *out, const float *in)
+{
+	assert(out);
+	assert(in);
+
+	out->data[0] = in[0];
+	out->data[1] = in[1];
+	out->data[2] = in[2];
+	out->data[3] = in[3];
+}
+
+
+void
+roa_mat2_multiply(roa_mat2 *out, const roa_mat2 *lhs, const roa_mat2 *rhs)
+{
+	assert(out);
+	assert(lhs);
+	assert(rhs);
+
+	int i;
+  for(i = 0; i < 4; ++i)
+  {
+    int row = (i / 2) * 2;
+    int col = i % 2;
+
+    roa_float2 left_vec = roa_float2_set_with_values(
+      lhs->data[row + 0],
+      lhs->data[row + 1]
+    );
+
+    roa_float2 right_vec = roa_float2_set_with_values(
+      rhs->data[col + 0],
+      rhs->data[col + 2]
+    );
+
+    float dot = roa_float2_dot(left_vec, right_vec);
+    out->data[i] = dot;
+  }
+}
+
+
+int
+roa_mat2_is_near(const roa_mat2 *a, const roa_mat2 *b, float err)
+{
+	int count = 0;
+
+	int i;
+	for(i = 0; i < 4; ++i)
+	{
+		count += roa_float_is_near(a->data[i], b->data[i], err);
+	}
+
+	return count == 4 ? 1 : 0;
+}
+
+
+/* -------------------------------------------------------------- [ mat3 ] -- */
 
 
 void
@@ -959,7 +1136,7 @@ roa_mat3_is_near(
 		count += roa_float_is_near(a->data[i], b->data[i], err);
 	}
 
-	return count == 9;
+	return count == 9 ? 1 : 0;
 }
 
 

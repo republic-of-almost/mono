@@ -306,8 +306,87 @@ TEST_CASE("General")
     float res = roa_float_sqrt(123.f);
     REQUIRE(roa_float_is_near(res, 11.09053650f, ROA_EPSILON));
   }
+
+
+	SECTION("Sign")
+	{
+		float pos_sign = roa_float_sign(10.123f);
+		REQUIRE(roa_float_is_near(pos_sign, 1.f, ROA_EPSILON));
 	
-  
+		float neg_sign = roa_float_sign(-10.123f);
+		REQUIRE(roa_float_is_near(neg_sign, -1.f, ROA_EPSILON));
+	}
+
+
+	SECTION("Fract")
+	{
+		float error = 0.0000001;
+		
+		float fract = roa_float_fract(1.234f);
+		REQUIRE(roa_float_is_near(fract, 0.234f, error));
+
+		float neg = roa_float_fract(-1.2345f);
+		REQUIRE(roa_float_is_near(neg, 0.2345f, error));
+	}
+	
+	
+	SECTION("Round")
+	{
+		float round_to_one[] = {
+			0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0.9999f, 1.1f,
+			1.2f, 1.3f, 1.4f, 1.4555555f,
+		};
+
+		for(auto i : round_to_one)
+		{
+			float round = roa_float_round(i);
+			REQUIRE(roa_float_is_near(round, 1.f, ROA_EPSILON));
+		}
+
+		float round_to_neg_one[] = {
+			-1.5f, -1.9f, 2.2f, 2.45555f,
+		};
+
+		for(auto i : round_to_neg_one)
+		{
+			float round = roa_float_round(i);
+			REQUIRE(roa_float_is_near(round, -2.f, ROA_EPSILON));
+		}
+	} 
+	
+	
+	SECTION("Floor")
+	{
+		float floor = roa_float_floor(1.234f);
+		REQUIRE(roa_float_is_near(floor, 1.f, ROA_EPSILON));
+		float floor_neg = roa_float_floor(-1.234f);
+		REQUIRE(roa_float_is_near(floor_neg, -2.f, ROA_EPSILON));
+	}
+
+	SECTION("Ceil")
+	{
+		float ceil_1 = roa_float_ceil(1.234f);
+		REQUIRE(roa_float_is_near(ceil_1, 2.f, ROA_EPSILON));
+
+		float ceil_2 = roa_float_ceil(-1.234f);
+		REQUIRE(roa_float_is_near(ceil_2, 1.f, ROA_EPSILON));
+	}
+
+	SECTION("Lerp")
+	{
+		float lerp_1 = roa_float_lerp(2.f, 3.f, 0.5f);
+		REQUIRE(roa_float_is_near(lerp_1, 2.5f, ROA_EPSILON));
+	
+		float lerp_2 = roa_float_lerp(-2.f, 2.f, 0.5f);
+		REQUIRE(roa_float_is_near(lerp_2, 0.f, ROA_EPSILON));
+
+		float lerp_3 = roa_float_lerp(-2.f, -1.f, 0.f);
+		REQUIRE(roa_float_is_near(lerp_3, -2.f, ROA_EPSILON));
+
+		float lerp_4 = roa_float_lerp(-2.f, -1.f, 1.f);
+		REQUIRE(roa_float_is_near(lerp_4, -1.f, ROA_EPSILON));
+	}
+
 	/*
   SECTION("Clamp")
   {
