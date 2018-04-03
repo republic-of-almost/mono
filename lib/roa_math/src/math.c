@@ -53,7 +53,9 @@ float
 roa_float_fract(float a)
 {
 	/*return a - roa_float_abs(a);*/
-	return a - (long)a;
+	//return roa_float_abs((float)(a - (long)a));
+  float f = roa_float_abs(a);
+  return roa_float_min(f - roa_float_floor(f), 0x1.fffffep-1f);
 }
 
 
@@ -84,7 +86,7 @@ roa_float_ceil(float a)
 float
 roa_float_lerp(float a, float b, float mix)
 {
-  return a * (1 - mix) + b * a;
+  return  a + (b - a) * mix;
 }
 
 
