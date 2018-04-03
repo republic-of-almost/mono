@@ -72,6 +72,7 @@ roa_float2      roa_float2_import(const float *in);
 void            roa_float2_export(roa_float2 a, float *out);
 
 roa_float2      roa_float2_add(roa_float2 a, roa_float2 b);
+roa_float2      roa_float2_subtract(roa_float2 a, roa_float2 b);
 roa_float2      roa_float2_multiply(roa_float2 a, roa_float2 b);
 roa_float2      roa_float2_divide(roa_float2 a, roa_float2 b);
 roa_float2      roa_float2_scale(roa_float2 a, float scale);

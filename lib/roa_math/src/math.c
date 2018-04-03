@@ -52,35 +52,39 @@ roa_float_sign(float a)
 float
 roa_float_fract(float a)
 {
-  return a - (long)a;
+	/*return a - roa_float_abs(a);*/
+	return a - (long)a;
 }
 
 
 float
 roa_float_round(float a)
 {
-  return (int)(a + (0.5f * roa_float_sign(a)));
+	return roundf(a);
+ /* return (int)(a + (0.5f * roa_float_sign(a)));*/
 }
 
 
 float
 roa_float_floor(float a)
 {
-  return roa_float_round(a - 1.0f);
+	return floorf(a);
+/*  return roa_float_round(a - 0.5f); */
 }
 
 
 float
 roa_float_ceil(float a)
 {
-  return roa_float_round(a + 0.5f);
+	return ceilf(a);
+/*  return roa_float_round(a + 0.5f);*/
 }
 
 
 float
 roa_float_lerp(float a, float b, float mix)
 {
-  return a + mix * (b - a);
+  return a * (1 - mix) + b * a;
 }
 
 
@@ -186,6 +190,15 @@ roa_float2_add(roa_float2 a, roa_float2 b)
   return roa_float2_set_with_values(
     a.x + b.x,
     a.y + b.y);
+}
+
+
+roa_float2
+roa_float2_subtract(roa_float2 a, roa_float2 b)
+{
+	return roa_float2_set_with_values(
+		a.x - b.x,
+		a.y - b.y);
 }
 
 
