@@ -66,7 +66,7 @@ roa_float_round(float a)
 float
 roa_float_floor(float a)
 {
-  return roa_float_round(a - 0.5f);
+  return roa_float_round(a - 1.0f);
 }
 
 
@@ -81,6 +81,30 @@ float
 roa_float_lerp(float a, float b, float mix)
 {
   return a + mix * (b - a);
+}
+
+
+float
+roa_float_max(float a, float b)
+{
+  return a > b ? a : b;
+}
+
+
+float
+roa_float_min(float a, float b)
+{
+  return a < b ? a : b;
+}
+
+
+float
+roa_float_clamp(float val, float a, float b)
+{
+  float min = roa_float_min(a, b);
+  float max = roa_float_max(a, b);
+
+  return roa_float_max(min, roa_float_min(val, max));
 }
 
 
@@ -151,9 +175,80 @@ roa_float2_import(const float *in)
 void
 roa_float2_export(roa_float2 a, float *out)
 {
-	out[0] = a.x;
-	out[1] = a.y;
+  out[0] = a.x;
+  out[1] = a.y;
 }
+
+
+roa_float2
+roa_float2_add(roa_float2 a, roa_float2 b)
+{
+  return roa_float2_set_with_values(
+    a.x + b.x,
+    a.y + b.y);
+}
+
+
+roa_float2
+roa_float2_multiply(roa_float2 a, roa_float2 b)
+{
+  return roa_float2_set_with_values(
+    a.x * b.x,
+    a.y * b.y);
+}
+
+
+roa_float2
+roa_float2_divide(roa_float2 a, roa_float2 b)
+{
+  return roa_float2_set_with_values(
+    a.x / b.x,
+    a.y / b.y);
+}
+
+
+roa_float2
+roa_float2_scale(roa_float2 a, float scale)
+{
+  return roa_float2_set_with_values(
+    a.x * scale,
+    a.y * scale);
+}
+
+
+roa_float2
+roa_float2_floor(roa_float2 a)
+{
+  return roa_float2_set_with_values(
+    roa_float_floor(a.x),
+    roa_float_floor(a.y)
+  );
+}
+
+
+roa_float2
+roa_float2_fract(roa_float2 a)
+{
+  return roa_float2_set_with_values(
+    roa_float_fract(a.x),
+    roa_float_fract(a.y)
+  );
+}
+
+
+float
+roa_float2_squared_length(roa_float2 a)
+{
+  return a.x * a.x + a.y * a.y;
+}
+
+
+float
+roa_float2_length(roa_float2 a)
+{
+  return roa_float_sqrt(roa_float2_squared_length(a));
+}
+
 
 float
 roa_float2_get_x(roa_float2 a)
@@ -969,6 +1064,28 @@ roa_mat2_multiply(roa_mat2 *out, const roa_mat2 *lhs, const roa_mat2 *rhs)
     float dot = roa_float2_dot(left_vec, right_vec);
     out->data[i] = dot;
   }
+}
+
+
+roa_float2
+roa_mat2_multiply_with_float2(
+  roa_float2 lhs,
+  const roa_mat2 *rhs)
+{
+  float vec_data[2];
+  int i;
+
+  for (i = 0; i < 2; ++i)
+  {
+    const roa_float2 dot_vec = roa_float2_set_with_values(
+      rhs->data[i + 0],
+      rhs->data[i + 2]
+    );
+
+    vec_data[i] = roa_float2_dot(lhs, dot_vec);
+  }
+
+  return roa_float2_import(vec_data);
 }
 
 

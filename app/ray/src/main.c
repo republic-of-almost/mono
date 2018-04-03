@@ -25,13 +25,64 @@ volt_vbo_t        screen_triangle      = VOLT_NULL;
 volt_input_t      screen_input_format  = VOLT_NULL;
 volt_rasterizer_t screen_rasterizer    = VOLT_NULL;
 
-int width = 1200;
-int height = 720;
+int width = 800;
+int height = 400;
 
 unsigned char *texture_data = ROA_NULL;
 
 
 /* ------------------------------------------------------------ [ tasks ] -- */
+
+
+float random(roa_float2 _st) {
+  return roa_float_fract(roa_float_sin(roa_float2_dot(_st,
+    roa_float2_set_with_values(12.9898, 78.233)))*
+    43758.5453123);
+}
+
+
+float noise(roa_float2 _st) {
+  roa_float2 i = roa_float2_floor(_st);
+  roa_float2 f = roa_float2_fract(_st);
+
+  // Four corners in 2D of a tile
+  float a = random(i);
+  float b = random(roa_float2_add(i, roa_float2_set_with_values(1.0, 0.0)));
+  float c = random(roa_float2_add(i, roa_float2_set_with_values(0.0, 1.0)));
+  float d = random(roa_float2_add(i, roa_float2_set_with_values(1.0, 1.0)));
+
+  roa_float2 u = roa_float2_multiply(roa_float2_multiply(f, f), roa_float2_scale(f, 3.0 - 2.0));
+
+  return roa_float_lerp(a, b, u.x) +
+    (c - a)* u.y * (1.0 - u.x) +
+    (d - b) * u.x * u.y;
+}
+
+#define NUM_OCTAVES 3
+
+
+float fbm(roa_float2 _st) {
+  float v = 0.0;
+  float a = 0.5;
+  roa_float2 shift = roa_float2_fill_with_value(100.0);
+  // Rotate to reduce axial bias
+
+  float mat_data[4] = {
+    roa_float_cos(0.5), roa_float_sin(0.5),
+    -roa_float_sin(0.5), roa_float_cos(0.50)
+  };
+
+  roa_mat2 rot;
+  roa_mat2_import(&rot, mat_data);
+
+  for (int i = 0; i < NUM_OCTAVES; ++i)
+  {
+    v += a * noise(_st);
+    _st = roa_mat2_multiply_with_float2(roa_float2_add(roa_float2_scale(_st, 2.0), shift), &rot);
+    a *= 0.5;
+  }
+  return v;
+}
 
 
 struct worker_arg
@@ -40,6 +91,7 @@ struct worker_arg
   unsigned length;
   unsigned offset;
   unsigned seed;
+  unsigned row;
 };
 
 
@@ -47,16 +99,68 @@ ROA_JOB(worker, struct worker_arg*)
 {
   ROA_UNUSED(job_ctx);
 
+  //roa_float2 res_3 = roa_float2_set_with_values(width, height);
+  //res_3 = roa_float2_scale(res_3, 3.f);
+
   int i;
   for (i = 0; i < arg->length; ++i)
   {
-    unsigned index = (arg->offset + i) * 4;
-    unsigned rand_color = roa_rand_xorshift_with_seed(arg->seed * i * i + 2);
+    roa_float2 frag_coord = roa_float2_set_with_values((float)i, (float)arg->row);
 
-    arg->pix[index + 0] = ROA_FIRST8_BITS(rand_color);
-    arg->pix[index + 1] = ROA_SECOND8_BITS(rand_color);
-    arg->pix[index + 2] = ROA_THIRD8_BITS(rand_color);
+    roa_float2 st = roa_float2_divide(frag_coord, roa_float2_set_with_values(width, height));
+    st = roa_float2_scale(st, 3);
+
+    //vec2 st = gl_FragCoord.xy / u_resolution.xy*3.;
+    // st += st * abs(sin(u_time*0.1)*3.0);
+    //vec3 color = vec3(0.0);
+    roa_float3 color = roa_float3_zero();
+
+    roa_float2 q = roa_float2_zero();
+    //vec2 q = vec2(0.);
+    float u_time = (float)arg->seed;
+    q.x = fbm(roa_float2_scale(st, 0.00*u_time));
+    q.y = fbm(roa_float2_add(st, roa_float2_one()));
+
+    //vec2 r = vec2(0.);
+    roa_float2 r = roa_float2_zero();
+    r.x = fbm(roa_float2_add(roa_float2_add(st, roa_float2_scale(q, 1.0)), roa_float2_add(roa_float2_set_with_values(1.7, 9.2), roa_float2_fill_with_value(0.15 * u_time))));
+    r.y = fbm(roa_float2_add(roa_float2_add(st, roa_float2_scale(q, 1.0)), roa_float2_add(roa_float2_set_with_values(8.3, 2.8), roa_float2_fill_with_value(0.126 * u_time))));
+
+    float f = fbm(roa_float2_add(st, r));
+
+    color = roa_float3_lerp(roa_float3_set_with_values(0.101961, 0.619608, 0.666667),
+      roa_float3_set_with_values(0.666667, 0.666667, 0.498039),
+      roa_float_clamp((f*f)*4.0, 0.0, 1.0));
+
+    color = roa_float3_lerp(color,
+      roa_float3_set_with_values(0, 0, 0.164706),
+      roa_float_clamp(roa_float2_length(q), 0.0, 1.0));
+
+    color = roa_float3_lerp(color,
+      roa_float3_set_with_values(0.666667, 1, 1),
+      roa_float_clamp(r.x, 0.0, 1.0));
+
+    float val = f*f*f + .6*f*f + .5*f;
+    roa_float3 final_color = roa_float3_scale(color, roa_float_abs(val));
+
+    //gl_FragColor = vec4((f*f*f + .6*f*f + .5*f)*color, 1.);
+
+    unsigned index = (arg->offset + i) * 4;
+
+    final_color = roa_float3_scale(final_color, 255);
+
+    arg->pix[index + 0] = final_color.x;
+    arg->pix[index + 1] = final_color.y;
+    arg->pix[index + 2] = final_color.z;
     arg->pix[index + 3] = 255;
+
+    //unsigned index = (arg->offset + i) * 4;
+    //unsigned rand_color = roa_rand_xorshift_with_seed(arg->seed * i * i + 2);
+
+    //arg->pix[index + 0] = ROA_FIRST8_BITS(rand_color);
+    //arg->pix[index + 1] = ROA_SECOND8_BITS(rand_color);
+    //arg->pix[index + 2] = ROA_THIRD8_BITS(rand_color);
+    //arg->pix[index + 3] = 255;
   }
 }
 
@@ -69,7 +173,7 @@ ROA_JOB(main_frame, void*)
   {
     volt_texture_get_desc(volt_ctx, screen_texture, &tex_desc);
 
-    struct roa_job_desc desc[128];
+    struct roa_job_desc desc[400];
     struct worker_arg arg[ROA_ARR_COUNT(desc)];
     int i;
 
@@ -83,7 +187,8 @@ ROA_JOB(main_frame, void*)
       arg[i].length = length;
       arg[i].offset = length * i;
       arg[i].pix = tex_desc.data;
-      arg[i].seed = (unsigned)(time + i);
+      arg[i].seed = time; //(unsigned)(time + i);
+      arg[i].row = i;
 
       desc[i].thread_locked = ROA_FALSE;
       desc[i].arg = &arg[i];

@@ -46,12 +46,15 @@ float           roa_float_cos(float a);
 
 float           roa_float_sqrt(float a);
 
-float						roa_float_sign(float a);
+float           roa_float_sign(float a);
 float           roa_float_fract(float a);
 float           roa_float_round(float a);
 float           roa_float_floor(float a);
 float           roa_float_ceil(float a);
 float           roa_float_lerp(float a, float b, float mix);
+float           roa_float_max(float a, float b);
+float           roa_float_min(float a, float b);
+float           roa_float_clamp(float val, float a, float b);
 
 float           roa_float_abs(float a);
 int             roa_float_is_near(float a, float b, float err);
@@ -60,18 +63,27 @@ int             roa_float_is_near(float a, float b, float err);
 /* ------------------------------------------------------------ [ float2 ] -- */
 
 
-roa_float2			roa_float2_zero();
-roa_float2			roa_float2_zero_one();
-roa_float2			roa_float2_one();
-roa_float2			roa_float2_fill_with_value(float v);
-roa_float2			roa_float2_set_with_values(float x, float y);
-roa_float2			roa_float2_import(const float *in);
-void						roa_float2_export(roa_float2 a, float *out);
+roa_float2      roa_float2_zero();
+roa_float2      roa_float2_zero_one();
+roa_float2      roa_float2_one();
+roa_float2      roa_float2_fill_with_value(float v);
+roa_float2      roa_float2_set_with_values(float x, float y);
+roa_float2      roa_float2_import(const float *in);
+void            roa_float2_export(roa_float2 a, float *out);
 
-float						roa_float2_get_x(roa_float2 a);
-float						roa_float2_get_y(roa_float2 a);
+roa_float2      roa_float2_add(roa_float2 a, roa_float2 b);
+roa_float2      roa_float2_multiply(roa_float2 a, roa_float2 b);
+roa_float2      roa_float2_divide(roa_float2 a, roa_float2 b);
+roa_float2      roa_float2_scale(roa_float2 a, float scale);
+roa_float2      roa_float2_floor(roa_float2 a);
+roa_float2      roa_float2_fract(roa_float2 a);
+float           roa_float2_squared_length(roa_float2 a);
+float           roa_float2_length(roa_float2 a);
 
-float						roa_float2_dot(roa_float2 a, roa_float2 b);
+float           roa_float2_get_x(roa_float2 a);
+float           roa_float2_get_y(roa_float2 a);
+
+float           roa_float2_dot(roa_float2 a, roa_float2 b);
 
 
 /* ------------------------------------------------------------ [ float3 ] -- */
@@ -120,7 +132,7 @@ roa_float4      roa_float4_one();
 roa_float4      roa_float4_fill_with_value(float v);
 roa_float4      roa_float4_set_with_values(float x, float y, float z, float w);
 
-roa_float4			roa_float4_import(const float *in);
+roa_float4      roa_float4_import(const float *in);
 void            roa_float4_export(roa_float4 a, float *out);
 
 float           roa_float4_get_x(roa_float4 a);
@@ -132,7 +144,7 @@ roa_float4      roa_float4_add(roa_float4 a, roa_float4 b);
 roa_float4      roa_float4_subtract(roa_float4 a, roa_float4 b);
 roa_float4      roa_float4_multiply(roa_float4 a, roa_float4 b);
 
-roa_float4			roa_float4_lerp(roa_float4 a, roa_float4 b, float t);
+roa_float4      roa_float4_lerp(roa_float4 a, roa_float4 b, float t);
 float           roa_float4_length(roa_float4 a);
 roa_float4      roa_float4_normalize(roa_float4 a);
 float           roa_float4_dot(roa_float4 a, roa_float4 b);
@@ -150,13 +162,13 @@ roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion righ
 
 int             roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float err);
 
-void						roa_quaternion_get_rotation_matrix(roa_quaternion rotation, roa_mat3 *out);
-roa_float3			roa_quaternion_rotate_vector(roa_quaternion rotation, roa_float3 vector);
+void            roa_quaternion_get_rotation_matrix(roa_quaternion rotation, roa_mat3 *out);
+roa_float3      roa_quaternion_rotate_vector(roa_quaternion rotation, roa_float3 vector);
 
-float						roa_quaternion_get_x(roa_quaternion a);
-float						roa_quaternion_get_y(roa_quaternion a);
-float						roa_quaternion_get_z(roa_quaternion a);
-float						roa_quaternion_get_w(roa_quaternion a);
+float           roa_quaternion_get_x(roa_quaternion a);
+float           roa_quaternion_get_y(roa_quaternion a);
+float           roa_quaternion_get_z(roa_quaternion a);
+float           roa_quaternion_get_w(roa_quaternion a);
 
 /* --------------------------------------------------------- [ transform ] -- */
 
@@ -166,14 +178,14 @@ void            roa_transform_inherited(roa_transform *out, const roa_transform 
 
 void            roa_transform_to_mat4(const roa_transform *trans, roa_mat4 *out);
 
-roa_float3			roa_transform_world_fwd();
-roa_float3			roa_transform_local_fwd(const roa_transform *trans);
+roa_float3      roa_transform_world_fwd();
+roa_float3      roa_transform_local_fwd(const roa_transform *trans);
 
-roa_float3			roa_transform_world_up();
-roa_float3			roa_transform_local_up(const roa_transform *trans);
+roa_float3      roa_transform_world_up();
+roa_float3      roa_transform_local_up(const roa_transform *trans);
 
-roa_float3			roa_transform_world_left();
-roa_float3			roa_transform_local_left(const roa_transform *trans);
+roa_float3      roa_transform_world_left();
+roa_float3      roa_transform_local_left(const roa_transform *trans);
 
 
 /* -------------------------------------------------------------- [ mat2 ] -- */
@@ -187,23 +199,23 @@ void            roa_mat2_import(roa_mat2 *out, const float *in);
 void            roa_mat2_multiply(roa_mat2 *out, const roa_mat2 *lhs, const roa_mat2 *rhs);
 roa_float2      roa_mat2_multiply_with_float2(roa_float2 lhs, const roa_mat2 *rhs);
 
-int							roa_mat2_is_near(const roa_mat2 *a, const roa_mat2 *b, float error);
+int             roa_mat2_is_near(const roa_mat2 *a, const roa_mat2 *b, float error);
 
 
 /* -------------------------------------------------------------- [ mat3 ] -- */
 
 
-void						roa_mat3_zero(roa_mat3 *out);
-void						roa_mat3_id(roa_mat3 *out);
-void						roa_mat3_fill(roa_mat3 *out, float value);
-void						roa_mat3_import(roa_mat3 *out, const float *in);
+void            roa_mat3_zero(roa_mat3 *out);
+void            roa_mat3_id(roa_mat3 *out);
+void            roa_mat3_fill(roa_mat3 *out, float value);
+void            roa_mat3_import(roa_mat3 *out, const float *in);
 
-void						roa_mat3_add(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *right);
-void						roa_mat3_subtract(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *right);
-void						roa_mat3_multiply(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *rhs);
-roa_float3	  	roa_mat3_multiply_with_float3(roa_float3 lhs, const roa_mat3 *rhs);
+void            roa_mat3_add(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *right);
+void            roa_mat3_subtract(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *right);
+void            roa_mat3_multiply(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *rhs);
+roa_float3      roa_mat3_multiply_with_float3(roa_float3 lhs, const roa_mat3 *rhs);
 
-int							roa_mat3_is_near(roa_mat3 *a, roa_mat3 *b, float error);
+int             roa_mat3_is_near(roa_mat3 *a, roa_mat3 *b, float error);
 
 
 /* -------------------------------------------------------------- [ mat4 ] -- */
