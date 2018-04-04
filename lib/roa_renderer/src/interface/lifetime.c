@@ -35,10 +35,6 @@ roa_renderer_ctx_create(
   
 	volt_ctx_create(&new_ctx->volt_ctx);
 
-	*ctx = new_ctx;
-
-	printf("1");
-
 	/* temp create some dummy data */
   /* create uniforms */
   {
@@ -63,8 +59,6 @@ roa_renderer_ctx_create(
     volt_uniform_create(new_ctx->volt_ctx, &new_ctx->world_data, &uni_desc_2);
     ROA_ASSERT(new_ctx->world_data);
   }
-
-	printf("2");
 
   /* create some assets */
   {
@@ -225,6 +219,11 @@ roa_renderer_ctx_create(
     volt_ctx_execute(new_ctx->volt_ctx);
   }
 
+  /* settings */
+  new_ctx->settings.device_viewport[0] = 800;
+  new_ctx->settings.device_viewport[1] = 480;
+
+  *ctx = new_ctx;
 
 	return new_ctx ? ROA_TRUE : ROA_FALSE;
 }

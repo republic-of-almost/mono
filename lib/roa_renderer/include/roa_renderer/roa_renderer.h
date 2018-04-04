@@ -51,6 +51,16 @@ roa_renderer_ctx_unlock(
 	roa_renderer_ctx_t ctx);
 
 
+/* ---------------------------------------------------------- [ Settings ] -- */
+
+
+void
+roa_renderer_set_device_resolution(
+  roa_renderer_ctx_t ctx,
+  unsigned width,
+  unsigned height);
+
+
 /* ------------------------------------------------------------ [ Camera ] -- */
 
 struct roa_renderer_camera
@@ -93,6 +103,13 @@ roa_renderer_renderable_set(
 	roa_renderer_ctx_t ctx,
 	struct roa_renderer_renderable *renderable,
 	uint32_t renderable_id);
+
+
+ROA_BOOL
+roa_renderer_renderable_get(
+  roa_renderer_ctx_t ctx,
+  struct roa_renderer_renderable *out_renderable,
+  uint32_t renderable_id);
 
 
 ROA_BOOL

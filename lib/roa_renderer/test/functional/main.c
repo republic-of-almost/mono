@@ -1,5 +1,6 @@
 #include <roa_renderer/roa_renderer.h>
 #include <roa_ctx/roa_ctx.h>
+#include <roa_math/math.h>
 #include <stdio.h>
 
 
@@ -13,8 +14,8 @@ roa_renderer_ctx_t renderer_ctx = ROA_NULL;
 /* ------------------------------------------ [ Func Test Renderer Data ] -- */
 
 
-uint32_t object_id_counter;
-uint32_t objects[2];
+uint32_t object_id_counter = 0;
+unsigned renderable_count = 24;
 
 
 /* -------------------------------------------------------- [ Func Test ] -- */
@@ -26,8 +27,12 @@ main()
   /* setup systems */
   {
     roa_ctx_create(&hw_ctx);
-
 	  roa_renderer_ctx_create(&renderer_ctx, ROA_NULL);
+
+    struct roa_ctx_window_desc win_desc;
+    roa_ctx_get_window_desc(hw_ctx, &win_desc);
+
+    roa_renderer_set_device_resolution(renderer_ctx, win_desc.width, win_desc.height);
   }
 
   /* setup objects */
@@ -45,25 +50,63 @@ main()
       camera.up[1]          = +1.f;
       camera.position[2]    = +3.f;
       
-      objects[0] = ++object_id_counter;
+      uint32_t camera_id = ++object_id_counter;
 
-      roa_renderer_camera_set(renderer_ctx, &camera, objects[0]);
+      roa_renderer_camera_set(renderer_ctx, &camera, camera_id);
     }
 
     /* renderable */
     {
-      struct roa_renderer_renderable renderable;
-      ROA_MEM_ZERO(renderable);
+      unsigned i;
 
-      objects[1] = ++object_id_counter;
+      for(i = 0; i < renderable_count; ++i)
+      {
+        struct roa_renderer_renderable renderable;
+        ROA_MEM_ZERO(renderable);
 
-      roa_renderer_renderable_set(renderer_ctx, &renderable, objects[1]);
+        uint32_t obj_id = ++object_id_counter;
+
+        roa_renderer_renderable_set(renderer_ctx, &renderable, obj_id);
+      }
     }
   }
 
   /* process the scene */
   while (roa_ctx_new_frame(hw_ctx))
   {
+    static float time = 0.f;
+    time += 0.1f;
+
+    /* set renderables */
+    {
+      float increment = ROA_TAU / (float)renderable_count;
+      float radius = 5.f;
+
+      unsigned i;
+
+      for (i = 1; i < renderable_count + 1; ++i)
+      {
+        struct roa_renderer_renderable renderable;
+        roa_renderer_renderable_get(renderer_ctx, &renderable, i);
+
+        float x = roa_float_sin(((float)i * increment)) * radius;
+        float y = 1.7f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
+        float z = roa_float_cos(((float)i * increment)) * radius;
+
+        roa_transform transform;
+        transform.position = roa_float3_set_with_values(x, y * 0.5f, z);
+        transform.rotation = roa_quaternion_default();
+        transform.scale = roa_float3_set_with_values(1, y, 1);
+
+        roa_mat4 world;
+        roa_transform_to_mat4(&transform, &world);
+
+        ROA_MEM_CPY(renderable.world_transform, world.data);
+
+        roa_renderer_renderable_set(renderer_ctx, &renderable, i);
+      }
+    }
+
     /* pump renderer events */
     while(1)
     {

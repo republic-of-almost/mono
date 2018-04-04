@@ -1989,8 +1989,9 @@ volt_ctx_create(volt_ctx_t *ctx)
   new_ctx->resource_destroy_stream.capacity = sizeof(uint8_t) * 1024;
 
   roa_spin_lock_init(&new_ctx->rdr_lock);
-  new_ctx->render_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * 1024);
-  new_ctx->render_stream.capacity = sizeof(uint8_t) * 1024;
+  int count = 1 << 12;
+  new_ctx->render_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * count);
+  new_ctx->render_stream.capacity = sizeof(uint8_t) * count;
 
   roa_spin_lock_init(&new_ctx->rp_lock);
   roa_array_create_with_capacity(new_ctx->renderpasses, 128);

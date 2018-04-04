@@ -7,32 +7,32 @@
 
 unsigned
 roa_renderer_task_pump(
-	roa_renderer_ctx_t ctx,
-	struct roa_renderer_task **tasks)
+  roa_renderer_ctx_t ctx,
+  struct roa_renderer_task **tasks)
 {
-	if(ctx->render == ROA_TRUE)
-	{
-		return 0;
-	}
+  if(ctx->render == ROA_TRUE)
+  {
+    return 0;
+  }
 
-	roa_array_clear(ctx->tasks);
+  roa_array_clear(ctx->tasks);
 
-	unsigned cam_count = roa_array_size(ctx->camera);
-	unsigned i;
+  unsigned cam_count = roa_array_size(ctx->camera);
+  unsigned i;
 
-	for(i = 0; i < cam_count; ++i)
-	{
-		struct roa_renderer_task render_task;
-		render_task.func = task_render; 
-		render_task.arg = ctx;
+  for(i = 0; i < cam_count; ++i)
+  {
+    struct roa_renderer_task render_task;
+    render_task.func = task_render; 
+    render_task.arg = ctx;
 
-		roa_array_push(ctx->tasks, render_task);
-	}
+    roa_array_push(ctx->tasks, render_task);
+  }
 
-	ctx->render = ROA_TRUE;
+  ctx->render = ROA_TRUE;
 
-	*tasks = ctx->tasks;
-	return cam_count;
+  *tasks = ctx->tasks;
+  return cam_count;
 }
 
 

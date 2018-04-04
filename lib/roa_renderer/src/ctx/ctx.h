@@ -19,6 +19,12 @@ struct mesh_camera_data
 };
 
 
+struct roa_device_settings
+{
+  unsigned device_viewport[2];
+};
+
+
 struct roa_renderer_ctx
 {
 	/* data */
@@ -53,6 +59,8 @@ struct roa_renderer_ctx
 	
 	ROA_BOOL render;
 
+  /* settings */
+  struct roa_device_settings settings;
 };
 
 
