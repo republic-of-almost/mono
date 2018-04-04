@@ -10,43 +10,29 @@ roa_renderer_task_pump(
 	roa_renderer_ctx_t ctx,
 	struct roa_renderer_task **tasks)
 {
-  /* what stage are we at */
-  static int i = 0;
-  i += 1;
+	if(ctx->render == ROA_TRUE)
+	{
+		return 0;
+	}
 
-  if(i == 1)
-  {
+	roa_array_clear(ctx->tasks);
 
-    /* cull objects per camera */
-    {
-      unsigned cam_count = roa_array_size(ctx->camera);
-      unsigned i;
+	unsigned cam_count = roa_array_size(ctx->camera);
+	unsigned i;
 
-      for (i = 0; i < cam_count; ++i)
-      {
-        struct roa_renderer_task task;
-        task.arg = ROA_NULL;
-        task.func = task_sphere_culling;
+	for(i = 0; i < cam_count; ++i)
+	{
+		struct roa_renderer_task render_task;
+		render_task.func = task_render; 
+		render_task.arg = ctx;
 
-        roa_array_push(ctx->tasks, task);
-      }
+		roa_array_push(ctx->tasks, render_task);
+	}
 
+	ctx->render = ROA_TRUE;
 
-      unsigned task_count = roa_array_size(ctx->tasks);
-
-      if (task_count)
-      {
-        *tasks = ctx->tasks;
-      }
-
-      return task_count;;
-    }
-
-  }
-
-  /* renderpass per camera */
-	
-	return 0;
+	*tasks = ctx->tasks;
+	return cam_count;
 }
 
 

@@ -21,6 +21,8 @@
 
 	"project_dependencies" : [
 		"Volt",
+		"STB",
+		"RepublicMath",
 		"RepublicLib"
 	]
 

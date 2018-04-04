@@ -38,6 +38,21 @@ struct roa_renderer_ctx
 
 	/* low level renderer */
   volt_ctx_t volt_ctx;
+
+	/* test stuff */
+	volt_uniform_t world_data;
+	volt_uniform_t proj_data;
+	volt_uniform_t view_data;
+	volt_texture_t texture_1;
+	volt_texture_t texture_2;
+	volt_rasterizer_t rasterizer;
+	volt_input_t input_format;
+	volt_vbo_t vbo;
+	volt_ibo_t ibo;
+	volt_program_t program;
+	
+	ROA_BOOL render;
+
 };
 
 

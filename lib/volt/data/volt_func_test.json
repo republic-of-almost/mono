@@ -1,7 +1,7 @@
 {
   "name": "VoltFunctionalTests",
   "kind": "ConsoleApp",
-  "language": "C89",
+  "language": "C",
   "location": "./",
 
   "assets": [

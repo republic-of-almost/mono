@@ -25,8 +25,8 @@ volt_vbo_t        screen_triangle      = VOLT_NULL;
 volt_input_t      screen_input_format  = VOLT_NULL;
 volt_rasterizer_t screen_rasterizer    = VOLT_NULL;
 
-int width = 800;
-int height = 480;
+int width = 200;
+int height = 200;
 
 unsigned char *texture_data = ROA_NULL;
 
@@ -36,9 +36,6 @@ unsigned char *texture_data = ROA_NULL;
 
 float random(roa_float2 _st)
 {
-	//ROA_ASSERT(_st.x >= 0);
-	//ROA_ASSERT(_st.y >= 0);
-
 	float dot = roa_float2_dot(_st, roa_float2_set_with_values(12.9898f, 78.233f));
 	float sin = roa_float_sin(dot) * 43758.5453123f;
 	float fract = roa_float_fract(sin);
@@ -54,15 +51,10 @@ float random(roa_float2 _st)
 
 float noise(roa_float2 _st)
 {
-	//ROA_ASSERT(_st.x >= 0);
-	//ROA_ASSERT(_st.y >= 0);
 
   roa_float2 i = roa_float2_floor(_st);
   roa_float2 f = roa_float2_fract(_st);
 
-	
-	// printf("ST %f %f, Fract %f %f, Floor %f %f\n", _st.x, _st.y, f.x, f.y, i.x, i.y);
-	
 
   /* Four corners in 2D of a tile */
   float a = random(roa_float2_add(i, roa_float2_set_with_values(0.f, 0.f)));
@@ -77,9 +69,6 @@ float noise(roa_float2 _st)
 	roa_float2 u = roa_float2_multiply(ff, three_neg_f2);
 
 
-
-  //roa_float2 u = roa_float2_multiply(roa_float2_multiply(f, f), roa_float2_scale(f, 3.0 - 2.0));
-	
   
  return roa_float_lerp(a, b, u.x) +
     (c - a)* u.y * (1.0 - u.x) +
@@ -96,7 +85,7 @@ float noise(roa_float2 _st)
 	*/
 }
 
-#define NUM_OCTAVES 2 
+#define NUM_OCTAVES 7 
 
 float fbm(roa_float2 _st) {
   float v = 0.0;
@@ -114,9 +103,6 @@ float fbm(roa_float2 _st) {
   roa_mat2 rot;
   roa_mat2_import(&rot, mat_data);
 	
-	//ROA_ASSERT(_st.x >= 0);
-	//ROA_ASSERT(_st.y >= 0);
-
 	int i;
   for (i = 0; i < NUM_OCTAVES; ++i)
   {
@@ -158,61 +144,38 @@ ROA_JOB(worker, struct worker_arg*)
   {
     roa_float2 frag_coord = roa_float2_set_with_values((float)i, (float)arg->row);
 
-    roa_float2 st = roa_float2_divide(frag_coord, roa_float2_set_with_values(width, height));
+    roa_float2 st = roa_float2_divide(frag_coord, roa_float2_set_with_values(width, width));
+		roa_float2 scaled_st = roa_float2_scale(st, 7.f);
 
-		/*
-		printf("ST: %f %f\n", st.x, st.y);
-		*/
-		ROA_ASSERT(st.x >= 0);
-		ROA_ASSERT(st.y >= 0);
+		/* q and r elements */
+		roa_float2 q = roa_float2_zero();
+		q.x = fbm(scaled_st);
+		q.y = fbm(roa_float2_add(q, roa_float2_one()));
+
+
+		roa_float2 r = roa_float2_zero();
+		roa_float2 rx_time = roa_float2_fill_with_value(0.15 * arg->seed);
+		r.x = fbm(roa_float2_add(st, rx_time));
 		
-		//roa_float3 color = roa_float3_fill_with_value(1.f);
-		//color = roa_float3_scale(color, fbm(st));
 
-	
-    //float n = fbm(roa_float2_scale(st, 10.f));
-		//roa_float3 final_color = roa_float3_fill_with_value(n);
+		float f = fbm(roa_float2_add(scaled_st, r));
 
-    roa_float2 q = roa_float2_fill_with_value(0);
-    q.x = fbm(roa_float2_add(st, roa_float2_fill_with_value(arg->seed)));
-    q.y = fbm(roa_float2_add(st, roa_float2_fill_with_value(1.0)));
+		
+		/* color */
+		float init_time = roa_float_clamp((f * f) * 4.f, 0.f, 1.f);
+		roa_float3 start_col = roa_float3_set_with_values(0.1019f, 0.6196f, 0.6667f);
+		roa_float3 end_col = roa_float3_set_with_values(0.6667f, 0.6667f, 0.4980f);
+		roa_float3 color = roa_float3_lerp(start_col, end_col, init_time);
 
-    roa_float2 r = roa_float2_fill_with_value(0);
 
-    roa_float2 rx_scale = roa_float2_fill_with_value(0.15f * (float)arg->seed);
-    roa_float2 rx_qvec = roa_float2_add(q, roa_float2_set_with_values(1.7, 9.2));
-    roa_float2 rxst1 = roa_float2_add(st, roa_float2_zero());
+		/* final color */
+		float color_scale = f * f * f + 0.6f * f * f + 0.5f * f;
+		color = roa_float3_scale(color, color_scale);
 
-    r.x = fbm(roa_float2_add(roa_float2_multiply(rxst1, rx_qvec), rx_scale));
+		roa_float3 final_color = color;
+		final_color = roa_float3_scale(final_color, 200);
 
-    roa_float2 ry_scale = roa_float2_fill_with_value(0.126f * (float)arg->seed);
-    roa_float2 ry_qvec = roa_float2_add(q, roa_float2_set_with_values(8.3, 2.8));
-    roa_float2 ryst1 = roa_float2_add(st, roa_float2_zero());
-
-    r.y = fbm(roa_float2_add(roa_float2_multiply(ryst1, ry_qvec), ry_scale));
-
-    float f = fbm(roa_float2_add(st, r));
-
-    roa_float3 color;
-    color = roa_float3_lerp(roa_float3_set_with_values(0.101961, 0.619608, 0.666667),
-      roa_float3_set_with_values(0.666667, 0.666667, 0.498039),
-      roa_float_clamp((f*f)*4.0, 0.0, 1.0));
-
-    color = roa_float3_lerp(color,
-      roa_float3_set_with_values(0, 0, 0.164706),
-      roa_float_clamp(roa_float2_length(q), 0.0, 1.0));
-
-    color = roa_float3_lerp(color,
-      roa_float3_set_with_values(0.666667, 1, 1),
-      roa_float_clamp(roa_float_abs(r.x), 0.0, 1.0));
-
-    float scale = f * f * f + 0.6 * f * f + 0.5f * f;
-    roa_float3 final_color = roa_float3_fill_with_value(1.f);
-    final_color = roa_float3_multiply(final_color, color);
-
-    
-
-    final_color = roa_float3_scale(final_color, 255);
+		/* apply color */
     unsigned index = (arg->offset + i) * 4;
 
     arg->pix[index + 0] = final_color.x;
@@ -231,7 +194,7 @@ ROA_JOB(main_frame, void*)
   {
     volt_texture_get_desc(volt_ctx, screen_texture, &tex_desc);
 
-    struct roa_job_desc desc[480];
+    struct roa_job_desc desc[width];
     struct worker_arg arg[ROA_ARR_COUNT(desc)];
     int i;
 

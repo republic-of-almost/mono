@@ -1,5 +1,6 @@
 #include <roa_renderer/roa_renderer.h>
 #include <roa_ctx/roa_ctx.h>
+#include <stdio.h>
 
 
 /* -------------------------------------------------- [ Func Test Ctx's ] -- */
@@ -25,9 +26,9 @@ main()
   /* setup systems */
   {
     roa_ctx_create(&hw_ctx);
+
 	  roa_renderer_ctx_create(&renderer_ctx, ROA_NULL);
   }
-
 
   /* setup objects */
   {
@@ -59,7 +60,6 @@ main()
       roa_renderer_renderable_set(renderer_ctx, &renderable, objects[1]);
     }
   }
-
 
   /* process the scene */
   while (roa_ctx_new_frame(hw_ctx))
