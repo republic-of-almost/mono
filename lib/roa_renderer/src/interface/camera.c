@@ -15,11 +15,53 @@ roa_renderer_camera_set(
   ROA_ASSERT(camera);
   ROA_ASSERT(camera_id);
 
-	/* push camera */
-	roa_array_push(ctx->camera_id, camera_id);
-	roa_array_push(ctx->camera, *camera);
+  /* find key */
+  unsigned cam_count = roa_array_size(ctx->camera_id);
+  unsigned i;
+
+  for (i = 0; i < cam_count; ++i)
+  {
+    if (ctx->renderable_id[i] == camera_id)
+    {
+      ctx->camera[i] = *camera;
+
+      return ROA_TRUE;
+    }
+  }
+
+  roa_array_push(ctx->camera_id, camera_id);
+  roa_array_push(ctx->camera, *camera);
 
   return ROA_TRUE;
+}
+
+
+ROA_BOOL
+roa_renderer_camera_get(
+  roa_renderer_ctx_t ctx,
+  struct roa_renderer_camera *out_camera,
+  uint32_t camera_id)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(out_camera);
+  ROA_ASSERT(camera_id);
+
+  /* find key */
+  unsigned rdr_count = roa_array_size(ctx->camera_id);
+  unsigned i;
+
+  for (i = 0; i < rdr_count; ++i)
+  {
+    if (ctx->camera_id[i] == camera_id)
+    {
+      *out_camera = ctx->camera[i];
+
+      return ROA_TRUE;
+    }
+  }
+
+  return ROA_FALSE;
 }
 
 

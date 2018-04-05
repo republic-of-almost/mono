@@ -77,6 +77,21 @@ main()
     static float time = 0.f;
     time += 0.1f;
 
+    /* set camera */
+    {
+      struct roa_renderer_camera camera;
+      roa_renderer_camera_get(renderer_ctx, &camera, 1);
+      
+
+      float x = roa_float_sin(time) * radius;
+      float y = radius - (radius / ROA_G_RATIO);
+      float z = roa_float_cos(time) * radius;
+
+      roa_float3 from = roa_float3_set_with_values(x, y, z);
+      roa_float3 at = roa_float3_fill_with_value(0.f);
+      roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
+    }
+
     /* set renderables */
     {
       float increment = ROA_TAU / (float)renderable_count;

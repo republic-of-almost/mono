@@ -84,6 +84,13 @@ roa_renderer_camera_set(
 
 
 ROA_BOOL
+roa_renderer_camera_get(
+  roa_renderer_ctx_t ctx,
+  struct roa_renderer_camera *out_camera,
+  uint32_t camera_id);
+
+
+ROA_BOOL
 roa_renderer_camera_clear(
 	roa_renderer_ctx_t ctx,
 	uint32_t camera_id);
