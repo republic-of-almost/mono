@@ -71,7 +71,7 @@ struct roa_renderer_camera
 	float field_of_view;
 
 	float position[3];
-	float direction[3];
+	float lookat[3];
 	float up[3];
 };
 
@@ -102,6 +102,7 @@ roa_renderer_camera_clear(
 struct roa_renderer_renderable
 {
 	float world_transform[16];
+	uint64_t mesh_id;
 };
 
 
@@ -123,6 +124,27 @@ ROA_BOOL
 roa_renderer_renderable_clear(
 	roa_renderer_ctx_t ctx,
 	uint32_t renderable_id);
+
+
+/* ---------------------------------------------------- [ Mesh Resources ] -- */
+
+
+struct roa_renderer_mesh_resource
+{
+	const char *name;
+
+	float *vert_vec3_array;
+	float *normal_vec3_array;
+	float *texture_coord_vec2_array;
+
+	unsigned vert_count;
+};
+
+
+uint64_t
+roa_renderer_mesh_resource_add(
+	roa_renderer_ctx_t ctx,
+	const struct roa_renderer_mesh_resource *rsrc);
 
 
 /* -------------------------------------------------------------- [ Task ] -- */

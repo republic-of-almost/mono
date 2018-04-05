@@ -4,6 +4,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
 #include <roa_lib/log.h>
+#include <roa_lib/atomic.h>
 #include <volt/utils/prim_model.h>
 
 
@@ -23,8 +24,6 @@ roa_renderer_ctx_create(
 
   unsigned count = 1 << 10;
 
-	printf("0");
-
   roa_array_create_with_capacity(new_ctx->mesh_camera_data, count);
   roa_array_create_with_capacity(new_ctx->mesh_rendering_data, count);
 	roa_array_create_with_capacity(new_ctx->camera_id, count);
@@ -32,7 +31,14 @@ roa_renderer_ctx_create(
 	roa_array_create_with_capacity(new_ctx->renderable_id, count);
 	roa_array_create_with_capacity(new_ctx->renderable, count);
   roa_array_create_with_capacity(new_ctx->tasks, count);
-  
+ 
+	/* mesh rsrc */
+	roa_array_create_with_capacity(new_ctx->mesh_rsrc.rsrc, count);
+	roa_array_create_with_capacity(new_ctx->mesh_rsrc.pending_ids, count);
+	roa_array_create_with_capacity(new_ctx->mesh_rsrc.ids, count);
+	roa_spin_lock_init(&new_ctx->mesh_rsrc.lock);
+
+
 	volt_ctx_create(&new_ctx->volt_ctx);
 
 	/* temp create some dummy data */

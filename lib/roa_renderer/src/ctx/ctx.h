@@ -5,6 +5,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_renderer/roa_renderer.h>
 #include <volt/volt.h>
+#include <roa_lib/atomic.h>
 
 
 struct mesh_rendering_data
@@ -16,6 +17,17 @@ struct mesh_rendering_data
 struct mesh_camera_data
 {
   int i;
+};
+
+
+struct roa_mesh_rsrc
+{
+	roa_atomic_int lock;
+
+	/* array */ uint64_t *pending_ids;
+
+	/* array */ uint64_t *ids;
+	/* array */ struct roa_renderer_mesh_resource *rsrc;
 };
 
 
@@ -34,6 +46,8 @@ struct roa_renderer_ctx
 
 	/* array */ uint32_t *renderable_id;
 	/* array */ struct roa_renderer_renderable *renderable;
+
+	struct roa_mesh_rsrc mesh_rsrc;
 
 	/* job data */
   

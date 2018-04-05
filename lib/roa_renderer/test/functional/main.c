@@ -16,6 +16,7 @@ roa_renderer_ctx_t renderer_ctx = ROA_NULL;
 
 uint32_t object_id_counter = 0;
 unsigned renderable_count = 24;
+uint64_t cube_mesh = 0;
 
 
 /* -------------------------------------------------------- [ Func Test ] -- */
@@ -34,6 +35,14 @@ main()
 
     roa_renderer_set_device_resolution(renderer_ctx, win_desc.width, win_desc.height);
   }
+	
+	/* setup resources */
+	{
+		struct roa_renderer_mesh_resource mesh_rsrc;
+		mesh_rsrc.name = "cube_mesh";
+
+		cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
+	}
 
   /* setup objects */
   {
@@ -46,8 +55,6 @@ main()
       camera.near_plane     = 0.1f;
       camera.far_plane      = 1000.f;
       camera.field_of_view  = 3.1421f * 0.125f;
-      camera.direction[2]   = -1.f;
-      camera.up[1]          = +1.f;
       camera.position[2]    = +3.f;
       
       uint32_t camera_id = ++object_id_counter;
@@ -81,15 +88,23 @@ main()
     {
       struct roa_renderer_camera camera;
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
-      
+     
+			float radius = 10.f;
+			float spin_time = time * 0.025f;
 
-      float x = roa_float_sin(time) * radius;
+      float x = roa_float_sin(spin_time) * radius;
       float y = radius - (radius / ROA_G_RATIO);
-      float z = roa_float_cos(time) * radius;
+      float z = roa_float_cos(spin_time) * radius;
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at = roa_float3_fill_with_value(0.f);
       roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
+
+			roa_float3_export(from, camera.position);
+			roa_float3_export(at, camera.lookat);
+			roa_float3_export(up, camera.up);
+
+			roa_renderer_camera_set(renderer_ctx, &camera, 1);
     }
 
     /* set renderables */
@@ -105,7 +120,7 @@ main()
         roa_renderer_renderable_get(renderer_ctx, &renderable, i);
 
         float x = roa_float_sin(((float)i * increment)) * radius;
-        float y = 1.7f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
+        float y = 1.8f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
         float z = roa_float_cos(((float)i * increment)) * radius;
 
         roa_transform transform;

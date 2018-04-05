@@ -17,34 +17,26 @@ task_render(void *arg)
 
 	unsigned renderable_count = roa_array_size(ctx->renderable);
 
-	static roa_mat4 view;
-  static roa_mat4 proj;
+	roa_mat4 view;
+  roa_mat4 proj;
 
   /* create mats */
   {
-    static float time = 0.1f;
-    time += 0.001f;
-    float radius = 10.f;
-
     float aspect = (float)ctx->settings.device_viewport[0] / (float)ctx->settings.device_viewport[1];
-    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 100.f, aspect);
 
-    float x = roa_float_sin(time) * radius;
-    float y = radius - (radius / ROA_G_RATIO);
-    float z = roa_float_cos(time) * radius;
-    
-    roa_float3 from = roa_float3_set_with_values(x, y, z);
-    roa_float3 at = roa_float3_fill_with_value(0.f);
-    roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
+		roa_mat4_projection(&proj, camera.field_of_view, camera.near_plane, camera.far_plane, aspect);
+		roa_float3 from = roa_float3_import(camera.position);
+		roa_float3 at = roa_float3_import(camera.lookat);
+		roa_float3 up = roa_float3_import(camera.up);
 
-    roa_mat4_lookat(&view, from, at, up);
-  }
+		roa_mat4_lookat(&view, from, at, up);	
+	}
 
   unsigned rdr_count = roa_array_size(ctx->renderable);
   unsigned i;
 
   volt_renderpass_t rp;
-  volt_renderpass_create(ctx->volt_ctx, &rp, "cube", ROA_NULL);
+  volt_renderpass_create(ctx->volt_ctx, &rp, "mesh_render", ROA_NULL);
 
   /* bind program */
   volt_renderpass_bind_program(rp, ctx->program);

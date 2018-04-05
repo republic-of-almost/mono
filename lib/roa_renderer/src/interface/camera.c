@@ -21,7 +21,7 @@ roa_renderer_camera_set(
 
   for (i = 0; i < cam_count; ++i)
   {
-    if (ctx->renderable_id[i] == camera_id)
+    if (ctx->camera_id[i] == camera_id)
     {
       ctx->camera[i] = *camera;
 
@@ -48,10 +48,10 @@ roa_renderer_camera_get(
   ROA_ASSERT(camera_id);
 
   /* find key */
-  unsigned rdr_count = roa_array_size(ctx->camera_id);
+  unsigned cam_count = roa_array_size(ctx->camera_id);
   unsigned i;
 
-  for (i = 0; i < rdr_count; ++i)
+  for (i = 0; i < cam_count; ++i)
   {
     if (ctx->camera_id[i] == camera_id)
     {
@@ -73,4 +73,7 @@ roa_renderer_camera_clear(
   /* param check */
   ROA_ASSERT(ctx);
   ROA_ASSERT(camera_id);
+
+
+	return ROA_FALSE;
 }
