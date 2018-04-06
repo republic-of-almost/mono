@@ -20,11 +20,21 @@ struct mesh_camera_data
 };
 
 
+struct renderer_alloc
+{
+  roa_renderer_alloc alloc;
+  roa_renderer_free free;
+
+  roa_renderer_alloc frame_alloc;
+  roa_renderer_free frame_free;
+};
+
+
 struct roa_mesh_rsrc
 {
 	roa_atomic_int lock;
 
-	/* array */ uint64_t *pending_ids;
+	/* array */ uint64_t *create_ids;
 
 	/* array */ uint64_t *ids;
 	/* array */ struct roa_renderer_mesh_resource *rsrc;
@@ -39,6 +49,8 @@ struct roa_device_settings
 
 struct roa_renderer_ctx
 {
+  struct renderer_alloc mem;
+
 	/* data */
 
 	/* array */ uint32_t *camera_id;

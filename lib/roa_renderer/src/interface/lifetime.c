@@ -14,13 +14,34 @@
 ROA_BOOL
 roa_renderer_ctx_create(
 	roa_renderer_ctx_t *ctx,
-  struct roa_renderer_desc *desc)
+  struct roa_renderer_ctx_desc *desc)
 {
 	/* param check */
 	ROA_ASSERT(ctx);
 
-	struct roa_renderer_ctx *new_ctx = roa_zalloc(sizeof(*new_ctx));
+  struct renderer_alloc alloc;
+
+  if (desc)
+  {
+    alloc.alloc = desc->alloc;
+    alloc.free = desc->free;
+
+    alloc.frame_alloc = desc->task_alloc;
+    alloc.frame_free = desc->task_free;
+  }
+  else
+  {
+    alloc.alloc = roa_zalloc;
+    alloc.free = roa_free;
+
+    alloc.frame_alloc = roa_zalloc;
+    alloc.frame_free = roa_free;
+  }
+
+	struct roa_renderer_ctx *new_ctx = alloc.alloc(sizeof(*new_ctx));
 	ROA_ASSERT(new_ctx);
+
+  new_ctx->mem = alloc;
 
   unsigned count = 1 << 10;
 
@@ -268,7 +289,9 @@ roa_renderer_ctx_destroy(
 
   volt_ctx_destroy(&kill_ctx->volt_ctx);
 
-	roa_free(kill_ctx);
+  roa_renderer_free free_fn = kill_ctx->mem.free;
+
+  free_fn(kill_ctx);
 
 	*ctx = ROA_NULL;
 }

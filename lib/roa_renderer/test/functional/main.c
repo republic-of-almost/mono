@@ -53,7 +53,7 @@ main()
       struct roa_renderer_camera camera;
       ROA_MEM_ZERO(camera);
       camera.near_plane     = 0.1f;
-      camera.far_plane      = 1000.f;
+      camera.far_plane      = 100.f;
       camera.field_of_view  = 3.1421f * 0.125f;
       camera.position[2]    = +3.f;
       
@@ -114,10 +114,12 @@ main()
 
       unsigned i;
 
-      for (i = 1; i < renderable_count + 1; ++i)
+      for (i = 0; i < renderable_count; ++i)
       {
+        uint32_t obj_id = i + 1;
+
         struct roa_renderer_renderable renderable;
-        roa_renderer_renderable_get(renderer_ctx, &renderable, i);
+        roa_renderer_renderable_get(renderer_ctx, &renderable, obj_id);
 
         float x = roa_float_sin(((float)i * increment)) * radius;
         float y = 1.8f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
@@ -133,7 +135,7 @@ main()
 
         ROA_MEM_CPY(renderable.world_transform, world.data);
 
-        roa_renderer_renderable_set(renderer_ctx, &renderable, i);
+        roa_renderer_renderable_set(renderer_ctx, &renderable, obj_id);
       }
     }
 

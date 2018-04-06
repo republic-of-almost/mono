@@ -17,14 +17,14 @@ task_render(void *arg)
 
 	unsigned renderable_count = roa_array_size(ctx->renderable);
 
-	roa_mat4 view;
-  roa_mat4 proj;
+	static roa_mat4 view;
+  static roa_mat4 proj;
 
   /* create mats */
   {
     float aspect = (float)ctx->settings.device_viewport[0] / (float)ctx->settings.device_viewport[1];
-
 		roa_mat4_projection(&proj, camera.field_of_view, camera.near_plane, camera.far_plane, aspect);
+
 		roa_float3 from = roa_float3_import(camera.position);
 		roa_float3 at = roa_float3_import(camera.lookat);
 		roa_float3 up = roa_float3_import(camera.up);
@@ -36,7 +36,7 @@ task_render(void *arg)
   unsigned i;
 
   volt_renderpass_t rp;
-  volt_renderpass_create(ctx->volt_ctx, &rp, "mesh_render", ROA_NULL);
+  volt_renderpass_create(ctx->volt_ctx, &rp, "cube", ROA_NULL);
 
   /* bind program */
   volt_renderpass_bind_program(rp, ctx->program);
@@ -45,15 +45,15 @@ task_render(void *arg)
   volt_renderpass_bind_input_format(rp, ctx->input_format);
   volt_renderpass_bind_rasterizer(rp, ctx->rasterizer);
 
+  volt_uniform_update(ctx->volt_ctx, ctx->view_data, view.data);
+  volt_uniform_update(ctx->volt_ctx, ctx->proj_data, proj.data);
+
   for (i = 0; i < rdr_count; ++i)
   {
-    volt_uniform_update(ctx->volt_ctx, ctx->view_data, view.data);
-    volt_uniform_update(ctx->volt_ctx, ctx->proj_data, proj.data);
     volt_uniform_update(ctx->volt_ctx, ctx->world_data, ctx->renderable[i].world_transform);
 
     volt_renderpass_set_viewport(rp, 0, 0, ctx->settings.device_viewport[0], ctx->settings.device_viewport[1]);
 
-    
     /* bind buffers */
     volt_renderpass_bind_vertex_buffer(rp, ctx->vbo);
     /*volt_renderpass_bind_index_buffer(rp, ctx->ibo);*/

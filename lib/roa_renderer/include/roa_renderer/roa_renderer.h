@@ -15,20 +15,27 @@ extern "C" {
 
 typedef struct roa_renderer_ctx * roa_renderer_ctx_t;
 
+typedef void*(*roa_renderer_alloc)(unsigned bytes);
+typedef void(*roa_renderer_free)(void *addr);
+
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
-struct roa_renderer_desc
+struct roa_renderer_ctx_desc
 {
-  int temp;
+  roa_renderer_alloc alloc;
+  roa_renderer_free free;
+
+  roa_renderer_alloc task_alloc;
+  roa_renderer_free task_free;
 };
 
 
 ROA_BOOL
 roa_renderer_ctx_create(
 	roa_renderer_ctx_t *ctx,
-  struct roa_renderer_desc *desc);
+  struct roa_renderer_ctx_desc *desc);
 
 
 void
