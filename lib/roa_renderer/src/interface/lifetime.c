@@ -55,7 +55,7 @@ roa_renderer_ctx_create(
  
 	/* mesh rsrc */
 	roa_array_create_with_capacity(new_ctx->mesh_rsrc.rsrc, count);
-	roa_array_create_with_capacity(new_ctx->mesh_rsrc.pending_ids, count);
+	roa_array_create_with_capacity(new_ctx->mesh_rsrc.create_ids, count);
 	roa_array_create_with_capacity(new_ctx->mesh_rsrc.ids, count);
 	roa_spin_lock_init(&new_ctx->mesh_rsrc.lock);
 

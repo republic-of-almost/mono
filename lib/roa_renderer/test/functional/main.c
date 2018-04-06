@@ -33,7 +33,10 @@ main()
     struct roa_ctx_window_desc win_desc;
     roa_ctx_get_window_desc(hw_ctx, &win_desc);
 
-    roa_renderer_set_device_resolution(renderer_ctx, win_desc.width, win_desc.height);
+    roa_renderer_set_device_resolution(
+			renderer_ctx,
+			win_desc.width,
+			win_desc.height);
   }
 	
 	/* setup resources */
