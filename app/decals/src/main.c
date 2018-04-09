@@ -216,15 +216,17 @@ setup_shader()
 ROA_BOOL
 setup_gbuffer()
 {
-  // Create the FBO
+  /* Create the FBO */
   glGenFramebuffers(1, &m_fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
-  // Create the gbuffer textures
-  glGenTextures(ROA_ARR_COUNT(m_textures), m_textures);
+  /* Create the gbuffer textures */
+	glGenTextures(ROA_ARR_COUNT(m_textures), m_textures);
   glGenTextures(1, &m_depthTexture);
 
-  for (unsigned int i = 0; i < ROA_ARR_COUNT(m_textures); i++) {
+	unsigned i;
+
+  for (i = 0; i < ROA_ARR_COUNT(m_textures); i++) {
     glBindTexture(GL_TEXTURE_2D, m_textures[i]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, WindowWidth, WindowHeight, 0, GL_RGB, GL_FLOAT, NULL);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i], 0);
@@ -232,7 +234,7 @@ setup_gbuffer()
     glObjectLabel(GL_TEXTURE, m_textures[i], -1, texture_names[i]);
   }
 
-  // depth
+  /* depth */
   glBindTexture(GL_TEXTURE_2D, m_depthTexture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, WindowWidth, WindowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
@@ -251,7 +253,7 @@ setup_gbuffer()
     return ROA_FALSE;
   }
 
-  // restore default FBO
+  /* restore default FBO */
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
   return ROA_TRUE;
@@ -540,7 +542,7 @@ main(int argc, char **argv)
       glBlitFramebuffer(0, 0, width, height, HalfWidth, 0, width, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
 
-    //volt_ctx_execute(volt_ctx);
+    /* volt_ctx_execute(volt_ctx); */
   }
 
   /* destroy systems */
