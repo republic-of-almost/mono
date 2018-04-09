@@ -50,6 +50,19 @@ roa_ctx_set_window_desc(
   const struct roa_ctx_window_desc *desc);
 
 
+/* ------------------------------------------------------------ [ input ] -- */
+
+
+struct roa_ctx_mouse_desc
+{
+  float x_pos;
+  float y_pos;
+
+  float x_delta;
+  float y_delta;
+};
+
+
 #ifdef __cplusplus
 } /* extern */
 #endif
