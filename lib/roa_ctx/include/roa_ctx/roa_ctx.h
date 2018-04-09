@@ -13,7 +13,7 @@ extern "C" {
 typedef struct roa_ctx * roa_ctx_t;
 
 
-/* --------------------------------------------------------- [ lifetime ] -- */
+/* ---------------------------------------------------------- [ lifetime ] -- */
 
 
 void
@@ -28,7 +28,7 @@ ROA_BOOL
 roa_ctx_new_frame(roa_ctx_t ctx);
 
 
-/* ----------------------------------------------------------- [ window ] -- */
+/* ------------------------------------------------------------ [ window ] -- */
 
 
 struct roa_ctx_window_desc
@@ -50,7 +50,7 @@ roa_ctx_set_window_desc(
   const struct roa_ctx_window_desc *desc);
 
 
-/* ------------------------------------------------------------ [ input ] -- */
+/* ------------------------------------------------------------- [ input ] -- */
 
 
 struct roa_ctx_mouse_desc
@@ -61,6 +61,12 @@ struct roa_ctx_mouse_desc
   float x_delta;
   float y_delta;
 };
+
+
+void
+roa_ctx_mouse_get_desc(
+	roa_ctx_t ctx,
+	struct roa_ctx_mouse_desc *out_desc);
 
 
 #ifdef __cplusplus

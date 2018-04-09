@@ -17,6 +17,14 @@ struct roa_ctx
 	int width;
 	int height;
 	char title[256];
+
+	float mouse_x;
+	float mouse_y;
+	float mouse_last_x;
+	float mouse_last_y;
+	float mouse_delta_x;
+	float mouse_delta_y;
+	int mouse_locked;
 };
 
 
@@ -38,7 +46,17 @@ roa_ctx_win_size_callback(GLFWwindow *win, int width, int height)
 }
 
 
-/* --------------------------------------------------------- [ Lifetime ] -- */
+static void
+roa_ctx_cursor_pos_callback(GLFWwindow *win, double xpos, double ypos)
+{
+	struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
+
+	ctx->mouse_x = (float)xpos;
+	ctx->mouse_y = (float)ypos;
+}
+
+
+/* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
 void
@@ -78,6 +96,7 @@ roa_ctx_create(roa_ctx_t *ctx)
       glfwSetWindowUserPointer(win, new_ctx);
 
       glfwSetWindowSizeCallback(win, roa_ctx_win_size_callback);
+			glfwSetCursorPosCallback(win, roa_ctx_cursor_pos_callback);
 
       gl3wInit();
 			
@@ -117,8 +136,16 @@ roa_ctx_new_frame(roa_ctx_t ctx)
 {
   if (ctx && ctx->window)
   {
+		/* graphics */
     glfwPollEvents();
     glfwSwapBuffers(ctx->window);
+
+		/* mouse position and delta */
+		ctx->mouse_delta_x = ctx->mouse_x - ctx->mouse_last_x;
+		ctx->mouse_delta_y = ctx->mouse_y - ctx->mouse_last_y;
+
+		ctx->mouse_last_x = ctx->mouse_x;
+		ctx->mouse_last_y = ctx->mouse_y;
 
     return glfwWindowShouldClose(ctx->window) ? ROA_FALSE : ROA_TRUE;
   }
@@ -127,7 +154,7 @@ roa_ctx_new_frame(roa_ctx_t ctx)
 }
 
 
-/* ----------------------------------------------------------- [ Window ] -- */
+/* ------------------------------------------------------------ [ Window ] -- */
 
 
 void
@@ -167,4 +194,16 @@ roa_ctx_set_window_desc(
 
   glfwSetWindowSize(ctx->window, desc->width, desc->height);
   glfwSetWindowTitle(ctx->window, desc->title);
+}
+
+
+/* ------------------------------------------------------------- [ input ] -- */
+void
+roa_ctx_mouse_get_desc(
+	roa_ctx_t ctx,
+	struct roa_ctx_mouse_desc *out_desc)
+{
+	/* param check */
+	ROA_ASSERT(ctx);
+	ROA_ASSERT(out_desc);
 }
