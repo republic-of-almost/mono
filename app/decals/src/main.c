@@ -228,16 +228,29 @@ setup_gbuffer()
 
   for (i = 0; i < ROA_ARR_COUNT(m_textures); i++) {
     glBindTexture(GL_TEXTURE_2D, m_textures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, WindowWidth, WindowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, WindowWidth, WindowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i], 0);
 
     glObjectLabel(GL_TEXTURE, m_textures[i], -1, texture_names[i]);
   }
 
+	{
+		int err = glGetError();
+		if(err)
+			printf("err 1 %d\n", err);
+	}
+
   /* depth */
   glBindTexture(GL_TEXTURE_2D, m_depthTexture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, WindowWidth, WindowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
+	
+	{
+		int err = glGetError();
+		if(err)
+			printf("err 2 %d\n", err);
+	}
+
 
   GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0,
     GL_COLOR_ATTACHMENT1,
@@ -246,10 +259,18 @@ setup_gbuffer()
 
   glDrawBuffers(ROA_ARR_COUNT(DrawBuffers), DrawBuffers);
 
+
+	{
+		int err = glGetError();
+		if(err)
+			printf("err 3 %d\n", err);
+	}
+
+
   GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
   if (Status != GL_FRAMEBUFFER_COMPLETE) {
-    printf("FB error, status: 0x%x\n", Status);
+    printf("FB error, status: %08x\n", Status);
     return ROA_FALSE;
   }
 
