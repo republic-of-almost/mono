@@ -187,7 +187,7 @@ main(int argc, char **argv)
 			tex_desc.height     = height;
 			tex_desc.dimentions = VOLT_TEXTURE_2D;
 			tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
-			tex_desc.format     = VOLT_PIXEL_FORMAT_DEPTH_32F;
+			tex_desc.format     = VOLT_PIXEL_FORMAT_DEPTH32F;
       tex_desc.data       = ROA_NULL;
       tex_desc.access     = VOLT_STATIC;
       tex_desc.mip_maps   = VOLT_FALSE;

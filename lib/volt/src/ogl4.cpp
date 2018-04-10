@@ -507,6 +507,19 @@ convert_gl_boolean_to_volt(GLboolean boolean)
 }
 
 GLenum
+convert_gl_format_to_gl_attachment(GLenum fmt)
+{
+  switch (fmt)
+  {
+    case(GL_DEPTH32F_STENCIL8): return GL_DEPTH_STENCIL_ATTACHMENT;
+    case(GL_DEPTH_COMPONENT): return GL_DEPTH_ATTACHMENT;
+  }
+
+  ROA_ASSERT(false);
+  return GL_NONE;
+}
+
+GLenum
 convert_volt_format_to_gl_type(volt_pixel_format fmt)
 {
   switch(fmt)
@@ -514,7 +527,8 @@ convert_volt_format_to_gl_type(volt_pixel_format fmt)
     case(VOLT_PIXEL_FORMAT_RGB): return GL_UNSIGNED_BYTE;
     case(VOLT_PIXEL_FORMAT_RGBA): return GL_UNSIGNED_BYTE;
     case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_FLOAT;
-    case(VOLT_PIXEL_FORMAT_DEPTH_32F): return GL_FLOAT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F): return GL_FLOAT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8): GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
   }
 }
 
@@ -526,7 +540,8 @@ convert_volt_format_to_gl_format(volt_pixel_format fmt)
     case(VOLT_PIXEL_FORMAT_RGB): return GL_RGB;
     case(VOLT_PIXEL_FORMAT_RGBA): return GL_RGBA;
     case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_RGBA;
-    case(VOLT_PIXEL_FORMAT_DEPTH_32F): return GL_DEPTH_COMPONENT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F): return GL_DEPTH_COMPONENT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8): return GL_DEPTH32F_STENCIL8;
   }
 
   ROA_ASSERT(false);
@@ -541,7 +556,8 @@ convert_volt_format_to_gl_internal_format(volt_pixel_format fmt)
     case(VOLT_PIXEL_FORMAT_RGB): return GL_RGB;
     case(VOLT_PIXEL_FORMAT_RGBA): return GL_RGBA;
     case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_RGBA32F;
-    case(VOLT_PIXEL_FORMAT_DEPTH_32F): return GL_DEPTH_COMPONENT32F;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F): return GL_DEPTH_COMPONENT32F;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8): return GL_DEPTH32F_STENCIL8;
   }
 
   ROA_ASSERT(false);
@@ -557,7 +573,7 @@ convert_gl_format_to_volt(GLenum fmt)
     case(GL_RGB): return VOLT_PIXEL_FORMAT_RGB;
     case(GL_RGBA): return VOLT_PIXEL_FORMAT_RGBA;
     case(GL_RGBA32F): return VOLT_PIXEL_FORMAT_RGBA32F;
-    case(GL_DEPTH_COMPONENT32F): return VOLT_PIXEL_FORMAT_DEPTH_32F;
+    case(GL_DEPTH_COMPONENT32F): return VOLT_PIXEL_FORMAT_DEPTH32F;
   }
 
   ROA_ASSERT(false);
@@ -1662,7 +1678,7 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   const GLenum type     = convert_volt_format_to_gl_type(cmd->desc.format);
   const GLint border    = 0;
   const GLenum target   = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
-  const GLint internal_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
+  const GLint in_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
   const GLenum format   = convert_volt_format_to_gl_format(cmd->desc.format);
   const GLboolean mips  = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
 
@@ -1676,7 +1692,7 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   glTexImage2D(
     target,
     level,
-    internal_format,
+    in_format,
     width,
     height,
     border,
@@ -1794,9 +1810,11 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
   {
     GLuint depth_buffer = cmd->desc.depth->gl_id;
 
+    GLenum attachment = convert_gl_format_to_gl_attachment(cmd->desc.depth->format);
+
     glFramebufferTexture2D(
       GL_FRAMEBUFFER,
-      GL_DEPTH_ATTACHMENT,
+      attachment,
       GL_TEXTURE_2D,
       depth_buffer,
       0);
