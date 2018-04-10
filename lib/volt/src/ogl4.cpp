@@ -26,7 +26,7 @@
 /* ----------------------------------------------------------- [ common ] -- */
 
 
-#define GL_ASSERT ROA_ASSERT(glGetError() == 0)
+#define GL_ASSERT do { auto err = glGetError(); if(err) { printf("GLERR: %d\n", err); ROA_ASSERT(0); } } while(0)
 
 
 /* ------------------------------------------------------ [ gl commands ] -- */
@@ -47,7 +47,7 @@ enum class volt_gl_cmd_id
   create_buffer_texture,
   update_buffer_texture,
   create_buffer_framebuffer,
-  
+
   /* renderpass */
 
   bind_program,
@@ -179,7 +179,7 @@ struct volt_gl_cmd_update_texture
 struct volt_gl_cmd_create_framebuffer
 {
   volt_gl_cmd_id id;
-  
+
   volt_framebuffer_t framebuffer;
   volt_framebuffer_desc desc;
 };
@@ -220,7 +220,7 @@ struct volt_gl_cmd_bind_input
 struct volt_gl_cmd_bind_texture
 {
   volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_texture */
-  
+
   GLuint gl_id;
   GLint active_texture;
   GLint sampler_location;
@@ -439,7 +439,7 @@ struct volt_ctx
 
   roa_atomic_int rsrc_destroy_lock;
   volt_gl_stream resource_destroy_stream;
-  
+
   roa_atomic_int rp_lock;
   /* array */ volt_renderpass_t *renderpasses;
 
@@ -506,14 +506,42 @@ convert_gl_boolean_to_volt(GLboolean boolean)
   return VOLT_FALSE;
 }
 
+GLenum
+convert_volt_format_to_gl_type(volt_pixel_format fmt)
+{
+  switch(fmt)
+  {
+    case(VOLT_PIXEL_FORMAT_RGB): return GL_UNSIGNED_BYTE;
+    case(VOLT_PIXEL_FORMAT_RGBA): return GL_UNSIGNED_BYTE;
+    case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_FLOAT;
+    case(VOLT_PIXEL_FORMAT_DEPTH_32F): return GL_FLOAT;
+  }
+}
 
 GLenum
-convert_volt_format_to_gl(volt_color_format fmt)
+convert_volt_format_to_gl_format(volt_pixel_format fmt)
 {
   switch (fmt)
   {
-    case(VOLT_COLOR_RGB): return GL_RGB;
-    case(VOLT_COLOR_RGBA): return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_RGB): return GL_RGB;
+    case(VOLT_PIXEL_FORMAT_RGBA): return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_DEPTH_32F): return GL_DEPTH_COMPONENT;
+  }
+
+  ROA_ASSERT(false);
+  return GL_NONE;
+};
+
+GLint
+convert_volt_format_to_gl_internal_format(volt_pixel_format fmt)
+{
+  switch (fmt)
+  {
+    case(VOLT_PIXEL_FORMAT_RGB): return GL_RGB;
+    case(VOLT_PIXEL_FORMAT_RGBA): return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_RGBA32F;
+    case(VOLT_PIXEL_FORMAT_DEPTH_32F): return GL_DEPTH_COMPONENT32F;
   }
 
   ROA_ASSERT(false);
@@ -521,22 +549,24 @@ convert_volt_format_to_gl(volt_color_format fmt)
 };
 
 
-volt_color_format
+volt_pixel_format
 convert_gl_format_to_volt(GLenum fmt)
 {
   switch (fmt)
   {
-    case(GL_RGB): return VOLT_COLOR_RGB;
-    case(GL_RGBA): return VOLT_COLOR_RGBA;
+    case(GL_RGB): return VOLT_PIXEL_FORMAT_RGB;
+    case(GL_RGBA): return VOLT_PIXEL_FORMAT_RGBA;
+    case(GL_RGBA32F): return VOLT_PIXEL_FORMAT_RGBA32F;
+    case(GL_DEPTH_COMPONENT32F): return VOLT_PIXEL_FORMAT_DEPTH_32F;
   }
 
   ROA_ASSERT(false);
-  return VOLT_COLOR_RGBA;
+  return VOLT_PIXEL_FORMAT_RGBA;
 }
 
 
 GLenum
-convert_volt_tex_dimention_to_gl(volt_texture_dimentions di)
+convert_volt_tex_dimention_to_gl_target(volt_texture_dimentions di)
 {
   switch (di)
   {
@@ -706,7 +736,7 @@ volt_input_create(
 
   /* prepare */
   volt_input_t new_input = (volt_input_t)roa_alloc(sizeof(*new_input));
-  
+
   unsigned max_count = ROA_ARR_COUNT(new_input->increment_stride);
   unsigned cpy_count = desc->count > max_count ? max_count : desc->count;
 
@@ -740,7 +770,7 @@ volt_input_create(
       new_input->byte_stride += new_input->attrib_count[i] * sizeof(float);
       new_input->element_stride += new_input->attrib_count[i];
     }
-  
+
     *input = new_input;
   }
 }
@@ -834,7 +864,7 @@ volt_index_buffer_create(
 
   /* prepare */
   volt_ibo_t new_ibo = (volt_ibo_t)roa_zalloc(sizeof(*new_ibo));
-  
+
   *ibo = new_ibo;
 
   /* submit cmd */
@@ -885,7 +915,7 @@ volt_program_create(
   ROA_ASSERT(ctx);
   ROA_ASSERT(program);
   ROA_ASSERT(desc);
-  
+
   /* prepare */
   volt_program_t new_prog = (volt_program_t)roa_zalloc(sizeof(*new_prog));
 
@@ -939,7 +969,7 @@ volt_uniform_create(
   ROA_ASSERT(ctx);
   ROA_ASSERT(uniform);
   ROA_ASSERT(desc);
-  
+
   /* prepare */
   volt_uniform_t new_rsrc = (volt_uniform_t)roa_zalloc(sizeof(*new_rsrc));
 
@@ -1403,7 +1433,7 @@ volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
   /* save vbo */
   cmd->vbo->gl_id = vbo;
   cmd->vbo->element_count = cmd->desc.count;
-  
+
   GL_ASSERT;
 }
 
@@ -1515,13 +1545,13 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
       glAttachShader(program, new_shd.gl_id);
     }
   }
-  
+
   glBindFragDataLocation(program, 0, "outColor");
   glLinkProgram(program);
 
   GLint status;
   glGetProgramiv(program, GL_LINK_STATUS, &status);
-  
+
   if (status == GL_FALSE)
   {
     GLchar error[1024]{};
@@ -1627,17 +1657,17 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
   /* prepare */
   const GLuint width    = cmd->desc.width;
   const GLuint height   = cmd->desc.height;
-  GLvoid *data    = cmd->desc.data;
+  GLvoid *data          = cmd->desc.data;
   const GLint level     = 0;
-  const GLenum type     = GL_UNSIGNED_BYTE;
+  const GLenum type     = convert_volt_format_to_gl_type(cmd->desc.format);
   const GLint border    = 0;
-  const GLenum target   = convert_volt_tex_dimention_to_gl(cmd->desc.dimentions);
-  const GLint internal_format = convert_volt_format_to_gl(cmd->desc.format);
-  const GLenum format         = convert_volt_format_to_gl(cmd->desc.format);
+  const GLenum target   = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
+  const GLint internal_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
+  const GLenum format   = convert_volt_format_to_gl_format(cmd->desc.format);
   const GLboolean mips  = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
 
   GLuint texture        = 0;
-  
+
   /* create texture */
   glGenTextures(1, &texture);
 
@@ -1654,10 +1684,16 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
     type,
     data);
 
-
+  /* mips if desired */
   if (mips == GL_TRUE)
   {
     glGenerateMipmap(target);
+  }
+
+  /* set a debug name if one provided */
+  if(cmd->desc.name)
+  {
+    glObjectLabel(GL_TEXTURE, texture, -1, cmd->desc.name);
   }
 
   /* texture wrap mode */
@@ -1695,10 +1731,10 @@ volt_gl_update_texture(const volt_gl_cmd_update_texture *cmd)
   const GLint level = 0;
   const GLint border = 0;
   GLvoid *data = cmd->desc.data;
-  const GLenum type = GL_UNSIGNED_BYTE;
-  const GLenum target = convert_volt_tex_dimention_to_gl(cmd->desc.dimentions);
-  const GLint internal_format = convert_volt_format_to_gl(cmd->desc.format);
-  const GLenum format = convert_volt_format_to_gl(cmd->desc.format);
+  const GLenum type = convert_volt_format_to_gl_type(cmd->desc.format);
+  const GLenum target = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
+  const GLint internal_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
+  const GLenum format = convert_volt_format_to_gl_format(cmd->desc.format);
   const GLboolean mips = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
 
   glBindTexture(target, cmd->texture->gl_id);
@@ -1723,7 +1759,6 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
   ROA_ASSERT(cmd);
 
   /* prepare */
-  GLuint color_buffer = cmd->desc.attachment->gl_id;
 
   /* create fbo */
   GLuint frame_buffer = 0;
@@ -1731,9 +1766,39 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
 
   glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 
-  glFramebufferTexture2D(
-    GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer, 0
-  );
+  int i;
+  for(i = 0; i < cmd->desc.attachment_count; ++i)
+  {
+    GLuint color_buffer = cmd->desc.attachments[i]->gl_id;
+
+    glFramebufferTexture2D(
+      GL_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0 + i,
+      GL_TEXTURE_2D,
+      color_buffer,
+      0
+    );
+
+    const GLenum buf = GL_COLOR_ATTACHMENT0 + i;
+    glDrawBuffers(1, &buf);
+  }
+
+  if(cmd->desc.depth)
+  {
+    GLuint depth_buffer = cmd->desc.depth->gl_id;
+
+    glFramebufferTexture2D(
+      GL_FRAMEBUFFER,
+      GL_DEPTH_ATTACHMENT,
+      GL_TEXTURE_2D,
+      depth_buffer,
+      0);
+  }
+
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  ROA_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
+
+  GL_ASSERT;
 }
 
 
@@ -1891,7 +1956,7 @@ volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
     case(GL_FLOAT_MAT2): glUniformMatrix2fv(location, 1, transpose, (GLfloat*)value); break;
     case(GL_FLOAT_MAT3): glUniformMatrix3fv(location, 1, transpose, (GLfloat*)value); break;
     case(GL_FLOAT_MAT4): glUniformMatrix4fv(location, 1, transpose, (GLfloat*)value); break;
-      
+
     case(GL_INT): glUniform1iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC2): glUniform2iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC3): glUniform3iv(location, count, (GLint*)value); break;
@@ -2051,7 +2116,7 @@ void
 volt_ctx_execute(volt_ctx_t ctx)
 {
   ROA_ASSERT(ctx);
-  
+
   auto err = glGetError(); /* clear msgs */
   //ROA_ASSERT(err == 0);
 
@@ -2064,7 +2129,7 @@ volt_ctx_execute(volt_ctx_t ctx)
     unsigned cmd_count = ctx->resource_create_stream.cmd_count;
 
     while ((cmd_count--) > 0)
-    {      
+    {
       const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
       ROA_ASSERT(uk_cmd);
 
@@ -2129,6 +2194,13 @@ volt_ctx_execute(volt_ctx_t ctx)
           volt_gl_update_texture(cmd);
           break;
         }
+        case(volt_gl_cmd_id::create_buffer_framebuffer):
+        {
+          const volt_gl_cmd_create_framebuffer *cmd = (const volt_gl_cmd_create_framebuffer*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_create_framebuffer(cmd);
+          break;
+        }
         case(volt_gl_cmd_id::create_uniform):
         {
           const volt_gl_cmd_create_uniform *cmd = (const volt_gl_cmd_create_uniform*)uk_cmd;
@@ -2176,7 +2248,7 @@ volt_ctx_execute(volt_ctx_t ctx)
     //glEnable(GL_SCISSOR_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glDisable(GL_CULL_FACE);
-  
+
     //glViewport(0, 0, 800, 480);
     //glScissor(0, 0, 800, 480);
     //glFrontFace(GL_CCW);
@@ -2287,7 +2359,7 @@ volt_ctx_execute(volt_ctx_t ctx)
             strcat(buffer, "\n");
             ctx->log_callback(buffer);
           }
-      
+
 
           if (ROA_IS_ENABLED(GL_ASSERT_ON_ERRORS))
           {

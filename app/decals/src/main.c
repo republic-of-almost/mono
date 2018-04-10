@@ -30,6 +30,23 @@ int height = 720;
 
 unsigned char *texture_data = ROA_NULL;
 
+struct g_buffer_data
+{
+	volt_program_t 			program;
+	volt_framebuffer_t 	fbo;
+	volt_texture_t 			fbo_color_outputs[4];
+	volt_texture_t 			fbo_depth;
+	volt_input_t 				input;
+	volt_rasterizer_t 	rasterizer;
+
+} g_buffer;
+
+
+struct scene_data
+{
+	volt_vbo_t vbos;
+} scene;
+
 /* --------------------------------------------------------- [ GL Stuff ] -- */
 
 int WindowWidth = 1200;
@@ -66,7 +83,7 @@ GLuint m_WVPLocation;
 GLuint m_WorldMatrixLocation;
 GLuint m_colorTextureUnitLocation;
 
-GLuint m_shaderProg;
+GLuint m_shaderProg, m_shaderProgPointLight;
 
 GLuint vbo;
 GLuint vert_count;
@@ -75,9 +92,6 @@ roa_float3 box_positions[5];
 roa_float3 cam_position;
 float cam_pitch = 0.f;
 float cam_yaw = 0.f;
-
-/* point light pass */
-GLuint m_shaderProgPointLight;
 
 
 /* ------------------------------------------------------- [ Applicaton ] -- */
@@ -191,7 +205,7 @@ setup_point_light_shader()
         "vec4 SpecularColor = vec4(0, 0, 0, 0);\n"
 
         "if (DiffuseFactor > 0.0) {\n"
-       
+
        "DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor, 1.0);\n"
 
           "vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos);\n"
@@ -469,7 +483,7 @@ setup_gbuffer()
   glBindTexture(GL_TEXTURE_2D, m_depthTexture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, WindowWidth, WindowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
-	
+
 	{
 		int err = glGetError();
 		if(err)
@@ -551,10 +565,52 @@ main(int argc, char **argv)
     volt_ctx_create(&volt_ctx);
   }
 
+	/* setup g buffer */
+	{
+		/* color outputs */
+		{
+			int i;
+			for(i = 0; i < ROA_ARR_COUNT(g_buffer.fbo_color_outputs); ++i)
+			{
+				struct volt_texture_desc tex_desc;
+				tex_desc.width = width;
+				tex_desc.height = height;
+				tex_desc.dimentions = VOLT_TEXTURE_2D;
+				tex_desc.sampling = VOLT_SAMPLING_BILINEAR;
+				tex_desc.format = VOLT_PIXEL_FORMAT_RGBA32F;
+				tex_desc.name = "GBUFFER";
+
+				volt_texture_create(volt_ctx, &g_buffer.fbo_color_outputs[i], &tex_desc);
+			}
+		}
+
+		/* depth buffer */
+		{
+			struct volt_texture_desc tex_desc;
+			tex_desc.width = width;
+			tex_desc.height = height;
+			tex_desc.dimentions = VOLT_TEXTURE_2D;
+			tex_desc.sampling = VOLT_SAMPLING_BILINEAR;
+			tex_desc.format = VOLT_PIXEL_FORMAT_DEPTH_32F;
+			tex_desc.name = "GBUFFER DEPTH";
+
+			volt_texture_create(volt_ctx, &g_buffer.fbo_depth, &tex_desc);
+		}
+
+		/* create fbo */
+		{
+			struct volt_framebuffer_desc fbo_desc;
+			fbo_desc.attachments = g_buffer.fbo_color_outputs;
+			fbo_desc.attachment_count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
+			fbo_desc.depth = g_buffer.fbo_depth;
+
+			volt_framebuffer_create(volt_ctx, &g_buffer.fbo, &fbo_desc);
+		}
+	}
+
   /* setup volt */
   {
     setup_gbuffer();
-    setup_point_light_shader();
     setup_shader();
     setup_geom();
 
@@ -594,7 +650,7 @@ main(int argc, char **argv)
       const char *shaders[2];
       shaders[0] = vert_shd;
       shaders[1] = frag_shd;
-      
+
       struct volt_program_desc screen_program_desc;
       screen_program_desc.stage_count         = ROA_ARR_COUNT(stages);
       screen_program_desc.shader_stages_type  = ROA_ARR_DATA(stages);
@@ -631,7 +687,7 @@ main(int argc, char **argv)
       tex_desc.height     = tex_height;
       tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
       tex_desc.mip_maps   = VOLT_FALSE;
-      tex_desc.format     = VOLT_COLOR_RGBA;
+      tex_desc.format     = VOLT_PIXEL_FORMAT_RGBA;
       tex_desc.access     = VOLT_STREAM;
 
       volt_texture_create(volt_ctx, &screen_texture, &tex_desc);
@@ -710,7 +766,7 @@ main(int argc, char **argv)
 
       cam_pitch += ms_desc.y_delta * 0.01f;
       cam_yaw += ms_desc.x_delta * 0.01f;
-      
+
       float x = roa_float_sin(cam_yaw) * radius;
       float y = 2.f;
       float z = roa_float_cos(cam_yaw) * radius;
@@ -772,7 +828,7 @@ main(int argc, char **argv)
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
       glClear(GL_COLOR_BUFFER_BIT);
       glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
-      
+
     }
 
     /* light pass */

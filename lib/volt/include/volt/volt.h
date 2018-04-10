@@ -21,10 +21,13 @@ typedef int VOLT_BOOL;
 #define VOLT_FALSE 0
 
 
-typedef enum _volt_color_format {
-  VOLT_COLOR_RGB,
-  VOLT_COLOR_RGBA
-} volt_color_format;
+typedef enum _volt_pixel_format {
+  VOLT_PIXEL_FORMAT_RGB,
+  VOLT_PIXEL_FORMAT_RGBA,
+  VOLT_PIXEL_FORMAT_RGBA32F,
+
+  VOLT_PIXEL_FORMAT_DEPTH_32F,
+} volt_pixel_format;
 
 
 typedef enum _volt_texture_dimentions {
@@ -103,9 +106,11 @@ struct volt_texture_desc
 {
   volt_texture_dimentions dimentions;
   volt_texture_sampling sampling;
-  volt_color_format format;
+  volt_pixel_format format;
   VOLT_BOOL mip_maps;
   volt_access access;
+
+  const char *name;
 
   void *data;
   unsigned width;
@@ -139,7 +144,10 @@ volt_texture_get_desc(
 
 struct volt_framebuffer_desc
 {
-  volt_texture_t attachment;
+  volt_texture_t *attachments;
+  unsigned attachment_count;
+
+  volt_texture_t depth;
 };
 
 
