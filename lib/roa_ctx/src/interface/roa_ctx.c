@@ -198,6 +198,8 @@ roa_ctx_set_window_desc(
 
 
 /* ------------------------------------------------------------- [ input ] -- */
+
+
 void
 roa_ctx_mouse_get_desc(
 	roa_ctx_t ctx,
@@ -206,4 +208,10 @@ roa_ctx_mouse_get_desc(
 	/* param check */
 	ROA_ASSERT(ctx);
 	ROA_ASSERT(out_desc);
+
+  out_desc->x_pos = ctx->mouse_x;
+  out_desc->y_pos = ctx->mouse_y;
+
+  out_desc->x_delta = ctx->mouse_delta_x;
+  out_desc->y_delta = ctx->mouse_delta_y;
 }

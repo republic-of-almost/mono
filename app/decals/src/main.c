@@ -73,11 +73,236 @@ GLuint vert_count;
 roa_float3 box_positions[5];
 
 roa_float3 cam_position;
-float cam_pitch;
-float cam_roll;
+float cam_pitch = 0.f;
+float cam_yaw = 0.f;
+
+/* point light pass */
+GLuint m_shaderProgPointLight;
 
 
 /* ------------------------------------------------------- [ Applicaton ] -- */
+
+
+ROA_BOOL
+setup_point_light_shader()
+{
+  m_shaderProgPointLight = glCreateProgram();
+
+  GLuint vs_id, fs_id;
+
+  {
+    const char vs[] = ""
+      "#version 330\n"
+
+      "layout (location = 0) in vec3 Position;\n"
+
+      "uniform mat4 gWVP;\n"
+
+      "void main()\n"
+      "{\n"
+      "gl_Position = gWVP * vec4(Position, 1.0);\n"
+      "}\n";
+
+    const GLchar *vs_src = vs;
+
+    vs_id = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs_id, 1, &vs_src, ROA_NULL);
+    glCompileShader(vs_id);
+
+    /* check for errors */
+    GLint status = 0;
+    glGetShaderiv(vs_id, GL_COMPILE_STATUS, &status);
+
+    if (status == GL_FALSE)
+    {
+      GLchar error[1024] = { 0 };
+      GLsizei length = 0;
+      glGetShaderInfoLog(
+        vs_id,
+        ROA_ARR_COUNT(error),
+        &length,
+        ROA_ARR_DATA(error));
+
+      ROA_ASSERT(0);
+    }
+
+    glAttachShader(m_shaderProgPointLight, vs_id);
+  }
+
+  {
+    const char fs[] = ""
+      "#version 330\n"
+
+      "struct BaseLight\n"
+      "{\n"
+      "vec3 Color;\n"
+      "float AmbientIntensity;\n"
+      "float DiffuseIntensity;\n"
+      "};\n"
+
+      "struct DirectionalLight\n"
+      "{\n"
+      "BaseLight Base;\n"
+      "vec3 Direction;\n"
+      "};\n"
+
+      "struct Attenuation\n"
+      "{\n"
+      "float Constant;\n"
+      "float Linear;\n"
+      "float Exp;\n"
+      "};\n"
+
+      "struct PointLight\n"
+      "{\n"
+      "BaseLight Base;\n"
+      "vec3 Position;\n"
+      "Attenuation Atten;\n"
+      "};\n"
+
+      "struct SpotLight\n"
+      "{\n"
+      "PointLight Base;\n"
+      "vec3 Direction;\n"
+      "float Cutoff;\n"
+      "};\n"
+
+      "uniform sampler2D gPositionMap;\n"
+      "uniform sampler2D gColorMap;\n"
+      "uniform sampler2D gNormalMap;\n"
+      "uniform DirectionalLight gDirectionalLight;\n"
+      "uniform PointLight gPointLight;\n"
+      "uniform SpotLight gSpotLight;\n"
+      "uniform vec3 gEyeWorldPos;\n"
+      "uniform float gMatSpecularIntensity;\n"
+      "uniform float gSpecularPower;\n"
+      "uniform int gLightType;\n"
+      "uniform vec2 gScreenSize;\n"
+
+      "vec4 CalcLightInternal(BaseLight Light,\n"
+      "vec3 LightDirection,\n"
+      "vec3 WorldPos,\n"
+      "vec3 Normal)\n"
+    "{\n"
+      "vec4 AmbientColor = vec4(Light.Color * Light.AmbientIntensity, 1.0);\n"
+        "float DiffuseFactor = dot(Normal, -LightDirection);\n"
+
+        "vec4 DiffuseColor  = vec4(0, 0, 0, 0);\n"
+        "vec4 SpecularColor = vec4(0, 0, 0, 0);\n"
+
+        "if (DiffuseFactor > 0.0) {\n"
+       
+       "DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor, 1.0);\n"
+
+          "vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos);\n"
+          "vec3 LightReflect = normalize(reflect(LightDirection, Normal));\n"
+          "float SpecularFactor = dot(VertexToEye, LightReflect); \n"
+          "if (SpecularFactor > 0.0) {\n"
+          "SpecularFactor = pow(SpecularFactor, gSpecularPower);\n"
+          "SpecularColor = vec4(Light.Color * gMatSpecularIntensity * \n""SpecularFactor, 1.0);\n"
+          "}\n"
+          "}\n"
+
+          "return (AmbientColor + DiffuseColor + SpecularColor);\n"
+          "}\n"
+
+          "vec4 CalcDirectionalLight(vec3 WorldPos, vec3 Normal)\n"
+          "{\n"
+          "return CalcLightInternal(gDirectionalLight.Base,\n"
+          "gDirectionalLight.Direction,\n"
+          "WorldPos,\n"
+          "Normal);\n"
+          "}\n"
+
+          "vec4 CalcPointLight(vec3 WorldPos, vec3 Normal)\n"
+          "{\n"
+          "vec3 LightDirection = WorldPos - gPointLight.Position;\n"
+          "float Distance = length(LightDirection);\n"
+          "LightDirection = normalize(LightDirection);\n"
+
+          "vec4 Color = CalcLightInternal(gPointLight.Base, LightDirection, WorldPos, Normal);\n"
+
+            "float Attenuation =  gPointLight.Atten.Constant +\n"
+            "gPointLight.Atten.Linear * Distance +\n"
+            "gPointLight.Atten.Exp * Distance * Distance;\n"
+
+            "Attenuation = max(1.0, Attenuation);\n"
+
+            "return Color / Attenuation;\n"
+            "}\n"
+
+
+            "vec2 CalcTexCoord()\n"
+            "{\n"
+            "return gl_FragCoord.xy / gScreenSize;\n"
+            "}\n"
+
+
+            "out vec4 FragColor;\n"
+
+            "void main()\n"
+            "{\n"
+            "vec2 TexCoord = CalcTexCoord();\n"
+            "vec3 WorldPos = texture(gPositionMap, TexCoord).xyz;\n"
+            "vec3 Color = texture(gColorMap, TexCoord).xyz;\n"
+            "vec3 Normal = texture(gNormalMap, TexCoord).xyz;\n"
+            "Normal = normalize(Normal);\n"
+
+            "FragColor = vec4(Color, 1.0) * CalcPointLight(WorldPos, Normal);\n"
+            "}\n";
+
+    const GLchar *fs_src = fs;
+
+    vs_id = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(vs_id, 1, &fs_src, ROA_NULL);
+    glCompileShader(vs_id);
+
+    /* check for errors */
+    GLint status = 0;
+    glGetShaderiv(vs_id, GL_COMPILE_STATUS, &status);
+
+    if (status == GL_FALSE)
+    {
+      GLchar error[1024] = { 0 };
+      GLsizei length = 0;
+      glGetShaderInfoLog(
+        vs_id,
+        ROA_ARR_COUNT(error),
+        &length,
+        ROA_ARR_DATA(error));
+
+      ROA_ASSERT(0);
+    }
+
+    glAttachShader(m_shaderProgPointLight, vs_id);
+  }
+
+  {
+    glLinkProgram(m_shaderProgPointLight);
+
+    GLint success;
+    GLchar ErrorLog[1024] = { 0 };
+
+    glGetProgramiv(m_shaderProgPointLight, GL_LINK_STATUS, &success);
+
+    if (success == 0) {
+      glGetProgramInfoLog(m_shaderProgPointLight, sizeof(ErrorLog), NULL, ErrorLog);
+      ROA_ASSERT(0);
+    }
+
+    glValidateProgram(m_shaderProgPointLight);
+    glGetProgramiv(m_shaderProgPointLight, GL_VALIDATE_STATUS, &success);
+
+    if (!success) {
+      glGetProgramInfoLog(m_shaderProgPointLight, sizeof(ErrorLog), NULL, ErrorLog);
+      ROA_ASSERT(0);
+    }
+
+    m_WVPLocation = glGetUniformLocation(m_shaderProgPointLight, "gWVP");
+    m_WorldMatrixLocation = glGetUniformLocation(m_shaderProgPointLight, "gWorld");
+    m_colorTextureUnitLocation = glGetUniformLocation(m_shaderProgPointLight, "gColorMap");
+  }
+}
 
 
 ROA_BOOL
@@ -329,6 +554,7 @@ main(int argc, char **argv)
   /* setup volt */
   {
     setup_gbuffer();
+    setup_point_light_shader();
     setup_shader();
     setup_geom();
 
@@ -477,13 +703,17 @@ main(int argc, char **argv)
       glDisable(GL_BLEND);
 
       /* cam */
-      static float time = 0.1f;
-      time += 0.03f;
       float radius = 2.5f;
 
-      float x = roa_float_sin(time) * radius;
+      struct roa_ctx_mouse_desc ms_desc;
+      roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
+
+      cam_pitch += ms_desc.y_delta * 0.01f;
+      cam_yaw += ms_desc.x_delta * 0.01f;
+      
+      float x = roa_float_sin(cam_yaw) * radius;
       float y = 2.f;
-      float z = roa_float_cos(time) * radius;
+      float z = roa_float_cos(cam_yaw) * radius;
 
       roa_float3 up = roa_float3_set_with_values(0, 1, 0);
       roa_float3 pos = roa_float3_set_with_values(x, y, z);
