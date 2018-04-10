@@ -1758,16 +1758,18 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
   /* param check */
   ROA_ASSERT(cmd);
 
-  /* prepare */
-
   /* create fbo */
   GLuint frame_buffer = 0;
   glGenFramebuffers(1, &frame_buffer);
 
   glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 
+  GLenum draw_buffers[16];
+
   int i;
-  for(i = 0; i < cmd->desc.attachment_count; ++i)
+  int attach_count = cmd->desc.attachment_count;
+
+  for(i = 0; i < attach_count; ++i)
   {
     GLuint color_buffer = cmd->desc.attachments[i]->gl_id;
 
@@ -1779,9 +1781,14 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
       0
     );
 
-    const GLenum buf = GL_COLOR_ATTACHMENT0 + i;
-    glDrawBuffers(1, &buf);
+    draw_buffers[i] = GL_COLOR_ATTACHMENT0 + i;
   }
+
+  ROA_ASSERT(attach_count < ROA_ARR_COUNT(draw_buffers));
+
+  int draw_buf_count = attach_count > ROA_ARR_COUNT(draw_buffers) ? ROA_ARR_COUNT(draw_buffers) : attach_count;
+
+  glDrawBuffers(draw_buf_count, draw_buffers);
 
   if(cmd->desc.depth)
   {
