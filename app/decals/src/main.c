@@ -66,6 +66,13 @@ struct fullscreen_data
 /* -------------------------------------------------------- [ Applicaton ] -- */
 
 
+void
+volt_cb(const char *msg)
+{
+  printf("%s", msg);
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -84,6 +91,7 @@ main(int argc, char **argv)
     roa_ctx_set_window_desc(hw_ctx, &win_desc);
 
     volt_ctx_create(&volt_ctx);
+    volt_ctx_logging_callback(volt_ctx, volt_cb);
   }
 	/* ------------------------------------------------------ [ Fullscreen ] -- */
 	{
@@ -107,8 +115,7 @@ main(int argc, char **argv)
 				"uniform sampler2D diffuse;\n"
 				"void main()\n"
 				"{\n"
-				/*" out_color = texture(diffuse, ps_in_tex_c);\n"*/
-				"out_color = vec4(1,1,1,1);"
+				" out_color = texture(diffuse, ps_in_tex_c);\n"
 				"}\n";
 
 			const char *shaders[] = {
@@ -185,10 +192,11 @@ main(int argc, char **argv)
   {
     /* load vbo */
     {
-      geom_vert_desc desc[3];
-      desc[0] = GEOM_VERT_POSITION;
-      desc[1] = GEOM_UV;
-      desc[2] = GEOM_NORMAL;
+      geom_vert_desc desc[] = {
+        GEOM_VERT_POSITION,
+        GEOM_UV,
+        GEOM_NORMAL,
+      };
 
       unsigned vert_count;
 
@@ -209,16 +217,16 @@ main(int argc, char **argv)
     /* box positions */
     {
       roa_transform_init(&scene.box_transform[0]);
-      scene.box_transform[0].position = roa_float3_set_with_values(0.f, 0.f, 5.f);
+      scene.box_transform[0].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
 
       roa_transform_init(&scene.box_transform[1]);
-      scene.box_transform[1].position = roa_float3_set_with_values(6.f, 1.f, 10.f);
+      scene.box_transform[1].position = roa_float3_set_with_values(4.f, 0.f, 0.f);
 
       roa_transform_init(&scene.box_transform[2]);
-      scene.box_transform[2].position = roa_float3_set_with_values(-5.f, -1.f, 12.f);
+      scene.box_transform[2].position = roa_float3_set_with_values(0.f, 4.f, 0.f);
 
       roa_transform_init(&scene.box_transform[3]);
-      scene.box_transform[3].position = roa_float3_set_with_values(4.f, 4.f, 15.f);
+      scene.box_transform[3].position = roa_float3_set_with_values(0.f, 0.f, 4.f);
 
       roa_transform_init(&scene.box_transform[4]);
       scene.box_transform[4].position = roa_float3_set_with_values(-4.f, 2.f, 20.f);
@@ -242,9 +250,9 @@ main(int argc, char **argv)
         world_uni_desc.count = 1;
 
         volt_uniform_create(volt_ctx, &scene.box_world_uni[i], &world_uni_desc);
-      }
 
-      volt_ctx_execute(volt_ctx);
+        volt_ctx_execute(volt_ctx);
+      }
     }
 
     /* projection camera */
@@ -422,7 +430,7 @@ main(int argc, char **argv)
     {
       /* view mat */
       {
-        float radius = 2.5f;
+        float radius = 3.5f;
 
         struct roa_ctx_mouse_desc ms_desc;
         roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
@@ -431,7 +439,7 @@ main(int argc, char **argv)
         scene.cam_yaw += ms_desc.x_delta * 0.01f;
 
         float x = roa_float_sin(scene.cam_yaw) * radius;
-        float y = 2.f;
+        float y = -2.f;
         float z = roa_float_cos(scene.cam_yaw) * radius;
 
         roa_float3 up   = roa_float3_set_with_values(0, 1, 0);
@@ -454,8 +462,13 @@ main(int argc, char **argv)
           roa_transform_to_mat4(&scene.box_transform[i], &scene.box_world[i]);
           roa_mat4_multiply(&scene.box_wvp[i], &scene.box_world[i], &view_proj);
 
-          volt_uniform_update(volt_ctx, scene.box_world_uni[i], (void*)scene.box_world[i].data);
-          volt_uniform_update(volt_ctx, scene.box_wvp_uni[i], (void*)scene.box_wvp[i].data);
+          volt_uniform_t world_uni = scene.box_world_uni[i];
+          roa_mat4 *world = &scene.box_world[i];
+          volt_uniform_update(volt_ctx, world_uni, (void*)world->data);
+
+          volt_uniform_t wvp_uni = scene.box_wvp_uni[i];
+          roa_mat4 *wvp = &scene.box_wvp[i];
+          volt_uniform_update(volt_ctx, wvp_uni, (void*)wvp->data);
 
           volt_ctx_execute(volt_ctx);
         }
@@ -481,8 +494,12 @@ main(int argc, char **argv)
 
       for (i = 0; i < count; ++i)
       {
-        volt_renderpass_bind_uniform(g_buffer_pass, scene.box_wvp_uni[i], "gWVP");
-        volt_renderpass_bind_uniform(g_buffer_pass, scene.box_world_uni[i], "gWorld");
+        volt_uniform_t wvp = scene.box_wvp_uni[i];
+        volt_renderpass_bind_uniform(g_buffer_pass, wvp, "gWVP");
+
+        volt_uniform_t world = scene.box_world_uni[i];
+        volt_renderpass_bind_uniform(g_buffer_pass, world, "gWorld");
+
         volt_renderpass_draw(g_buffer_pass);
       }
 

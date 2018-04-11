@@ -1119,8 +1119,6 @@ volt_renderpass_create(
 
     cmd->id = volt_gl_cmd_id::bind_framebuffer;
     cmd->gl_id = target ? target->gl_id : 0;
-
-    printf("fbo bind value %p\n", cmd);
   }
 
   *pass = rp;
@@ -1258,7 +1256,9 @@ volt_renderpass_bind_uniform(
   {
     if (pass->uniform_hash[i] == hash_name)
     {
-      /* already bound */
+      pass->uniform_hash[i] = hash_name;
+      pass->uniform[i] = uniform;
+
       return;
     }
   }
@@ -1330,6 +1330,37 @@ volt_renderpass_draw(volt_renderpass_t pass)
     pass->last_bound_program = pass->curr_program;
   }
 
+  /* bind any changes that are required */
+  if (pass->curr_vbo != pass->last_bound_vbo)
+  {
+    /* cmd */
+    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
+
+    /* prepare */
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_bind_vbo *cmd = (volt_gl_cmd_bind_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_vbo;
+    cmd->vbo = vbo;
+
+    pass->last_bound_vbo = pass->curr_vbo;
+  }
+
+  if (pass->curr_ibo != pass->last_bound_ibo)
+  {
+    /* prepare */
+    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
+
+    /* cmd */
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_bind_ibo *cmd = (volt_gl_cmd_bind_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_ibo;
+    cmd->ibo = ibo;
+
+    pass->last_bound_ibo = pass->curr_ibo;
+  }
+
   if (pass->curr_input != pass->last_bound_input)
   {
     if (pass->curr_input)
@@ -1361,37 +1392,6 @@ volt_renderpass_draw(volt_renderpass_t pass)
     }
 
     pass->last_bound_input = pass->curr_input;
-  }
-
-  /* bind any changes that are required */
-  if (pass->curr_vbo != pass->last_bound_vbo)
-  {
-    /* cmd */
-    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
-
-    /* prepare */
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_bind_vbo *cmd = (volt_gl_cmd_bind_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::bind_vbo;
-    cmd->vbo = vbo;
-
-    pass->last_bound_vbo = pass->curr_vbo;
-  }
-
-  if (pass->curr_ibo != pass->last_bound_ibo)
-  {
-    /* prepare */
-    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
-
-    /* cmd */
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_bind_ibo *cmd = (volt_gl_cmd_bind_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::bind_ibo;
-    cmd->ibo = ibo;
-
-    pass->last_bound_ibo = pass->curr_ibo;
   }
 
   if (pass->curr_rasterizer != pass->last_bound_rasterizer)
@@ -1475,9 +1475,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
     const GLuint stride     = pass->curr_input->element_stride;
     const GLuint ele_count  = pass->curr_vbo->element_count;
     const GLuint count      = ele_count / stride;
-
-    printf("draw value %p\n", cmd);
-
+    
     cmd->id     = volt_gl_cmd_id::draw_count;
     cmd->first  = 0;
     cmd->count  = count;
@@ -2106,8 +2104,6 @@ volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
   const GLint first   = cmd->first;
   const GLsizei count = cmd->count;
 
-  printf("DRAW\n");
-
   /* draw */
   glDrawArrays(mode, first, count);
 
@@ -2247,6 +2243,15 @@ volt_ctx_execute(volt_ctx_t ctx)
 {
   ROA_ASSERT(ctx);
 
+  /* log cmd */
+  if (ROA_IS_ENABLED(GL_LOG_CMDS)) {
+    if (ctx->log_callback) {
+      char buffer[1024]{};
+      strcat(buffer, "EXEC: \n");
+      ctx->log_callback(buffer);
+    }
+  }
+
   /* create resource stream  */
   {
     roa_spin_lock_aquire(&ctx->rsrc_create_lock);
@@ -2376,7 +2381,7 @@ volt_ctx_execute(volt_ctx_t ctx)
 
     const uint8_t *data = ctx->render_stream.data;
     unsigned cmd_count = ctx->render_stream.cmd_count;
-
+    
     while ((cmd_count--) > 0)
     {
       const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
