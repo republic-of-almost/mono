@@ -28,7 +28,7 @@ struct g_buffer_data
 {
 	volt_program_t 			program;
 	volt_framebuffer_t 	fbo;
-	volt_texture_t 			fbo_color_outputs[4];
+	volt_texture_t 			fbo_color_outputs[5];
 	volt_texture_t 			fbo_depth;
 	volt_input_t 				input;
 	volt_rasterizer_t 	rasterizer;
@@ -161,6 +161,15 @@ main(int argc, char **argv)
 	{
 		/* color outputs */
 		{
+      /* texture names */
+      const char *g_buffer_texture_names[ROA_ARR_COUNT(g_buffer.fbo_color_outputs)] = {
+        "GBuffer:Positions",
+        "GBuffer:Diffuse",
+        "GBuffer:Normals",
+        "GBuffer:TexCoords",
+        "GBuffer:Final",
+      };
+
 			int i;
 			for(i = 0; i < ROA_ARR_COUNT(g_buffer.fbo_color_outputs); ++i)
 			{
@@ -173,7 +182,7 @@ main(int argc, char **argv)
         tex_desc.mip_maps   = VOLT_FALSE;
         tex_desc.data       = ROA_NULL;
         tex_desc.access     = VOLT_STATIC;
-				tex_desc.name       = "GBUFFER";
+				tex_desc.name       = g_buffer_texture_names[i];
 
 				volt_texture_create(volt_ctx, &g_buffer.fbo_color_outputs[i], &tex_desc);
         volt_ctx_execute(volt_ctx);
@@ -191,7 +200,7 @@ main(int argc, char **argv)
       tex_desc.data       = ROA_NULL;
       tex_desc.access     = VOLT_STATIC;
       tex_desc.mip_maps   = VOLT_FALSE;
-			tex_desc.name       = "GBUFFER DEPTH";
+			tex_desc.name       = "GBuffer:Depth";
 
 			volt_texture_create(volt_ctx, &g_buffer.fbo_depth, &tex_desc);
       volt_ctx_execute(volt_ctx);
@@ -202,7 +211,7 @@ main(int argc, char **argv)
 			struct volt_framebuffer_desc fbo_desc;
 			fbo_desc.attachments      = g_buffer.fbo_color_outputs;
 			fbo_desc.attachment_count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
-			fbo_desc.depth = g_buffer.fbo_depth;
+			fbo_desc.depth            = g_buffer.fbo_depth;
 
 			volt_framebuffer_create(volt_ctx, &g_buffer.fbo, &fbo_desc);
       volt_ctx_execute(volt_ctx);
@@ -226,10 +235,10 @@ main(int argc, char **argv)
 
         "void main()\n"
         "{\n"
-        "gl_Position = gWVP * vec4(Position, 1.0);\n"
-        "TexCoord0 = TexCoord;\n"
-        "Normal0 = (gWorld * vec4(Normal, 0.0)).xyz;\n"
-        "WorldPos0 = (gWorld * vec4(Position, 1.0)).xyz;\n"
+        " gl_Position = gWVP * vec4(Position, 1.0);\n"
+        " TexCoord0 = TexCoord;\n"
+        " Normal0 = (gWorld * vec4(Normal, 0.0)).xyz;\n"
+        " WorldPos0 = (gWorld * vec4(Position, 1.0)).xyz;\n"
         "}\n";
 
       const char fs[] = ""
@@ -248,10 +257,10 @@ main(int argc, char **argv)
 
         "void main()  \n"
         "{    \n"
-        "WorldPosOut     = WorldPos0;    \n"
-        "DiffuseOut      = vec3(1, 0, 1); /*texture(gColorMap, TexCoord0).xyz;*/\n"
-        "NormalOut       = normalize(Normal0);    \n"
-        "TexCoordOut     = vec3(TexCoord0, 0.0);  \n"
+        " WorldPosOut     = WorldPos0;    \n"
+        " DiffuseOut      = vec3(1, 0, 1); /*texture(gColorMap, TexCoord0).xyz;*/\n"
+        " NormalOut       = normalize(Normal0);    \n"
+        " TexCoordOut     = vec3(TexCoord0, 0.0);  \n"
         "}\n";
 
       volt_shader_stage stages[2] = {
@@ -277,9 +286,9 @@ main(int argc, char **argv)
     /* input format */
     {
       volt_input_attribute attrs[3] = {
-        VOLT_INPUT_FLOAT3,
-        VOLT_INPUT_FLOAT2,
-        VOLT_INPUT_FLOAT3
+        VOLT_INPUT_FLOAT3, /* positions */
+        VOLT_INPUT_FLOAT2, /* tex coords  */
+        VOLT_INPUT_FLOAT3, /* normals */
       };
 
       struct volt_input_desc input_desc;
