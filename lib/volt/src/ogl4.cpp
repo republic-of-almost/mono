@@ -213,7 +213,7 @@ struct volt_gl_cmd_bind_input
   GLenum type;
   GLboolean normalized;
   GLsizei stride;
-  GLuint pointer;
+  GLsizeiptr pointer;
 };
 
 
@@ -230,7 +230,9 @@ struct volt_gl_cmd_bind_texture
 
 struct volt_gl_cmd_bind_framebuffer
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_framebuffer */
+
+  GLuint gl_id;
 };
 
 
@@ -270,7 +272,7 @@ struct volt_gl_cmd_draw_indexed
   GLenum mode;
   GLenum type;
   GLuint count;
-  GLuint indices;
+  GLsizeiptr indices;
 };
 
 
@@ -349,7 +351,7 @@ struct volt_texture
 
 struct volt_framebuffer
 {
-  int unk;
+  GLuint gl_id;
 };
 
 
@@ -381,6 +383,8 @@ struct volt_input
   GLint attrib_count[12];
   GLsizei byte_stride;
   GLuint element_stride;
+  GLenum type[12];
+  GLboolean normalized[12];
   GLuint count;
 };
 
@@ -476,7 +480,58 @@ struct volt_renderpass
 };
 
 
-/* ------------------------------------------------------- [ gl to volt ] -- */
+/* ------------------------------------------------------- [ volt helper ] -- */
+
+unsigned
+volt_input_attribute_count(volt_input_attribute attr)
+{
+  switch(attr)
+  {
+    case(VOLT_INPUT_FLOAT4): return 4;
+    case(VOLT_INPUT_FLOAT3): return 3;
+    case(VOLT_INPUT_FLOAT2): return 2;
+    case(VOLT_INPUT_FLOAT):  return 1;
+  }
+
+  ROA_ASSERT(false);
+  return 0;
+}
+
+
+
+/* -------------------------------------------------------- [ gl to volt ] -- */
+
+
+GLenum
+convert_volt_attribute_to_gl_type(volt_input_attribute attr)
+{
+  switch(attr)
+  {
+    case(VOLT_INPUT_FLOAT4): return GL_FLOAT;
+    case(VOLT_INPUT_FLOAT3): return GL_FLOAT;
+    case(VOLT_INPUT_FLOAT2): return GL_FLOAT;
+    case(VOLT_INPUT_FLOAT):  return GL_FLOAT;
+  }
+
+  ROA_ASSERT(false);
+  return GL_NONE;
+}
+
+
+GLboolean
+convert_volt_attribute_to_gl_normalized(volt_input_attribute attr)
+{
+  switch(attr)
+  {
+    case(VOLT_INPUT_FLOAT4): return GL_FALSE;
+    case(VOLT_INPUT_FLOAT3): return GL_FALSE;
+    case(VOLT_INPUT_FLOAT2): return GL_FALSE;
+    case(VOLT_INPUT_FLOAT):  return GL_FALSE;
+  }
+
+  ROA_ASSERT(false);
+  return GL_FALSE;
+}
 
 
 GLboolean
@@ -484,7 +539,7 @@ convert_volt_boolean_to_gl(VOLT_BOOL boolean)
 {
   switch (boolean)
   {
-    case(VOLT_TRUE): return GL_TRUE;
+    case(VOLT_TRUE):  return GL_TRUE;
     case(VOLT_FALSE): return GL_FALSE;
   }
 
@@ -498,7 +553,7 @@ convert_gl_boolean_to_volt(GLboolean boolean)
 {
   switch (boolean)
   {
-    case(GL_TRUE): return VOLT_TRUE;
+    case(GL_TRUE):  return VOLT_TRUE;
     case(GL_FALSE): return VOLT_FALSE;
   }
 
@@ -512,7 +567,7 @@ convert_gl_format_to_gl_attachment(GLenum fmt)
   switch (fmt)
   {
     case(GL_DEPTH32F_STENCIL8): return GL_DEPTH_STENCIL_ATTACHMENT;
-    case(GL_DEPTH_COMPONENT): return GL_DEPTH_ATTACHMENT;
+    case(GL_DEPTH_COMPONENT):   return GL_DEPTH_ATTACHMENT;
   }
 
   ROA_ASSERT(false);
@@ -524,12 +579,15 @@ convert_volt_format_to_gl_type(volt_pixel_format fmt)
 {
   switch(fmt)
   {
-    case(VOLT_PIXEL_FORMAT_RGB): return GL_UNSIGNED_BYTE;
-    case(VOLT_PIXEL_FORMAT_RGBA): return GL_UNSIGNED_BYTE;
-    case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_FLOAT;
-    case(VOLT_PIXEL_FORMAT_DEPTH32F): return GL_FLOAT;
-    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8): GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+    case(VOLT_PIXEL_FORMAT_RGB):                return GL_UNSIGNED_BYTE;
+    case(VOLT_PIXEL_FORMAT_RGBA):               return GL_UNSIGNED_BYTE;
+    case(VOLT_PIXEL_FORMAT_RGBA32F):            return GL_FLOAT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F):           return GL_FLOAT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8):  return GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
   }
+
+  ROA_ASSERT(false);
+  return GL_NONE;
 }
 
 GLenum
@@ -537,11 +595,11 @@ convert_volt_format_to_gl_format(volt_pixel_format fmt)
 {
   switch (fmt)
   {
-    case(VOLT_PIXEL_FORMAT_RGB): return GL_RGB;
-    case(VOLT_PIXEL_FORMAT_RGBA): return GL_RGBA;
-    case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_RGBA;
-    case(VOLT_PIXEL_FORMAT_DEPTH32F): return GL_DEPTH_COMPONENT;
-    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8): return GL_DEPTH32F_STENCIL8;
+    case(VOLT_PIXEL_FORMAT_RGB):                return GL_RGB;
+    case(VOLT_PIXEL_FORMAT_RGBA):               return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_RGBA32F):            return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F):           return GL_DEPTH_COMPONENT;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8):  return GL_DEPTH32F_STENCIL8;
   }
 
   ROA_ASSERT(false);
@@ -553,11 +611,11 @@ convert_volt_format_to_gl_internal_format(volt_pixel_format fmt)
 {
   switch (fmt)
   {
-    case(VOLT_PIXEL_FORMAT_RGB): return GL_RGB;
-    case(VOLT_PIXEL_FORMAT_RGBA): return GL_RGBA;
-    case(VOLT_PIXEL_FORMAT_RGBA32F): return GL_RGBA32F;
-    case(VOLT_PIXEL_FORMAT_DEPTH32F): return GL_DEPTH_COMPONENT32F;
-    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8): return GL_DEPTH32F_STENCIL8;
+    case(VOLT_PIXEL_FORMAT_RGB):                return GL_RGB;
+    case(VOLT_PIXEL_FORMAT_RGBA):               return GL_RGBA;
+    case(VOLT_PIXEL_FORMAT_RGBA32F):            return GL_RGBA32F;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F):           return GL_DEPTH_COMPONENT32F;
+    case(VOLT_PIXEL_FORMAT_DEPTH32F_STENCIL8):  return GL_DEPTH32F_STENCIL8;
   }
 
   ROA_ASSERT(false);
@@ -570,10 +628,10 @@ convert_gl_format_to_volt(GLenum fmt)
 {
   switch (fmt)
   {
-    case(GL_RGB): return VOLT_PIXEL_FORMAT_RGB;
-    case(GL_RGBA): return VOLT_PIXEL_FORMAT_RGBA;
-    case(GL_RGBA32F): return VOLT_PIXEL_FORMAT_RGBA32F;
-    case(GL_DEPTH_COMPONENT32F): return VOLT_PIXEL_FORMAT_DEPTH32F;
+    case(GL_RGB):                 return VOLT_PIXEL_FORMAT_RGB;
+    case(GL_RGBA):                return VOLT_PIXEL_FORMAT_RGBA;
+    case(GL_RGBA32F):             return VOLT_PIXEL_FORMAT_RGBA32F;
+    case(GL_DEPTH_COMPONENT32F):  return VOLT_PIXEL_FORMAT_DEPTH32F;
   }
 
   ROA_ASSERT(false);
@@ -730,8 +788,11 @@ volt_framebuffer_create(
 volt_resource_status
 volt_framebuffer_status(
   volt_ctx_t ctx,
-  volt_framebuffer_t)
+  volt_framebuffer_t fbo)
 {
+  ROA_UNUSED(ctx);
+  ROA_UNUSED(fbo);
+
   return VOLT_RSRC_ERROR;
 }
 
@@ -764,27 +825,14 @@ volt_input_create(
   {
     for (unsigned i = 0; i < cpy_count; ++i)
     {
-      unsigned attrib_count;
+      volt_input_attribute attr = desc->attributes[i];
 
-      switch (desc->attributes[i])
-      {
-        case(VOLT_INPUT_FLOAT4): { attrib_count = 4; break; }
-        case(VOLT_INPUT_FLOAT3): { attrib_count = 3; break; }
-        case(VOLT_INPUT_FLOAT2): { attrib_count = 2; break; }
-        case(VOLT_INPUT_FLOAT):  { attrib_count = 1; break; }
-
-        default:
-        {
-          ROA_ASSERT(false);
-          attrib_count = 1;
-        }
-      }
-
-      new_input->attrib_count[i] = attrib_count;
-      new_input->increment_stride[i] = new_input->byte_stride;
-
-      new_input->byte_stride += new_input->attrib_count[i] * sizeof(float);
-      new_input->element_stride += new_input->attrib_count[i];
+      new_input->attrib_count[i]      = volt_input_attribute_count(attr);
+      new_input->increment_stride[i]  = new_input->byte_stride;
+      new_input->type[i]              = convert_volt_attribute_to_gl_type(attr);
+      new_input->normalized[i]        = convert_volt_attribute_to_gl_normalized(attr);
+      new_input->byte_stride          += new_input->attrib_count[i] * sizeof(float);
+      new_input->element_stride       += new_input->attrib_count[i];
     }
 
     *input = new_input;
@@ -797,6 +845,8 @@ volt_input_status(
   volt_ctx_t ctx,
   volt_input_t input)
 {
+  ROA_UNUSED(ctx);
+
   if (input)
   {
     if (input->count > 0)
@@ -851,6 +901,8 @@ volt_vertex_buffer_status(
   volt_ctx_t ctx,
   volt_vbo_t vbo)
 {
+  ROA_UNUSED(ctx);
+
   if (vbo)
   {
     if (vbo->gl_id)
@@ -904,6 +956,8 @@ volt_index_buffer_status(
   volt_ctx_t ctx,
   volt_ibo_t ibo)
 {
+  ROA_UNUSED(ctx);
+
   if (ibo)
   {
     if (ibo->gl_id)
@@ -958,6 +1012,8 @@ volt_program_buffer_status(
   volt_ctx_t ctx,
   volt_program_t program)
 {
+  ROA_UNUSED(ctx);
+
   if (program)
   {
     if (program->gl_id)
@@ -1049,9 +1105,23 @@ volt_renderpass_create(
   /* param check */
   ROA_ASSERT(ctx);
   ROA_ASSERT(pass);
+  ROA_UNUSED(pass_name);
 
+  /* new pass */
   volt_renderpass_t rp = (volt_renderpass_t)roa_zalloc(sizeof(*rp));
   rp->render_stream = &ctx->render_stream;
+
+  volt_gl_stream *stream = rp->render_stream;
+
+  /* bind fbo or default back buffer */
+  {
+    volt_gl_cmd_bind_framebuffer *cmd = (volt_gl_cmd_bind_framebuffer*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_framebuffer;
+    cmd->gl_id = target ? target->gl_id : 0;
+
+    printf("fbo bind value %p\n", cmd);
+  }
 
   *pass = rp;
 }
@@ -1106,8 +1176,9 @@ volt_renderpass_bind_texture_buffer(
 
   /* check to see if its already bound */
   const unsigned sampler_slot_count = ROA_ARR_COUNT(pass->sampler_hash);
+  unsigned i;
 
-  for (int i = 0; i < sampler_slot_count; ++i)
+  for (i = 0; i < sampler_slot_count; ++i)
   {
     if (pass->sampler_hash[i] == hash_name)
     {
@@ -1117,7 +1188,7 @@ volt_renderpass_bind_texture_buffer(
   }
 
   /* add if not bound */
-  for (int i = 0; i < sampler_slot_count; ++i)
+  for (unsigned i = 0; i < sampler_slot_count; ++i)
   {
     if (pass->sampler_hash[i] == 0)
     {
@@ -1181,8 +1252,9 @@ volt_renderpass_bind_uniform(
 
   /* check to see if its already bound */
   const unsigned uniform_slot_count = ROA_ARR_COUNT(pass->uniform_hash);
+  unsigned i;
 
-  for (int i = 0; i < uniform_slot_count; ++i)
+  for (i = 0; i < uniform_slot_count; ++i)
   {
     if (pass->uniform_hash[i] == hash_name)
     {
@@ -1192,7 +1264,7 @@ volt_renderpass_bind_uniform(
   }
 
   /* add if not bound */
-  for (int i = 0; i < uniform_slot_count; ++i)
+  for (i = 0; i < uniform_slot_count; ++i)
   {
     if (pass->uniform_hash[i] == 0)
     {
@@ -1267,12 +1339,12 @@ volt_renderpass_draw(volt_renderpass_t pass)
       for (int i = 0; i < input_count; ++i)
       {
         /* prepare */
-        GLuint index = i;
-        GLint size = pass->curr_input->attrib_count[i];
-        GLenum type = GL_FLOAT;
-        GLboolean normalized = GL_FALSE;
-        GLsizei stride = pass->curr_input->byte_stride;
-        GLuint pointer = pass->curr_input->increment_stride[i];
+        GLuint index          = i;
+        GLint size            = pass->curr_input->attrib_count[i];
+        GLenum type           = pass->curr_input->type[i];
+        GLboolean normalized  = pass->curr_input->normalized[i];
+        GLsizei stride        = pass->curr_input->byte_stride;
+        GLuint pointer        = pass->curr_input->increment_stride[i];
 
         /* cmd */
         volt_gl_stream *stream = pass->render_stream;
@@ -1340,7 +1412,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
       const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
 
       /* check bound textures */
-      for (int j = 0; j < ROA_ARR_COUNT(pass->sampler_hash); ++j)
+      for (unsigned j = 0; j < ROA_ARR_COUNT(pass->sampler_hash); ++j)
       {
         const uint64_t bound_sampler_hash = pass->sampler_hash[j];
 
@@ -1373,7 +1445,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
       const uint64_t prog_uniform_hash = pass->curr_program->uniform_keys[i];
 
       /* check bound uniforms */
-      for (int j = 0; j < ROA_ARR_COUNT(pass->uniform_hash); ++j)
+      for (unsigned j = 0; j < ROA_ARR_COUNT(pass->uniform_hash); ++j)
       {
         const uint64_t bound_hash = pass->uniform_hash[j];
 
@@ -1403,6 +1475,8 @@ volt_renderpass_draw(volt_renderpass_t pass)
     const GLuint stride     = pass->curr_input->element_stride;
     const GLuint ele_count  = pass->curr_vbo->element_count;
     const GLuint count      = ele_count / stride;
+
+    printf("draw value %p\n", cmd);
 
     cmd->id     = volt_gl_cmd_id::draw_count;
     cmd->first  = 0;
@@ -1592,7 +1666,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
 
     /* more uniforms than space*/
     /* increase space or dynamic allocation */
-    ROA_ASSERT(ROA_ARR_COUNT(cmd->program->uniforms) > uniform_count);
+    ROA_ASSERT(ROA_ARR_COUNT(cmd->program->uniforms) > (unsigned)uniform_count);
 
     GLint data_count = 0;
     GLint samp_count = 0;
@@ -1618,7 +1692,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
 
       /* users text will hash incorrectly */
       /* increase buffer or dynamic allocations */
-      ROA_ASSERT(ROA_ARR_COUNT(name_buffer) > length);
+      ROA_ASSERT(ROA_ARR_COUNT(name_buffer) > (unsigned)length);
 
       uint64_t uni_hash = roa_hash(ROA_ARR_DATA(name_buffer));
 
@@ -1742,31 +1816,36 @@ volt_gl_update_texture(const volt_gl_cmd_update_texture *cmd)
   ROA_ASSERT(cmd->texture);
 
   /* prepare */
-  const GLuint width = cmd->desc.width;
-  const GLuint height = cmd->desc.height;
-  const GLint level = 0;
-  const GLint border = 0;
-  GLvoid *data = cmd->desc.data;
-  const GLenum type = convert_volt_format_to_gl_type(cmd->desc.format);
-  const GLenum target = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
-  const GLint internal_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
-  const GLenum format = convert_volt_format_to_gl_format(cmd->desc.format);
-  const GLboolean mips = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
+  GLvoid *data          = cmd->desc.data;
+  const GLuint width    = cmd->desc.width;
+  const GLuint height   = cmd->desc.height;
+  const GLint level     = 0;
+  const GLint border    = 0;
+  const GLenum type     = convert_volt_format_to_gl_type(cmd->desc.format);
+  const GLenum target   = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
+  const GLint in_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
+  const GLenum format   = convert_volt_format_to_gl_format(cmd->desc.format);
+  const GLboolean mips  = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
 
   glBindTexture(target, cmd->texture->gl_id);
 
   glTexImage2D(
     target,
     level,
-    internal_format,
+    in_format,
     width,
     height,
     border,
     format,
     type,
     data);
-}
 
+  /* mips if desired */
+  if (mips == GL_TRUE)
+  {
+    glGenerateMipmap(target);
+  }
+}
 
 static void
 volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
@@ -1782,8 +1861,8 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
 
   GLenum draw_buffers[16];
 
-  int i;
-  int attach_count = cmd->desc.attachment_count;
+  unsigned i;
+  unsigned attach_count = cmd->desc.attachment_count;
 
   for(i = 0; i < attach_count; ++i)
   {
@@ -1802,14 +1881,13 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
 
   ROA_ASSERT(attach_count < ROA_ARR_COUNT(draw_buffers));
 
-  int draw_buf_count = attach_count > ROA_ARR_COUNT(draw_buffers) ? ROA_ARR_COUNT(draw_buffers) : attach_count;
+  unsigned draw_buf_count = attach_count > ROA_ARR_COUNT(draw_buffers) ? ROA_ARR_COUNT(draw_buffers) : attach_count;
 
   glDrawBuffers(draw_buf_count, draw_buffers);
 
   if(cmd->desc.depth)
   {
     GLuint depth_buffer = cmd->desc.depth->gl_id;
-
     GLenum attachment = convert_gl_format_to_gl_attachment(cmd->desc.depth->format);
 
     glFramebufferTexture2D(
@@ -1822,6 +1900,8 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
 
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   ROA_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
+
+  cmd->framebuffer->gl_id = frame_buffer;
 
   GL_ASSERT;
 }
@@ -1958,6 +2038,29 @@ volt_gl_bind_texture(const volt_gl_cmd_bind_texture *cmd)
 
 
 static void
+volt_gl_bind_framebuffer(const volt_gl_cmd_bind_framebuffer *cmd)
+{
+  /* param check */
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  /* prepare */
+  const GLenum gl_id = cmd->gl_id;
+
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl_id);
+
+  /* junk */
+  glClearColor(0.5, 0, 0, 1);
+
+  glEnable(GL_DEPTH_TEST);
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  glDisable(GL_CULL_FACE);
+
+
+  GL_ASSERT;
+}
+
+
+static void
 volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
 {
   /* param check */
@@ -1973,7 +2076,7 @@ volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
   /* bind */
   switch(data_type)
   {
-    case(GL_FLOAT): glUniform1fv(location, count, (GLfloat*)value); break;
+    case(GL_FLOAT):      glUniform1fv(location, count, (GLfloat*)value); break;
     case(GL_FLOAT_VEC2): glUniform2fv(location, count, (GLfloat*)value); break;
     case(GL_FLOAT_VEC3): glUniform3fv(location, count, (GLfloat*)value); break;
     case(GL_FLOAT_VEC4): glUniform4fv(location, count, (GLfloat*)value); break;
@@ -1982,7 +2085,7 @@ volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
     case(GL_FLOAT_MAT3): glUniformMatrix3fv(location, 1, transpose, (GLfloat*)value); break;
     case(GL_FLOAT_MAT4): glUniformMatrix4fv(location, 1, transpose, (GLfloat*)value); break;
 
-    case(GL_INT): glUniform1iv(location, count, (GLint*)value); break;
+    case(GL_INT):      glUniform1iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC2): glUniform2iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC3): glUniform3iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC4): glUniform4iv(location, count, (GLint*)value); break;
@@ -2003,6 +2106,8 @@ volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
   const GLint first   = cmd->first;
   const GLsizei count = cmd->count;
 
+  printf("DRAW\n");
+
   /* draw */
   glDrawArrays(mode, first, count);
 
@@ -2020,10 +2125,10 @@ volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
   const GLenum mode     = cmd->mode;
   const GLsizei count   = cmd->count;
   const GLenum type     = cmd->type;
-  const GLuint indices  = cmd->indices;
+  const GLvoid *indices = (GLvoid*)cmd->indices;
 
   /* draw */
-  glDrawElements(mode, count, type, (GLvoid*)indices);
+  glDrawElements(mode, count, type, indices);
 
   GL_ASSERT;
 }
@@ -2036,9 +2141,9 @@ volt_gl_set_viewport(const volt_gl_cmd_set_viewport *cmd)
   ROA_ASSERT_PEDANTIC(cmd);
 
   /* prepare */
-  const GLint x = cmd->x;
-  const GLint y = cmd->y;
-  const GLsizei width = cmd->width;
+  const GLint x        = cmd->x;
+  const GLint y        = cmd->y;
+  const GLsizei width  = cmd->width;
   const GLsizei height = cmd->height;
 
   /* set vp */
@@ -2079,7 +2184,7 @@ volt_ctx_create(volt_ctx_t *ctx)
   new_ctx->resource_destroy_stream.capacity = sizeof(uint8_t) * 1024;
 
   roa_spin_lock_init(&new_ctx->rdr_lock);
-  int count = 1 << 13;
+  int count = 1 << 14;
   new_ctx->render_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * count);
   new_ctx->render_stream.capacity = sizeof(uint8_t) * count;
 
@@ -2142,15 +2247,11 @@ volt_ctx_execute(volt_ctx_t ctx)
 {
   ROA_ASSERT(ctx);
 
-  auto err = glGetError(); /* clear msgs */
-  //ROA_ASSERT(err == 0);
-
   /* create resource stream  */
   {
     roa_spin_lock_aquire(&ctx->rsrc_create_lock);
 
     const uint8_t *data = ctx->resource_create_stream.data;
-    const unsigned bytes = roa_array_size(data);
     unsigned cmd_count = ctx->resource_create_stream.cmd_count;
 
     while ((cmd_count--) > 0)
@@ -2267,13 +2368,6 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   /* execute render stream */
   {
-    glClearColor(0.5, 0, 0, 1);
-
-    glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_SCISSOR_TEST);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glDisable(GL_CULL_FACE);
-
     //glViewport(0, 0, 800, 480);
     //glScissor(0, 0, 800, 480);
     //glFrontFace(GL_CCW);
@@ -2281,7 +2375,6 @@ volt_ctx_execute(volt_ctx_t ctx)
     //glCullFace(GL_NONE);
 
     const uint8_t *data = ctx->render_stream.data;
-    const unsigned bytes = roa_array_size(data);
     unsigned cmd_count = ctx->render_stream.cmd_count;
 
     while ((cmd_count--) > 0)
@@ -2335,6 +2428,13 @@ volt_ctx_execute(volt_ctx_t ctx)
           const volt_gl_cmd_bind_texture *cmd = (const volt_gl_cmd_bind_texture*)uk_cmd;
           data += sizeof(*cmd);
           volt_gl_bind_texture(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::bind_framebuffer):
+        {
+          const volt_gl_cmd_bind_framebuffer *cmd = (const volt_gl_cmd_bind_framebuffer*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_bind_framebuffer(cmd);
           break;
         }
         case(volt_gl_cmd_id::bind_uniform):
@@ -2399,9 +2499,8 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   /* destroy resource stream */
   {
-    const uint8_t *next = ctx->resource_destroy_stream.data;
-    const unsigned bytes = roa_array_size(next);
-
+    /*const uint8_t *next = ctx->resource_destroy_stream.data;*/
+    /*const unsigned bytes = roa_array_size(next);*/
   }
 }
 

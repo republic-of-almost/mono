@@ -5,24 +5,23 @@
 #include <roa_math/math.h>
 #include <volt/volt.h>
 #include <roa_lib/time.h>
-#include <GL/gl3w.h>
 #include <scratch/geometry.h>
+#include <stdlib.h>
 
 
-/* ---------------------------------------------------------- [ Systems ] -- */
+/* ----------------------------------------------------------- [ Systems ] -- */
 
 
 roa_ctx_t                 hw_ctx;     /* windowing */
 volt_ctx_t                volt_ctx;   /* graphics api */
 
 
-/* ------------------------------------------------------------ [ Scene ] -- */
+/* ------------------------------------------------------------- [ Scene ] -- */
 
 
 int width = 1200;
 int height = 720;
 
-unsigned char *texture_data = ROA_NULL;
 
 struct g_buffer_data
 {
@@ -55,7 +54,16 @@ struct scene_data
 } scene;
 
 
-/* ------------------------------------------------------- [ Applicaton ] -- */
+struct fullscreen_data
+{
+	volt_program_t    program;
+	volt_vbo_t        triangle;
+	volt_input_t      input;
+	volt_rasterizer_t rasterizer;
+} fullscreen;
+
+
+/* -------------------------------------------------------- [ Applicaton ] -- */
 
 
 int
@@ -65,7 +73,7 @@ main(int argc, char **argv)
   ROA_UNUSED(argc);
   ROA_UNUSED(argv);
 
-  /* -------------------------------------------------------- [ Systems ] -- */
+  /* --------------------------------------------------------- [ Systems ] -- */
   {
     struct roa_ctx_window_desc win_desc;
     win_desc.width = width;
@@ -77,8 +85,103 @@ main(int argc, char **argv)
 
     volt_ctx_create(&volt_ctx);
   }
-  
-  /* ---------------------------------------------------------- [ Scene ] -- */
+	/* ------------------------------------------------------ [ Fullscreen ] -- */
+	{
+		/* program */
+		{
+			const char *vert_shd =
+				"#version 150 core\n"
+				"in vec2 vs_in_pos;\n"
+				"in vec2 vs_in_tex_c;\n"
+				"out vec2 ps_in_tex_c;\n"
+				"void main()\n"
+				"{\n"
+				" gl_Position = vec4(vs_in_pos, 0.0, 1.0);\n"
+				" ps_in_tex_c = vs_in_tex_c;\n"
+				"}\n";
+
+			const char *frag_shd =
+				"#version 150 core\n"
+				"in vec2 ps_in_tex_c;\n"
+				"out vec4 out_color;\n"
+				"uniform sampler2D diffuse;\n"
+				"void main()\n"
+				"{\n"
+				/*" out_color = texture(diffuse, ps_in_tex_c);\n"*/
+				"out_color = vec4(1,1,1,1);"
+				"}\n";
+
+			const char *shaders[] = {
+				vert_shd,
+				frag_shd,
+			};
+
+			volt_shader_stage stages[] = {
+				VOLT_SHD_VERTEX,
+				VOLT_SHD_FRAGMENT,
+			};
+
+			struct volt_program_desc screen_program_desc;
+			screen_program_desc.stage_count         = ROA_ARR_COUNT(stages);
+			screen_program_desc.shader_stages_type  = ROA_ARR_DATA(stages);
+			screen_program_desc.shader_stages_src   = ROA_ARR_DATA(shaders);
+
+			volt_program_create(volt_ctx, &fullscreen.program, &screen_program_desc);
+
+			ROA_ASSERT(fullscreen.program != VOLT_NULL);
+			volt_ctx_execute(volt_ctx); /* because shader text will go out of scope */
+		}
+
+		/* triangle */
+		{
+			float verts[] = {
+				/* x y, s t */
+				+3.f, +1.f, 2.f, 0.f,
+				-1.f, +1.f, 0.f, 0.f,
+				-1.f, -3.f, 0.f, 2.f,
+			};
+
+			struct volt_vbo_desc vbo_desc;
+			vbo_desc.data  = ROA_ARR_DATA(verts);
+			vbo_desc.count = ROA_ARR_COUNT(verts);
+
+			volt_vertex_buffer_create(volt_ctx, &fullscreen.triangle, &vbo_desc);
+
+			ROA_ASSERT(fullscreen.triangle != VOLT_NULL);
+			volt_ctx_execute(volt_ctx);
+		}
+
+		/* input */
+		{
+			volt_input_attribute attrs[2];
+			attrs[0] = VOLT_INPUT_FLOAT2;
+			attrs[1] = VOLT_INPUT_FLOAT2;
+
+			struct volt_input_desc input_desc;
+			input_desc.attributes = ROA_ARR_DATA(attrs);
+			input_desc.count      = ROA_ARR_COUNT(attrs);
+
+			/*volt_input_t   input_format;*/
+			volt_input_create(volt_ctx, &fullscreen.input, &input_desc);
+
+			ROA_ASSERT(fullscreen.input != VOLT_NULL);
+			volt_ctx_execute(volt_ctx); /* attrs will go out of scope */
+		}
+
+		/* rasterizer */
+		{
+			struct volt_rasterizer_desc raster_desc;
+			raster_desc.cull_mode = VOLT_CULL_FRONT;
+			raster_desc.primitive_type = VOLT_PRIM_TRIANGLES;
+			raster_desc.winding_order = VOLT_WIND_CW;
+
+			volt_rasterizer_create(volt_ctx, &fullscreen.rasterizer, &raster_desc);
+			volt_ctx_execute(volt_ctx);
+		}
+	}
+
+
+  /* ----------------------------------------------------------- [ Scene ] -- */
   {
     /* load vbo */
     {
@@ -107,7 +210,7 @@ main(int argc, char **argv)
     {
       roa_transform_init(&scene.box_transform[0]);
       scene.box_transform[0].position = roa_float3_set_with_values(0.f, 0.f, 5.f);
-      
+
       roa_transform_init(&scene.box_transform[1]);
       scene.box_transform[1].position = roa_float3_set_with_values(6.f, 1.f, 10.f);
 
@@ -157,7 +260,7 @@ main(int argc, char **argv)
     }
   }
 
-  /* ------------------------------------------------------- [ G-Buffer ] -- */
+  /* -------------------------------------------------------- [ G-Buffer ] -- */
 	{
 		/* color outputs */
 		{
@@ -170,7 +273,7 @@ main(int argc, char **argv)
         "GBuffer:Final",
       };
 
-			int i;
+			unsigned i;
 			for(i = 0; i < ROA_ARR_COUNT(g_buffer.fbo_color_outputs); ++i)
 			{
 				struct volt_texture_desc tex_desc;
@@ -312,10 +415,10 @@ main(int argc, char **argv)
     }
 	}
 
-  /* ----------------------------------------------------------- [ Loop ] -- */
+  /* ------------------------------------------------------------ [ Loop ] -- */
   while (roa_ctx_new_frame(hw_ctx))
   {
-    /* ------------------------------------------ [ Generate Scene Data ] -- */
+    /* ------------------------------------------- [ Generate Scene Data ] -- */
     {
       /* view mat */
       {
@@ -359,7 +462,7 @@ main(int argc, char **argv)
       }
     }
 
-    /* ------------------------------------------ [ G Buffer Renderpass ] -- */
+    /* ------------------------------------------- [ G Buffer Renderpass ] -- */
     {
       volt_renderpass_t g_buffer_pass;
       volt_renderpass_create(volt_ctx, &g_buffer_pass, "Fill GBuffer", g_buffer.fbo);
@@ -368,7 +471,7 @@ main(int argc, char **argv)
       volt_renderpass_bind_program(g_buffer_pass, g_buffer.program);
       volt_renderpass_bind_rasterizer(g_buffer_pass, g_buffer.rasterizer);
       volt_renderpass_bind_input_format(g_buffer_pass, g_buffer.input);
-      
+
       /* render geometry */
       volt_renderpass_bind_vertex_buffer(g_buffer_pass, scene.vbo);
       volt_renderpass_set_viewport(g_buffer_pass, 0, 0, width, height);
@@ -385,6 +488,32 @@ main(int argc, char **argv)
 
       volt_renderpass_commit(volt_ctx, &g_buffer_pass);
     }
+
+		/* ------------------------------------------- [ Lighting Renderpass ] -- */
+		{
+			/*
+			volt_renderpass_t lighting_pass;
+      volt_renderpass_create(volt_ctx, &lighting_pass, "Lighting Pass", 0);
+			volt_renderpass_commit(volt_ctx, &lighting_pass);
+			*/
+		}
+
+		/* ---------------------------------------------- [ Final Renderpass ] -- */
+		{
+			volt_renderpass_t final_pass;
+      volt_renderpass_create(volt_ctx, &final_pass, "Final Pass", 0);
+
+			volt_renderpass_set_viewport(final_pass, 0, 0, width, height);
+			volt_renderpass_bind_program(final_pass, fullscreen.program);
+			volt_renderpass_bind_rasterizer(final_pass, fullscreen.rasterizer);
+			volt_renderpass_bind_input_format(final_pass, fullscreen.input);
+			volt_renderpass_bind_vertex_buffer(final_pass, fullscreen.triangle);
+			volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[0], "diffuse");
+
+			volt_renderpass_draw(final_pass);
+
+			volt_renderpass_commit(volt_ctx, &final_pass);
+		}
 
     volt_ctx_execute(volt_ctx);
 
