@@ -59,6 +59,8 @@ enum class volt_gl_cmd_id
   bind_framebuffer,
 
   set_viewport,
+  set_scissor,
+  clear,
 
   /* draw */
 
@@ -278,7 +280,7 @@ struct volt_gl_cmd_draw_indexed
 
 struct volt_gl_cmd_set_viewport
 {
-  volt_gl_cmd_id id;
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::set_viewport */
 
   GLint x;
   GLint y;
@@ -287,7 +289,27 @@ struct volt_gl_cmd_set_viewport
 };
 
 
-/* ---------------------------------------------- [ internal gl structs ] -- */
+
+struct volt_gl_cmd_clear
+{
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::clear */
+
+  GLbitfield mask;
+};
+
+
+struct volt_gl_cmd_set_scissor
+{
+  volt_gl_cmd_id id; /* volt_gl_cmd_id::set_scissor */
+
+  GLint x;
+  GLint y;
+  GLsizei width;
+  GLsizei height;
+};
+
+
+/* ----------------------------------------------- [ internal gl structs ] -- */
 
 
 struct volt_program
@@ -460,6 +482,9 @@ struct volt_renderpass
   volt_program_t curr_program;
   volt_rasterizer_t curr_rasterizer;
   volt_viewport curr_viewport;
+  volt_viewport curr_scissor;
+
+  unsigned curr_clear;
 
   /* samplers */
   uint64_t sampler_hash[32];
@@ -662,6 +687,19 @@ convert_gl_dimention_to_volt(GLenum di)
 
   ROA_ASSERT(false);
   return VOLT_TEXTURE_2D;
+}
+
+
+GLbitfield
+convert_volt_clear_to_gl_flag(unsigned flags)
+{
+  GLbitfield mask = 0;
+
+  if(flags & VOLT_CLEAR_COLOR)    { mask |= GL_COLOR_BUFFER_BIT;   }
+  if(flags & VOLT_CLEAR_DEPTH)    { mask |= GL_DEPTH_BUFFER_BIT;   }
+  if(flags & VOLT_CLEAR_STENCIL)  { mask |= GL_STENCIL_BUFFER_BIT; }
+
+  return mask;
 }
 
 
@@ -1180,7 +1218,9 @@ volt_renderpass_bind_texture_buffer(
   {
     if (pass->sampler_hash[i] == hash_name)
     {
-      /* already bound */
+      pass->sampler_hash[i] = hash_name;
+      pass->sampler[i] = texture;
+      
       return;
     }
   }
@@ -1298,6 +1338,32 @@ volt_renderpass_set_viewport(
 
 
 void
+volt_renderpass_set_scissor(
+  volt_renderpass_t pass,
+  int x,
+  int y,
+  unsigned width,
+  unsigned height)
+{
+  ROA_ASSERT(pass);
+
+  volt_viewport vp{x, y, width, height};
+  pass->curr_scissor = vp;
+}
+
+
+void
+volt_renderpass_clear(
+  volt_renderpass_t pass,
+  unsigned volt_clear_flags)
+{
+  ROA_ASSERT(pass);
+
+  pass->curr_clear = volt_clear_flags;
+}
+
+
+void
 volt_renderpass_draw(volt_renderpass_t pass)
 {
   /* param */
@@ -1314,6 +1380,32 @@ volt_renderpass_draw(volt_renderpass_t pass)
     cmd->y = pass->curr_viewport.y;
     cmd->width = pass->curr_viewport.width;
     cmd->height = pass->curr_viewport.height;
+  }
+
+  /* scissor */
+  {
+    if(pass->curr_scissor.width > 0)
+    {
+      volt_gl_cmd_set_scissor *cmd = (volt_gl_cmd_set_scissor*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+      cmd->id = volt_gl_cmd_id::set_scissor;
+      cmd->x = pass->curr_scissor.x;
+      cmd->y = pass->curr_scissor.y;
+      cmd->width = pass->curr_scissor.width;
+      cmd->height = pass->curr_scissor.height;
+    }
+  }
+
+  /* clear */
+  {
+    if(pass->curr_clear)
+    {
+      volt_gl_cmd_clear *cmd = (volt_gl_cmd_clear*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+      cmd->id = volt_gl_cmd_id::clear;
+      cmd->mask = convert_volt_clear_to_gl_flag(pass->curr_clear);
+      pass->curr_clear = 0;
+    }
   }
 
   if (pass->curr_program != pass->last_bound_program)
@@ -1475,7 +1567,7 @@ volt_renderpass_draw(volt_renderpass_t pass)
     const GLuint stride     = pass->curr_input->element_stride;
     const GLuint ele_count  = pass->curr_vbo->element_count;
     const GLuint count      = ele_count / stride;
-    
+
     cmd->id     = volt_gl_cmd_id::draw_count;
     cmd->first  = 0;
     cmd->count  = count;
@@ -2047,12 +2139,10 @@ volt_gl_bind_framebuffer(const volt_gl_cmd_bind_framebuffer *cmd)
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl_id);
 
   /* junk */
-  glClearColor(0.5, 0, 0, 1);
-
+  glDisable(GL_SCISSOR_TEST);
   glEnable(GL_DEPTH_TEST);
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glDisable(GL_CULL_FACE);
-
 
   GL_ASSERT;
 }
@@ -2144,6 +2234,35 @@ volt_gl_set_viewport(const volt_gl_cmd_set_viewport *cmd)
 
   /* set vp */
   glViewport(x, y, width, height);
+}
+
+
+static void
+volt_gl_set_scissor(const volt_gl_cmd_set_scissor *cmd)
+{
+  /* param check */
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  /* prepare */
+  const GLint x        = cmd->x;
+  const GLint y        = cmd->y;
+  const GLsizei width  = cmd->width;
+  const GLsizei height = cmd->height;
+
+  /* set scissor */
+  glEnable(GL_SCISSOR_TEST);
+  glScissor(x, y, width, height);
+}
+
+
+static void
+volt_gl_clear(const volt_gl_cmd_clear *cmd)
+{
+  /* param check */
+  ROA_ASSERT_PEDANTIC(cmd);
+
+  /* set clear */
+  glClear(cmd->mask);
 }
 
 
@@ -2381,7 +2500,7 @@ volt_ctx_execute(volt_ctx_t ctx)
 
     const uint8_t *data = ctx->render_stream.data;
     unsigned cmd_count = ctx->render_stream.cmd_count;
-    
+
     while ((cmd_count--) > 0)
     {
       const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
@@ -2468,6 +2587,20 @@ volt_ctx_execute(volt_ctx_t ctx)
           const volt_gl_cmd_set_viewport *cmd = (const volt_gl_cmd_set_viewport*)uk_cmd;
           data += sizeof(*cmd);
           volt_gl_set_viewport(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::set_scissor):
+        {
+          const volt_gl_cmd_set_scissor *cmd = (const volt_gl_cmd_set_scissor*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_set_scissor(cmd);
+          break;
+        }
+        case(volt_gl_cmd_id::clear):
+        {
+          const volt_gl_cmd_clear *cmd = (const volt_gl_cmd_clear*)uk_cmd;
+          data += sizeof(*cmd);
+          volt_gl_clear(cmd);
           break;
         }
         default:

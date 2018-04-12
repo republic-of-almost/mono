@@ -7,6 +7,7 @@
 #include <roa_lib/time.h>
 #include <scratch/geometry.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 /* ----------------------------------------------------------- [ Systems ] -- */
@@ -38,12 +39,12 @@ struct g_buffer_data
 struct scene_data
 {
 	volt_vbo_t vbo;
-  roa_transform box_transform[5];
-  roa_mat4 box_world[5];
-  roa_mat4 box_wvp[5];
+  roa_transform box_transform[9];
+  roa_mat4 box_world[9];
+  roa_mat4 box_wvp[9];
 
-  volt_uniform_t box_world_uni[5];
-  volt_uniform_t box_wvp_uni[5];
+  volt_uniform_t box_world_uni[9];
+  volt_uniform_t box_wvp_uni[9];
 
   roa_mat4 view_mat;
   roa_mat4 proj_mat;
@@ -143,9 +144,9 @@ main(int argc, char **argv)
 		{
 			float verts[] = {
 				/* x y, s t */
-				+3.f, +1.f, 2.f, 0.f,
-				-1.f, +1.f, 0.f, 0.f,
-				-1.f, -3.f, 0.f, 2.f,
+				-1.f, +3.f, 0.f, 2.f,
+				-1.f, -1.f, 0.f, 0.f,
+				+3.f, -1.f, 2.f, 0.f,
 			};
 
 			struct volt_vbo_desc vbo_desc;
@@ -178,9 +179,9 @@ main(int argc, char **argv)
 		/* rasterizer */
 		{
 			struct volt_rasterizer_desc raster_desc;
-			raster_desc.cull_mode = VOLT_CULL_FRONT;
-			raster_desc.primitive_type = VOLT_PRIM_TRIANGLES;
-			raster_desc.winding_order = VOLT_WIND_CW;
+			raster_desc.cull_mode 			= VOLT_CULL_FRONT;
+			raster_desc.primitive_type 	= VOLT_PRIM_TRIANGLES;
+			raster_desc.winding_order 	= VOLT_WIND_CW;
 
 			volt_rasterizer_create(volt_ctx, &fullscreen.rasterizer, &raster_desc);
 			volt_ctx_execute(volt_ctx);
@@ -217,19 +218,33 @@ main(int argc, char **argv)
     /* box positions */
     {
       roa_transform_init(&scene.box_transform[0]);
-      scene.box_transform[0].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
+      scene.box_transform[0].position = roa_float3_set_with_values(+2.f, 0.f, +2.f);
 
       roa_transform_init(&scene.box_transform[1]);
-      scene.box_transform[1].position = roa_float3_set_with_values(4.f, 0.f, 0.f);
+      scene.box_transform[1].position = roa_float3_set_with_values(+2.f, 0.f, -2.f);
 
       roa_transform_init(&scene.box_transform[2]);
-      scene.box_transform[2].position = roa_float3_set_with_values(0.f, 4.f, 0.f);
+      scene.box_transform[2].position = roa_float3_set_with_values(-2.f, 0.f, +2.f);
 
       roa_transform_init(&scene.box_transform[3]);
-      scene.box_transform[3].position = roa_float3_set_with_values(0.f, 0.f, 4.f);
+      scene.box_transform[3].position = roa_float3_set_with_values(-2.f, 0.f, -2.f);
+
 
       roa_transform_init(&scene.box_transform[4]);
-      scene.box_transform[4].position = roa_float3_set_with_values(-4.f, 2.f, 20.f);
+      scene.box_transform[4].position = roa_float3_set_with_values(+2.f, 3.f, +2.f);
+
+			roa_transform_init(&scene.box_transform[5]);
+      scene.box_transform[5].position = roa_float3_set_with_values(+2.f, 3.f, -2.f);
+
+      roa_transform_init(&scene.box_transform[6]);
+      scene.box_transform[6].position = roa_float3_set_with_values(-2.f, 3.f, +2.f);
+
+      roa_transform_init(&scene.box_transform[7]);
+      scene.box_transform[7].position = roa_float3_set_with_values(-2.f, 3.f, -2.f);
+
+
+			roa_transform_init(&scene.box_transform[8]);
+      scene.box_transform[8].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
     }
 
     /* uniforms */
@@ -430,21 +445,21 @@ main(int argc, char **argv)
     {
       /* view mat */
       {
-        float radius = 3.5f;
+        float radius = 4.f;
 
         struct roa_ctx_mouse_desc ms_desc;
         roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
 
         scene.cam_pitch += ms_desc.y_delta * 0.01f;
-        scene.cam_yaw += ms_desc.x_delta * 0.01f;
+        scene.cam_yaw 	+= ms_desc.x_delta * 0.01f;
 
         float x = roa_float_sin(scene.cam_yaw) * radius;
-        float y = -2.f;
+        float y = 5.5f;
         float z = roa_float_cos(scene.cam_yaw) * radius;
 
-        roa_float3 up   = roa_float3_set_with_values(0, 1, 0);
-        roa_float3 pos  = roa_float3_set_with_values(x, y, z);
-        roa_float3 at   = roa_float3_zero();
+        roa_float3 up  = roa_float3_set_with_values(0, 1, 0);
+        roa_float3 pos = roa_float3_set_with_values(x, y, z);
+        roa_float3 at  = roa_float3_zero();
 
         roa_mat4_lookat(&scene.view_mat, pos, at, up);
       }
@@ -479,6 +494,8 @@ main(int argc, char **argv)
     {
       volt_renderpass_t g_buffer_pass;
       volt_renderpass_create(volt_ctx, &g_buffer_pass, "Fill GBuffer", g_buffer.fbo);
+
+			volt_renderpass_clear(g_buffer_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
 
       /* setup gbuffer */
       volt_renderpass_bind_program(g_buffer_pass, g_buffer.program);
@@ -518,16 +535,27 @@ main(int argc, char **argv)
 		/* ---------------------------------------------- [ Final Renderpass ] -- */
 		{
 			volt_renderpass_t final_pass;
-      volt_renderpass_create(volt_ctx, &final_pass, "Final Pass", 0);
-
+			volt_renderpass_create(volt_ctx, &final_pass, "Final Pass", 0);
 			volt_renderpass_set_viewport(final_pass, 0, 0, width, height);
+			volt_renderpass_clear(final_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
 			volt_renderpass_bind_program(final_pass, fullscreen.program);
 			volt_renderpass_bind_rasterizer(final_pass, fullscreen.rasterizer);
 			volt_renderpass_bind_input_format(final_pass, fullscreen.input);
 			volt_renderpass_bind_vertex_buffer(final_pass, fullscreen.triangle);
-			volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[0], "diffuse");
 
-			volt_renderpass_draw(final_pass);
+			int count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
+			count = count > 4 ? 4 : count;
+			int i;
+			int size = width / count;
+
+			/* each color buffer */
+			for(i = 0; i < count; ++i)
+			{
+				volt_renderpass_set_scissor(final_pass, size * i, 0, size, height);
+				volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[i], "diffuse");
+
+				volt_renderpass_draw(final_pass);
+			}
 
 			volt_renderpass_commit(volt_ctx, &final_pass);
 		}

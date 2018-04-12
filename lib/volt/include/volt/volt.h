@@ -63,6 +63,13 @@ typedef enum _volt_access {
   VOLT_STATIC,
 } volt_access;
 
+
+typedef enum _volt_clear {
+  VOLT_CLEAR_COLOR,
+  VOLT_CLEAR_DEPTH,
+  VOLT_CLEAR_STENCIL,
+} volt_clear;
+
 /* --------------------------------------------------------- [ lifetime ] -- */
 
 
@@ -398,6 +405,21 @@ volt_renderpass_set_viewport(
   int y,
   unsigned width,
   unsigned height);
+
+
+void
+volt_renderpass_set_scissor(
+  volt_renderpass_t pass,
+  int x,
+  int y,
+  unsigned width,
+  unsigned height);
+
+
+void
+volt_renderpass_clear(
+  volt_renderpass_t pass,
+  unsigned volt_clear_flags);
 
 
 void
