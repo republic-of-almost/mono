@@ -235,6 +235,9 @@ struct volt_gl_cmd_bind_framebuffer
   volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_framebuffer */
 
   GLuint gl_id;
+
+  GLenum color_attachments[8];
+  GLsizei color_attachment_count;
 };
 
 
@@ -360,6 +363,7 @@ struct volt_viewport
 struct volt_texture
 {
   GLuint gl_id;
+
   GLenum target;
   GLenum format;
   GLuint width;
@@ -374,6 +378,8 @@ struct volt_texture
 struct volt_framebuffer
 {
   GLuint gl_id;
+
+  GLsizei number_of_color_attachments;
 };
 
 
@@ -1137,13 +1143,11 @@ void
 volt_renderpass_create(
   volt_ctx_t ctx,
   volt_renderpass_t *pass,
-  const char *pass_name,
-  volt_framebuffer_t target)
+  struct volt_renderpass_desc *desc)
 {
   /* param check */
   ROA_ASSERT(ctx);
   ROA_ASSERT(pass);
-  ROA_UNUSED(pass_name);
 
   /* new pass */
   volt_renderpass_t rp = (volt_renderpass_t)roa_zalloc(sizeof(*rp));
@@ -1156,7 +1160,50 @@ volt_renderpass_create(
     volt_gl_cmd_bind_framebuffer *cmd = (volt_gl_cmd_bind_framebuffer*)volt_gl_stream_alloc(stream, sizeof(*cmd));
 
     cmd->id = volt_gl_cmd_id::bind_framebuffer;
-    cmd->gl_id = target ? target->gl_id : 0;
+    cmd->gl_id = desc && desc->fbo ? desc->fbo->gl_id : 0;
+    
+    if (desc && desc->fbo && desc->attachment_count)
+    {
+      unsigned i;
+      unsigned count = desc->attachment_count;
+
+      for (i = 0; i < count; ++i)
+      {
+        cmd->color_attachments[i] = GL_COLOR_ATTACHMENT0 + desc->attachments[i];
+      }
+
+      cmd->color_attachment_count = desc->attachment_count;
+    }
+    else if (desc && desc->fbo)
+    {
+      unsigned i;
+      unsigned count = desc->fbo->number_of_color_attachments;
+
+      for (i = 0; i < count; ++i)
+      {
+        cmd->color_attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+      }
+
+      cmd->color_attachment_count = count;
+    }
+
+    if (desc && strcmp(desc->name, "Dir Light Pass") == 0)
+    {
+      glDisable(GL_SCISSOR_TEST);
+      glEnable(GL_DEPTH_TEST);
+      glDisable(GL_CULL_FACE);
+      glEnable(GL_BLEND);
+      glBlendEquation(GL_FUNC_ADD);
+      glBlendFunc(GL_ONE, GL_ONE);
+    }
+    else
+    {
+      glClear(GL_COLOR_BUFFER_BIT);
+      glDisable(GL_SCISSOR_TEST);
+      glEnable(GL_DEPTH_TEST);
+      glDisable(GL_CULL_FACE);
+      glDisable(GL_BLEND);
+    }
   }
 
   *pass = rp;
@@ -1975,6 +2022,8 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
 
   glDrawBuffers(draw_buf_count, draw_buffers);
 
+  cmd->framebuffer->number_of_color_attachments = draw_buf_count;
+
   if(cmd->desc.depth)
   {
     GLuint depth_buffer = cmd->desc.depth->gl_id;
@@ -2138,11 +2187,10 @@ volt_gl_bind_framebuffer(const volt_gl_cmd_bind_framebuffer *cmd)
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl_id);
 
-  /* junk */
-  glDisable(GL_SCISSOR_TEST);
-  glEnable(GL_DEPTH_TEST);
-  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  glDisable(GL_CULL_FACE);
+  if(gl_id)
+  {
+    glDrawBuffers(cmd->color_attachment_count, ROA_ARR_DATA(cmd->color_attachments));
+  }
 
   GL_ASSERT;
 }

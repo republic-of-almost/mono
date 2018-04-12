@@ -32,8 +32,26 @@ struct g_buffer_data
 	volt_texture_t 			fbo_depth;
 	volt_input_t 				input;
 	volt_rasterizer_t 	rasterizer;
-
 } g_buffer;
+
+
+struct point_light_data
+{
+  volt_program_t      program;
+  volt_rasterizer_t 	rasterizer;
+  volt_input_t 				input;
+} point_lights;
+
+
+struct direction_light_data
+{
+  volt_program_t    program;
+  volt_rasterizer_t rasterizer;
+  volt_vbo_t        triangle;
+  volt_input_t      input;
+  volt_uniform_t    eye_pos_uni;
+  volt_uniform_t    wvp_uni;
+} dir_lights;
 
 
 struct scene_data
@@ -282,6 +300,234 @@ main(int argc, char **argv)
       scene.cam_position = roa_float3_one();
     }
   }
+  
+  /* ------------------------------------------------------- [ Dir Light ] -- */
+  {
+    /* program */
+    {
+      const char vs[] = ""
+        "#version 330\n"
+        "layout (location = 0) in vec2 Position; \n"
+        "uniform mat4 gWVP;\n"
+        "void main()\n"
+        "{\n"
+        "gl_Position = vec4(Position, 0.0, 1.0);\n"
+        "}\n";
+
+      const char fs[] = ""
+        "#version 330\n"
+
+        "struct BaseLight\n"
+        "{\n"
+        "vec3 Color;\n"
+        "float AmbientIntensity;\n"
+        "float DiffuseIntensity;\n"
+        "};\n"
+
+        "struct DirectionalLight\n"
+        "{\n"
+        "BaseLight Base;\n"
+        "vec3 Direction;\n"
+        "};\n"
+
+        "struct Attenuation\n"
+        "{\n"
+        "float Constant;\n"
+        "float Linear;\n"
+        "float Exp;\n"
+        "};\n"
+
+        "struct PointLight\n"
+        "{\n"
+        "BaseLight Base;\n"
+        "vec3 Position;\n"
+        "Attenuation Atten;\n"
+        "};\n"
+
+        "struct SpotLight\n"
+        "{\n"
+        "PointLight Base;\n"
+        "vec3 Direction;\n"
+        "float Cutoff;\n"
+        "};\n"
+
+        "uniform sampler2D gPositionMap;\n"
+        "uniform sampler2D gColorMap;\n"
+        "uniform sampler2D gNormalMap;\n"
+        "uniform DirectionalLight gDirectionalLight;\n"
+        "uniform PointLight gPointLight;\n"
+        "uniform SpotLight gSpotLight;\n"
+        "uniform vec3 gEyeWorldPos;\n"
+        "uniform float gMatSpecularIntensity;\n"
+        "uniform float gSpecularPower;\n"
+        "uniform int gLightType;\n"
+        "uniform vec2 gScreenSize;\n"
+
+        "vec4 CalcLightInternal(BaseLight Light,\n"
+        "vec3 LightDirection,\n"
+        "vec3 WorldPos,\n"
+        "vec3 Normal)\n"
+        "{\n"
+        "vec4 AmbientColor = vec4(Light.Color * Light.AmbientIntensity, 1.0);\n"
+        "float DiffuseFactor = dot(Normal, -LightDirection);\n"
+
+        "vec4 DiffuseColor  = vec4(0, 0, 0, 0);\n"
+        "vec4 SpecularColor = vec4(0, 0, 0, 0);\n"
+
+        "if (DiffuseFactor > 0.0) {\n"
+        "DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor, 1.0);\n"
+
+        "vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos);\n"
+        "vec3 LightReflect = normalize(reflect(LightDirection, Normal));\n"
+        "float SpecularFactor = dot(VertexToEye, LightReflect); \n"
+        "if (SpecularFactor > 0.0) {\n"
+        "SpecularFactor = pow(SpecularFactor, gSpecularPower);\n"
+        "SpecularColor = vec4(Light.Color * gMatSpecularIntensity * SpecularFactor, 1.0);\n"
+        "}\n"
+        "}\n"
+
+        "return (AmbientColor + DiffuseColor + SpecularColor);\n"
+        "}\n"
+
+        "vec4 CalcDirectionalLight(vec3 WorldPos, vec3 Normal)\n"
+        "{\n"
+        "return CalcLightInternal(gDirectionalLight.Base,\n"
+        "gDirectionalLight.Direction,\n"
+        "WorldPos,\n"
+        "Normal);\n"
+        "}\n"
+
+        "vec4 CalcPointLight(vec3 WorldPos, vec3 Normal)\n"
+        "{\n"
+        "vec3 LightDirection = WorldPos - gPointLight.Position;\n"
+        "float Distance = length(LightDirection);\n"
+        "LightDirection = normalize(LightDirection);\n"
+
+        "vec4 Color = CalcLightInternal(gPointLight.Base, LightDirection, WorldPos, Normal);\n"
+
+        "float Attenuation =  gPointLight.Atten.Constant +\n"
+        "gPointLight.Atten.Linear * Distance +\n"
+        "gPointLight.Atten.Exp * Distance * Distance;\n"
+
+        "Attenuation = max(1.0, Attenuation);\n"
+
+        "return Color / Attenuation;\n"
+        "}\n"
+
+
+        "vec2 CalcTexCoord()\n"
+        "{\n"
+        "return gl_FragCoord.xy / gScreenSize;\n"
+        "}\n"
+
+        "out vec4 FragColor;\n"
+
+        "void main()\n"
+        "{\n"
+        "vec2 TexCoord = CalcTexCoord();\n"
+        "vec3 WorldPos = texture(gPositionMap, TexCoord).xyz;\n"
+        "vec3 Color = texture(gColorMap, TexCoord).xyz;\n"
+        "vec3 Normal = texture(gNormalMap, TexCoord).xyz;\n"
+        "Normal = normalize(Normal);\n"
+
+        "FragColor = vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"
+        "}\n";
+
+
+      volt_shader_stage stages[2] = {
+        VOLT_SHD_VERTEX,
+        VOLT_SHD_FRAGMENT,
+      };
+
+      const char *stages_src[2] = {
+        vs,
+        fs,
+      };
+
+      struct volt_program_desc prog_desc;
+      ROA_MEM_ZERO(prog_desc);
+
+      prog_desc.shader_stages_src   = stages_src;
+      prog_desc.shader_stages_type  = stages;
+      prog_desc.stage_count         = ROA_ARR_COUNT(stages);
+
+      volt_program_create(volt_ctx, &dir_lights.program, &prog_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* triangle */
+    {
+      float verts[] = {
+        /* x y */
+        -1.f, +3.f,
+        -1.f, -1.f,
+        +3.f, -1.f,
+      };
+
+      struct volt_vbo_desc vbo_desc;
+      ROA_MEM_ZERO(vbo_desc);
+
+      vbo_desc.data   = ROA_ARR_DATA(verts);
+      vbo_desc.count  = ROA_ARR_COUNT(verts);
+
+      volt_vertex_buffer_create(volt_ctx, &dir_lights.triangle, &vbo_desc);
+
+      ROA_ASSERT(dir_lights.triangle != VOLT_NULL);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* uniforms */
+    {
+      struct volt_uniform_desc uni_desc;
+      ROA_MEM_ZERO(uni_desc);
+
+      uni_desc.data_type = VOLT_DATA_FLOAT4;
+      uni_desc.count     = 1;
+
+      volt_uniform_create(volt_ctx, &dir_lights.eye_pos_uni, &uni_desc);
+      
+      struct volt_uniform_desc uni_wvp_desc;
+      ROA_MEM_ZERO(uni_wvp_desc);
+
+      uni_wvp_desc.data_type = VOLT_DATA_MAT4;
+      uni_wvp_desc.count = 1;
+
+      volt_uniform_create(volt_ctx, &dir_lights.wvp_uni, &uni_wvp_desc);
+
+
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* input format */
+    {
+      volt_input_attribute attrs[] = {
+        VOLT_INPUT_FLOAT2, /* positions */
+      };
+
+      struct volt_input_desc input_desc;
+      ROA_MEM_ZERO(input_desc);
+
+      input_desc.attributes = ROA_ARR_DATA(attrs);
+      input_desc.count      = ROA_ARR_COUNT(attrs);
+
+      /*volt_input_t   input_format;*/
+      volt_input_create(volt_ctx, &dir_lights.input, &input_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* rasterizer */
+    {
+      struct volt_rasterizer_desc raster_desc;
+      ROA_MEM_ZERO(raster_desc);
+
+      raster_desc.cull_mode = VOLT_CULL_FRONT;
+      raster_desc.primitive_type = VOLT_PRIM_TRIANGLES;
+      raster_desc.winding_order = VOLT_WIND_CW;
+
+      volt_rasterizer_create(volt_ctx, &dir_lights.rasterizer, &raster_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+  }
 
   /* -------------------------------------------------------- [ G-Buffer ] -- */
 	{
@@ -462,6 +708,10 @@ main(int argc, char **argv)
         roa_float3 at  = roa_float3_zero();
 
         roa_mat4_lookat(&scene.view_mat, pos, at, up);
+
+        scene.cam_position = pos;
+        volt_uniform_update(volt_ctx, dir_lights.eye_pos_uni, &scene.cam_position);
+        volt_ctx_execute(volt_ctx);
       }
 
       /* world */
@@ -469,7 +719,7 @@ main(int argc, char **argv)
         int count = ROA_ARR_COUNT(scene.box_transform);
         int i;
 
-        roa_mat4 view_proj;
+        static roa_mat4 view_proj;
         roa_mat4_multiply(&view_proj, &scene.view_mat, &scene.proj_mat);
 
         for (i = 0; i < count; ++i)
@@ -485,6 +735,8 @@ main(int argc, char **argv)
           roa_mat4 *wvp = &scene.box_wvp[i];
           volt_uniform_update(volt_ctx, wvp_uni, (void*)wvp->data);
 
+          volt_uniform_update(volt_ctx, dir_lights.wvp_uni, (void*)view_proj.data);
+
           volt_ctx_execute(volt_ctx);
         }
       }
@@ -492,8 +744,13 @@ main(int argc, char **argv)
 
     /* ------------------------------------------- [ G Buffer Renderpass ] -- */
     {
+      struct volt_renderpass_desc rp_desc;
+      ROA_MEM_ZERO(rp_desc);
+      rp_desc.fbo = g_buffer.fbo;
+      rp_desc.name = "Fill Gbuffer";
+
       volt_renderpass_t g_buffer_pass;
-      volt_renderpass_create(volt_ctx, &g_buffer_pass, "Fill GBuffer", g_buffer.fbo);
+      volt_renderpass_create(volt_ctx, &g_buffer_pass, &rp_desc);
 
 			volt_renderpass_clear(g_buffer_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
 
@@ -523,34 +780,53 @@ main(int argc, char **argv)
       volt_renderpass_commit(volt_ctx, &g_buffer_pass);
     }
 
-		/* ------------------------------------------- [ Lighting Renderpass ] -- */
+		/* --------------------------------------- [ Dir Lighting Renderpass ] -- */
 		{
-			/*
-			volt_renderpass_t lighting_pass;
-      volt_renderpass_create(volt_ctx, &lighting_pass, "Lighting Pass", 0);
-			volt_renderpass_commit(volt_ctx, &lighting_pass);
-			*/
+      unsigned attachments[] = {
+        4,
+      };
+
+      struct volt_renderpass_desc rp_desc;
+      ROA_MEM_ZERO(rp_desc);
+      rp_desc.fbo = g_buffer.fbo;
+      rp_desc.attachments = ROA_ARR_DATA(attachments);
+      rp_desc.attachment_count = ROA_ARR_COUNT(attachments);
+      rp_desc.name = "Dir Light Pass";
+
+			volt_renderpass_t dir_light_pass;
+      volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
+      volt_renderpass_clear(dir_light_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
+      volt_renderpass_bind_program(dir_light_pass, dir_lights.program);
+      volt_renderpass_bind_input_format(dir_light_pass, dir_lights.input);
+      volt_renderpass_set_viewport(dir_light_pass, 0, 0, width, height);
+      volt_renderpass_bind_vertex_buffer(dir_light_pass, dir_lights.triangle);
+      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.eye_pos_uni, "");*/
+      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.wvp_uni, "gWVP");*/
+      volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[0], "gPositionMap");
+      volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[1], "gColorMap");
+      volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[2], "gNormalMap");
+      volt_renderpass_draw(dir_light_pass);
+      volt_renderpass_commit(volt_ctx, &dir_light_pass);
 		}
 
 		/* ---------------------------------------------- [ Final Renderpass ] -- */
 		{
 			volt_renderpass_t final_pass;
-			volt_renderpass_create(volt_ctx, &final_pass, "Final Pass", 0);
-			volt_renderpass_set_viewport(final_pass, 0, 0, width, height);
-			volt_renderpass_clear(final_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
+			volt_renderpass_create(volt_ctx, &final_pass, 0);
+      volt_renderpass_set_viewport(final_pass, 0, 0, width, height);
 			volt_renderpass_bind_program(final_pass, fullscreen.program);
 			volt_renderpass_bind_rasterizer(final_pass, fullscreen.rasterizer);
 			volt_renderpass_bind_input_format(final_pass, fullscreen.input);
 			volt_renderpass_bind_vertex_buffer(final_pass, fullscreen.triangle);
 
 			int count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
-			count = count > 4 ? 4 : count;
 			int i;
 			int size = width / count;
 
 			/* each color buffer */
 			for(i = 0; i < count; ++i)
 			{
+        volt_renderpass_clear(final_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
 				volt_renderpass_set_scissor(final_pass, size * i, 0, size, height);
 				volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[i], "diffuse");
 

@@ -65,9 +65,9 @@ typedef enum _volt_access {
 
 
 typedef enum _volt_clear {
-  VOLT_CLEAR_COLOR,
-  VOLT_CLEAR_DEPTH,
-  VOLT_CLEAR_STENCIL,
+  VOLT_CLEAR_COLOR = 1 << 0,
+  VOLT_CLEAR_DEPTH = 1 << 1,
+  VOLT_CLEAR_STENCIL = 1 << 2,
 } volt_clear;
 
 /* --------------------------------------------------------- [ lifetime ] -- */
@@ -340,12 +340,20 @@ volt_rasterizer_create(
 /* ------------------------------------------------------- [ renderpass ] -- */
 
 
+struct volt_renderpass_desc
+{
+  volt_framebuffer_t fbo;
+  unsigned *attachments;
+  unsigned attachment_count;
+  const char *name;
+};
+
+
 void
 volt_renderpass_create(
   volt_ctx_t ctx,
   volt_renderpass_t *pass,
-  const char *pass_name,
-  volt_framebuffer_t target);
+  struct volt_renderpass_desc *desc);
 
 
 void
