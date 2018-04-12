@@ -27,18 +27,16 @@ main()
   volt_ctx_t ctx = VOLT_NULL;
   volt_ctx_create(&ctx);
 
-  volt_vbo_t vbo = VOLT_NULL;
-  volt_ibo_t ibo = VOLT_NULL;
-  volt_texture_t texture_1 = VOLT_NULL;
-  volt_texture_t texture_2 = VOLT_NULL;
-  volt_program_t program = VOLT_NULL;
-  volt_input_t vert_input = VOLT_NULL;
-  volt_rasterizer_t rasterizer = VOLT_NULL;
-  
-
-  volt_uniform_t proj_data = VOLT_NULL;
-  volt_uniform_t view_data = VOLT_NULL;
-  volt_uniform_t world_data = VOLT_NULL;
+  volt_vbo_t vbo                = VOLT_NULL;
+  volt_ibo_t ibo                = VOLT_NULL;
+  volt_texture_t texture_1      = VOLT_NULL;
+  volt_texture_t texture_2      = VOLT_NULL;
+  volt_program_t program        = VOLT_NULL;
+  volt_input_t vert_input       = VOLT_NULL;
+  volt_rasterizer_t rasterizer  = VOLT_NULL;
+  volt_uniform_t proj_data      = VOLT_NULL;
+  volt_uniform_t view_data      = VOLT_NULL;
+  volt_uniform_t world_data     = VOLT_NULL;
 
   roa_mat4 world;
   roa_mat4 view;
@@ -47,6 +45,8 @@ main()
   /* create uniforms */
   {
     struct volt_uniform_desc uni_desc_1;
+    ROA_MEM_ZERO(uni_desc_1);
+
     uni_desc_1.data_type = VOLT_DATA_MAT4;
     uni_desc_1.count = 1;
 
@@ -54,6 +54,8 @@ main()
     ROA_ASSERT(proj_data);
 
     struct volt_uniform_desc uni_desc_2;
+    ROA_MEM_ZERO(uni_desc_2);
+
     uni_desc_2.data_type = VOLT_DATA_MAT4;
     uni_desc_2.count = 1;
 
@@ -61,6 +63,8 @@ main()
     ROA_ASSERT(view_data);
 
     struct volt_uniform_desc uni_desc_3;
+    ROA_MEM_ZERO(uni_desc_3);
+
     uni_desc_3.data_type = VOLT_DATA_MAT4;
     uni_desc_3.count = 1;
 
@@ -74,6 +78,8 @@ main()
 
     /* textures */
     struct volt_texture_desc tex_desc_1;
+    ROA_MEM_ZERO(tex_desc_1);
+
     tex_desc_1.dimentions = VOLT_TEXTURE_2D;
     tex_desc_1.mip_maps = VOLT_FALSE;
     tex_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
@@ -95,9 +101,11 @@ main()
 
     tex_desc_1.width = x;
     tex_desc_1.height = y;
-    tex_desc_1.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
+    tex_desc_1.format = n > 3 ? VOLT_PIXEL_FORMAT_RGBA : VOLT_PIXEL_FORMAT_RGB;
 
     struct volt_texture_desc tex_desc_2;
+    ROA_MEM_ZERO(tex_desc_2);
+
     tex_desc_2.dimentions = VOLT_TEXTURE_2D;
     tex_desc_2.mip_maps = VOLT_FALSE;
     tex_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
@@ -117,7 +125,7 @@ main()
 
     tex_desc_2.width = x;
     tex_desc_2.height = y;
-    tex_desc_2.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
+    tex_desc_2.format = n > 3 ? VOLT_PIXEL_FORMAT_RGBA : VOLT_PIXEL_FORMAT_RGB;
 
     volt_texture_create(ctx, &texture_1, &tex_desc_1);
     volt_texture_create(ctx, &texture_2, &tex_desc_2);
@@ -141,6 +149,8 @@ main()
     );
 
     struct volt_vbo_desc vbo_desc;
+    ROA_MEM_ZERO(vbo_desc);
+
     vbo_desc.data = ROA_ARR_DATA(verts);
     vbo_desc.count = vert_count;
 
@@ -153,6 +163,8 @@ main()
     };
 
     struct volt_ibo_desc ibo_desc;
+    ROA_MEM_ZERO(ibo_desc);
+
     ibo_desc.data = ROA_ARR_DATA(index);
     ibo_desc.count = ROA_ARR_COUNT(index);
 
@@ -206,6 +218,8 @@ main()
     stage_types[1] = VOLT_SHD_FRAGMENT;
 
     struct volt_program_desc shd_desc;
+    ROA_MEM_ZERO(shd_desc);
+
     shd_desc.shader_stages_src = stages;
     shd_desc.shader_stages_type = stage_types;
     shd_desc.stage_count = 2;
@@ -219,8 +233,10 @@ main()
     };
 
     struct volt_input_desc input_desc;
+    ROA_MEM_ZERO(input_desc);
+
     input_desc.attributes = ROA_ARR_DATA(input_fmt);
-    input_desc.count = ROA_ARR_COUNT(input_fmt);
+    input_desc.count      = ROA_ARR_COUNT(input_fmt);
 
     volt_input_create(ctx, &vert_input, &input_desc);
 
@@ -253,12 +269,12 @@ main()
       roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
 
       float x = roa_float_sin(time) * radius;
-      float y = roa_float_cos(time) * radius;
-      float z = radius - (radius / ROA_G_RATIO);
+      float y = radius - (radius / ROA_G_RATIO);
+      float z = roa_float_cos(time) * radius;
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at = roa_float3_fill_with_value(0.f);
-      roa_float3 up = roa_float3_set_with_values(0.f, 0.f, 1.f);
+      roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
 
       roa_mat4_lookat(&view, from, at, up);
 

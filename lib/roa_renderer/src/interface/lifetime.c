@@ -93,6 +93,7 @@ roa_renderer_ctx_create(
 
     /* textures */
     struct volt_texture_desc tex_desc_1;
+    ROA_MEM_ZERO(tex_desc_1);
     tex_desc_1.dimentions = VOLT_TEXTURE_2D;
     tex_desc_1.mip_maps = VOLT_FALSE;
     tex_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
@@ -114,7 +115,7 @@ roa_renderer_ctx_create(
 
     tex_desc_1.width = x;
     tex_desc_1.height = y;
-    tex_desc_1.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
+    tex_desc_1.format = n > 3 ? VOLT_PIXEL_FORMAT_RGBA : VOLT_PIXEL_FORMAT_RGB;
 
     struct volt_texture_desc tex_desc_2;
     tex_desc_2.dimentions = VOLT_TEXTURE_2D;
@@ -136,14 +137,16 @@ roa_renderer_ctx_create(
 
     tex_desc_2.width = x;
     tex_desc_2.height = y;
-    tex_desc_2.format = n > 3 ? VOLT_COLOR_RGBA : VOLT_COLOR_RGB;
+    tex_desc_2.format = n > 3 ? VOLT_PIXEL_FORMAT_RGBA : VOLT_PIXEL_FORMAT_RGB;
 
     volt_texture_create(new_ctx->volt_ctx, &new_ctx->texture_1, &tex_desc_1);
     volt_texture_create(new_ctx->volt_ctx, &new_ctx->texture_2, &tex_desc_2);
 
     /* vbo */
     volt_vert_desc vert_desc[] = {
-      VOLT_VERT_POSITION, VOLT_NORMAL, VOLT_UV,
+      VOLT_VERT_POSITION,
+      VOLT_NORMAL,
+      VOLT_UV,
     };
 
     float verts[1024];
@@ -160,6 +163,7 @@ roa_renderer_ctx_create(
     );
 
     struct volt_vbo_desc vbo_desc;
+    ROA_MEM_ZERO(vbo_desc);
     vbo_desc.data = ROA_ARR_DATA(verts);
     vbo_desc.count = vert_count;
 
@@ -172,6 +176,7 @@ roa_renderer_ctx_create(
     };
 
     struct volt_ibo_desc ibo_desc;
+    ROA_MEM_ZERO(ibo_desc);
     ibo_desc.data = ROA_ARR_DATA(index);
     ibo_desc.count = ROA_ARR_COUNT(index);
 
@@ -238,6 +243,7 @@ roa_renderer_ctx_create(
     };
 
     struct volt_input_desc input_desc;
+    ROA_MEM_ZERO(input_desc);
     input_desc.attributes = ROA_ARR_DATA(input_fmt);
     input_desc.count = ROA_ARR_COUNT(input_fmt);
 
