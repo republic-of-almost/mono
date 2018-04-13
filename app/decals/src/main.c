@@ -102,6 +102,8 @@ main(int argc, char **argv)
   /* --------------------------------------------------------- [ Systems ] -- */
   {
     struct roa_ctx_window_desc win_desc;
+    ROA_MEM_ZERO(win_desc);
+
     win_desc.width = width;
     win_desc.height = height;
     win_desc.title = "Decals";
@@ -148,6 +150,8 @@ main(int argc, char **argv)
 			};
 
 			struct volt_program_desc screen_program_desc;
+      ROA_MEM_ZERO(screen_program_desc);
+
 			screen_program_desc.stage_count         = ROA_ARR_COUNT(stages);
 			screen_program_desc.shader_stages_type  = ROA_ARR_DATA(stages);
 			screen_program_desc.shader_stages_src   = ROA_ARR_DATA(shaders);
@@ -168,6 +172,8 @@ main(int argc, char **argv)
 			};
 
 			struct volt_vbo_desc vbo_desc;
+      ROA_MEM_ZERO(vbo_desc);
+
 			vbo_desc.data  = ROA_ARR_DATA(verts);
 			vbo_desc.count = ROA_ARR_COUNT(verts);
 
@@ -184,10 +190,12 @@ main(int argc, char **argv)
 			attrs[1] = VOLT_INPUT_FLOAT2;
 
 			struct volt_input_desc input_desc;
+      ROA_MEM_ZERO(input_desc);
+
 			input_desc.attributes = ROA_ARR_DATA(attrs);
 			input_desc.count      = ROA_ARR_COUNT(attrs);
 
-			/*volt_input_t   input_format;*/
+			/*volt_input_t input_format;*/
 			volt_input_create(volt_ctx, &fullscreen.input, &input_desc);
 
 			ROA_ASSERT(fullscreen.input != VOLT_NULL);
@@ -197,6 +205,8 @@ main(int argc, char **argv)
 		/* rasterizer */
 		{
 			struct volt_rasterizer_desc raster_desc;
+      ROA_MEM_ZERO(raster_desc);
+
 			raster_desc.cull_mode 			= VOLT_CULL_FRONT;
 			raster_desc.primitive_type 	= VOLT_PRIM_TRIANGLES;
 			raster_desc.winding_order 	= VOLT_WIND_CW;
@@ -226,6 +236,8 @@ main(int argc, char **argv)
       geometry_generate_cube(desc, 3, 1, 1, 1, data, &vert_count);
 
       struct volt_vbo_desc vbo_desc;
+      ROA_MEM_ZERO(vbo_desc);
+
       vbo_desc.data   = data;
       vbo_desc.count  = vert_count;
 
@@ -260,7 +272,6 @@ main(int argc, char **argv)
       roa_transform_init(&scene.box_transform[7]);
       scene.box_transform[7].position = roa_float3_set_with_values(-2.f, 3.f, -2.f);
 
-
 			roa_transform_init(&scene.box_transform[8]);
       scene.box_transform[8].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
     }
@@ -273,12 +284,16 @@ main(int argc, char **argv)
       for(i = 0; i < count; ++i)
       {
         struct volt_uniform_desc wvp_uni_desc;
+        ROA_MEM_ZERO(wvp_uni_desc);
+
         wvp_uni_desc.data_type = VOLT_DATA_MAT4;
         wvp_uni_desc.count = 1;
 
         volt_uniform_create(volt_ctx, &scene.box_wvp_uni[i], &wvp_uni_desc);
 
         struct volt_uniform_desc world_uni_desc;
+        ROA_MEM_ZERO(world_uni_desc);
+
         world_uni_desc.data_type = VOLT_DATA_MAT4;
         world_uni_desc.count = 1;
 
@@ -308,9 +323,14 @@ main(int argc, char **argv)
       const char vs[] = ""
         "#version 330\n"
         "layout (location = 0) in vec2 Position; \n"
+        "layout (location = 1) in vec2 TexC;\n"
+
+        "out vec2 TexCoords;\n"
+
         "uniform mat4 gWVP;\n"
         "void main()\n"
         "{\n"
+        "TexCoords = TexC;\n"
         "gl_Position = vec4(Position, 0.0, 1.0);\n"
         "}\n";
 
@@ -354,6 +374,7 @@ main(int argc, char **argv)
         "uniform sampler2D gPositionMap;\n"
         "uniform sampler2D gColorMap;\n"
         "uniform sampler2D gNormalMap;\n"
+
         "uniform DirectionalLight gDirectionalLight;\n"
         "uniform PointLight gPointLight;\n"
         "uniform SpotLight gSpotLight;\n"
@@ -413,24 +434,24 @@ main(int argc, char **argv)
 
         "return Color / Attenuation;\n"
         "}\n"
-
-
+        
         "vec2 CalcTexCoord()\n"
         "{\n"
         "return gl_FragCoord.xy / gScreenSize;\n"
         "}\n"
 
+        "in vec2 TexCoords;\n"
         "out vec4 FragColor;\n"
 
         "void main()\n"
         "{\n"
-        "vec2 TexCoord = CalcTexCoord();\n"
+        "vec2 TexCoord = TexCoords; //CalcTexCoord();\n"
         "vec3 WorldPos = texture(gPositionMap, TexCoord).xyz;\n"
         "vec3 Color = texture(gColorMap, TexCoord).xyz;\n"
         "vec3 Normal = texture(gNormalMap, TexCoord).xyz;\n"
         "Normal = normalize(Normal);\n"
-
-        "FragColor = vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"
+        /*"FragColor = vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"*/
+          "FragColor = vec4(Color, 1.0);\n"
         "}\n";
 
 
@@ -458,10 +479,10 @@ main(int argc, char **argv)
     /* triangle */
     {
       float verts[] = {
-        /* x y */
-        -1.f, +3.f,
-        -1.f, -1.f,
-        +3.f, -1.f,
+        /* x y, s t */
+        -1.f, +3.f, 0.f, 2.f,
+        -1.f, -1.f, 0.f, 0.f,
+        +3.f, -1.f, 2.f, 0.f,
       };
 
       struct volt_vbo_desc vbo_desc;
@@ -502,6 +523,7 @@ main(int argc, char **argv)
     {
       volt_input_attribute attrs[] = {
         VOLT_INPUT_FLOAT2, /* positions */
+        VOLT_INPUT_FLOAT2, /* texc */
       };
 
       struct volt_input_desc input_desc;
@@ -531,8 +553,8 @@ main(int argc, char **argv)
 
   /* -------------------------------------------------------- [ G-Buffer ] -- */
 	{
-		/* color outputs */
-		{
+    /* color outputs */
+    {
       /* texture names */
       const char *g_buffer_texture_names[ROA_ARR_COUNT(g_buffer.fbo_color_outputs)] = {
         "GBuffer:Positions",
@@ -542,28 +564,32 @@ main(int argc, char **argv)
         "GBuffer:Final",
       };
 
-			unsigned i;
-			for(i = 0; i < ROA_ARR_COUNT(g_buffer.fbo_color_outputs); ++i)
-			{
-				struct volt_texture_desc tex_desc;
-				tex_desc.width      = width;
-				tex_desc.height     = height;
-				tex_desc.dimentions = VOLT_TEXTURE_2D;
-				tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
-				tex_desc.format     = VOLT_PIXEL_FORMAT_RGBA32F;
+      unsigned i;
+      for(i = 0; i < ROA_ARR_COUNT(g_buffer.fbo_color_outputs); ++i)
+      {
+        struct volt_texture_desc tex_desc;
+        ROA_MEM_ZERO(tex_desc);
+
+        tex_desc.width      = width;
+        tex_desc.height     = height;
+        tex_desc.dimentions = VOLT_TEXTURE_2D;
+        tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
+        tex_desc.format     = VOLT_PIXEL_FORMAT_RGBA32F;
         tex_desc.mip_maps   = VOLT_FALSE;
         tex_desc.data       = ROA_NULL;
         tex_desc.access     = VOLT_STATIC;
-				tex_desc.name       = g_buffer_texture_names[i];
+        tex_desc.name       = g_buffer_texture_names[i];
 
-				volt_texture_create(volt_ctx, &g_buffer.fbo_color_outputs[i], &tex_desc);
+        volt_texture_create(volt_ctx, &g_buffer.fbo_color_outputs[i], &tex_desc);
         volt_ctx_execute(volt_ctx);
-			}
-		}
+      }
+    }
 
 		/* depth buffer */
 		{
 			struct volt_texture_desc tex_desc;
+      ROA_MEM_ZERO(tex_desc);
+
 			tex_desc.width      = width;
 			tex_desc.height     = height;
 			tex_desc.dimentions = VOLT_TEXTURE_2D;
@@ -581,6 +607,8 @@ main(int argc, char **argv)
 		/* create fbo */
 		{
 			struct volt_framebuffer_desc fbo_desc;
+      ROA_MEM_ZERO(fbo_desc);
+
 			fbo_desc.attachments      = g_buffer.fbo_color_outputs;
 			fbo_desc.attachment_count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
 			fbo_desc.depth            = g_buffer.fbo_depth;
@@ -646,6 +674,8 @@ main(int argc, char **argv)
       };
 
       struct volt_program_desc prog_desc;
+      ROA_MEM_ZERO(prog_desc);
+
       prog_desc.shader_stages_src   = stages_src;
       prog_desc.shader_stages_type  = stages;
       prog_desc.stage_count         = ROA_ARR_COUNT(stages);
@@ -664,6 +694,8 @@ main(int argc, char **argv)
       };
 
       struct volt_input_desc input_desc;
+      ROA_MEM_ZERO(input_desc);
+
       input_desc.attributes = ROA_ARR_DATA(attrs);
       input_desc.count      = ROA_ARR_COUNT(attrs);
 
@@ -675,6 +707,8 @@ main(int argc, char **argv)
     /* rasterizer */
     {
       struct volt_rasterizer_desc raster_desc;
+      ROA_MEM_ZERO(raster_desc);
+
       raster_desc.cull_mode       = VOLT_CULL_FRONT;
       raster_desc.primitive_type  = VOLT_PRIM_TRIANGLES;
       raster_desc.winding_order   = VOLT_WIND_CW;
@@ -694,6 +728,8 @@ main(int argc, char **argv)
         float radius = 4.f;
 
         struct roa_ctx_mouse_desc ms_desc;
+        ROA_MEM_ZERO(ms_desc);
+
         roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
 
         scene.cam_pitch += ms_desc.y_delta * 0.01f;
@@ -746,7 +782,8 @@ main(int argc, char **argv)
     {
       struct volt_renderpass_desc rp_desc;
       ROA_MEM_ZERO(rp_desc);
-      rp_desc.fbo = g_buffer.fbo;
+
+      rp_desc.fbo  = g_buffer.fbo;
       rp_desc.name = "Fill Gbuffer";
 
       volt_renderpass_t g_buffer_pass;
@@ -788,6 +825,7 @@ main(int argc, char **argv)
 
       struct volt_renderpass_desc rp_desc;
       ROA_MEM_ZERO(rp_desc);
+
       rp_desc.fbo = g_buffer.fbo;
       rp_desc.attachments = ROA_ARR_DATA(attachments);
       rp_desc.attachment_count = ROA_ARR_COUNT(attachments);
@@ -812,6 +850,8 @@ main(int argc, char **argv)
 		/* ---------------------------------------------- [ Final Renderpass ] -- */
 		{
 			volt_renderpass_t final_pass;
+      ROA_MEM_ZERO(final_pass);
+
 			volt_renderpass_create(volt_ctx, &final_pass, 0);
       volt_renderpass_set_viewport(final_pass, 0, 0, width, height);
 			volt_renderpass_bind_program(final_pass, fullscreen.program);
