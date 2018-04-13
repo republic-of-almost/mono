@@ -1161,7 +1161,7 @@ volt_renderpass_create(
 
     cmd->id = volt_gl_cmd_id::bind_framebuffer;
     cmd->gl_id = desc && desc->fbo ? desc->fbo->gl_id : 0;
-    
+
     if (desc && desc->fbo && desc->attachment_count)
     {
       unsigned i;
@@ -1267,7 +1267,7 @@ volt_renderpass_bind_texture_buffer(
     {
       pass->sampler_hash[i] = hash_name;
       pass->sampler[i] = texture;
-      
+
       return;
     }
   }

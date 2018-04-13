@@ -15,10 +15,19 @@ extern "C" {
 
 #define VOLT_NULL 0
 
-typedef int VOLT_BOOL;
+typedef int volt_bool;
 
 #define VOLT_TRUE 1
 #define VOLT_FALSE 0
+
+
+struct volt_rect2d
+{
+  int x
+  int y;
+  unsigned width;
+  unsigned height;
+};
 
 
 typedef enum _volt_pixel_format {
@@ -85,7 +94,7 @@ void
 volt_ctx_execute(volt_ctx_t ctx);
 
 
-VOLT_BOOL
+volt_bool
 volt_ctx_has_pending_rsrcs(volt_ctx_t ctx);
 
 
@@ -115,7 +124,7 @@ struct volt_texture_desc
   volt_texture_dimentions dimentions;
   volt_texture_sampling sampling;
   volt_pixel_format format;
-  VOLT_BOOL mip_maps;
+  volt_bool mip_maps;
   volt_access access;
 
   const char *name;
@@ -342,61 +351,62 @@ volt_rasterizer_create(
 
 struct volt_renderpass_desc
 {
-  volt_framebuffer_t fbo;
-  unsigned *attachments;
-  unsigned attachment_count;
-  const char *name;
+  volt_framebuffer_t  fbo;                /* optional - fbo to render to - VOLT_NULL if default backbuffer. */
+  unsigned *          attachments;        /* optional - if fbo bound, and attachments VOLT_NULL then defaults to all color attachments. */
+  unsigned            attachment_count;   /* number of attachments. */
+  const char *        name;               /* optional - if supported used in debugging. */
+  volt_bool           copy_uniform_data;  /* copies uniform into internal buffer. */
 };
 
 
 void
 volt_renderpass_create(
-  volt_ctx_t ctx,
-  volt_renderpass_t *pass,
-  struct volt_renderpass_desc *desc);
+  volt_ctx_t                    ctx,      /* valid volt ctx */
+  volt_renderpass_t *           pass,     /* out pass value */
+  struct volt_renderpass_desc * desc);    /* renderpass desc */
 
 
 void
 volt_renderpass_commit(
-  volt_ctx_t ctx,
-  volt_renderpass_t *pass);
+  volt_ctx_t                    ctx,      /* valid volt ctx */
+  volt_renderpass_t *           pass);    /* renderpass to submit - invalid after submission */
 
 
 void
 volt_renderpass_bind_rasterizer(
-  volt_renderpass_t pass,
-  volt_rasterizer_t rasterizer);
+  volt_renderpass_t             pass,         /* valid renderpass */
+  volt_rasterizer_t             rasterizer);  /* rasterizer object */
 
 
 void
 volt_renderpass_bind_input_format(
-  volt_renderpass_t pass,
-  volt_input_t);
+  volt_renderpass_t             pass,     /* valid renderpass */
+  volt_input_t                  input);   /* valid input format */
 
 
 void
 volt_renderpass_bind_vertex_buffer(
-  volt_renderpass_t pass,
-  volt_vbo_t vbo);
+  volt_renderpass_t             pass,     /* valid renderpass */
+  volt_vbo_t                    vbo);     /* valid vbo */
 
 
 void
 volt_renderpass_bind_index_buffer(
-  volt_renderpass_t pass,
-  volt_ibo_t ibo);
+  volt_renderpass_t             pass,     /* valid renderpass */
+  volt_ibo_t                    ibo);     /* valid ibo */
 
 
 void
 volt_renderpass_bind_texture_buffer(
-  volt_renderpass_t pass,
-  volt_texture_t texture,
-  const char *location);
+  volt_renderpass_t             pass,     /* valid renderpass */
+  volt_texture_t                texture,  /* valid texture */
+  const char *                  location);/* sampler to bind to */
 
 
 void
 volt_renderpass_bind_program(
-  volt_renderpass_t pass,
-  volt_program_t program);
+  volt_renderpass_t             pass,     /* valid renderpass */
+  volt_program_t                program); /* valid program */
 
 
 void
