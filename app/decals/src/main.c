@@ -93,6 +93,8 @@ struct fullscreen_data
 	volt_input_t      input;
 	volt_rasterizer_t rasterizer;
 
+  volt_sampler_t    u_diffuse;
+
 	struct volt_pipeline_desc pipeline_desc;
 	struct volt_draw_desc 		draw_desc;
 } fullscreen;
@@ -373,6 +375,17 @@ main(int argc, char **argv)
 
 			fullscreen.draw_desc = draw_desc;
 		}
+
+    /* sampler */
+    {
+      struct volt_sampler_desc desc;
+      ROA_MEM_ZERO(desc);
+
+      desc.name     = "diffuse";
+      desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+      volt_sampler_create(volt_ctx, &fullscreen.u_diffuse, &desc);
+    }
 	}
 
 
@@ -963,7 +976,7 @@ main(int argc, char **argv)
 
         struct volt_rect2d scissor = { size * i, 0, size, height};
 				volt_renderpass_set_scissor_cmd(final_pass, scissor);
-				volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[i], "diffuse");
+				volt_renderpass_bind_texture_buffer_cmd(final_pass, fullscreen.u_diffuse, g_buffer.fbo_color_outputs[i]);
 
 				volt_renderpass_draw_cmd(final_pass, &fullscreen.draw_desc);
 			}

@@ -479,13 +479,6 @@ volt_renderpass_draw_cmd(
 
 
 void
-volt_renderpass_bind_texture_buffer(
-  volt_renderpass_t             pass,       /* valid renderpass */
-  volt_texture_t                texture,    /* valid texture */
-  const char *                  location);  /* sampler to bind to */
-
-
-void
 volt_renderpass_bind_uniform_data_cmd(
   volt_renderpass_t             pass,       /* valid renderpass */
   volt_uniform_t                uniform,    /* valid uniform */
