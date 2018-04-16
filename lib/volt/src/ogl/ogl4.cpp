@@ -386,9 +386,12 @@ struct volt_framebuffer
 
 struct volt_uniform
 {
+  uint64_t hash_name;
   GLvoid *value;
   GLenum type;
   GLsizei count;
+
+  volt_bool copy_data;
 };
 
 
@@ -911,6 +914,9 @@ volt_uniform_create(
   /* prepare */
   volt_uniform_t new_rsrc = (volt_uniform_t)roa_zalloc(sizeof(*new_rsrc));
 
+  new_rsrc->hash_name = roa_hash(desc->name);
+  new_rsrc->copy_data = desc->copy_data;
+
   *uniform = new_rsrc;
 
   /* submit cmd */
@@ -923,7 +929,6 @@ volt_uniform_create(
     cmd->id = volt_gl_cmd_id::create_uniform;
     cmd->desc = *desc;
     cmd->uniform = *uniform;
-
 
     roa_spin_lock_release(&ctx->rsrc_create_lock);
   }
@@ -1210,6 +1215,49 @@ volt_renderpass_bind_program(
 
 
 void
+volt_renderpass_bind_uniform_data_cmd(
+  volt_renderpass_t pass,
+  volt_uniform_t uniform,
+  void *data)
+{
+  uint64_t hash_name = uniform->hash_name;
+
+  /* check to see if its already bound */
+  const unsigned uniform_slot_count = ROA_ARR_COUNT(pass->uniform_hash);
+  unsigned i;
+
+  for (i = 0; i < uniform_slot_count; ++i)
+  {
+    if (pass->uniform_hash[i] == hash_name)
+    {
+      pass->uniform_hash[i] = hash_name;
+      pass->uniform[i] = uniform;
+      uniform->value = data;
+
+      return;
+    }
+  }
+
+  /* add if not bound */
+  for (i = 0; i < uniform_slot_count; ++i)
+  {
+    if (pass->uniform_hash[i] == 0)
+    {
+      /* bound */
+      pass->uniform_hash[i] = hash_name;
+      pass->uniform[i] = uniform;
+      uniform->value = data;
+
+      return;
+    }
+  }
+
+  /* all slots bound */
+  ROA_ASSERT(false);
+}
+
+
+void
 volt_renderpass_bind_uniform(
   volt_renderpass_t pass,
   volt_uniform_t uniform,
@@ -1251,22 +1299,6 @@ volt_renderpass_bind_uniform(
 
 
 void
-volt_renderpass_set_viewport(
-  volt_renderpass_t pass,
-  int x,
-  int y,
-  unsigned width,
-  unsigned height)
-{
-  ROA_ASSERT(pass);
-
-  volt_rect2d vp{x,y,width,height};
-
-  pass->curr_viewport = vp;
-}
-
-
-void
 volt_renderpass_set_scissor(
   volt_renderpass_t pass,
   int x,
@@ -1282,7 +1314,7 @@ volt_renderpass_set_scissor(
 
 
 void
-volt_renderpass_clear(
+volt_renderpass_clear_cmd(
   volt_renderpass_t pass,
   unsigned volt_clear_flags)
 {
@@ -1953,6 +1985,7 @@ volt_gl_create_uniform(const volt_gl_cmd_create_uniform *cmd)
   cmd->uniform->value = NULL;
   cmd->uniform->type = type;
   cmd->uniform->count = (GLuint)cmd->desc.count;
+  cmd->uniform->copy_data = cmd->desc.copy_data;
 
   GL_ASSERT;
 }

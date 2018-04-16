@@ -13,7 +13,7 @@
 /* ----------------------------------------------------------- [ Systems ] -- */
 
 
-roa_ctx_t                 hw_ctx;     /* windowing */
+roa_ctx_t                 hw_ctx;     /* windowing / input */
 volt_ctx_t                volt_ctx;   /* graphics api */
 
 
@@ -32,6 +32,8 @@ struct g_buffer_data
 	volt_texture_t 			fbo_depth;
 	volt_input_t 				input;
 	volt_rasterizer_t 	rasterizer;
+
+	struct volt_pipeline_desc pipeline_desc;
 } g_buffer;
 
 
@@ -66,9 +68,10 @@ struct scene_data
   roa_transform box_transform[9];
   roa_mat4 box_world[9];
   roa_mat4 box_wvp[9];
+	struct volt_draw_desc draw_desc[9];
 
-  volt_uniform_t box_world_uni[9];
-  volt_uniform_t box_wvp_uni[9];
+  volt_uniform_t box_world_uni;
+  volt_uniform_t box_wvp_uni;
 
   roa_mat4 view_mat;
   roa_mat4 proj_mat;
@@ -85,6 +88,9 @@ struct fullscreen_data
 	volt_vbo_t        triangle;
 	volt_input_t      input;
 	volt_rasterizer_t rasterizer;
+
+	struct volt_pipeline_desc pipeline_desc;
+	struct volt_draw_desc 		draw_desc;
 } fullscreen;
 
 
@@ -152,6 +158,18 @@ main(int argc, char **argv)
       volt_ctx_execute(volt_ctx);
     }
 
+		/* draw desc */
+		{
+			int count = ROA_ARR_COUNT(scene.draw_desc);
+			int i;
+
+			for(i = 0; i < count; ++i)
+			{
+				ROA_MEM_ZERO(scene.draw_desc[i]);
+				scene.draw_desc[i].vbo = scene.vbo;
+			}
+		}
+
     /* box positions */
     {
       roa_transform_init(&scene.box_transform[0]);
@@ -188,37 +206,42 @@ main(int argc, char **argv)
       int i;
       int count = ROA_ARR_COUNT(scene.box_transform);
 
-      for (i = 0; i < count; ++i)
-      {
-        struct volt_uniform_desc wvp_uni_desc;
-        ROA_MEM_ZERO(wvp_uni_desc);
+      struct volt_uniform_desc wvp_uni_desc;
+			{
+	      ROA_MEM_ZERO(wvp_uni_desc);
 
-        wvp_uni_desc.data_type = VOLT_DATA_MAT4;
-        wvp_uni_desc.count = 1;
+				wvp_uni_desc.name 		 = "gWVP";
+	      wvp_uni_desc.data_type = VOLT_DATA_MAT4;
+	      wvp_uni_desc.count 		 = 1;
+				wvp_uni_desc.copy_data = VOLT_FALSE;
 
-        volt_uniform_create(volt_ctx, &scene.box_wvp_uni[i], &wvp_uni_desc);
+	      volt_uniform_create(volt_ctx, &scene.box_wvp_uni, &wvp_uni_desc);
+			}
 
-        struct volt_uniform_desc world_uni_desc;
-        ROA_MEM_ZERO(world_uni_desc);
+      struct volt_uniform_desc world_uni_desc;
+			{
+	      ROA_MEM_ZERO(world_uni_desc);
 
-        world_uni_desc.data_type = VOLT_DATA_MAT4;
-        world_uni_desc.count = 1;
+				world_uni_desc.name 		 = "gWorld";
+	      world_uni_desc.data_type = VOLT_DATA_MAT4;
+	      world_uni_desc.count 		 = 1;
+				world_uni_desc.copy_data = VOLT_FALSE;
 
-        volt_uniform_create(volt_ctx, &scene.box_world_uni[i], &world_uni_desc);
+	      volt_uniform_create(volt_ctx, &scene.box_world_uni, &world_uni_desc);
+			}
 
-        volt_ctx_execute(volt_ctx);
-      }
+      volt_ctx_execute(volt_ctx);
     }
 
     /* projection camera */
     {
-      float aspect = (float)width / (float)height;
-      float fov = ROA_TAU * 0.125f;
+      float aspect 	= (float)width / (float)height;
+      float fov 		= ROA_TAU * 0.125f;
 
       roa_mat4_projection(&scene.proj_mat, fov, 0.1, 100, aspect);
 
-      scene.cam_pitch = 0.f;
-      scene.cam_yaw = 0.f;
+      scene.cam_pitch 	 = 0.f;
+      scene.cam_yaw 		 = 0.f;
       scene.cam_position = roa_float3_one();
     }
   }
@@ -323,9 +346,32 @@ main(int argc, char **argv)
 			volt_rasterizer_create(volt_ctx, &fullscreen.rasterizer, &raster_desc);
 			volt_ctx_execute(volt_ctx);
 		}
+
+		/* pipeline */
+		{
+			struct volt_pipeline_desc pipeline_desc;
+			ROA_MEM_ZERO(pipeline_desc);
+
+			pipeline_desc.viewport 	 = scene.viewport;
+			pipeline_desc.input 		 = fullscreen.input;
+			pipeline_desc.rasterizer = fullscreen.rasterizer;
+			pipeline_desc.program 	 = fullscreen.program;
+
+			fullscreen.pipeline_desc = pipeline_desc;
+		}
+
+		/* draw vbo */
+		{
+			struct volt_draw_desc draw_desc;
+			ROA_MEM_ZERO(draw_desc);
+
+			draw_desc.vbo = fullscreen.triangle;
+
+			fullscreen.draw_desc = draw_desc;
+		}
 	}
 
-  
+
   /* ------------------------------------------------------- [ Dir Light ] -- */
   {
     /* program */
@@ -444,7 +490,7 @@ main(int argc, char **argv)
 
         "return Color / Attenuation;\n"
         "}\n"
-        
+
         "vec2 CalcTexCoord()\n"
         "{\n"
         "return gl_FragCoord.xy / gScreenSize;\n"
@@ -509,24 +555,7 @@ main(int argc, char **argv)
 
     /* uniforms */
     {
-      struct volt_uniform_desc uni_desc;
-      ROA_MEM_ZERO(uni_desc);
 
-      uni_desc.data_type = VOLT_DATA_FLOAT4;
-      uni_desc.count     = 1;
-
-      volt_uniform_create(volt_ctx, &dir_lights.eye_pos_uni, &uni_desc);
-      
-      struct volt_uniform_desc uni_wvp_desc;
-      ROA_MEM_ZERO(uni_wvp_desc);
-
-      uni_wvp_desc.data_type = VOLT_DATA_MAT4;
-      uni_wvp_desc.count = 1;
-
-      volt_uniform_create(volt_ctx, &dir_lights.wvp_uni, &uni_wvp_desc);
-
-
-      volt_ctx_execute(volt_ctx);
     }
 
     /* input format */
@@ -569,7 +598,7 @@ main(int argc, char **argv)
       dir_lights.pipeline_desc.rasterizer = dir_lights.rasterizer;
       dir_lights.pipeline_desc.viewport   = scene.viewport;
     }
-    
+
     /* draw */
     {
       ROA_MEM_ZERO(dir_lights.draw_desc);
@@ -743,6 +772,19 @@ main(int argc, char **argv)
       volt_rasterizer_create(volt_ctx, &g_buffer.rasterizer, &raster_desc);
       volt_ctx_execute(volt_ctx);
     }
+
+		/* pipeline */
+		{
+			struct volt_pipeline_desc pipe_desc;
+			ROA_MEM_ZERO(pipe_desc);
+
+			pipe_desc.program 		= g_buffer.program;
+			pipe_desc.rasterizer 	= g_buffer.rasterizer;
+			pipe_desc.input 			= g_buffer.input;
+			pipe_desc.viewport 		= scene.viewport;
+
+			g_buffer.pipeline_desc = pipe_desc;
+		}
 	}
 
   /* ------------------------------------------------------------ [ Loop ] -- */
@@ -773,7 +815,7 @@ main(int argc, char **argv)
         roa_mat4_lookat(&scene.view_mat, pos, at, up);
 
         scene.cam_position = pos;
-        volt_uniform_update(volt_ctx, dir_lights.eye_pos_uni, &scene.cam_position);
+
         volt_ctx_execute(volt_ctx);
       }
 
@@ -790,16 +832,6 @@ main(int argc, char **argv)
           roa_transform_to_mat4(&scene.box_transform[i], &scene.box_world[i]);
           roa_mat4_multiply(&scene.box_wvp[i], &scene.box_world[i], &view_proj);
 
-          volt_uniform_t world_uni = scene.box_world_uni[i];
-          roa_mat4 *world = &scene.box_world[i];
-          volt_uniform_update(volt_ctx, world_uni, (void*)world->data);
-
-          volt_uniform_t wvp_uni = scene.box_wvp_uni[i];
-          roa_mat4 *wvp = &scene.box_wvp[i];
-          volt_uniform_update(volt_ctx, wvp_uni, (void*)wvp->data);
-
-          volt_uniform_update(volt_ctx, dir_lights.wvp_uni, (void*)view_proj.data);
-
           volt_ctx_execute(volt_ctx);
         }
       }
@@ -815,30 +847,28 @@ main(int argc, char **argv)
 
       volt_renderpass_t g_buffer_pass;
       volt_renderpass_create(volt_ctx, &g_buffer_pass, &rp_desc);
+			volt_renderpass_set_pipeline(g_buffer_pass, &g_buffer.pipeline_desc);
 
-			volt_renderpass_clear(g_buffer_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
-
-      /* setup gbuffer */
-      volt_renderpass_bind_program(g_buffer_pass, g_buffer.program);
-      volt_renderpass_bind_rasterizer(g_buffer_pass, g_buffer.rasterizer);
-      volt_renderpass_bind_input_format(g_buffer_pass, g_buffer.input);
-
-      /* render geometry */
-      volt_renderpass_bind_vertex_buffer(g_buffer_pass, scene.vbo);
-      volt_renderpass_set_viewport(g_buffer_pass, 0, 0, width, height);
+			unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+			volt_renderpass_clear_cmd(g_buffer_pass, clear_flags);
 
       int i;
       int count = ROA_ARR_COUNT(scene.box_world);
 
       for (i = 0; i < count; ++i)
       {
-        volt_uniform_t wvp = scene.box_wvp_uni[i];
-        volt_renderpass_bind_uniform(g_buffer_pass, wvp, "gWVP");
+				/* Uniform world view projection */
+        volt_uniform_t wvp = scene.box_wvp_uni;
+				void *wvp_data = (void*)scene.box_wvp[i].data;
+				volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, wvp, wvp_data);
 
-        volt_uniform_t world = scene.box_world_uni[i];
-        volt_renderpass_bind_uniform(g_buffer_pass, world, "gWorld");
+				/* Uniform world */
+        volt_uniform_t world = scene.box_world_uni;
+				void *world_data = (void*)scene.box_world[i].data;
+				volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, world, world_data);
 
-        volt_renderpass_draw(g_buffer_pass);
+				/* Draw */
+        volt_renderpass_draw_cmd(g_buffer_pass, &scene.draw_desc[i]);
       }
 
       volt_renderpass_commit(volt_ctx, &g_buffer_pass);
@@ -862,23 +892,18 @@ main(int argc, char **argv)
 
 			volt_renderpass_t dir_light_pass;
       volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
-      volt_renderpass_clear(dir_light_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
+			volt_renderpass_set_pipeline(dir_light_pass, &dir_lights.pipeline_desc);
 
-      volt_renderpass_set_pipeline(dir_light_pass, &dir_lights.pipeline_desc);
-      
+			unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+			volt_renderpass_clear_cmd(dir_light_pass, clear_flags);
+
       volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[0], "gPositionMap");
       volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[1], "gColorMap");
       volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[2], "gNormalMap");
 
       volt_renderpass_draw_cmd(dir_light_pass, &dir_lights.draw_desc);
 
-
-      /*volt_renderpass_bind_vertex_buffer(dir_light_pass, dir_lights.triangle);*/
-      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.eye_pos_uni, "");*/
-      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.wvp_uni, "gWVP");*/
-      
-      /*volt_renderpass_draw(dir_light_pass);*/
-      volt_renderpass_commit(volt_ctx, &dir_light_pass);
+			volt_renderpass_commit(volt_ctx, &dir_light_pass);
 		}
 
 		/* ---------------------------------------------- [ Final Renderpass ] -- */
@@ -887,11 +912,7 @@ main(int argc, char **argv)
       ROA_MEM_ZERO(final_pass);
 
 			volt_renderpass_create(volt_ctx, &final_pass, 0);
-      volt_renderpass_set_viewport(final_pass, 0, 0, width, height);
-			volt_renderpass_bind_program(final_pass, fullscreen.program);
-			volt_renderpass_bind_rasterizer(final_pass, fullscreen.rasterizer);
-			volt_renderpass_bind_input_format(final_pass, fullscreen.input);
-			volt_renderpass_bind_vertex_buffer(final_pass, fullscreen.triangle);
+			volt_renderpass_set_pipeline(final_pass, &fullscreen.pipeline_desc);
 
 			int count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
 			int i;
@@ -900,11 +921,12 @@ main(int argc, char **argv)
 			/* each color buffer */
 			for(i = 0; i < count; ++i)
 			{
-        volt_renderpass_clear(final_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
+				unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+        volt_renderpass_clear_cmd(final_pass, clear_flags);
 				volt_renderpass_set_scissor(final_pass, size * i, 0, size, height);
 				volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[i], "diffuse");
 
-				volt_renderpass_draw(final_pass);
+				volt_renderpass_draw_cmd(final_pass, &fullscreen.draw_desc);
 			}
 
 			volt_renderpass_commit(volt_ctx, &final_pass);

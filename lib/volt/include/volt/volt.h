@@ -291,7 +291,9 @@ typedef enum _volt_data_type {
 
 struct volt_uniform_desc
 {
+  const char *name;
   volt_data_type data_type;
+  volt_bool copy_data;
   unsigned count;
 };
 
@@ -360,7 +362,7 @@ struct volt_renderpass_desc
 
 struct volt_pipeline_desc
 {
-  struct volt_rect2d       viewport;
+  struct volt_rect2d  viewport;
   volt_program_t      program;
   volt_rasterizer_t   rasterizer;
   volt_input_t        input;
@@ -400,56 +402,17 @@ volt_renderpass_draw_cmd(
 
 
 void
-volt_renderpass_bind_rasterizer(
-  volt_renderpass_t             pass,         /* valid renderpass */
-  volt_rasterizer_t             rasterizer);  /* rasterizer object */
-
-
-void
-volt_renderpass_bind_input_format(
-  volt_renderpass_t             pass,     /* valid renderpass */
-  volt_input_t                  input);   /* valid input format */
-
-
-void
-volt_renderpass_bind_vertex_buffer(
-  volt_renderpass_t             pass,     /* valid renderpass */
-  volt_vbo_t                    vbo);     /* valid vbo */
-
-
-void
-volt_renderpass_bind_index_buffer(
-  volt_renderpass_t             pass,     /* valid renderpass */
-  volt_ibo_t                    ibo);     /* valid ibo */
-
-
-void
 volt_renderpass_bind_texture_buffer(
-  volt_renderpass_t             pass,     /* valid renderpass */
-  volt_texture_t                texture,  /* valid texture */
-  const char *                  location);/* sampler to bind to */
+  volt_renderpass_t             pass,       /* valid renderpass */
+  volt_texture_t                texture,    /* valid texture */
+  const char *                  location);  /* sampler to bind to */
 
 
 void
-volt_renderpass_bind_program(
-  volt_renderpass_t             pass,     /* valid renderpass */
-  volt_program_t                program); /* valid program */
-
-
-void
-volt_renderpass_bind_uniform(
-  volt_renderpass_t pass,
-  volt_uniform_t uniform,
-  const char *location);
-
-
-void
-volt_renderpass_set_viewport(
-  volt_renderpass_t pass,
-  int x,
-  int y,
-  unsigned width,
-  unsigned height);
+volt_renderpass_bind_uniform_data_cmd(
+  volt_renderpass_t             pass,       /* valid renderpass */
+  volt_uniform_t                uniform,    /* valid uniform */
+  void *                        data);      /* ptr to the data */
 
 
 void
@@ -462,7 +425,7 @@ volt_renderpass_set_scissor(
 
 
 void
-volt_renderpass_clear(
+volt_renderpass_clear_cmd(
   volt_renderpass_t pass,
   unsigned volt_clear_flags);
 
