@@ -395,6 +395,14 @@ struct volt_uniform
 };
 
 
+struct volt_sampler
+{
+  uint64_t hash_name;
+
+  GLenum sampling;
+};
+
+
 struct volt_vbo
 {
   GLuint gl_id;
@@ -947,6 +955,31 @@ volt_uniform_update(
 }
 
 
+
+/* ----------------------------------------------------- [ rsrc sampler ] -- */
+
+
+void
+volt_sampler_create(
+  volt_ctx_t ctx,
+  volt_sampler_t *sampler,
+  struct volt_sampler_desc *desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(sampler);
+  ROA_ASSERT(desc);
+
+  /* prepare */
+  volt_sampler_t new_rsrc = (volt_sampler_t)roa_zalloc(sizeof(*new_rsrc));
+  new_rsrc->hash_name     = roa_hash(desc->name);
+  new_rsrc->sampling      = desc->sampling; /* not gl */
+
+  /* assign return */
+  *sampler = new_rsrc;
+}
+
+
 /* -------------------------------------------------- [ rsrc rasterizer ] -- */
 
 
@@ -1108,7 +1141,220 @@ volt_renderpass_draw_cmd(
     }
   }
 
-  volt_renderpass_draw(pass);
+  volt_gl_stream *stream = pass->render_stream;
+
+  /* viewport */
+  {
+    volt_gl_cmd_set_viewport *cmd = (volt_gl_cmd_set_viewport*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::set_viewport;
+    cmd->x = pass->curr_viewport.x;
+    cmd->y = pass->curr_viewport.y;
+    cmd->width = pass->curr_viewport.width;
+    cmd->height = pass->curr_viewport.height;
+  }
+
+  /* scissor */
+  {
+    if (pass->curr_scissor.width > 0)
+    {
+      volt_gl_cmd_set_scissor *cmd = (volt_gl_cmd_set_scissor*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+      cmd->id = volt_gl_cmd_id::set_scissor;
+      cmd->x = pass->curr_scissor.x;
+      cmd->y = pass->curr_scissor.y;
+      cmd->width = pass->curr_scissor.width;
+      cmd->height = pass->curr_scissor.height;
+    }
+  }
+
+  /* clear */
+  {
+    if (pass->curr_clear)
+    {
+      volt_gl_cmd_clear *cmd = (volt_gl_cmd_clear*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+      cmd->id = volt_gl_cmd_id::clear;
+      cmd->mask = convert_volt_clear_to_gl_flag(pass->curr_clear);
+      pass->curr_clear = 0;
+    }
+  }
+
+  if (pass->curr_program != pass->last_bound_program)
+  {
+    /* prepare */
+    const GLuint program = pass->curr_program ? pass->curr_program->gl_id : 0;
+
+    /* cmd */
+    volt_gl_cmd_bind_program *cmd = (volt_gl_cmd_bind_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_program;
+    cmd->program = program;
+
+    pass->last_bound_program = pass->curr_program;
+  }
+
+  /* bind any changes that are required */
+  if (pass->curr_vbo != pass->last_bound_vbo)
+  {
+    /* cmd */
+    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
+
+    /* prepare */
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_bind_vbo *cmd = (volt_gl_cmd_bind_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_vbo;
+    cmd->vbo = vbo;
+
+    pass->last_bound_vbo = pass->curr_vbo;
+  }
+
+  if (pass->curr_ibo != pass->last_bound_ibo)
+  {
+    /* prepare */
+    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
+
+    /* cmd */
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_bind_ibo *cmd = (volt_gl_cmd_bind_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::bind_ibo;
+    cmd->ibo = ibo;
+
+    pass->last_bound_ibo = pass->curr_ibo;
+  }
+
+  if (pass->curr_input != pass->last_bound_input)
+  {
+    if (pass->curr_input)
+    {
+      int input_count = pass->curr_input->count;
+
+      for (int i = 0; i < input_count; ++i)
+      {
+        /* prepare */
+        GLuint index = i;
+        GLint size = pass->curr_input->attrib_count[i];
+        GLenum type = pass->curr_input->type[i];
+        GLboolean normalized = pass->curr_input->normalized[i];
+        GLsizei stride = pass->curr_input->byte_stride;
+        GLuint pointer = pass->curr_input->increment_stride[i];
+
+        /* cmd */
+        volt_gl_stream *stream = pass->render_stream;
+        volt_gl_cmd_bind_input *cmd = (volt_gl_cmd_bind_input*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+        cmd->id = volt_gl_cmd_id::bind_input;
+        cmd->index = index;
+        cmd->size = size;
+        cmd->type = type;
+        cmd->normalized = normalized;
+        cmd->stride = stride;
+        cmd->pointer = pointer;
+      }
+    }
+
+    pass->last_bound_input = pass->curr_input;
+  }
+
+  if (pass->curr_rasterizer != pass->last_bound_rasterizer)
+  {
+
+  }
+
+  /* textures */
+  {
+    /* todo! don't rebind textures */
+
+    /* check to see if textures have been bound */
+    unsigned sampler_count = pass->curr_program->sampler_count;
+    GLint active_textures = 0;
+
+    for (unsigned i = 0; i < sampler_count; ++i)
+    {
+      const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
+
+      /* check bound textures */
+      for (unsigned j = 0; j < ROA_ARR_COUNT(pass->sampler_hash); ++j)
+      {
+        const uint64_t bound_sampler_hash = pass->sampler_hash[j];
+
+        if (bound_sampler_hash == prog_sampler_hash)
+        {
+          /* bind texture */
+          volt_gl_stream *stream = pass->render_stream;
+          volt_gl_cmd_bind_texture *cmd = (volt_gl_cmd_bind_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+          cmd->id = volt_gl_cmd_id::bind_texture;
+          cmd->gl_id = pass->sampler[j]->gl_id;
+          cmd->active_texture = active_textures;
+          cmd->sampler_location = pass->curr_program->samplers[i].location;
+
+          active_textures += 1;
+        }
+      }
+    }
+  }
+
+  /* uniforms */
+  {
+    /* todo! don't rebind uniforms */
+
+    /* check to see if uniforms have been bound */
+    unsigned uniform_count = pass->curr_program->uniform_count;
+
+    for (unsigned i = 0; i < uniform_count; ++i)
+    {
+      const uint64_t prog_uniform_hash = pass->curr_program->uniform_keys[i];
+
+      /* check bound uniforms */
+      for (unsigned j = 0; j < ROA_ARR_COUNT(pass->uniform_hash); ++j)
+      {
+        const uint64_t bound_hash = pass->uniform_hash[j];
+
+        if (bound_hash == prog_uniform_hash)
+        {
+          /* bind uniform */
+          volt_gl_stream *stream = pass->render_stream;
+          volt_gl_cmd_bind_uniform *cmd = (volt_gl_cmd_bind_uniform*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+          /* must check types */
+          cmd->id = volt_gl_cmd_id::bind_uniform;
+          cmd->location = pass->curr_program->uniforms[i].location;
+          cmd->value = pass->uniform[j]->value;
+          cmd->type = pass->uniform[j]->type;
+          cmd->count = pass->uniform[j]->count;
+        }
+      }
+    }
+  }
+
+  /* cmd */
+  if (pass->curr_ibo == ROA_NULL)
+  {
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_draw_count *cmd = (volt_gl_cmd_draw_count*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    const GLuint stride = pass->curr_input->element_stride;
+    const GLuint ele_count = pass->curr_vbo->element_count;
+    const GLuint count = ele_count / stride;
+
+    cmd->id = volt_gl_cmd_id::draw_count;
+    cmd->first = 0;
+    cmd->count = count;
+    cmd->mode = GL_TRIANGLES;
+  }
+  else
+  {
+    volt_gl_stream *stream = pass->render_stream;
+    volt_gl_cmd_draw_indexed *cmd = (volt_gl_cmd_draw_indexed*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+
+    cmd->id = volt_gl_cmd_id::draw_indexed;
+    cmd->count = pass->curr_ibo->element_count;
+    cmd->type = GL_UNSIGNED_INT;
+    cmd->mode = GL_TRIANGLES;
+  }
 }
 
 
@@ -1133,6 +1379,47 @@ volt_renderpass_bind_input_format(
   {
     pass->curr_input = input;
   }
+}
+
+
+void
+volt_renderpass_bind_texture_buffer_cmd(
+  volt_renderpass_t pass,
+  volt_sampler_t sampler,
+  volt_texture_t texture)
+{
+  const uint64_t hash_name = sampler->hash_name;
+
+  /* check to see if its already bound */
+  const unsigned sampler_slot_count = ROA_ARR_COUNT(pass->sampler_hash);
+  unsigned i;
+
+  for (i = 0; i < sampler_slot_count; ++i)
+  {
+    if (pass->sampler_hash[i] == hash_name)
+    {
+      pass->sampler_hash[i] = hash_name;
+      pass->sampler[i] = texture;
+
+      return;
+    }
+  }
+
+  /* add if not bound */
+  for (unsigned i = 0; i < sampler_slot_count; ++i)
+  {
+    if (pass->sampler_hash[i] == 0)
+    {
+      /* bound */
+      pass->sampler_hash[i] = hash_name;
+      pass->sampler[i] = texture;
+
+      return;
+    }
+  }
+
+  /* all slots bound */
+  ROA_ASSERT(false);
 }
 
 
@@ -1299,17 +1586,13 @@ volt_renderpass_bind_uniform(
 
 
 void
-volt_renderpass_set_scissor(
+volt_renderpass_set_scissor_cmd(
   volt_renderpass_t pass,
-  int x,
-  int y,
-  unsigned width,
-  unsigned height)
+  volt_rect2d scissor)
 {
   ROA_ASSERT(pass);
 
-  volt_rect2d vp{x, y, width, height};
-  pass->curr_scissor = vp;
+  pass->curr_scissor = scissor;
 }
 
 
@@ -1321,229 +1604,6 @@ volt_renderpass_clear_cmd(
   ROA_ASSERT(pass);
 
   pass->curr_clear = volt_clear_flags;
-}
-
-
-void
-volt_renderpass_draw(volt_renderpass_t pass)
-{
-  /* param */
-  ROA_ASSERT(pass);
-
-  volt_gl_stream *stream = pass->render_stream;
-
-  /* viewport */
-  {
-    volt_gl_cmd_set_viewport *cmd = (volt_gl_cmd_set_viewport*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::set_viewport;
-    cmd->x = pass->curr_viewport.x;
-    cmd->y = pass->curr_viewport.y;
-    cmd->width = pass->curr_viewport.width;
-    cmd->height = pass->curr_viewport.height;
-  }
-
-  /* scissor */
-  {
-    if(pass->curr_scissor.width > 0)
-    {
-      volt_gl_cmd_set_scissor *cmd = (volt_gl_cmd_set_scissor*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-      cmd->id = volt_gl_cmd_id::set_scissor;
-      cmd->x = pass->curr_scissor.x;
-      cmd->y = pass->curr_scissor.y;
-      cmd->width = pass->curr_scissor.width;
-      cmd->height = pass->curr_scissor.height;
-    }
-  }
-
-  /* clear */
-  {
-    if(pass->curr_clear)
-    {
-      volt_gl_cmd_clear *cmd = (volt_gl_cmd_clear*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-      cmd->id = volt_gl_cmd_id::clear;
-      cmd->mask = convert_volt_clear_to_gl_flag(pass->curr_clear);
-      pass->curr_clear = 0;
-    }
-  }
-
-  if (pass->curr_program != pass->last_bound_program)
-  {
-    /* prepare */
-    const GLuint program = pass->curr_program ? pass->curr_program->gl_id : 0;
-
-    /* cmd */
-    volt_gl_cmd_bind_program *cmd = (volt_gl_cmd_bind_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::bind_program;
-    cmd->program = program;
-
-    pass->last_bound_program = pass->curr_program;
-  }
-
-  /* bind any changes that are required */
-  if (pass->curr_vbo != pass->last_bound_vbo)
-  {
-    /* cmd */
-    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
-
-    /* prepare */
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_bind_vbo *cmd = (volt_gl_cmd_bind_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::bind_vbo;
-    cmd->vbo = vbo;
-
-    pass->last_bound_vbo = pass->curr_vbo;
-  }
-
-  if (pass->curr_ibo != pass->last_bound_ibo)
-  {
-    /* prepare */
-    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
-
-    /* cmd */
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_bind_ibo *cmd = (volt_gl_cmd_bind_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::bind_ibo;
-    cmd->ibo = ibo;
-
-    pass->last_bound_ibo = pass->curr_ibo;
-  }
-
-  if (pass->curr_input != pass->last_bound_input)
-  {
-    if (pass->curr_input)
-    {
-      int input_count = pass->curr_input->count;
-
-      for (int i = 0; i < input_count; ++i)
-      {
-        /* prepare */
-        GLuint index          = i;
-        GLint size            = pass->curr_input->attrib_count[i];
-        GLenum type           = pass->curr_input->type[i];
-        GLboolean normalized  = pass->curr_input->normalized[i];
-        GLsizei stride        = pass->curr_input->byte_stride;
-        GLuint pointer        = pass->curr_input->increment_stride[i];
-
-        /* cmd */
-        volt_gl_stream *stream = pass->render_stream;
-        volt_gl_cmd_bind_input *cmd = (volt_gl_cmd_bind_input*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-        cmd->id = volt_gl_cmd_id::bind_input;
-        cmd->index      = index;
-        cmd->size       = size;
-        cmd->type       = type;
-        cmd->normalized = normalized;
-        cmd->stride     = stride;
-        cmd->pointer    = pointer;
-      }
-    }
-
-    pass->last_bound_input = pass->curr_input;
-  }
-
-  if (pass->curr_rasterizer != pass->last_bound_rasterizer)
-  {
-
-  }
-
-  /* textures */
-  {
-    /* todo! don't rebind textures */
-
-    /* check to see if textures have been bound */
-    unsigned sampler_count = pass->curr_program->sampler_count;
-    GLint active_textures = 0;
-
-    for(unsigned i = 0; i < sampler_count; ++i)
-    {
-      const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
-
-      /* check bound textures */
-      for (unsigned j = 0; j < ROA_ARR_COUNT(pass->sampler_hash); ++j)
-      {
-        const uint64_t bound_sampler_hash = pass->sampler_hash[j];
-
-        if (bound_sampler_hash == prog_sampler_hash)
-        {
-          /* bind texture */
-          volt_gl_stream *stream = pass->render_stream;
-          volt_gl_cmd_bind_texture *cmd = (volt_gl_cmd_bind_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-          cmd->id = volt_gl_cmd_id::bind_texture;
-          cmd->gl_id = pass->sampler[j]->gl_id;
-          cmd->active_texture = active_textures;
-          cmd->sampler_location = pass->curr_program->samplers[i].location;
-
-          active_textures += 1;
-        }
-      }
-    }
-  }
-
-  /* uniforms */
-  {
-    /* todo! don't rebind uniforms */
-
-    /* check to see if uniforms have been bound */
-    unsigned uniform_count = pass->curr_program->uniform_count;
-
-    for (unsigned i = 0; i < uniform_count; ++i)
-    {
-      const uint64_t prog_uniform_hash = pass->curr_program->uniform_keys[i];
-
-      /* check bound uniforms */
-      for (unsigned j = 0; j < ROA_ARR_COUNT(pass->uniform_hash); ++j)
-      {
-        const uint64_t bound_hash = pass->uniform_hash[j];
-
-        if (bound_hash == prog_uniform_hash)
-        {
-          /* bind uniform */
-          volt_gl_stream *stream = pass->render_stream;
-          volt_gl_cmd_bind_uniform *cmd = (volt_gl_cmd_bind_uniform*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-          /* must check types */
-          cmd->id         = volt_gl_cmd_id::bind_uniform;
-          cmd->location   = pass->curr_program->uniforms[i].location;
-          cmd->value      = pass->uniform[j]->value;
-          cmd->type       = pass->uniform[j]->type;
-          cmd->count      = pass->uniform[j]->count;
-        }
-      }
-    }
-  }
-
-  /* cmd */
-  if(pass->curr_ibo == ROA_NULL)
-  {
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_draw_count *cmd = (volt_gl_cmd_draw_count*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    const GLuint stride     = pass->curr_input->element_stride;
-    const GLuint ele_count  = pass->curr_vbo->element_count;
-    const GLuint count      = ele_count / stride;
-
-    cmd->id     = volt_gl_cmd_id::draw_count;
-    cmd->first  = 0;
-    cmd->count  = count;
-    cmd->mode   = GL_TRIANGLES;
-  }
-  else
-  {
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_draw_indexed *cmd = (volt_gl_cmd_draw_indexed*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id     = volt_gl_cmd_id::draw_indexed;
-    cmd->count  = pass->curr_ibo->element_count;
-    cmd->type   = GL_UNSIGNED_INT;
-    cmd->mode   = GL_TRIANGLES;
-  }
 }
 
 

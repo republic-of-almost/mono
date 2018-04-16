@@ -54,6 +54,10 @@ struct direction_light_data
   volt_uniform_t    eye_pos_uni;
   volt_uniform_t    wvp_uni;
 
+  volt_sampler_t    u_color;
+  volt_sampler_t    u_position;
+  volt_sampler_t    u_normal;
+
   struct volt_pipeline_desc pipeline_desc;
   struct volt_draw_desc     draw_desc;
 
@@ -558,6 +562,39 @@ main(int argc, char **argv)
 
     }
 
+    /* samplers */
+    {
+      {
+        struct volt_sampler_desc sampler_desc;
+        ROA_MEM_ZERO(sampler_desc);
+
+        sampler_desc.name     = "gColorMap";
+        sampler_desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+        volt_sampler_create(volt_ctx, &dir_lights.u_color, &sampler_desc);
+      }
+
+      {
+        struct volt_sampler_desc sampler_desc;
+        ROA_MEM_ZERO(sampler_desc);
+
+        sampler_desc.name = "gNormalMap";
+        sampler_desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+        volt_sampler_create(volt_ctx, &dir_lights.u_normal, &sampler_desc);
+      }
+
+      {
+        struct volt_sampler_desc sampler_desc;
+        ROA_MEM_ZERO(sampler_desc);
+
+        sampler_desc.name = "gPositionMap";
+        sampler_desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+        volt_sampler_create(volt_ctx, &dir_lights.u_position, &sampler_desc);
+      }
+    }
+
     /* input format */
     {
       volt_input_attribute attrs[] = {
@@ -897,9 +934,9 @@ main(int argc, char **argv)
 			unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
 			volt_renderpass_clear_cmd(dir_light_pass, clear_flags);
 
-      volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[0], "gPositionMap");
-      volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[1], "gColorMap");
-      volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[2], "gNormalMap");
+      volt_renderpass_bind_texture_buffer_cmd(dir_light_pass, dir_lights.u_position, g_buffer.fbo_color_outputs[0]);
+      volt_renderpass_bind_texture_buffer_cmd(dir_light_pass, dir_lights.u_color, g_buffer.fbo_color_outputs[1]);
+      volt_renderpass_bind_texture_buffer_cmd(dir_light_pass, dir_lights.u_normal, g_buffer.fbo_color_outputs[2]);
 
       volt_renderpass_draw_cmd(dir_light_pass, &dir_lights.draw_desc);
 
@@ -923,7 +960,9 @@ main(int argc, char **argv)
 			{
 				unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
         volt_renderpass_clear_cmd(final_pass, clear_flags);
-				volt_renderpass_set_scissor(final_pass, size * i, 0, size, height);
+
+        struct volt_rect2d scissor = { size * i, 0, size, height};
+				volt_renderpass_set_scissor_cmd(final_pass, scissor);
 				volt_renderpass_bind_texture_buffer(final_pass, g_buffer.fbo_color_outputs[i], "diffuse");
 
 				volt_renderpass_draw_cmd(final_pass, &fullscreen.draw_desc);
