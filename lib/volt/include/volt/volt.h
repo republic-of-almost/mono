@@ -23,7 +23,7 @@ typedef int volt_bool;
 
 struct volt_rect2d
 {
-  int x
+  int x;
   int y;
   unsigned width;
   unsigned height;
@@ -355,7 +355,22 @@ struct volt_renderpass_desc
   unsigned *          attachments;        /* optional - if fbo bound, and attachments VOLT_NULL then defaults to all color attachments. */
   unsigned            attachment_count;   /* number of attachments. */
   const char *        name;               /* optional - if supported used in debugging. */
-  volt_bool           copy_uniform_data;  /* copies uniform into internal buffer. */
+};
+
+
+struct volt_pipeline_desc
+{
+  struct volt_rect2d       viewport;
+  volt_program_t      program;
+  volt_rasterizer_t   rasterizer;
+  volt_input_t        input;
+};
+
+
+struct volt_draw_desc
+{
+  volt_vbo_t          vbo;
+  volt_ibo_t          ibo;
 };
 
 
@@ -370,6 +385,18 @@ void
 volt_renderpass_commit(
   volt_ctx_t                    ctx,      /* valid volt ctx */
   volt_renderpass_t *           pass);    /* renderpass to submit - invalid after submission */
+
+
+void
+volt_renderpass_set_pipeline(
+  volt_renderpass_t             pass,       /* valid renderpass */
+  struct volt_pipeline_desc *   pipeline);  /* pipeline desc */
+
+
+void
+volt_renderpass_draw_cmd(
+  volt_renderpass_t             pass,       /* valid renderpass */
+  struct volt_draw_desc *       draw);      /* draw desc */
 
 
 void

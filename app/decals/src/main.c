@@ -51,11 +51,17 @@ struct direction_light_data
   volt_input_t      input;
   volt_uniform_t    eye_pos_uni;
   volt_uniform_t    wvp_uni;
+
+  struct volt_pipeline_desc pipeline_desc;
+  struct volt_draw_desc     draw_desc;
+
 } dir_lights;
 
 
 struct scene_data
 {
+  struct volt_rect2d viewport;
+
 	volt_vbo_t vbo;
   roa_transform box_transform[9];
   roa_mat4 box_world[9];
@@ -114,6 +120,109 @@ main(int argc, char **argv)
     volt_ctx_create(&volt_ctx);
     volt_ctx_logging_callback(volt_ctx, volt_cb);
   }
+
+  /* ----------------------------------------------------------- [ Scene ] -- */
+  {
+    struct volt_rect2d vp = {0,0,width, height};
+    scene.viewport = vp;
+
+    /* load vbo */
+    {
+      geom_vert_desc desc[] = {
+        GEOM_VERT_POSITION,
+        GEOM_UV,
+        GEOM_NORMAL,
+      };
+
+      unsigned vert_count;
+
+      geometry_generate_cube(desc, 3, 1, 1, 1, ROA_NULL, &vert_count);
+
+      float *data = malloc(sizeof(float) * vert_count);
+
+      geometry_generate_cube(desc, 3, 1, 1, 1, data, &vert_count);
+
+      struct volt_vbo_desc vbo_desc;
+      ROA_MEM_ZERO(vbo_desc);
+
+      vbo_desc.data = data;
+      vbo_desc.count = vert_count;
+
+      volt_vertex_buffer_create(volt_ctx, &scene.vbo, &vbo_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* box positions */
+    {
+      roa_transform_init(&scene.box_transform[0]);
+      scene.box_transform[0].position = roa_float3_set_with_values(+2.f, 0.f, +2.f);
+
+      roa_transform_init(&scene.box_transform[1]);
+      scene.box_transform[1].position = roa_float3_set_with_values(+2.f, 0.f, -2.f);
+
+      roa_transform_init(&scene.box_transform[2]);
+      scene.box_transform[2].position = roa_float3_set_with_values(-2.f, 0.f, +2.f);
+
+      roa_transform_init(&scene.box_transform[3]);
+      scene.box_transform[3].position = roa_float3_set_with_values(-2.f, 0.f, -2.f);
+
+
+      roa_transform_init(&scene.box_transform[4]);
+      scene.box_transform[4].position = roa_float3_set_with_values(+2.f, 3.f, +2.f);
+
+      roa_transform_init(&scene.box_transform[5]);
+      scene.box_transform[5].position = roa_float3_set_with_values(+2.f, 3.f, -2.f);
+
+      roa_transform_init(&scene.box_transform[6]);
+      scene.box_transform[6].position = roa_float3_set_with_values(-2.f, 3.f, +2.f);
+
+      roa_transform_init(&scene.box_transform[7]);
+      scene.box_transform[7].position = roa_float3_set_with_values(-2.f, 3.f, -2.f);
+
+      roa_transform_init(&scene.box_transform[8]);
+      scene.box_transform[8].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
+    }
+
+    /* uniforms */
+    {
+      int i;
+      int count = ROA_ARR_COUNT(scene.box_transform);
+
+      for (i = 0; i < count; ++i)
+      {
+        struct volt_uniform_desc wvp_uni_desc;
+        ROA_MEM_ZERO(wvp_uni_desc);
+
+        wvp_uni_desc.data_type = VOLT_DATA_MAT4;
+        wvp_uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &scene.box_wvp_uni[i], &wvp_uni_desc);
+
+        struct volt_uniform_desc world_uni_desc;
+        ROA_MEM_ZERO(world_uni_desc);
+
+        world_uni_desc.data_type = VOLT_DATA_MAT4;
+        world_uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &scene.box_world_uni[i], &world_uni_desc);
+
+        volt_ctx_execute(volt_ctx);
+      }
+    }
+
+    /* projection camera */
+    {
+      float aspect = (float)width / (float)height;
+      float fov = ROA_TAU * 0.125f;
+
+      roa_mat4_projection(&scene.proj_mat, fov, 0.1, 100, aspect);
+
+      scene.cam_pitch = 0.f;
+      scene.cam_yaw = 0.f;
+      scene.cam_position = roa_float3_one();
+    }
+  }
+
 	/* ------------------------------------------------------ [ Fullscreen ] -- */
 	{
 		/* program */
@@ -216,105 +325,6 @@ main(int argc, char **argv)
 		}
 	}
 
-
-  /* ----------------------------------------------------------- [ Scene ] -- */
-  {
-    /* load vbo */
-    {
-      geom_vert_desc desc[] = {
-        GEOM_VERT_POSITION,
-        GEOM_UV,
-        GEOM_NORMAL,
-      };
-
-      unsigned vert_count;
-
-      geometry_generate_cube(desc, 3, 1, 1, 1, ROA_NULL, &vert_count);
-
-      float *data = malloc(sizeof(float) * vert_count);
-
-      geometry_generate_cube(desc, 3, 1, 1, 1, data, &vert_count);
-
-      struct volt_vbo_desc vbo_desc;
-      ROA_MEM_ZERO(vbo_desc);
-
-      vbo_desc.data   = data;
-      vbo_desc.count  = vert_count;
-
-      volt_vertex_buffer_create(volt_ctx, &scene.vbo, &vbo_desc);
-      volt_ctx_execute(volt_ctx);
-    }
-
-    /* box positions */
-    {
-      roa_transform_init(&scene.box_transform[0]);
-      scene.box_transform[0].position = roa_float3_set_with_values(+2.f, 0.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[1]);
-      scene.box_transform[1].position = roa_float3_set_with_values(+2.f, 0.f, -2.f);
-
-      roa_transform_init(&scene.box_transform[2]);
-      scene.box_transform[2].position = roa_float3_set_with_values(-2.f, 0.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[3]);
-      scene.box_transform[3].position = roa_float3_set_with_values(-2.f, 0.f, -2.f);
-
-
-      roa_transform_init(&scene.box_transform[4]);
-      scene.box_transform[4].position = roa_float3_set_with_values(+2.f, 3.f, +2.f);
-
-			roa_transform_init(&scene.box_transform[5]);
-      scene.box_transform[5].position = roa_float3_set_with_values(+2.f, 3.f, -2.f);
-
-      roa_transform_init(&scene.box_transform[6]);
-      scene.box_transform[6].position = roa_float3_set_with_values(-2.f, 3.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[7]);
-      scene.box_transform[7].position = roa_float3_set_with_values(-2.f, 3.f, -2.f);
-
-			roa_transform_init(&scene.box_transform[8]);
-      scene.box_transform[8].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
-    }
-
-    /* uniforms */
-    {
-      int i;
-      int count = ROA_ARR_COUNT(scene.box_transform);
-
-      for(i = 0; i < count; ++i)
-      {
-        struct volt_uniform_desc wvp_uni_desc;
-        ROA_MEM_ZERO(wvp_uni_desc);
-
-        wvp_uni_desc.data_type = VOLT_DATA_MAT4;
-        wvp_uni_desc.count = 1;
-
-        volt_uniform_create(volt_ctx, &scene.box_wvp_uni[i], &wvp_uni_desc);
-
-        struct volt_uniform_desc world_uni_desc;
-        ROA_MEM_ZERO(world_uni_desc);
-
-        world_uni_desc.data_type = VOLT_DATA_MAT4;
-        world_uni_desc.count = 1;
-
-        volt_uniform_create(volt_ctx, &scene.box_world_uni[i], &world_uni_desc);
-
-        volt_ctx_execute(volt_ctx);
-      }
-    }
-
-    /* projection camera */
-    {
-      float aspect = (float)width / (float)height;
-      float fov = ROA_TAU * 0.125f;
-
-      roa_mat4_projection(&scene.proj_mat, fov, 0.1, 100, aspect);
-
-      scene.cam_pitch    = 0.f;
-      scene.cam_yaw      = 0.f;
-      scene.cam_position = roa_float3_one();
-    }
-  }
   
   /* ------------------------------------------------------- [ Dir Light ] -- */
   {
@@ -548,6 +558,23 @@ main(int argc, char **argv)
 
       volt_rasterizer_create(volt_ctx, &dir_lights.rasterizer, &raster_desc);
       volt_ctx_execute(volt_ctx);
+    }
+
+    /* pipeline */
+    {
+      ROA_MEM_ZERO(dir_lights.pipeline_desc);
+
+      dir_lights.pipeline_desc.program    = dir_lights.program;
+      dir_lights.pipeline_desc.input      = dir_lights.input;
+      dir_lights.pipeline_desc.rasterizer = dir_lights.rasterizer;
+      dir_lights.pipeline_desc.viewport   = scene.viewport;
+    }
+    
+    /* draw */
+    {
+      ROA_MEM_ZERO(dir_lights.draw_desc);
+
+      dir_lights.draw_desc.vbo = dir_lights.triangle;
     }
   }
 
@@ -824,26 +851,33 @@ main(int argc, char **argv)
       };
 
       struct volt_renderpass_desc rp_desc;
-      ROA_MEM_ZERO(rp_desc);
+      {
+        ROA_MEM_ZERO(rp_desc);
 
-      rp_desc.fbo = g_buffer.fbo;
-      rp_desc.attachments = ROA_ARR_DATA(attachments);
-      rp_desc.attachment_count = ROA_ARR_COUNT(attachments);
-      rp_desc.name = "Dir Light Pass";
+        rp_desc.fbo               = g_buffer.fbo;
+        rp_desc.attachments       = ROA_ARR_DATA(attachments);
+        rp_desc.attachment_count  = ROA_ARR_COUNT(attachments);
+        rp_desc.name              = "Dir Light Pass";
+      }
 
 			volt_renderpass_t dir_light_pass;
       volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
       volt_renderpass_clear(dir_light_pass, VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH);
-      volt_renderpass_bind_program(dir_light_pass, dir_lights.program);
-      volt_renderpass_bind_input_format(dir_light_pass, dir_lights.input);
-      volt_renderpass_set_viewport(dir_light_pass, 0, 0, width, height);
-      volt_renderpass_bind_vertex_buffer(dir_light_pass, dir_lights.triangle);
-      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.eye_pos_uni, "");*/
-      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.wvp_uni, "gWVP");*/
+
+      volt_renderpass_set_pipeline(dir_light_pass, &dir_lights.pipeline_desc);
+      
       volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[0], "gPositionMap");
       volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[1], "gColorMap");
       volt_renderpass_bind_texture_buffer(dir_light_pass, g_buffer.fbo_color_outputs[2], "gNormalMap");
-      volt_renderpass_draw(dir_light_pass);
+
+      volt_renderpass_draw_cmd(dir_light_pass, &dir_lights.draw_desc);
+
+
+      /*volt_renderpass_bind_vertex_buffer(dir_light_pass, dir_lights.triangle);*/
+      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.eye_pos_uni, "");*/
+      /*volt_renderpass_bind_uniform(dir_light_pass, dir_lights.wvp_uni, "gWVP");*/
+      
+      /*volt_renderpass_draw(dir_light_pass);*/
       volt_renderpass_commit(volt_ctx, &dir_light_pass);
 		}
 

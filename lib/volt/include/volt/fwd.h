@@ -20,6 +20,7 @@ typedef struct volt_program *     volt_program_t;
 typedef struct volt_rasterizer *  volt_rasterizer_t;
 typedef struct volt_uniform *     volt_uniform_t;
 typedef struct volt_framebuffer * volt_framebuffer_t;
+typedef struct volt_blend *       volt_blend_t;
 
 
 #ifdef __cplusplus
