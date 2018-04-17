@@ -26,12 +26,12 @@ int height = 720;
 
 struct g_buffer_data
 {
-	volt_program_t 			program;
-	volt_framebuffer_t 	fbo;
-	volt_texture_t 			fbo_color_outputs[5];
-	volt_texture_t 			fbo_depth;
-	volt_input_t 				input;
-	volt_rasterizer_t 	rasterizer;
+	volt_program_t      program;
+	volt_framebuffer_t  fbo;
+	volt_texture_t      fbo_color_outputs[5];
+	volt_texture_t      fbo_depth;
+	volt_input_t        input;
+	volt_rasterizer_t   rasterizer;
 
 	struct volt_pipeline_desc pipeline_desc;
 } g_buffer;
@@ -40,8 +40,8 @@ struct g_buffer_data
 struct point_light_data
 {
   volt_program_t      program;
-  volt_rasterizer_t 	rasterizer;
-  volt_input_t 				input;
+  volt_rasterizer_t   rasterizer;
+  volt_input_t        input;
 } point_lights;
 
 
@@ -51,8 +51,13 @@ struct direction_light_data
   volt_rasterizer_t rasterizer;
   volt_vbo_t        triangle;
   volt_input_t      input;
-  volt_uniform_t    eye_pos_uni;
-  volt_uniform_t    wvp_uni;
+  
+  volt_uniform_t    u_eye_pos;
+  volt_uniform_t    u_dir_light;
+  volt_uniform_t    u_spec_power;
+  volt_uniform_t    u_mat_spec_intensity;
+  volt_uniform_t    u_light_type;
+  volt_uniform_t    u_screen_size;
 
   volt_sampler_t    u_color;
   volt_sampler_t    u_position;
@@ -66,23 +71,22 @@ struct direction_light_data
 
 struct scene_data
 {
-  struct volt_rect2d viewport;
+  struct volt_rect2d    viewport;
 
-	volt_vbo_t vbo;
-  roa_transform box_transform[9];
-  roa_mat4 box_world[9];
-  roa_mat4 box_wvp[9];
+	volt_vbo_t            vbo;
+  roa_transform         box_transform[9];
+  roa_mat4              box_world[9];
+  roa_mat4              box_wvp[9];
 	struct volt_draw_desc draw_desc[9];
+  volt_uniform_t        box_world_uni;
+  volt_uniform_t        box_wvp_uni;
 
-  volt_uniform_t box_world_uni;
-  volt_uniform_t box_wvp_uni;
+  roa_mat4              view_mat;
+  roa_mat4              proj_mat;
 
-  roa_mat4 view_mat;
-  roa_mat4 proj_mat;
-
-  roa_float3 cam_position;
-  float cam_pitch;
-  float cam_yaw;
+  roa_float3            cam_position;
+  float                 cam_pitch;
+  float                 cam_yaw;
 } scene;
 
 
@@ -572,7 +576,65 @@ main(int argc, char **argv)
 
     /* uniforms */
     {
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
 
+        uni_desc.name       = "gEyeWorldPos";
+        uni_desc.count      = 1;
+        uni_desc.copy_data  = VOLT_FALSE;
+        uni_desc.data_type  = VOLT_DATA_FLOAT3;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_eye_pos, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name       = "gMatSpecularIntensity";
+        uni_desc.count      = 1;
+        uni_desc.copy_data  = VOLT_FALSE;
+        uni_desc.data_type  = VOLT_DATA_FLOAT;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_mat_spec_intensity, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name       = "gSpecularPower";
+        uni_desc.count      = 1;
+        uni_desc.copy_data  = VOLT_FALSE;
+        uni_desc.data_type  = VOLT_DATA_FLOAT;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_spec_power, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name       = "gLightType";
+        uni_desc.count      = 1;
+        uni_desc.copy_data  = VOLT_FALSE;
+        uni_desc.data_type  = VOLT_DATA_INT;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_light_type, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name       = "gScreenSize";
+        uni_desc.count      = 1;
+        uni_desc.copy_data  = VOLT_FALSE;
+        uni_desc.data_type  = VOLT_DATA_FLOAT2;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_screen_size, &uni_desc);
+      }
     }
 
     /* samplers */

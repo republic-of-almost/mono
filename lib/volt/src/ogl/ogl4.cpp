@@ -488,6 +488,8 @@ struct volt_ctx
   /* array */ volt_renderpass_t *renderpasses;
 
   volt_log_callback_fn log_callback;
+
+  /* array */ struct rsrc_create_tasks *rsrc_create;
 };
 
 
@@ -2035,6 +2037,9 @@ volt_gl_create_uniform(const volt_gl_cmd_create_uniform *cmd)
     case(VOLT_DATA_FLOAT2): type = GL_FLOAT_VEC2; break;
     case(VOLT_DATA_FLOAT3): type = GL_FLOAT_VEC3; break;
     case(VOLT_DATA_FLOAT4): type = GL_FLOAT_VEC4; break;
+    case(VOLT_DATA_INT): type = GL_INT; break;
+    case(VOLT_DATA_INT2): type = GL_INT_VEC2; break;
+    case(VOLT_DATA_INT3): type = GL_INT_VEC3; break;
     case(VOLT_DATA_MAT2): type = GL_FLOAT_MAT2; break;
     case(VOLT_DATA_MAT3): type = GL_FLOAT_MAT3; break;
     case(VOLT_DATA_MAT4): type = GL_FLOAT_MAT4; break;
