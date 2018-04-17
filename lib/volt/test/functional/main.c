@@ -8,7 +8,7 @@
 #include <roa_lib/assert.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_math/math.h>
-#include <volt/utils/prim_model.h>
+#include <scratch/geometry.h>
 #include <string.h>
 
 
@@ -37,6 +37,8 @@ main()
   volt_uniform_t proj_data      = VOLT_NULL;
   volt_uniform_t view_data      = VOLT_NULL;
   volt_uniform_t world_data     = VOLT_NULL;
+  volt_sampler_t samp_1         = VOLT_NULL;
+  volt_sampler_t samp_2         = VOLT_NULL;
 
   roa_mat4 world;
   roa_mat4 view;
@@ -46,30 +48,47 @@ main()
   {
     struct volt_uniform_desc uni_desc_1;
     ROA_MEM_ZERO(uni_desc_1);
-
-    uni_desc_1.data_type = VOLT_DATA_MAT4;
-    uni_desc_1.count = 1;
+    uni_desc_1.name       = "proj";
+    uni_desc_1.data_type  = VOLT_DATA_MAT4;
+    uni_desc_1.count      = 1;
 
     volt_uniform_create(ctx, &proj_data, &uni_desc_1);
     ROA_ASSERT(proj_data);
 
     struct volt_uniform_desc uni_desc_2;
     ROA_MEM_ZERO(uni_desc_2);
-
-    uni_desc_2.data_type = VOLT_DATA_MAT4;
-    uni_desc_2.count = 1;
+    uni_desc_2.name       = "view";
+    uni_desc_2.data_type  = VOLT_DATA_MAT4;
+    uni_desc_2.count      = 1;
 
     volt_uniform_create(ctx, &view_data, &uni_desc_2);
     ROA_ASSERT(view_data);
 
     struct volt_uniform_desc uni_desc_3;
     ROA_MEM_ZERO(uni_desc_3);
+    uni_desc_3.name       = "model";
+    uni_desc_3.data_type  = VOLT_DATA_MAT4;
+    uni_desc_3.count      = 1;
 
-    uni_desc_3.data_type = VOLT_DATA_MAT4;
-    uni_desc_3.count = 1;
-
-    volt_uniform_create(ctx, &world_data, &uni_desc_2);
+    volt_uniform_create(ctx, &world_data, &uni_desc_3);
     ROA_ASSERT(world_data);
+  }
+
+  /* create sampler */
+  {
+    struct volt_sampler_desc samp_desc_1;
+    ROA_MEM_ZERO(samp_desc_1);
+    samp_desc_1.name = "texture_01";
+    samp_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
+
+    volt_sampler_create(ctx, &samp_1, &samp_desc_1);
+
+    struct volt_sampler_desc samp_desc_2;
+    ROA_MEM_ZERO(samp_desc_2);
+    samp_desc_2.name = "texture_02";
+    samp_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
+
+    volt_sampler_create(ctx, &samp_2, &samp_desc_2);
   }
 
   /* create some assets */
@@ -131,14 +150,14 @@ main()
     volt_texture_create(ctx, &texture_2, &tex_desc_2);
 
     /* vbo */
-    volt_vert_desc vert_desc[] = {
-      VOLT_VERT_POSITION, VOLT_NORMAL, VOLT_UV,
+    geom_vert_desc vert_desc[] = {
+      GEOM_VERT_POSITION, GEOM_NORMAL, GEOM_UV,
     };
 
     float verts[1024];
     unsigned vert_count = 0;
 
-    volt_util_generate_cube(
+    geometry_generate_cube(
       ROA_ARR_DATA(vert_desc),
       ROA_ARR_COUNT(vert_desc),
       0.5f,
@@ -165,7 +184,7 @@ main()
     struct volt_ibo_desc ibo_desc;
     ROA_MEM_ZERO(ibo_desc);
 
-    ibo_desc.data = ROA_ARR_DATA(index);
+    ibo_desc.data  = ROA_ARR_DATA(index);
     ibo_desc.count = ROA_ARR_COUNT(index);
 
     volt_index_buffer_create(ctx, &ibo, &ibo_desc);
@@ -198,31 +217,34 @@ main()
       "in vec3 oColor;\n"
       "in vec2 oTexcoord;\n"
 
-      "uniform sampler2D texKitten;\n"
-      "uniform sampler2D texPuppy;\n"
+      "uniform sampler2D texture_01;\n"
+      "uniform sampler2D texture_02;\n"
 
       "out vec4 outColor;\n"
 
       "void main()\n"
       "{\n"
-      "outColor = mix(texture(texKitten, oTexcoord), texture(texPuppy, oTexcoord), length(oColor));\n"
-      "outColor = vec4(abs(oColor), 1);"
+      "float x_val = (oTexcoord.x * 2.0) - 1.0;"
+      "float y_val = (oTexcoord.y * 2.0) - 1.0;"
+      "float mix_value = sin(x_val) * cos(y_val);"
+      "outColor = mix(texture(texture_01, oTexcoord), texture(texture_02, oTexcoord), mix_value);"
       "}\n";
 
     const char *stages[2];
     stages[0] = vert_src;
     stages[1] = frag_src;
 
-    volt_shader_stage stage_types[2];
-    stage_types[0] = VOLT_SHD_VERTEX;
-    stage_types[1] = VOLT_SHD_FRAGMENT;
+    volt_shader_stage stage_types[] = {
+      VOLT_SHD_VERTEX,
+      VOLT_SHD_FRAGMENT,
+    };
 
     struct volt_program_desc shd_desc;
     ROA_MEM_ZERO(shd_desc);
 
-    shd_desc.shader_stages_src = stages;
+    shd_desc.shader_stages_src  = stages;
     shd_desc.shader_stages_type = stage_types;
-    shd_desc.stage_count = 2;
+    shd_desc.stage_count        = ROA_ARR_COUNT(stage_types);
 
     volt_program_create(ctx, &program, &shd_desc);
 
@@ -273,44 +295,61 @@ main()
       float z = roa_float_cos(time) * radius;
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
-      roa_float3 at = roa_float3_fill_with_value(0.f);
-      roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
+      roa_float3 at   = roa_float3_fill_with_value(0.f);
+      roa_float3 up   = roa_float3_set_with_values(0.f, 1.f, 0.f);
 
       roa_mat4_lookat(&view, from, at, up);
 
       roa_mat4_id(&world);
     }
 
-    volt_uniform_update(ctx, view_data, view.data);
-    volt_uniform_update(ctx, proj_data, proj.data);
-    volt_uniform_update(ctx, world_data, world.data);
-
     /* draw some stuff */
     {
+      struct volt_renderpass_desc rp_desc;
+      ROA_MEM_ZERO(rp_desc);
+      rp_desc.name = "To Back Buffer";
+
       volt_renderpass_t rp;
-      volt_renderpass_create(ctx, &rp, "cube", ROA_NULL);
+      volt_renderpass_create(ctx, &rp, &rp_desc);
 
-      volt_renderpass_set_viewport(rp, 0,0,win_desc.width,win_desc.height);
+      struct volt_rect2d viewport = { 0,0,win_desc.width,win_desc.height };
 
-      /* bind program */
-      volt_renderpass_bind_program(rp, program);
+      /* bind pipeline */
+      {
+        struct volt_pipeline_desc pipeline_desc;
+        ROA_MEM_ZERO(pipeline_desc);
+        pipeline_desc.viewport    = viewport;
+        pipeline_desc.input       = vert_input;
+        pipeline_desc.program     = program;
+        pipeline_desc.rasterizer  = rasterizer;
+      
+        volt_renderpass_set_pipeline(rp, &pipeline_desc);
+      }
+
+      unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+      volt_renderpass_clear_cmd(rp, clear_flags);
 
       /* bind buffers */
-      volt_renderpass_bind_vertex_buffer(rp, vbo);
-      /*volt_renderpass_bind_index_buffer(rp, ibo);*/
-      volt_renderpass_bind_texture_buffer(rp, texture_1, "texKitten");
-      volt_renderpass_bind_texture_buffer(rp, texture_2, "texPuppy");
+      {
+        volt_renderpass_bind_texture_buffer_cmd(rp, samp_1, texture_1);
+        volt_renderpass_bind_texture_buffer_cmd(rp, samp_2, texture_2);
+      }
 
-      volt_renderpass_bind_uniform(rp, proj_data, "proj");
-      volt_renderpass_bind_uniform(rp, view_data, "view");
-      volt_renderpass_bind_uniform(rp, world_data, "model");
-
-      /* bind formatting */
-      volt_renderpass_bind_input_format(rp, vert_input);
-      volt_renderpass_bind_rasterizer(rp, rasterizer);
+      /* uniforms */
+      {
+        volt_renderpass_bind_uniform_data_cmd(rp, proj_data, proj.data);
+        volt_renderpass_bind_uniform_data_cmd(rp, world_data, world.data);
+        volt_renderpass_bind_uniform_data_cmd(rp, view_data, view.data);
+      }
 
       /* draw */
-      volt_renderpass_draw(rp);
+      {
+        struct volt_draw_desc draw_desc;
+        ROA_MEM_ZERO(draw_desc);
+        draw_desc.vbo = vbo;
+
+        volt_renderpass_draw_cmd(rp, &draw_desc);
+      }
 
       volt_renderpass_commit(ctx, &rp);
     }

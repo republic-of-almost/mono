@@ -10,6 +10,12 @@
 #include <stdio.h>
 
 
+/* ------------------------------------------------------------ [ Config ] -- */
+
+
+#define DECAL_TEST_SHOW_G_BUFFER 0
+
+
 /* ----------------------------------------------------------- [ Systems ] -- */
 
 
@@ -53,7 +59,10 @@ struct direction_light_data
   volt_input_t      input;
 
   volt_uniform_t    u_eye_pos;
-  volt_uniform_t    u_dir_light;
+  volt_uniform_t    u_dir_light_color;
+  volt_uniform_t    u_dir_light_amb_int;
+  volt_uniform_t    u_dir_light_diff_int;
+  volt_uniform_t    u_dir_light_dir;
   volt_uniform_t    u_spec_power;
   volt_uniform_t    u_mat_spec_intensity;
   volt_uniform_t    u_light_type;
@@ -168,17 +177,17 @@ main(int argc, char **argv)
       volt_ctx_execute(volt_ctx);
     }
 
-		/* draw desc */
-		{
-			int count = ROA_ARR_COUNT(scene.draw_desc);
-			int i;
+    /* draw desc */
+    {
+      int count = ROA_ARR_COUNT(scene.draw_desc);
+      int i;
 
-			for(i = 0; i < count; ++i)
-			{
-				ROA_MEM_ZERO(scene.draw_desc[i]);
-				scene.draw_desc[i].vbo = scene.vbo;
-			}
-		}
+      for(i = 0; i < count; ++i)
+      {
+        ROA_MEM_ZERO(scene.draw_desc[i]);
+        scene.draw_desc[i].vbo = scene.vbo;
+      }
+    }
 
     /* box positions */
     {
@@ -217,36 +226,35 @@ main(int argc, char **argv)
       int count = ROA_ARR_COUNT(scene.box_transform);
 
       struct volt_uniform_desc wvp_uni_desc;
-			{
-	      ROA_MEM_ZERO(wvp_uni_desc);
+      {
+        ROA_MEM_ZERO(wvp_uni_desc);
 
-				wvp_uni_desc.name 		 = "gWVP";
-	      wvp_uni_desc.data_type = VOLT_DATA_MAT4;
-	      wvp_uni_desc.count 		 = 1;
-				wvp_uni_desc.copy_data = VOLT_FALSE;
+        wvp_uni_desc.name       = "gWVP";
+        wvp_uni_desc.data_type  = VOLT_DATA_MAT4;
+        wvp_uni_desc.count      = 1;
+        wvp_uni_desc.copy_data  = VOLT_FALSE;
 
-	      volt_uniform_create(volt_ctx, &scene.box_wvp_uni, &wvp_uni_desc);
-			}
+        volt_uniform_create(volt_ctx, &scene.box_wvp_uni, &wvp_uni_desc);
+      }
 
       struct volt_uniform_desc world_uni_desc;
-			{
-	      ROA_MEM_ZERO(world_uni_desc);
+      {
+        ROA_MEM_ZERO(world_uni_desc);
+        world_uni_desc.name       = "gWorld";
+        world_uni_desc.data_type  = VOLT_DATA_MAT4;
+        world_uni_desc.count      = 1;
+        world_uni_desc.copy_data  = VOLT_FALSE;
 
-				world_uni_desc.name 		 = "gWorld";
-	      world_uni_desc.data_type = VOLT_DATA_MAT4;
-	      world_uni_desc.count 		 = 1;
-				world_uni_desc.copy_data = VOLT_FALSE;
-
-	      volt_uniform_create(volt_ctx, &scene.box_world_uni, &world_uni_desc);
-			}
+        volt_uniform_create(volt_ctx, &scene.box_world_uni, &world_uni_desc);
+      }
 
       volt_ctx_execute(volt_ctx);
     }
 
     /* projection camera */
     {
-      float aspect 	= (float)width / (float)height;
-      float fov 		= ROA_TAU * 0.125f;
+      float aspect  = (float)width / (float)height;
+      float fov     = ROA_TAU * 0.125f;
 
       roa_mat4_projection(&scene.proj_mat, fov, 0.1, 100, aspect);
 
@@ -527,8 +535,8 @@ main(int argc, char **argv)
         "vec3 Color = texture(gColorMap, TexCoord).xyz;\n"
         "vec3 Normal = texture(gNormalMap, TexCoord).xyz;\n"
         "Normal = normalize(Normal);\n"
-        /*"FragColor = vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"*/
-          "FragColor = vec4(Color, 1.0);\n"
+        "FragColor = vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"
+         /* "FragColor = vec4(Color, 1.0);\n"*/
         "}\n";
 
 
@@ -635,6 +643,54 @@ main(int argc, char **argv)
 
         volt_uniform_create(volt_ctx, &dir_lights.u_screen_size, &uni_desc);
       }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name = "gDirectionalLight.Base.Color";
+        uni_desc.count = 1;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.data_type = VOLT_DATA_FLOAT3;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_dir_light_color, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name = "gDirectionalLight.Base.AmbientIntensity";
+        uni_desc.count = 1;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.data_type = VOLT_DATA_FLOAT;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_dir_light_amb_int, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name = "gDirectionalLight.Base.DiffuseIntensity";
+        uni_desc.count = 1;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.data_type = VOLT_DATA_FLOAT;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_dir_light_diff_int, &uni_desc);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+
+        uni_desc.name = "gDirectionalLight.Direction";
+        uni_desc.count = 1;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.data_type = VOLT_DATA_FLOAT3;
+
+        volt_uniform_create(volt_ctx, &dir_lights.u_dir_light_dir, &uni_desc);
+      }
     }
 
     /* samplers */
@@ -720,7 +776,7 @@ main(int argc, char **argv)
   }
 
   /* -------------------------------------------------------- [ G-Buffer ] -- */
-	{
+  {
     /* color outputs */
     {
       /* texture names */
@@ -753,37 +809,37 @@ main(int argc, char **argv)
       }
     }
 
-		/* depth buffer */
-		{
-			struct volt_texture_desc tex_desc;
+    /* depth buffer */
+    {
+      struct volt_texture_desc tex_desc;
       ROA_MEM_ZERO(tex_desc);
 
-			tex_desc.width      = width;
-			tex_desc.height     = height;
-			tex_desc.dimentions = VOLT_TEXTURE_2D;
-			tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
-			tex_desc.format     = VOLT_PIXEL_FORMAT_DEPTH32F;
+      tex_desc.width      = width;
+      tex_desc.height     = height;
+      tex_desc.dimentions = VOLT_TEXTURE_2D;
+      tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
+      tex_desc.format     = VOLT_PIXEL_FORMAT_DEPTH32F;
       tex_desc.data       = ROA_NULL;
       tex_desc.access     = VOLT_STATIC;
       tex_desc.mip_maps   = VOLT_FALSE;
-			tex_desc.name       = "GBuffer:Depth";
+      tex_desc.name       = "GBuffer:Depth";
 
-			volt_texture_create(volt_ctx, &g_buffer.fbo_depth, &tex_desc);
+      volt_texture_create(volt_ctx, &g_buffer.fbo_depth, &tex_desc);
       volt_ctx_execute(volt_ctx);
-		}
+    }
 
-		/* create fbo */
-		{
-			struct volt_framebuffer_desc fbo_desc;
+    /* create fbo */
+    {
+      struct volt_framebuffer_desc fbo_desc;
       ROA_MEM_ZERO(fbo_desc);
 
-			fbo_desc.attachments      = g_buffer.fbo_color_outputs;
-			fbo_desc.attachment_count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
-			fbo_desc.depth            = g_buffer.fbo_depth;
+      fbo_desc.attachments      = g_buffer.fbo_color_outputs;
+      fbo_desc.attachment_count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
+      fbo_desc.depth            = g_buffer.fbo_depth;
 
-			volt_framebuffer_create(volt_ctx, &g_buffer.fbo, &fbo_desc);
+      volt_framebuffer_create(volt_ctx, &g_buffer.fbo, &fbo_desc);
       volt_ctx_execute(volt_ctx);
-		}
+    }
 
     /* shader */
     {
@@ -885,19 +941,19 @@ main(int argc, char **argv)
       volt_ctx_execute(volt_ctx);
     }
 
-		/* pipeline */
-		{
-			struct volt_pipeline_desc pipe_desc;
-			ROA_MEM_ZERO(pipe_desc);
+    /* pipeline */
+    {
+      struct volt_pipeline_desc pipe_desc;
+       ROA_MEM_ZERO(pipe_desc);
 
-			pipe_desc.program 		= g_buffer.program;
-			pipe_desc.rasterizer 	= g_buffer.rasterizer;
-			pipe_desc.input 			= g_buffer.input;
-			pipe_desc.viewport 		= scene.viewport;
+      pipe_desc.program 		= g_buffer.program;
+      pipe_desc.rasterizer 	= g_buffer.rasterizer;
+      pipe_desc.input 			= g_buffer.input;
+      pipe_desc.viewport 		= scene.viewport;
 
-			g_buffer.pipeline_desc = pipe_desc;
-		}
-	}
+      g_buffer.pipeline_desc = pipe_desc;
+    }
+  }
 
   /* ------------------------------------------------------------ [ Loop ] -- */
   while (roa_ctx_new_frame(hw_ctx))
@@ -959,35 +1015,35 @@ main(int argc, char **argv)
 
       volt_renderpass_t g_buffer_pass;
       volt_renderpass_create(volt_ctx, &g_buffer_pass, &rp_desc);
-			volt_renderpass_set_pipeline(g_buffer_pass, &g_buffer.pipeline_desc);
+      volt_renderpass_set_pipeline(g_buffer_pass, &g_buffer.pipeline_desc);
 
-			unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
-			volt_renderpass_clear_cmd(g_buffer_pass, clear_flags);
+      unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+      volt_renderpass_clear_cmd(g_buffer_pass, clear_flags);
 
       int i;
       int count = ROA_ARR_COUNT(scene.box_world);
 
       for (i = 0; i < count; ++i)
       {
-				/* Uniform world view projection */
+        /* Uniform world view projection */
         volt_uniform_t wvp = scene.box_wvp_uni;
-				void *wvp_data = (void*)scene.box_wvp[i].data;
-				volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, wvp, wvp_data);
+        void *wvp_data = (void*)scene.box_wvp[i].data;
+        volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, wvp, wvp_data);
 
-				/* Uniform world */
+        /* Uniform world */
         volt_uniform_t world = scene.box_world_uni;
-				void *world_data = (void*)scene.box_world[i].data;
-				volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, world, world_data);
+        void *world_data = (void*)scene.box_world[i].data;
+        volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, world, world_data);
 
-				/* Draw */
+        /* Draw */
         volt_renderpass_draw_cmd(g_buffer_pass, &scene.draw_desc[i]);
       }
 
       volt_renderpass_commit(volt_ctx, &g_buffer_pass);
     }
 
-		/* --------------------------------------- [ Dir Lighting Renderpass ] -- */
-		{
+    /* --------------------------------------- [ Dir Lighting Renderpass ] -- */
+    {
       unsigned attachments[] = {
         4,
       };
@@ -1002,12 +1058,23 @@ main(int argc, char **argv)
         rp_desc.name              = "Dir Light Pass";
       }
 
-			volt_renderpass_t dir_light_pass;
-      volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
-			volt_renderpass_set_pipeline(dir_light_pass, &dir_lights.pipeline_desc);
+      static float amb_intensity = 0.f;
+      static float diff_intensity = 0.5f;
+      static float color[3] = {1,1,0};
+      static float direction[3] = {0.707f, -0.707f, 0.f};
 
-			unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
-			volt_renderpass_clear_cmd(dir_light_pass, clear_flags);
+
+      volt_renderpass_t dir_light_pass;
+      volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
+      volt_renderpass_set_pipeline(dir_light_pass, &dir_lights.pipeline_desc);
+
+      unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+      volt_renderpass_clear_cmd(dir_light_pass, clear_flags);
+
+      volt_renderpass_bind_uniform_data_cmd(dir_light_pass, dir_lights.u_dir_light_color, &color);
+      volt_renderpass_bind_uniform_data_cmd(dir_light_pass, dir_lights.u_dir_light_amb_int, &amb_intensity);
+      volt_renderpass_bind_uniform_data_cmd(dir_light_pass, dir_lights.u_dir_light_diff_int, &diff_intensity);
+      volt_renderpass_bind_uniform_data_cmd(dir_light_pass, dir_lights.u_dir_light_dir, &direction);
 
       volt_renderpass_bind_texture_buffer_cmd(dir_light_pass, dir_lights.u_position, g_buffer.fbo_color_outputs[0]);
       volt_renderpass_bind_texture_buffer_cmd(dir_light_pass, dir_lights.u_color, g_buffer.fbo_color_outputs[1]);
@@ -1015,36 +1082,45 @@ main(int argc, char **argv)
 
       volt_renderpass_draw_cmd(dir_light_pass, &dir_lights.draw_desc);
 
-			volt_renderpass_commit(volt_ctx, &dir_light_pass);
-		}
+      volt_renderpass_commit(volt_ctx, &dir_light_pass);
+    }
 
-		/* ---------------------------------------------- [ Final Renderpass ] -- */
-		{
-			volt_renderpass_t final_pass;
+    /* ---------------------------------------------- [ Final Renderpass ] -- */
+    {
+      volt_renderpass_t final_pass;
       ROA_MEM_ZERO(final_pass);
 
-			volt_renderpass_create(volt_ctx, &final_pass, 0);
-			volt_renderpass_set_pipeline(final_pass, &fullscreen.pipeline_desc);
+      volt_renderpass_create(volt_ctx, &final_pass, 0);
+      volt_renderpass_set_pipeline(final_pass, &fullscreen.pipeline_desc);
 
-			int count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
-			int i;
-			int size = width / count;
+      unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
+      volt_renderpass_clear_cmd(final_pass, clear_flags);
 
-			/* each color buffer */
-			for(i = 0; i < count; ++i)
-			{
-				unsigned clear_flags = VOLT_CLEAR_COLOR | VOLT_CLEAR_DEPTH;
-        volt_renderpass_clear_cmd(final_pass, clear_flags);
+      if(ROA_IS_ENABLED(DECAL_TEST_SHOW_G_BUFFER))
+      {
+        int count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
+        int i;
+        int size = width / count;
 
-        struct volt_rect2d scissor = { size * i, 0, size, height};
-				volt_renderpass_set_scissor_cmd(final_pass, scissor);
-				volt_renderpass_bind_texture_buffer_cmd(final_pass, fullscreen.u_diffuse, g_buffer.fbo_color_outputs[i]);
+        /* each color buffer */
+        for(i = 0; i < count; ++i)
+        {
+          struct volt_rect2d scissor = { size * i, 0, size, height};
+          volt_renderpass_set_scissor_cmd(final_pass, scissor);
+          volt_renderpass_bind_texture_buffer_cmd(final_pass, fullscreen.u_diffuse, g_buffer.fbo_color_outputs[i]);
 
-				volt_renderpass_draw_cmd(final_pass, &fullscreen.draw_desc);
-			}
+          volt_renderpass_draw_cmd(final_pass, &fullscreen.draw_desc);
+        }
+      }
+      else
+      {
+        volt_renderpass_bind_texture_buffer_cmd(final_pass, fullscreen.u_diffuse, g_buffer.fbo_color_outputs[4]);
 
-			volt_renderpass_commit(volt_ctx, &final_pass);
-		}
+        volt_renderpass_draw_cmd(final_pass, &fullscreen.draw_desc);
+      }
+
+      volt_renderpass_commit(volt_ctx, &final_pass);
+    }
 
     volt_ctx_execute(volt_ctx);
 

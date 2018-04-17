@@ -943,9 +943,12 @@ volt_renderpass_create(
   volt_renderpass_t rp = (volt_renderpass_t)roa_zalloc(sizeof(*rp));
   roa_array_create_with_capacity(rp->render_cmds, 128);
 
+  roa_array_push(ctx->renderpasses, rp);
+
   /* bind fbo or default back buffer */
   {
     cmd_fbo_bind cmd;
+    ROA_MEM_ZERO(cmd);
     cmd.gl_id = desc && desc->fbo ? desc->fbo->gl_id : 0;
 
     if (desc && desc->fbo && desc->attachment_count)
@@ -1012,8 +1015,6 @@ volt_renderpass_commit(
   ROA_ASSERT(ctx);
   ROA_ASSERT(pass);
 
-  /* free */
-  roa_free(*pass);
   *pass = ROA_NULL;
 }
 
@@ -1284,10 +1285,11 @@ volt_renderpass_draw_cmd(
         {
           /* bind uniform */
           struct cmd_uniform_bind cmd;
-          cmd.location = pass->curr_program->uniforms[i].location;
-          cmd.value = pass->uniform[j]->value;
-          cmd.type = pass->uniform[j]->type;
-          cmd.count = pass->uniform[j]->count;
+          ROA_MEM_ZERO(cmd);
+          cmd.location  = pass->curr_program->uniforms[i].location;
+          cmd.value     = pass->uniform[j]->value;
+          cmd.type      = pass->uniform[j]->type;
+          cmd.count     = pass->uniform[j]->count;
 
           struct volt_gl_cmd cmd_wrapper;
           cmd_wrapper.cmd_id = CMD_UNIFORM_BIND;
@@ -1323,6 +1325,7 @@ volt_renderpass_draw_cmd(
     cmd.count = pass->curr_ibo->element_count;
     cmd.type = GL_UNSIGNED_INT;
     cmd.mode = GL_TRIANGLES;
+    cmd.indices = GL_ZERO;
 
     struct volt_gl_cmd cmd_wrapper;
     cmd_wrapper.cmd_id = CMD_DRAW_INDEXED;
@@ -2558,6 +2561,7 @@ volt_ctx_execute(volt_ctx_t ctx)
       }
 
       roa_array_destroy(ctx->renderpasses[i]->render_cmds);
+      roa_free(ctx->renderpasses[i]);
     }
 
     roa_array_clear(ctx->renderpasses);
