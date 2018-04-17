@@ -16,7 +16,7 @@
 #include <string.h>
 
 
-/* ----------------------------------------------------------- [ config ] -- */
+/* ------------------------------------------------------------ [ config ] -- */
 
 
 #define GL_LOG_CMDS 0
@@ -24,193 +24,162 @@
 #define GL_LOG_EXEC_ERRORS 0
 
 
-/* ----------------------------------------------------------- [ common ] -- */
+/* ------------------------------------------------------------ [ common ] -- */
 
 
 #define GL_ASSERT do { auto err = glGetError(); if(err) { printf("GLERR: %d\n", err); ROA_ASSERT(0); } } while(0)
 
 
-/* ------------------------------------------------------ [ gl commands ] -- */
+/* ------------------------------------------------------- [ gl commands ] -- */
 
 
-enum class volt_gl_cmd_id
+typedef enum volt_cmd_id
 {
-  unknown,
+  CMD_UNKNOWN,
 
-  /* resource */
+  CMD_PROGRAM_CREATE,
+  CMD_PROGRAM_BIND,
 
-  create_program,
-  create_uniform,
-  create_buffer_ibo,
-  create_buffer_vbo,
-  update_buffer_vbo,
-  create_buffer_input,
-  create_buffer_texture,
-  update_buffer_texture,
-  create_buffer_framebuffer,
+  CMD_VBO_CREATE,
+  CMD_VBO_UPDATE,
+  CMD_VBO_BIND,
 
-  /* renderpass */
+  CMD_IBO_CREATE,
+  CMD_IBO_BIND,
 
-  bind_program,
-  bind_vbo,
-  bind_ibo,
-  bind_input,
-  bind_texture,
-  bind_uniform,
-  bind_framebuffer,
+  CMD_FBO_CREATE,
+  CMD_FBO_BIND,
 
-  set_viewport,
-  set_scissor,
-  clear,
+  CMD_TEXTURE_CREATE,
+  CMD_TEXTURE_UPDATE,
+  CMD_TEXTURE_BIND,
 
-  /* draw */
+  CMD_UNIFORM_CREATE,
+  CMD_UNIFORM_BIND,
 
-  draw_count,
-  draw_indexed,
-};
+  CMD_INPUT_CREATE,
+  CMD_INPUT_BIND,
+
+  CMD_DRAW_COUNT,
+  CMD_DRAW_INDEXED,
+
+  CMD_VIEWPORT,
+  CMD_SCISSOR,
+  CMD_CLEAR,
+
+  CMD_COUNT /* nothing after this */
+} volt_cmd_id;
 
 
-const char*
-volt_gl_cmd_to_string(volt_gl_cmd_id id)
+struct cmd_program_create
 {
-  switch (id)
-  {
-    case(volt_gl_cmd_id::create_program):               return "create_program";
-    case(volt_gl_cmd_id::create_uniform):               return "create_uniform";
-    case(volt_gl_cmd_id::create_buffer_ibo):            return "create_buffer_ibo";
-    case(volt_gl_cmd_id::create_buffer_vbo):            return "create_buffer_vbo";
-    case(volt_gl_cmd_id::update_buffer_vbo):            return "update_buffer_vbo";
-    case(volt_gl_cmd_id::create_buffer_input):          return "create_buffer_input";
-    case(volt_gl_cmd_id::create_buffer_texture):        return "create_buffer_texture";
-    case(volt_gl_cmd_id::create_buffer_framebuffer):    return "create_buffer_framebuffer";
-    case(volt_gl_cmd_id::bind_program):                 return "bind_program";
-    case(volt_gl_cmd_id::bind_vbo):                     return "bind_vbo";
-    case(volt_gl_cmd_id::bind_ibo):                     return "bind_ibo";
-    case(volt_gl_cmd_id::bind_input):                   return "bind_input";
-    case(volt_gl_cmd_id::bind_texture):                 return "bind_texture";
-    case(volt_gl_cmd_id::bind_uniform):                 return "bind_uniform";
-    case(volt_gl_cmd_id::bind_framebuffer):             return "bind_framebuffer";
-    case(volt_gl_cmd_id::set_viewport):                 return "set_viewport";
-    case(volt_gl_cmd_id::draw_count):                   return "draw_count";
-    case(volt_gl_cmd_id::draw_indexed):                 return "draw_indexed";
-    default:                                            return "unknown";
-  }
-}
-
-
-struct volt_gl_cmd_unknown
-{
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::unknown */
-};
-
-
-/* ------------------------------------------ [ gl resource cmd structs ] -- */
-
-
-struct volt_gl_cmd_create_program
-{
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_program */
-
   volt_program_t program;
   volt_program_desc desc;
 };
 
 
-struct volt_gl_cmd_create_uniform
+struct cmd_program_bind
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_uniform */
-
-  volt_uniform_t uniform;
-  volt_uniform_desc desc;
+  GLuint program;
 };
 
 
-struct volt_gl_cmd_create_vbo
+struct cmd_vbo_create
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_vbo */
-
   volt_vbo_t vbo;
   volt_vbo_desc desc;
 };
 
 
-struct volt_gl_cmd_update_vbo
+struct cmd_vbo_update
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::update_buffer_vbo */
-
   volt_vbo_t vbo;
   volt_vbo_desc desc;
 };
 
 
-struct volt_gl_cmd_create_ibo
+struct cmd_vbo_bind
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_ibo */
+  GLuint vbo;
+};
 
+
+struct cmd_ibo_create
+{
   volt_ibo_t ibo;
   volt_ibo_desc desc;
 };
 
 
-struct volt_gl_cmd_create_input
+struct cmd_ibo_bind
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_buffer_input */
-
-  volt_input_t input;
-  volt_input_desc desc;
+  GLuint ibo;
 };
 
 
-struct volt_gl_cmd_create_texture
+struct cmd_fbo_create
 {
-  volt_gl_cmd_id id;
-
-  volt_texture_t texture;
-  volt_texture_desc desc;
-};
-
-
-struct volt_gl_cmd_update_texture
-{
-  volt_gl_cmd_id id;
-
-  volt_texture_t texture;
-  volt_texture_desc desc;
-};
-
-
-struct volt_gl_cmd_create_framebuffer
-{
-  volt_gl_cmd_id id;
-
   volt_framebuffer_t framebuffer;
   volt_framebuffer_desc desc;
 };
 
 
-/* ---------------------------------------- [ gl renderpass cmd structs ] -- */
-
-
-struct volt_gl_cmd_bind_vbo
+struct cmd_fbo_bind
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_vbo */
+  GLuint gl_id;
 
-  GLuint vbo;
+  GLenum color_attachments[8];
+  GLsizei color_attachment_count;
 };
 
 
-struct volt_gl_cmd_bind_ibo
+struct cmd_texture_create
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_ibo */
-
-  GLuint ibo;
+  volt_texture_t texture;
+  volt_texture_desc desc;
 };
 
 
-struct volt_gl_cmd_bind_input
+struct cmd_texture_update
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_input */
+  volt_texture_t texture;
+  volt_texture_desc desc;
+};
 
+
+struct cmd_texture_bind
+{
+  GLuint gl_id;
+  GLint active_texture;
+  GLint sampler_location;
+};
+
+
+struct cmd_uniform_create
+{
+  volt_uniform_t uniform;
+  volt_uniform_desc desc;
+};
+
+
+struct cmd_uniform_bind
+{
+  GLint location;
+  GLvoid *value;
+  GLsizei count;
+  GLenum type;
+};
+
+
+struct cmd_input_create
+{
+  volt_input_t input;
+  volt_input_desc desc;
+};
+
+
+struct cmd_input_bind
+{
   GLuint index;
   GLint size;
   GLenum type;
@@ -220,61 +189,16 @@ struct volt_gl_cmd_bind_input
 };
 
 
-struct volt_gl_cmd_bind_texture
+struct cmd_draw_count
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_texture */
-
-  GLuint gl_id;
-  GLint active_texture;
-  GLint sampler_location;
-};
-
-
-
-struct volt_gl_cmd_bind_framebuffer
-{
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_framebuffer */
-
-  GLuint gl_id;
-
-  GLenum color_attachments[8];
-  GLsizei color_attachment_count;
-};
-
-
-struct volt_gl_cmd_bind_uniform
-{
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::bind_uniform */
-
-  GLint location;
-  GLvoid *value;
-  GLsizei count;
-  GLenum type;
-};
-
-
-struct volt_gl_cmd_bind_program
-{
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::create_program */
-
-  GLuint program;
-};
-
-
-struct volt_gl_cmd_draw_count
-{
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::draw_count */
-
   GLenum mode;
   GLint first;
   GLsizei count;
 };
 
 
-struct volt_gl_cmd_draw_indexed
+struct cmd_draw_indexed
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::draw_indexed */
-
   GLenum mode;
   GLenum type;
   GLuint count;
@@ -282,10 +206,8 @@ struct volt_gl_cmd_draw_indexed
 };
 
 
-struct volt_gl_cmd_set_viewport
+struct cmd_scissor
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::set_viewport */
-
   GLint x;
   GLint y;
   GLsizei width;
@@ -293,23 +215,57 @@ struct volt_gl_cmd_set_viewport
 };
 
 
-
-struct volt_gl_cmd_clear
+struct cmd_viewport
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::clear */
+  GLint x;
+  GLint y;
+  GLsizei width;
+  GLsizei height;
+};
 
+
+struct cmd_clear
+{
   GLbitfield mask;
 };
 
 
-struct volt_gl_cmd_set_scissor
+struct volt_gl_cmd
 {
-  volt_gl_cmd_id id; /* volt_gl_cmd_id::set_scissor */
+  volt_cmd_id cmd_id;
 
-  GLint x;
-  GLint y;
-  GLsizei width;
-  GLsizei height;
+  union
+  {
+    struct cmd_program_create program_create;
+    struct cmd_program_bind program_bind;
+
+    struct cmd_vbo_create vbo_create;
+    struct cmd_vbo_update vbo_update;
+    struct cmd_vbo_bind vbo_bind;
+
+    struct cmd_ibo_create ibo_create;
+    struct cmd_ibo_bind ibo_bind;
+
+    struct cmd_fbo_create fbo_create;
+    struct cmd_fbo_bind fbo_bind;
+
+    struct cmd_texture_create texture_create;
+    struct cmd_texture_update texture_update;
+    struct cmd_texture_bind texture_bind;
+
+    struct cmd_uniform_create uniform_create;
+    struct cmd_uniform_bind uniform_bind;
+
+    struct cmd_input_create input_create; /* unused atm */
+    struct cmd_input_bind input_bind;
+
+    struct cmd_draw_count draw_count;
+    struct cmd_draw_indexed draw_indexed;
+
+    struct cmd_scissor scissor;
+    struct cmd_viewport viewport;
+    struct cmd_clear clear;
+  };
 };
 
 
@@ -429,67 +385,15 @@ struct volt_input
 };
 
 
-struct volt_gl_stream
-{
-  uint8_t *data;
-  unsigned count;
-  unsigned capacity;
-  unsigned cmd_count;
-};
-
-
-void*
-volt_gl_stream_alloc(volt_gl_stream *stream, unsigned bytes)
-{
-  /* param check */
-  ROA_ASSERT(stream);
-  ROA_ASSERT(bytes);
-
-  /* beware! This is not aligned, emscripten will fail */
-  unsigned new_bytes = bytes + stream->count;
-
-  if (new_bytes < stream->capacity)
-  {
-    void *ptr = (void*)&stream->data[stream->count];
-    stream->count = new_bytes;
-
-    stream->cmd_count += 1;
-
-    return ptr;
-  }
-
-  return nullptr;
-}
-
-void
-volt_gl_stream_clear(volt_gl_stream *stream)
-{
-  ROA_ASSERT(stream);
-
-  stream->cmd_count = 0;
-  stream->count = 0;
-}
-
-
 struct volt_ctx
 {
   GLuint vao;
 
-  roa_atomic_int rsrc_create_lock;
-  volt_gl_stream resource_create_stream;
-
-  roa_atomic_int rdr_lock;
-  volt_gl_stream render_stream;
-
-  roa_atomic_int rsrc_destroy_lock;
-  volt_gl_stream resource_destroy_stream;
-
-  roa_atomic_int rp_lock;
+  /* array */ struct volt_gl_cmd *rsrc_create_cmds;
+  /* array */ struct volt_gl_cmd *rsrc_destroy_cmds;
   /* array */ volt_renderpass_t *renderpasses;
 
   volt_log_callback_fn log_callback;
-
-  /* array */ struct rsrc_create_tasks *rsrc_create;
 };
 
 
@@ -521,11 +425,12 @@ struct volt_renderpass
   volt_program_t last_bound_program;
   volt_rasterizer_t last_bound_rasterizer;
 
-  /* array */ volt_gl_stream *render_stream;
+  /* array */ struct volt_gl_cmd *render_cmds;
 };
 
 
 /* ------------------------------------------------------- [ volt helper ] -- */
+
 
 unsigned
 volt_input_attribute_count(volt_input_attribute attr)
@@ -543,8 +448,7 @@ volt_input_attribute_count(volt_input_attribute attr)
 }
 
 
-
-/* ----------------------------------------------------- [ rsrc texture ] -- */
+/* ------------------------------------------------------ [ rsrc texture ] -- */
 
 
 void
@@ -554,27 +458,29 @@ volt_texture_create(
   volt_texture_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(texture);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(texture);
+    ROA_ASSERT(desc);
+  }
 
   /* prepare */
-  volt_texture_t new_texture = (volt_texture_t)roa_zalloc(sizeof(*new_texture));
-
-  *texture = new_texture;
+  {
+    volt_texture_t new_texture = (volt_texture_t)roa_zalloc(sizeof(*new_texture));
+    *texture = new_texture;
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_texture_create cmd;
+    cmd.desc     = *desc;
+    cmd.texture  = *texture;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_create_texture *cmd = (volt_gl_cmd_create_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id         = CMD_TEXTURE_CREATE;
+    cmd_wrapper.texture_create = cmd;
 
-    cmd->id      = volt_gl_cmd_id::create_buffer_texture;
-    cmd->desc    = *desc;
-    cmd->texture = *texture;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -586,22 +492,23 @@ volt_texture_update(
   volt_texture_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(texture);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(texture);
+    ROA_ASSERT(desc);
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_texture_update cmd;
+    cmd.desc     = *desc;
+    cmd.texture  = texture;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_update_texture *cmd = (volt_gl_cmd_update_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_TEXTURE_UPDATE;
+    cmd_wrapper.texture_update = cmd;
 
-    cmd->id = volt_gl_cmd_id::update_buffer_texture;
-    cmd->desc = *desc;
-    cmd->texture = texture;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -613,23 +520,27 @@ volt_texture_get_desc(
   struct volt_texture_desc *out_desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(texture);
-  ROA_ASSERT(out_desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(texture);
+    ROA_ASSERT(out_desc);
+  }
 
   /* convert gl to volt */
-  out_desc->mip_maps    = convert_gl_boolean_to_volt(texture->mips);
-  out_desc->dimentions  = convert_gl_dimention_to_volt(texture->dimention);
-  out_desc->width       = texture->width;
-  out_desc->height      = texture->height;
-  out_desc->sampling    = VOLT_SAMPLING_BILINEAR;
-  out_desc->data        = texture->data;
-  out_desc->access      = texture->data ? VOLT_STREAM : VOLT_STATIC;
-  out_desc->format      = convert_gl_format_to_volt(texture->format);
+  {
+    out_desc->mip_maps    = convert_gl_boolean_to_volt(texture->mips);
+    out_desc->dimentions  = convert_gl_dimention_to_volt(texture->dimention);
+    out_desc->width       = texture->width;
+    out_desc->height      = texture->height;
+    out_desc->sampling    = VOLT_SAMPLING_BILINEAR;
+    out_desc->data        = texture->data;
+    out_desc->access      = texture->data ? VOLT_STREAM : VOLT_STATIC;
+    out_desc->format      = convert_gl_format_to_volt(texture->format);
+  }
 }
 
 
-/* ------------------------------------------------- [ rsrc framebuffer ] -- */
+/* -------------------------------------------------- [ rsrc framebuffer ] -- */
 
 
 void
@@ -639,27 +550,29 @@ volt_framebuffer_create(
   struct volt_framebuffer_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(fbo);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(fbo);
+    ROA_ASSERT(desc);
+  }
 
   /* prepare */
-  volt_framebuffer_t new_fbo = (volt_framebuffer_t)roa_zalloc(sizeof(*new_fbo));
-
-  *fbo = new_fbo;
+  {
+    volt_framebuffer_t new_fbo = (volt_framebuffer_t)roa_zalloc(sizeof(*new_fbo));
+    *fbo = new_fbo;
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_fbo_create cmd;
+    cmd.desc        = *desc;
+    cmd.framebuffer = *fbo;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_create_framebuffer *cmd = (volt_gl_cmd_create_framebuffer*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_FBO_CREATE;
+    cmd_wrapper.fbo_create = cmd;
 
-    cmd->id = volt_gl_cmd_id::create_buffer_framebuffer;
-    cmd->desc = *desc;
-    cmd->framebuffer = *fbo;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -669,14 +582,17 @@ volt_framebuffer_status(
   volt_ctx_t ctx,
   volt_framebuffer_t fbo)
 {
-  ROA_UNUSED(ctx);
-  ROA_UNUSED(fbo);
+  /* param check */
+  {
+    ROA_UNUSED(ctx);
+    ROA_UNUSED(fbo);
+  }
 
   return VOLT_RSRC_ERROR;
 }
 
 
-/* ------------------------------------------------------- [ rsrc input ] -- */
+/* -------------------------------------------------------- [ rsrc input ] -- */
 
 
 void
@@ -740,7 +656,7 @@ volt_input_status(
 }
 
 
-/* --------------------------------------------------------- [ rsrc vbo ] -- */
+/* ---------------------------------------------------------- [ rsrc vbo ] -- */
 
 
 void
@@ -755,22 +671,22 @@ volt_vertex_buffer_create(
   ROA_ASSERT(desc);
 
   /* prepare */
-  volt_vbo_t new_vbo = (volt_vbo_t)roa_zalloc(sizeof(*new_vbo));
-
-  *vbo = new_vbo;
+  {
+    volt_vbo_t new_vbo = (volt_vbo_t)roa_zalloc(sizeof(*new_vbo));
+    *vbo = new_vbo;
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_vbo_create cmd;
+    cmd.desc = *desc;
+    cmd.vbo  = *vbo;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_create_vbo *cmd = (volt_gl_cmd_create_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id      = CMD_VBO_CREATE;
+    cmd_wrapper.vbo_create  = cmd;
 
-    cmd->id   = volt_gl_cmd_id::create_buffer_vbo;
-    cmd->desc = *desc;
-    cmd->vbo  = *vbo;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -810,22 +726,22 @@ volt_index_buffer_create(
   ROA_ASSERT(desc);
 
   /* prepare */
-  volt_ibo_t new_ibo = (volt_ibo_t)roa_zalloc(sizeof(*new_ibo));
-
-  *ibo = new_ibo;
+  {
+    volt_ibo_t new_ibo = (volt_ibo_t)roa_zalloc(sizeof(*new_ibo));
+    *ibo = new_ibo;
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_ibo_create cmd;
+    cmd.desc  = *desc;
+    cmd.ibo   = *ibo;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_create_ibo *cmd = (volt_gl_cmd_create_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_IBO_CREATE;
+    cmd_wrapper.ibo_create = cmd;
 
-    cmd->id = volt_gl_cmd_id::create_buffer_ibo;
-    cmd->desc = *desc;
-    cmd->ibo = *ibo;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -861,27 +777,29 @@ volt_program_create(
   struct volt_program_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(program);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(program);
+    ROA_ASSERT(desc);
+  }
 
   /* prepare */
-  volt_program_t new_prog = (volt_program_t)roa_zalloc(sizeof(*new_prog));
-
-  *program = new_prog;
+  {
+    volt_program_t new_prog = (volt_program_t)roa_zalloc(sizeof(*new_prog));
+    *program = new_prog;
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_program_create cmd;
+    cmd.desc     = *desc;
+    cmd.program  = *program;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_create_program *cmd = (volt_gl_cmd_create_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id         = CMD_PROGRAM_CREATE;
+    cmd_wrapper.program_create = cmd;
 
-    cmd->id = volt_gl_cmd_id::create_program;
-    cmd->desc = *desc;
-    cmd->program = *program;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -917,30 +835,32 @@ volt_uniform_create(
   struct volt_uniform_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(uniform);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(uniform);
+    ROA_ASSERT(desc);
+  }
 
   /* prepare */
-  volt_uniform_t new_rsrc = (volt_uniform_t)roa_zalloc(sizeof(*new_rsrc));
+  {
+    volt_uniform_t new_rsrc = (volt_uniform_t)roa_zalloc(sizeof(*new_rsrc));
+    new_rsrc->hash_name = roa_hash(desc->name);
+    new_rsrc->copy_data = desc->copy_data;
 
-  new_rsrc->hash_name = roa_hash(desc->name);
-  new_rsrc->copy_data = desc->copy_data;
-
-  *uniform = new_rsrc;
+    *uniform = new_rsrc;
+  }
 
   /* submit cmd */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    struct cmd_uniform_create cmd;
+    cmd.desc    = *desc;
+    cmd.uniform = *uniform;
 
-    volt_gl_stream *stream = &ctx->resource_create_stream;
-    volt_gl_cmd_create_uniform *cmd = (volt_gl_cmd_create_uniform*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_UNIFORM_CREATE;
+    cmd_wrapper.uniform_create = cmd;
 
-    cmd->id = volt_gl_cmd_id::create_uniform;
-    cmd->desc = *desc;
-    cmd->uniform = *uniform;
-
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+    roa_array_push(ctx->rsrc_create_cmds, cmd_wrapper);
   }
 }
 
@@ -968,17 +888,20 @@ volt_sampler_create(
   struct volt_sampler_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(sampler);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(sampler);
+    ROA_ASSERT(desc);
+  }
 
   /* prepare */
-  volt_sampler_t new_rsrc = (volt_sampler_t)roa_zalloc(sizeof(*new_rsrc));
-  new_rsrc->hash_name     = roa_hash(desc->name);
-  new_rsrc->sampling      = desc->sampling; /* not gl */
+  {
+    volt_sampler_t new_rsrc = (volt_sampler_t)roa_zalloc(sizeof(*new_rsrc));
+    new_rsrc->hash_name     = roa_hash(desc->name);
+    new_rsrc->sampling      = desc->sampling; /* not gl */
 
-  /* assign return */
-  *sampler = new_rsrc;
+    *sampler = new_rsrc;
+  }
 }
 
 
@@ -992,9 +915,11 @@ volt_rasterizer_create(
   struct volt_rasterizer_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(rasterizer);
-  ROA_ASSERT(desc);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(rasterizer);
+    ROA_ASSERT(desc);
+  }
 }
 
 
@@ -1008,21 +933,20 @@ volt_renderpass_create(
   struct volt_renderpass_desc *desc)
 {
   /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(pass);
+  {
+    ROA_ASSERT(ctx);
+    ROA_ASSERT(pass);
+    /* null desc is fine, means default backbuffer */
+  }
 
   /* new pass */
   volt_renderpass_t rp = (volt_renderpass_t)roa_zalloc(sizeof(*rp));
-  rp->render_stream = &ctx->render_stream;
-
-  volt_gl_stream *stream = rp->render_stream;
+  roa_array_create_with_capacity(rp->render_cmds, 128);
 
   /* bind fbo or default back buffer */
   {
-    volt_gl_cmd_bind_framebuffer *cmd = (volt_gl_cmd_bind_framebuffer*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
-    cmd->id = volt_gl_cmd_id::bind_framebuffer;
-    cmd->gl_id = desc && desc->fbo ? desc->fbo->gl_id : 0;
+    cmd_fbo_bind cmd;
+    cmd.gl_id = desc && desc->fbo ? desc->fbo->gl_id : 0;
 
     if (desc && desc->fbo && desc->attachment_count)
     {
@@ -1031,10 +955,10 @@ volt_renderpass_create(
 
       for (i = 0; i < count; ++i)
       {
-        cmd->color_attachments[i] = GL_COLOR_ATTACHMENT0 + desc->attachments[i];
+        cmd.color_attachments[i] = GL_COLOR_ATTACHMENT0 + desc->attachments[i];
       }
 
-      cmd->color_attachment_count = desc->attachment_count;
+      cmd.color_attachment_count = desc->attachment_count;
     }
     else if (desc && desc->fbo)
     {
@@ -1043,11 +967,18 @@ volt_renderpass_create(
 
       for (i = 0; i < count; ++i)
       {
-        cmd->color_attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+        cmd.color_attachments[i] = GL_COLOR_ATTACHMENT0 + i;
       }
 
-      cmd->color_attachment_count = count;
+      cmd.color_attachment_count = count;
     }
+
+    /* package cmd */
+    volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_FBO_BIND;
+    cmd_wrapper.fbo_bind = cmd;
+
+    roa_array_push(rp->render_cmds, cmd_wrapper);
 
     if (desc && strcmp(desc->name, "Dir Light Pass") == 0)
     {
@@ -1143,30 +1074,36 @@ volt_renderpass_draw_cmd(
     }
   }
 
-  volt_gl_stream *stream = pass->render_stream;
-
   /* viewport */
   {
-    volt_gl_cmd_set_viewport *cmd = (volt_gl_cmd_set_viewport*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct cmd_viewport cmd;
+    cmd.x       = pass->curr_viewport.x;
+    cmd.y       = pass->curr_viewport.y;
+    cmd.width   = pass->curr_viewport.width;
+    cmd.height  = pass->curr_viewport.height;
 
-    cmd->id = volt_gl_cmd_id::set_viewport;
-    cmd->x = pass->curr_viewport.x;
-    cmd->y = pass->curr_viewport.y;
-    cmd->width = pass->curr_viewport.width;
-    cmd->height = pass->curr_viewport.height;
+    volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id    = CMD_VIEWPORT;
+    cmd_wrapper.viewport  = cmd;
+
+    roa_array_push(pass->render_cmds, cmd_wrapper);
   }
 
   /* scissor */
   {
     if (pass->curr_scissor.width > 0)
     {
-      volt_gl_cmd_set_scissor *cmd = (volt_gl_cmd_set_scissor*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+      struct cmd_scissor cmd;
+      cmd.x       = pass->curr_scissor.x;
+      cmd.y       = pass->curr_scissor.y;
+      cmd.width   = pass->curr_scissor.width;
+      cmd.height  = pass->curr_scissor.height;
 
-      cmd->id = volt_gl_cmd_id::set_scissor;
-      cmd->x = pass->curr_scissor.x;
-      cmd->y = pass->curr_scissor.y;
-      cmd->width = pass->curr_scissor.width;
-      cmd->height = pass->curr_scissor.height;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id  = CMD_SCISSOR;
+      cmd_wrapper.scissor = cmd;
+
+      roa_array_push(pass->render_cmds, cmd_wrapper);
     }
   }
 
@@ -1174,10 +1111,15 @@ volt_renderpass_draw_cmd(
   {
     if (pass->curr_clear)
     {
-      volt_gl_cmd_clear *cmd = (volt_gl_cmd_clear*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+      struct cmd_clear cmd;
+      cmd.mask = convert_volt_clear_to_gl_flag(pass->curr_clear);
 
-      cmd->id = volt_gl_cmd_id::clear;
-      cmd->mask = convert_volt_clear_to_gl_flag(pass->curr_clear);
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id = CMD_CLEAR;
+      cmd_wrapper.clear  = cmd;
+
+      roa_array_push(pass->render_cmds, cmd_wrapper);
+
       pass->curr_clear = 0;
     }
   }
@@ -1188,10 +1130,16 @@ volt_renderpass_draw_cmd(
     const GLuint program = pass->curr_program ? pass->curr_program->gl_id : 0;
 
     /* cmd */
-    volt_gl_cmd_bind_program *cmd = (volt_gl_cmd_bind_program*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    {
+      struct cmd_program_bind cmd;
+      cmd.program = program;
 
-    cmd->id = volt_gl_cmd_id::bind_program;
-    cmd->program = program;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id = CMD_PROGRAM_BIND;
+      cmd_wrapper.program_bind = cmd;
+
+      roa_array_push(pass->render_cmds, cmd_wrapper);
+    }
 
     pass->last_bound_program = pass->curr_program;
   }
@@ -1200,14 +1148,18 @@ volt_renderpass_draw_cmd(
   if (pass->curr_vbo != pass->last_bound_vbo)
   {
     /* cmd */
-    const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
+    {
+      const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
 
-    /* prepare */
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_bind_vbo *cmd = (volt_gl_cmd_bind_vbo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+      struct cmd_vbo_bind cmd;
+      cmd.vbo = vbo;
 
-    cmd->id = volt_gl_cmd_id::bind_vbo;
-    cmd->vbo = vbo;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id = CMD_VBO_BIND;
+      cmd_wrapper.vbo_bind = cmd;
+
+      roa_array_push(pass->render_cmds, cmd_wrapper);
+    }
 
     pass->last_bound_vbo = pass->curr_vbo;
   }
@@ -1218,11 +1170,16 @@ volt_renderpass_draw_cmd(
     const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
 
     /* cmd */
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_bind_ibo *cmd = (volt_gl_cmd_bind_ibo*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    {
+      struct cmd_ibo_bind cmd;
+      cmd.ibo = ibo;
 
-    cmd->id = volt_gl_cmd_id::bind_ibo;
-    cmd->ibo = ibo;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id   = CMD_IBO_BIND;
+      cmd_wrapper.ibo_bind = cmd;
+
+      roa_array_push(pass->render_cmds, cmd_wrapper);
+    }
 
     pass->last_bound_ibo = pass->curr_ibo;
   }
@@ -1244,16 +1201,21 @@ volt_renderpass_draw_cmd(
         GLuint pointer = pass->curr_input->increment_stride[i];
 
         /* cmd */
-        volt_gl_stream *stream = pass->render_stream;
-        volt_gl_cmd_bind_input *cmd = (volt_gl_cmd_bind_input*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+        {
+          struct cmd_input_bind cmd;
+          cmd.index       = index;
+          cmd.size        = size;
+          cmd.type        = type;
+          cmd.normalized  = normalized;
+          cmd.stride      = stride;
+          cmd.pointer     = pointer;
 
-        cmd->id = volt_gl_cmd_id::bind_input;
-        cmd->index = index;
-        cmd->size = size;
-        cmd->type = type;
-        cmd->normalized = normalized;
-        cmd->stride = stride;
-        cmd->pointer = pointer;
+          struct volt_gl_cmd cmd_wrapper;
+          cmd_wrapper.cmd_id      = CMD_INPUT_BIND;
+          cmd_wrapper.input_bind  = cmd;
+
+          roa_array_push(pass->render_cmds, cmd_wrapper);
+        }
       }
     }
 
@@ -1285,13 +1247,16 @@ volt_renderpass_draw_cmd(
         if (bound_sampler_hash == prog_sampler_hash)
         {
           /* bind texture */
-          volt_gl_stream *stream = pass->render_stream;
-          volt_gl_cmd_bind_texture *cmd = (volt_gl_cmd_bind_texture*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+          struct cmd_texture_bind cmd;
+          cmd.gl_id = pass->sampler[j]->gl_id;
+          cmd.active_texture = active_textures;
+          cmd.sampler_location = pass->curr_program->samplers[i].location;
 
-          cmd->id = volt_gl_cmd_id::bind_texture;
-          cmd->gl_id = pass->sampler[j]->gl_id;
-          cmd->active_texture = active_textures;
-          cmd->sampler_location = pass->curr_program->samplers[i].location;
+          struct volt_gl_cmd cmd_wrapper;
+          cmd_wrapper.cmd_id = CMD_TEXTURE_BIND;
+          cmd_wrapper.texture_bind = cmd;
+
+          roa_array_push(pass->render_cmds, cmd_wrapper);
 
           active_textures += 1;
         }
@@ -1318,15 +1283,17 @@ volt_renderpass_draw_cmd(
         if (bound_hash == prog_uniform_hash)
         {
           /* bind uniform */
-          volt_gl_stream *stream = pass->render_stream;
-          volt_gl_cmd_bind_uniform *cmd = (volt_gl_cmd_bind_uniform*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+          struct cmd_uniform_bind cmd;
+          cmd.location = pass->curr_program->uniforms[i].location;
+          cmd.value = pass->uniform[j]->value;
+          cmd.type = pass->uniform[j]->type;
+          cmd.count = pass->uniform[j]->count;
 
-          /* must check types */
-          cmd->id = volt_gl_cmd_id::bind_uniform;
-          cmd->location = pass->curr_program->uniforms[i].location;
-          cmd->value = pass->uniform[j]->value;
-          cmd->type = pass->uniform[j]->type;
-          cmd->count = pass->uniform[j]->count;
+          struct volt_gl_cmd cmd_wrapper;
+          cmd_wrapper.cmd_id = CMD_UNIFORM_BIND;
+          cmd_wrapper.uniform_bind = cmd;
+
+          roa_array_push(pass->render_cmds, cmd_wrapper);
         }
       }
     }
@@ -1335,27 +1302,33 @@ volt_renderpass_draw_cmd(
   /* cmd */
   if (pass->curr_ibo == ROA_NULL)
   {
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_draw_count *cmd = (volt_gl_cmd_draw_count*)volt_gl_stream_alloc(stream, sizeof(*cmd));
-
     const GLuint stride = pass->curr_input->element_stride;
     const GLuint ele_count = pass->curr_vbo->element_count;
     const GLuint count = ele_count / stride;
 
-    cmd->id = volt_gl_cmd_id::draw_count;
-    cmd->first = 0;
-    cmd->count = count;
-    cmd->mode = GL_TRIANGLES;
+    struct cmd_draw_count cmd;
+    cmd.first = 0;
+    cmd.count = count;
+    cmd.mode = GL_TRIANGLES;
+
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_DRAW_COUNT;
+    cmd_wrapper.draw_count = cmd;
+
+    roa_array_push(pass->render_cmds, cmd_wrapper);
   }
   else
   {
-    volt_gl_stream *stream = pass->render_stream;
-    volt_gl_cmd_draw_indexed *cmd = (volt_gl_cmd_draw_indexed*)volt_gl_stream_alloc(stream, sizeof(*cmd));
+    struct cmd_draw_indexed cmd;
+    cmd.count = pass->curr_ibo->element_count;
+    cmd.type = GL_UNSIGNED_INT;
+    cmd.mode = GL_TRIANGLES;
 
-    cmd->id = volt_gl_cmd_id::draw_indexed;
-    cmd->count = pass->curr_ibo->element_count;
-    cmd->type = GL_UNSIGNED_INT;
-    cmd->mode = GL_TRIANGLES;
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_DRAW_INDEXED;
+    cmd_wrapper.draw_indexed = cmd;
+
+    roa_array_push(pass->render_cmds, cmd_wrapper);
   }
 }
 
@@ -1613,7 +1586,7 @@ volt_renderpass_clear_cmd(
 
 
 static void
-volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
+volt_gl_create_vbo(const cmd_vbo_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1642,7 +1615,7 @@ volt_gl_create_vbo(const volt_gl_cmd_create_vbo *cmd)
 
 
 static void
-volt_gl_update_vbo(const volt_gl_cmd_update_vbo *cmd)
+volt_gl_update_vbo(const cmd_vbo_update *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1651,7 +1624,7 @@ volt_gl_update_vbo(const volt_gl_cmd_update_vbo *cmd)
 
 
 static void
-volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
+volt_gl_create_ibo(const cmd_ibo_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1680,7 +1653,7 @@ volt_gl_create_ibo(const volt_gl_cmd_create_ibo *cmd)
 
 
 static void
-volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
+volt_gl_create_program(const cmd_program_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1840,7 +1813,7 @@ volt_gl_create_program(const volt_gl_cmd_create_program *cmd)
 
 
 static void
-volt_gl_create_input(const volt_gl_cmd_create_input *cmd)
+volt_gl_create_input(const cmd_input_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1851,7 +1824,7 @@ volt_gl_create_input(const volt_gl_cmd_create_input *cmd)
 
 
 static void
-volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
+volt_gl_create_texture(const cmd_texture_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1922,7 +1895,7 @@ volt_gl_create_texture(const volt_gl_cmd_create_texture *cmd)
 
 
 static void
-volt_gl_update_texture(const volt_gl_cmd_update_texture *cmd)
+volt_gl_update_texture(const cmd_texture_update *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -1961,7 +1934,7 @@ volt_gl_update_texture(const volt_gl_cmd_update_texture *cmd)
 }
 
 static void
-volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
+volt_gl_create_framebuffer(const cmd_fbo_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -2023,7 +1996,7 @@ volt_gl_create_framebuffer(const volt_gl_cmd_create_framebuffer *cmd)
 
 
 static void
-volt_gl_create_uniform(const volt_gl_cmd_create_uniform *cmd)
+volt_gl_create_uniform(const cmd_uniform_create *cmd)
 {
   /* param check */
   ROA_ASSERT(cmd);
@@ -2060,7 +2033,7 @@ volt_gl_create_uniform(const volt_gl_cmd_create_uniform *cmd)
 
 
 static void
-volt_gl_bind_vbo(const volt_gl_cmd_bind_vbo *cmd)
+volt_gl_bind_vbo(const cmd_vbo_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2078,7 +2051,7 @@ volt_gl_bind_vbo(const volt_gl_cmd_bind_vbo *cmd)
 
 
 static void
-volt_gl_bind_ibo(const volt_gl_cmd_bind_ibo *cmd)
+volt_gl_bind_ibo(const cmd_ibo_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2096,7 +2069,7 @@ volt_gl_bind_ibo(const volt_gl_cmd_bind_ibo *cmd)
 
 
 static void
-volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
+volt_gl_bind_program(const cmd_program_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2113,7 +2086,7 @@ volt_gl_bind_program(const volt_gl_cmd_bind_program *cmd)
 
 
 static void
-volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
+volt_gl_bind_input(const cmd_input_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2135,7 +2108,7 @@ volt_gl_bind_input(const volt_gl_cmd_bind_input *cmd)
 
 
 static void
-volt_gl_bind_texture(const volt_gl_cmd_bind_texture *cmd)
+volt_gl_bind_texture(const cmd_texture_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2157,7 +2130,7 @@ volt_gl_bind_texture(const volt_gl_cmd_bind_texture *cmd)
 
 
 static void
-volt_gl_bind_framebuffer(const volt_gl_cmd_bind_framebuffer *cmd)
+volt_gl_bind_framebuffer(const cmd_fbo_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2177,7 +2150,7 @@ volt_gl_bind_framebuffer(const volt_gl_cmd_bind_framebuffer *cmd)
 
 
 static void
-volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
+volt_gl_bind_uniform(const cmd_uniform_bind *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2212,7 +2185,7 @@ volt_gl_bind_uniform(const volt_gl_cmd_bind_uniform *cmd)
 
 
 static void
-volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
+volt_gl_draw_count(const cmd_draw_count *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2230,7 +2203,7 @@ volt_gl_draw_count(const volt_gl_cmd_draw_count *cmd)
 
 
 static void
-volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
+volt_gl_draw_indexed(const cmd_draw_indexed *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2249,7 +2222,7 @@ volt_gl_draw_indexed(const volt_gl_cmd_draw_indexed *cmd)
 
 
 static void
-volt_gl_set_viewport(const volt_gl_cmd_set_viewport *cmd)
+volt_gl_set_viewport(const cmd_viewport *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2266,7 +2239,7 @@ volt_gl_set_viewport(const volt_gl_cmd_set_viewport *cmd)
 
 
 static void
-volt_gl_set_scissor(const volt_gl_cmd_set_scissor *cmd)
+volt_gl_set_scissor(const cmd_scissor *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2284,7 +2257,7 @@ volt_gl_set_scissor(const volt_gl_cmd_set_scissor *cmd)
 
 
 static void
-volt_gl_clear(const volt_gl_cmd_clear *cmd)
+volt_gl_clear(const cmd_clear *cmd)
 {
   /* param check */
   ROA_ASSERT_PEDANTIC(cmd);
@@ -2318,20 +2291,8 @@ volt_ctx_create(volt_ctx_t *ctx)
   struct volt_ctx *new_ctx = nullptr;
   new_ctx = (volt_ctx*)roa_zalloc(sizeof(*new_ctx));
 
-  roa_spin_lock_init(&new_ctx->rsrc_create_lock);
-  new_ctx->resource_create_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * 1024);
-  new_ctx->resource_create_stream.capacity = sizeof(uint8_t) * 1024;
-
-  roa_spin_lock_init(&new_ctx->rsrc_destroy_lock);
-  new_ctx->resource_destroy_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * 1024);
-  new_ctx->resource_destroy_stream.capacity = sizeof(uint8_t) * 1024;
-
-  roa_spin_lock_init(&new_ctx->rdr_lock);
-  int count = 1 << 14;
-  new_ctx->render_stream.data = (uint8_t*)roa_zalloc(sizeof(uint8_t) * count);
-  new_ctx->render_stream.capacity = sizeof(uint8_t) * count;
-
-  roa_spin_lock_init(&new_ctx->rp_lock);
+  roa_array_create_with_capacity(new_ctx->rsrc_create_cmds, 128);
+  roa_array_create_with_capacity(new_ctx->rsrc_destroy_cmds, 128);
   roa_array_create_with_capacity(new_ctx->renderpasses, 128);
 
   *ctx = new_ctx;
@@ -2351,9 +2312,14 @@ volt_ctx_create(volt_ctx_t *ctx)
 void
 volt_ctx_destroy(volt_ctx_t *ctx)
 {
-  /* destroy streams */
+  volt_ctx *kill_ctx = *ctx;
 
-  roa_free(*ctx);
+  roa_array_destroy(kill_ctx->rsrc_create_cmds);
+  roa_array_destroy(kill_ctx->rsrc_destroy_cmds);
+  roa_array_destroy(kill_ctx->renderpasses);
+  roa_free(kill_ctx);
+
+  kill_ctx = ROA_NULL;
 }
 
 
@@ -2362,13 +2328,9 @@ volt_ctx_has_pending_rsrcs(volt_ctx_t ctx)
 {
   volt_bool pending = VOLT_FALSE;
 
-  roa_spin_lock_aquire(&ctx->rsrc_create_lock);
-
-  unsigned cmd_count = ctx->resource_create_stream.cmd_count;
+  unsigned cmd_count = roa_array_size(ctx->rsrc_create_cmds);
 
   pending = cmd_count ? VOLT_TRUE : VOLT_FALSE;
-
-  roa_spin_lock_release(&ctx->rsrc_create_lock);
 
   return pending;
 }
@@ -2401,88 +2363,66 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   /* create resource stream  */
   {
-    roa_spin_lock_aquire(&ctx->rsrc_create_lock);
+    unsigned cmd_count = roa_array_size(ctx->rsrc_create_cmds);
+    unsigned i;
 
-    const uint8_t *data = ctx->resource_create_stream.data;
-    unsigned cmd_count = ctx->resource_create_stream.cmd_count;
-
-    while ((cmd_count--) > 0)
+    for(i = 0; i < cmd_count; ++i)
     {
-      const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
-      ROA_ASSERT(uk_cmd);
+      volt_gl_cmd *uk_cmd = &ctx->rsrc_create_cmds[i];
 
-      /* log cmd */
-      if (ROA_IS_ENABLED(GL_LOG_CMDS)) {
-        if (ctx->log_callback) {
-          char buffer[1024]{};
-          strcat(buffer, "CMD: ");
-          strcat(buffer, volt_gl_cmd_to_string(uk_cmd->id));
-          strcat(buffer, "\n");
-          ctx->log_callback(buffer);
-        }
-      }
-
-      switch (uk_cmd->id)
+      switch (uk_cmd->cmd_id)
       {
-        case(volt_gl_cmd_id::create_buffer_vbo):
+        case(CMD_VBO_CREATE):
         {
-          const volt_gl_cmd_create_vbo *cmd = (const volt_gl_cmd_create_vbo*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_vbo_create *cmd = &uk_cmd->vbo_create;
           volt_gl_create_vbo(cmd);
           break;
         }
-        case(volt_gl_cmd_id::update_buffer_vbo):
+        case(CMD_VBO_UPDATE):
         {
-          const volt_gl_cmd_update_vbo *cmd = (const volt_gl_cmd_update_vbo*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_vbo_update *cmd = &uk_cmd->vbo_update;
           volt_gl_update_vbo(cmd);
+          break;
         }
-        case(volt_gl_cmd_id::create_buffer_ibo):
+        case(CMD_IBO_CREATE):
         {
-          const volt_gl_cmd_create_ibo *cmd = (const volt_gl_cmd_create_ibo*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_ibo_create *cmd = &uk_cmd->ibo_create;
           volt_gl_create_ibo(cmd);
           break;
         }
-        case(volt_gl_cmd_id::create_buffer_input):
+        case(CMD_INPUT_CREATE):
         {
-          const volt_gl_cmd_create_input *cmd = (const volt_gl_cmd_create_input*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_input_create *cmd = &uk_cmd->input_create;
           volt_gl_create_input(cmd);
           break;
         }
-        case(volt_gl_cmd_id::create_program):
+        case(CMD_PROGRAM_CREATE):
         {
-          const volt_gl_cmd_create_program *cmd = (const volt_gl_cmd_create_program*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_program_create *cmd = &uk_cmd->program_create;
           volt_gl_create_program(cmd);
           break;
         }
-        case(volt_gl_cmd_id::create_buffer_texture):
+        case(CMD_TEXTURE_CREATE):
         {
-          const volt_gl_cmd_create_texture *cmd = (const volt_gl_cmd_create_texture*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_texture_create *cmd = &uk_cmd->texture_create;
           volt_gl_create_texture(cmd);
           break;
         }
-        case(volt_gl_cmd_id::update_buffer_texture):
+        case(CMD_TEXTURE_UPDATE):
         {
-          const volt_gl_cmd_update_texture *cmd = (const volt_gl_cmd_update_texture*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_texture_update *cmd = &uk_cmd->texture_update;
           volt_gl_update_texture(cmd);
           break;
         }
-        case(volt_gl_cmd_id::create_buffer_framebuffer):
+        case(CMD_FBO_CREATE):
         {
-          const volt_gl_cmd_create_framebuffer *cmd = (const volt_gl_cmd_create_framebuffer*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_fbo_create *cmd = &uk_cmd->fbo_create;
           volt_gl_create_framebuffer(cmd);
           break;
         }
-        case(volt_gl_cmd_id::create_uniform):
+        case(CMD_UNIFORM_CREATE):
         {
-          const volt_gl_cmd_create_uniform *cmd = (const volt_gl_cmd_create_uniform*)uk_cmd;
-          data += sizeof(*cmd);
+          cmd_uniform_create *cmd = &uk_cmd->uniform_create;
           volt_gl_create_uniform(cmd);
           break;
         }
@@ -2512,10 +2452,9 @@ volt_ctx_execute(volt_ctx_t ctx)
           }
         }
       }
-    }
 
-    volt_gl_stream_clear(&ctx->resource_create_stream);
-    roa_spin_lock_release(&ctx->rsrc_create_lock);
+      roa_array_clear(ctx->rsrc_create_cmds);
+    }
   }
 
   /* execute render stream */
@@ -2526,141 +2465,102 @@ volt_ctx_execute(volt_ctx_t ctx)
     //glEnable(GL_CULL_FACE);
     //glCullFace(GL_NONE);
 
-    const uint8_t *data = ctx->render_stream.data;
-    unsigned cmd_count = ctx->render_stream.cmd_count;
+    unsigned rp_count = roa_array_size(ctx->renderpasses);
+    unsigned i;
 
-    while ((cmd_count--) > 0)
+    for(i = 0; i < rp_count; ++i)
     {
-      const volt_gl_cmd_unknown *uk_cmd = (const volt_gl_cmd_unknown*)data;
-      ROA_ASSERT(uk_cmd);
+      unsigned cmd_count = roa_array_size(ctx->renderpasses[i]->render_cmds);
+      unsigned j;
 
-      /* log cmd */
-      if (ROA_IS_ENABLED(GL_LOG_CMDS)) {
-        if (ctx->log_callback) {
-          char buffer[1024]{};
-          strcat(buffer, "CMD: ");
-          strcat(buffer, volt_gl_cmd_to_string(uk_cmd->id));
-          strcat(buffer, "\n");
-          ctx->log_callback(buffer);
-        }
-      }
-
-      switch (uk_cmd->id)
+      for(j = 0; j < cmd_count; ++j)
       {
-        case(volt_gl_cmd_id::bind_vbo):
-        {
-          const volt_gl_cmd_bind_vbo *cmd = (const volt_gl_cmd_bind_vbo*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_vbo(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::bind_ibo):
-        {
-          const volt_gl_cmd_bind_ibo *cmd = (const volt_gl_cmd_bind_ibo*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_ibo(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::bind_program):
-        {
-          const volt_gl_cmd_bind_program *cmd = (const volt_gl_cmd_bind_program*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_program(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::bind_input):
-        {
-          const volt_gl_cmd_bind_input *cmd = (const volt_gl_cmd_bind_input*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_input(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::bind_texture):
-        {
-          const volt_gl_cmd_bind_texture *cmd = (const volt_gl_cmd_bind_texture*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_texture(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::bind_framebuffer):
-        {
-          const volt_gl_cmd_bind_framebuffer *cmd = (const volt_gl_cmd_bind_framebuffer*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_framebuffer(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::bind_uniform):
-        {
-          const volt_gl_cmd_bind_uniform *cmd = (const volt_gl_cmd_bind_uniform*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_bind_uniform(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::draw_count):
-        {
-          const volt_gl_cmd_draw_count *cmd = (const volt_gl_cmd_draw_count*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_draw_count(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::draw_indexed):
-        {
-          const volt_gl_cmd_draw_indexed *cmd = (const volt_gl_cmd_draw_indexed*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_draw_indexed(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::set_viewport):
-        {
-          const volt_gl_cmd_set_viewport *cmd = (const volt_gl_cmd_set_viewport*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_set_viewport(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::set_scissor):
-        {
-          const volt_gl_cmd_set_scissor *cmd = (const volt_gl_cmd_set_scissor*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_set_scissor(cmd);
-          break;
-        }
-        case(volt_gl_cmd_id::clear):
-        {
-          const volt_gl_cmd_clear *cmd = (const volt_gl_cmd_clear*)uk_cmd;
-          data += sizeof(*cmd);
-          volt_gl_clear(cmd);
-          break;
-        }
-        default:
-          /* only renderpass cmds should be here */
-          ROA_ASSERT(false);
-      }
+        volt_gl_cmd *uk_cmd = &ctx->renderpasses[i]->render_cmds[j];
 
-      /* log err */
-      if (ROA_IS_ENABLED(GL_LOG_EXEC_ERRORS))
-      {
-        GLint err = glGetError();
-
-        if(err)
+        switch (uk_cmd->cmd_id)
         {
-          if (ctx->log_callback)
+          case(CMD_VBO_BIND):
           {
-            char buffer[1024]{};
-            strcat(buffer, "GL RENDER ERR: ");
-            strcat(buffer, "\n");
-            ctx->log_callback(buffer);
+            cmd_vbo_bind *cmd = &uk_cmd->vbo_bind;
+            volt_gl_bind_vbo(cmd);
+            break;
           }
-
-
-          if (ROA_IS_ENABLED(GL_ASSERT_ON_ERRORS))
+          case(CMD_IBO_BIND):
           {
+            cmd_ibo_bind *cmd = &uk_cmd->ibo_bind;
+            volt_gl_bind_ibo(cmd);
+            break;
+          }
+          case(CMD_PROGRAM_BIND):
+          {
+            cmd_program_bind *cmd = &uk_cmd->program_bind;
+            volt_gl_bind_program(cmd);
+            break;
+          }
+          case(CMD_INPUT_BIND):
+          {
+            cmd_input_bind *cmd = &uk_cmd->input_bind;
+            volt_gl_bind_input(cmd);
+            break;
+          }
+          case(CMD_TEXTURE_BIND):
+          {
+            cmd_texture_bind *cmd = &uk_cmd->texture_bind;
+            volt_gl_bind_texture(cmd);
+            break;
+          }
+          case(CMD_FBO_BIND):
+          {
+            cmd_fbo_bind *cmd = &uk_cmd->fbo_bind;
+            volt_gl_bind_framebuffer(cmd);
+            break;
+          }
+          case(CMD_UNIFORM_BIND):
+          {
+            cmd_uniform_bind *cmd = &uk_cmd->uniform_bind;
+            volt_gl_bind_uniform(cmd);
+            break;
+          }
+          case(CMD_DRAW_COUNT):
+          {
+            cmd_draw_count *cmd = &uk_cmd->draw_count;
+            volt_gl_draw_count(cmd);
+            break;
+          }
+          case(CMD_DRAW_INDEXED):
+          {
+            cmd_draw_indexed *cmd = &uk_cmd->draw_indexed;
+            volt_gl_draw_indexed(cmd);
+            break;
+          }
+          case(CMD_VIEWPORT):
+          {
+            cmd_viewport *cmd = &uk_cmd->viewport;
+            volt_gl_set_viewport(cmd);
+            break;
+          }
+          case(CMD_SCISSOR):
+          {
+            cmd_scissor *cmd = &uk_cmd->scissor;
+            volt_gl_set_scissor(cmd);
+            break;
+          }
+          case(CMD_CLEAR):
+          {
+            cmd_clear *cmd = &uk_cmd->clear;
+            volt_gl_clear(cmd);
+            break;
+          }
+          default:
+            /* only renderpass cmds should be here */
             ROA_ASSERT(false);
-          }
         }
       }
+
+      roa_array_destroy(ctx->renderpasses[i]->render_cmds);
     }
 
-    volt_gl_stream_clear(&ctx->render_stream);
+    roa_array_clear(ctx->renderpasses);
   }
 
   /* destroy resource stream */

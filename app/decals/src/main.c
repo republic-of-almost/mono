@@ -51,7 +51,7 @@ struct direction_light_data
   volt_rasterizer_t rasterizer;
   volt_vbo_t        triangle;
   volt_input_t      input;
-  
+
   volt_uniform_t    u_eye_pos;
   volt_uniform_t    u_dir_light;
   volt_uniform_t    u_spec_power;
