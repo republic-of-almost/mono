@@ -224,10 +224,10 @@ main()
 
       "void main()\n"
       "{\n"
-      "float x_val = (oTexcoord.x * 2.0) - 1.0;"
-      "float y_val = (oTexcoord.y * 2.0) - 1.0;"
-      "float mix_value = sin(x_val) * cos(y_val);"
-      "outColor = mix(texture(texture_01, oTexcoord), texture(texture_02, oTexcoord), mix_value);"
+      "float x_val = ((oTexcoord.x * 2) - 1.0) * 5.0;"
+      "float y_val = ((oTexcoord.y * 2) - 1.0) * 3.0;"
+      "float mix_value = 20 * sin(((x_val * x_val) + (y_val * y_val)));"
+      "outColor = mix(texture(texture_01, oTexcoord), texture(texture_02, oTexcoord), clamp(mix_value, 0, 1));"
       "}\n";
 
     const char *stages[2];
@@ -284,11 +284,11 @@ main()
     /* create mats */
     {
       static float time = 0.1f;
-      time += 0.01f;
-      float radius = 3.f;
+      time += 0.005f;
+      float radius = 2.f;
 
       float aspect = (float)win_desc.width / (float)win_desc.height;
-      roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25, 0.1f, 10.f, aspect);
+      roa_mat4_projection(&proj, ROA_QUART_TAU / 4, 0.1f, 10.f, aspect);
 
       float x = roa_float_sin(time) * radius;
       float y = radius - (radius / ROA_G_RATIO);
@@ -377,6 +377,8 @@ app_create()
 
   roa_ctx_get_window_desc(win_ctx, &win_desc);
   win_desc.title = "Volt Functional Test";
+  win_desc.width = 1200;
+  win_desc.height = 720;
 
   roa_ctx_set_window_desc(win_ctx, &win_desc);
 

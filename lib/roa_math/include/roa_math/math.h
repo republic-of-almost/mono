@@ -31,6 +31,7 @@ typedef struct roa_ray { roa_float3 origin; roa_float3 dir; } roa_ray;
 #define         ROA_TAU 6.28318530718
 #define         ROA_HALF_TAU 3.14159265359
 #define         ROA_QUART_TAU 1.5707963268
+#define         ROA_EIGHTH_TAU 0.7853981634
 #define         ROA_G_RATIO 1.61803398875
 #define         ROA_ROOT_TWO 1.41421356237
 #define         ROA_ROOT_THREE 1.73205080757
