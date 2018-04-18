@@ -13,8 +13,8 @@ extern "C" {
 
   Input
   --
-  layout(location=0) in vec3 vs_in_position
-  layout(location=2) in vec2 vs_in_texcoord
+  in vec3 vs_in_position
+  in vec2 vs_in_texcoord
 
   Uniforms
   --
@@ -38,16 +38,14 @@ const char*
 glsl_two_textures_fs();
 
 
-
-/* -------------------------------------------------------- [ Fullbright ] -- */
+/* -------------------------------------------------------- [ Fullscreen ] -- */
 /*
-  Program that simply renders mesh with a diffuse texture, no lighting or
-  anything fancy.
+  Program is ment for rendering a texture to a quad / fullscreen triangle etc.
 
   Input
   --
-  layout(location=0) in vec3 vs_in_position
-  layout(location=2) in vec2 vs_in_texcoord
+  in vec3 vs_in_position
+  in vec2 vs_in_texcoord
 
   Uniforms
   --
@@ -63,38 +61,11 @@ glsl_two_textures_fs();
 */
 
 const char*
-glsl_fullbright_vs();
+glsl_blit_vs();
 
 
 const char*
-glsl_fullbright_fs();
-
-
-/* ---------------------------------------------------- [ Colored Render ] -- */
-/*
-  Program that renders a mesh a certain color
-
-  Input
-  --
-  layout(location=0) in vec3 vs_in_position
-
-  Uniforms
-  --
-  uniform mat4 uni_wvp_mat
-  uniform vec4 uni_color
-
-  Output
-  --
-  out vec4 fs_out_fragcolor
-*/
-
-
-const char*
-glsl_colored_vs();
-
-
-const char*
-glsl_colored_fs();
+glsl_blit_fs();
 
 
 #ifdef __cplusplus

@@ -20,5 +20,9 @@
 		"RepublicLib",
     "Scratch",
     "Volt"
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
   ]
 }

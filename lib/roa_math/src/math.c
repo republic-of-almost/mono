@@ -162,7 +162,10 @@ roa_float2_fill_with_value(float v)
 roa_float2
 roa_float2_set_with_values(float x, float y)
 {
-	roa_float2 vec = {x, y};
+	roa_float2 vec;
+  vec.x = x;
+  vec.y = y;
+
 	return vec;
 }
 

@@ -94,6 +94,12 @@
   ],
 
   "defines_windows" : [
-     "_GLFW_WIN32"
+     "_GLFW_WIN32",
+     "_CRT_SECURE_NO_WARNINGS"
+  ],
+
+  "disable_warning_windows" : [
+    "4100",
+    "4204"
   ]
 }

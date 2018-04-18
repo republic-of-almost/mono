@@ -26,5 +26,9 @@
     "STB",
     "OpenGL",
     "GLFW"
+  ],
+
+  "disable_warning_windows" : [
+    "4206"
   ]
 }

@@ -16,5 +16,10 @@
 
   "defines_windows": [
     "_CRT_SECURE_NO_WARNINGS"
+  ],
+
+  "disable_warning_windows" : [
+    "4100",
+    "4204"
   ]
 }

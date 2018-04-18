@@ -24,5 +24,9 @@
     "Scratch",
     "STB",
     "MMX"
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
   ]
 }

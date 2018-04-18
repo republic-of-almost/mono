@@ -6,6 +6,7 @@
 #include <volt/volt.h>
 #include <roa_lib/time.h>
 #include <scratch/geometry.h>
+#include <scratch/glsl.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -149,8 +150,10 @@ main(int argc, char **argv)
 
   /* ----------------------------------------------------------- [ Scene ] -- */
   {
-    struct volt_rect2d vp = {0,0,width, height};
-    scene.viewport = vp;
+    scene.viewport.x      = 0;
+    scene.viewport.y      = 0;
+    scene.viewport.width  = width;
+    scene.viewport.height = height;
 
     /* load vbo */
     {
@@ -193,7 +196,7 @@ main(int argc, char **argv)
     /* box positions */
     {
       roa_transform_init(&scene.box_transform[0]);
-      scene.box_transform[0].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
+      scene.box_transform[0].position = roa_float3_set_with_values(0.f, ROA_G_RATIO / 2, 0.f);
 			scene.box_transform[0].scale = roa_float3_set_with_values(1.f, ROA_G_RATIO, 1.f);
     }
 
@@ -232,143 +235,115 @@ main(int argc, char **argv)
 
       roa_mat4_projection(&scene.proj_mat, fov, 0.1, 100, aspect);
 
-      scene.cam_pitch 	 = 0.f;
-      scene.cam_yaw 		 = 0.f;
-			scene.cam_radius   = 8.f;
+      scene.cam_pitch    = 0.f;
+      scene.cam_yaw      = 0.f;
+      scene.cam_radius   = 4.f;
       scene.cam_position = roa_float3_one();
     }
   }
 
-	/* ------------------------------------------------------ [ Fullscreen ] -- */
-	{
-		/* program */
-		{
-			const char *vert_shd =
-				"#version 150 core\n"
-				"in vec2 vs_in_pos;\n"
-				"in vec2 vs_in_tex_c;\n"
-				"out vec2 ps_in_tex_c;\n"
-				"void main()\n"
-				"{\n"
-				" gl_Position = vec4(vs_in_pos, 0.0, 1.0);\n"
-				" ps_in_tex_c = vs_in_tex_c;\n"
-				"}\n";
+  /* ------------------------------------------------------ [ Fullscreen ] -- */
+  {
+    /* program */
+    {
+      const char *shaders[2];
+      shaders[0] = glsl_blit_vs();
+      shaders[1] = glsl_blit_fs();
 
-			const char *frag_shd =
-				"#version 150 core\n"
-				"in vec2 ps_in_tex_c;\n"
-				"out vec4 out_color;\n"
-				"uniform sampler2D diffuse;\n"
-				"void main()\n"
-				"{\n"
-				" out_color = texture(diffuse, ps_in_tex_c);\n"
-				"}\n";
+      volt_shader_stage stages[] = {
+        VOLT_SHD_VERTEX,
+        VOLT_SHD_FRAGMENT,
+      };
 
-			const char *shaders[] = {
-				vert_shd,
-				frag_shd,
-			};
-
-			volt_shader_stage stages[] = {
-				VOLT_SHD_VERTEX,
-				VOLT_SHD_FRAGMENT,
-			};
-
-			struct volt_program_desc screen_program_desc;
+      struct volt_program_desc screen_program_desc;
       ROA_MEM_ZERO(screen_program_desc);
 
-			screen_program_desc.stage_count         = ROA_ARR_COUNT(stages);
-			screen_program_desc.shader_stages_type  = ROA_ARR_DATA(stages);
-			screen_program_desc.shader_stages_src   = ROA_ARR_DATA(shaders);
+      screen_program_desc.stage_count         = ROA_ARR_COUNT(stages);
+      screen_program_desc.shader_stages_type  = ROA_ARR_DATA(stages);
+      screen_program_desc.shader_stages_src   = ROA_ARR_DATA(shaders);
 
-			volt_program_create(volt_ctx, &fullscreen.program, &screen_program_desc);
+      volt_program_create(volt_ctx, &fullscreen.program, &screen_program_desc);
 
-			ROA_ASSERT(fullscreen.program != VOLT_NULL);
-			volt_ctx_execute(volt_ctx); /* because shader text will go out of scope */
-		}
+      ROA_ASSERT(fullscreen.program != VOLT_NULL);
+      volt_ctx_execute(volt_ctx); /* because shader text will go out of scope */
+    }
 
-		/* triangle */
-		{
-			float verts[] = {
-				/* x y, s t */
-				-1.f, +3.f, 0.f, 2.f,
-				-1.f, -1.f, 0.f, 0.f,
-				+3.f, -1.f, 2.f, 0.f,
-			};
+    /* triangle */
+    {
+      float verts[] = {
+        /* x y, z, s t */
+        -1.f, +3.f, 0.f, 0.f, 2.f,
+        -1.f, -1.f, 0.f, 0.f, 0.f,
+        +3.f, -1.f, 0.f, 2.f, 0.f,
+      };
 
-			struct volt_vbo_desc vbo_desc;
+      struct volt_vbo_desc vbo_desc;
       ROA_MEM_ZERO(vbo_desc);
+      vbo_desc.data  = ROA_ARR_DATA(verts);
+      vbo_desc.count = ROA_ARR_COUNT(verts);
 
-			vbo_desc.data  = ROA_ARR_DATA(verts);
-			vbo_desc.count = ROA_ARR_COUNT(verts);
+      volt_vertex_buffer_create(volt_ctx, &fullscreen.triangle, &vbo_desc);
 
-			volt_vertex_buffer_create(volt_ctx, &fullscreen.triangle, &vbo_desc);
+      ROA_ASSERT(fullscreen.triangle != VOLT_NULL);
+      volt_ctx_execute(volt_ctx);
+    }
 
-			ROA_ASSERT(fullscreen.triangle != VOLT_NULL);
-			volt_ctx_execute(volt_ctx);
-		}
+    /* input */
+    {
+      volt_input_attribute attrs[2];
+      attrs[0] = VOLT_INPUT_FLOAT3;
+      attrs[1] = VOLT_INPUT_FLOAT2;
 
-		/* input */
-		{
-			volt_input_attribute attrs[2];
-			attrs[0] = VOLT_INPUT_FLOAT2;
-			attrs[1] = VOLT_INPUT_FLOAT2;
-
-			struct volt_input_desc input_desc;
+      struct volt_input_desc input_desc;
       ROA_MEM_ZERO(input_desc);
+      input_desc.attributes = ROA_ARR_DATA(attrs);
+      input_desc.count      = ROA_ARR_COUNT(attrs);
 
-			input_desc.attributes = ROA_ARR_DATA(attrs);
-			input_desc.count      = ROA_ARR_COUNT(attrs);
+      /*volt_input_t input_format;*/
+      volt_input_create(volt_ctx, &fullscreen.input, &input_desc);
 
-			/*volt_input_t input_format;*/
-			volt_input_create(volt_ctx, &fullscreen.input, &input_desc);
+      ROA_ASSERT(fullscreen.input != VOLT_NULL);
+      volt_ctx_execute(volt_ctx); /* attrs will go out of scope */
+    }
 
-			ROA_ASSERT(fullscreen.input != VOLT_NULL);
-			volt_ctx_execute(volt_ctx); /* attrs will go out of scope */
-		}
-
-		/* rasterizer */
-		{
-			struct volt_rasterizer_desc raster_desc;
+    /* rasterizer */
+    {
+      struct volt_rasterizer_desc raster_desc;
       ROA_MEM_ZERO(raster_desc);
+      raster_desc.cull_mode       = VOLT_CULL_FRONT;
+      raster_desc.primitive_type  = VOLT_PRIM_TRIANGLES;
+      raster_desc.winding_order   = VOLT_WIND_CW;
 
-			raster_desc.cull_mode 			= VOLT_CULL_FRONT;
-			raster_desc.primitive_type 	= VOLT_PRIM_TRIANGLES;
-			raster_desc.winding_order 	= VOLT_WIND_CW;
+      volt_rasterizer_create(volt_ctx, &fullscreen.rasterizer, &raster_desc);
+      volt_ctx_execute(volt_ctx);
+    }
 
-			volt_rasterizer_create(volt_ctx, &fullscreen.rasterizer, &raster_desc);
-			volt_ctx_execute(volt_ctx);
-		}
+    /* pipeline */
+    {
+      struct volt_pipeline_desc pipeline_desc;
+      ROA_MEM_ZERO(pipeline_desc);
+      pipeline_desc.viewport   = scene.viewport;
+      pipeline_desc.input      = fullscreen.input;
+      pipeline_desc.rasterizer = fullscreen.rasterizer;
+      pipeline_desc.program    = fullscreen.program;
 
-		/* pipeline */
-		{
-			struct volt_pipeline_desc pipeline_desc;
-			ROA_MEM_ZERO(pipeline_desc);
+      fullscreen.pipeline_desc = pipeline_desc;
+    }
 
-			pipeline_desc.viewport 	 = scene.viewport;
-			pipeline_desc.input 		 = fullscreen.input;
-			pipeline_desc.rasterizer = fullscreen.rasterizer;
-			pipeline_desc.program 	 = fullscreen.program;
+    /* draw vbo */
+    {
+      struct volt_draw_desc draw_desc;
+      ROA_MEM_ZERO(draw_desc);
+      draw_desc.vbo = fullscreen.triangle;
 
-			fullscreen.pipeline_desc = pipeline_desc;
-		}
-
-		/* draw vbo */
-		{
-			struct volt_draw_desc draw_desc;
-			ROA_MEM_ZERO(draw_desc);
-
-			draw_desc.vbo = fullscreen.triangle;
-
-			fullscreen.draw_desc = draw_desc;
-		}
+      fullscreen.draw_desc = draw_desc;
+    }
 
     /* sampler */
     {
       struct volt_sampler_desc desc;
       ROA_MEM_ZERO(desc);
-
-      desc.name     = "diffuse";
+      desc.name     = "samp_diffuse_01";
       desc.sampling = VOLT_SAMPLING_BILINEAR;
 
       volt_sampler_create(volt_ctx, &fullscreen.u_diffuse, &desc);
@@ -520,14 +495,12 @@ main(int argc, char **argv)
         VOLT_SHD_FRAGMENT,
       };
 
-      const char *stages_src[2] = {
-        vs,
-        fs,
-      };
+      const char *stages_src[2];
+      stages_src[0] = vs;
+      stages_src[1] = fs;
 
       struct volt_program_desc prog_desc;
       ROA_MEM_ZERO(prog_desc);
-
       prog_desc.shader_stages_src   = stages_src;
       prog_desc.shader_stages_type  = stages;
       prog_desc.stage_count         = ROA_ARR_COUNT(stages);
@@ -822,7 +795,7 @@ main(int argc, char **argv)
         "#version 330\n"
 
         "layout(location = 0) in vec3 Position;\n"
-        "layout (location = 1) in vec2 TexCoord; \n"
+        "layout(location = 1) in vec2 TexCoord; \n"
         "layout(location = 2) in vec3 Normal;\n"
 
         "uniform mat4 gWVP;\n"
@@ -847,19 +820,19 @@ main(int argc, char **argv)
         "in vec3 Normal0;   \n"
         "in vec3 WorldPos0;  \n"
 
-        "layout (location = 0) out vec3 WorldPosOut;   \n"
-        "layout (location = 1) out vec3 DiffuseOut;  \n"
-        "layout (location = 2) out vec3 NormalOut;   \n"
-        "layout (location = 3) out vec3 TexCoordOut; \n"
+        "uniform sampler2D gColorMap;\n"
 
-        "uniform sampler2D gColorMap;   \n"
+        "layout (location = 0) out vec3 WorldPosOut;\n"
+        "layout (location = 1) out vec3 DiffuseOut;\n"
+        "layout (location = 2) out vec3 NormalOut;\n"
+        "layout (location = 3) out vec3 TexCoordOut;\n"
 
         "void main()  \n"
-        "{    \n"
-        " WorldPosOut     = WorldPos0;    \n"
+        "{\n"
+        " WorldPosOut     = WorldPos0;\n"
         " DiffuseOut      = vec3(1, 0, 1); /*texture(gColorMap, TexCoord0).xyz;*/\n"
-        " NormalOut       = normalize(Normal0);    \n"
-        " TexCoordOut     = vec3(TexCoord0, 0.0);  \n"
+        " NormalOut       = normalize(Normal0);\n"
+        " TexCoordOut     = vec3(TexCoord0, 0.0);\n"
         "}\n";
 
       volt_shader_stage stages[2] = {
@@ -867,10 +840,9 @@ main(int argc, char **argv)
         VOLT_SHD_FRAGMENT,
       };
 
-      const char *stages_src[2] = {
-        vs,
-        fs,
-      };
+      const char *stages_src[2];
+      stages_src[0] = vs;
+      stages_src[1] = fs;
 
       struct volt_program_desc prog_desc;
       ROA_MEM_ZERO(prog_desc);
@@ -1041,10 +1013,10 @@ main(int argc, char **argv)
         rp_desc.name              = "Dir Light Pass";
       }
 
-      static float amb_intensity 	= 0.f;
+      static float amb_intensity  = 0.f;
       static float diff_intensity = 0.5f;
-      static float color[3] 			= {1,1,0};
-      static float direction[3] 	= {0.5773f, -0.5773f, 0.5773f};
+      static float color[3]       = {1,1,0};
+      static float direction[3]   = {0.5773f, -0.5773f, 0.5773f};
 
       volt_renderpass_t dir_light_pass;
       volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
@@ -1087,7 +1059,12 @@ main(int argc, char **argv)
         /* each color buffer */
         for(i = 0; i < count; ++i)
         {
-          struct volt_rect2d scissor = { size * i, 0, size, height};
+          struct volt_rect2d scissor;
+          scissor.x       = size * i;
+          scissor.y       = 0;
+          scissor.width   = width;
+          scissor.height  = height;
+
           volt_renderpass_set_scissor_cmd(final_pass, scissor);
           volt_renderpass_bind_texture_buffer_cmd(final_pass, fullscreen.u_diffuse, g_buffer.fbo_color_outputs[i]);
 

@@ -29,6 +29,10 @@
     "VOLT_OGL4=1"
   ],
 
+  "disable_warning_windows" : [
+    "4127"
+  ],
+
   "project_dependencies" : [
     "RepublicLib",
     "OpenGL"

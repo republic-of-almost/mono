@@ -1193,11 +1193,11 @@ volt_renderpass_draw_cmd(
       {
         /* prepare */
         GLuint index = i;
-        GLint size = pass->curr_input->attrib_count[i];
-        GLenum type = pass->curr_input->type[i];
-        GLboolean normalized = pass->curr_input->normalized[i];
-        GLsizei stride = pass->curr_input->byte_stride;
-        GLuint pointer = pass->curr_input->increment_stride[i];
+        GLint size            = pass->curr_input->attrib_count[i];
+        GLenum type           = pass->curr_input->type[i];
+        GLboolean normalized  = pass->curr_input->normalized[i];
+        GLsizei stride        = pass->curr_input->byte_stride;
+        GLuint pointer        = pass->curr_input->increment_stride[i];
 
         /* cmd */
         {
@@ -1382,13 +1382,15 @@ volt_renderpass_bind_texture_buffer_cmd(
   }
 
   /* add if not bound */
-  for (unsigned i = 0; i < sampler_slot_count; ++i)
+  unsigned j;
+
+  for (j = 0; j < sampler_slot_count; ++j)
   {
-    if (pass->sampler_hash[i] == 0)
+    if (pass->sampler_hash[j] == 0)
     {
       /* bound */
-      pass->sampler_hash[i] = hash_name;
-      pass->sampler[i] = texture;
+      pass->sampler_hash[j] = hash_name;
+      pass->sampler[j] = texture;
 
       return;
     }
@@ -1423,13 +1425,15 @@ volt_renderpass_bind_texture_buffer(
   }
 
   /* add if not bound */
-  for (unsigned i = 0; i < sampler_slot_count; ++i)
+  unsigned j;
+
+  for (j = 0; j < sampler_slot_count; ++j)
   {
-    if (pass->sampler_hash[i] == 0)
+    if (pass->sampler_hash[j] == 0)
     {
       /* bound */
-      pass->sampler_hash[i] = hash_name;
-      pass->sampler[i] = texture;
+      pass->sampler_hash[j] = hash_name;
+      pass->sampler[j] = texture;
 
       return;
     }
