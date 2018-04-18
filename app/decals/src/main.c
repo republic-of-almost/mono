@@ -19,14 +19,14 @@
 /* ----------------------------------------------------------- [ Systems ] -- */
 
 
-roa_ctx_t                 hw_ctx;     /* windowing / input */
-volt_ctx_t                volt_ctx;   /* graphics api */
+roa_ctx_t  hw_ctx;     /* windowing / input */
+volt_ctx_t volt_ctx;   /* graphics api */
 
 
 /* ------------------------------------------------------------- [ Scene ] -- */
 
 
-int width = 1200;
+int width  = 1200;
 int height = 720;
 
 
@@ -83,10 +83,10 @@ struct scene_data
   struct volt_rect2d    viewport;
 
 	volt_vbo_t            vbo;
-  roa_transform         box_transform[9];
-  roa_mat4              box_world[9];
-  roa_mat4              box_wvp[9];
-	struct volt_draw_desc draw_desc[9];
+  roa_transform         box_transform[1];
+  roa_mat4              box_world[1];
+  roa_mat4              box_wvp[1];
+	struct volt_draw_desc draw_desc[1];
   volt_uniform_t        box_world_uni;
   volt_uniform_t        box_wvp_uni;
 
@@ -96,6 +96,7 @@ struct scene_data
   roa_float3            cam_position;
   float                 cam_pitch;
   float                 cam_yaw;
+	float 								cam_radius;
 } scene;
 
 
@@ -192,39 +193,12 @@ main(int argc, char **argv)
     /* box positions */
     {
       roa_transform_init(&scene.box_transform[0]);
-      scene.box_transform[0].position = roa_float3_set_with_values(+2.f, 0.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[1]);
-      scene.box_transform[1].position = roa_float3_set_with_values(+2.f, 0.f, -2.f);
-
-      roa_transform_init(&scene.box_transform[2]);
-      scene.box_transform[2].position = roa_float3_set_with_values(-2.f, 0.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[3]);
-      scene.box_transform[3].position = roa_float3_set_with_values(-2.f, 0.f, -2.f);
-
-
-      roa_transform_init(&scene.box_transform[4]);
-      scene.box_transform[4].position = roa_float3_set_with_values(+2.f, 3.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[5]);
-      scene.box_transform[5].position = roa_float3_set_with_values(+2.f, 3.f, -2.f);
-
-      roa_transform_init(&scene.box_transform[6]);
-      scene.box_transform[6].position = roa_float3_set_with_values(-2.f, 3.f, +2.f);
-
-      roa_transform_init(&scene.box_transform[7]);
-      scene.box_transform[7].position = roa_float3_set_with_values(-2.f, 3.f, -2.f);
-
-      roa_transform_init(&scene.box_transform[8]);
-      scene.box_transform[8].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
+      scene.box_transform[0].position = roa_float3_set_with_values(0.f, 0.f, 0.f);
+			scene.box_transform[0].scale = roa_float3_set_with_values(1.f, ROA_G_RATIO, 1.f);
     }
 
     /* uniforms */
     {
-      int i;
-      int count = ROA_ARR_COUNT(scene.box_transform);
-
       struct volt_uniform_desc wvp_uni_desc;
       {
         ROA_MEM_ZERO(wvp_uni_desc);
@@ -260,6 +234,7 @@ main(int argc, char **argv)
 
       scene.cam_pitch 	 = 0.f;
       scene.cam_yaw 		 = 0.f;
+			scene.cam_radius   = 8.f;
       scene.cam_position = roa_float3_one();
     }
   }
@@ -535,7 +510,7 @@ main(int argc, char **argv)
         "vec3 Color = texture(gColorMap, TexCoord).xyz;\n"
         "vec3 Normal = texture(gNormalMap, TexCoord).xyz;\n"
         "Normal = normalize(Normal);\n"
-        "FragColor = vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"
+        "FragColor = (vec4(Color, 1.0) * 0.1) + vec4(Color, 1.0) * CalcDirectionalLight(WorldPos, Normal);\n"
          /* "FragColor = vec4(Color, 1.0);\n"*/
         "}\n";
 
@@ -962,29 +937,37 @@ main(int argc, char **argv)
     {
       /* view mat */
       {
-        float radius = 4.f;
+				/* camera movement */
+				{
+	        struct roa_ctx_mouse_desc ms_desc;
+	        ROA_MEM_ZERO(ms_desc);
 
-        struct roa_ctx_mouse_desc ms_desc;
-        ROA_MEM_ZERO(ms_desc);
+	        roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
 
-        roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
+	        scene.cam_pitch 	+= ms_desc.y_delta * 0.02f;
+	        scene.cam_yaw 		+= ms_desc.x_delta * 0.02f;
+					scene.cam_radius 	+= ms_desc.y_scroll * 0.4f;
+				}
 
-        scene.cam_pitch += ms_desc.y_delta * 0.01f;
-        scene.cam_yaw 	+= ms_desc.x_delta * 0.01f;
+				/* calculate camera lookat */
+				{
+					roa_float3 w_up	 	= roa_transform_world_up();
+					roa_float3 w_left = roa_transform_world_left();
+					roa_float3 w_fwd 	= roa_transform_world_fwd();
 
-        float x = roa_float_sin(scene.cam_yaw) * radius;
-        float y = 5.5f;
-        float z = roa_float_cos(scene.cam_yaw) * radius;
+					roa_quaternion yaw 					= roa_quaternion_from_axis_angle(w_up, scene.cam_yaw);
+					roa_quaternion pitch 				= roa_quaternion_from_axis_angle(w_left, scene.cam_pitch);
+					roa_quaternion rot 					= roa_quaternion_multiply(yaw, pitch);
 
-        roa_float3 up  = roa_float3_set_with_values(0, 1, 0);
-        roa_float3 pos = roa_float3_set_with_values(x, y, z);
-        roa_float3 at  = roa_float3_zero();
+					roa_float3 rotated_position = roa_quaternion_rotate_vector(rot, w_fwd);
+					roa_float3 scaled_position 	= roa_float3_scale(rotated_position, scene.cam_radius);
+					roa_float3 local_up 				= roa_quaternion_rotate_vector(rot, w_up);
 
-        roa_mat4_lookat(&scene.view_mat, pos, at, up);
+	        roa_mat4_lookat(&scene.view_mat, scaled_position, roa_float3_zero(), local_up);
 
-        scene.cam_position = pos;
-
-        volt_ctx_execute(volt_ctx);
+					/* update eye position */
+	        scene.cam_position = scaled_position;
+				}
       }
 
       /* world */
@@ -1058,11 +1041,10 @@ main(int argc, char **argv)
         rp_desc.name              = "Dir Light Pass";
       }
 
-      static float amb_intensity = 0.f;
+      static float amb_intensity 	= 0.f;
       static float diff_intensity = 0.5f;
-      static float color[3] = {1,1,0};
-      static float direction[3] = {0.707f, -0.707f, 0.f};
-
+      static float color[3] 			= {1,1,0};
+      static float direction[3] 	= {0.5773f, -0.5773f, 0.5773f};
 
       volt_renderpass_t dir_light_pass;
       volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);

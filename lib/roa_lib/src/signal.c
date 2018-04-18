@@ -4,6 +4,7 @@
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <pthread.h>
+#include <sys/time.h>
 #include <errno.h>
 #elif defined(_WIN32)
 #include <windows.h>
@@ -51,7 +52,7 @@ roa_signal_create()
   pthread_cond_init(&signal->condition, NULL);
   signal->value = 0;
 
-  #endif 
+  #endif
 
   return (roa_signal)signal;
 }
@@ -152,7 +153,7 @@ roa_signal_wait(roa_signal *s, int timeout_ms)
   pthread_mutex_unlock(&signal->mutex);
   return !timed_out;
 
-  #else 
+  #else
   #error Unknown platform.
-  #endif  
+  #endif
 }

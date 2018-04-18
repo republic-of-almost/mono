@@ -16,7 +16,7 @@ roa_dlib_open(
   #ifdef _WIN32
   return (void*)LoadLibrary((const TCHAR*)name);
   #else
-  dlopen(name, RTLD_LAZY);
+  return dlopen(name, RTLD_LAZY);
   #endif
 }
 

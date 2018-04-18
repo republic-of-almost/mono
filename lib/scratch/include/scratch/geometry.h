@@ -2,7 +2,6 @@
 #define SCRATCH_INCLUDED_1F4F06F2_C04E_483C_8411_88D3BFDA1333
 
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,4 +35,3 @@ geometry_generate_cube(
 
 
 #endif /* inc guard */
-

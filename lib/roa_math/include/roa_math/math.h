@@ -160,6 +160,7 @@ int             roa_float4_is_near(roa_float4 a, roa_float4 b, float err);
 
 roa_quaternion  roa_quaternion_default();
 roa_quaternion  roa_quaternion_set_with_values(float x, float y, float z, float w);
+roa_quaternion  roa_quaternion_from_axis_angle(roa_float3 axis, float radians);
 roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion right);
 
 int             roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float err);
@@ -251,4 +252,3 @@ void            roa_mat4_multiply_three(roa_mat4 *out, const roa_mat4 *a, const 
 
 
 #endif /* inc guard */
-

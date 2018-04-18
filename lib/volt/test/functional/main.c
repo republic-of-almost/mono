@@ -9,6 +9,8 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_math/math.h>
 #include <scratch/geometry.h>
+#include <scratch/glsl.h>
+#include <scratch/textures.h>
 #include <string.h>
 
 
@@ -34,58 +36,39 @@ main()
   volt_program_t program        = VOLT_NULL;
   volt_input_t vert_input       = VOLT_NULL;
   volt_rasterizer_t rasterizer  = VOLT_NULL;
-  volt_uniform_t proj_data      = VOLT_NULL;
-  volt_uniform_t view_data      = VOLT_NULL;
-  volt_uniform_t world_data     = VOLT_NULL;
+  volt_uniform_t uni_wvp        = VOLT_NULL;
   volt_sampler_t samp_1         = VOLT_NULL;
   volt_sampler_t samp_2         = VOLT_NULL;
 
   roa_mat4 world;
   roa_mat4 view;
   roa_mat4 proj;
+  roa_mat4 wvp;
 
   /* create uniforms */
   {
-    struct volt_uniform_desc uni_desc_1;
-    ROA_MEM_ZERO(uni_desc_1);
-    uni_desc_1.name       = "proj";
-    uni_desc_1.data_type  = VOLT_DATA_MAT4;
-    uni_desc_1.count      = 1;
+    struct volt_uniform_desc uni_desc;
+    ROA_MEM_ZERO(uni_desc);
+    uni_desc.name       = "uni_wvp_mat";
+    uni_desc.data_type  = VOLT_DATA_MAT4;
+    uni_desc.count      = 1;
 
-    volt_uniform_create(ctx, &proj_data, &uni_desc_1);
-    ROA_ASSERT(proj_data);
-
-    struct volt_uniform_desc uni_desc_2;
-    ROA_MEM_ZERO(uni_desc_2);
-    uni_desc_2.name       = "view";
-    uni_desc_2.data_type  = VOLT_DATA_MAT4;
-    uni_desc_2.count      = 1;
-
-    volt_uniform_create(ctx, &view_data, &uni_desc_2);
-    ROA_ASSERT(view_data);
-
-    struct volt_uniform_desc uni_desc_3;
-    ROA_MEM_ZERO(uni_desc_3);
-    uni_desc_3.name       = "model";
-    uni_desc_3.data_type  = VOLT_DATA_MAT4;
-    uni_desc_3.count      = 1;
-
-    volt_uniform_create(ctx, &world_data, &uni_desc_3);
-    ROA_ASSERT(world_data);
+    volt_uniform_create(ctx, &uni_wvp, &uni_desc);
+    ROA_ASSERT(uni_wvp);
   }
 
   /* create sampler */
   {
     struct volt_sampler_desc samp_desc_1;
     ROA_MEM_ZERO(samp_desc_1);
-    samp_desc_1.name = "texture_01";
+    samp_desc_1.name = "samp_diffuse_01";
     samp_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
 
     volt_sampler_create(ctx, &samp_1, &samp_desc_1);
 
     struct volt_sampler_desc samp_desc_2;
     ROA_MEM_ZERO(samp_desc_2);
-    samp_desc_2.name = "texture_02";
+    samp_desc_2.name = "samp_diffuse_02";
     samp_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
 
     volt_sampler_create(ctx, &samp_2, &samp_desc_2);
@@ -103,15 +86,14 @@ main()
     tex_desc_1.mip_maps = VOLT_FALSE;
     tex_desc_1.sampling = VOLT_SAMPLING_BILINEAR;
 
-    char file_path_01[2048];
-    memset(file_path_01, 0, sizeof(file_path_01));
-    strcat(file_path_01, roa_exe_dir());
-    strcat(file_path_01, "assets/volt_func/dev_tex_01.png");
-
     stbi_set_flip_vertically_on_load(1);
 
-    tex_desc_1.data = (void*)stbi_load(
-      file_path_01,
+    unsigned bytes = 0;
+    unsigned char *tex_data = texture_png_data_blender_1(&bytes);
+
+    tex_desc_1.data = (void*)stbi_load_from_memory(
+      tex_data,
+      bytes,
       &x,
       &y,
       &n,
@@ -129,13 +111,11 @@ main()
     tex_desc_2.mip_maps = VOLT_FALSE;
     tex_desc_2.sampling = VOLT_SAMPLING_BILINEAR;
 
-    char file_path_02[2048];
-    memset(file_path_02, 0, sizeof(file_path_02));
-    strcat(file_path_02, roa_exe_dir());
-    strcat(file_path_02, "assets/volt_func/dev_tex_02.png");
+    tex_data = texture_png_data_blender_2(&bytes);
 
-    tex_desc_2.data = (void*)stbi_load(
-      file_path_02,
+    tex_desc_2.data = (void*)stbi_load_from_memory(
+      tex_data,
+      bytes,
       &x,
       &y,
       &n,
@@ -176,7 +156,7 @@ main()
     volt_vertex_buffer_create(ctx, &vbo, &vbo_desc);
 
     /* ibo */
-    const unsigned index[] = {
+    unsigned index[] = {
       0,1,2,
       2,3,0
     };
@@ -189,50 +169,10 @@ main()
 
     volt_index_buffer_create(ctx, &ibo, &ibo_desc);
 
-    const char *vert_src = ""
-
-      "/* Vert */\n"
-      "#version 400 core\n"
-
-      "layout(location=0) in vec3 position;\n"
-      "layout(location=1) in vec3 color;\n"
-      "layout(location=2) in vec2 texcoord;\n"
-
-      "uniform mat4 model;\n"
-      "uniform mat4 view;\n"
-      "uniform mat4 proj;\n"
-
-      "out vec3 oColor;\n"
-      "out vec2 oTexcoord;\n"
-
-      "void main() {\n"
-      "oColor = color;\n"
-      "oTexcoord = texcoord;\n"
-      "gl_Position = proj * view * model * vec4(position, 1.0);\n"
-      "}\n";
-
-    const char* frag_src = ""
-      "/* Frag */\n"
-      "#version 400 core\n"
-      "in vec3 oColor;\n"
-      "in vec2 oTexcoord;\n"
-
-      "uniform sampler2D texture_01;\n"
-      "uniform sampler2D texture_02;\n"
-
-      "out vec4 outColor;\n"
-
-      "void main()\n"
-      "{\n"
-      "float x_val = ((oTexcoord.x * 2) - 1.0) * 5.0;"
-      "float y_val = ((oTexcoord.y * 2) - 1.0) * 3.0;"
-      "float mix_value = 20 * sin(((x_val * x_val) + (y_val * y_val)));"
-      "outColor = mix(texture(texture_01, oTexcoord), texture(texture_02, oTexcoord), clamp(mix_value, 0, 1));"
-      "}\n";
 
     const char *stages[2];
-    stages[0] = vert_src;
-    stages[1] = frag_src;
+    stages[0] = glsl_two_textures_vs();
+    stages[1] = glsl_two_textures_fs();
 
     volt_shader_stage stage_types[] = {
       VOLT_SHD_VERTEX,
@@ -280,7 +220,7 @@ main()
 
     static int count = 0;
     ++count;
-    
+
     /* create mats */
     {
       static float time = 0.1f;
@@ -301,6 +241,8 @@ main()
       roa_mat4_lookat(&view, from, at, up);
 
       roa_mat4_id(&world);
+
+      roa_mat4_multiply_three(&wvp, &world, &view, &proj);
     }
 
     /* draw some stuff */
@@ -322,7 +264,7 @@ main()
         pipeline_desc.input       = vert_input;
         pipeline_desc.program     = program;
         pipeline_desc.rasterizer  = rasterizer;
-      
+
         volt_renderpass_set_pipeline(rp, &pipeline_desc);
       }
 
@@ -337,9 +279,7 @@ main()
 
       /* uniforms */
       {
-        volt_renderpass_bind_uniform_data_cmd(rp, proj_data, proj.data);
-        volt_renderpass_bind_uniform_data_cmd(rp, world_data, world.data);
-        volt_renderpass_bind_uniform_data_cmd(rp, view_data, view.data);
+        volt_renderpass_bind_uniform_data_cmd(rp, uni_wvp, wvp.data);
       }
 
       /* draw */

@@ -20,10 +20,19 @@ struct roa_ctx
 
 	float mouse_x;
 	float mouse_y;
-	float mouse_last_x;
+
+  float mouse_last_x;
 	float mouse_last_y;
-	float mouse_delta_x;
+
+  float mouse_delta_x;
 	float mouse_delta_y;
+
+  float mouse_scroll_x;
+  float mouse_scroll_y;
+
+  float mouse_scroll_delta_x;
+  float mouse_scroll_delta_y;
+
 	int mouse_locked;
 };
 
@@ -43,6 +52,9 @@ static void
 roa_ctx_win_size_callback(GLFWwindow *win, int width, int height)
 {
   struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
+
+  ctx->width = width;
+  ctx->height = height;
 }
 
 
@@ -53,6 +65,16 @@ roa_ctx_cursor_pos_callback(GLFWwindow *win, double xpos, double ypos)
 
 	ctx->mouse_x = (float)xpos;
 	ctx->mouse_y = (float)ypos;
+}
+
+
+static void
+roa_ctx_cursor_scroll_callback(GLFWwindow *win, double xoffset, double yoffset)
+{
+  struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
+
+	ctx->mouse_scroll_delta_x += (float)xoffset;
+	ctx->mouse_scroll_delta_y += (float)yoffset;
 }
 
 
@@ -97,12 +119,13 @@ roa_ctx_create(roa_ctx_t *ctx)
 
       glfwSetWindowSizeCallback(win, roa_ctx_win_size_callback);
 			glfwSetCursorPosCallback(win, roa_ctx_cursor_pos_callback);
+      glfwSetScrollCallback(win, roa_ctx_cursor_scroll_callback);
 
       gl3wInit();
-			
+
 			new_ctx->width = width;
 			new_ctx->height = height;
-			
+
 			int bytes = strlen(title) + 1 > sizeof(new_ctx->title) - 1 ? sizeof(new_ctx->title) - 1 : strlen(title);
 			memcpy(new_ctx->title, title, bytes);
 
@@ -136,6 +159,9 @@ roa_ctx_new_frame(roa_ctx_t ctx)
 {
   if (ctx && ctx->window)
   {
+    ctx->mouse_scroll_delta_x = 0;
+    ctx->mouse_scroll_delta_y = 0;
+
 		/* graphics */
     glfwPollEvents();
     glfwSwapBuffers(ctx->window);
@@ -185,7 +211,7 @@ roa_ctx_set_window_desc(
   ROA_ASSERT(desc->width);
   ROA_ASSERT(desc->title);
   ROA_ASSERT(desc->height);
-	
+
 	ctx->width = desc->width;
 	ctx->height = desc->height;
 
@@ -214,4 +240,7 @@ roa_ctx_mouse_get_desc(
 
   out_desc->x_delta = ctx->mouse_delta_x;
   out_desc->y_delta = ctx->mouse_delta_y;
+
+  out_desc->x_scroll = ctx->mouse_scroll_delta_x;
+  out_desc->y_scroll = ctx->mouse_scroll_delta_y;
 }

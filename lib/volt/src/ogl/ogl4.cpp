@@ -157,59 +157,59 @@ struct cmd_texture_bind
 
 struct cmd_uniform_create
 {
-  volt_uniform_t uniform;
+  volt_uniform_t    uniform;
   volt_uniform_desc desc;
 };
 
 
 struct cmd_uniform_bind
 {
-  GLint location;
-  GLvoid *value;
-  GLsizei count;
-  GLenum type;
+  GLint     location;
+  GLvoid *  value;
+  GLsizei   count;
+  GLenum    type;
 };
 
 
 struct cmd_input_create
 {
-  volt_input_t input;
+  volt_input_t    input;
   volt_input_desc desc;
 };
 
 
 struct cmd_input_bind
 {
-  GLuint index;
-  GLint size;
-  GLenum type;
-  GLboolean normalized;
-  GLsizei stride;
-  GLsizeiptr pointer;
+  GLuint      index;
+  GLint       size;
+  GLenum      type;
+  GLboolean   normalized;
+  GLsizei     stride;
+  GLsizeiptr  pointer;
 };
 
 
 struct cmd_draw_count
 {
-  GLenum mode;
-  GLint first;
+  GLenum  mode;
+  GLint   first;
   GLsizei count;
 };
 
 
 struct cmd_draw_indexed
 {
-  GLenum mode;
-  GLenum type;
-  GLuint count;
-  GLsizeiptr indices;
+  GLenum      mode;
+  GLenum      type;
+  GLuint      count;
+  GLsizeiptr  indices;
 };
 
 
 struct cmd_scissor
 {
-  GLint x;
-  GLint y;
+  GLint   x;
+  GLint   y;
   GLsizei width;
   GLsizei height;
 };
@@ -217,8 +217,8 @@ struct cmd_scissor
 
 struct cmd_viewport
 {
-  GLint x;
-  GLint y;
+  GLint   x;
+  GLint   y;
   GLsizei width;
   GLsizei height;
 };
@@ -236,35 +236,35 @@ struct volt_gl_cmd
 
   union
   {
-    struct cmd_program_create program_create;
-    struct cmd_program_bind program_bind;
+    struct cmd_program_create     program_create;
+    struct cmd_program_bind       program_bind;
 
-    struct cmd_vbo_create vbo_create;
-    struct cmd_vbo_update vbo_update;
-    struct cmd_vbo_bind vbo_bind;
+    struct cmd_vbo_create         vbo_create;
+    struct cmd_vbo_update         vbo_update;
+    struct cmd_vbo_bind           vbo_bind;
 
-    struct cmd_ibo_create ibo_create;
-    struct cmd_ibo_bind ibo_bind;
+    struct cmd_ibo_create         ibo_create;
+    struct cmd_ibo_bind           ibo_bind;
 
-    struct cmd_fbo_create fbo_create;
-    struct cmd_fbo_bind fbo_bind;
+    struct cmd_fbo_create         fbo_create;
+    struct cmd_fbo_bind           fbo_bind;
 
-    struct cmd_texture_create texture_create;
-    struct cmd_texture_update texture_update;
-    struct cmd_texture_bind texture_bind;
+    struct cmd_texture_create     texture_create;
+    struct cmd_texture_update     texture_update;
+    struct cmd_texture_bind       texture_bind;
 
-    struct cmd_uniform_create uniform_create;
-    struct cmd_uniform_bind uniform_bind;
+    struct cmd_uniform_create     uniform_create;
+    struct cmd_uniform_bind       uniform_bind;
 
-    struct cmd_input_create input_create; /* unused atm */
-    struct cmd_input_bind input_bind;
+    struct cmd_input_create       input_create; /* unused atm */
+    struct cmd_input_bind         input_bind;
 
-    struct cmd_draw_count draw_count;
-    struct cmd_draw_indexed draw_indexed;
+    struct cmd_draw_count         draw_count;
+    struct cmd_draw_indexed       draw_indexed;
 
-    struct cmd_scissor scissor;
-    struct cmd_viewport viewport;
-    struct cmd_clear clear;
+    struct cmd_scissor            scissor;
+    struct cmd_viewport           viewport;
+    struct cmd_clear              clear;
   };
 };
 
@@ -283,9 +283,9 @@ struct volt_program
     GLint location;
   };
 
-  uint64_t sampler_keys[16];
-  volt_program_sampler samplers[16];
-  unsigned sampler_count;
+  uint64_t              sampler_keys[16];
+  volt_program_sampler  samplers[16];
+  unsigned              sampler_count;
 
   struct volt_program_uniform
   {
@@ -294,9 +294,9 @@ struct volt_program
     GLint location;
   };
 
-  uint64_t uniform_keys[32];
-  volt_program_uniform uniforms[32];
-  unsigned uniform_count;
+  uint64_t                      uniform_keys[32];
+  struct volt_program_uniform   uniforms[32];
+  unsigned                      uniform_count;
 };
 
 
@@ -310,31 +310,31 @@ struct volt_rasterizer
 
 struct volt_viewport
 {
-  GLint x;
-  GLint y;
-  GLuint width;
-  GLuint height;
+  GLint   x;
+  GLint   y;
+  GLuint  width;
+  GLuint  height;
 };
 
 
 struct volt_texture
 {
-  GLuint gl_id;
+  GLuint    gl_id;
 
-  GLenum target;
-  GLenum format;
-  GLuint width;
-  GLuint height;
-  GLenum sampling;
-  GLenum dimention;
+  GLenum    target;
+  GLenum    format;
+  GLuint    width;
+  GLuint    height;
+  GLenum    sampling;
+  GLenum    dimention;
   GLboolean mips;
-  GLvoid *data;
+  GLvoid *  data;
 };
 
 
 struct volt_framebuffer
 {
-  GLuint gl_id;
+  GLuint  gl_id;
 
   GLsizei number_of_color_attachments;
 };
@@ -342,20 +342,18 @@ struct volt_framebuffer
 
 struct volt_uniform
 {
-  uint64_t hash_name;
-  GLvoid *value;
-  GLenum type;
-  GLsizei count;
-
+  uint64_t  hash_name;
+  GLvoid *  value;
+  GLenum    type;
+  GLsizei   count;
   volt_bool copy_data;
 };
 
 
 struct volt_sampler
 {
-  uint64_t hash_name;
-
-  GLenum sampling;
+  uint64_t  hash_name;
+  GLenum    sampling;
 };
 
 
@@ -375,13 +373,13 @@ struct volt_ibo
 
 struct volt_input
 {
-  GLuint increment_stride[12];
-  GLint attrib_count[12];
-  GLsizei byte_stride;
-  GLuint element_stride;
-  GLenum type[12];
+  GLuint    increment_stride[12];
+  GLint     attrib_count[12];
+  GLsizei   byte_stride;
+  GLuint    element_stride;
+  GLenum    type[12];
   GLboolean normalized[12];
-  GLuint count;
+  GLuint    count;
 };
 
 
@@ -400,29 +398,29 @@ struct volt_ctx
 struct volt_renderpass
 {
   /* next to bind */
-  volt_vbo_t curr_vbo;
-  volt_ibo_t curr_ibo;
-  volt_input_t curr_input;
-  volt_program_t curr_program;
+  volt_vbo_t        curr_vbo;
+  volt_ibo_t        curr_ibo;
+  volt_input_t      curr_input;
+  volt_program_t    curr_program;
   volt_rasterizer_t curr_rasterizer;
-  volt_rect2d curr_viewport;
-  volt_rect2d curr_scissor;
+  volt_rect2d       curr_viewport;
+  volt_rect2d       curr_scissor;
 
-  unsigned curr_clear;
+  unsigned          curr_clear;
 
   /* samplers */
-  uint64_t sampler_hash[32];
-  volt_texture_t sampler[32];
+  uint64_t          sampler_hash[32];
+  volt_texture_t    sampler[32];
 
   /* uniforms */
-  uint64_t uniform_hash[32];
-  volt_uniform_t uniform[32];
+  uint64_t          uniform_hash[32];
+  volt_uniform_t    uniform[32];
 
   /* last bound */
-  volt_vbo_t last_bound_vbo;
-  volt_ibo_t last_bound_ibo;
-  volt_input_t last_bound_input;
-  volt_program_t last_bound_program;
+  volt_vbo_t        last_bound_vbo;
+  volt_ibo_t        last_bound_ibo;
+  volt_input_t      last_bound_input;
+  volt_program_t    last_bound_program;
   volt_rasterizer_t last_bound_rasterizer;
 
   /* array */ struct volt_gl_cmd *render_cmds;
@@ -2462,12 +2460,6 @@ volt_ctx_execute(volt_ctx_t ctx)
 
   /* execute render stream */
   {
-    //glViewport(0, 0, 800, 480);
-    //glScissor(0, 0, 800, 480);
-    //glFrontFace(GL_CCW);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_NONE);
-
     unsigned rp_count = roa_array_size(ctx->renderpasses);
     unsigned i;
 
@@ -2565,12 +2557,6 @@ volt_ctx_execute(volt_ctx_t ctx)
     }
 
     roa_array_clear(ctx->renderpasses);
-  }
-
-  /* destroy resource stream */
-  {
-    /*const uint8_t *next = ctx->resource_destroy_stream.data;*/
-    /*const unsigned bytes = roa_array_size(next);*/
   }
 }
 

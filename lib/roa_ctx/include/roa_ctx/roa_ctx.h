@@ -60,6 +60,9 @@ struct roa_ctx_mouse_desc
 
   float x_delta;
   float y_delta;
+
+  float x_scroll;
+  float y_scroll;
 };
 
 

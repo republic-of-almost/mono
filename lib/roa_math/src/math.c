@@ -283,7 +283,7 @@ float
 roa_float2_dot(roa_float2 a, roa_float2 b)
 {
   return (roa_float2_get_x(a) * roa_float2_get_x(b)) +
-    (roa_float2_get_y(a) * roa_float2_get_y(b)); 
+    (roa_float2_get_y(a) * roa_float2_get_y(b));
 }
 
 
@@ -392,7 +392,7 @@ roa_float3
 roa_float3_add(roa_float3 a, roa_float3 b)
 {
   roa_float3 ret;
-  
+
   ret.x = a.x + b.x;
   ret.y = a.y + b.y;
   ret.z = a.z + b.z;
@@ -485,13 +485,13 @@ roa_float3_dot(roa_float3 a, roa_float3 b)
 roa_float3
 roa_float3_cross(roa_float3 a, roa_float3 b)
 {
-  float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) - 
+  float x = (roa_float3_get_y(a) * roa_float3_get_z(b)) -
 						(roa_float3_get_z(a) * roa_float3_get_y(b));
 
-  float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) - 
+  float y = (roa_float3_get_x(a) * roa_float3_get_z(b)) -
 						(roa_float3_get_z(a) * roa_float3_get_x(b));
 
-  float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) - 
+  float z = (roa_float3_get_x(a) * roa_float3_get_y(b)) -
 						(roa_float3_get_y(a) * roa_float3_get_x(b));
 
   return roa_float3_set_with_values(x, -y, z);
@@ -713,14 +713,14 @@ roa_float4_lerp(roa_float4 a, roa_float4 b, float t)
 float
 roa_float4_length(roa_float4 a)
 {
-  float len = (a.x * a.x) + 
-							(a.y * a.y) + 
-							(a.z * a.z) + 
+  float len = (a.x * a.x) +
+							(a.y * a.y) +
+							(a.z * a.z) +
 							(a.w * a.w);
 
 	float result = roa_float_sqrt(len);
 
-  return result; 
+  return result;
 }
 
 
@@ -794,26 +794,41 @@ roa_quaternion_set_with_values(float x, float y, float z, float w)
 
 
 roa_quaternion
+roa_quaternion_from_axis_angle(roa_float3 axis, float angle)
+{
+  const float half_angle = 0.5f * angle;
+  const float sin_angle  = roa_float_sin(half_angle);
+
+  const float qx = sin_angle * axis.x;
+  const float qy = sin_angle * axis.y;
+  const float qz = sin_angle * axis.z;
+  const float qw = roa_float_cos(half_angle);
+
+  return roa_quaternion_set_with_values(qx, qy, qz, qw);
+}
+
+
+roa_quaternion
 roa_quaternion_multiply(roa_quaternion left, roa_quaternion right)
 {
   float w = (left.w * right.w) -
-						(left.x * right.x) - 
-						(left.y * right.y) - 
+						(left.x * right.x) -
+						(left.y * right.y) -
 						(left.z * right.z);
 
-  float x = (left.w * right.x) + 
-						(left.x * right.w) + 
-						(left.y * right.z) - 
+  float x = (left.w * right.x) +
+						(left.x * right.w) +
+						(left.y * right.z) -
 						(left.z * right.y);
 
-  float y = (left.w * right.y) + 
-						(left.y * right.w) + 
-						(left.z * right.x) - 
+  float y = (left.w * right.y) +
+						(left.y * right.w) +
+						(left.z * right.x) -
 						(left.x * right.z);
 
-  float z = (left.w * right.z) + 
-						(left.z * right.w) + 
-						(left.x * right.y) - 
+  float z = (left.w * right.z) +
+						(left.z * right.w) +
+						(left.x * right.y) -
 						(left.y * right.x);
 
   return roa_quaternion_set_with_values(x, y, z, w);
@@ -838,7 +853,7 @@ roa_quaternion_get_rotation_matrix(roa_quaternion rot, roa_mat3 *out)
 	float x_sq = rot.x * rot.x;
   float y_sq = rot.y * rot.y;
   float z_sq = rot.z * rot.z;
-  
+
   float mat_data[9];
   mat_data[0] = 1 - 2 * y_sq - 2 * z_sq;
   mat_data[1] = 2 * (rot.x * rot.y) + 2 * (rot.z * rot.w);
@@ -847,7 +862,7 @@ roa_quaternion_get_rotation_matrix(roa_quaternion rot, roa_mat3 *out)
   mat_data[3] = 2 * (rot.x * rot.y) - 2 * (rot.z * rot.w);
   mat_data[4] = 1 - 2 * x_sq - 2 * z_sq;
   mat_data[5] = 2 * (rot.y * rot.z) + 2 * (rot.x * rot.w);
-        
+
   mat_data[6] = 2 * (rot.x * rot.z) + 2 * (rot.y * rot.w);
   mat_data[7] = 2 * (rot.y * rot.z) - 2 * (rot.x * rot.w);
   mat_data[8] = 1 - 2 * x_sq - 2 * y_sq;
@@ -1167,7 +1182,7 @@ roa_mat3_import(
 {
 	assert(out);
 	assert(in);
-	
+
 	memcpy(out->data, in, sizeof(out->data));
 }
 

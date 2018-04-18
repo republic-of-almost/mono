@@ -114,15 +114,11 @@ roa_thread_destroy(roa_thread th)
 
   #if defined(__linux__) || defined(__APPLE__)
   int success = pthread_join((pthread_t)th, ROA_NULL);
-  
+  ROA_ASSERT(success);
   #elif defined(_WIN32)
-
   HANDLE win_th = (HANDLE)th;
-
   WaitForSingleObject(win_th, INFINITE);
   CloseHandle(win_th);
-
-  
   #else
   #error "Unsupported Platform"
   #endif
@@ -138,10 +134,16 @@ roa_thread_destroy(roa_thread th)
 void
 roa_thread_set_affinity(roa_thread th, int affinity)
 {
-  #if defined(__linux__) || defined(__APPLE__)
-  
-#elif defined(_WIN32)
+  #if defined(__linux__)
+  /* todo */
+  ROA_UNUSED(th);
+  ROA_UNUSED(affinity);
+  #elif defined(_WIN32)
   SetThreadIdealProcessor((HANDLE)th, affinity);
+  #elif defined(__APPLE__)
+  /* todo */
+  ROA_UNUSED(th);
+  ROA_UNUSED(affinity);
   #else
   #error "Unsupported Platform"
   #endif
@@ -239,6 +241,3 @@ roa_thread_core_count()
   #error "Unsupported Platform"
   #endif
 }
-
-
-
