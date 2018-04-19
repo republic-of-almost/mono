@@ -397,13 +397,8 @@ struct volt_ctx
 
 struct volt_renderpass
 {
-  /* next to bind */
-  volt_vbo_t        curr_vbo;
-  volt_ibo_t        curr_ibo;
-  volt_input_t      curr_input;
-  volt_program_t    curr_program;
-  volt_rasterizer_t curr_rasterizer;
-  volt_rect2d       curr_viewport;
+  struct volt_pipeline_desc pipeline;
+
   volt_rect2d       curr_scissor;
 
   unsigned          curr_clear;
@@ -415,13 +410,6 @@ struct volt_renderpass
   /* uniforms */
   uint64_t          uniform_hash[32];
   volt_uniform_t    uniform[32];
-
-  /* last bound */
-  volt_vbo_t        last_bound_vbo;
-  volt_ibo_t        last_bound_ibo;
-  volt_input_t      last_bound_input;
-  volt_program_t    last_bound_program;
-  volt_rasterizer_t last_bound_rasterizer;
 
   /* array */ struct volt_gl_cmd *render_cmds;
 };
@@ -1026,26 +1014,53 @@ volt_renderpass_set_pipeline(
   ROA_ASSERT(pass);
   ROA_ASSERT(pipeline);
 
-  /* set pipeline states */
-  if (pass && pipeline)
+  /* program cmd if changed */
   {
-    if (pipeline->rasterizer)
-    {
-      pass->curr_rasterizer = pipeline->rasterizer;
-    }
+    volt_program_t next = pipeline->program;
 
-    if (pipeline->input)
+    if (next)
     {
-      pass->curr_input = pipeline->input;
-    }
+      const GLuint program = next ? next->gl_id : 0;
 
-    if (pipeline->program)
-    {
-      pass->curr_program = pipeline->program;
-    }
+      struct cmd_program_bind cmd;
+      cmd.program = program;
 
-    pass->curr_viewport = pipeline->viewport;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id        = CMD_PROGRAM_BIND;
+      cmd_wrapper.program_bind  = cmd;
+
+      roa_array_push(pass->render_cmds, cmd_wrapper); 
+    }
   }
+
+  /* input */
+  {
+    /* this command is sent in the draw cmd */
+  }
+
+  /* rasterizer */
+  {
+    /* not yet supported */
+  }
+
+  /* viewport */
+  {
+    struct cmd_viewport cmd;
+    cmd.x      = pipeline->viewport.x;
+    cmd.y      = pipeline->viewport.y;
+    cmd.width  = pipeline->viewport.width;
+    cmd.height = pipeline->viewport.height;
+
+    volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id   = CMD_VIEWPORT;
+    cmd_wrapper.viewport = cmd;
+
+    roa_array_push(pass->render_cmds, cmd_wrapper);
+  }
+  
+
+  /* save new pipeline */
+  pass->pipeline = *pipeline;
 }
 
 
@@ -1057,36 +1072,6 @@ volt_renderpass_draw_cmd(
   /* param check */
   ROA_ASSERT(pass);
   ROA_ASSERT(draw);
-
-  /* set draw states */
-  if (pass && draw)
-  {
-    if(draw->vbo)
-    {
-      pass->curr_vbo = draw->vbo;
-      pass->last_bound_input = VOLT_NULL;
-    }
-
-    if(draw->ibo)
-    {
-      pass->curr_ibo = draw->ibo;
-    }
-  }
-
-  /* viewport */
-  {
-    struct cmd_viewport cmd;
-    cmd.x       = pass->curr_viewport.x;
-    cmd.y       = pass->curr_viewport.y;
-    cmd.width   = pass->curr_viewport.width;
-    cmd.height  = pass->curr_viewport.height;
-
-    volt_gl_cmd cmd_wrapper;
-    cmd_wrapper.cmd_id    = CMD_VIEWPORT;
-    cmd_wrapper.viewport  = cmd;
-
-    roa_array_push(pass->render_cmds, cmd_wrapper);
-  }
 
   /* scissor */
   {
@@ -1123,50 +1108,29 @@ volt_renderpass_draw_cmd(
     }
   }
 
-  if (pass->curr_program != pass->last_bound_program)
+  /* bind any changes that are required */
+  if (draw->vbo)
   {
     /* prepare */
-    const GLuint program = pass->curr_program ? pass->curr_program->gl_id : 0;
+    const GLuint vbo = draw->vbo->gl_id;
 
     /* cmd */
     {
-      struct cmd_program_bind cmd;
-      cmd.program = program;
-
-      struct volt_gl_cmd cmd_wrapper;
-      cmd_wrapper.cmd_id = CMD_PROGRAM_BIND;
-      cmd_wrapper.program_bind = cmd;
-
-      roa_array_push(pass->render_cmds, cmd_wrapper);
-    }
-
-    pass->last_bound_program = pass->curr_program;
-  }
-
-  /* bind any changes that are required */
-  if (pass->curr_vbo != pass->last_bound_vbo)
-  {
-    /* cmd */
-    {
-      const GLuint vbo = pass->curr_vbo ? pass->curr_vbo->gl_id : 0;
-
       struct cmd_vbo_bind cmd;
       cmd.vbo = vbo;
 
       struct volt_gl_cmd cmd_wrapper;
-      cmd_wrapper.cmd_id = CMD_VBO_BIND;
+      cmd_wrapper.cmd_id   = CMD_VBO_BIND;
       cmd_wrapper.vbo_bind = cmd;
 
       roa_array_push(pass->render_cmds, cmd_wrapper);
     }
-
-    pass->last_bound_vbo = pass->curr_vbo;
   }
 
-  if (pass->curr_ibo != pass->last_bound_ibo)
+  if (draw->ibo)
   {
     /* prepare */
-    const GLuint ibo = pass->curr_ibo ? pass->curr_ibo->gl_id : 0;
+    const GLuint ibo = draw->ibo->gl_id;
 
     /* cmd */
     {
@@ -1179,25 +1143,25 @@ volt_renderpass_draw_cmd(
 
       roa_array_push(pass->render_cmds, cmd_wrapper);
     }
-
-    pass->last_bound_ibo = pass->curr_ibo;
   }
 
-  if (pass->curr_input != pass->last_bound_input)
+  /* input format */
   {
-    if (pass->curr_input)
+    volt_input_t input = pass->pipeline.input;
+
+    if (input)
     {
-      int input_count = pass->curr_input->count;
+      int input_count = input->count;
 
       for (int i = 0; i < input_count; ++i)
       {
         /* prepare */
         GLuint index = i;
-        GLint size            = pass->curr_input->attrib_count[i];
-        GLenum type           = pass->curr_input->type[i];
-        GLboolean normalized  = pass->curr_input->normalized[i];
-        GLsizei stride        = pass->curr_input->byte_stride;
-        GLuint pointer        = pass->curr_input->increment_stride[i];
+        GLint size            = input->attrib_count[i];
+        GLenum type           = input->type[i];
+        GLboolean normalized  = input->normalized[i];
+        GLsizei stride        = input->byte_stride;
+        GLuint pointer        = input->increment_stride[i];
 
         /* cmd */
         {
@@ -1217,26 +1181,20 @@ volt_renderpass_draw_cmd(
         }
       }
     }
-
-    pass->last_bound_input = pass->curr_input;
-  }
-
-  if (pass->curr_rasterizer != pass->last_bound_rasterizer)
-  {
-
   }
 
   /* textures */
   {
     /* todo! don't rebind textures */
+    volt_program_t curr_prog = pass->pipeline.program;
 
     /* check to see if textures have been bound */
-    unsigned sampler_count = pass->curr_program->sampler_count;
+    unsigned sampler_count = curr_prog->sampler_count;
     GLint active_textures = 0;
 
     for (unsigned i = 0; i < sampler_count; ++i)
     {
-      const uint64_t prog_sampler_hash = pass->curr_program->sampler_keys[i];
+      const uint64_t prog_sampler_hash = curr_prog->sampler_keys[i];
 
       /* check bound textures */
       for (unsigned j = 0; j < ROA_ARR_COUNT(pass->sampler_hash); ++j)
@@ -1247,13 +1205,13 @@ volt_renderpass_draw_cmd(
         {
           /* bind texture */
           struct cmd_texture_bind cmd;
-          cmd.gl_id = pass->sampler[j]->gl_id;
-          cmd.active_texture = active_textures;
-          cmd.sampler_location = pass->curr_program->samplers[i].location;
+          cmd.gl_id             = pass->sampler[j]->gl_id;
+          cmd.active_texture    = active_textures;
+          cmd.sampler_location  = curr_prog->samplers[i].location;
 
           struct volt_gl_cmd cmd_wrapper;
-          cmd_wrapper.cmd_id = CMD_TEXTURE_BIND;
-          cmd_wrapper.texture_bind = cmd;
+          cmd_wrapper.cmd_id        = CMD_TEXTURE_BIND;
+          cmd_wrapper.texture_bind  = cmd;
 
           roa_array_push(pass->render_cmds, cmd_wrapper);
 
@@ -1266,13 +1224,14 @@ volt_renderpass_draw_cmd(
   /* uniforms */
   {
     /* todo! don't rebind uniforms */
+    volt_program_t curr_prog = pass->pipeline.program;
 
     /* check to see if uniforms have been bound */
-    unsigned uniform_count = pass->curr_program->uniform_count;
+    unsigned uniform_count = curr_prog->uniform_count;
 
     for (unsigned i = 0; i < uniform_count; ++i)
     {
-      const uint64_t prog_uniform_hash = pass->curr_program->uniform_keys[i];
+      const uint64_t prog_uniform_hash = curr_prog->uniform_keys[i];
 
       /* check bound uniforms */
       for (unsigned j = 0; j < ROA_ARR_COUNT(pass->uniform_hash); ++j)
@@ -1284,7 +1243,7 @@ volt_renderpass_draw_cmd(
           /* bind uniform */
           struct cmd_uniform_bind cmd;
           ROA_MEM_ZERO(cmd);
-          cmd.location  = pass->curr_program->uniforms[i].location;
+          cmd.location  = curr_prog->uniforms[i].location;
           cmd.value     = pass->uniform[j]->value;
           cmd.type      = pass->uniform[j]->type;
           cmd.count     = pass->uniform[j]->count;
@@ -1300,11 +1259,13 @@ volt_renderpass_draw_cmd(
   }
 
   /* cmd */
-  if (pass->curr_ibo == ROA_NULL)
+  if (!draw->ibo)
   {
-    const GLuint stride = pass->curr_input->element_stride;
-    const GLuint ele_count = pass->curr_vbo->element_count;
-    const GLuint count = ele_count / stride;
+    volt_input_t input = pass->pipeline.input;
+
+    const GLuint stride     = input->element_stride;
+    const GLuint ele_count  = draw->vbo->element_count;
+    const GLuint count      = ele_count / stride;
 
     struct cmd_draw_count cmd;
     cmd.first = 0;
@@ -1320,40 +1281,16 @@ volt_renderpass_draw_cmd(
   else
   {
     struct cmd_draw_indexed cmd;
-    cmd.count = pass->curr_ibo->element_count;
-    cmd.type = GL_UNSIGNED_INT;
-    cmd.mode = GL_TRIANGLES;
+    cmd.count   = draw->ibo->element_count;
+    cmd.type    = GL_UNSIGNED_INT;
+    cmd.mode    = GL_TRIANGLES;
     cmd.indices = GL_ZERO;
 
     struct volt_gl_cmd cmd_wrapper;
-    cmd_wrapper.cmd_id = CMD_DRAW_INDEXED;
-    cmd_wrapper.draw_indexed = cmd;
+    cmd_wrapper.cmd_id        = CMD_DRAW_INDEXED;
+    cmd_wrapper.draw_indexed  = cmd;
 
     roa_array_push(pass->render_cmds, cmd_wrapper);
-  }
-}
-
-
-void
-volt_renderpass_bind_rasterizer(
-  volt_renderpass_t pass,
-  volt_rasterizer_t rasterizer)
-{
-  if (pass->curr_rasterizer != rasterizer)
-  {
-    pass->curr_rasterizer = rasterizer;
-  }
-}
-
-
-void
-volt_renderpass_bind_input_format(
-  volt_renderpass_t pass,
-  volt_input_t input)
-{
-  if (pass->curr_input != input)
-  {
-    pass->curr_input = input;
   }
 }
 
@@ -1441,43 +1378,6 @@ volt_renderpass_bind_texture_buffer(
 
   /* all slots bound */
   ROA_ASSERT(false);
-}
-
-
-void
-volt_renderpass_bind_vertex_buffer(
-  volt_renderpass_t pass,
-  volt_vbo_t vbo)
-{
-  if (pass->curr_vbo != vbo)
-  {
-    pass->curr_vbo = vbo;
-    pass->last_bound_input = VOLT_NULL;
-  }
-}
-
-
-void
-volt_renderpass_bind_index_buffer(
-  volt_renderpass_t pass,
-  volt_ibo_t ibo)
-{
-  if (pass->curr_ibo != ibo)
-  {
-    pass->curr_ibo = ibo;
-  }
-}
-
-
-void
-volt_renderpass_bind_program(
-  volt_renderpass_t pass,
-  volt_program_t program)
-{
-  if (pass->curr_program != program)
-  {
-    pass->curr_program = program;
-  }
 }
 
 
@@ -2183,6 +2083,10 @@ volt_gl_bind_uniform(const cmd_uniform_bind *cmd)
     case(GL_INT_VEC2): glUniform2iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC3): glUniform3iv(location, count, (GLint*)value); break;
     case(GL_INT_VEC4): glUniform4iv(location, count, (GLint*)value); break;
+
+    default:
+      /* something doesn't exist */
+      ROA_ASSERT(0);
   }
 
   GL_ASSERT;
