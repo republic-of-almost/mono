@@ -33,14 +33,22 @@ int height = 720;
 
 struct g_buffer_data
 {
+  volt_framebuffer_t  fbo;
+  volt_texture_t      fbo_color_outputs[5];
+  volt_texture_t      fbo_depth;
+
+  /* object render */
 	volt_program_t      program;
-	volt_framebuffer_t  fbo;
-	volt_texture_t      fbo_color_outputs[5];
-	volt_texture_t      fbo_depth;
 	volt_input_t        input;
 	volt_rasterizer_t   rasterizer;
 
 	struct volt_pipeline_desc pipeline_desc;
+
+  /* decal render */
+  volt_program_t      decal_program;
+
+  struct volt_pipeline_desc decal_pipeline_desc;
+
 } g_buffer;
 
 
@@ -81,23 +89,39 @@ struct direction_light_data
 
 struct scene_data
 {
-  struct volt_rect2d    viewport;
+  volt_vbo_t            vbo;
 
-	volt_vbo_t            vbo;
+  /* objects */
+
   roa_transform         box_transform[1];
   roa_mat4              box_world[1];
   roa_mat4              box_wvp[1];
-	struct volt_draw_desc draw_desc[1];
+
+  /* decals */
+
+  roa_transform         decal_transform[1];
+  roa_mat4              decal_world[1];
+  roa_mat4              decal_wvp[1];
+  roa_mat4              decal_inv_world[1];
+  roa_mat4              decal_inv_view[1];
+  roa_mat4              decal_world_view[1];
+
+  /* camera */
+
+  struct volt_rect2d    viewport;
+  struct volt_draw_desc draw_desc[1];
+
   volt_uniform_t        box_world_uni;
   volt_uniform_t        box_wvp_uni;
 
   roa_mat4              view_mat;
   roa_mat4              proj_mat;
+  roa_mat4              inv_view_mat;
 
   roa_float3            cam_position;
   float                 cam_pitch;
   float                 cam_yaw;
-	float 								cam_radius;
+  float                 cam_radius;
 } scene;
 
 
@@ -197,7 +221,14 @@ main(int argc, char **argv)
     {
       roa_transform_init(&scene.box_transform[0]);
       scene.box_transform[0].position = roa_float3_set_with_values(0.f, ROA_G_RATIO / 2, 0.f);
-			scene.box_transform[0].scale = roa_float3_set_with_values(1.f, ROA_G_RATIO, 1.f);
+      scene.box_transform[0].scale    = roa_float3_set_with_values(ROA_G_RATIO / 4, ROA_G_RATIO, 1.f);
+    }
+
+    /* decals */
+    {
+      roa_transform_init(&scene.decal_transform[0]);
+      scene.decal_transform[0].position = roa_float3_set_with_values(0,0.2,0);
+      scene.decal_transform[0].scale    = roa_float3_set_with_values(3, 0.3, 0.3);
     }
 
     /* uniforms */
@@ -833,7 +864,7 @@ main(int argc, char **argv)
         "void main()  \n"
         "{\n"
         " WorldPosOut     = WorldPos0;\n"
-        " DiffuseOut      = vec3(1, 0, 1); /*texture(gColorMap, TexCoord0).xyz;*/\n"
+        " DiffuseOut      = vec3(1, 0.3, 0); /*texture(gColorMap, TexCoord0).xyz;*/\n"
         " NormalOut       = normalize(Normal0);\n"
         " TexCoordOut     = vec3(TexCoord0, 0.0);\n"
         "}\n";
@@ -857,7 +888,6 @@ main(int argc, char **argv)
       volt_program_create(volt_ctx, &g_buffer.program, &prog_desc);
       volt_ctx_execute(volt_ctx);
     }
-
 
     /* input format */
     {
@@ -895,7 +925,7 @@ main(int argc, char **argv)
     /* pipeline */
     {
       struct volt_pipeline_desc pipe_desc;
-       ROA_MEM_ZERO(pipe_desc);
+      ROA_MEM_ZERO(pipe_desc);
 
       pipe_desc.program 	 = g_buffer.program;
       pipe_desc.rasterizer = g_buffer.rasterizer;
@@ -903,6 +933,114 @@ main(int argc, char **argv)
       pipe_desc.viewport 	 = scene.viewport;
 
       g_buffer.pipeline_desc = pipe_desc;
+    }
+
+    /* decal program */
+    {
+      const char vs[] = ""
+        "#version 430\n"
+
+        "layout(location=0) in vec4 vs_in_position;\n"
+        "layout(location=1) in vec3 vs_in_normal;\n"
+        "layout(location=2) in vec2 vs_in_texcoord;\n"
+
+        "uniform mat4 u_view;\n"
+        "uniform mat4 u_proj;\n"
+        "uniform mat4 u_model;\n"
+        "uniform vec3 u_decal_size;\n"
+        "uniform float u_far_clip;\n"
+
+        "out vec4 pos_fs;\n"
+        "out vec4 pos_w;\n"
+        "out vec2 uv_fs;\n"
+
+        "void main()\n"
+        "{\n"
+        " pos_w       = u_model * vec4(vs_in_position.xyz * 1, vs_in_position.w);\n"
+        " pos_fs      = u_proj * u_view * pos_w;\n"
+        " uv_fs       = vs_in_texcoord;\n"
+        " gl_Position = pos_fs;\n"
+        "}\n";
+
+      const char fs[] = ""
+        "#version 430\n"
+        "#extension GL_ARB_texture_rectangle : enable\n"
+
+        "in vec4 pos_fs;\n"
+        "in vec4 pos_w;\n"
+        "in vec2 uv_fs;\n"
+
+        "uniform sampler2D samp_normal;\n"
+        "uniform sampler2D samp_depth;\n"
+        "uniform sampler2D samp_diffuse;\n"
+
+        "uniform mat4 u_inv_proj_view;\n"
+        "uniform mat4 u_inv_model;\n"
+
+        "vec4 reconstruct_pos(float z, vec2 uv_f)\n"
+        "{\n"
+        "  vec4 sPos = vec4(uv_f * 2.0 - 1.0, z, 1.0);\n"
+          "sPos = u_inv_proj_view * sPos;\n"
+          "return vec4((sPos.xyz / sPos.w), sPos.w);\n"
+        "}\n"
+
+        "layout (location = 0) out vec3 fs_out_diffuse;\n"
+
+        "void main()  \n"
+        "{\n"
+        "vec2 screenPosition = pos_fs.xy / pos_fs.w;\n"
+
+        "vec2 depthUV = screenPosition * 0.5 + 0.5;\n"
+        "depthUV += vec2(0.5 / 1280.0f, 0.5 / 720.0);\n"
+        "float depth = texture2D(samp_depth, depthUV).w;\n"
+
+        "vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
+        "vec4 localPos = u_inv_model * worldPos;\n"
+
+        "float dist = 0.5 - abs(localPos.y);\n"
+        "float dist2 = 0.5 - abs(localPos.x);\n"
+
+        "if (dist > 0.0f && dist2 > 0)\n"
+        "{\n"
+          "vec2 uv = vec2(localPos.x, localPos.y) + 0.5;\n"
+          "vec4 diffuseColor = texture2D(samp_diffuse, uv);\n"
+          "fs_out_diffuse = diffuseColor.xyz;\n"
+        "}\n"
+        "else {\n"
+          "fs_out_diffuse = vec4(1.0, 0, 0, 1).xyz;\n"
+          "}\n"
+        "}\n";
+
+      volt_shader_stage stages[2] = {
+        VOLT_SHD_VERTEX,
+        VOLT_SHD_FRAGMENT,
+      };
+
+      const char *stages_src[2];
+      stages_src[0] = vs;
+      stages_src[1] = fs;
+
+      struct volt_program_desc prog_desc;
+      ROA_MEM_ZERO(prog_desc);
+      prog_desc.shader_stages_src = stages_src;
+      prog_desc.shader_stages_type = stages;
+      prog_desc.stage_count = ROA_ARR_COUNT(stages);
+
+      volt_program_create(volt_ctx, &g_buffer.decal_program, &prog_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* decal pipeline */
+    {
+      struct volt_pipeline_desc decal_pipeline_desc;
+      ROA_MEM_ZERO(decal_pipeline_desc);
+
+      decal_pipeline_desc.program     = g_buffer.decal_program;
+      decal_pipeline_desc.rasterizer  = g_buffer.rasterizer;
+      decal_pipeline_desc.input       = g_buffer.input;
+      decal_pipeline_desc.viewport    = scene.viewport;
+
+      g_buffer.decal_pipeline_desc = decal_pipeline_desc;
     }
   }
 
@@ -946,18 +1084,33 @@ main(int argc, char **argv)
 				}
       }
 
-      /* world */
+      /* cam data */
+      static roa_mat4 view_proj;
+      roa_mat4_multiply(&view_proj, &scene.view_mat, &scene.proj_mat);
+
+      /* object data */
       {
         int count = ROA_ARR_COUNT(scene.box_transform);
         int i;
-
-        static roa_mat4 view_proj;
-        roa_mat4_multiply(&view_proj, &scene.view_mat, &scene.proj_mat);
 
         for (i = 0; i < count; ++i)
         {
           roa_transform_to_mat4(&scene.box_transform[i], &scene.box_world[i]);
           roa_mat4_multiply(&scene.box_wvp[i], &scene.box_world[i], &view_proj);
+
+          volt_ctx_execute(volt_ctx);
+        }
+      }
+
+      /* decal data */
+      {
+        int count = ROA_ARR_COUNT(scene.decal_transform);
+        int i;
+
+        for (i = 0; i < count; ++i)
+        {
+          roa_transform_to_mat4(&scene.decal_transform[i], &scene.decal_world[i]);
+          roa_mat4_multiply(&scene.decal_wvp[i], &scene.decal_world[i], &view_proj);
 
           volt_ctx_execute(volt_ctx);
         }
@@ -1001,6 +1154,39 @@ main(int argc, char **argv)
       volt_renderpass_commit(volt_ctx, &g_buffer_pass);
     }
 
+    /* --------------------------------------------- [ Decals Renderpass ] -- */
+    {
+      struct volt_renderpass_desc decal_pass_desc;
+      ROA_MEM_ZERO(decal_pass_desc);
+      decal_pass_desc.fbo = g_buffer.fbo;
+      decal_pass_desc.name = "Decal Gbuffer";
+
+      volt_renderpass_t decal_pass;
+      volt_renderpass_create(volt_ctx, &decal_pass, &decal_pass_desc);
+      volt_renderpass_set_pipeline(decal_pass, &g_buffer.decal_pipeline_desc);
+
+      int i;
+      int count = ROA_ARR_COUNT(scene.decal_world);
+
+      for (i = 0; i < count; ++i)
+      {
+        /* Uniform world view projection */
+        volt_uniform_t wvp = scene.box_wvp_uni;
+        void *wvp_data = (void*)scene.decal_wvp[i].data;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, wvp, wvp_data);
+
+        /* Uniform world */
+        volt_uniform_t world = scene.box_world_uni;
+        void *world_data = (void*)scene.decal_world[i].data;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, world, world_data);
+
+        /* Draw */
+        volt_renderpass_draw_cmd(decal_pass, &scene.draw_desc[i]);
+      }
+
+      volt_renderpass_commit(volt_ctx, &decal_pass);
+    }
+
     /* --------------------------------------- [ Dir Lighting Renderpass ] -- */
     {
       unsigned attachments[] = {
@@ -1020,7 +1206,7 @@ main(int argc, char **argv)
       static float amb_intensity  = 0.f;
       static float diff_intensity = 0.5f;
       static float color[3]       = {1,1,0};
-      static float direction[3]   = {0.5773f, -0.5773f, 0.5773f};
+      static float direction[3]   = {0.4558f, -0.6837f, 0.5698f};
 
       volt_renderpass_t dir_light_pass;
       volt_renderpass_create(volt_ctx, &dir_light_pass, &rp_desc);
