@@ -310,9 +310,10 @@ main(int argc, char **argv)
     {
       struct volt_rasterizer_desc raster_desc;
       ROA_MEM_ZERO(raster_desc);
-      raster_desc.cull_mode       = VOLT_CULL_FRONT;
-      raster_desc.primitive_type  = VOLT_PRIM_TRIANGLES;
-      raster_desc.winding_order   = VOLT_WIND_CW;
+      raster_desc.cull_mode       = VOLT_CULL_BACK;
+      raster_desc.primitive  			= VOLT_PRIM_TRIANGLES;
+      raster_desc.winding_order   = VOLT_WIND_CCW;
+			raster_desc.depth_test      = VOLT_TRUE;
 
       volt_rasterizer_create(volt_ctx, &fullscreen.rasterizer, &raster_desc);
       volt_ctx_execute(volt_ctx);
@@ -696,10 +697,13 @@ main(int argc, char **argv)
     {
       struct volt_rasterizer_desc raster_desc;
       ROA_MEM_ZERO(raster_desc);
-
-      raster_desc.cull_mode = VOLT_CULL_FRONT;
-      raster_desc.primitive_type = VOLT_PRIM_TRIANGLES;
-      raster_desc.winding_order = VOLT_WIND_CW;
+      raster_desc.cull_mode 		 = VOLT_CULL_BACK;
+      raster_desc.primitive	 		 = VOLT_PRIM_TRIANGLES;
+      raster_desc.winding_order  = VOLT_WIND_CCW;
+			raster_desc.blend_equation = VOLT_BLEND_EQ_ADD;
+			raster_desc.blend_src      = VOLT_BLEND_FLAG_ONE;
+			raster_desc.blend_dst      = VOLT_BLEND_FLAG_ONE;
+			raster_desc.depth_test 		 = VOLT_TRUE;
 
       volt_rasterizer_create(volt_ctx, &dir_lights.rasterizer, &raster_desc);
       volt_ctx_execute(volt_ctx);
@@ -708,7 +712,6 @@ main(int argc, char **argv)
     /* pipeline */
     {
       ROA_MEM_ZERO(dir_lights.pipeline_desc);
-
       dir_lights.pipeline_desc.program    = dir_lights.program;
       dir_lights.pipeline_desc.input      = dir_lights.input;
       dir_lights.pipeline_desc.rasterizer = dir_lights.rasterizer;
@@ -880,9 +883,10 @@ main(int argc, char **argv)
       struct volt_rasterizer_desc raster_desc;
       ROA_MEM_ZERO(raster_desc);
 
-      raster_desc.cull_mode       = VOLT_CULL_FRONT;
-      raster_desc.primitive_type  = VOLT_PRIM_TRIANGLES;
-      raster_desc.winding_order   = VOLT_WIND_CW;
+      raster_desc.cull_mode     = VOLT_CULL_BACK;
+      raster_desc.primitive  		= VOLT_PRIM_TRIANGLES;
+      raster_desc.winding_order = VOLT_WIND_CCW;
+			raster_desc.depth_test    = VOLT_TRUE;
 
       volt_rasterizer_create(volt_ctx, &g_buffer.rasterizer, &raster_desc);
       volt_ctx_execute(volt_ctx);
@@ -893,10 +897,10 @@ main(int argc, char **argv)
       struct volt_pipeline_desc pipe_desc;
        ROA_MEM_ZERO(pipe_desc);
 
-      pipe_desc.program 		= g_buffer.program;
-      pipe_desc.rasterizer 	= g_buffer.rasterizer;
-      pipe_desc.input 			= g_buffer.input;
-      pipe_desc.viewport 		= scene.viewport;
+      pipe_desc.program 	 = g_buffer.program;
+      pipe_desc.rasterizer = g_buffer.rasterizer;
+      pipe_desc.input 		 = g_buffer.input;
+      pipe_desc.viewport 	 = scene.viewport;
 
       g_buffer.pipeline_desc = pipe_desc;
     }
@@ -916,9 +920,9 @@ main(int argc, char **argv)
 
 	        roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
 
-	        scene.cam_pitch 	+= ms_desc.y_delta * 0.02f;
-	        scene.cam_yaw 		+= ms_desc.x_delta * 0.02f;
-					scene.cam_radius 	+= ms_desc.y_scroll * 0.4f;
+	        scene.cam_pitch  += ms_desc.y_delta * 0.02f;
+	        scene.cam_yaw 	 += ms_desc.x_delta * 0.02f;
+					scene.cam_radius += ms_desc.y_scroll * 0.4f;
 				}
 
 				/* calculate camera lookat */

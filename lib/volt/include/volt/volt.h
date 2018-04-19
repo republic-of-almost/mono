@@ -82,7 +82,7 @@ typedef enum _volt_clear {
 
 typedef enum _volt_primitive_type {
   VOLT_PRIM_TRIANGLES,
-  VOLT_PRIM_POINT,
+  VOLT_PRIM_POINTS,
 } volt_primitive_type;
 
 
@@ -106,7 +106,7 @@ typedef enum _volt_blend_equation {
 
 typedef enum _volt_blend_flag {
   VOLT_BLEND_FLAG_ONE,
-} _volt_blend_flag;
+} volt_blend_flag;
 
 
 typedef enum _volt_data_type {
@@ -421,13 +421,13 @@ volt_sampler_create(
 
 struct volt_rasterizer_desc
 {
-  volt_primitive_type   primitive_type;       /* what time of primitive to render with */
+  volt_primitive_type   primitive;            /* what time of primitive to render with */
   volt_winding_order    winding_order;        /* clockwise or counter clockwise */
   volt_cull_mode        cull_mode;            /* culling mode */
   volt_bool             depth_test;           /* depth test true or false */
-  volt_blend_equation   blend_equation;
-  volt_blend_flag       src_blend;
-  volt_blend_flag       dst_blend;
+  volt_blend_equation   blend_equation;       /* if blending equation is set then the src and dest will be used */
+  volt_blend_flag       blend_src;
+  volt_blend_flag       blend_dst;
 };
 
 

@@ -66,6 +66,11 @@ typedef enum volt_cmd_id
   CMD_VIEWPORT,
   CMD_SCISSOR,
   CMD_CLEAR,
+  CMD_RASTERIZER,
+
+  CMD_DEBUG_MARKER_PUSH,
+  CMD_DEBUG_MARKER_POP,
+  CMD_DEBUG_MARKER_EVENT,
 
   CMD_COUNT /* nothing after this */
 } volt_cmd_id;
@@ -230,6 +235,29 @@ struct cmd_clear
 };
 
 
+struct cmd_rasterizer
+{
+  GLenum blend_eq;
+  GLenum blend_src;
+  GLenum blend_dst;
+  GLenum depth_test;
+  GLenum winding_order;
+  GLenum cull_mode;
+};
+
+
+struct cmd_debug_marker
+{
+  const char *marker_name;
+};
+
+
+struct cmd_debug_marker_pop
+{
+  GLint i; /* does nothing */
+};
+
+
 struct volt_gl_cmd
 {
   volt_cmd_id cmd_id;
@@ -265,6 +293,11 @@ struct volt_gl_cmd
     struct cmd_scissor            scissor;
     struct cmd_viewport           viewport;
     struct cmd_clear              clear;
+    struct cmd_rasterizer         rasterizer;
+
+    struct cmd_debug_marker       debug_marker_insert;
+    struct cmd_debug_marker       debug_marker_push;
+    struct cmd_debug_marker_pop   debug_marker_pop;
   };
 };
 
@@ -302,9 +335,13 @@ struct volt_program
 
 struct volt_rasterizer
 {
-  GLenum prim;
+  GLenum primitive;
   GLenum winding_order;
   GLenum culling_mode;
+  GLenum depth_test;
+  GLenum blend_mode;
+  GLenum blend_src;
+  GLenum blend_dst;
 };
 
 
@@ -514,14 +551,14 @@ volt_texture_get_desc(
 
   /* convert gl to volt */
   {
-    out_desc->mip_maps    = convert_gl_boolean_to_volt(texture->mips);
-    out_desc->dimentions  = convert_gl_dimention_to_volt(texture->dimention);
+    out_desc->mip_maps    = gl_boolean_to_volt(texture->mips);
+    out_desc->dimentions  = gl_dimention_to_volt(texture->dimention);
     out_desc->width       = texture->width;
     out_desc->height      = texture->height;
     out_desc->sampling    = VOLT_SAMPLING_BILINEAR;
     out_desc->data        = texture->data;
     out_desc->access      = texture->data ? VOLT_STREAM : VOLT_STATIC;
-    out_desc->format      = convert_gl_format_to_volt(texture->format);
+    out_desc->format      = gl_format_to_volt(texture->format);
   }
 }
 
@@ -610,8 +647,8 @@ volt_input_create(
 
       new_input->attrib_count[i]      = volt_input_attribute_count(attr);
       new_input->increment_stride[i]  = new_input->byte_stride;
-      new_input->type[i]              = convert_volt_attribute_to_gl_type(attr);
-      new_input->normalized[i]        = convert_volt_attribute_to_gl_normalized(attr);
+      new_input->type[i]              = volt_attribute_to_gl_type(attr);
+      new_input->normalized[i]        = volt_attribute_to_gl_normalized(attr);
       new_input->byte_stride          += new_input->attrib_count[i] * sizeof(float);
       new_input->element_stride       += new_input->attrib_count[i];
     }
@@ -906,6 +943,20 @@ volt_rasterizer_create(
     ROA_ASSERT(rasterizer);
     ROA_ASSERT(desc);
   }
+
+  /* prepare */
+  {
+    volt_rasterizer_t new_rsrc   = (volt_rasterizer_t)roa_zalloc(sizeof(*new_rsrc));
+    new_rsrc->blend_mode         = volt_blend_eq_to_gl(desc->blend_equation);
+    new_rsrc->blend_src          = volt_blend_flag_to_gl(desc->blend_src);
+    new_rsrc->blend_src          = volt_blend_flag_to_gl(desc->blend_dst);
+    new_rsrc->depth_test         = desc->depth_test ? GL_DEPTH_TEST : GL_NONE;
+    new_rsrc->winding_order      = volt_winding_order_to_gl(desc->winding_order);
+    new_rsrc->culling_mode       = volt_cull_mode_to_gl(desc->cull_mode);
+    new_rsrc->primitive          = volt_primitive_to_gl(desc->primitive);
+
+    *rasterizer = new_rsrc;
+  }
 }
 
 
@@ -968,24 +1019,6 @@ volt_renderpass_create(
     cmd_wrapper.fbo_bind = cmd;
 
     roa_array_push(rp->render_cmds, cmd_wrapper);
-
-    if (desc && strcmp(desc->name, "Dir Light Pass") == 0)
-    {
-      glDisable(GL_SCISSOR_TEST);
-      glEnable(GL_DEPTH_TEST);
-      glDisable(GL_CULL_FACE);
-      glEnable(GL_BLEND);
-      glBlendEquation(GL_FUNC_ADD);
-      glBlendFunc(GL_ONE, GL_ONE);
-    }
-    else
-    {
-      glClear(GL_COLOR_BUFFER_BIT);
-      glDisable(GL_SCISSOR_TEST);
-      glEnable(GL_DEPTH_TEST);
-      glDisable(GL_CULL_FACE);
-      glDisable(GL_BLEND);
-    }
   }
 
   *pass = rp;
@@ -1013,6 +1046,7 @@ volt_renderpass_set_pipeline(
   /* param check */
   ROA_ASSERT(pass);
   ROA_ASSERT(pipeline);
+  ROA_ASSERT(pipeline->rasterizer);
 
   /* program cmd if changed */
   {
@@ -1029,7 +1063,7 @@ volt_renderpass_set_pipeline(
       cmd_wrapper.cmd_id        = CMD_PROGRAM_BIND;
       cmd_wrapper.program_bind  = cmd;
 
-      roa_array_push(pass->render_cmds, cmd_wrapper); 
+      roa_array_push(pass->render_cmds, cmd_wrapper);
     }
   }
 
@@ -1040,7 +1074,19 @@ volt_renderpass_set_pipeline(
 
   /* rasterizer */
   {
-    /* not yet supported */
+    struct cmd_rasterizer cmd;
+    cmd.blend_eq      = pipeline->rasterizer->blend_mode;
+    cmd.blend_src     = pipeline->rasterizer->blend_src;
+    cmd.blend_dst     = pipeline->rasterizer->blend_dst;
+    cmd.depth_test    = pipeline->rasterizer->depth_test;
+    cmd.winding_order = pipeline->rasterizer->winding_order;
+    cmd.cull_mode     = pipeline->rasterizer->culling_mode;
+
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id      = CMD_RASTERIZER;
+    cmd_wrapper.rasterizer  = cmd;
+
+    roa_array_push(pass->render_cmds, cmd_wrapper);
   }
 
   /* viewport */
@@ -1057,7 +1103,7 @@ volt_renderpass_set_pipeline(
 
     roa_array_push(pass->render_cmds, cmd_wrapper);
   }
-  
+
 
   /* save new pipeline */
   pass->pipeline = *pipeline;
@@ -1096,7 +1142,7 @@ volt_renderpass_draw_cmd(
     if (pass->curr_clear)
     {
       struct cmd_clear cmd;
-      cmd.mask = convert_volt_clear_to_gl_flag(pass->curr_clear);
+      cmd.mask = volt_clear_to_gl_flag(pass->curr_clear);
 
       struct volt_gl_cmd cmd_wrapper;
       cmd_wrapper.cmd_id = CMD_CLEAR;
@@ -1259,38 +1305,41 @@ volt_renderpass_draw_cmd(
   }
 
   /* cmd */
-  if (!draw->ibo)
   {
     volt_input_t input = pass->pipeline.input;
+    volt_rasterizer_t rasterizer = pass->pipeline.rasterizer;
 
-    const GLuint stride     = input->element_stride;
-    const GLuint ele_count  = draw->vbo->element_count;
-    const GLuint count      = ele_count / stride;
+    if (!draw->ibo)
+    {
+      const GLuint stride     = input->element_stride;
+      const GLuint ele_count  = draw->vbo->element_count;
+      const GLuint count      = ele_count / stride;
 
-    struct cmd_draw_count cmd;
-    cmd.first = 0;
-    cmd.count = count;
-    cmd.mode = GL_TRIANGLES;
+      struct cmd_draw_count cmd;
+      cmd.first = 0;
+      cmd.count = count;
+      cmd.mode  = rasterizer->primitive;
 
-    struct volt_gl_cmd cmd_wrapper;
-    cmd_wrapper.cmd_id = CMD_DRAW_COUNT;
-    cmd_wrapper.draw_count = cmd;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id     = CMD_DRAW_COUNT;
+      cmd_wrapper.draw_count = cmd;
 
-    roa_array_push(pass->render_cmds, cmd_wrapper);
-  }
-  else
-  {
-    struct cmd_draw_indexed cmd;
-    cmd.count   = draw->ibo->element_count;
-    cmd.type    = GL_UNSIGNED_INT;
-    cmd.mode    = GL_TRIANGLES;
-    cmd.indices = GL_ZERO;
+      roa_array_push(pass->render_cmds, cmd_wrapper);
+    }
+    else
+    {
+      struct cmd_draw_indexed cmd;
+      cmd.count   = draw->ibo->element_count;
+      cmd.type    = GL_UNSIGNED_INT;
+      cmd.mode    = rasterizer->primitive;
+      cmd.indices = GL_ZERO;
 
-    struct volt_gl_cmd cmd_wrapper;
-    cmd_wrapper.cmd_id        = CMD_DRAW_INDEXED;
-    cmd_wrapper.draw_indexed  = cmd;
+      struct volt_gl_cmd cmd_wrapper;
+      cmd_wrapper.cmd_id        = CMD_DRAW_INDEXED;
+      cmd_wrapper.draw_indexed  = cmd;
 
-    roa_array_push(pass->render_cmds, cmd_wrapper);
+      roa_array_push(pass->render_cmds, cmd_wrapper);
+    }
   }
 }
 
@@ -1740,12 +1789,12 @@ volt_gl_create_texture(const cmd_texture_create *cmd)
   const GLuint height   = cmd->desc.height;
   GLvoid *data          = cmd->desc.data;
   const GLint level     = 0;
-  const GLenum type     = convert_volt_format_to_gl_type(cmd->desc.format);
+  const GLenum type     = volt_format_to_gl_type(cmd->desc.format);
   const GLint border    = 0;
-  const GLenum target   = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
-  const GLint in_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
-  const GLenum format   = convert_volt_format_to_gl_format(cmd->desc.format);
-  const GLboolean mips  = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
+  const GLenum target   = volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
+  const GLint in_format = volt_format_to_gl_internal_format(cmd->desc.format);
+  const GLenum format   = volt_format_to_gl_format(cmd->desc.format);
+  const GLboolean mips  = volt_boolean_to_gl(cmd->desc.mip_maps);
 
   GLuint texture        = 0;
 
@@ -1812,11 +1861,11 @@ volt_gl_update_texture(const cmd_texture_update *cmd)
   const GLuint height   = cmd->desc.height;
   const GLint level     = 0;
   const GLint border    = 0;
-  const GLenum type     = convert_volt_format_to_gl_type(cmd->desc.format);
-  const GLenum target   = convert_volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
-  const GLint in_format = convert_volt_format_to_gl_internal_format(cmd->desc.format);
-  const GLenum format   = convert_volt_format_to_gl_format(cmd->desc.format);
-  const GLboolean mips  = convert_volt_boolean_to_gl(cmd->desc.mip_maps);
+  const GLenum type     = volt_format_to_gl_type(cmd->desc.format);
+  const GLenum target   = volt_tex_dimention_to_gl_target(cmd->desc.dimentions);
+  const GLint in_format = volt_format_to_gl_internal_format(cmd->desc.format);
+  const GLenum format   = volt_format_to_gl_format(cmd->desc.format);
+  const GLboolean mips  = volt_boolean_to_gl(cmd->desc.mip_maps);
 
   glBindTexture(target, cmd->texture->gl_id);
 
@@ -1881,7 +1930,7 @@ volt_gl_create_framebuffer(const cmd_fbo_create *cmd)
   if(cmd->desc.depth)
   {
     GLuint depth_buffer = cmd->desc.depth->gl_id;
-    GLenum attachment = convert_gl_format_to_gl_attachment(cmd->desc.depth->format);
+    GLenum attachment = gl_format_to_gl_attachment(cmd->desc.depth->format);
 
     glFramebufferTexture2D(
       GL_FRAMEBUFFER,
@@ -2176,8 +2225,37 @@ volt_gl_clear(const cmd_clear *cmd)
 }
 
 
-/* -------------------------------------- [ gl cmd destroy rsrc actions ] -- */
+void
+volt_gl_rasterizer(const cmd_rasterizer *cmd)
+{
+  /* blending cmd */
+  if(cmd->blend_eq != GL_NONE)
+  {
+    glEnable(GL_BLEND);
+    glBlendEquation(cmd->blend_eq);
+    glBlendFunc(cmd->blend_src, cmd->blend_dst);
+  }
+  else
+  {
+    glDisable(GL_BLEND);
+  }
 
+  /* depth */
+  if(cmd->depth_test != GL_NONE)
+  {
+    glEnable(GL_DEPTH_TEST);
+  }
+  else
+  {
+    glDisable(GL_DEPTH_TEST);
+  }
+
+  /* winding order */
+  {
+    glFrontFace(cmd->winding_order);
+    glCullFace(cmd->cull_mode);
+  }
+}
 
 
 /* --------------------------------------------------------- [ lifetime ] -- */
@@ -2452,6 +2530,12 @@ volt_ctx_execute(volt_ctx_t ctx)
           {
             cmd_clear *cmd = &uk_cmd->clear;
             volt_gl_clear(cmd);
+            break;
+          }
+          case(CMD_RASTERIZER):
+          {
+            cmd_rasterizer *cmd = &uk_cmd->rasterizer;
+            volt_gl_rasterizer(cmd);
             break;
           }
           default:
