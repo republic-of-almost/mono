@@ -9,7 +9,8 @@ extern "C" {
 
 typedef enum _geom_vert_desc {
 
-  GEOM_VERT_POSITION,
+  GEOM_VERT_POSITION4,
+  GEOM_VERT_POSITION3,
   GEOM_NORMAL,
   GEOM_UV,
 
