@@ -22,6 +22,7 @@
 #define GL_LOG_CMDS 0
 #define GL_ASSERT_ON_ERRORS 0
 #define GL_LOG_EXEC_ERRORS 0
+#define GL_DEBUG_MARKERS 1
 
 
 /* ------------------------------------------------------------ [ common ] -- */
@@ -68,9 +69,8 @@ typedef enum volt_cmd_id
   CMD_CLEAR,
   CMD_RASTERIZER,
 
-  CMD_DEBUG_MARKER_PUSH,
-  CMD_DEBUG_MARKER_POP,
-  CMD_DEBUG_MARKER_EVENT,
+  CMD_DEBUG_MARKER_PUSH, /* extension prior to 4.3 */
+  CMD_DEBUG_MARKER_POP, /* extension prior to 4.3 */
 
   CMD_COUNT /* nothing after this */
 } volt_cmd_id;
@@ -246,9 +246,9 @@ struct cmd_rasterizer
 };
 
 
-struct cmd_debug_marker
+struct cmd_debug_marker_push
 {
-  const char *marker_name;
+  char marker_name[32];
 };
 
 
@@ -295,8 +295,7 @@ struct volt_gl_cmd
     struct cmd_clear              clear;
     struct cmd_rasterizer         rasterizer;
 
-    struct cmd_debug_marker       debug_marker_insert;
-    struct cmd_debug_marker       debug_marker_push;
+    struct cmd_debug_marker_push  debug_marker_push;
     struct cmd_debug_marker_pop   debug_marker_pop;
   };
 };
@@ -434,8 +433,6 @@ struct volt_ctx
 
 struct volt_renderpass
 {
-  char name[64];
-
   struct volt_pipeline_desc pipeline;
 
   volt_rect2d       curr_scissor;
@@ -984,9 +981,25 @@ volt_renderpass_create(
 
   roa_array_push(ctx->renderpasses, rp);
 
-  const char *cpy_name = desc && desc->name ? desc->name : "Renderpass";
+  /* Debug Marker */
+  if(ROA_IS_ENABLED(GL_DEBUG_MARKERS))
+  {
+    struct cmd_debug_marker_push cmd;
+    ROA_MEM_ZERO(cmd);
 
-  memcpy(rp->name, cpy_name, strlen(cpy_name));
+    const char *cpy_name = desc && desc->name ? desc->name : "Volt-Renderpass";
+    unsigned len = strlen(cpy_name);
+    unsigned dest_len = sizeof(cmd.marker_name) - 1;
+    unsigned cpy_len = len > dest_len ? dest_len : len;
+
+    memcpy(cmd.marker_name, cpy_name, cpy_len);
+
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_DEBUG_MARKER_PUSH;
+    cmd_wrapper.debug_marker_push = cmd;
+
+    roa_array_push(rp->render_cmds, cmd_wrapper);
+  }
 
   /* bind fbo or default back buffer */
   {
@@ -1020,7 +1033,7 @@ volt_renderpass_create(
     }
 
     /* package cmd */
-    volt_gl_cmd cmd_wrapper;
+    struct volt_gl_cmd cmd_wrapper;
     cmd_wrapper.cmd_id = CMD_FBO_BIND;
     cmd_wrapper.fbo_bind = cmd;
 
@@ -1039,6 +1052,21 @@ volt_renderpass_commit(
   /* param check */
   ROA_ASSERT(ctx);
   ROA_ASSERT(pass);
+
+  volt_renderpass_t kill_pass = *pass;
+
+  /* Debug Marker */
+  if(ROA_IS_ENABLED(GL_DEBUG_MARKERS))
+  {
+    struct cmd_debug_marker_pop cmd;
+    ROA_MEM_ZERO(cmd);
+
+    struct volt_gl_cmd cmd_wrapper;
+    cmd_wrapper.cmd_id = CMD_DEBUG_MARKER_POP;
+    cmd_wrapper.debug_marker_pop = cmd;
+
+    roa_array_push(kill_pass->render_cmds, cmd_wrapper);
+  }
 
   *pass = ROA_NULL;
 }
@@ -1768,6 +1796,12 @@ volt_gl_create_program(const cmd_program_create *cmd)
     cmd->program->uniform_count = data_count;
   }
 
+  /* add debug name */
+  if(cmd->desc.name && strlen(cmd->desc.name))
+  {
+    glObjectLabel(GL_PROGRAM, cmd->program->gl_id, -1, cmd->desc.name);
+  }
+
   GL_ASSERT;
 }
 
@@ -1966,16 +2000,16 @@ volt_gl_create_uniform(const cmd_uniform_create *cmd)
 
   switch (cmd->desc.data_type)
   {
-    case(VOLT_DATA_FLOAT): type = GL_FLOAT; break;
-    case(VOLT_DATA_FLOAT2): type = GL_FLOAT_VEC2; break;
-    case(VOLT_DATA_FLOAT3): type = GL_FLOAT_VEC3; break;
-    case(VOLT_DATA_FLOAT4): type = GL_FLOAT_VEC4; break;
-    case(VOLT_DATA_INT): type = GL_INT; break;
-    case(VOLT_DATA_INT2): type = GL_INT_VEC2; break;
-    case(VOLT_DATA_INT3): type = GL_INT_VEC3; break;
-    case(VOLT_DATA_MAT2): type = GL_FLOAT_MAT2; break;
-    case(VOLT_DATA_MAT3): type = GL_FLOAT_MAT3; break;
-    case(VOLT_DATA_MAT4): type = GL_FLOAT_MAT4; break;
+    case(VOLT_DATA_FLOAT):    type = GL_FLOAT; break;
+    case(VOLT_DATA_FLOAT2):   type = GL_FLOAT_VEC2; break;
+    case(VOLT_DATA_FLOAT3):   type = GL_FLOAT_VEC3; break;
+    case(VOLT_DATA_FLOAT4):   type = GL_FLOAT_VEC4; break;
+    case(VOLT_DATA_INT):      type = GL_INT; break;
+    case(VOLT_DATA_INT2):     type = GL_INT_VEC2; break;
+    case(VOLT_DATA_INT3):     type = GL_INT_VEC3; break;
+    case(VOLT_DATA_MAT2):     type = GL_FLOAT_MAT2; break;
+    case(VOLT_DATA_MAT3):     type = GL_FLOAT_MAT3; break;
+    case(VOLT_DATA_MAT4):     type = GL_FLOAT_MAT4; break;
     default:
       ROA_ASSERT(false);
   }
@@ -1990,19 +2024,19 @@ volt_gl_create_uniform(const cmd_uniform_create *cmd)
 
 
 static void
-volt_gl_insert_marker(cmd_debug_marker *cmd)
+volt_gl_push_marker(cmd_debug_marker_push *cmd)
 {
-  
-}
-
-
-static void
-volt_gl_push_marker(cmd_debug_marker *cmd)
-{
-  if (glPushDebugGroup)
+  if(ROA_IS_ENABLED(GL_DEBUG_MARKERS))
   {
-    glPushDebugGroup(GL_DONT_CARE, GL_DONT_CARE, -1, cmd->marker_name);
-    while (glGetError()); /* some drivers report error but still work anyway */
+    if (glPushDebugGroup) /* extension prior to 4.3 */
+    {
+      glPushDebugGroup(GL_DONT_CARE, GL_DONT_CARE, -1, cmd->marker_name);
+      while (glGetError()); /* some drivers report error but still work anyway */
+    }
+  }
+  else
+  {
+    ROA_UNUSED(cmd);
   }
 }
 
@@ -2010,10 +2044,15 @@ volt_gl_push_marker(cmd_debug_marker *cmd)
 static void
 volt_gl_pop_marker(cmd_debug_marker_pop *cmd)
 {
-  if (glPopDebugGroup)
+  ROA_UNUSED(cmd);
+
+  if(ROA_IS_ENABLED(GL_DEBUG_MARKERS))
   {
-    glPopDebugGroup();
-    while (glGetError()); /* some drivers report error but still work anyway */
+    if (glPopDebugGroup) /* extension prior to 4.3 */
+    {
+      glPopDebugGroup();
+      while (glGetError()); /* some drivers report error but still work anyway */
+    }
   }
 }
 
@@ -2387,6 +2426,18 @@ volt_ctx_execute(volt_ctx_t ctx)
     unsigned cmd_count = roa_array_size(ctx->rsrc_create_cmds);
     unsigned i;
 
+    if(ROA_IS_ENABLED(GL_DEBUG_MARKERS))
+    {
+      if(cmd_count)
+      {
+        struct cmd_debug_marker_push cmd;
+        const char *msg = "Creating Resources";
+        memcpy(cmd.marker_name, msg, strlen(msg));
+
+        volt_gl_push_marker(&cmd);
+      }
+    }
+
     for(i = 0; i < cmd_count; ++i)
     {
       volt_gl_cmd *uk_cmd = &ctx->rsrc_create_cmds[i];
@@ -2473,8 +2524,17 @@ volt_ctx_execute(volt_ctx_t ctx)
           }
         }
       }
+    }
 
-      roa_array_clear(ctx->rsrc_create_cmds);
+    roa_array_clear(ctx->rsrc_create_cmds);
+
+    if(ROA_IS_ENABLED(GL_DEBUG_MARKERS))
+    {
+      if(cmd_count)
+      {
+        struct cmd_debug_marker_pop cmd;
+        volt_gl_pop_marker(&cmd);
+      }
     }
   }
 
@@ -2572,6 +2632,18 @@ volt_ctx_execute(volt_ctx_t ctx)
             volt_gl_rasterizer(cmd);
             break;
           }
+          case(CMD_DEBUG_MARKER_PUSH):
+          {
+            struct cmd_debug_marker_push *cmd = &uk_cmd->debug_marker_push;
+            volt_gl_push_marker(cmd);
+            break;
+          }
+          case(CMD_DEBUG_MARKER_POP):
+          {
+            struct cmd_debug_marker_pop *cmd = &uk_cmd->debug_marker_pop;
+            volt_gl_pop_marker(cmd);
+            break;
+          }
           default:
             /* only renderpass cmds should be here */
             ROA_ASSERT(false);
@@ -2591,6 +2663,7 @@ volt_ctx_execute(volt_ctx_t ctx)
 #undef GL_ASSERT
 #undef GL_ASSERT_ON_ERRORS
 #undef GL_LOG_EXEC_ERRORS
+#undef GL_DEBUG_MARKERS
 
 
 #endif

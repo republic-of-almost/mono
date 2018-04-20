@@ -338,6 +338,7 @@ volt_index_buffer_status(
 
 struct volt_program_desc
 {
+  const char *        name;
   const char **       shader_stages_src;
   volt_shader_stage * shader_stages_type;
   unsigned            stage_count;
