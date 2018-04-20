@@ -232,6 +232,8 @@ void            roa_mat4_export(roa_mat4 *in, float *out);
 void            roa_mat4_scale(roa_mat4 *out, roa_float3 scale);
 void            roa_mat4_translate(roa_mat4 *out, roa_float3 translate);
 void            roa_mat4_rotate(roa_mat4 *out, roa_quaternion rotation);
+void            roa_mat4_inverse(roa_mat4 *out, const roa_mat4 *to_inverse);
+float           roa_mat4_determinant(const roa_mat4 *mat);
 
 void            roa_mat4_fill_with_value(roa_mat4 *out, float val);
 
