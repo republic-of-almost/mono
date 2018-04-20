@@ -434,6 +434,8 @@ struct volt_ctx
 
 struct volt_renderpass
 {
+  char name[64];
+
   struct volt_pipeline_desc pipeline;
 
   volt_rect2d       curr_scissor;
@@ -981,6 +983,10 @@ volt_renderpass_create(
   roa_array_create_with_capacity(rp->render_cmds, 128);
 
   roa_array_push(ctx->renderpasses, rp);
+
+  const char *cpy_name = desc && desc->name ? desc->name : "Renderpass";
+
+  memcpy(rp->name, cpy_name, strlen(cpy_name));
 
   /* bind fbo or default back buffer */
   {
@@ -1982,6 +1988,34 @@ volt_gl_create_uniform(const cmd_uniform_create *cmd)
   GL_ASSERT;
 }
 
+
+static void
+volt_gl_insert_marker(cmd_debug_marker *cmd)
+{
+  
+}
+
+
+static void
+volt_gl_push_marker(cmd_debug_marker *cmd)
+{
+  if (glPushDebugGroup)
+  {
+    glPushDebugGroup(GL_DONT_CARE, GL_DONT_CARE, -1, cmd->marker_name);
+    while (glGetError()); /* some drivers report error but still work anyway */
+  }
+}
+
+
+static void
+volt_gl_pop_marker(cmd_debug_marker_pop *cmd)
+{
+  if (glPopDebugGroup)
+  {
+    glPopDebugGroup();
+    while (glGetError()); /* some drivers report error but still work anyway */
+  }
+}
 
 /* ---------------------------------------- [ gl cmd renderpass actions ] -- */
 
