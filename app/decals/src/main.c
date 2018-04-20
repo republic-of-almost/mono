@@ -89,28 +89,28 @@ struct direction_light_data
 
 struct scene_data
 {
-  volt_vbo_t            vbo;
-
   /* objects */
 
+  volt_vbo_t            object_vbo;
   roa_transform         box_transform[1];
   roa_mat4              box_world[1];
   roa_mat4              box_wvp[1];
+  struct volt_draw_desc box_draw_desc[1];
 
   /* decals */
 
+  volt_vbo_t            decal_vbo;
   roa_transform         decal_transform[1];
   roa_mat4              decal_world[1];
   roa_mat4              decal_wvp[1];
   roa_mat4              decal_inv_world[1];
   roa_mat4              decal_inv_view[1];
   roa_mat4              decal_world_view[1];
+  struct volt_draw_desc decal_draw_desc[1];
 
   /* camera */
 
   struct volt_rect2d    viewport;
-  struct volt_draw_desc draw_desc[1];
-
   volt_uniform_t        box_world_uni;
   volt_uniform_t        box_wvp_uni;
 
@@ -179,10 +179,10 @@ main(int argc, char **argv)
     scene.viewport.width  = width;
     scene.viewport.height = height;
 
-    /* load vbo */
+    /* load object vbo */
     {
       geom_vert_desc desc[] = {
-        GEOM_VERT_POSITION,
+        GEOM_VERT_POSITION3,
         GEOM_UV,
         GEOM_NORMAL,
       };
@@ -201,19 +201,56 @@ main(int argc, char **argv)
       vbo_desc.data = data;
       vbo_desc.count = vert_count;
 
-      volt_vertex_buffer_create(volt_ctx, &scene.vbo, &vbo_desc);
+      volt_vertex_buffer_create(volt_ctx, &scene.object_vbo, &vbo_desc);
       volt_ctx_execute(volt_ctx);
     }
 
-    /* draw desc */
+    /* draw obj desc */
     {
-      int count = ROA_ARR_COUNT(scene.draw_desc);
+      int count = ROA_ARR_COUNT(scene.box_draw_desc);
       int i;
 
       for(i = 0; i < count; ++i)
       {
-        ROA_MEM_ZERO(scene.draw_desc[i]);
-        scene.draw_desc[i].vbo = scene.vbo;
+        ROA_MEM_ZERO(scene.box_draw_desc[i]);
+        scene.box_draw_desc[i].vbo = scene.object_vbo;
+      }
+    }
+
+    /* load decal vbo */
+    {
+      geom_vert_desc desc[] = {
+        GEOM_VERT_POSITION4,
+        GEOM_UV,
+        GEOM_NORMAL,
+      };
+
+      unsigned vert_count;
+
+      geometry_generate_cube(desc, 3, 1, 1, 1, ROA_NULL, &vert_count);
+
+      float *data = malloc(sizeof(float) * vert_count);
+
+      geometry_generate_cube(desc, 3, 1, 1, 1, data, &vert_count);
+
+      struct volt_vbo_desc vbo_desc;
+      ROA_MEM_ZERO(vbo_desc);
+      vbo_desc.data = data;
+      vbo_desc.count = vert_count;
+
+      volt_vertex_buffer_create(volt_ctx, &scene.decal_vbo, &vbo_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* draw decal desc */
+    {
+      int count = ROA_ARR_COUNT(scene.decal_draw_desc);
+      int i;
+
+      for (i = 0; i < count; ++i)
+      {
+        ROA_MEM_ZERO(scene.decal_draw_desc[i]);
+        scene.decal_draw_desc[i].vbo = scene.decal_vbo;
       }
     }
 
@@ -1148,7 +1185,7 @@ main(int argc, char **argv)
         volt_renderpass_bind_uniform_data_cmd(g_buffer_pass, world, world_data);
 
         /* Draw */
-        volt_renderpass_draw_cmd(g_buffer_pass, &scene.draw_desc[i]);
+        volt_renderpass_draw_cmd(g_buffer_pass, &scene.box_draw_desc[i]);
       }
 
       volt_renderpass_commit(volt_ctx, &g_buffer_pass);
@@ -1181,7 +1218,7 @@ main(int argc, char **argv)
         volt_renderpass_bind_uniform_data_cmd(decal_pass, world, world_data);
 
         /* Draw */
-        volt_renderpass_draw_cmd(decal_pass, &scene.draw_desc[i]);
+        volt_renderpass_draw_cmd(decal_pass, &scene.decal_draw_desc[i]);
       }
 
       volt_renderpass_commit(volt_ctx, &decal_pass);
