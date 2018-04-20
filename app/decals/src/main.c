@@ -46,6 +46,19 @@ struct g_buffer_data
 
   /* decal render */
   volt_program_t      decal_program;
+	volt_input_t        decal_input;
+
+	volt_uniform_t      u_inv_proj_view;
+	volt_uniform_t      u_inv_model;
+	volt_uniform_t      u_view;
+	volt_uniform_t      u_proj;
+	volt_uniform_t      u_model;
+	volt_uniform_t      u_decal_size;
+	volt_uniform_t      u_far_clip;
+
+	volt_sampler_t      s_normal;
+	volt_sampler_t      s_depth;
+	volt_sampler_t      s_diffuse;
 
   struct volt_pipeline_desc decal_pipeline_desc;
 
@@ -104,8 +117,11 @@ struct scene_data
   roa_mat4              decal_world[1];
   roa_mat4              decal_wvp[1];
   roa_mat4              decal_inv_world[1];
+	roa_mat4 							decal_inv_proj_view[1];
   roa_mat4              decal_inv_view[1];
   roa_mat4              decal_world_view[1];
+	roa_float3            decal_size[1];
+	float                 far_clip[1];
   struct volt_draw_desc decal_draw_desc[1];
 
   /* camera */
@@ -264,8 +280,8 @@ main(int argc, char **argv)
     /* decals */
     {
       roa_transform_init(&scene.decal_transform[0]);
-      scene.decal_transform[0].position = roa_float3_set_with_values(0,0.2,0);
-      scene.decal_transform[0].scale    = roa_float3_set_with_values(3, 0.3, 0.3);
+      scene.decal_transform[0].position = roa_float3_set_with_values(0,0,0);
+      scene.decal_transform[0].scale    = roa_float3_set_with_values(2, 2, 2);
     }
 
     /* uniforms */
@@ -325,7 +341,7 @@ main(int argc, char **argv)
 
       struct volt_program_desc screen_program_desc;
       ROA_MEM_ZERO(screen_program_desc);
-
+			screen_program_desc.name                = "Scratch:Blit";
       screen_program_desc.stage_count         = ROA_ARR_COUNT(stages);
       screen_program_desc.shader_stages_type  = ROA_ARR_DATA(stages);
       screen_program_desc.shader_stages_src   = ROA_ARR_DATA(shaders);
@@ -570,6 +586,7 @@ main(int argc, char **argv)
 
       struct volt_program_desc prog_desc;
       ROA_MEM_ZERO(prog_desc);
+			prog_desc.name                = "Lighting:Directional";
       prog_desc.shader_stages_src   = stages_src;
       prog_desc.shader_stages_type  = stages;
       prog_desc.stage_count         = ROA_ARR_COUNT(stages);
@@ -700,7 +717,6 @@ main(int argc, char **argv)
       {
         struct volt_uniform_desc uni_desc;
         ROA_MEM_ZERO(uni_desc);
-
         uni_desc.name = "gDirectionalLight.Direction";
         uni_desc.count = 1;
         uni_desc.copy_data = VOLT_FALSE;
@@ -715,7 +731,6 @@ main(int argc, char **argv)
       {
         struct volt_sampler_desc sampler_desc;
         ROA_MEM_ZERO(sampler_desc);
-
         sampler_desc.name     = "gColorMap";
         sampler_desc.sampling = VOLT_SAMPLING_BILINEAR;
 
@@ -725,7 +740,6 @@ main(int argc, char **argv)
       {
         struct volt_sampler_desc sampler_desc;
         ROA_MEM_ZERO(sampler_desc);
-
         sampler_desc.name = "gNormalMap";
         sampler_desc.sampling = VOLT_SAMPLING_BILINEAR;
 
@@ -735,7 +749,6 @@ main(int argc, char **argv)
       {
         struct volt_sampler_desc sampler_desc;
         ROA_MEM_ZERO(sampler_desc);
-
         sampler_desc.name = "gPositionMap";
         sampler_desc.sampling = VOLT_SAMPLING_BILINEAR;
 
@@ -917,7 +930,7 @@ main(int argc, char **argv)
 
       struct volt_program_desc prog_desc;
       ROA_MEM_ZERO(prog_desc);
-
+			prog_desc.name                = "GBuffer:Fill";
       prog_desc.shader_stages_src   = stages_src;
       prog_desc.shader_stages_type  = stages;
       prog_desc.stage_count         = ROA_ARR_COUNT(stages);
@@ -942,6 +955,25 @@ main(int argc, char **argv)
 
       /*volt_input_t   input_format;*/
       volt_input_create(volt_ctx, &g_buffer.input, &input_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
+    /* decal_input input format */
+    {
+      volt_input_attribute attrs[3] = {
+        VOLT_INPUT_FLOAT4, /* positions */
+        VOLT_INPUT_FLOAT2, /* tex coords  */
+        VOLT_INPUT_FLOAT3, /* normals */
+      };
+
+      struct volt_input_desc input_desc;
+      ROA_MEM_ZERO(input_desc);
+
+      input_desc.attributes = ROA_ARR_DATA(attrs);
+      input_desc.count      = ROA_ARR_COUNT(attrs);
+
+      /*volt_input_t   input_format;*/
+      volt_input_create(volt_ctx, &g_buffer.decal_input, &input_desc);
       volt_ctx_execute(volt_ctx);
     }
 
@@ -1028,7 +1060,7 @@ main(int argc, char **argv)
         "vec2 screenPosition = pos_fs.xy / pos_fs.w;\n"
 
         "vec2 depthUV = screenPosition * 0.5 + 0.5;\n"
-        "depthUV += vec2(0.5 / 1280.0f, 0.5 / 720.0);\n"
+        "depthUV += vec2(0.5 / 1200.0, 0.5 / 720.0);\n"
         "float depth = texture2D(samp_depth, depthUV).w;\n"
 
         "vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
@@ -1059,12 +1091,127 @@ main(int argc, char **argv)
 
       struct volt_program_desc prog_desc;
       ROA_MEM_ZERO(prog_desc);
-      prog_desc.shader_stages_src = stages_src;
-      prog_desc.shader_stages_type = stages;
-      prog_desc.stage_count = ROA_ARR_COUNT(stages);
+			prog_desc.name                = "GBuffer:Decal";
+      prog_desc.shader_stages_src   = stages_src;
+      prog_desc.shader_stages_type  = stages;
+      prog_desc.stage_count 				= ROA_ARR_COUNT(stages);
 
       volt_program_create(volt_ctx, &g_buffer.decal_program, &prog_desc);
       volt_ctx_execute(volt_ctx);
+    }
+
+    /* uniforms and samplers */
+    {
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_inv_proj_view";
+        uni_desc.data_type = VOLT_DATA_MAT4;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_inv_proj_view, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_inv_model";
+        uni_desc.data_type = VOLT_DATA_MAT4;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_inv_model, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_view";
+        uni_desc.data_type = VOLT_DATA_MAT4;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_view, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_proj";
+        uni_desc.data_type = VOLT_DATA_MAT4;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_proj, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_model";
+        uni_desc.data_type = VOLT_DATA_MAT4;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_model, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_decal_size";
+        uni_desc.data_type = VOLT_DATA_FLOAT3;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_decal_size, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_uniform_desc uni_desc;
+        ROA_MEM_ZERO(uni_desc);
+        uni_desc.name = "u_far_clip";
+        uni_desc.data_type = VOLT_DATA_FLOAT;
+        uni_desc.copy_data = VOLT_FALSE;
+        uni_desc.count = 1;
+
+        volt_uniform_create(volt_ctx, &g_buffer.u_far_clip, &uni_desc);
+        volt_ctx_execute(volt_ctx);
+      }
+
+      {
+        struct volt_sampler_desc samp_desc;
+        ROA_MEM_ZERO(samp_desc);
+        samp_desc.name = "samp_normal";
+        samp_desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+        volt_sampler_create(volt_ctx, &g_buffer.s_normal, &samp_desc);
+      }
+
+      {
+        struct volt_sampler_desc samp_desc;
+        ROA_MEM_ZERO(samp_desc);
+        samp_desc.name = "samp_depth";
+        samp_desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+        volt_sampler_create(volt_ctx, &g_buffer.s_depth, &samp_desc);
+      }
+
+      {
+        struct volt_sampler_desc samp_desc;
+        ROA_MEM_ZERO(samp_desc);
+        samp_desc.name = "samp_diffuse";
+        samp_desc.sampling = VOLT_SAMPLING_BILINEAR;
+
+        volt_sampler_create(volt_ctx, &g_buffer.s_diffuse, &samp_desc);
+      }
     }
 
     /* decal pipeline */
@@ -1074,7 +1221,7 @@ main(int argc, char **argv)
 
       decal_pipeline_desc.program     = g_buffer.decal_program;
       decal_pipeline_desc.rasterizer  = g_buffer.rasterizer;
-      decal_pipeline_desc.input       = g_buffer.input;
+      decal_pipeline_desc.input       = g_buffer.decal_input;
       decal_pipeline_desc.viewport    = scene.viewport;
 
       g_buffer.decal_pipeline_desc = decal_pipeline_desc;
@@ -1149,6 +1296,20 @@ main(int argc, char **argv)
           roa_transform_to_mat4(&scene.decal_transform[i], &scene.decal_world[i]);
           roa_mat4_multiply(&scene.decal_wvp[i], &scene.decal_world[i], &view_proj);
 
+          roa_mat4_multiply(&scene.decal_world_view[i], &scene.decal_world[i], &scene.view_mat);
+
+          roa_mat4_inverse(&scene.decal_inv_world[i], &scene.decal_world[i]);
+
+          roa_mat4 proj_view;
+          roa_mat4_multiply(&proj_view, &scene.proj_mat, &scene.view_mat);
+
+          roa_mat4_inverse(&scene.decal_inv_proj_view[i], &proj_view);
+
+          roa_mat4_inverse(&scene.decal_inv_view[i], &scene.view_mat);
+
+          scene.decal_size[i] = roa_float3_set_with_values(1,1,1);
+          scene.far_clip[i] = 10.f;
+
           volt_ctx_execute(volt_ctx);
         }
       }
@@ -1193,10 +1354,16 @@ main(int argc, char **argv)
 
     /* --------------------------------------------- [ Decals Renderpass ] -- */
     {
+      unsigned attachments[] = {
+        1,
+      };
+
       struct volt_renderpass_desc decal_pass_desc;
       ROA_MEM_ZERO(decal_pass_desc);
       decal_pass_desc.fbo = g_buffer.fbo;
       decal_pass_desc.name = "Decal Gbuffer";
+      decal_pass_desc.attachments = ROA_ARR_DATA(attachments);
+      decal_pass_desc.attachment_count = ROA_ARR_COUNT(attachments);
 
       volt_renderpass_t decal_pass;
       volt_renderpass_create(volt_ctx, &decal_pass, &decal_pass_desc);
@@ -1207,15 +1374,42 @@ main(int argc, char **argv)
 
       for (i = 0; i < count; ++i)
       {
-        /* Uniform world view projection */
-        volt_uniform_t wvp = scene.box_wvp_uni;
-        void *wvp_data = (void*)scene.decal_wvp[i].data;
-        volt_renderpass_bind_uniform_data_cmd(decal_pass, wvp, wvp_data);
+        volt_uniform_t u_view = g_buffer.u_view;
+        void *u_view_data = (void*)scene.view_mat.data;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_view, u_view_data);
 
-        /* Uniform world */
-        volt_uniform_t world = scene.box_world_uni;
-        void *world_data = (void*)scene.decal_world[i].data;
-        volt_renderpass_bind_uniform_data_cmd(decal_pass, world, world_data);
+        volt_uniform_t u_proj = g_buffer.u_proj;
+        void *u_proj_data = (void*)scene.proj_mat.data;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_proj, u_proj_data);
+
+        volt_uniform_t u_model = g_buffer.u_model;
+        void *u_model_data = (void*)scene.decal_world[i].data;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_model, u_model_data);
+
+        volt_uniform_t u_inv_proj_view = g_buffer.u_inv_proj_view;
+        void *u_inv_proj_view_data = (void*)scene.decal_inv_proj_view;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_inv_proj_view, u_inv_proj_view_data);
+
+        volt_uniform_t u_inv_model = g_buffer.u_inv_model;
+        void *u_inv_model_data = (void*)scene.decal_inv_world;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_inv_model, u_inv_model_data);
+
+        volt_uniform_t u_decal_size = g_buffer.u_decal_size;
+        void *u_decal_size_data = (void*)scene.decal_size;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_decal_size, u_decal_size_data);
+
+        volt_uniform_t u_far_clip = g_buffer.u_far_clip;
+        void *u_far_clip_data = (void*)scene.far_clip;
+        volt_renderpass_bind_uniform_data_cmd(decal_pass, u_far_clip, u_far_clip_data);
+
+        volt_sampler_t samp_normal = g_buffer.s_normal;
+        volt_renderpass_bind_texture_buffer_cmd(decal_pass, samp_normal, g_buffer.fbo_color_outputs[2]);
+
+        volt_sampler_t samp_depth = g_buffer.s_depth;
+        volt_renderpass_bind_texture_buffer_cmd(decal_pass, samp_depth, g_buffer.fbo_depth);
+
+        volt_sampler_t samp_diffuse = g_buffer.s_diffuse;
+        volt_renderpass_bind_texture_buffer_cmd(decal_pass, samp_diffuse, g_buffer.fbo_color_outputs[1]);
 
         /* Draw */
         volt_renderpass_draw_cmd(decal_pass, &scene.decal_draw_desc[i]);

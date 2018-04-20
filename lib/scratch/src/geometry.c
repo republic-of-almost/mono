@@ -13,7 +13,7 @@ geometry_generate_cube(
   float *out_verts,
   unsigned *out_element_count)
 {
-  float raw_pos_data[] = 
+  float raw_pos_data[] =
   {
     +1.f, -1.f, -1.f, 0.f,
     +1.f, -1.f, +1.f, 0.f,
@@ -72,8 +72,8 @@ geometry_generate_cube(
     {
       if (desc[j] == GEOM_VERT_POSITION3)
       {
-        unsigned position_index = raw_index[i + 0] * 4;
-        
+        unsigned position_index = raw_index[i] * 4;
+
         if(out_verts)
         {
           out_verts[ele_count + 0] = raw_pos_data[position_index + 0] * x_scale;
@@ -85,14 +85,14 @@ geometry_generate_cube(
       }
       else if (desc[j] == GEOM_VERT_POSITION4)
       {
-        unsigned position_index = raw_index[i + 0] * 4;
+        unsigned position_index = raw_index[i] * 4;
 
         if (out_verts)
         {
           out_verts[ele_count + 0] = raw_pos_data[position_index + 0] * x_scale;
           out_verts[ele_count + 1] = raw_pos_data[position_index + 1] * y_scale;
           out_verts[ele_count + 2] = raw_pos_data[position_index + 2] * z_scale;
-          out_verts[ele_count + 2] = raw_pos_data[position_index + 4];
+          out_verts[ele_count + 3] = raw_pos_data[position_index + 3];
         }
 
         ele_count += 4;
@@ -126,5 +126,5 @@ geometry_generate_cube(
 
     *out_element_count = ele_count;
   }
-  
+
 }
