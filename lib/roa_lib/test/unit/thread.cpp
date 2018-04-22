@@ -63,8 +63,7 @@ TEST_CASE("Thread Test")
   	roa_thread th = roa_thread_create(test, 0, 0, 0);
   	REQUIRE(th != ROA_NULL);
 
-  	roa_thread_destroy(&th);
-  	REQUIRE(th == ROA_NULL);
+  	roa_thread_destroy(th);
   }
 
   SECTION("Create from self")
