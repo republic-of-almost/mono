@@ -39,7 +39,7 @@ rep_data_init()
 	roa_graph_ctx_create(&roa_graph_ctx_data);
 
   ROA_MEM_ZERO(roa_renderer_ctx_data);
-  roa_renderer_ctx_create(&roa_renderer_ctx_data);
+  roa_renderer_ctx_create(&roa_renderer_ctx_data, ROA_NULL);
 }
 
 
