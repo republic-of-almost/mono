@@ -33,7 +33,7 @@ Project assets are not included in the repo as they are subject copyright.
   ```
   git clone https://github.com/republic-of-almost/mono.git
   cd mono/scripts/solution
-  premake4 --file=solution.lua xcode4
+  premake5 --file=solution.lua xcode4
   open RepublicOfAlmost.xcworkspace/
   ```
 
@@ -52,7 +52,7 @@ Project assets are not included in the repo as they are subject copyright.
   ```
   git clone https://github.com/republic-of-almost/mono.git
   cd mono/scripts/solution
-  premake4 --file=solution.lua gmake
+  premake5 --file=solution.lua gmake
   ```
 
   You can then type `make help` to see which project to build.
@@ -84,20 +84,10 @@ Name     | Website                                       | License
 Catch    | https://github.com/philsquared/Catch          | MIT
 GLFW     | https://github.com/glfw/glfw                  | zlib
 GL3W     | https://github.com/skaslev/gl3w               | Public Domain
-Imgui    | https://github.com/ocornut/imgui              | MIT
-Imguizmo | https://github.com/CedricGuillemet/ImGuizmo   | MIT
 Json     | https://github.com/sheredom/json.h            | Public Domain
-Remotery | https://github.com/Celtoys/Remotery           | Apache 2.0
-SoLoud   | https://github.com/jarikomppa/soloud          | Zlib/LibPng
+MMX      | https://github.com/vurtun/mmx                 | zlib / BSD
 STB      | https://github.com/nothings/stb               | Public Domain
 TinyDIR  | https://github.com/cxong/tinydir.git          | Simplified BSD
-
-
-### Other Third Party
-
-Name           | Website                  | License
----------------|--------------------------|---------
-Proggy Fonts   | https://proggyfonts.net/ | Free
 
 
 ## License
