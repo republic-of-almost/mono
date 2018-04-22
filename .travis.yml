@@ -18,8 +18,8 @@ install:
 
 env:
   matrix:
-    - EXE=LibTest
-    - EXE=MathTest
+    - EXE=RepublicMathUnitTest
+    - EXE=RepublicLibUnitTest
     #- EXE=NilTest
     #- EXE=ROATest
 
