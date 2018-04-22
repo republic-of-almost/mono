@@ -19,7 +19,8 @@
     "RepublicCtx",
 		"RepublicLib",
     "Scratch",
-    "Volt"
+    "Volt",
+    "STB"
   ],
 
   "disable_warning_windows" : [

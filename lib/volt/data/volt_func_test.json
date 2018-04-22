@@ -1,5 +1,5 @@
 {
-  "name": "VoltFunctionalTests",
+  "name": "VoltFunctionalTest",
   "kind": "ConsoleApp",
   "language": "C",
   "location": "./",

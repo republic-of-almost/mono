@@ -1,2 +1,0 @@
-# ROV Scratch
-

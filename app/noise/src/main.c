@@ -25,8 +25,8 @@ volt_vbo_t        screen_triangle      = VOLT_NULL;
 volt_input_t      screen_input_format  = VOLT_NULL;
 volt_rasterizer_t screen_rasterizer    = VOLT_NULL;
 
-int width = 200;
-int height = 200;
+#define SCREEN_WIDTH 200
+#define SCREEN_HEIGHT 200
 
 unsigned char *texture_data = ROA_NULL;
 
@@ -144,7 +144,7 @@ ROA_JOB(worker, struct worker_arg*)
   {
     roa_float2 frag_coord = roa_float2_set_with_values((float)i, (float)arg->row);
 
-    roa_float2 st = roa_float2_divide(frag_coord, roa_float2_set_with_values(width, width));
+    roa_float2 st = roa_float2_divide(frag_coord, roa_float2_set_with_values(SCREEN_WIDTH, SCREEN_HEIGHT));
 		roa_float2 scaled_st = roa_float2_scale(st, 7.f);
 
 		/* q and r elements */
@@ -194,7 +194,7 @@ ROA_JOB(main_frame, void*)
   {
     volt_texture_get_desc(volt_ctx, screen_texture, &tex_desc);
 
-    struct roa_job_desc desc[width];
+    struct roa_job_desc desc[SCREEN_WIDTH];
     struct worker_arg arg[ROA_ARR_COUNT(desc)];
     int i;
 
@@ -234,7 +234,7 @@ ROA_JOB(main_frame, void*)
     volt_renderpass_bind_input_format(rp, screen_input_format);
     volt_renderpass_bind_vertex_buffer(rp, screen_triangle);
     volt_renderpass_bind_program(rp, screen_program);
-    volt_renderpass_set_viewport(rp, 0, 0, width, height);
+    volt_renderpass_set_viewport(rp, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     volt_renderpass_bind_rasterizer(rp, screen_rasterizer);
     volt_renderpass_bind_texture_buffer(rp, screen_texture, "diffuse");
     volt_renderpass_draw(rp);
@@ -273,8 +273,8 @@ main(int argc, char **argv)
   /* create systems */
   {
     struct roa_ctx_window_desc win_desc;
-    win_desc.width = width;
-    win_desc.height = height;
+    win_desc.width = SCREEN_WIDTH;
+    win_desc.height = SCREEN_HEIGHT;
     win_desc.title = "Rays";
 
     roa_ctx_create(&hw_ctx);
@@ -330,11 +330,11 @@ main(int argc, char **argv)
 
     /* texture */
     {
-      texture_data = roa_alloc(width * height * 4);
+      texture_data = roa_alloc(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
       unsigned i;
 
       /* fill with random color for now */
-      for (i = 0; i < width * height; ++i)
+      for (i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
       {
         unsigned index = i * 4;
         texture_data[index + 0] = rand() % 255;
@@ -343,8 +343,8 @@ main(int argc, char **argv)
         texture_data[index + 3] = 255;
       }
 
-      int tex_width = width;
-      int tex_height = height;
+      int tex_width = SCREEN_WIDTH;
+      int tex_height = SCREEN_HEIGHT;
 
       struct volt_texture_desc tex_desc;
       tex_desc.data       = ROA_ARR_DATA(texture_data);
@@ -353,7 +353,7 @@ main(int argc, char **argv)
       tex_desc.height     = tex_height;
       tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
       tex_desc.mip_maps   = VOLT_FALSE;
-      tex_desc.format     = VOLT_COLOR_RGBA;
+      tex_desc.format     = VOLT_PIXEL_FORMAT_RGBA;
       tex_desc.access     = VOLT_STREAM;
 
       volt_texture_create(volt_ctx, &screen_texture, &tex_desc);
@@ -401,7 +401,7 @@ main(int argc, char **argv)
     {
       struct volt_rasterizer_desc raster_desc;
       raster_desc.cull_mode = VOLT_CULL_FRONT;
-      raster_desc.primitive_type = VOLT_PRIM_TRIANGLES;
+      raster_desc.primitive = VOLT_PRIM_TRIANGLES;
       raster_desc.winding_order = VOLT_WIND_CW;
 
       volt_rasterizer_create(volt_ctx, &screen_rasterizer, &raster_desc);
