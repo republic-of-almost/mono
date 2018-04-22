@@ -19,8 +19,7 @@ env:
   matrix:
     - EXE=RepublicMathUnitTest
     - EXE=RepublicLibUnitTest
-    #- EXE=NilTest
-    #- EXE=ROATest
+    - EXE=RepublicGraphUnitTest
 
 addons:
     apt:

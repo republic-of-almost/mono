@@ -71,17 +71,17 @@ TEST_CASE("Local transforms")
 
     /* get inherited parent transform */
     {
-      roa_transform transform;
-      roa_graph_node_get_transform(graph_ctx, parent, &transform, ROA_TRUE);
+      //roa_transform transform;
+      //roa_graph_node_get_transform(graph_ctx, parent, &transform, ROA_TRUE);
 
-      roa_float3 expected_scale = roa_float3_one();
-      REQUIRE(roa_float3_is_near(expected_scale, transform.scale, ROA_EPSILON) == ROA_TRUE);
+      //roa_float3 expected_scale = roa_float3_one();
+      //REQUIRE(roa_float3_is_near(expected_scale, transform.scale, ROA_EPSILON) == ROA_TRUE);
 
-      roa_float3 expected_position = roa_float3_zero();
-      REQUIRE(roa_float3_is_near(expected_position, transform.position, ROA_EPSILON) == ROA_TRUE);
+      //roa_float3 expected_position = roa_float3_zero();
+      //REQUIRE(roa_float3_is_near(expected_position, transform.position, ROA_EPSILON) == ROA_TRUE);
 
-      roa_quaternion expected_rotation = roa_quaternion_default();
-      REQUIRE(roa_quaternion_is_near(expected_rotation, transform.rotation, ROA_EPSILON) == ROA_TRUE);
+      //roa_quaternion expected_rotation = roa_quaternion_default();
+      //REQUIRE(roa_quaternion_is_near(expected_rotation, transform.rotation, ROA_EPSILON) == ROA_TRUE);
     }
 
     /* get inherited child transform */
