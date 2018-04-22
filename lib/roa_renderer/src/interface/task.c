@@ -15,6 +15,11 @@ roa_renderer_task_pump(
     return 0;
   }
 
+  unsigned renderable_count = roa_array_size(ctx->renderable);
+  unsigned c_count = roa_array_size(ctx->camera);
+
+  return 0;
+
   roa_array_clear(ctx->tasks);
 
   unsigned cam_count = roa_array_size(ctx->camera);
@@ -31,7 +36,10 @@ roa_renderer_task_pump(
 
   ctx->render = ROA_TRUE;
 
-  *tasks = ctx->tasks;
+  if(roa_array_size(ctx->tasks))
+  {
+    *tasks = ctx->tasks;
+  }
   return cam_count;
 }
 
