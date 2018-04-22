@@ -14,7 +14,9 @@ script: rake ci
 
 
 install:
-    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install premake5; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install wget; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then tar xf premake-5.0.0-alpha12-macosx.tar.gz; fi
     - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz; fi
     - if [ "$TRAVIS_OS_NAME" = "linux" ]; then tar xf premake-5.0.0-alpha12-linux.tar.gz; fi
     - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
