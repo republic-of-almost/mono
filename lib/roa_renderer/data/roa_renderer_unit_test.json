@@ -5,8 +5,8 @@
 	"location": "./",
 
 	"src_files" : [
-		"../test/unit/**.h",
-		"../test/unit/**.c"
+		"../data/roa_renderer_unit_test.json",
+		"../test/unit/**.cpp"
 	],
 
 	"project_dependencies" : [

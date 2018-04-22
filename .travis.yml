@@ -20,6 +20,8 @@ env:
     - EXE=RepublicMathUnitTest
     - EXE=RepublicLibUnitTest
     - EXE=RepublicGraphUnitTest
+    - EXE=RepublicJobUnitTest
+    - EXE=RepublicRendererUnitTest
 
 addons:
     apt:
