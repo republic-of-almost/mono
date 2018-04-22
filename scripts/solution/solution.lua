@@ -25,7 +25,7 @@ project_files = os.matchfiles("../../**.json")
 
 if project_files then
 
-  print("Loading project json")
+  --print("Loading project json")
 
   for i, proj in ipairs(project_files) do
     json_str = io.readfile(proj)
@@ -38,7 +38,7 @@ if project_files then
 
       table.insert(projects, proj_table)
 
-      print(proj_table["name"] .. " loaded");
+      --print(proj_table["name"] .. " loaded");
     end
   end
 
