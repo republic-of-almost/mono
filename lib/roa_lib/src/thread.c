@@ -113,8 +113,7 @@ roa_thread_destroy(roa_thread th)
   ROA_ASSERT(th);
 
   #if defined(__linux__) || defined(__APPLE__)
-  int success = pthread_join((pthread_t)th, ROA_NULL);
-  ROA_ASSERT(success);
+  pthread_join((pthread_t)th, ROA_NULL);
   #elif defined(_WIN32)
   HANDLE win_th = (HANDLE)th;
   WaitForSingleObject(win_th, INFINITE);
