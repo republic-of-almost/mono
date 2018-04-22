@@ -5,6 +5,7 @@
   "location": "./",
 
   "src_files": [
+    "../data/**.json",
     "../src/**.c",
     "../src/**.h",
     "../docs/**.md",
