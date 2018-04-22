@@ -218,7 +218,7 @@ void            roa_mat3_subtract(roa_mat3 *out, const roa_mat3 *left, const roa
 void            roa_mat3_multiply(roa_mat3 *out, const roa_mat3 *left, const roa_mat3 *rhs);
 roa_float3      roa_mat3_multiply_with_float3(roa_float3 lhs, const roa_mat3 *rhs);
 
-int             roa_mat3_is_near(roa_mat3 *a, roa_mat3 *b, float error);
+int             roa_mat3_is_near(const roa_mat3 *a, const roa_mat3 *b, float error);
 
 
 /* -------------------------------------------------------------- [ mat4 ] -- */
@@ -226,7 +226,8 @@ int             roa_mat3_is_near(roa_mat3 *a, roa_mat3 *b, float error);
 
 void            roa_mat4_zero(roa_mat4 *out);
 void            roa_mat4_id(roa_mat4 *out);
-void            roa_mat4_import(roa_mat4 *out, float *data);
+void            roa_mat4_fill(roa_mat4 *out, float value);
+void            roa_mat4_import(roa_mat4 *out, const float *data);
 void            roa_mat4_export(roa_mat4 *in, float *out);
 
 void            roa_mat4_scale(roa_mat4 *out, roa_float3 scale);
@@ -242,6 +243,8 @@ void            roa_mat4_lookat(roa_mat4 *out, roa_float3 from, roa_float3 to, r
 
 void            roa_mat4_multiply(roa_mat4 *out, const roa_mat4 *a, const roa_mat4 *b);
 void            roa_mat4_multiply_three(roa_mat4 *out, const roa_mat4 *a, const roa_mat4 *b, const roa_mat4 *c);
+
+int             roa_mat4_is_near(const roa_mat4 *a, const roa_mat4 *b, float error);
 
 
 /* --------------------------------------------------------------- [ ray ] -- */
