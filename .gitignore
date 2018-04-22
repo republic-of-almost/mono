@@ -1,6 +1,7 @@
 output/
 assets/
 media_masters/
+app/roa_apps/
 
 tags
 imgui.ini
