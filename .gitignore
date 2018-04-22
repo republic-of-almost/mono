@@ -5,6 +5,9 @@ app/roa_apps/
 tags
 imgui.ini
 
+# Junk
+*.DS_Store
+
 # Shaders are stored here
 !lib/rov/assets/
 
