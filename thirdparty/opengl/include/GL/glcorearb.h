@@ -5596,4 +5596,5 @@ GLAPI void APIENTRY glFramebufferTextureMultiviewOVR (GLenum target, GLenum atta
 
 #endif
 
-#endif // #ifndef __EMSCRIPTEN__
+/* #ifndef __EMSCRIPTEN__ */
+#endif

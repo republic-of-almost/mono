@@ -2531,4 +2531,5 @@ extern PFNGLWINDOWRECTANGLESEXTPROC                         gl3wWindowRectangles
 
 #endif
 
-#endif // #ifndef __EMSCRIPTEN__
+/* #ifndef __EMSCRIPTEN__ */
+#endif

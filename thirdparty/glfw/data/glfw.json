@@ -101,5 +101,17 @@
   "disable_warning_windows" : [
     "4100",
     "4204"
+  ],
+
+  "disable_warning_linux" : [
+    "int-conversion",
+    "implicit-function-declaration",
+    "endif-labels"
+  ],
+
+  "disable_warning_osx" : [
+    "int-conversion",
+    "implicit-function-declaration",
+    "endif-labels"
   ]
 }

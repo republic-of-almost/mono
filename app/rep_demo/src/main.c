@@ -17,14 +17,16 @@ uint32_t objects[32];
 void
 app_tick(void *arg)
 {
+  ROA_UNUSED(arg);
+
   /* scale transforms */
   {
-    
+
   }
 
   /* move camera */
   {
-    
+
   }
 }
 
@@ -32,6 +34,8 @@ app_tick(void *arg)
 void
 app_startup(void *arg)
 {
+  ROA_UNUSED(arg);
+
   /* create objects */
   {
     struct rep_object_desc obj_desc[ROA_ARR_COUNT(objects)];
@@ -107,8 +111,8 @@ app_startup(void *arg)
     }
 
     rep_transform_set(
-      &objects,
-      &trans_desc,
+      ROA_ARR_DATA(objects),
+      ROA_ARR_DATA(trans_desc),
       ROA_ARR_COUNT(trans_desc));
   }
 
