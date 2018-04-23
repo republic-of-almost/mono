@@ -3,7 +3,7 @@
 
 
 typedef struct roa_ctx * roa_ctx_t;
-typedef struct roa_dispatcher_ctx * roa_dispatcher_ctx_t;
+typedef struct roa_job_dispatcher_ctx * roa_job_dispatcher_ctx_t;
 typedef struct volt_ctx * volt_ctx_t;
 typedef struct roa_graph_ctx * roa_graph_ctx_t;
 typedef struct roa_renderer_ctx * roa_renderer_ctx_t;
@@ -21,7 +21,7 @@ roa_ctx_t
 rep_data_ctx();
 
 
-roa_dispatcher_ctx_t
+roa_job_dispatcher_ctx_t
 rep_data_dispatcher();
 
 

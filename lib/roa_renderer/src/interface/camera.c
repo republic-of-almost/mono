@@ -75,5 +75,5 @@ roa_renderer_camera_clear(
   ROA_ASSERT(camera_id);
 
 
-	return ROA_FALSE;
+	return ROA_TRUE;
 }

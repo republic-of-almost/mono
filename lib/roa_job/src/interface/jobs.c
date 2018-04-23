@@ -11,11 +11,11 @@
 #include <fiber/fiber.h>
 
 
-#ifndef JOB_DEBUG_OUTPUT
-#define JOB_DEBUG_OUTPUT 1
+#ifndef ROA_JOB_DEBUG_OUTPUT
+#define ROA_JOB_DEBUG_OUTPUT 0
 #endif
 
-#ifdef JOB_DEBUG_OUTPUT
+#ifdef ROA_JOB_DEBUG_OUTPUT
 #include <stdio.h>
 #endif
 
@@ -44,7 +44,7 @@ roa_job_submit(
     new_batch.count = count;
 
     new_batch.counter = roa_zalloc(sizeof(*new_batch.counter));
-    
+
 		roa_atomic_int_store(new_batch.counter, (int)count);
 
     uint32_t new_batch_id = ++tls->batch_counter;
@@ -55,7 +55,7 @@ roa_job_submit(
 		roa_array_push(tls->batch_ids, new_batch_id);
 
     /*
-		if(ROA_IS_ENABLED(JOB_DEBUG_OUTPUT))
+		if(ROA_IS_ENABLED(ROA_JOB_DEBUG_OUTPUT))
 		{
 			printf("New Marker %d, Thread %d Counter %d \n", marker, th_index, new_batch_id);
 		}
@@ -74,7 +74,7 @@ roa_job_submit(
       roa_array_push(tls->pending_jobs, job);
     }
 
-    if (ROA_IS_ENABLED(JOB_DEBUG_OUTPUT))
+    if (ROA_IS_ENABLED(ROA_JOB_DEBUG_OUTPUT))
     {
       unsigned pending_job_count = roa_array_size(tls->pending_jobs);
       printf("Pending Jobs %d \n", pending_job_count);

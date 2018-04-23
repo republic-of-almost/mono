@@ -1370,7 +1370,7 @@ main(int argc, char **argv)
           roa_mat4_inverse(&scene.decal_inv_proj_view[i], &proj_view);
 
           roa_mat4_inverse(&scene.decal_inv_view[i], &scene.view_mat);
-          
+
 
           scene.decal_size[i] = roa_float3_set_with_values(1,1,1);
           scene.far_clip[i] = 10.f;

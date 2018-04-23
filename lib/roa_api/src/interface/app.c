@@ -17,8 +17,6 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 {
   ROA_BOOL new_frame = roa_ctx_new_frame(rep_data_ctx());
 
-	ROA_LOG_INFO("frame %d", new_frame);
-
   if (new_frame == ROA_TRUE)
   {
     /* user task */
@@ -41,16 +39,18 @@ ROA_JOB(rep_game_loop_tick, rep_task)
       renderer_tick.arg           = ROA_NULL;
       renderer_tick.thread_locked = ROA_TRUE;
 
+      roa_job_dispatcher_ctx_t job_ctx = rep_data_dispatcher();
+
       uint64_t marker = roa_job_submit(
-				rep_data_dispatcher(),
+				job_ctx,
 				&renderer_tick,
 				1);
 
-      roa_job_wait(rep_data_dispatcher(), marker);
+      roa_job_wait(job_ctx, marker);
 
       roa_tagged_allocator_free(rep_config_tagged_hash_rendering());
     }
-    
+
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;

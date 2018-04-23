@@ -43,6 +43,7 @@
     "ROA_JOB_CPU_AFFINITY=1",
     "ROA_JOB_DEBUG_TH_PROCESS_OUTPUT=0",
     "ROA_JOB_STEAL_SIZE=1"
+    "ROA_JOB_DEBUG_OUTPUT=0"
   ],
 
   "defines_windows": [

@@ -1,5 +1,6 @@
 #include <roa_job/roa_job.h>
 #include <roa_renderer/roa_renderer.h>
+#include <data/config.h>
 #include <volt/volt.h>
 #include <data/engine_data.h>
 #include <roa_lib/alloc.h>
@@ -7,6 +8,8 @@
 
 ROA_JOB(rep_renderer_task, struct roa_renderer_task *)
 {
+  ROA_UNUSED(job_ctx);
+
   roa_renderer_task_run(arg);
 }
 
@@ -17,10 +20,11 @@ ROA_JOB(rep_renderer_tick, void*)
 
   /* create an allocator here */
   struct roa_tagged_allocator allocator;
-  roa_tagged_allocator_create(&allocator, "renderer");
+
+  roa_tagged_allocator_create(&allocator, rep_config_tagged_hash_rendering());
 
   unsigned count;
-  
+
   /* wrap renderer tasks in jobs and execute */
 	while (count = roa_renderer_task_pump(rep_data_renderer(), tasks), count > 0)
   {

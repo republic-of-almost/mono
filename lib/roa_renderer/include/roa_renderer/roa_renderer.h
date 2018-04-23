@@ -109,7 +109,9 @@ roa_renderer_camera_clear(
 struct roa_renderer_renderable
 {
 	float world_transform[16];
+
 	uint64_t mesh_id;
+  uint64_t material_id;
 };
 
 
@@ -175,7 +177,7 @@ roa_renderer_task_run(
   struct roa_renderer_task *task);
 
 
-#ifdef __cpluplus
+#ifdef __cplusplus
 } /* extern */
 #endif
 

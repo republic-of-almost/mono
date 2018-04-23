@@ -31,14 +31,14 @@ main()
 	  roa_renderer_ctx_create(&renderer_ctx, ROA_NULL);
 
     struct roa_ctx_window_desc win_desc;
-    roa_ctx_get_window_desc(hw_ctx, &win_desc);
+    ROA_MEM_ZERO(win_desc);
+    win_desc.width = 1200;
+    win_desc.height = 720;
+    win_desc.title = "ROA Renderer Func Test";
 
-    roa_renderer_set_device_resolution(
-			renderer_ctx,
-			win_desc.width,
-			win_desc.height);
+    roa_ctx_set_window_desc(hw_ctx, &win_desc);
   }
-	
+
 	/* setup resources */
 	{
 		struct roa_renderer_mesh_resource mesh_rsrc;
@@ -59,7 +59,7 @@ main()
       camera.far_plane      = 100.f;
       camera.field_of_view  = 3.1421f * 0.125f;
       camera.position[2]    = +3.f;
-      
+
       uint32_t camera_id = ++object_id_counter;
 
       roa_renderer_camera_set(renderer_ctx, &camera, camera_id);
@@ -91,7 +91,7 @@ main()
     {
       struct roa_renderer_camera camera;
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
-     
+
 			float radius = 10.f;
 			float spin_time = time * 0.025f;
 

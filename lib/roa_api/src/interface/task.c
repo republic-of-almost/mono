@@ -16,7 +16,7 @@ struct rep_task_wrapper_arg
 
 
 void
-rep_task_wrapper(roa_dispatcher_ctx_t job_ctx, void *void_arg)
+rep_task_wrapper(roa_job_dispatcher_ctx_t job_ctx, void *void_arg)
 {
   ROA_UNUSED(job_ctx);
 
