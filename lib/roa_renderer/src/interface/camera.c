@@ -74,6 +74,55 @@ roa_renderer_camera_clear(
   ROA_ASSERT(ctx);
   ROA_ASSERT(camera_id);
 
+  /* find camera */
+  unsigned count = roa_array_size(ctx->camera_id);
+  unsigned i;
 
-	return ROA_TRUE;
+  for (i = 0; i < count; ++i)
+  {
+    if (ctx->camera_id[i] == camera_id)
+    {
+      roa_array_erase(ctx->camera_id, i);
+      roa_array_erase(ctx->camera, i);
+
+      return ROA_TRUE;
+    }
+  }
+
+	return ROA_FALSE;
+}
+
+
+unsigned
+roa_renderer_camera_count(
+  const roa_renderer_ctx_t ctx)
+{
+  unsigned count = roa_array_size(ctx->camera_id);
+
+  return count;
+}
+
+
+ROA_BOOL
+roa_renderer_camera_exists(
+  const roa_renderer_ctx_t ctx,
+  uint32_t camera_id)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(camera_id);
+
+  /* find key */
+  unsigned cam_count = roa_array_size(ctx->camera_id);
+  unsigned i;
+
+  for (i = 0; i < cam_count; ++i)
+  {
+    if (ctx->camera_id[i] == camera_id)
+    {
+      return ROA_TRUE;
+    }
+  }
+
+  return ROA_FALSE;
 }

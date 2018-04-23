@@ -103,10 +103,21 @@ roa_renderer_camera_clear(
 	uint32_t camera_id);
 
 
-/* -------------------------------------------------------- [ Renderable ] -- */
+unsigned
+roa_renderer_camera_count(
+  const roa_renderer_ctx_t ctx);
 
 
-struct roa_renderer_renderable
+ROA_BOOL
+roa_renderer_camera_exists(
+  const roa_renderer_ctx_t ctx,
+  uint32_t camera_id);
+
+
+/* ---------------------------------------------------- [ Mesh Renderable ] -- */
+
+
+struct roa_renderer_mesh_renderable
 {
 	float world_transform[16];
 
@@ -116,23 +127,34 @@ struct roa_renderer_renderable
 
 
 ROA_BOOL
-roa_renderer_renderable_set(
+roa_renderer_mesh_renderable_set(
 	roa_renderer_ctx_t ctx,
-	struct roa_renderer_renderable *renderable,
+	struct roa_renderer_mesh_renderable *renderable,
 	uint32_t renderable_id);
 
 
 ROA_BOOL
-roa_renderer_renderable_get(
+roa_renderer_mesh_renderable_get(
   roa_renderer_ctx_t ctx,
-  struct roa_renderer_renderable *out_renderable,
+  struct roa_renderer_mesh_renderable *out_renderable,
   uint32_t renderable_id);
 
 
 ROA_BOOL
-roa_renderer_renderable_clear(
+roa_renderer_mesh_renderable_clear(
 	roa_renderer_ctx_t ctx,
 	uint32_t renderable_id);
+
+
+unsigned
+roa_renderer_mesh_renderable_count(
+  roa_renderer_ctx_t ctx);
+
+
+ROA_BOOL
+roa_renderer_mesh_renderable_exists(
+  roa_renderer_ctx_t ctx,
+  uint32_t renderable_id);
 
 
 /* ---------------------------------------------------- [ Mesh Resources ] -- */

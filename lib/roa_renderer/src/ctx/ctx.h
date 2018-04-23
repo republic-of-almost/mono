@@ -57,7 +57,7 @@ struct roa_renderer_ctx
 	/* array */ struct roa_renderer_camera *camera;
 
 	/* array */ uint32_t *renderable_id;
-	/* array */ struct roa_renderer_renderable *renderable;
+	/* array */ struct roa_renderer_mesh_renderable *renderable;
 
 	struct roa_mesh_rsrc mesh_rsrc;
 

@@ -23,11 +23,15 @@ TEST_CASE("Camera")
   cam_desc.up[1]          = 1.f;
   cam_desc.up[2]          = 0.f;
 
+  REQUIRE(roa_renderer_camera_count(ctx) == 0);
+
   SECTION("Set/Get Camera")
   {
     uint32_t cam_id = 1;
     ROA_BOOL set_success = roa_renderer_camera_set(ctx, &cam_desc, cam_id);
     REQUIRE(set_success == ROA_TRUE);
+
+    REQUIRE(roa_renderer_camera_count(ctx) == 1);
 
     struct roa_renderer_camera get_desc {};
     ROA_BOOL get_success = roa_renderer_camera_get(ctx, &get_desc, cam_id);
@@ -48,12 +52,37 @@ TEST_CASE("Camera")
 
   SECTION("Set camera twice")
   {
+    uint32_t cam_id = 1;
 
+    /* first set */
+
+    ROA_BOOL set_first = roa_renderer_camera_set(ctx, &cam_desc, cam_id);
+    REQUIRE(set_first == ROA_TRUE);
+
+    unsigned first_count = roa_renderer_camera_count(ctx);
+    REQUIRE(first_count == 1);
+
+    /* set again */
+
+    ROA_BOOL set_second = roa_renderer_camera_set(ctx, &cam_desc, cam_id);
+    REQUIRE(set_second == ROA_TRUE);
+
+    unsigned second_count = roa_renderer_camera_count(ctx);
+    REQUIRE(second_count == 1);
   }
 
   SECTION("Has camera")
   {
+    uint32_t cam_id = 1;
 
+    ROA_BOOL exists = roa_renderer_camera_exists(ctx, cam_id);
+    REQUIRE(exists == ROA_FALSE);
+
+    ROA_BOOL set = roa_renderer_camera_set(ctx, &cam_desc, cam_id);
+    REQUIRE(set == ROA_TRUE);
+
+    ROA_BOOL second_exists = roa_renderer_camera_exists(ctx, cam_id);
+    REQUIRE(second_exists == ROA_TRUE);
   }
 
   SECTION("Get Unknown Camera")
@@ -67,7 +96,19 @@ TEST_CASE("Camera")
 
   SECTION("Set/Clear/Get Camera")
   {
+    uint32_t cam_id = 1;
 
+    ROA_BOOL set = roa_renderer_camera_set(ctx, &cam_desc, cam_id);
+    REQUIRE(set == ROA_TRUE);
+
+    ROA_BOOL clear = roa_renderer_camera_clear(ctx, cam_id);
+    REQUIRE(clear == ROA_TRUE);
+
+    unsigned count = roa_renderer_camera_count(ctx);
+    REQUIRE(count == 0);
+
+    ROA_BOOL exists = roa_renderer_camera_exists(ctx, cam_id);
+    REQUIRE(exists == ROA_FALSE);
   }
 
   SECTION("Clear Unknown Camera")
@@ -75,6 +116,6 @@ TEST_CASE("Camera")
     uint32_t cam_id = 1;
     ROA_BOOL get_success = roa_renderer_camera_clear(ctx, cam_id);
 
-    REQUIRE(get_success == ROA_TRUE);
+    REQUIRE(get_success == ROA_FALSE);
   }
 }

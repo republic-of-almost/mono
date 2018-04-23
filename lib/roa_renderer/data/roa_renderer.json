@@ -17,11 +17,10 @@
 	],
 
 	"private_inc_dirs" : [
-		"../src"
+		"../src/"
 	],
 
 	"project_dependencies" : [
-		"Volt",
 		"STB",
 		"RepublicMath",
 		"RepublicLib"
