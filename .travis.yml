@@ -2,26 +2,32 @@ language: cpp
 
 compiler: gcc
 
+os:
+  - linux
+  # - osx
+
 before_script:
-  - sudo apt-get update
-  - sudo apt-get install libc6:i386 libstdc++6:i386
-  - sudo add-apt-repository -y ppa:codegear/release
-  - sudo apt-get -qq update
-  - sudo apt-get install premake4
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libc6:i386 libstdc++6:i386; fi
 
 script: rake ci
 
 
 install:
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-macosx.tar.gz; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then tar xf premake-5.0.0-alpha12-macosx.tar.gz; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-linux.tar.gz; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then tar xf premake-5.0.0-alpha12-linux.tar.gz; fi
     - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
     - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
 
 env:
   matrix:
-    - EXE=LibTest
-    - EXE=MathTest
-    #- EXE=NilTest
-    #- EXE=ROATest
+    - EXE=RepublicMathUnitTest
+    - EXE=RepublicLibUnitTest
+    - EXE=RepublicGraphUnitTest
+    - EXE=RepublicJobUnitTest
+    - EXE=RepublicRendererUnitTest
 
 addons:
     apt:

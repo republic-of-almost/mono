@@ -1,4 +1,5 @@
 #include <catch/catch.hpp>
+#include <roa_math/math.h>
 #include <array>
 
 
@@ -7,7 +8,7 @@ TEST_CASE("Matrix 4x4")
 
   // ---------------------------------------------------------- [ Constants ] --
 
-	/*
+	
   SECTION("ID Mat")
   {
     const float mat_data[] {
@@ -17,14 +18,15 @@ TEST_CASE("Matrix 4x4")
       0.f, 0.f, 0.f, 1.f,
     };
     
-    const math::mat4 mat_expected = math::mat4_init(mat_data);
-    const math::mat4 mat = math::mat4_id();
-    
-    REQUIRE(math::mat4_is_near(mat_expected, mat));
+    roa_mat4 expected;
+    roa_mat4_import(&expected, mat_data);
+
+    roa_mat4 mat;
+    roa_mat4_id(&mat);
+
+    REQUIRE(roa_mat4_is_near(&expected, &mat, ROA_EPSILON));
   }
-	*/
   
-	/*
   SECTION("Zero Mat")
   {
     const float mat_data[] {
@@ -34,91 +36,34 @@ TEST_CASE("Matrix 4x4")
       0.f, 0.f, 0.f, 0.f,
     };
     
-    const math::mat4 mat_expected = math::mat4_init(mat_data);
-    const math::mat4 mat = math::mat4_zero();
-    
-    REQUIRE(math::mat4_is_near(mat_expected, mat));
+    roa_mat4 expected;
+    roa_mat4_import(&expected, mat_data);
+
+    roa_mat4 mat;
+    roa_mat4_zero(&mat);
+
+    REQUIRE(roa_mat4_is_near(&expected, &mat, ROA_EPSILON));
   }
-	*/
   
   // --------------------------------------------------------- [ Initialize ] --
   
-	/*
-  SECTION("Init With Nothing")
+  SECTION("Init with Value")
   {
-    const math::mat4 mat_default_init = math::mat4_init();
-    const math::mat4 id = math::mat4_id();
-    
-    REQUIRE(math::mat4_is_near(mat_default_init, id));
-  }
-	*/
-  
-	/*
-  SECTION("Init with value")
-  {
-    const float mat_data[] {
+    const float mat_data[]{
       3.f, 3.f, 3.f, 3.f,
       3.f, 3.f, 3.f, 3.f,
       3.f, 3.f, 3.f, 3.f,
       3.f, 3.f, 3.f, 3.f,
     };
-    
-    const math::mat4 mat_expected = math::mat4_init(mat_data);
-    const math::mat4 mat_init_with_value = math::mat4_init(3.f);
-    
-    REQUIRE(math::mat4_is_near(mat_expected, mat_init_with_value));
+
+    roa_mat4 expected;
+    roa_mat4_import(&expected, mat_data);
+
+    roa_mat4 mat;
+    roa_mat4_fill(&mat, 3.f);
+
+    REQUIRE(roa_mat4_is_near(&expected, &mat, ROA_EPSILON));
   }
-	*/
-  
-	/*
-  SECTION("Init with sub mat")
-  {
-    const float mat_expected_data[] {
-      4.f, 4.f, 4.f, 0.f,
-      4.f, 4.f, 4.f, 0.f,
-      4.f, 4.f, 4.f, 0.f,
-      0.f, 0.f, 0.f, 0.f,
-    };
-    
-    const math::mat4 mat_expected = math::mat4_init(mat_expected_data);
-    
-    const float mat_sub_data[] {
-      4.f, 4.f, 4.f,
-      4.f, 4.f, 4.f,
-      4.f, 4.f, 4.f,
-    };
-    
-    const math::mat3 sub_mat = math::mat3_init(mat_sub_data);
-    const math::mat4 mat_init_with_sub = math::mat4_init(sub_mat);
-    
-    REQUIRE(math::mat4_is_near(mat_expected, mat_init_with_sub));
-  }
-	*/
-  
-	/*
-  SECTION("Init with array")
-  {
-    const float mat_data_1[] {
-      1.f, 1.f, 1.f, 1.f,
-      1.f, 1.f, 1.f, 1.f,
-      1.f, 1.f, 1.f, 1.f,
-      1.f, 1.f, 1.f, 1.f,
-    };
-    
-    const math::mat4 mat_a = math::mat4_init(mat_data_1);
-    
-    const float mat_data_2[] {
-      2.f, 2.f, 2.f, 2.f,
-      2.f, 2.f, 2.f, 2.f,
-      2.f, 2.f, 2.f, 2.f,
-      2.f, 2.f, 2.f, 2.f,
-    };
-    
-    const math::mat4 mat_b = math::mat4_init(mat_data_2);
-    
-    REQUIRE(math::mat4_is_not_near(mat_a, mat_b));
-  }
-	*/
   
   
   // --------------------------------------------- [ Special Init With Data ] --
@@ -182,7 +127,8 @@ TEST_CASE("Matrix 4x4")
   
   // --------------------------------------------------------- [ Operations ] --
   
-	/*
+	
+  /*
   SECTION("Addition")
   {
     const float mat_data_1[] {
@@ -192,7 +138,8 @@ TEST_CASE("Matrix 4x4")
       1.f, 1.f, 1.f, 1.f,
     };
     
-    const math::mat4 mat_a = math::mat4_init(mat_data_1);
+    roa_mat4 mat_a;
+    roa_mat4_import(&mat_a, mat_data_1);
     
     const float mat_data_2[] {
       2.f, 2.f, 2.f, 2.f,
@@ -201,7 +148,8 @@ TEST_CASE("Matrix 4x4")
       2.f, 2.f, 2.f, 2.f,
     };
     
-    const math::mat4 mat_b = math::mat4_init(mat_data_2);
+    roa_mat4 mat_b;
+    roa_mat4_import(&mat_b, mat_data_2);
     
     const float mat_expected_data[] {
       3.f, 3.f, 3.f, 3.f,
@@ -210,12 +158,15 @@ TEST_CASE("Matrix 4x4")
       3.f, 3.f, 3.f, 3.f,
     };
     
-    const math::mat4 mat_expected = math::mat4_init(mat_expected_data);
-    const math::mat4 mat_final = math::mat4_add(mat_a, mat_b);
+    roa_mat4 mat_expected;
+    roa_mat4_import(&mat_expected, mat_expected_data);
+
+    roa_mat4 mat_final;
+    roa_mat4_add(&mat4_final, &mat_a, &mat_b);
     
-    REQUIRE(math::mat4_is_near(mat_expected, mat_final));
+    REQUIRE(roa_mat4_is_near(mat_expected, mat_final, ROA_EPSILON));
   }
-	*/
+  */
   
 	/*
   SECTION("Subtraction")
@@ -403,7 +354,7 @@ TEST_CASE("Matrix 4x4")
   }
 	*/
   
-	/*
+	
   SECTION("Inverse")
   {
     const float mat_data[] {
@@ -413,8 +364,11 @@ TEST_CASE("Matrix 4x4")
       10.f, 11.f, 12.f, 1.f,
     };
     
-    const math::mat4 mat_a = math::mat4_init(mat_data);
-    const math::mat4 inverse = math::mat4_inverse(mat_a);
+    roa_mat4 mat_a;
+    roa_mat4_import(&mat_a, mat_data);
+
+    roa_mat4 inverse;
+    roa_mat4_inverse(&inverse, &mat_a);
     
     const float mat_expected_data[] {
       1.f, -2.f, 1.f, 0.f,
@@ -423,13 +377,27 @@ TEST_CASE("Matrix 4x4")
       -10.f, 63.f / 3.f, -12.f, 1.f,
     };
     
-    const math::mat4 mat_expected = math::mat4_init(mat_expected_data);
-    
-    REQUIRE(math::mat4_is_near(inverse, mat_expected, 0.00001f));
+    roa_mat4 expected;
+    roa_mat4_import(&expected, mat_expected_data);
+
+    REQUIRE(roa_mat4_is_near(&inverse, &expected, 0.00001f));
   }
-	*/
+
+  SECTION("Inverse ID")
+  {
+    roa_mat4 mat_a;
+    roa_mat4_id(&mat_a);
+
+    roa_mat4 inverse;
+    roa_mat4_inverse(&inverse, &mat_a);
+
+    roa_mat4 expected;
+    roa_mat4_id(&expected);
+
+    REQUIRE(roa_mat4_is_near(&inverse, &expected, 0.00001f));
+  }
   
-	/*
+
   SECTION("Determinant")
   {
     const float mat_data[] {
@@ -439,12 +407,13 @@ TEST_CASE("Matrix 4x4")
       10.f, 11.f, 12.f, 1.f,
     };
     
-    const math::mat4 mat_a = math::mat4_init(mat_data);
-    const float determinant = math::mat4_get_determinant(mat_a);
+    roa_mat4 mat_a;
+    roa_mat4_import(&mat_a, mat_data);
+
+    const float determinant = roa_mat4_determinant(&mat_a);
     
-    REQUIRE(math::is_near(determinant, -3.f));
+    REQUIRE(roa_float_is_near(determinant, -3.f, ROA_EPSILON));
   }
-	*/
   
   // --------------------------------------------------------------- [ Data ] --
   

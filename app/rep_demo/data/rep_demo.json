@@ -1,5 +1,5 @@
 {
-  "name": "AppDecals",
+  "name": "AppRepDemo",
   "kind": "ConsoleApp",
   "language": "C89",
   "location": "./",
@@ -7,7 +7,10 @@
   "src_files": [
     "../src/**.c",
     "../src/**.h",
-    "../docs/**.md"
+    "../docs/**.md",
+    "../data/**.json",
+    "../assets/**.material",
+    "../assets/**.entity"
   ],
 
   "private_inc_dirs": [
@@ -15,12 +18,7 @@
   ],
 
   "project_dependencies": [
-    "RepublicMath",
-    "RepublicCtx",
-		"RepublicLib",
-    "Scratch",
-    "Volt",
-    "STB"
+    "RepublicAPI"
   ],
 
   "disable_warning_windows" : [

@@ -6,6 +6,8 @@
 #include <volt/volt.h>
 #include <roa_lib/time.h>
 #include <scratch/geometry.h>
+#include <scratch/textures.h>
+#include <stb/stb_image.h>
 #include <scratch/glsl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -61,6 +63,7 @@ struct g_buffer_data
 	volt_sampler_t      s_diffuse;
 
   struct volt_pipeline_desc decal_pipeline_desc;
+  volt_rasterizer_t         decal_rasterizer;
 
 } g_buffer;
 
@@ -102,6 +105,8 @@ struct direction_light_data
 
 struct scene_data
 {
+  volt_texture_t test_texture;
+
   /* objects */
 
   volt_vbo_t            object_vbo;
@@ -117,7 +122,7 @@ struct scene_data
   roa_mat4              decal_world[1];
   roa_mat4              decal_wvp[1];
   roa_mat4              decal_inv_world[1];
-	roa_mat4 							decal_inv_proj_view[1];
+	roa_mat4              decal_inv_proj_view[1];
   roa_mat4              decal_inv_view[1];
   roa_mat4              decal_world_view[1];
 	roa_float3            decal_size[1];
@@ -161,7 +166,7 @@ struct fullscreen_data
 void
 volt_cb(const char *msg)
 {
-  printf("%s", msg);
+  printf("Volt Err: %s", msg);
 }
 
 
@@ -194,6 +199,28 @@ main(int argc, char **argv)
     scene.viewport.y      = 0;
     scene.viewport.width  = width;
     scene.viewport.height = height;
+
+    /* test texture */
+    {
+
+      int x, y, ch;
+      const char *file = "C:/Users/SimStim/Developer/mono/lib/volt/assets/volt_func/dev_tex_02.png";
+      unsigned char * img_data = stbi_load(file, &x, &y, &ch, 3);
+
+      struct volt_texture_desc tex_desc;
+      ROA_MEM_ZERO(tex_desc);
+      tex_desc.data       = img_data;
+      tex_desc.access     = VOLT_STATIC;
+      tex_desc.dimentions = VOLT_TEXTURE_2D;
+      tex_desc.width      = x;
+      tex_desc.height     = y;
+      tex_desc.format     = VOLT_PIXEL_FORMAT_RGB;
+      tex_desc.name       = "Test Texture";
+      tex_desc.sampling   = VOLT_SAMPLING_BILINEAR;
+
+      volt_texture_create(volt_ctx, &scene.test_texture, &tex_desc);
+      volt_ctx_execute(volt_ctx);
+    }
 
     /* load object vbo */
     {
@@ -274,15 +301,15 @@ main(int argc, char **argv)
     /* box positions */
     {
       roa_transform_init(&scene.box_transform[0]);
-      scene.box_transform[0].position = roa_float3_set_with_values(0.f, ROA_G_RATIO / 2, 0.f);
-      scene.box_transform[0].scale    = roa_float3_set_with_values(ROA_G_RATIO / 4, ROA_G_RATIO, 1.f);
+      scene.box_transform[0].position = roa_float3_set_with_values(0.f, -0.5f, 0.f);
+      scene.box_transform[0].scale    = roa_float3_set_with_values(ROA_G_RATIO * 2, 1.f, ROA_G_RATIO * 2);
     }
 
     /* decals */
     {
       roa_transform_init(&scene.decal_transform[0]);
       scene.decal_transform[0].position = roa_float3_set_with_values(0,0,0);
-      scene.decal_transform[0].scale    = roa_float3_set_with_values(2, 2, 2);
+      scene.decal_transform[0].scale    = roa_float3_set_with_values(1, 1, 1);
     }
 
     /* uniforms */
@@ -376,9 +403,10 @@ main(int argc, char **argv)
 
     /* input */
     {
-      volt_input_attribute attrs[2];
-      attrs[0] = VOLT_INPUT_FLOAT3;
-      attrs[1] = VOLT_INPUT_FLOAT2;
+      volt_input_attribute attrs[] = {
+        VOLT_INPUT_FLOAT3,
+        VOLT_INPUT_FLOAT2,
+      };
 
       struct volt_input_desc input_desc;
       ROA_MEM_ZERO(input_desc);
@@ -1027,7 +1055,7 @@ main(int argc, char **argv)
 
         "void main()\n"
         "{\n"
-        " pos_w       = u_model * vec4(vs_in_position.xyz * 1, vs_in_position.w);\n"
+        " pos_w       = u_model * vs_in_position;\n"
         " pos_fs      = u_proj * u_view * pos_w;\n"
         " uv_fs       = vs_in_texcoord;\n"
         " gl_Position = pos_fs;\n"
@@ -1041,7 +1069,10 @@ main(int argc, char **argv)
         "in vec4 pos_w;\n"
         "in vec2 uv_fs;\n"
 
-        "uniform sampler2D samp_normal;\n"
+        "uniform mat4 u_model;\n"
+        "uniform mat4 u_view;\n"
+        "uniform mat4 u_proj;\n"
+
         "uniform sampler2D samp_depth;\n"
         "uniform sampler2D samp_diffuse;\n"
 
@@ -1050,9 +1081,11 @@ main(int argc, char **argv)
 
         "vec4 reconstruct_pos(float z, vec2 uv_f)\n"
         "{\n"
-        "  vec4 sPos = vec4(uv_f * 2.0 - 1.0, z, 1.0);\n"
-          "sPos = u_inv_proj_view * sPos;\n"
-          "return vec4((sPos.xyz / sPos.w), sPos.w);\n"
+        "  vec4 sPos = vec4(uv_f * 2.0 - 1.0, -z, 1.0);\n"
+        "mat4 proj_view = u_view * u_proj;"
+        "sPos = inverse(proj_view) * sPos;\n"
+        //"sPos = u_inv_proj_view * sPos;\n"
+        "return vec4((sPos.xyz / sPos.w), sPos.w);\n"
         "}\n"
 
         "layout (location = 0) out vec3 fs_out_diffuse;\n"
@@ -1061,25 +1094,39 @@ main(int argc, char **argv)
         "{\n"
         "vec2 screenPosition = pos_fs.xy / pos_fs.w;\n"
 
-        "vec2 depthUV = screenPosition * 0.5 + 0.5;\n"
-        "depthUV += vec2(0.5 / 1200.0, 0.5 / 720.0);\n"
-        "float depth = texture2D(samp_depth, depthUV).w;\n"
+        "vec2 depthUV = screenPosition * vec2(0.5, -0.5);\n"
+        "depthUV += vec2(1200.0, 720.0);\n"
+
+        "float depth = texture2D(samp_depth, depthUV).r;\n"
 
         "vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
-        "vec4 localPos = u_inv_model * worldPos;\n"
+        "vec4 localPos = inverse(u_model) * worldPos;\n"
+
+        //"if(0.5 - abs(length(worldPos.xyz)) < 0) { discard; }"
+
+        //"vec4 localPos = u_inv_model * worldPos;\n"
 
         "float dist = 0.5 - abs(localPos.y);\n"
         "float dist2 = 0.5 - abs(localPos.x);\n"
 
+        //Position on the screen
+        "vec2 screenPos = pos_fs.xy / pos_fs.w;\n"
+
+        //Convert into a texture coordinate
+        "vec2 texCoord = vec2("
+        "(1 + screenPos.x) / 2 + (0.5 / 1200.0),"
+        "(1 - screenPos.y) / 2 + (0.5 / 720.0)"
+        ");"
+
         "if (dist > 0.0f && dist2 > 0)\n"
         "{\n"
-          "vec2 uv = vec2(localPos.x, localPos.y) + 0.5;\n"
-          "vec4 diffuseColor = texture2D(samp_diffuse, uv);\n"
-          "fs_out_diffuse = diffuseColor.xyz;\n"
+        "vec2 uv = vec2(localPos.x, localPos.y) + 0.5;\n"
+        "vec4 diffuseColor = texture2D(samp_diffuse, uv);\n"
+        "fs_out_diffuse = diffuseColor.xyz;\n"
         "}\n"
-        "else {\n"
-          "fs_out_diffuse = vec4(1.0, 0, 0, 1).xyz;\n"
-          "}\n"
+         "else {\n"
+         "fs_out_diffuse = vec4(1.0, 0, 0, 1).xyz;\n"
+         "}\n"
         "}\n";
 
       volt_shader_stage stages[2] = {
@@ -1117,15 +1164,15 @@ main(int argc, char **argv)
       }
 
       {
-        struct volt_uniform_desc uni_desc;
-        ROA_MEM_ZERO(uni_desc);
-        uni_desc.name = "u_inv_model";
-        uni_desc.data_type = VOLT_DATA_MAT4;
-        uni_desc.copy_data = VOLT_FALSE;
-        uni_desc.count = 1;
+      struct volt_uniform_desc uni_desc;
+      ROA_MEM_ZERO(uni_desc);
+      uni_desc.name = "u_inv_model";
+      uni_desc.data_type = VOLT_DATA_MAT4;
+      uni_desc.copy_data = VOLT_FALSE;
+      uni_desc.count = 1;
 
-        volt_uniform_create(volt_ctx, &g_buffer.u_inv_model, &uni_desc);
-        volt_ctx_execute(volt_ctx);
+      volt_uniform_create(volt_ctx, &g_buffer.u_inv_model, &uni_desc);
+      volt_ctx_execute(volt_ctx);
       }
 
       {
@@ -1216,13 +1263,27 @@ main(int argc, char **argv)
       }
     }
 
+    /* decal rasterizer */
+    {
+      struct volt_rasterizer_desc raster_desc;
+      ROA_MEM_ZERO(raster_desc);
+
+      raster_desc.cull_mode = VOLT_CULL_BACK;
+      raster_desc.primitive = VOLT_PRIM_TRIANGLES;
+      raster_desc.winding_order = VOLT_WIND_CCW;
+      raster_desc.depth_test = VOLT_TRUE;
+
+      volt_rasterizer_create(volt_ctx, &g_buffer.decal_rasterizer, &raster_desc);
+      volt_ctx_execute(volt_ctx);
+    }
+
     /* decal pipeline */
     {
       struct volt_pipeline_desc decal_pipeline_desc;
       ROA_MEM_ZERO(decal_pipeline_desc);
 
       decal_pipeline_desc.program     = g_buffer.decal_program;
-      decal_pipeline_desc.rasterizer  = g_buffer.rasterizer;
+      decal_pipeline_desc.rasterizer  = g_buffer.decal_rasterizer;
       decal_pipeline_desc.input       = g_buffer.decal_input;
       decal_pipeline_desc.viewport    = scene.viewport;
 
@@ -1305,9 +1366,11 @@ main(int argc, char **argv)
           roa_mat4 proj_view;
           roa_mat4_multiply(&proj_view, &scene.proj_mat, &scene.view_mat);
 
+          //roa_mat4_inverse(&scene.decal_inv_proj_view[i], &view_proj);
           roa_mat4_inverse(&scene.decal_inv_proj_view[i], &proj_view);
 
           roa_mat4_inverse(&scene.decal_inv_view[i], &scene.view_mat);
+          
 
           scene.decal_size[i] = roa_float3_set_with_values(1,1,1);
           scene.far_clip[i] = 10.f;
@@ -1411,7 +1474,7 @@ main(int argc, char **argv)
         volt_renderpass_bind_texture_buffer_cmd(decal_pass, samp_depth, g_buffer.fbo_depth);
 
         volt_sampler_t samp_diffuse = g_buffer.s_diffuse;
-        volt_renderpass_bind_texture_buffer_cmd(decal_pass, samp_diffuse, g_buffer.fbo_color_outputs[1]);
+        volt_renderpass_bind_texture_buffer_cmd(decal_pass, samp_diffuse, scene.test_texture);
 
         /* Draw */
         volt_renderpass_draw_cmd(decal_pass, &scene.decal_draw_desc[i]);

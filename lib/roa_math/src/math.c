@@ -1274,8 +1274,8 @@ roa_mat3_multiply_with_float3(
 
 int
 roa_mat3_is_near(
-	roa_mat3 *a,
-	roa_mat3 *b,
+	const roa_mat3 *a,
+	const roa_mat3 *b,
 	float err)
 {
 	int count = 0;
@@ -1317,7 +1317,19 @@ roa_mat4_id(roa_mat4 *out)
 
 
 void
-roa_mat4_import(roa_mat4 *out, float *data)
+roa_mat4_fill(roa_mat4 *out, float value)
+{
+  int i;
+
+  for (i = 0; i < 16; ++i)
+  {
+    out->data[i] = value;
+  }
+}
+
+
+void
+roa_mat4_import(roa_mat4 *out, const float *data)
 {
   memcpy(out->data, data, sizeof(out->data));
 }
@@ -1378,136 +1390,135 @@ roa_mat4_rotate(roa_mat4 *out, roa_quaternion rotation)
 void
 roa_mat4_inverse(roa_mat4 *out, const roa_mat4 *to_inverse)
 {
-  const float temp[16] =
-  {
-    // 0
+  float temp[16];
+  
+    temp[0] =
     to_inverse->data[5]  * to_inverse->data[10] * to_inverse->data[15] -
     to_inverse->data[5]  * to_inverse->data[11] * to_inverse->data[14] -
     to_inverse->data[9]  * to_inverse->data[6]  * to_inverse->data[15] +
     to_inverse->data[9]  * to_inverse->data[7]  * to_inverse->data[14] +
     to_inverse->data[13] * to_inverse->data[6]  * to_inverse->data[11] -
-    to_inverse->data[13] * to_inverse->data[7]  * to_inverse->data[10],
+    to_inverse->data[13] * to_inverse->data[7]  * to_inverse->data[10];
 
-    // 1
+    temp[1] =
     -to_inverse->data[1]  * to_inverse->data[10] * to_inverse->data[15] +
     to_inverse->data[1]  * to_inverse->data[11] * to_inverse->data[14] +
     to_inverse->data[9]  * to_inverse->data[2] * to_inverse->data[15] -
     to_inverse->data[9]  * to_inverse->data[3] * to_inverse->data[14] -
     to_inverse->data[13] * to_inverse->data[2] * to_inverse->data[11] +
-    to_inverse->data[13] * to_inverse->data[3] * to_inverse->data[10],
+    to_inverse->data[13] * to_inverse->data[3] * to_inverse->data[10];
 
-    // 2
+    temp[2] = 
     to_inverse->data[1]  * to_inverse->data[6] * to_inverse->data[15] -
     to_inverse->data[1]  * to_inverse->data[7] * to_inverse->data[14] -
     to_inverse->data[5]  * to_inverse->data[2] * to_inverse->data[15] +
     to_inverse->data[5]  * to_inverse->data[3] * to_inverse->data[14] +
     to_inverse->data[13] * to_inverse->data[2] * to_inverse->data[7] -
-    to_inverse->data[13] * to_inverse->data[3] * to_inverse->data[6],
+    to_inverse->data[13] * to_inverse->data[3] * to_inverse->data[6];
 
-    // 3
+    temp[3] =
     -to_inverse->data[1] * to_inverse->data[6] * to_inverse->data[11] +
     to_inverse->data[1] * to_inverse->data[7] * to_inverse->data[10] +
     to_inverse->data[5] * to_inverse->data[2] * to_inverse->data[11] -
     to_inverse->data[5] * to_inverse->data[3] * to_inverse->data[10] -
     to_inverse->data[9] * to_inverse->data[2] * to_inverse->data[7] +
-    to_inverse->data[9] * to_inverse->data[3] * to_inverse->data[6],
+    to_inverse->data[9] * to_inverse->data[3] * to_inverse->data[6];
 
-    // 4
+    temp[4] =
     -to_inverse->data[4]  * to_inverse->data[10] * to_inverse->data[15] +
     to_inverse->data[4]  * to_inverse->data[11] * to_inverse->data[14] +
     to_inverse->data[8]  * to_inverse->data[6]  * to_inverse->data[15] -
     to_inverse->data[8]  * to_inverse->data[7]  * to_inverse->data[14] -
     to_inverse->data[12] * to_inverse->data[6]  * to_inverse->data[11] +
-    to_inverse->data[12] * to_inverse->data[7]  * to_inverse->data[10],
+    to_inverse->data[12] * to_inverse->data[7]  * to_inverse->data[10];
 
-    // 5
+    temp[5] =
     to_inverse->data[0]  * to_inverse->data[10] * to_inverse->data[15] -
     to_inverse->data[0]  * to_inverse->data[11] * to_inverse->data[14] -
     to_inverse->data[8]  * to_inverse->data[2] * to_inverse->data[15] +
     to_inverse->data[8]  * to_inverse->data[3] * to_inverse->data[14] +
     to_inverse->data[12] * to_inverse->data[2] * to_inverse->data[11] -
-    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[10],
+    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[10];
 
-    // 6
+    temp[6] =
     -to_inverse->data[0]  * to_inverse->data[6] * to_inverse->data[15] +
     to_inverse->data[0]  * to_inverse->data[7] * to_inverse->data[14] +
     to_inverse->data[4]  * to_inverse->data[2] * to_inverse->data[15] -
     to_inverse->data[4]  * to_inverse->data[3] * to_inverse->data[14] -
     to_inverse->data[12] * to_inverse->data[2] * to_inverse->data[7] +
-    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[6],
+    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[6];
 
-    // 7
+    temp[7] =
     to_inverse->data[0] * to_inverse->data[6] * to_inverse->data[11] -
     to_inverse->data[0] * to_inverse->data[7] * to_inverse->data[10] -
     to_inverse->data[4] * to_inverse->data[2] * to_inverse->data[11] +
     to_inverse->data[4] * to_inverse->data[3] * to_inverse->data[10] +
     to_inverse->data[8] * to_inverse->data[2] * to_inverse->data[7] -
-    to_inverse->data[8] * to_inverse->data[3] * to_inverse->data[6],
+    to_inverse->data[8] * to_inverse->data[3] * to_inverse->data[6];
 
-    // 8
+    temp[8] =
     to_inverse->data[4]  * to_inverse->data[9] * to_inverse->data[15] -
     to_inverse->data[4]  * to_inverse->data[11] * to_inverse->data[13] -
     to_inverse->data[8]  * to_inverse->data[5] * to_inverse->data[15] +
     to_inverse->data[8]  * to_inverse->data[7] * to_inverse->data[13] +
     to_inverse->data[12] * to_inverse->data[5] * to_inverse->data[11] -
-    to_inverse->data[12] * to_inverse->data[7] * to_inverse->data[9],
+    to_inverse->data[12] * to_inverse->data[7] * to_inverse->data[9];
 
-    // 9
+    temp[9] =
     -to_inverse->data[0]  * to_inverse->data[9] * to_inverse->data[15] +
     to_inverse->data[0]  * to_inverse->data[11] * to_inverse->data[13] +
     to_inverse->data[8]  * to_inverse->data[1] * to_inverse->data[15] -
     to_inverse->data[8]  * to_inverse->data[3] * to_inverse->data[13] -
     to_inverse->data[12] * to_inverse->data[1] * to_inverse->data[11] +
-    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[9],
+    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[9];
 
-    // 10
+    temp[10] =
     to_inverse->data[0]  * to_inverse->data[5] * to_inverse->data[15] -
     to_inverse->data[0]  * to_inverse->data[7] * to_inverse->data[13] -
     to_inverse->data[4]  * to_inverse->data[1] * to_inverse->data[15] +
     to_inverse->data[4]  * to_inverse->data[3] * to_inverse->data[13] +
     to_inverse->data[12] * to_inverse->data[1] * to_inverse->data[7] -
-    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[5],
+    to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[5];
 
-    // 11
+    temp[11] = 
     -to_inverse->data[0] * to_inverse->data[5] * to_inverse->data[11] +
     to_inverse->data[0] * to_inverse->data[7] * to_inverse->data[9] +
     to_inverse->data[4] * to_inverse->data[1] * to_inverse->data[11] -
     to_inverse->data[4] * to_inverse->data[3] * to_inverse->data[9] -
     to_inverse->data[8] * to_inverse->data[1] * to_inverse->data[7] +
-    to_inverse->data[8] * to_inverse->data[3] * to_inverse->data[5],
+    to_inverse->data[8] * to_inverse->data[3] * to_inverse->data[5];
 
-    // 12
+    temp[12] =
     -to_inverse->data[4]  * to_inverse->data[9] * to_inverse->data[14] +
     to_inverse->data[4]  * to_inverse->data[10] * to_inverse->data[13] +
     to_inverse->data[8]  * to_inverse->data[5] * to_inverse->data[14] -
     to_inverse->data[8]  * to_inverse->data[6] * to_inverse->data[13] -
     to_inverse->data[12] * to_inverse->data[5] * to_inverse->data[10] +
-    to_inverse->data[12] * to_inverse->data[6] * to_inverse->data[9],
+    to_inverse->data[12] * to_inverse->data[6] * to_inverse->data[9];
 
-    // 13
+    temp[13] =
     to_inverse->data[0]  * to_inverse->data[9] * to_inverse->data[14] -
     to_inverse->data[0]  * to_inverse->data[10] * to_inverse->data[13] -
     to_inverse->data[8]  * to_inverse->data[1] * to_inverse->data[14] +
     to_inverse->data[8]  * to_inverse->data[2] * to_inverse->data[13] +
     to_inverse->data[12] * to_inverse->data[1] * to_inverse->data[10] -
-    to_inverse->data[12] * to_inverse->data[2] * to_inverse->data[9],
+    to_inverse->data[12] * to_inverse->data[2] * to_inverse->data[9];
 
-    // 14
+    temp[14] =
     -to_inverse->data[0]  * to_inverse->data[5] * to_inverse->data[14] +
     to_inverse->data[0]  * to_inverse->data[6] * to_inverse->data[13] +
     to_inverse->data[4]  * to_inverse->data[1] * to_inverse->data[14] -
     to_inverse->data[4]  * to_inverse->data[2] * to_inverse->data[13] -
     to_inverse->data[12] * to_inverse->data[1] * to_inverse->data[6] +
-    to_inverse->data[12] * to_inverse->data[2] * to_inverse->data[5],
+    to_inverse->data[12] * to_inverse->data[2] * to_inverse->data[5];
 
-    // 16
+    temp[15] =
     to_inverse->data[0] * to_inverse->data[5] * to_inverse->data[10] -
     to_inverse->data[0] * to_inverse->data[6] * to_inverse->data[9] -
     to_inverse->data[4] * to_inverse->data[1] * to_inverse->data[10] +
     to_inverse->data[4] * to_inverse->data[2] * to_inverse->data[9] +
     to_inverse->data[8] * to_inverse->data[1] * to_inverse->data[6] -
-    to_inverse->data[8] * to_inverse->data[2] * to_inverse->data[5]
-  };
+    to_inverse->data[8] * to_inverse->data[2] * to_inverse->data[5];
 
   const float determinant = roa_mat4_determinant(to_inverse);
 
@@ -1530,138 +1541,140 @@ roa_mat4_inverse(roa_mat4 *out, const roa_mat4 *to_inverse)
 float
 roa_mat4_determinant(const roa_mat4 *det)
 {
-  const float temp[16] =
-  {
-    // 0
+  float temp[16];
+
+  temp[0] = 
    det->data[5]  *det->data[10] *det->data[15] -
    det->data[5]  *det->data[11] *det->data[14] -
    det->data[9]  *det->data[6]  *det->data[15] +
    det->data[9]  *det->data[7]  *det->data[14] +
    det->data[13] *det->data[6]  *det->data[11] -
-   det->data[13] *det->data[7]  *det->data[10],
+   det->data[13] *det->data[7]  *det->data[10];
 
-    // 1
-    -det->data[1]  *det->data[10] *det->data[15] +
+   temp[1] = 
+   -det->data[1]  *det->data[10] *det->data[15] +
    det->data[1]  *det->data[11] *det->data[14] +
    det->data[9]  *det->data[2] *det->data[15] -
    det->data[9]  *det->data[3] *det->data[14] -
    det->data[13] *det->data[2] *det->data[11] +
-   det->data[13] *det->data[3] *det->data[10],
+   det->data[13] *det->data[3] *det->data[10];
 
-    // 2
+   temp[2] = 
    det->data[1]  *det->data[6] *det->data[15] -
    det->data[1]  *det->data[7] *det->data[14] -
    det->data[5]  *det->data[2] *det->data[15] +
    det->data[5]  *det->data[3] *det->data[14] +
    det->data[13] *det->data[2] *det->data[7] -
-   det->data[13] *det->data[3] *det->data[6],
+   det->data[13] *det->data[3] *det->data[6];
 
-    // 3
-    -det->data[1] *det->data[6] *det->data[11] +
+   temp[3] =
+   -det->data[1] *det->data[6] *det->data[11] +
    det->data[1] *det->data[7] *det->data[10] +
    det->data[5] *det->data[2] *det->data[11] -
    det->data[5] *det->data[3] *det->data[10] -
    det->data[9] *det->data[2] *det->data[7] +
-   det->data[9] *det->data[3] *det->data[6],
+   det->data[9] *det->data[3] *det->data[6];
 
-    // 4
+   temp[4] =
     -det->data[4]  *det->data[10] *det->data[15] +
    det->data[4]  *det->data[11] *det->data[14] +
    det->data[8]  *det->data[6]  *det->data[15] -
    det->data[8]  *det->data[7]  *det->data[14] -
    det->data[12] *det->data[6]  *det->data[11] +
-   det->data[12] *det->data[7]  *det->data[10],
+   det->data[12] *det->data[7]  *det->data[10];
 
-    // 5
+   temp[5] =
    det->data[0]  *det->data[10] *det->data[15] -
    det->data[0]  *det->data[11] *det->data[14] -
    det->data[8]  *det->data[2] *det->data[15] +
    det->data[8]  *det->data[3] *det->data[14] +
    det->data[12] *det->data[2] *det->data[11] -
-   det->data[12] *det->data[3] *det->data[10],
+   det->data[12] *det->data[3] *det->data[10];
 
-    // 6
-    -det->data[0]  *det->data[6] *det->data[15] +
+   temp[6] =
+   -det->data[0]  *det->data[6] *det->data[15] +
    det->data[0]  *det->data[7] *det->data[14] +
    det->data[4]  *det->data[2] *det->data[15] -
    det->data[4]  *det->data[3] *det->data[14] -
    det->data[12] *det->data[2] *det->data[7] +
-   det->data[12] *det->data[3] *det->data[6],
+   det->data[12] *det->data[3] *det->data[6];
 
-    // 7
+   temp[7] =
    det->data[0] *det->data[6] *det->data[11] -
    det->data[0] *det->data[7] *det->data[10] -
    det->data[4] *det->data[2] *det->data[11] +
    det->data[4] *det->data[3] *det->data[10] +
    det->data[8] *det->data[2] *det->data[7] -
-   det->data[8] *det->data[3] *det->data[6],
+   det->data[8] *det->data[3] *det->data[6];
 
-    // 8
+   temp[8] =
    det->data[4]  *det->data[9] *det->data[15] -
    det->data[4]  *det->data[11] *det->data[13] -
    det->data[8]  *det->data[5] *det->data[15] +
    det->data[8]  *det->data[7] *det->data[13] +
    det->data[12] *det->data[5] *det->data[11] -
-   det->data[12] *det->data[7] *det->data[9],
+   det->data[12] *det->data[7] *det->data[9];
 
-    // 9
-    -det->data[0]  *det->data[9] *det->data[15] +
+   temp[9] =
+   -det->data[0]  *det->data[9] *det->data[15] +
    det->data[0]  *det->data[11] *det->data[13] +
    det->data[8]  *det->data[1] *det->data[15] -
    det->data[8]  *det->data[3] *det->data[13] -
    det->data[12] *det->data[1] *det->data[11] +
-   det->data[12] *det->data[3] *det->data[9],
+   det->data[12] *det->data[3] *det->data[9];
 
-    // 10
+   temp[10] =
    det->data[0]  *det->data[5] *det->data[15] -
    det->data[0]  *det->data[7] *det->data[13] -
    det->data[4]  *det->data[1] *det->data[15] +
    det->data[4]  *det->data[3] *det->data[13] +
    det->data[12] *det->data[1] *det->data[7] -
-   det->data[12] *det->data[3] *det->data[5],
+   det->data[12] *det->data[3] *det->data[5];
 
-    // 11
-    -det->data[0] *det->data[5] *det->data[11] +
+   temp[11] =
+   -det->data[0] *det->data[5] *det->data[11] +
    det->data[0] *det->data[7] *det->data[9] +
    det->data[4] *det->data[1] *det->data[11] -
    det->data[4] *det->data[3] *det->data[9] -
    det->data[8] *det->data[1] *det->data[7] +
-   det->data[8] *det->data[3] *det->data[5],
+   det->data[8] *det->data[3] *det->data[5];
 
-    // 12
+    temp[12] =
     -det->data[4]  *det->data[9] *det->data[14] +
    det->data[4]  *det->data[10] *det->data[13] +
    det->data[8]  *det->data[5] *det->data[14] -
    det->data[8]  *det->data[6] *det->data[13] -
    det->data[12] *det->data[5] *det->data[10] +
-   det->data[12] *det->data[6] *det->data[9],
+   det->data[12] *det->data[6] *det->data[9];
 
-    // 13
+    temp[13] =
    det->data[0]  *det->data[9] *det->data[14] -
    det->data[0]  *det->data[10] *det->data[13] -
    det->data[8]  *det->data[1] *det->data[14] +
    det->data[8]  *det->data[2] *det->data[13] +
    det->data[12] *det->data[1] *det->data[10] -
-   det->data[12] *det->data[2] *det->data[9],
+   det->data[12] *det->data[2] *det->data[9];
 
-    // 14
+    temp[14] =
     -det->data[0]  *det->data[5] *det->data[14] +
    det->data[0]  *det->data[6] *det->data[13] +
    det->data[4]  *det->data[1] *det->data[14] -
    det->data[4]  *det->data[2] *det->data[13] -
    det->data[12] *det->data[1] *det->data[6] +
-   det->data[12] *det->data[2] *det->data[5],
+   det->data[12] *det->data[2] *det->data[5];
 
-    // 16
+    temp[15] =
    det->data[0] *det->data[5] *det->data[10] -
    det->data[0] *det->data[6] *det->data[9] -
    det->data[4] *det->data[1] *det->data[10] +
    det->data[4] *det->data[2] *det->data[9] +
    det->data[8] *det->data[1] *det->data[6] -
-   det->data[8] *det->data[2] *det->data[5]
-  };
+   det->data[8] *det->data[2] *det->data[5];
 
-  const float determinant = det->data[0] * temp[0] +det->data[1] * temp[4] +det->data[2] * temp[8] +det->data[3] * temp[12];
+  float determinant = det->data[0] * temp[0] +
+                      det->data[1] * temp[4] +
+                      det->data[2] * temp[8] +
+                      det->data[3] * temp[12];
 
   return determinant;
 }
@@ -1784,6 +1797,24 @@ roa_mat4_multiply_three(
 	roa_mat4 temp;
   roa_mat4_multiply(&temp, a, b);
 	roa_mat4_multiply(out, &temp, c);
+}
+
+
+int
+roa_mat4_is_near(
+  const roa_mat4 *a,
+  const roa_mat4 *b,
+  float err)
+{
+  int count = 0;
+
+  int i;
+  for (i = 0; i < 16; ++i)
+  {
+    count += roa_float_is_near(a->data[i], b->data[i], err);
+  }
+
+  return count == 16 ? 1 : 0;
 }
 
 

@@ -24,3 +24,13 @@ roa_rand_xorshift()
   return x;
 }
 
+
+float
+roa_rand_range_float(float start, float end)
+{
+  unsigned rand = roa_rand_xorshift();
+  unsigned rand_max = ((unsigned)-1);
+
+  return start + (float)rand / ((float)(rand_max / (end - start)));
+}
+

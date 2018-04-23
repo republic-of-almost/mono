@@ -1,0 +1,9 @@
+{
+  "name": "Camera",
+
+  "camera": {
+    "width": 1.0,
+    "height": 1.0,
+    "FOV": 0.7853981634
+  }
+}

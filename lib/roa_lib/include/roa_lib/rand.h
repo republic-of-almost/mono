@@ -15,6 +15,10 @@ unsigned
 roa_rand_xorshift();
 
 
+float
+roa_rand_range_float(float start, float end);
+
+
 #ifdef __cplusplus
 } /* extern */
 #endif

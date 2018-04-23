@@ -57,6 +57,16 @@ main()
     ROA_ASSERT(uni_wvp);
   }
 
+  /* rasterizer */
+  {
+    struct volt_rasterizer_desc raster_desc;
+    ROA_MEM_ZERO(raster_desc);
+    raster_desc.primitive = VOLT_PRIM_TRIANGLES;
+    raster_desc.depth_test = VOLT_TRUE;
+
+    volt_rasterizer_create(ctx, &rasterizer, &raster_desc);
+  }
+
   /* create sampler */
   {
     struct volt_sampler_desc samp_desc_1;
@@ -131,7 +141,7 @@ main()
 
     /* vbo */
     geom_vert_desc vert_desc[] = {
-      GEOM_VERT_POSITION, GEOM_NORMAL, GEOM_UV,
+      GEOM_VERT_POSITION3, GEOM_NORMAL, GEOM_UV,
     };
 
     float verts[1024];

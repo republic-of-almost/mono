@@ -2,7 +2,7 @@
 
 make = {} -- namespace
 
-os_target = "unkown"
+os_target = "unknown"
 
 if os.target ~= nil then
   os_target = os.target()
@@ -149,7 +149,7 @@ make.create_solution(solution_data, project_defaults, projects)
   local configs = {}
 
   for i, config in ipairs(code_configs) do
-    print(config.name)
+    --print(config.name)
     table.insert(configs, config.name)
   end
 
@@ -240,32 +240,39 @@ make.create_solution(solution_data, project_defaults, projects)
       return result_table
     end
 
+    function
+    find_table(proj, ident)
+      
+      local results = {};
 
+      local data = proj[ident];
 
-    -- Preprocessor
-    if proj.defines then defines(proj.defines); end
+      if data then
+        results = table.join(results, data)
+      end
 
-    local platform_defines = find_table_with_platform(proj, "defines")
-    if platform_defines then defines(platform_defines) end
+      local platform_data = proj[ident .. "_" .. os_target]
 
-    -- Src files
-    local _files = {};
-    table.insert(_files, proj.src_files)
-    table.insert(_files, find_table_with_platform(proj, "src_files"))
-    _files = table.flatten(_files)
+      if platform_data then
+        results = table.join(results, platform_data)
+      end
 
-    for i,v in ipairs(_files) do
-      _files[i] = proj.base_location .. "/" .. v
-      print("FILE: " .. proj.base_location .. "/" .. v)
+      return results;
+
     end
 
-    if _files then files(_files) end
+    -- Src files
+    local _files = find_table(proj, "src_files");
+
+    for i,v in ipairs(find_table(proj, "src_files")) do
+      _files[i] = proj.base_location .. "/" .. v
+      --print("FILE: " .. proj.base_location .. "/" .. v)
+    end
+
+    files(_files)
 
     -- Excludes
-    if proj.src_files_exclude then excludes(proj.src_files_exclude) end
-
-    local platform_exclude = find_table_with_platform(proj, "src_files_exclude")
-    if platform_exclude then excludes(platform_exclude) end
+    excludes(find_table(proj, "src_files_exclude"))
 
     -- include dirs (pub and private)
     local _inc_dirs = {};
@@ -284,26 +291,11 @@ make.create_solution(solution_data, project_defaults, projects)
       includedirs(_inc_dirs)
     end
 
-    -- Library directories
-    if proj.lib_dirs then libdirs(proj.lib_dirs) end
-
-    local platform_lib_dirs = find_table_with_platform(proj, "lib_dirs")
-    if platform_lib_dirs then libdirs(platform_lib_dirs) end
-
-    -- Link options
-    if proj.linkoptions then  linkoptions(proj.linkoptions) end
-
-    local platform_link_options = find_table_with_platform(proj, "linkoptions")
-    if platform_link_options then linkoptions(platform_link_options) end
-
-    -- Warnings
-    if proj.disable_warning then disablewarnings(proj.disable_warning) end
-
-    local platform_disable_warning = find_table_with_platform(proj, "disable_warning")
-    if platform_disable_warning then disablewarnings(platform_disable_warning) end
-
-    -- Links and Link dependencies
-    if proj.links then links(proj.links) end
+    defines(find_table(proj, "defines"))
+    libdirs(find_table(proj, "libdirs")) -- this might have a realitive path issue.
+    linkoptions(find_table(proj, "linkoptions"))
+    disablewarnings(find_table(proj, "disable_warning"))
+    links(find_table(proj, "links"))
 
     -- dependencies --
     -- Helper to allow us to recursivly get the dependencies --
@@ -321,7 +313,7 @@ make.create_solution(solution_data, project_defaults, projects)
         -- Loop through each of the dependencies
         for i, dep in ipairs(proj.project_dependencies) do
 
-          print(padding .. "  Dependency " .. dep)
+          --print(padding .. "  Dependency " .. dep)
 
           -- Loop through the projects we have been given.
           for j, other_proj in ipairs(projects) do
@@ -342,28 +334,9 @@ make.create_solution(solution_data, project_defaults, projects)
 
               if link and (orig_proj.kind ~= "StaticLib") then
 
-                -- Add this project as a dep
                 links(other_proj.name)
-
-                -- Add listed project deps
-                if other_proj.link_dependencies then
-                  links(other_proj.link_dependencies)
-                end
-
-                -- Find platform deps
-                local platform_dep_links = find_table_with_platform(other_proj, "link_dependencies")
-                if platform_dep_links then links(platform_dep_links) end
-
-                -- Add link option dependencies
-                if other_proj.linkoption_dependencies then
-                  linkoptions(other_proj.linkoption_dependencies)
-                end
-
-                -- Platform
-                local platform_dep_link_options = find_table_with_platform(other_proj, "linkoption_dependencies")
-                if platform_dep_link_options then
-                  linkoptions(platform_dep_link_options)
-                end
+                links(find_table(other_proj, "link_dependencies"))
+                linkoptions(find_table(other_proj, "linkoption_dependencies"));
 
               end
 
@@ -388,15 +361,11 @@ make.create_solution(solution_data, project_defaults, projects)
 
               -- We also need link dirs
               if proj.kind ~= "StaticLib" then
-                if other_proj.lib_dirs then libdirs(other_proj.lib_dirs) end
-                local platform_dep_lib_dirs = find_table_with_platform(other_proj, "lib_dirs")
-                if platform_dep_lib_dirs then libdirs(platform_dep_lib_dirs) end
+                libdirs(find_table(other_proj, "lib_dirs"))
               end
 
               -- Preprocessor
-              if other_proj.defines then defines(other_proj.defines) end
-              local platform_defines = find_table_with_platform(other_proj, "defines")
-              if platform_defines then defines(platform_defines) end
+              defines(find_table(other_proj, "defines"))
 
               -- dependencies
               get_dependencies(other_proj, orig_proj, padding .. "  ")
@@ -414,6 +383,7 @@ make.create_solution(solution_data, project_defaults, projects)
 
     -- Global build options --
     if proj.ignore_defaults ~= true then
+
       if project_defaults.buildoptions then buildoptions(project_defaults.buildoptions) end
 
       local plaform_project_default_buildopts = find_table_with_platform(project_defaults, "buildoptions")
