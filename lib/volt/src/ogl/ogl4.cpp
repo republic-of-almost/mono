@@ -1598,6 +1598,12 @@ volt_gl_create_vbo(const cmd_vbo_create *cmd)
   cmd->vbo->gl_id = vbo;
   cmd->vbo->element_count = cmd->desc.count;
 
+  /* name for debugging */
+  if(cmd->desc.name && strlen(cmd->desc.name) && glObjectLabel)
+  {
+    glObjectLabel(GL_BUFFER, cmd->vbo->gl_id, -1, cmd->desc.name);
+  }
+
   GL_ASSERT;
 }
 
@@ -1635,6 +1641,11 @@ volt_gl_create_ibo(const cmd_ibo_create *cmd)
   /* save vbo */
   cmd->ibo->gl_id = ibo;
   cmd->ibo->element_count = cmd->desc.count;
+
+  if(cmd->desc.name && strlen(cmd->desc.name) && glObjectLabel)
+  {
+    glObjectLabel(GL_BUFFER, cmd->ibo->gl_id, -1, cmd->desc.name);
+  }
 
   GL_ASSERT;
 }
@@ -1797,7 +1808,7 @@ volt_gl_create_program(const cmd_program_create *cmd)
   }
 
   /* add debug name */
-  if(cmd->desc.name && strlen(cmd->desc.name))
+  if(cmd->desc.name && strlen(cmd->desc.name) && glObjectLabel)
   {
     glObjectLabel(GL_PROGRAM, cmd->program->gl_id, -1, cmd->desc.name);
   }
@@ -1861,7 +1872,7 @@ volt_gl_create_texture(const cmd_texture_create *cmd)
   }
 
   /* set a debug name if one provided */
-  if(cmd->desc.name)
+  if(cmd->desc.name && strlen(cmd->desc.name) && glObjectLabel)
   {
     glObjectLabel(GL_TEXTURE, texture, -1, cmd->desc.name);
   }
@@ -1984,6 +1995,12 @@ volt_gl_create_framebuffer(const cmd_fbo_create *cmd)
   ROA_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 
   cmd->framebuffer->gl_id = frame_buffer;
+
+  /* name resource */
+  if(cmd->desc.name && strlen(cmd->desc.name) && glObjectLabel)
+  {
+    glObjectLabel(GL_FRAMEBUFFER, cmd->framebuffer->gl_id, -1, cmd->desc.name);
+  }
 
   GL_ASSERT;
 }
@@ -2359,6 +2376,11 @@ volt_ctx_create(volt_ctx_t *ctx)
 
   glGenVertexArrays(1, &new_ctx->vao);
   glBindVertexArray(new_ctx->vao);
+
+  if(glObjectLabel)
+  {
+    glObjectLabel(GL_VERTEX_ARRAY, new_ctx->vao, -1, "VAO:Global");
+  }
 
   const GLubyte *version  = glGetString(GL_VERSION);
   const GLubyte *vendor   = glGetString(GL_VENDOR);

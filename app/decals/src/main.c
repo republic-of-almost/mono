@@ -213,8 +213,8 @@ main(int argc, char **argv)
 
       struct volt_vbo_desc vbo_desc;
       ROA_MEM_ZERO(vbo_desc);
-
-      vbo_desc.data = data;
+			vbo_desc.name  = "Cube";
+      vbo_desc.data  = data;
       vbo_desc.count = vert_count;
 
       volt_vertex_buffer_create(volt_ctx, &scene.object_vbo, &vbo_desc);
@@ -251,7 +251,8 @@ main(int argc, char **argv)
 
       struct volt_vbo_desc vbo_desc;
       ROA_MEM_ZERO(vbo_desc);
-      vbo_desc.data = data;
+			vbo_desc.name  = "DecalBox";
+      vbo_desc.data  = data;
       vbo_desc.count = vert_count;
 
       volt_vertex_buffer_create(volt_ctx, &scene.decal_vbo, &vbo_desc);
@@ -363,6 +364,7 @@ main(int argc, char **argv)
 
       struct volt_vbo_desc vbo_desc;
       ROA_MEM_ZERO(vbo_desc);
+			vbo_desc.name  = "FullscreenTriangle:XYZST";
       vbo_desc.data  = ROA_ARR_DATA(verts);
       vbo_desc.count = ROA_ARR_COUNT(verts);
 
@@ -606,7 +608,7 @@ main(int argc, char **argv)
 
       struct volt_vbo_desc vbo_desc;
       ROA_MEM_ZERO(vbo_desc);
-
+			vbo_desc.name   = "FullscreenTriangle:XYST";
       vbo_desc.data   = ROA_ARR_DATA(verts);
       vbo_desc.count  = ROA_ARR_COUNT(verts);
 
@@ -864,7 +866,7 @@ main(int argc, char **argv)
     {
       struct volt_framebuffer_desc fbo_desc;
       ROA_MEM_ZERO(fbo_desc);
-
+			fbo_desc.name             = "FBO:GBuffer";
       fbo_desc.attachments      = g_buffer.fbo_color_outputs;
       fbo_desc.attachment_count = ROA_ARR_COUNT(g_buffer.fbo_color_outputs);
       fbo_desc.depth            = g_buffer.fbo_depth;

@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 
- /* ----------------------------------------------------------- [ types ] -- */
+/* ------------------------------------------------------------- [ types ] -- */
 
 
 #define VOLT_NULL 0
@@ -132,7 +132,7 @@ typedef enum _volt_resource_status {
 } volt_resource_status;
 
 
-/* --------------------------------------------------------- [ lifetime ] -- */
+/* ---------------------------------------------------------- [ lifetime ] -- */
 /*
   Lifetime of the context and application, provide an error callback for error
   handling information.
@@ -171,7 +171,7 @@ volt_ctx_logging_callback(
   volt_log_callback_fn callback);
 
 
-/* ----------------------------------------------------- [ rsrc texture ] -- */
+/* ------------------------------------------------------ [ rsrc texture ] -- */
 /*
   Texture
   --
@@ -214,7 +214,7 @@ volt_texture_get_desc(
   struct volt_texture_desc *  out_desc);
 
 
-/* ------------------------------------------------- [ rsrc framebuffer ] -- */
+/* -------------------------------------------------- [ rsrc framebuffer ] -- */
 /*
   FBO
   --
@@ -225,6 +225,7 @@ volt_texture_get_desc(
 
 struct volt_framebuffer_desc
 {
+  const char *        name;
   volt_texture_t *    attachments;
   unsigned            attachment_count;
   volt_texture_t      depth;
@@ -244,7 +245,7 @@ volt_framebuffer_status(
   volt_framebuffer_t              fbo);
 
 
-/* ------------------------------------------------------- [ rsrc input ] -- */
+/* -------------------------------------------------------- [ rsrc input ] -- */
 /*
   Input
   --
@@ -272,7 +273,7 @@ volt_input_status(
   volt_input_t              input);
 
 
-/* --------------------------------------------------------- [ rsrc vbo ] -- */
+/* ---------------------------------------------------------- [ rsrc vbo ] -- */
 /*
   VBO
   --
@@ -282,8 +283,9 @@ volt_input_status(
 
 struct volt_vbo_desc
 {
-  float *   data;
-  unsigned  count;
+  const char *  name;
+  float *       data;
+  unsigned      count;
 };
 
 
@@ -300,7 +302,7 @@ volt_vertex_buffer_status(
   volt_vbo_t              vbo);
 
 
-/* --------------------------------------------------------- [ rsrc ibo ] -- */
+/* ---------------------------------------------------------- [ rsrc ibo ] -- */
 /*
   IBO
   --
@@ -310,6 +312,7 @@ volt_vertex_buffer_status(
 
 struct volt_ibo_desc
 {
+  const char *      name;
   unsigned int *    data;
   unsigned          count;
 };
@@ -328,7 +331,7 @@ volt_index_buffer_status(
   volt_ibo_t              ibo);
 
 
-/* ----------------------------------------------------- [ rsrc program ] -- */
+/* ------------------------------------------------------ [ rsrc program ] -- */
 /*
   Program
   --
@@ -358,7 +361,7 @@ volt_program_buffer_status(
   volt_program_t              program);
 
 
-/* ----------------------------------------------------- [ rsrc uniform ] -- */
+/* ------------------------------------------------------ [ rsrc uniform ] -- */
 /*
   Uniform
   --
@@ -389,7 +392,7 @@ volt_uniform_update(
   void *                        data);
 
 
-/* ----------------------------------------------------- [ rsrc sampler ] -- */
+/* ------------------------------------------------------ [ rsrc sampler ] -- */
 /*
   Sampler
   --
@@ -412,7 +415,7 @@ volt_sampler_create(
 
 
 
-/* -------------------------------------------------- [ rsrc rasterizer ] -- */
+/* --------------------------------------------------- [ rsrc rasterizer ] -- */
 /*
   Rasterizer
   --
@@ -439,7 +442,7 @@ volt_rasterizer_create(
   struct volt_rasterizer_desc * desc);        /* rasterizer desc */
 
 
-/* ------------------------------------------------------- [ renderpass ] -- */
+/* -------------------------------------------------------- [ renderpass ] -- */
 /*
   Renderpass
   --
