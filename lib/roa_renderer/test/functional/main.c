@@ -71,12 +71,12 @@ main()
 
       for(i = 0; i < renderable_count; ++i)
       {
-        struct roa_renderer_renderable renderable;
+        struct roa_renderer_mesh_renderable renderable;
         ROA_MEM_ZERO(renderable);
 
         uint32_t obj_id = ++object_id_counter;
 
-        roa_renderer_renderable_set(renderer_ctx, &renderable, obj_id);
+        roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
       }
     }
   }
@@ -90,6 +90,7 @@ main()
     /* set camera */
     {
       struct roa_renderer_camera camera;
+      ROA_MEM_ZERO(camera);
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
 
 			float radius = 10.f;
@@ -121,8 +122,9 @@ main()
       {
         uint32_t obj_id = i + 1;
 
-        struct roa_renderer_renderable renderable;
-        roa_renderer_renderable_get(renderer_ctx, &renderable, obj_id);
+        struct roa_renderer_mesh_renderable renderable;
+        ROA_MEM_ZERO(renderable);
+        roa_renderer_mesh_renderable_get(renderer_ctx, &renderable, obj_id);
 
         float x = roa_float_sin(((float)i * increment)) * radius;
         float y = 1.8f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
@@ -133,12 +135,9 @@ main()
         transform.rotation = roa_quaternion_default();
         transform.scale = roa_float3_set_with_values(1, y, 1);
 
-        roa_mat4 world;
-        roa_transform_to_mat4(&transform, &world);
+        roa_transform_export_mat4(&transform, renderable.world_transform);
 
-        ROA_MEM_CPY(renderable.world_transform, world.data);
-
-        roa_renderer_renderable_set(renderer_ctx, &renderable, obj_id);
+        roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
       }
     }
 

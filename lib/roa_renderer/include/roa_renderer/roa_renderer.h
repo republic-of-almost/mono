@@ -40,22 +40,22 @@ roa_renderer_ctx_create(
 
 void
 roa_renderer_ctx_execute(
-	roa_renderer_ctx_t ctx);
+  roa_renderer_ctx_t ctx);
 
 
 void
 roa_renderer_ctx_destroy(
-	roa_renderer_ctx_t *ctx);
+  roa_renderer_ctx_t *ctx);
 
 
 void
 roa_renderer_ctx_lock(
-	roa_renderer_ctx_t ctx);
+  roa_renderer_ctx_t ctx);
 
 
 void
 roa_renderer_ctx_unlock(
-	roa_renderer_ctx_t ctx);
+  roa_renderer_ctx_t ctx);
 
 
 /* ---------------------------------------------------------- [ Settings ] -- */
@@ -72,14 +72,14 @@ roa_renderer_set_device_resolution(
 
 struct roa_renderer_camera
 {
-	float near_plane;
-	float far_plane;
+  float near_plane;
+  float far_plane;
 
-	float field_of_view;
+  float field_of_view;
 
-	float position[3];
-	float lookat[3];
-	float up[3];
+  float position[3];
+  float lookat[3];
+  float up[3];
 };
 
 
@@ -99,8 +99,8 @@ roa_renderer_camera_get(
 
 ROA_BOOL
 roa_renderer_camera_clear(
-	roa_renderer_ctx_t ctx,
-	uint32_t camera_id);
+  roa_renderer_ctx_t ctx,
+  uint32_t camera_id);
 
 
 unsigned
@@ -119,18 +119,18 @@ roa_renderer_camera_exists(
 
 struct roa_renderer_mesh_renderable
 {
-	float world_transform[16];
+  float world_transform[16];
 
-	uint64_t mesh_id;
+  uint64_t mesh_id;
   uint64_t material_id;
 };
 
 
 ROA_BOOL
 roa_renderer_mesh_renderable_set(
-	roa_renderer_ctx_t ctx,
-	struct roa_renderer_mesh_renderable *renderable,
-	uint32_t renderable_id);
+  roa_renderer_ctx_t ctx,
+  struct roa_renderer_mesh_renderable *renderable,
+  uint32_t renderable_id);
 
 
 ROA_BOOL
@@ -142,8 +142,8 @@ roa_renderer_mesh_renderable_get(
 
 ROA_BOOL
 roa_renderer_mesh_renderable_clear(
-	roa_renderer_ctx_t ctx,
-	uint32_t renderable_id);
+  roa_renderer_ctx_t ctx,
+  uint32_t renderable_id);
 
 
 unsigned
@@ -162,20 +162,20 @@ roa_renderer_mesh_renderable_exists(
 
 struct roa_renderer_mesh_resource
 {
-	const char *name;
+  const char *name;
 
-	float *vert_vec3_array;
-	float *normal_vec3_array;
-	float *texture_coord_vec2_array;
+  float *vert_vec3_array;
+  float *normal_vec3_array;
+  float *texture_coord_vec2_array;
 
-	unsigned vert_count;
+  unsigned vert_count;
 };
 
 
 uint64_t
 roa_renderer_mesh_resource_add(
-	roa_renderer_ctx_t ctx,
-	const struct roa_renderer_mesh_resource *rsrc);
+  roa_renderer_ctx_t ctx,
+  const struct roa_renderer_mesh_resource *rsrc);
 
 
 /* -------------------------------------------------------------- [ Task ] -- */
@@ -190,7 +190,7 @@ struct roa_renderer_task
 
 unsigned
 roa_renderer_task_pump(
-	roa_renderer_ctx_t ctx,
+  roa_renderer_ctx_t ctx,
   struct roa_renderer_task **tasks);
 
 

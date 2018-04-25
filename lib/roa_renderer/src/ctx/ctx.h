@@ -4,19 +4,23 @@
 
 #include <roa_lib/fundamental.h>
 #include <roa_renderer/roa_renderer.h>
-#include <volt/volt.h>
 #include <roa_lib/atomic.h>
 
 
-struct mesh_rendering_data
+struct mesh_draw_call
 {
-  int i;
+  float world[16];
+  float world_view_projection[16];
 };
 
 
-struct mesh_camera_data
+struct mesh_renderpass
 {
-  int i;
+  float projection[16];
+  float view[16];
+  float camera_pos[3];
+
+  struct mesh_draw_call *draw_calls;
 };
 
 
@@ -43,7 +47,7 @@ struct roa_mesh_rsrc
 
 struct roa_device_settings
 {
-  unsigned device_viewport[2];
+  float device_viewport[2];
 };
 
 
@@ -60,30 +64,8 @@ struct roa_renderer_ctx
 	/* array */ struct roa_renderer_mesh_renderable *renderable;
 
 	struct roa_mesh_rsrc mesh_rsrc;
-
-	/* job data */
-  
-  /* array */ struct mesh_rendering_data *mesh_rendering_data;
-  /* array */ struct mesh_camera_data *mesh_camera_data;
-
-  /* array */ struct roa_renderer_task *tasks;
-
-	/* low level renderer */
-  volt_ctx_t volt_ctx;
-
-	/* test stuff */
-	volt_uniform_t world_data;
-	volt_uniform_t proj_data;
-	volt_uniform_t view_data;
-	volt_texture_t texture_1;
-	volt_texture_t texture_2;
-	volt_rasterizer_t rasterizer;
-	volt_input_t input_format;
-	volt_vbo_t vbo;
-	volt_ibo_t ibo;
-	volt_program_t program;
-	
-	ROA_BOOL render;
+    
+  /* array */ struct mesh_renderpass *mesh_renderpasses;
 
   /* settings */
   struct roa_device_settings settings;

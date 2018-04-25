@@ -2,20 +2,23 @@
 #define PLATFORM_INCLUDED_
 
 
-void
-platform_setup();
+#include <ctx/ctx.h>
 
 
 void
-platform_update();
+platform_setup(roa_renderer_ctx_t ctx);
 
 
 void
-platform_render();
+platform_update(roa_renderer_ctx_t ctx);
 
 
 void
-platform_destroy();
+platform_render(roa_renderer_ctx_t ctx);
+
+
+void
+platform_destroy(roa_renderer_ctx_t ctx);
 
 
 #endif /* inc guard */

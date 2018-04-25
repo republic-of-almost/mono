@@ -5,7 +5,7 @@
 	"location": "./",
 
 	"src_files" : [
-		"../data/**.json",
+		"../data/roa_renderer.json",
 		"../include/**.h",
 		"../src/**.h",
 		"../src/**.c",
@@ -23,7 +23,9 @@
 	"project_dependencies" : [
 		"STB",
 		"RepublicMath",
-		"RepublicLib"
+    "RepublicLib",
+    "Scratch",
+    "OpenGL"
 	]
 
 }

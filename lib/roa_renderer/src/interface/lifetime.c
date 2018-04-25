@@ -5,7 +5,6 @@
 #include <roa_lib/array.h>
 #include <roa_lib/log.h>
 #include <roa_lib/atomic.h>
-#include <volt/utils/prim_model.h>
 #include <graphics_api/platform.h>
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
@@ -45,13 +44,11 @@ roa_renderer_ctx_create(
 
   unsigned count = 1 << 10;
 
-  roa_array_create_with_capacity(new_ctx->mesh_camera_data, count);
-  roa_array_create_with_capacity(new_ctx->mesh_rendering_data, count);
+  roa_array_create_with_capacity(new_ctx->mesh_renderpasses, count);
 	roa_array_create_with_capacity(new_ctx->camera_id, count);
 	roa_array_create_with_capacity(new_ctx->camera, count);
 	roa_array_create_with_capacity(new_ctx->renderable_id, count);
 	roa_array_create_with_capacity(new_ctx->renderable, count);
-  roa_array_create_with_capacity(new_ctx->tasks, count);
 
 	/* mesh rsrc */
 	roa_array_create_with_capacity(new_ctx->mesh_rsrc.rsrc, count);
@@ -65,7 +62,7 @@ roa_renderer_ctx_create(
 
   *ctx = new_ctx;
 
-	platform_setup();
+	platform_setup(ctx);
 
 	return new_ctx ? ROA_TRUE : ROA_FALSE;
 }
@@ -78,10 +75,8 @@ roa_renderer_ctx_execute(
 	/* param check */
 	ROA_ASSERT(ctx);
 
-	ctx->render = ROA_FALSE;
-
-	platform_update();
-	platform_render();
+	platform_update(ctx);
+	platform_render(ctx);
 }
 
 
@@ -93,20 +88,16 @@ roa_renderer_ctx_destroy(
 	ROA_ASSERT(ctx);
 	ROA_ASSERT(*ctx);
 
-	platform_destroy();
+	platform_destroy(ctx);
 
 	struct roa_renderer_ctx *kill_ctx = *ctx;
 
-  roa_array_destroy(kill_ctx->mesh_camera_data);
-  roa_array_destroy(kill_ctx->mesh_rendering_data);
-  roa_array_destroy(kill_ctx->tasks);
+  roa_array_destroy(kill_ctx->mesh_renderpasses);
 	roa_array_destroy(kill_ctx->renderable);
 	roa_array_destroy(kill_ctx->renderable_id);
 	roa_array_destroy(kill_ctx->camera);
 	roa_array_destroy(kill_ctx->camera_id);
-
-  volt_ctx_destroy(&kill_ctx->volt_ctx);
-
+  
   roa_renderer_free free_fn = kill_ctx->mem.free;
 
   free_fn(kill_ctx);
