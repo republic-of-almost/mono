@@ -180,6 +180,7 @@ void            roa_transform_init(roa_transform *out);
 void            roa_transform_inherited(roa_transform *out, const roa_transform *parent, const roa_transform *local);
 
 void            roa_transform_to_mat4(const roa_transform *trans, roa_mat4 *out);
+void            roa_transform_export_mat4(const roa_transform *trans, float *out);
 
 roa_float3      roa_transform_world_fwd();
 roa_float3      roa_transform_local_fwd(const roa_transform *trans);

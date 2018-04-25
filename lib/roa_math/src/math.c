@@ -969,6 +969,18 @@ roa_transform_to_mat4(
 }
 
 
+void
+roa_transform_export_mat4(
+  const roa_transform *trans,
+  float *out)
+{
+  roa_mat4 to_export;
+  roa_transform_to_mat4(trans, &to_export);
+
+  roa_mat4_export(&to_export, out);
+}
+
+
 roa_float3
 roa_transform_world_fwd()
 {
