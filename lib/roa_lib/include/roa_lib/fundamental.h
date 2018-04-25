@@ -49,6 +49,13 @@ typedef int ROA_BOOL;
 #define ROA_IS_ENABLED(expr) ((expr) != 0)
 
 
+/* --------------------------------------------------------- [ min / max ] -- */
+
+
+#define ROA_MIN(a, b) (a < b ? a : b)
+#define ROA_MAX(a, b) (a > b ? a : b)
+
+
 /* ------------------------------------------------------- [ conversions ] -- */
 
 

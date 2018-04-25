@@ -105,4 +105,10 @@ TEST_CASE("Fundamental")
       REQUIRE(src[i] == 0);
     }
   }
+
+  SECTION("Min/Max")
+  {
+    REQUIRE(ROA_MIN(-1,2) == -1);
+    REQUIRE(ROA_MAX(-1,2) == 2);
+  }
 }
