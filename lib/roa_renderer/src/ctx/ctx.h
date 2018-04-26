@@ -6,6 +6,15 @@
 #include <roa_renderer/roa_renderer.h>
 #include <roa_lib/atomic.h>
 
+#include <GL/gl3w.h>
+
+struct graphics_api
+{
+  GLuint mesh_program;
+  GLuint vbo;
+  GLuint vao;
+};
+
 
 struct mesh_draw_call
 {
@@ -64,11 +73,13 @@ struct roa_renderer_ctx
 	/* array */ struct roa_renderer_mesh_renderable *renderable;
 
 	struct roa_mesh_rsrc mesh_rsrc;
-    
+
   /* array */ struct mesh_renderpass *mesh_renderpasses;
 
   /* settings */
   struct roa_device_settings settings;
+
+  struct graphics_api gfx_api;
 };
 
 

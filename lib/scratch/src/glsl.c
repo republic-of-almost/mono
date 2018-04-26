@@ -50,6 +50,51 @@ glsl_two_textures_fs()
 }
 
 
+/* -------------------------------------------------------- [ Fullbright ] -- */
+
+
+const char*
+glsl_fullbright_vs()
+{
+  static const char *vert_src = ""
+    "#version 400 core\n"
+
+    "layout(location=0) in vec3 vs_in_position;\n"
+
+    "uniform mat4 uni_wvp_mat;\n"
+
+    "out vec2 fs_in_texcoord;\n"
+
+    "void main() {\n"
+    "  fs_in_texcoord = vs_in_texcoord;\n"
+    "  gl_Position = uni_wvp_mat * vec4(vs_in_position, 1.0);\n"
+    "}\n";
+
+  return vert_src;
+}
+
+
+const char*
+glsl_fullbright_fs()
+{
+  const char* frag_src = ""
+    "#version 400 core\n"
+
+    "in vec2 fs_in_texcoord;\n"
+
+    "uniform sampler2D samp_diffuse_01;\n"
+
+    "out vec4 fs_out_fragcolor;\n"
+
+    "void main() {\n"
+    /*"  fs_out_fragcolor = texture(samp_diffuse_01, fs_in_texcoord);"*/
+    "  fs_out_fragcolor = vec4(1,0,0,1);\n"
+    "}\n";
+
+  return frag_src;
+}
+
+
 /* -------------------------------------------------------- [ Fullscreen ] -- */
 
 

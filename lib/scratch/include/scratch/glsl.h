@@ -38,6 +38,18 @@ const char*
 glsl_two_textures_fs();
 
 
+/* -------------------------------------------------------- [ Fullbright ] -- */
+
+
+const char*
+glsl_fullbright_vs();
+
+
+const char*
+glsl_fullbright_fs();
+
+
+
 /* -------------------------------------------------------- [ Fullscreen ] -- */
 /*
   Program is ment for rendering a texture to a quad / fullscreen triangle etc.
