@@ -23,12 +23,29 @@ platform_setup(roa_renderer_ctx_t ctx)
   /* mesh program */
   {
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const char *vertexSource = glsl_fullbright_vs();
+    const GLchar *vertexSource = glsl_fullbright_vs();
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
 
+    /* check for errors */
+    GLint status = 0;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+
+    if (status == GL_FALSE)
+    {
+      GLchar error[1024];
+      GLsizei length = 0;
+      glGetShaderInfoLog(
+        vertexShader,
+        ROA_ARR_COUNT(error),
+        &length,
+        ROA_ARR_DATA(error));
+
+      int i = 0;
+    }
+
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const char *fragmentSource = glsl_fullbright_fs();
+    const GLchar *fragmentSource = glsl_fullbright_fs();
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     glCompileShader(fragmentShader);
 

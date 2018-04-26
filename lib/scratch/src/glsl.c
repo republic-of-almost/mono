@@ -60,6 +60,7 @@ glsl_fullbright_vs()
     "#version 400 core\n"
 
     "layout(location=0) in vec3 vs_in_position;\n"
+    "layout(location=2) in vec2 vs_in_texcoord;\n"
 
     "uniform mat4 uni_wvp_mat;\n"
 
@@ -87,7 +88,7 @@ glsl_fullbright_fs()
     "out vec4 fs_out_fragcolor;\n"
 
     "void main() {\n"
-    /*"  fs_out_fragcolor = texture(samp_diffuse_01, fs_in_texcoord);"*/
+    "  fs_out_fragcolor = texture(samp_diffuse_01, fs_in_texcoord);"
     "  fs_out_fragcolor = vec4(1,0,0,1);\n"
     "}\n";
 

@@ -26,8 +26,8 @@ roa_renderer_task_pump(
     /* look at */
     roa_mat4 view;
     {
-      roa_float3 at = roa_float3_import(cam->lookat);
-      roa_float3 up = roa_float3_import(cam->up);
+      roa_float3 at  = roa_float3_import(cam->lookat);
+      roa_float3 up  = roa_float3_import(cam->up);
       roa_float3 pos = roa_float3_import(cam->position);
 
       roa_mat4_lookat(&view, pos, at, up);
@@ -39,7 +39,7 @@ roa_renderer_task_pump(
     /* projection */
     roa_mat4 proj;
     {
-      float width = ctx->settings.device_viewport[0];
+      float width  = ctx->settings.device_viewport[0];
       float height = ctx->settings.device_viewport[1];
       float aspect = width / height;
 
@@ -61,6 +61,7 @@ roa_renderer_task_pump(
       unsigned mesh_count = roa_array_size(ctx->renderable);
       unsigned j;
 
+      pass->draw_calls = ROA_NULL;
       roa_array_create_with_capacity(pass->draw_calls, mesh_count);
       roa_array_resize(pass->draw_calls, mesh_count);
 
@@ -76,7 +77,7 @@ roa_renderer_task_pump(
         roa_mat4_multiply(&world_view_proj, &world, &view_proj);
 
         roa_mat4_export(&world, dc->world);
-        roa_mat4_export(&world, dc->world_view_projection);
+        roa_mat4_export(&world_view_proj, dc->world_view_projection);
       }
     }
   }

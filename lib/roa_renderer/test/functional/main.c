@@ -87,13 +87,21 @@ main()
     static float time = 0.f;
     time += 0.1f;
 
+    /* set resolution */
+    {
+      struct roa_ctx_window_desc win_desc;
+      roa_ctx_get_window_desc(hw_ctx, &win_desc);
+
+      roa_renderer_set_device_resolution(renderer_ctx, win_desc.width, win_desc.height);
+    }
+
     /* set camera */
     {
       struct roa_renderer_camera camera;
       ROA_MEM_ZERO(camera);
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
 
-			float radius = 10.f;
+			float radius = 20.f;
 			float spin_time = time * 0.025f;
 
       float x = roa_float_sin(spin_time) * radius;
@@ -101,8 +109,8 @@ main()
       float z = roa_float_cos(spin_time) * radius;
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
-      roa_float3 at = roa_float3_fill_with_value(0.f);
-      roa_float3 up = roa_float3_set_with_values(0.f, 1.f, 0.f);
+      roa_float3 at   = roa_float3_fill_with_value(0.f);
+      roa_float3 up   = roa_float3_set_with_values(0.f, 1.f, 0.f);
 
 			roa_float3_export(from, camera.position);
 			roa_float3_export(at, camera.lookat);
@@ -114,7 +122,7 @@ main()
     /* set renderables */
     {
       float increment = ROA_TAU / (float)renderable_count;
-      float radius = 5.f;
+      float radius = 9.f;
 
       unsigned i;
 
@@ -131,7 +139,7 @@ main()
         float z = roa_float_cos(((float)i * increment)) * radius;
 
         roa_transform transform;
-        transform.position = roa_float3_set_with_values(x, y * 0.5f, z);
+        transform.position = roa_float3_set_with_values(x, y, z);
         transform.rotation = roa_quaternion_default();
         transform.scale = roa_float3_set_with_values(1, y, 1);
 

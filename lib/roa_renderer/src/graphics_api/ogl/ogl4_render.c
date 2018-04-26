@@ -9,6 +9,11 @@ platform_render(roa_renderer_ctx_t ctx)
   glClearColor(1,1,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  GLsizei vp_width  = ctx->settings.device_viewport[0];
+  GLsizei vp_height = ctx->settings.device_viewport[1];
+
+  glViewport(0, 0, vp_width, vp_height);
+
   glBindVertexArray(ctx->gfx_api.vao);
 
   unsigned count = roa_array_size(ctx->mesh_renderpasses);
@@ -19,11 +24,12 @@ platform_render(roa_renderer_ctx_t ctx)
     struct mesh_renderpass *rp = &ctx->mesh_renderpasses[i];
 
     glUseProgram(ctx->gfx_api.mesh_program);
-    glBindBuffer(GL_ARRAY_BUFFER, ctx->gfx_api.vbo);
 
     GLint posAttrib = glGetAttribLocation(ctx->gfx_api.mesh_program, "vs_in_position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ctx->gfx_api.vbo);
 
     unsigned draw_call = roa_array_size(rp->draw_calls);
 

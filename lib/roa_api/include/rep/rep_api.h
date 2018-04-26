@@ -35,6 +35,7 @@ struct rep_app_desc
   int height;
 
   rep_task frame_job;
+  void *frame_arg;
 };
 
 

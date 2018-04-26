@@ -60,9 +60,9 @@ roa_renderer_ctx_create(
   new_ctx->settings.device_viewport[0] = 800;
   new_ctx->settings.device_viewport[1] = 480;
 
-  *ctx = new_ctx;
+  platform_setup(new_ctx);
 
-	platform_setup(ctx);
+  *ctx = new_ctx;
 
 	return new_ctx ? ROA_TRUE : ROA_FALSE;
 }

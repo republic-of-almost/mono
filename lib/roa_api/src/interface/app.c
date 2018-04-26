@@ -11,6 +11,7 @@
 
 
 rep_task application_frame_func = ROA_NULL;
+void *application_frame_arg = ROA_NULL;
 
 
 ROA_JOB(rep_game_loop_tick, rep_task)
@@ -21,7 +22,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
   {
     /* user task */
     {
-      arg(0); /* test */
+      application_frame_func(application_frame_arg);
 
       roa_tagged_allocator_free(rep_config_tagged_hash_logic());
     }
@@ -54,8 +55,8 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* submit next frame */
     {
       struct roa_job_desc tick_desc;
-      tick_desc.arg				  	= application_frame_func;
-      tick_desc.func				  = rep_game_loop_tick;
+      tick_desc.func          = rep_game_loop_tick;
+      tick_desc.arg           = ROA_NULL;
       tick_desc.thread_locked = ROA_TRUE;
 
       roa_job_submit(rep_data_dispatcher(), &tick_desc, 1);
@@ -138,6 +139,7 @@ rep_app_set(
 
     /* global application function */
     application_frame_func = desc->frame_job;
+    application_frame_arg = desc->frame_arg;
   }
 }
 
