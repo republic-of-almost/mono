@@ -84,12 +84,12 @@ glsl_fullbright_fs()
     "in vec2 fs_in_texcoord;\n"
 
     "uniform sampler2D samp_diffuse_01;\n"
+    "uniform vec4 uni_color;\n"
 
     "out vec4 fs_out_fragcolor;\n"
 
     "void main() {\n"
-    "  fs_out_fragcolor = texture(samp_diffuse_01, fs_in_texcoord);"
-    "  fs_out_fragcolor = vec4(1,0,0,1);\n"
+    "  fs_out_fragcolor = mix(texture(samp_diffuse_01, fs_in_texcoord), uni_color, uni_color.a);\n"
     "}\n";
 
   return frag_src;

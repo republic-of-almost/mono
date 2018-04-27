@@ -121,6 +121,8 @@ struct roa_renderer_mesh_renderable
 {
   float world_transform[16];
 
+  uint32_t color;
+
   uint64_t mesh_id;
   uint64_t material_id;
 };

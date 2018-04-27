@@ -38,6 +38,11 @@ platform_render(roa_renderer_ctx_t ctx)
       GLint uni_wvp = glGetUniformLocation(ctx->gfx_api.mesh_program, "uni_wvp_mat");
       glUniformMatrix4fv(uni_wvp, 1, GL_FALSE, rp->draw_calls[j].world_view_projection);
 
+      float color[] = {1,0,1,1};
+
+      GLint u_color = glGetUniformLocation(ctx->gfx_api.mesh_program, "uni_color");
+      glUniform4fv(u_color, 1, color);
+
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
