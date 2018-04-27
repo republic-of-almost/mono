@@ -12,6 +12,11 @@ roa_renderer_task_pump(
   struct roa_renderer_task **tasks)
 {
   unsigned cam_count = roa_array_size(ctx->camera_id);
+
+  if (!cam_count)
+  {
+    return;
+  }
   
   roa_array_resize(ctx->mesh_renderpasses, cam_count);
 
