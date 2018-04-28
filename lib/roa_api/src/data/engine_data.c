@@ -3,8 +3,8 @@
 #include <roa_lib/alloc.h>
 #include <roa_graph/roa_graph.h>
 #include <data/config.h>
-#include <volt/volt.h>
 #include <roa_renderer/roa_renderer.h>
+#include <rep/rep_api.h>
 
 
 roa_ctx_t roa_ctx_data;
@@ -14,9 +14,9 @@ struct roa_tagged_allocator dispatcher_allocator;
 
 roa_graph_ctx_t roa_graph_ctx_data;
 
-volt_ctx_t volt_ctx_data;
-
 roa_renderer_ctx_t roa_renderer_ctx_data;
+
+struct rep_input_desc rep_input_data;
 
 void
 rep_data_init()
@@ -32,14 +32,30 @@ rep_data_init()
   ROA_MEM_ZERO(dispatcher_allocator);
   roa_tagged_allocator_create(&dispatcher_allocator, rep_config_tagged_hash_logic());
 
-  ROA_MEM_ZERO(volt_ctx_data);
-  volt_ctx_create(&volt_ctx_data);
-
+  /* graph */
 	ROA_MEM_ZERO(roa_graph_ctx_data);
 	roa_graph_ctx_create(&roa_graph_ctx_data);
 
+  /* renderer */
   ROA_MEM_ZERO(roa_renderer_ctx_data);
   roa_renderer_ctx_create(&roa_renderer_ctx_data, ROA_NULL);
+
+  /* input */
+  ROA_MEM_ZERO(rep_input_data);
+  rep_input_data.kb = roa_zalloc(sizeof(struct rep_keyboard_desc));
+  rep_input_data.kb_count = 1;
+  rep_input_data.kb[0].keys = roa_zalloc(sizeof(rep_keystate) * REP_KB_COUNT);
+
+  rep_input_data.ms = roa_zalloc(sizeof(struct rep_mouse_desc));
+  rep_input_data.ms_count = 1;
+  rep_input_data.ms[0].ms_buttons = roa_zalloc(sizeof(rep_keystate) * REP_MS_COUNT);
+
+  rep_input_data.gp = roa_zalloc(sizeof(struct rep_keyboard_desc) * 4);
+  rep_input_data.gp_count = 4;
+  rep_input_data.gp[0].gp_buttons = roa_zalloc(sizeof(rep_keystate) * REP_GP_COUNT);
+  rep_input_data.gp[1].gp_buttons = roa_zalloc(sizeof(rep_keystate) * REP_GP_COUNT);
+  rep_input_data.gp[2].gp_buttons = roa_zalloc(sizeof(rep_keystate) * REP_GP_COUNT);
+  rep_input_data.gp[3].gp_buttons = roa_zalloc(sizeof(rep_keystate) * REP_GP_COUNT);
 }
 
 
@@ -64,17 +80,17 @@ rep_data_dispatcher()
 }
 
 
+struct rep_input_desc*
+rep_data_input_data()
+{
+  return &rep_input_data;
+}
+
+
 struct roa_tagged_allocator*
 rep_data_dispatcher_allocator()
 {
   return &dispatcher_allocator;
-}
-
-
-volt_ctx_t
-rep_data_volt()
-{
-  return volt_ctx_data;
 }
 
 

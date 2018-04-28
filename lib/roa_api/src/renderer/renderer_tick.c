@@ -1,7 +1,6 @@
 #include <roa_job/roa_job.h>
 #include <roa_renderer/roa_renderer.h>
 #include <data/config.h>
-#include <volt/volt.h>
 #include <data/engine_data.h>
 #include <roa_lib/alloc.h>
 
@@ -44,5 +43,4 @@ ROA_JOB(rep_renderer_tick, void*)
   }
 
   roa_renderer_ctx_execute(rep_data_renderer());
-	volt_ctx_execute(rep_data_volt());
 }

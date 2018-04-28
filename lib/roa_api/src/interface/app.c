@@ -6,7 +6,6 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_job/roa_job.h>
 #include <renderer/renderer_tick.h>
-#include <volt/volt.h>
 #include <roa_lib/log.h>
 
 
@@ -20,6 +19,11 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 
   if (new_frame == ROA_TRUE)
   {
+    /* update input */
+    {
+      
+    }
+
     /* user task */
     {
       application_frame_func(application_frame_arg);
@@ -29,7 +33,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 
     /* physics tasks */
     {
-			/* physics is undecided atm */
+      /* physics is undecided atm */
       roa_tagged_allocator_free(rep_config_tagged_hash_physics());
     }
 
@@ -43,9 +47,9 @@ ROA_JOB(rep_game_loop_tick, rep_task)
       roa_job_dispatcher_ctx_t job_ctx = rep_data_dispatcher();
 
       uint64_t marker = roa_job_submit(
-				job_ctx,
-				&renderer_tick,
-				1);
+        job_ctx,
+        &renderer_tick,
+        1);
 
       roa_job_wait(job_ctx, marker);
 

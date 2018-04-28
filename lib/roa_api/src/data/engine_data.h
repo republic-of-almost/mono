@@ -4,10 +4,10 @@
 
 typedef struct roa_ctx * roa_ctx_t;
 typedef struct roa_job_dispatcher_ctx * roa_job_dispatcher_ctx_t;
-typedef struct volt_ctx * volt_ctx_t;
 typedef struct roa_graph_ctx * roa_graph_ctx_t;
 typedef struct roa_renderer_ctx * roa_renderer_ctx_t;
 
+struct rep_input_desc;
 
 void
 rep_data_init();
@@ -21,16 +21,16 @@ roa_ctx_t
 rep_data_ctx();
 
 
+struct rep_input_desc*
+rep_data_input_data();
+
+
 roa_job_dispatcher_ctx_t
 rep_data_dispatcher();
 
 
 struct roa_tagged_allocator*
 rep_data_dispatcher_allocator();
-
-
-volt_ctx_t
-rep_data_volt();
 
 
 roa_graph_ctx_t

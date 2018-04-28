@@ -34,7 +34,7 @@ rep_mesh_renderable_set(
       struct roa_renderer_mesh_renderable renderable;
       roa_mat4_export(&world_transform, renderable.world_transform);
 
-      ROA_BOOL set = roa_renderer_renderable_set(renderer, &renderable, object_ids[i]);
+      ROA_BOOL set = roa_renderer_mesh_renderable_set(renderer, &renderable, object_ids[i]);
       
     }
 	}

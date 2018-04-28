@@ -58,6 +58,103 @@ void
 rep_app_destroy();
 
 
+/* ------------------------------------------------------------- [ Input ] -- */
+
+
+typedef enum rep_kb_id
+{
+  REP_KB_0, REP_KB_1, REP_KB_2, REP_KB_3, REP_KB_4, REP_KB_5, REP_KB_6,
+  REP_KB_7, REP_KB_8, REP_KB_9,
+
+  REP_KB_A, REP_KB_B, REP_KB_C, REP_KB_D, REP_KB_E, REP_KB_F, REP_KB_G,
+  REP_KB_H, REP_KB_I, REP_KB_J, REP_KB_K, REP_KB_L, REP_KB_M, REP_KB_N,
+  REP_KB_O, REP_KB_P, REP_KB_Q, REP_KB_R, REP_KB_S, REP_KB_T, REP_KB_U,
+  REP_KB_V, REP_KB_W, REP_KB_X, REP_KB_Y, REP_KB_Z,
+
+  REP_KB_UP, REP_KB_DOWN, REP_KB_LEFT, REP_KB_RIGHT,
+
+  REP_KB_F1, REP_KB_F2, REP_KB_F3, REP_KB_F4, REP_KB_F5, REP_KB_F6,
+  REP_KB_F7, REP_KB_F8, REP_KB_F9, REP_KB_F10, REP_KB_F11, REP_KB_F12,
+  REP_KB_F13, REP_KB_F14, REP_KB_F15,
+
+  REP_KB_COUNT
+} rep_kb_id;
+
+
+typedef enum rep_keystate
+{
+  REP_KEYSTATE_UP, REP_KEYSTATE_FRAME_UP,
+  REP_KEYSTATE_DOWN, REP_KEYSTATE_FRAME_DOWN,
+} rep_keystate;
+
+
+struct rep_keyboard_desc
+{
+  rep_keystate *keys;
+  int key_count;
+};
+
+
+typedef enum rep_ms_button_id
+{
+  REP_MS_LEFT, REP_MS_RIGHT, REP_MS_MIDDLE,
+
+  REP_MS_COUNT,
+} rep_msbutton_id;
+
+
+struct rep_mouse_desc
+{
+  rep_keystate *ms_buttons;
+  int button_count;
+
+  float position[2];
+  float delta[2];
+  float scroll[2];
+};
+
+
+typedef enum rep_gp_button_id
+{
+  REP_GP_A, REP_GP_B, REP_GP_Y, REP_GP_X,
+  REP_GP_DPAD_UP, REP_GP_DPAD_DOWN, REP_GP_DPAD_LEFT, REP_GP_DPAD_RIGHT,
+  REP_GP_LEFT_AXIS, REP_GP_RIGHT_AXIS,
+  REP_GP_LEFT_BUMPER, REP_GP_RIGHT_BUMPER,
+  REP_GP_START, REP_GP_MENU,
+
+  REP_GP_COUNT
+} rep_msbutton_id;
+
+
+struct rep_gamepad_desc
+{
+  rep_keystate *gp_buttons;
+
+  float triggers[2];
+
+  float axis_1[2];
+  float axis_2[2];
+};
+
+
+struct rep_input_desc
+{
+  struct rep_keyboard_desc *kb;
+  int kb_count;
+
+  struct rep_mouse_desc *ms;
+  int ms_count;
+
+  struct rep_gamepad_desc *gp;
+  int gp_count;
+};
+
+
+void
+rep_input_get(
+  struct rep_input_desc *out_desc);
+
+
 /* -------------------------------------------------------------- [ Task ] -- */
 
 
