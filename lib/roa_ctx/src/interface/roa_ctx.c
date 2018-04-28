@@ -18,6 +18,9 @@ struct roa_ctx
 	int height;
 	char title[256];
 
+  int kb_keys[ROA_KB_COUNT];
+  int ms_keys[ROA_MS_BUTTON_COUNT];
+
 	float mouse_x;
 	float mouse_y;
 
@@ -78,6 +81,84 @@ roa_ctx_cursor_scroll_callback(GLFWwindow *win, double xoffset, double yoffset)
 }
 
 
+static void
+roa_ctx_key_callback(GLFWwindow *win, int key, int scancode, int action, int mods)
+{
+  struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
+
+  kb_button_id roa_key = ROA_KB_UNKNOWN;
+  int state = action == GLFW_RELEASE ? 0 : 1;
+
+  switch (key)
+  {
+    /* numeric */
+    case(GLFW_KEY_0): roa_key = ROA_KB_0; break;
+    case(GLFW_KEY_1): roa_key = ROA_KB_1; break;
+    case(GLFW_KEY_2): roa_key = ROA_KB_2; break;
+    case(GLFW_KEY_3): roa_key = ROA_KB_3; break;
+    case(GLFW_KEY_4): roa_key = ROA_KB_4; break;
+    case(GLFW_KEY_5): roa_key = ROA_KB_5; break;
+    case(GLFW_KEY_6): roa_key = ROA_KB_6; break;
+    case(GLFW_KEY_7): roa_key = ROA_KB_7; break;
+    case(GLFW_KEY_8): roa_key = ROA_KB_8; break;
+    case(GLFW_KEY_9): roa_key = ROA_KB_9; break;
+
+    /* alpha */
+    case(GLFW_KEY_A): roa_key = ROA_KB_A; break;
+    case(GLFW_KEY_B): roa_key = ROA_KB_B; break;
+    case(GLFW_KEY_C): roa_key = ROA_KB_C; break;
+    case(GLFW_KEY_D): roa_key = ROA_KB_D; break;
+    case(GLFW_KEY_E): roa_key = ROA_KB_E; break;
+    case(GLFW_KEY_F): roa_key = ROA_KB_F; break;
+    case(GLFW_KEY_G): roa_key = ROA_KB_G; break;
+    case(GLFW_KEY_H): roa_key = ROA_KB_H; break;
+    case(GLFW_KEY_I): roa_key = ROA_KB_I; break;
+    case(GLFW_KEY_J): roa_key = ROA_KB_J; break;
+    case(GLFW_KEY_K): roa_key = ROA_KB_K; break;
+    case(GLFW_KEY_L): roa_key = ROA_KB_L; break;
+    case(GLFW_KEY_M): roa_key = ROA_KB_M; break;
+    case(GLFW_KEY_N): roa_key = ROA_KB_N; break;
+    case(GLFW_KEY_O): roa_key = ROA_KB_O; break;
+    case(GLFW_KEY_P): roa_key = ROA_KB_P; break;
+    case(GLFW_KEY_Q): roa_key = ROA_KB_Q; break;
+    case(GLFW_KEY_R): roa_key = ROA_KB_R; break;
+    case(GLFW_KEY_S): roa_key = ROA_KB_S; break;
+    case(GLFW_KEY_T): roa_key = ROA_KB_T; break;
+    case(GLFW_KEY_U): roa_key = ROA_KB_U; break;
+    case(GLFW_KEY_V): roa_key = ROA_KB_V; break;
+    case(GLFW_KEY_W): roa_key = ROA_KB_W; break;
+    case(GLFW_KEY_X): roa_key = ROA_KB_X; break;
+    case(GLFW_KEY_Y): roa_key = ROA_KB_Y; break;
+    case(GLFW_KEY_Z): roa_key = ROA_KB_Z; break;
+
+    /* function keys */
+    case(GLFW_KEY_F1): roa_key = ROA_KB_F1; break;
+    case(GLFW_KEY_F2): roa_key = ROA_KB_F2; break;
+    case(GLFW_KEY_F3): roa_key = ROA_KB_F3; break;
+    case(GLFW_KEY_F4): roa_key = ROA_KB_F4; break;
+    case(GLFW_KEY_F5): roa_key = ROA_KB_F5; break;
+    case(GLFW_KEY_F6): roa_key = ROA_KB_F6; break;
+    case(GLFW_KEY_F7): roa_key = ROA_KB_F7; break;
+    case(GLFW_KEY_F8): roa_key = ROA_KB_F8; break;
+    case(GLFW_KEY_F9): roa_key = ROA_KB_F9; break;
+    case(GLFW_KEY_F10): roa_key = ROA_KB_F10; break;
+    case(GLFW_KEY_F11): roa_key = ROA_KB_F11; break;
+    case(GLFW_KEY_F12): roa_key = ROA_KB_F12; break;
+    case(GLFW_KEY_F13): roa_key = ROA_KB_F13; break;
+    case(GLFW_KEY_F14): roa_key = ROA_KB_F14; break;
+    case(GLFW_KEY_F15): roa_key = ROA_KB_F15; break;
+
+    /* dir keys */
+    case(GLFW_KEY_UP): roa_key = ROA_KB_UP; break;
+    case(GLFW_KEY_DOWN): roa_key = ROA_KB_DOWN; break;
+    case(GLFW_KEY_LEFT): roa_key = ROA_KB_LEFT; break;
+    case(GLFW_KEY_RIGHT): roa_key = ROA_KB_RIGHT; break;
+  }
+
+  ctx->kb_keys[roa_key] = state;
+}
+
+
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
@@ -120,6 +201,7 @@ roa_ctx_create(roa_ctx_t *ctx)
       glfwSetWindowSizeCallback(win, roa_ctx_win_size_callback);
 			glfwSetCursorPosCallback(win, roa_ctx_cursor_pos_callback);
       glfwSetScrollCallback(win, roa_ctx_cursor_scroll_callback);
+      glfwSetKeyCallback(win, roa_ctx_key_callback);
 
       gl3wInit();
 
@@ -243,4 +325,17 @@ roa_ctx_mouse_get_desc(
 
   out_desc->x_scroll = ctx->mouse_scroll_delta_x;
   out_desc->y_scroll = ctx->mouse_scroll_delta_y;
+}
+
+
+void
+roa_ctx_keyboard_get_desc(
+  roa_ctx_t ctx,
+  struct roa_ctx_keyboard_desc *out_desc)
+{
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(out_desc);
+
+  
 }

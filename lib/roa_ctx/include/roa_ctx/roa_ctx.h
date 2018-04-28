@@ -50,11 +50,22 @@ roa_ctx_set_window_desc(
   const struct roa_ctx_window_desc *desc);
 
 
-/* ------------------------------------------------------------- [ input ] -- */
+/* ---------------------------------------------------------- [ ms input ] -- */
+
+
+typedef enum ms_button_id {
+  ROA_MS_BUTTON_LEFT, ROA_MS_BUTTON_MIDDLE, ROA_MS_BUTTON_RIGHT,
+  ROA_MS_BUTTON_0, ROA_MS_BUTTON_1, ROA_MS_BUTTON_2, ROA_MS_BUTTON_3, ROA_MS_BUTTON_4,
+
+  ROA_MS_BUTTON_COUNT
+} ms_button_id;
 
 
 struct roa_ctx_mouse_desc
 {
+  int *ms_keys;
+  int ms_key_count;
+
   float x_pos;
   float y_pos;
 
@@ -70,6 +81,44 @@ void
 roa_ctx_mouse_get_desc(
 	roa_ctx_t ctx,
 	struct roa_ctx_mouse_desc *out_desc);
+
+
+/* ---------------------------------------------------------- [ kb input ] -- */
+
+
+typedef enum kb_button_id 
+{
+  ROA_KB_UNKNOWN,
+
+  ROA_KB_0, ROA_KB_1, ROA_KB_2, ROA_KB_3, ROA_KB_4, ROA_KB_5, ROA_KB_6,
+  ROA_KB_7, ROA_KB_8, ROA_KB_9,
+
+  ROA_KB_A, ROA_KB_B, ROA_KB_C, ROA_KB_D, ROA_KB_E, ROA_KB_F, ROA_KB_G,
+  ROA_KB_H, ROA_KB_I, ROA_KB_J, ROA_KB_K, ROA_KB_L, ROA_KB_M, ROA_KB_N,
+  ROA_KB_O, ROA_KB_P, ROA_KB_Q, ROA_KB_R, ROA_KB_S, ROA_KB_T, ROA_KB_U,
+  ROA_KB_V, ROA_KB_W, ROA_KB_X, ROA_KB_Y, ROA_KB_Z,
+
+  ROA_KB_UP, ROA_KB_DOWN, ROA_KB_LEFT, ROA_KB_RIGHT,
+
+  ROA_KB_F1, ROA_KB_F2, ROA_KB_F3, ROA_KB_F4, ROA_KB_F5, ROA_KB_F6,
+  ROA_KB_F7, ROA_KB_F8, ROA_KB_F9, ROA_KB_F10, ROA_KB_F11, ROA_KB_F12,
+  ROA_KB_F13, ROA_KB_F14, ROA_KB_F15,
+
+  ROA_KB_COUNT
+} kb_button_id;
+
+
+struct roa_ctx_keyboard_desc
+{
+  int *kb_keys;
+  int kb_key_count;
+};
+
+
+void
+roa_ctx_keyboard_get_desc(
+  roa_ctx_t ctx,
+  struct roa_ctx_keyboard_desc *out_desc);
 
 
 #ifdef __cplusplus
