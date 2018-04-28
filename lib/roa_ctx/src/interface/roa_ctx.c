@@ -153,6 +153,9 @@ roa_ctx_key_callback(GLFWwindow *win, int key, int scancode, int action, int mod
     case(GLFW_KEY_DOWN): roa_key = ROA_KB_DOWN; break;
     case(GLFW_KEY_LEFT): roa_key = ROA_KB_LEFT; break;
     case(GLFW_KEY_RIGHT): roa_key = ROA_KB_RIGHT; break;
+
+    /* other keys */
+    case(GLFW_KEY_ESCAPE): roa_key = ROA_KB_ESC; break;
   }
 
   ctx->kb_keys[roa_key] = state;
@@ -337,5 +340,6 @@ roa_ctx_keyboard_get_desc(
   ROA_ASSERT(ctx);
   ROA_ASSERT(out_desc);
 
-  
+  out_desc->kb_keys = &ctx->kb_keys;
+  out_desc->kb_key_count = ROA_KB_COUNT;
 }
