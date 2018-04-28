@@ -781,6 +781,17 @@ roa_quaternion_default()
 
 
 roa_quaternion
+roa_quaternion_import(const float *import_val)
+{
+  return roa_quaternion_set_with_values(
+    import_val[0],
+    import_val[1],
+    import_val[2],
+    import_val[3]);
+}
+
+
+roa_quaternion
 roa_quaternion_set_with_values(float x, float y, float z, float w)
 {
 	roa_float4 vec = roa_float4_set_with_values(x, y, z, w);

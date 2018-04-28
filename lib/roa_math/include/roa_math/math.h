@@ -159,6 +159,7 @@ int             roa_float4_is_near(roa_float4 a, roa_float4 b, float err);
 
 
 roa_quaternion  roa_quaternion_default();
+roa_quaternion  roa_quaternion_import(const float *val);
 roa_quaternion  roa_quaternion_set_with_values(float x, float y, float z, float w);
 roa_quaternion  roa_quaternion_from_axis_angle(roa_float3 axis, float radians);
 roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion right);
