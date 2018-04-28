@@ -26,7 +26,52 @@ app_tick(void *arg)
 
   /* move camera */
   {
+    uint32_t cam_id = objects[0];
 
+    /* movement */
+    roa_float3 movement = roa_float3_zero();
+    {
+      struct rep_input_desc input_desc;
+      ROA_MEM_ZERO(input_desc);
+
+      rep_input_get(&input_desc);
+
+      if (input_desc.kb[0].keys[REP_KB_W] == REP_KEYSTATE_DOWN)
+      {
+        movement.z += 1;
+      }
+      if (input_desc.kb[0].keys[REP_KB_S] == REP_KEYSTATE_DOWN)
+      {
+        movement.z -= 1;
+      }
+      if (input_desc.kb[0].keys[REP_KB_A] == REP_KEYSTATE_DOWN)
+      {
+        movement.x += 1;
+      }
+      if (input_desc.kb[0].keys[REP_KB_D] == REP_KEYSTATE_DOWN)
+      {
+        movement.x -= 1;
+      }
+    }
+
+    /* update transform */
+    if (roa_float3_length(movement) > 0.f)
+    {
+      roa_float3 normalized_movement = roa_float3_normalize(movement);
+
+      struct rep_transform_desc transform;
+      ROA_MEM_ZERO(transform);
+
+      rep_transform_get(&cam_id, &transform, 1);
+
+      roa_float3 scaled_movement = roa_float3_scale(normalized_movement, 0.01f);
+      roa_float3 curr_pos = roa_float3_import(transform.position);
+      roa_float3 new_pos = roa_float3_add(curr_pos, scaled_movement);
+
+      roa_float3_export(new_pos, transform.position);
+
+      rep_transform_set(&cam_id, &transform, 1);
+    }
   }
 }
 
@@ -89,6 +134,7 @@ app_startup(void *arg)
     trans_desc[0].scale[0] = 1.f;
     trans_desc[0].scale[1] = 1.f;
     trans_desc[0].scale[2] = 1.f;
+    trans_desc[0].rotation[3] = 1.f;
 
     int count = ROA_ARR_COUNT(trans_desc);
     int i;
@@ -121,8 +167,8 @@ app_startup(void *arg)
     struct rep_camera_desc cam_desc;
     ROA_MEM_ZERO(cam_desc);
     cam_desc.fov    = ROA_TAU / 8.f;
-    cam_desc.width  = 1.f;
-    cam_desc.height = 1.f;
+    cam_desc.width  = 800.f;
+    cam_desc.height = 600.f;
 
     rep_camera_set(&objects[0], &cam_desc, 1);
   }
