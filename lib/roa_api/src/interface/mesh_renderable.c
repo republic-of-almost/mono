@@ -2,6 +2,7 @@
 #include <roa_lib/assert.h>
 #include <roa_graph/roa_graph.h>
 #include <roa_renderer/roa_renderer.h>
+#include <data/config.h>
 
 
 void
@@ -22,6 +23,8 @@ rep_mesh_renderable_set(
 
     for (i = 0; i < count; ++i)
     {
+      roa_graph_node_register_type(graph, object_ids[i], REP_DATA_TYPEID_RENDERER_MESH);
+
       /* get the local transform */
       struct roa_transform cam_transform;
       roa_graph_node_get_transform(graph, object_ids[i], &cam_transform, ROA_TRUE);

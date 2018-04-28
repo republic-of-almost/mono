@@ -63,6 +63,8 @@ rep_app_destroy();
 
 typedef enum rep_kb_id
 {
+  REP_KB_UNKNOWN,
+
   REP_KB_0, REP_KB_1, REP_KB_2, REP_KB_3, REP_KB_4, REP_KB_5, REP_KB_6,
   REP_KB_7, REP_KB_8, REP_KB_9,
 
@@ -76,6 +78,8 @@ typedef enum rep_kb_id
   REP_KB_F1, REP_KB_F2, REP_KB_F3, REP_KB_F4, REP_KB_F5, REP_KB_F6,
   REP_KB_F7, REP_KB_F8, REP_KB_F9, REP_KB_F10, REP_KB_F11, REP_KB_F12,
   REP_KB_F13, REP_KB_F14, REP_KB_F15,
+
+  REP_KB_ESC,
 
   REP_KB_COUNT
 } rep_kb_id;

@@ -21,4 +21,8 @@ uint64_t
 rep_config_tagged_hash_physics();
 
 
+#define REP_DATA_TYPEID_CAMERA ROA_BIT(1)
+#define REP_DATA_TYPEID_RENDERER_MESH ROA_BIT(2)
+
+
 #endif /* inc guard */

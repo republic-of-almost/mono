@@ -1,0 +1,14 @@
+{
+  "name": "RepublicAPIUnitTest",
+  "kind": "ConsoleApp",
+  "language": "C89",
+  "location": "./",
+
+  "src_files" : [
+    "../test/unit/*.c"
+  ],
+
+  "project_dependencies" : [
+    "RepublicAPI"
+  ]
+}

@@ -16,16 +16,113 @@ void *application_frame_arg = ROA_NULL;
 ROA_JOB(rep_game_loop_tick, rep_task)
 {
   ROA_BOOL new_frame = roa_ctx_new_frame(rep_data_ctx());
+  ROA_BOOL has_tick = !!application_frame_func;
 
-  if (new_frame == ROA_TRUE)
+  if (new_frame == ROA_TRUE && has_tick == ROA_TRUE)
   {
     /* update input */
     {
+      struct roa_ctx_keyboard_desc kb_desc;
+      
+      roa_ctx_keyboard_get_desc(rep_data_ctx(), &kb_desc);
+
+      /* copy kb data */
+      int i;
+      int count = kb_desc.kb_key_count;
+
+      struct rep_input_desc *rep_in_desc = rep_data_input_data();
+
+      for (i = 0; i < count; ++i)
+      {
+        int roa_key = i;
+        int rep_key = REP_KB_UNKNOWN;
+
+        switch (i)
+        {
+          /* numeric */
+          case(ROA_KB_0): rep_key = REP_KB_0; break;
+          case(ROA_KB_1): rep_key = REP_KB_1; break;
+          case(ROA_KB_2): rep_key = REP_KB_2; break;
+          case(ROA_KB_3): rep_key = REP_KB_3; break;
+          case(ROA_KB_4): rep_key = REP_KB_4; break;
+          case(ROA_KB_5): rep_key = REP_KB_5; break;
+          case(ROA_KB_6): rep_key = REP_KB_6; break;
+          case(ROA_KB_7): rep_key = REP_KB_7; break;
+          case(ROA_KB_8): rep_key = REP_KB_8; break;
+          case(ROA_KB_9): rep_key = REP_KB_9; break;
+
+          /* alpha */
+          case(ROA_KB_A): rep_key = REP_KB_A; break;
+          case(ROA_KB_B): rep_key = REP_KB_B; break;
+          case(ROA_KB_C): rep_key = REP_KB_C; break;
+          case(ROA_KB_D): rep_key = REP_KB_D; break;
+          case(ROA_KB_E): rep_key = REP_KB_E; break;
+          case(ROA_KB_F): rep_key = REP_KB_F; break;
+          case(ROA_KB_G): rep_key = REP_KB_G; break;
+          case(ROA_KB_H): rep_key = REP_KB_H; break;
+          case(ROA_KB_I): rep_key = REP_KB_I; break;
+          case(ROA_KB_J): rep_key = REP_KB_J; break;
+          case(ROA_KB_K): rep_key = REP_KB_K; break;
+          case(ROA_KB_L): rep_key = REP_KB_L; break;
+          case(ROA_KB_M): rep_key = REP_KB_M; break;
+          case(ROA_KB_N): rep_key = REP_KB_N; break;
+          case(ROA_KB_O): rep_key = REP_KB_O; break;
+          case(ROA_KB_P): rep_key = REP_KB_P; break;
+          case(ROA_KB_Q): rep_key = REP_KB_Q; break;
+          case(ROA_KB_R): rep_key = REP_KB_R; break;
+          case(ROA_KB_S): rep_key = REP_KB_S; break;
+          case(ROA_KB_T): rep_key = REP_KB_T; break;
+          case(ROA_KB_U): rep_key = REP_KB_U; break;
+          case(ROA_KB_V): rep_key = REP_KB_V; break;
+          case(ROA_KB_W): rep_key = REP_KB_W; break;
+          case(ROA_KB_X): rep_key = REP_KB_X; break;
+          case(ROA_KB_Y): rep_key = REP_KB_Y; break;
+          case(ROA_KB_Z): rep_key = REP_KB_Z; break;
+
+          /* other */
+          case(ROA_KB_ESC): rep_key = REP_KB_ESC; break;
+        }
+
+        int curr_roa_ctx_state = kb_desc.kb_keys[i];
+        rep_keystate curr_rep_state = rep_in_desc->kb[0].keys[rep_key];
+
+        if (curr_roa_ctx_state)
+        {
+          if (curr_rep_state == REP_KEYSTATE_FRAME_DOWN)
+          {
+            rep_in_desc->kb[0].keys[rep_key] = REP_KEYSTATE_DOWN;
+          }
+          else if(curr_rep_state != REP_KEYSTATE_DOWN)
+          {
+            rep_in_desc->kb[0].keys[rep_key] = REP_KEYSTATE_FRAME_DOWN;
+          }
+          else
+          {
+            rep_in_desc->kb[0].keys[rep_key] = REP_KEYSTATE_DOWN;
+          }
+        }
+        else
+        {
+          if (curr_rep_state == REP_KEYSTATE_FRAME_UP)
+          {
+            rep_in_desc->kb[0].keys[rep_key] = REP_KEYSTATE_UP;
+          }
+          else if (curr_rep_state != REP_KEYSTATE_UP)
+          {
+            rep_in_desc->kb[0].keys[rep_key] = REP_KEYSTATE_FRAME_UP;
+          }
+          else
+          {
+            rep_in_desc->kb[0].keys[rep_key] = REP_KEYSTATE_UP;
+          }
+        }
+      }
+
       
     }
 
     /* user task */
-    {
+    { 
       application_frame_func(application_frame_arg);
 
       roa_tagged_allocator_free(rep_config_tagged_hash_logic());
@@ -100,6 +197,7 @@ rep_app_create(
 
     /* closing */
     roa_tagged_allocator_destroy();
+    rep_data_destroy();
   }
 }
 
@@ -151,5 +249,6 @@ rep_app_set(
 void
 rep_app_destroy()
 {
-  rep_data_destroy();
+  application_frame_func = ROA_NULL;
+  application_frame_arg = ROA_NULL;
 }
