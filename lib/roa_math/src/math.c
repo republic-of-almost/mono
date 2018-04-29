@@ -791,6 +791,15 @@ roa_quaternion_import(const float *import_val)
 }
 
 
+void
+roa_quaternion_export(roa_quaternion q, float *export)
+{
+  export[0] = q.x;
+  export[1] = q.y;
+  export[2] = q.z;
+  export[3] = q.w;
+}
+
 roa_quaternion
 roa_quaternion_set_with_values(float x, float y, float z, float w)
 {
