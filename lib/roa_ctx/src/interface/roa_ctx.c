@@ -206,6 +206,8 @@ roa_ctx_create(roa_ctx_t *ctx)
       glfwSetScrollCallback(win, roa_ctx_cursor_scroll_callback);
       glfwSetKeyCallback(win, roa_ctx_key_callback);
 
+      glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
       gl3wInit();
 
 			new_ctx->width = width;
