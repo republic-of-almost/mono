@@ -10,6 +10,7 @@ platform_render(roa_renderer_ctx_t ctx)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
 
   GLsizei vp_width  = ctx->settings.device_viewport[0];
   GLsizei vp_height = ctx->settings.device_viewport[1];
