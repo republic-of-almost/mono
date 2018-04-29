@@ -6,11 +6,11 @@
 void
 app_test(void*arg)
 {
+  uint32_t obj_ids[10];
+  ROA_MEM_ZERO(obj_ids);
+
   /* object */
   {
-    uint32_t obj_ids[10];
-    ROA_MEM_ZERO(obj_ids);
-
     struct rep_object_desc obj_desc[ROA_ARR_COUNT(obj_ids)];
     ROA_MEM_ZERO(obj_desc);
 
@@ -28,7 +28,17 @@ app_test(void*arg)
 
   /* transform */
   {
-    uint32_t trans_id = 0;
+    struct rep_transform_desc trans;
+    rep_transform_get(&obj_ids[0], &trans, 1);
+
+    trans.position[0] = 1.f; trans.position[1] = 2.f; trans.position[2] = 3.f;
+
+    rep_transform_set(&obj_ids[0], &trans, 1);
+    rep_transform_get(&obj_ids[0], &trans, 1);
+
+    ROA_ASSERT(trans.position[0] == 1.f);
+    ROA_ASSERT(trans.position[1] == 2.f);
+    ROA_ASSERT(trans.position[2] == 3.f);
   }
 
   /* camera */

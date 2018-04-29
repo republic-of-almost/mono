@@ -28,6 +28,8 @@ rep_transform_set(
 
     for(i = 0; i < count; ++i)
     {
+      uint32_t obj_id = object_ids[i];
+
       roa_transform transform;
       roa_transform_init(&transform);
 
@@ -35,37 +37,37 @@ rep_transform_set(
       transform.rotation = roa_quaternion_import(desc[i].rotation);
       transform.scale = roa_float3_import(desc[i].scale);
 
-      roa_graph_node_set_transform(rep_data_graph(), object_ids[i], &transform);
+      roa_graph_node_set_transform(rep_data_graph(), obj_id, &transform);
 
       /* update any data that is interested */
       {
         uint64_t type_ids;
-        roa_graph_node_get_data_type_id(graph, object_ids[i], &type_ids);
+        roa_graph_node_get_data_type_id(graph, obj_id, &type_ids);
 
         if (type_ids & REP_DATA_TYPEID_CAMERA)
         {
           roa_float3 fwd = roa_transform_local_fwd(&transform);
           roa_float3 at = roa_float3_add(transform.position, fwd);
-
           roa_float3 up = roa_transform_local_up(&transform);
 
           struct roa_renderer_camera cam;
-          roa_renderer_camera_get(renderer, &cam, object_ids[i]);
+          roa_renderer_camera_get(renderer, &cam, obj_id);
+
           memcpy(cam.position, desc[i].position, sizeof(cam.position));
           memcpy(cam.lookat, &at, sizeof(cam.lookat));
           memcpy(cam.up, &up, sizeof(cam.up));
 
-          roa_renderer_camera_set(renderer, &cam, object_ids[i]);
+          roa_renderer_camera_set(renderer, &cam, obj_id);
         }
-        else if (type_ids & REP_DATA_TYPEID_RENDERER_MESH)
+
+        if (type_ids & REP_DATA_TYPEID_RENDERER_MESH)
         {
           struct roa_renderer_mesh_renderable mesh;
-          roa_renderer_mesh_renderable_get(renderer, &mesh, object_ids[i]);
+          roa_renderer_mesh_renderable_get(renderer, &mesh, obj_id);
           
-          roa_mat4 world_mat;
-          roa_transform_to_mat4(&transform, &world_mat);
+          roa_transform_export_mat4(&transform, mesh.world_transform);
 
-          roa_renderer_mesh_renderable_set(renderer, &mesh, object_ids[i]);
+          roa_renderer_mesh_renderable_set(renderer, &mesh, obj_id);
         }
       }
     }

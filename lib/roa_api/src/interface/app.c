@@ -3,6 +3,7 @@
 #include <data/config.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/alloc.h>
+#include <roa_renderer/roa_renderer.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_job/roa_job.h>
 #include <renderer/renderer_tick.h>
@@ -118,7 +119,11 @@ ROA_JOB(rep_game_loop_tick, rep_task)
         }
       }
 
-      
+      struct roa_ctx_mouse_desc ms_desc;
+      roa_ctx_mouse_get_desc(rep_data_ctx(), &ms_desc);
+
+      rep_in_desc->ms[0].delta[0] = ms_desc.x_delta;
+      rep_in_desc->ms[0].delta[1] = ms_desc.y_delta;
     }
 
     /* user task */
@@ -175,17 +180,30 @@ rep_app_create(
   if (desc)
   {
     /* init order is important */
-    roa_tagged_allocator_init();
-    rep_config_init();
-    rep_data_init();
+    {
+      roa_tagged_allocator_init();
+      rep_config_init();
+      rep_data_init();
+    }
 
     /* set desc */
     rep_app_set(desc);
 
+    /* tell renderer viewport */
+    {
+      struct roa_ctx_window_desc win_desc;
+      roa_ctx_get_window_desc(rep_data_ctx(), &win_desc);
+
+      roa_renderer_set_device_resolution(
+        rep_data_renderer(),
+        win_desc.width,
+        win_desc.height);
+    }
+
     /* setup job dispatcher */
     struct roa_job_desc tick_desc;
-    tick_desc.arg						= application_frame_func;
-    tick_desc.func				  = rep_game_loop_tick;
+    tick_desc.arg           = application_frame_func;
+    tick_desc.func          = rep_game_loop_tick;
     tick_desc.thread_locked = ROA_TRUE;
 
     roa_job_submit(rep_data_dispatcher(), &tick_desc, 1);
@@ -193,7 +211,7 @@ rep_app_create(
     /* start dispatcher */
     roa_job_dispatcher_ctx_run(rep_data_dispatcher());
 
-		ROA_LOG_INFO("No Jobs in dispatcher shutting down");
+    ROA_LOG_INFO("No Jobs in dispatcher shutting down");
 
     /* closing */
     roa_tagged_allocator_destroy();
@@ -214,9 +232,9 @@ rep_app_get(
     struct roa_ctx_window_desc win_desc;
     roa_ctx_get_window_desc(rep_data_ctx(), &win_desc);
 
-    out_desc->title = win_desc.title;
-    out_desc->width = win_desc.width;
-    out_desc->height = win_desc.height;
+    out_desc->title     = win_desc.title;
+    out_desc->width     = win_desc.width;
+    out_desc->height    = win_desc.height;
     out_desc->frame_job = application_frame_func;
   }
 }
@@ -233,15 +251,15 @@ rep_app_set(
   {
     /* window */
     struct roa_ctx_window_desc win_desc;
-    win_desc.title = desc->title;
-    win_desc.width = desc->width;
+    win_desc.title  = desc->title;
+    win_desc.width  = desc->width;
     win_desc.height = desc->height;
 
     roa_ctx_set_window_desc(rep_data_ctx(), &win_desc);
 
     /* global application function */
     application_frame_func = desc->frame_job;
-    application_frame_arg = desc->frame_arg;
+    application_frame_arg  = desc->frame_arg;
   }
 }
 
@@ -250,5 +268,5 @@ void
 rep_app_destroy()
 {
   application_frame_func = ROA_NULL;
-  application_frame_arg = ROA_NULL;
+  application_frame_arg  = ROA_NULL;
 }

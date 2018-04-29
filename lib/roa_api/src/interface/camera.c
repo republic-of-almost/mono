@@ -32,22 +32,21 @@ rep_camera_set(
       roa_graph_node_register_type(graph, object_ids[i], REP_DATA_TYPEID_CAMERA);
 
       /* get the local transform */
-      struct roa_transform cam_transform;
-      roa_graph_node_get_transform(graph, object_ids[i], &cam_transform, ROA_TRUE);
-
-      roa_float3 local_fwd = roa_transform_local_fwd(&cam_transform);
-
-      roa_float3 from = cam_transform.position;
-      roa_float3 at = roa_float3_add(from, local_fwd);
-      roa_float3 up = roa_transform_local_up(&cam_transform);
+      struct roa_transform transform;
+      roa_graph_node_get_transform(graph, object_ids[i], &transform, ROA_FALSE);
 
       /* set in the renderer */
       struct roa_renderer_camera cam_desc;
-      roa_float3_export(cam_transform.position, cam_desc.position);
       cam_desc.field_of_view = desc->fov;
       cam_desc.near_plane = 0.1f;
       cam_desc.far_plane = 1000.f;
-      memcpy(cam_desc.position, &from, sizeof(cam_desc.position));
+
+      /* set transform */
+      roa_float3 fwd = roa_transform_local_fwd(&transform);
+      roa_float3 at = roa_float3_add(transform.position, fwd);
+      roa_float3 up = roa_transform_local_up(&transform);
+
+      memcpy(cam_desc.position, &transform.position, sizeof(cam_desc.position));
       memcpy(cam_desc.lookat, &at, sizeof(cam_desc.lookat));
       memcpy(cam_desc.up, &up, sizeof(cam_desc.up));
 
