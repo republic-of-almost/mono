@@ -260,6 +260,8 @@ roa_graph_node_recalc_transform_branch(
     last_world_trans = child_world;
   }
 
+  roa_array_destroy(transform_stack);
+
   return ROA_TRUE;
 }
 
