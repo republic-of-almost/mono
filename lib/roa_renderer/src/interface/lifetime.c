@@ -62,6 +62,7 @@ roa_renderer_ctx_create(
   new_ctx->settings.device_viewport[0] = 800;
   new_ctx->settings.device_viewport[1] = 480;
 
+	/* api setup */
   platform_setup(new_ctx);
 
   *ctx = new_ctx;

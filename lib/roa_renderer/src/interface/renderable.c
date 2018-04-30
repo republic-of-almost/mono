@@ -73,6 +73,7 @@ roa_renderer_renderable_clear(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
+  /* unused */
   ROA_UNUSED(ctx);
   ROA_UNUSED(renderable_id);
 
