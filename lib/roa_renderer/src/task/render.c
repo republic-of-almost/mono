@@ -14,8 +14,6 @@ task_render(void *arg)
 	/* camera */
 	struct roa_renderer_camera camera = ctx->camera[0];
 
-	unsigned renderable_count = roa_array_size(ctx->renderable);
-
 	static roa_mat4 view;
   static roa_mat4 proj;
 
@@ -28,7 +26,7 @@ task_render(void *arg)
 		roa_float3 at = roa_float3_import(camera.lookat);
 		roa_float3 up = roa_float3_import(camera.up);
 
-		roa_mat4_lookat(&view, from, at, up);	
+		roa_mat4_lookat(&view, from, at, up);
 	}
-  
+
 }

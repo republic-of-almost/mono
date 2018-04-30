@@ -86,7 +86,7 @@ roa_ctx_mouse_get_desc(
 /* ---------------------------------------------------------- [ kb input ] -- */
 
 
-typedef enum kb_button_id 
+typedef enum kb_button_id
 {
   ROA_KB_UNKNOWN,
 

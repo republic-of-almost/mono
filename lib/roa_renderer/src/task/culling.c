@@ -1,8 +1,9 @@
 #include <task/task.h>
+#include <roa_lib/fundamental.h>
 
 
 void
 task_sphere_culling(void *arg)
 {
- printf("sphere culling\n"); 
+  ROA_UNUSED(arg);
 }

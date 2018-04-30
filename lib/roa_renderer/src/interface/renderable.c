@@ -27,14 +27,14 @@ roa_renderer_mesh_renderable_set(
     if (ctx->renderable_id[i] == renderable_id)
     {
       ctx->renderable[i] = *renderable;
-      
+
       return ROA_TRUE;
     }
   }
 
   roa_array_push(ctx->renderable_id, renderable_id);
   roa_array_push(ctx->renderable, *renderable);
-  
+
   return ROA_TRUE;
 }
 
@@ -73,6 +73,9 @@ roa_renderer_renderable_clear(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
+  ROA_UNUSED(ctx);
+  ROA_UNUSED(renderable_id);
+
   return ROA_FALSE;
 }
 

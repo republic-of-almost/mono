@@ -6,14 +6,12 @@
 #include <roa_renderer/roa_renderer.h>
 #include <roa_lib/atomic.h>
 
-#include <GL/gl3w.h>
 
-struct graphics_api
-{
-  GLuint mesh_program;
-  GLuint vbo;
-  GLuint vao;
-};
+#ifdef ROA_RENDERER_API_NOOP
+#include <graphics_api/noop/noop.h>
+#elif defined ROA_RENDERER_API_GL4
+#include <graphics_api/ogl/ogl4.h>
+#endif
 
 
 struct mesh_draw_call

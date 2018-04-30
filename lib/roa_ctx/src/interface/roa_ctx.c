@@ -52,7 +52,10 @@ roa_ctx_err_callback(int error, const char *desc)
 
 
 static void
-roa_ctx_win_size_callback(GLFWwindow *win, int width, int height)
+roa_ctx_win_size_callback(
+  GLFWwindow *win,
+  int width,
+  int height)
 {
   struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
 
@@ -62,7 +65,10 @@ roa_ctx_win_size_callback(GLFWwindow *win, int width, int height)
 
 
 static void
-roa_ctx_cursor_pos_callback(GLFWwindow *win, double xpos, double ypos)
+roa_ctx_cursor_pos_callback(
+  GLFWwindow *win,
+  double xpos,
+  double ypos)
 {
 	struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
 
@@ -72,7 +78,10 @@ roa_ctx_cursor_pos_callback(GLFWwindow *win, double xpos, double ypos)
 
 
 static void
-roa_ctx_cursor_scroll_callback(GLFWwindow *win, double xoffset, double yoffset)
+roa_ctx_cursor_scroll_callback(
+  GLFWwindow *win,
+  double xoffset,
+  double yoffset)
 {
   struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
 
@@ -82,8 +91,16 @@ roa_ctx_cursor_scroll_callback(GLFWwindow *win, double xoffset, double yoffset)
 
 
 static void
-roa_ctx_key_callback(GLFWwindow *win, int key, int scancode, int action, int mods)
+roa_ctx_key_callback(
+  GLFWwindow *win,
+  int key,
+  int scancode,
+  int action,
+  int mods)
 {
+  ROA_UNUSED(scancode);
+  ROA_UNUSED(mods);
+
   struct roa_ctx *ctx = (struct roa_ctx*)glfwGetWindowUserPointer(win);
 
   kb_button_id roa_key = ROA_KB_UNKNOWN;
@@ -343,6 +360,6 @@ roa_ctx_keyboard_get_desc(
   ROA_ASSERT(ctx);
   ROA_ASSERT(out_desc);
 
-  out_desc->kb_keys = &ctx->kb_keys;
-  out_desc->kb_key_count = ROA_KB_COUNT;
+  out_desc->kb_keys = ROA_ARR_DATA(ctx->kb_keys);
+  out_desc->kb_key_count = ROA_ARR_COUNT(ctx->kb_keys);
 }

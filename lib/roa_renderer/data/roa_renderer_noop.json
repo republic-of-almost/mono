@@ -1,5 +1,5 @@
 {
-	"name": "RepublicRenderer",
+	"name": "RepublicRendererNoOp",
 	"kind": "StaticLib",
 	"language": "C89",
 	"location": "./",
@@ -24,12 +24,11 @@
 		"STB",
 		"RepublicMath",
     "RepublicLib",
-    "Scratch",
-    "OpenGL"
+    "Scratch"
 	],
 
 	"defines" : [
-		"ROA_RENDERER_API_GL4"
+		"ROA_RENDERER_API_NOOP"
 	]
 
 }

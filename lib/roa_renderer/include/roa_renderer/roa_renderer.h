@@ -114,7 +114,7 @@ roa_renderer_camera_exists(
   uint32_t camera_id);
 
 
-/* ---------------------------------------------------- [ Mesh Renderable ] -- */
+/* --------------------------------------------------- [ Mesh Renderable ] -- */
 
 
 struct roa_renderer_mesh_renderable

@@ -5,7 +5,9 @@
 #include <roa_lib/array.h>
 #include <roa_lib/log.h>
 #include <roa_lib/atomic.h>
+#include <roa_lib/spin_lock.h>
 #include <graphics_api/platform.h>
+
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
@@ -88,16 +90,16 @@ roa_renderer_ctx_destroy(
 	ROA_ASSERT(ctx);
 	ROA_ASSERT(*ctx);
 
-	platform_destroy(ctx);
-
 	struct roa_renderer_ctx *kill_ctx = *ctx;
+
+	platform_destroy(kill_ctx);
 
   roa_array_destroy(kill_ctx->mesh_renderpasses);
 	roa_array_destroy(kill_ctx->renderable);
 	roa_array_destroy(kill_ctx->renderable_id);
 	roa_array_destroy(kill_ctx->camera);
 	roa_array_destroy(kill_ctx->camera_id);
-  
+
   roa_renderer_free free_fn = kill_ctx->mem.free;
 
   free_fn(kill_ctx);

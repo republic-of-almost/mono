@@ -792,12 +792,12 @@ roa_quaternion_import(const float *import_val)
 
 
 void
-roa_quaternion_export(roa_quaternion q, float *export)
+roa_quaternion_export(roa_quaternion q, float *export_data)
 {
-  export[0] = q.x;
-  export[1] = q.y;
-  export[2] = q.z;
-  export[3] = q.w;
+  export_data[0] = q.x;
+  export_data[1] = q.y;
+  export_data[2] = q.z;
+  export_data[3] = q.w;
 }
 
 roa_quaternion
@@ -1423,7 +1423,7 @@ void
 roa_mat4_inverse(roa_mat4 *out, const roa_mat4 *to_inverse)
 {
   float temp[16];
-  
+
     temp[0] =
     to_inverse->data[5]  * to_inverse->data[10] * to_inverse->data[15] -
     to_inverse->data[5]  * to_inverse->data[11] * to_inverse->data[14] -
@@ -1440,7 +1440,7 @@ roa_mat4_inverse(roa_mat4 *out, const roa_mat4 *to_inverse)
     to_inverse->data[13] * to_inverse->data[2] * to_inverse->data[11] +
     to_inverse->data[13] * to_inverse->data[3] * to_inverse->data[10];
 
-    temp[2] = 
+    temp[2] =
     to_inverse->data[1]  * to_inverse->data[6] * to_inverse->data[15] -
     to_inverse->data[1]  * to_inverse->data[7] * to_inverse->data[14] -
     to_inverse->data[5]  * to_inverse->data[2] * to_inverse->data[15] +
@@ -1512,7 +1512,7 @@ roa_mat4_inverse(roa_mat4 *out, const roa_mat4 *to_inverse)
     to_inverse->data[12] * to_inverse->data[1] * to_inverse->data[7] -
     to_inverse->data[12] * to_inverse->data[3] * to_inverse->data[5];
 
-    temp[11] = 
+    temp[11] =
     -to_inverse->data[0] * to_inverse->data[5] * to_inverse->data[11] +
     to_inverse->data[0] * to_inverse->data[7] * to_inverse->data[9] +
     to_inverse->data[4] * to_inverse->data[1] * to_inverse->data[11] -
@@ -1575,7 +1575,7 @@ roa_mat4_determinant(const roa_mat4 *det)
 {
   float temp[16];
 
-  temp[0] = 
+  temp[0] =
    det->data[5]  *det->data[10] *det->data[15] -
    det->data[5]  *det->data[11] *det->data[14] -
    det->data[9]  *det->data[6]  *det->data[15] +
@@ -1583,7 +1583,7 @@ roa_mat4_determinant(const roa_mat4 *det)
    det->data[13] *det->data[6]  *det->data[11] -
    det->data[13] *det->data[7]  *det->data[10];
 
-   temp[1] = 
+   temp[1] =
    -det->data[1]  *det->data[10] *det->data[15] +
    det->data[1]  *det->data[11] *det->data[14] +
    det->data[9]  *det->data[2] *det->data[15] -
@@ -1591,7 +1591,7 @@ roa_mat4_determinant(const roa_mat4 *det)
    det->data[13] *det->data[2] *det->data[11] +
    det->data[13] *det->data[3] *det->data[10];
 
-   temp[2] = 
+   temp[2] =
    det->data[1]  *det->data[6] *det->data[15] -
    det->data[1]  *det->data[7] *det->data[14] -
    det->data[5]  *det->data[2] *det->data[15] +

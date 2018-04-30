@@ -84,6 +84,17 @@ main()
   /* process the scene */
   while (roa_ctx_new_frame(hw_ctx))
   {
+    /* quit if escape pressed */
+    {
+      struct roa_ctx_keyboard_desc kb_desc;
+      roa_ctx_keyboard_get_desc(hw_ctx, &kb_desc);
+
+      if(kb_desc.kb_keys[ROA_KB_ESC])
+      {
+        break;
+      }
+    }
+
     static float time = 0.f;
     time += 0.1f;
 
@@ -141,7 +152,7 @@ main()
         roa_transform transform;
         transform.position = roa_float3_set_with_values(x, y, z);
         transform.rotation = roa_quaternion_default();
-        transform.scale = roa_float3_set_with_values(1, y, 1);
+        transform.scale    = roa_float3_set_with_values(1, y, 1);
 
         roa_transform_export_mat4(&transform, renderable.world_transform);
 
