@@ -19,6 +19,7 @@ struct rep_transform_desc trans_desc[ROA_ARR_COUNT(objects)];
 void
 app_tick(void *arg)
 {
+  /* unused */
   ROA_UNUSED(arg);
 
   struct rep_input_desc input_desc;
@@ -97,7 +98,7 @@ app_tick(void *arg)
       {
         movement = roa_float3_normalize(movement);
       }
-      
+
       /* mouse */
       static float pitch = -0.44f;
       static float yaw = 0.f;

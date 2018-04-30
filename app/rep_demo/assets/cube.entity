@@ -1,8 +1,0 @@
-{
-  "name": "Cube",
-
-  "mesh_renderable": {
-    "material": "Foo",
-    "mesh": "Cube"
-  }
-}
