@@ -143,8 +143,8 @@ struct roa_renderer_light
 
   union {
     struct roa_renderer_point_light point;
-    struct roa_renderer_dir_light directional;
-  }
+    struct roa_renderer_directional_light directional;
+  };
 };
 
 

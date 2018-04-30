@@ -8,14 +8,28 @@
 #include <roa_job/roa_job.h>
 #include <renderer/renderer_tick.h>
 #include <roa_lib/log.h>
+#include <roa_lib/time.h>
 
 
 rep_task application_frame_func = ROA_NULL;
 void *application_frame_arg = ROA_NULL;
 
+unsigned long last_tick = 0;
+
+
 
 ROA_JOB(rep_game_loop_tick, rep_task)
 {
+  /* delta time */
+  {
+    unsigned long this_tick = roa_time_get_current_ms();
+    unsigned long difference = this_tick - last_tick;
+    last_tick = this_tick;
+
+    rep_data_time()->delta_time = (float)difference / 1000.f;
+  }
+
+  /* new frame */
   ROA_BOOL new_frame = roa_ctx_new_frame(rep_data_ctx());
   ROA_BOOL has_tick = !!application_frame_func;
 
@@ -213,6 +227,9 @@ rep_app_create(
     roa_job_dispatcher_ctx_run(rep_data_dispatcher());
 
     ROA_LOG_INFO("No Jobs in dispatcher shutting down");
+
+    /* some data */
+    last_tick = roa_time_get_current_ms();
 
     /* closing */
     roa_tagged_allocator_destroy();

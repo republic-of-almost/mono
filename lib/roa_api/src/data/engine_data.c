@@ -18,6 +18,8 @@ roa_renderer_ctx_t roa_renderer_ctx_data;
 
 struct rep_input_desc rep_input_data;
 
+struct rep_time_desc rep_time_data;
+
 void
 rep_data_init()
 {
@@ -106,3 +108,10 @@ rep_data_renderer()
 {
   return roa_renderer_ctx_data;
 }
+
+
+struct rep_time_desc*
+rep_data_time()
+{
+  return &rep_time_data;
+};

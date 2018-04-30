@@ -41,4 +41,8 @@ roa_renderer_ctx_t
 rep_data_renderer();
 
 
+struct rep_time_desc*
+rep_data_time();
+
+
 #endif /* inc guard */

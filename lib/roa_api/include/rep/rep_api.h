@@ -58,6 +58,20 @@ void
 rep_app_destroy();
 
 
+/* -------------------------------------------------------------- [ Time ] -- */
+
+
+struct rep_time_desc
+{
+  float delta_time;
+};
+
+
+void
+rep_time_get(
+  struct rep_time_desc * out_desc);
+
+
 /* ------------------------------------------------------------- [ Input ] -- */
 
 
