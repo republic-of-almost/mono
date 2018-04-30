@@ -156,6 +156,7 @@ roa_ctx_key_callback(GLFWwindow *win, int key, int scancode, int action, int mod
 
     /* other keys */
     case(GLFW_KEY_ESCAPE): roa_key = ROA_KB_ESC; break;
+    case(GLFW_KEY_TAB): roa_key = ROA_KB_TAB; break;
   }
 
   ctx->kb_keys[roa_key] = state;

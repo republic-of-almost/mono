@@ -104,7 +104,7 @@ typedef enum kb_button_id
   ROA_KB_F7, ROA_KB_F8, ROA_KB_F9, ROA_KB_F10, ROA_KB_F11, ROA_KB_F12,
   ROA_KB_F13, ROA_KB_F14, ROA_KB_F15,
 
-  ROA_KB_ESC,
+  ROA_KB_ESC, ROA_KB_TAB,
 
   ROA_KB_COUNT
 } kb_button_id;
