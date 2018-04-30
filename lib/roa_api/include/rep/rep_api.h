@@ -79,7 +79,7 @@ typedef enum rep_kb_id
   REP_KB_F7, REP_KB_F8, REP_KB_F9, REP_KB_F10, REP_KB_F11, REP_KB_F12,
   REP_KB_F13, REP_KB_F14, REP_KB_F15,
 
-  REP_KB_ESC,
+  REP_KB_ESC, REP_KB_TAB,
 
   REP_KB_COUNT
 } rep_kb_id;

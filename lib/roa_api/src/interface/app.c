@@ -82,6 +82,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 
           /* other */
           case(ROA_KB_ESC): rep_key = REP_KB_ESC; break;
+          case(ROA_KB_TAB): rep_key = REP_KB_TAB; break;
         }
 
         int curr_roa_ctx_state = kb_desc.kb_keys[i];
