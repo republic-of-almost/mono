@@ -5,6 +5,11 @@
 #include <roa_lib/fundamental.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* ------------------------------------------------------------- [ types ] -- */
 
 
@@ -89,6 +94,11 @@ void
 roa_job_wait(
   roa_job_dispatcher_ctx_t ctx,
   uint64_t job_marker);
+
+
+#ifdef __cplusplus
+} /* extern */
+#endif
 
 
 #endif /* inc guard */
