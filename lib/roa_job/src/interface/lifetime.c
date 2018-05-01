@@ -83,7 +83,7 @@ roa_job_dispatcher_ctx_create(
 
 					roa_spin_lock_init(&new_tls.job_lock);
 		      roa_spin_lock_init(&new_tls.fiber_lock);
-		
+
 				  roa_array_create_with_capacity(new_tls.batches, 64);
 					roa_array_create_with_capacity(new_tls.batch_ids, 64);
 		      roa_array_create_with_capacity(new_tls.pending_jobs, 256);
@@ -93,7 +93,7 @@ roa_job_dispatcher_ctx_create(
 		      roa_array_create_with_capacity(new_tls.blocked_fibers, fiber_count);
 					roa_array_create_with_capacity(new_tls.blocked_fiber_batch_ids, fiber_count);
 		      roa_array_create_with_capacity(new_tls.free_fiber_pool, fiber_count);
-			    
+
           unsigned j;
 
           for (j = 0; j < fiber_count; ++j)
@@ -174,7 +174,7 @@ roa_job_dispatcher_ctx_run(
   /* quitting ... */
 }
 
-
+#include <stdio.h>
 void
 roa_job_dispatcher_ctx_destroy(
   roa_job_dispatcher_ctx_t *ctx)

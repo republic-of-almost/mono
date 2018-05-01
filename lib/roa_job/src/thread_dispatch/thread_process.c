@@ -16,6 +16,9 @@
 #include <stdlib.h>
 
 
+/* ------------------------------------------------------------ [ config ] -- */
+
+
 #ifndef ROA_JOB_DEBUG_TH_PROCESS_OUTPUT
 #define ROA_JOB_DEBUG_TH_PROCESS_OUTPUT 0
 #endif
@@ -29,6 +32,9 @@
 #ifndef ROA_JOB_STEAL_SIZE
 #define ROA_JOB_STEAL_SIZE 1
 #endif
+
+
+/* ---------------------------------------------------- [ thread process ] -- */
 
 
 /*
@@ -75,10 +81,10 @@ fiber_process(void *arg)
         char buffer[128];
         ROA_MEM_ZERO(buffer);
 
-        sprintf(buffer, "th: %d - func: %p arg %p", th_index, job_func, job_arg);
+        sprintf(buffer, "th: %d exec - func: %p arg %p counter %p", th_index, job_func, job_arg, tls->executing_fiber.desc.counter);
         printf("%s\n", buffer);
       }
-      
+
       job_func(ctx, job_arg);
     }
 
@@ -87,6 +93,18 @@ fiber_process(void *arg)
     {
       /* decrement job count */
       roa_atomic_int_dec(tls->executing_fiber.desc.counter);
+
+      char buffer[128];
+      ROA_MEM_ZERO(buffer);
+
+      struct job_internal job_data = tls->executing_fiber.desc;
+      struct roa_job_desc desc = job_data.desc;
+
+      roa_job_fn job_func = (roa_job_fn)desc.func;
+      void *job_arg = desc.arg;
+
+      sprintf(buffer, "th: %d done - func: %p arg %p counter %p", th_index, job_func, job_arg, tls->executing_fiber.desc.counter);
+      printf("%s\n", buffer);
     }
 
     /* swtich back */
@@ -107,7 +125,7 @@ fiber_process(void *arg)
 }
 
 /*
-  Switches to a pending fiber. 
+  Switches to a pending fiber.
   returns true if a pending fiber was executed.
 */
 ROA_BOOL
@@ -121,7 +139,7 @@ thread_internal_run_fiber(
 	unsigned batch_count = 0;
 	{
 		roa_spin_lock_aquire(&tls->job_lock);
-		
+
 		batch_count = roa_array_size(tls->batch_ids);
 
 		if(batch_count)
@@ -170,6 +188,7 @@ thread_internal_run_fiber(
     if (batch_id)
     {
       roa_free(batch_id);
+      batch_id = ROA_NULL;
     }
 
     /* setup fiber */
@@ -213,7 +232,7 @@ thread_internal_run_fiber(
 
 		roa_spin_lock_release(&tls->fiber_lock);
 	}
-  
+
   return return_val;
 }
 
@@ -238,12 +257,21 @@ thread_internal_remove_cleared_batches(
 
   for (i = 0; i < batch_count; ++i)
   {
-    struct job_batch *batch = &tls->batches[i];
+    struct job_batch *batch = &tls->batches[erase_index];
     int count = roa_atomic_int_load(batch->counter);
 
     if (count <= 0)
     {
+      if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
+      {
+        printf("th: %d Batch %lu erased - jobs done %d - counter %p\n", tls->th_index, tls->batch_ids[erase_index], batch->count, batch->counter);
+      }
+
       roa_free(batch->counter);
+      batch->counter =  ROA_NULL;
+
+      ROA_ASSERT(roa_array_size(tls->batch_ids) == roa_array_size(tls->batches));
+      ROA_ASSERT(roa_array_size(tls->batch_ids) > erase_index);
 
       roa_array_erase(tls->batch_ids, erase_index);
       roa_array_erase(tls->batches, erase_index);
@@ -298,6 +326,11 @@ thread_internal_check_pending(
       exec.worker_fiber = new_fiber;
       exec.desc = desc;
 
+      if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
+      {
+        printf("th: %d queued task: fn %p, arg %p, counter %p\n", tls->th_index, desc.desc.func, desc.desc.arg, desc.counter);
+      }
+
       roa_array_push(tls->blocked_fiber_batch_ids, 0);
       roa_array_push(tls->blocked_fibers, exec);
 
@@ -331,10 +364,12 @@ thread_internal_steal_jobs(
 
 	/* search for work to steal */
 	{
+    /*
 		if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
 		{
 			printf("Thread %d looking to steal \n", th_index);
 		}
+    */
 
 		unsigned i;
 
@@ -364,14 +399,14 @@ thread_internal_steal_jobs(
 					{
 						steal_job[steal_job_counter] = steal;
 						steal_job_counter += 1;
-            
+
 						roa_array_erase(steal_tls->pending_jobs, k);
 
 						if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
 						{
-							printf("Thread %d stole from thread %d \n", th_index, steal_index);
+							printf("th: %d stole %p from thread %d counter %p \n", th_index, steal.desc.func, steal_index, steal.counter);
 						}
-            
+
             if(steal_job_counter >= ROA_JOB_STEAL_SIZE)
             {
 						  break;
@@ -399,7 +434,7 @@ thread_internal_steal_jobs(
 	{
     /* thread lock so it doesn't bounce around getting stolen */
     return_val = ROA_TRUE;
-     
+
     /* lock this tls jobs and apply work */
     {
 		  roa_spin_lock_aquire(&tls->job_lock);
@@ -441,7 +476,7 @@ thread_internal_wait_or_quit(
   {
     unsigned i;
     ROA_BOOL work = ROA_FALSE;
-    
+
 		/* lock all thread jobs */
 		for(i = 0; i < th_count; ++i)
 		{
@@ -471,7 +506,7 @@ thread_internal_wait_or_quit(
 		{
 			for(i = 0; i < th_count; ++i)
 			{
-				tls_arr[i].thread_status = TLS_QUIT; 
+				tls_arr[i].thread_status = TLS_QUIT;
 			}
 
 			stay_alive = ROA_FALSE;
@@ -489,7 +524,7 @@ thread_internal_wait_or_quit(
 /*
   Runs the thread.
   It will in order check each stage, should any stage complete, it will start again from
-  the begining. 
+  the begining.
 
   if it gets to the end the thread will exit.
 */
@@ -509,13 +544,14 @@ thread_process(void *arg)
 
     ctx = th_arg->ctx;
     roa_free(arg);
+    arg = ROA_NULL;
   }
 
   if(ROA_IS_ENABLED(ROA_JOB_DEBUG_NAME_THREADS))
   {
     roa_thread_set_current_name("ROA_Job Thread");
   }
-  
+
   /* find self in thread pool */
   struct thread_local_storage *tls = ROA_NULL;
   int th_index = -1;
@@ -535,11 +571,12 @@ thread_process(void *arg)
     ROA_ASSERT(th_index > -1);
 
     tls = &ctx->tls[th_index];
+    tls->th_index = th_index;
     ROA_ASSERT(tls);
   }
-    
+
   roa_fiber_create(&tls->home_fiber, ROA_NULL, ROA_NULL);
-  
+
   /*
     first check pending fibers, if found switch to.
     then check pending jobs, if found create pending fiber.
@@ -579,7 +616,7 @@ thread_process(void *arg)
     {
       continue;
     }
-    
+
     /* steal jobs - since nothing else todo :) */
     if (thread_internal_steal_jobs(
           tls,
@@ -589,7 +626,7 @@ thread_process(void *arg)
     {
       continue;
     }
-    
+
     if (thread_internal_wait_or_quit(
           tls,
           ctx->tls,
@@ -605,7 +642,7 @@ thread_process(void *arg)
 		}
 
     return ROA_NULL;
-    
+
   } /* while true */
 
   return ROA_NULL;

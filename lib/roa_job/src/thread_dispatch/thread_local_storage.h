@@ -46,6 +46,8 @@ struct thread_local_storage
   /* array */ uint32_t *blocked_fiber_batch_ids;
   /* array */ struct executing_fiber *blocked_fibers;
 
+  int th_index;
+
 	struct executing_fiber executing_fiber;
   struct roa_fiber *home_fiber;
 

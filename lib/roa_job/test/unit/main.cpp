@@ -21,7 +21,7 @@ double_submit_crash(roa_job_dispatcher_ctx_t ctx, void *)
   roa_job_submit(ctx, &desc, 1);
 
   roa_job_desc other_desc{};
-  desc.func = some_other_dummy_work;
+  other_desc.func = some_other_dummy_work;
 
   roa_job_submit(ctx, &other_desc, 1);
 }
@@ -33,6 +33,12 @@ shutdown_failure(roa_job_dispatcher_ctx_t ctx, void *)
   roa_job_desc desc{};
   desc.func = some_dummy_work;
 
+  roa_job_submit(ctx, &desc, 1);
+  roa_job_submit(ctx, &desc, 1);
+  roa_job_submit(ctx, &desc, 1);
+  roa_job_submit(ctx, &desc, 1);
+  roa_job_submit(ctx, &desc, 1);
+  roa_job_submit(ctx, &desc, 1);
   roa_job_submit(ctx, &desc, 1);
   roa_job_submit(ctx, &desc, 1);
 }
