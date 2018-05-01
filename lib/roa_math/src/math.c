@@ -36,6 +36,13 @@ roa_float_cos(float a)
 
 
 float
+roa_float_acos(float a)
+{
+  return acosf(a);
+}
+
+
+float
 roa_float_sqrt(float a)
 {
   return sqrtf(a);
@@ -855,6 +862,16 @@ roa_quaternion_multiply(roa_quaternion left, roa_quaternion right)
 						(left.y * right.x);
 
   return roa_quaternion_set_with_values(x, y, z, w);
+}
+
+
+roa_quaternion
+roa_quaternion_normalize(roa_quaternion quat)
+{
+  roa_float4 vec = roa_float4_set_with_values(quat.x, quat.y, quat.z, quat.w);
+  roa_float4 nor = roa_float4_normalize(vec);
+
+  return roa_quaternion_set_with_values(nor.x, nor.y, nor.z, nor.w);
 }
 
 

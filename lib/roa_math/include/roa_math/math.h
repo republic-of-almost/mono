@@ -44,6 +44,7 @@ typedef struct roa_ray { roa_float3 origin; roa_float3 dir; } roa_ray;
 float           roa_float_tan(float a);
 float           roa_float_sin(float a);
 float           roa_float_cos(float a);
+float           roa_float_acos(float a);
 
 float           roa_float_sqrt(float a);
 
@@ -164,6 +165,7 @@ void            roa_quaternion_export(roa_quaternion q, float *export_data);
 roa_quaternion  roa_quaternion_set_with_values(float x, float y, float z, float w);
 roa_quaternion  roa_quaternion_from_axis_angle(roa_float3 axis, float radians);
 roa_quaternion  roa_quaternion_multiply(roa_quaternion left, roa_quaternion right);
+roa_quaternion  roa_quaternion_normalize(roa_quaternion q);
 
 int             roa_quaternion_is_near(roa_quaternion a, roa_quaternion b, float err);
 
