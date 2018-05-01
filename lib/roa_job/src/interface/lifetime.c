@@ -191,6 +191,7 @@ roa_job_dispatcher_ctx_destroy(
     unsigned i;
     for (i = 1; i < kill_ctx->thread_count; ++i)
     {
+      printf("th destroy %d\n", i);
       roa_thread_destroy(kill_ctx->threads[i]);
     }
 

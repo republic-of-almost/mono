@@ -506,6 +506,7 @@ thread_internal_wait_or_quit(
 		{
 			for(i = 0; i < th_count; ++i)
 			{
+        printf("th: %d quit\n", i);
 				tls_arr[i].thread_status = TLS_QUIT;
 			}
 
@@ -593,11 +594,8 @@ thread_process(void *arg)
     roa_signal_raise(ctx->signal_start);
   }
 
-  tls->thread_status = TLS_RUNNING;
-
-
   /* if this loop gets to the bottom it exits */
-  while (1)
+  while (tls->thread_status != TLS_QUIT)
   {
     /* remove completed batches */
     if (thread_internal_remove_cleared_batches(tls))
@@ -641,9 +639,7 @@ thread_process(void *arg)
 			printf("Exiting th %d\n", th_index);
 		}
 
-    return ROA_NULL;
-
-  } /* while true */
+  } /* while processing */
 
   return ROA_NULL;
 }
