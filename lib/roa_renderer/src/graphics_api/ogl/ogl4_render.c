@@ -36,6 +36,11 @@ platform_render(roa_renderer_ctx_t ctx)
 
     glBindBuffer(GL_ARRAY_BUFFER, ctx->gfx_api.vbo);
 
+    if(rp->draw_calls == ROA_NULL)
+    {
+      continue;
+    }
+
     unsigned draw_call = roa_array_size(rp->draw_calls);
 
     for (j = 0; j < draw_call; ++j)

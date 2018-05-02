@@ -63,9 +63,11 @@ roa_renderer_task_pump(
     roa_mat4 view_proj;
     roa_mat4_multiply(&view_proj, &view, &proj);
 
+    unsigned mesh_count = roa_array_size(ctx->renderable);
+
     /* mesh renderables */
+    if(mesh_count)
     {
-      unsigned mesh_count = roa_array_size(ctx->renderable);
       unsigned j;
 
       pass->draw_calls = ROA_NULL;
