@@ -1,0 +1,27 @@
+{
+  "name": "AppRepDemo02",
+  "kind": "ConsoleApp",
+  "language": "C89",
+  "location": "./",
+
+  "src_files": [
+    "../src/**.c",
+    "../src/**.h",
+    "../docs/**.md",
+    "../data/**.json",
+    "../assets/**.material",
+    "../assets/**.entity"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "project_dependencies": [
+    "RepublicAPI"
+  ],
+
+  "disable_warning_windows" : [
+    "4127"
+  ]
+}
