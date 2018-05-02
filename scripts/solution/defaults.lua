@@ -7,9 +7,9 @@ project_defaults = {
   },
 
   flags = {
-    "EnableSSE2",
-    "ExtraWarnings",
-    "FloatFast",
+    --"EnableSSE2",
+    --"ExtraWarnings",
+    --"FloatFast",
     -- "NoExceptions", -- deprecated premake5
     -- "NoRTTI", -- deprecated premake5
   },

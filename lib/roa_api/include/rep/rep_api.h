@@ -118,7 +118,7 @@ typedef enum rep_ms_button_id
   REP_MS_LEFT, REP_MS_RIGHT, REP_MS_MIDDLE,
 
   REP_MS_COUNT,
-} rep_msbutton_id;
+} rep_ms_button_id;
 
 
 struct rep_mouse_desc
@@ -141,7 +141,7 @@ typedef enum rep_gp_button_id
   REP_GP_START, REP_GP_MENU,
 
   REP_GP_COUNT
-} rep_msbutton_id;
+} rep_gp_button_id;
 
 
 struct rep_gamepad_desc

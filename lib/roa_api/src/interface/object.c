@@ -1,6 +1,7 @@
 #include <rep/rep_api.h>
 #include <roa_lib/assert.h>
 #include <roa_graph/roa_graph.h>
+#include <data/engine_data.h>
 
 
 void
@@ -12,7 +13,7 @@ rep_object_create(
   ROA_ASSERT(out_object_ids);
   ROA_ASSERT(desc);
   ROA_ASSERT(count);
-	
+
 	/* create objects */
 	if(out_object_ids && desc && count)
 	{
@@ -24,7 +25,7 @@ rep_object_create(
 			out_object_ids[i] = roa_graph_node_create(
 				rep_data_graph());
 		}
-			
+
 		/* set parents if any */
 		for(i = 0; i < count; ++i)
 		{
@@ -49,7 +50,7 @@ rep_object_update(
   ROA_ASSERT(object_ids);
   ROA_ASSERT(desc);
   ROA_ASSERT(count);
-	
+
 	if(object_ids && desc && count)
 	{
 		unsigned i;

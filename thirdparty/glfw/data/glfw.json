@@ -106,12 +106,16 @@
   "disable_warning_linux" : [
     "int-conversion",
     "implicit-function-declaration",
-    "endif-labels"
+    "endif-labels",
+    "unused-parameter",
+    "sign-compare"
   ],
 
   "disable_warning_osx" : [
     "int-conversion",
     "implicit-function-declaration",
-    "endif-labels"
+    "endif-labels",
+    "unused-parameter",
+    "sign-compare"
   ]
 }

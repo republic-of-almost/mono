@@ -94,17 +94,20 @@ fiber_process(void *arg)
       /* decrement job count */
       roa_atomic_int_dec(tls->executing_fiber.desc.counter);
 
-      char buffer[128];
-      ROA_MEM_ZERO(buffer);
+      if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
+      {
+        char buffer[128];
+        ROA_MEM_ZERO(buffer);
 
-      struct job_internal job_data = tls->executing_fiber.desc;
-      struct roa_job_desc desc = job_data.desc;
+        struct job_internal job_data = tls->executing_fiber.desc;
+        struct roa_job_desc desc = job_data.desc;
 
-      roa_job_fn job_func = (roa_job_fn)desc.func;
-      void *job_arg = desc.arg;
+        roa_job_fn job_func = (roa_job_fn)desc.func;
+        void *job_arg = desc.arg;
 
-      sprintf(buffer, "th: %d done - func: %p arg %p counter %p", th_index, job_func, job_arg, tls->executing_fiber.desc.counter);
-      printf("%s\n", buffer);
+        sprintf(buffer, "th: %d done - func: %p arg %p counter %p", th_index, job_func, job_arg, tls->executing_fiber.desc.counter);
+        printf("%s\n", buffer);
+      }
     }
 
     /* swtich back */
@@ -264,7 +267,7 @@ thread_internal_remove_cleared_batches(
     {
       if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
       {
-        printf("th: %d Batch %lu erased - jobs done %d - counter %p\n", tls->th_index, tls->batch_ids[erase_index], batch->count, batch->counter);
+        printf("th: %d Batch %d erased - jobs done %d - counter %p\n", tls->th_index, tls->batch_ids[erase_index], batch->count, batch->counter);
       }
 
       roa_free(batch->counter);
@@ -506,7 +509,10 @@ thread_internal_wait_or_quit(
 		{
 			for(i = 0; i < th_count; ++i)
 			{
-        printf("th: %d quit\n", i);
+        if(ROA_IS_ENABLED(ROA_JOB_DEBUG_TH_PROCESS_OUTPUT))
+        {
+          printf("th: %d quit\n", i);
+        }
 				tls_arr[i].thread_status = TLS_QUIT;
 			}
 

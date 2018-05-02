@@ -4,7 +4,9 @@
 #include <data/engine_data.h>
 #include <roa_renderer/roa_renderer.h>
 #include <data/config.h>
+#include <data/engine_data.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 void
@@ -24,7 +26,7 @@ rep_transform_set(
     roa_graph_ctx_t graph = rep_data_graph();
     roa_renderer_ctx_t renderer = rep_data_renderer();
 
-    int i;
+    unsigned i;
 
     for(i = 0; i < count; ++i)
     {
@@ -64,7 +66,7 @@ rep_transform_set(
         {
           struct roa_renderer_mesh_renderable mesh;
           roa_renderer_mesh_renderable_get(renderer, &mesh, obj_id);
-          
+
           roa_transform_export_mat4(&transform, mesh.world_transform);
 
           roa_renderer_mesh_renderable_set(renderer, &mesh, obj_id);
@@ -90,7 +92,7 @@ rep_transform_get(
   if (object_ids && desc && count)
   {
     roa_graph_ctx_t graph = rep_data_graph();
-    int i;
+    unsigned i;
 
     for(i = 0; i < count; ++i)
     {

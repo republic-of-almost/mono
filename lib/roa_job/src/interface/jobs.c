@@ -54,7 +54,7 @@ roa_job_submit(
     roa_array_push(tls->batches, new_batch);
 		roa_array_push(tls->batch_ids, new_batch_id);
 
-		/*if(ROA_IS_ENABLED(ROA_JOB_DEBUG_OUTPUT))*/
+		if(ROA_IS_ENABLED(ROA_JOB_DEBUG_OUTPUT))
 		{
 			printf("th: %d new batch %lu, counter %p \n", tls->th_index, marker, new_batch.counter);
 		}
@@ -66,10 +66,12 @@ roa_job_submit(
     {
 			struct job_internal job;
 			job.desc = desc[j];
-			/*job.batch_id = new_batch_id;*/
       job.counter = new_batch.counter;
 
-      printf("th: %d, pushed %p\n", tls->th_index, job.desc.func);
+      if(ROA_IS_ENABLED(ROA_JOB_DEBUG_OUTPUT))
+      {
+        printf("th: %d, pushed %p\n", tls->th_index, job.desc.func);
+      }
 
       roa_array_push(tls->pending_jobs, job);
     }

@@ -20,6 +20,8 @@ unsigned long last_tick = 0;
 
 ROA_JOB(rep_game_loop_tick, rep_task)
 {
+  ROA_UNUSED(arg);
+
   /* delta time */
   {
     unsigned long this_tick = roa_time_get_current_ms();
@@ -38,7 +40,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     /* update input */
     {
       struct roa_ctx_keyboard_desc kb_desc;
-      
+
       roa_ctx_keyboard_get_desc(rep_data_ctx(), &kb_desc);
 
       /* copy kb data */
@@ -49,7 +51,6 @@ ROA_JOB(rep_game_loop_tick, rep_task)
 
       for (i = 0; i < count; ++i)
       {
-        int roa_key = i;
         int rep_key = REP_KB_UNKNOWN;
 
         switch (i)
@@ -142,7 +143,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
     }
 
     /* user task */
-    { 
+    {
       application_frame_func(application_frame_arg);
 
       roa_tagged_allocator_free(rep_config_tagged_hash_logic());
@@ -180,7 +181,7 @@ ROA_JOB(rep_game_loop_tick, rep_task)
       tick_desc.arg           = ROA_NULL;
       tick_desc.thread_locked = ROA_TRUE;
 
-      roa_job_submit(rep_data_dispatcher(), &tick_desc, 1);
+      roa_job_submit(job_ctx, &tick_desc, 1);
     }
   }
 }

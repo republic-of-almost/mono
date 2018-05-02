@@ -104,8 +104,10 @@ code_configs = {
   -- no errors on warnings etc.
   {
     name = "development",
-    flags = {"Symbols"},
-    defines = {"DEBUG", "NIL_DEVELOPMENT", "NIL_PEDANTIC"},
+    symbols = true,
+    simd = false,
+    fast_float = true,
+    extra_warnings = true,
   },
 
   -- Stage --
@@ -114,16 +116,24 @@ code_configs = {
   -- Debug flags still enabled.
   {
     name = "staging",
-    flags = {"Optimize", "Symbols"},
-    defines = {"DEBUG", "NIL_STAGE", "NIL_PEDANTIC"},
+    symbols = true,
+    simd = true,
+    optimize = true,
+    fast_float = true,
+    extra_warnings = true,
   },
 
   -- Release --
   -- Final build.
   {
     name = "release",
-    flags = {"Optimize"},
-    defines = {"NDEBUG", "NIL_RELEASE", "NIMGUI", "NDEBUGLINES"},
+    symbols = false,
+    simd = true,
+    optimize = true,
+    fast_float = true,
+    extra_warnings = true,
+
+    defines = {"NDEBUG"},
   },
 }
 
@@ -242,7 +252,7 @@ make.create_solution(solution_data, project_defaults, projects)
 
     function
     find_table(proj, ident)
-      
+
       local results = {};
 
       local data = proj[ident];
@@ -399,7 +409,13 @@ make.create_solution(solution_data, project_defaults, projects)
       configuration(config.name)
 
       defines(config.defines)
-      flags(config.flags)
+
+      if config.optimize then optimize("On") else optimize("Off") end
+      if config.symbols then symbols("On") else symbols("Off") end
+      if config.simd then vectorextensions("SSE2") end
+      if config.fast_float then floatingpoint("Fast") end
+      if config.extra_warnings then warnings("Extra") end
+
       targetdir(output .. config.name .. "/")
       objdir(output .. "objects/")
 
@@ -408,8 +424,6 @@ make.create_solution(solution_data, project_defaults, projects)
 
         local platform_project_default_defines = find_table_with_platform(project_defaults, "defines")
         if platform_project_default_defines then defines(platform_project_default_defines) end
-
-        flags(project_defaults.flags)
       end
 
       -- RTTI --

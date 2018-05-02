@@ -15,6 +15,8 @@ ROA_JOB(rep_renderer_task, struct roa_renderer_task *)
 
 ROA_JOB(rep_renderer_tick, void*)
 {
+  ROA_UNUSED(arg);
+
   struct roa_renderer_task **tasks = ROA_NULL;
 
   /* create an allocator here */

@@ -14,8 +14,21 @@
 #include <thread_dispatch/thread_process.h>
 
 
+/* ------------------------------------------------------------ [ config ] -- */
+
+
 #ifndef ROA_JOB_CPU_AFFINITY
 #define ROA_JOB_CPU_AFFINITY 0
+#endif
+
+
+#ifndef ROA_JOB_DEBUG_OUTPUT
+#define ROA_JOB_DEBUG_OUTPUT 0
+#endif
+
+
+#ifdef ROA_JOB_DEBUG_OUTPUT
+#include <stdio.h>
 #endif
 
 
@@ -191,7 +204,10 @@ roa_job_dispatcher_ctx_destroy(
     unsigned i;
     for (i = 1; i < kill_ctx->thread_count; ++i)
     {
-      printf("th destroy %d\n", i);
+      if(ROA_IS_ENABLED(ROA_JOB_DEBUG_OUTPUT))
+      {
+        printf("th destroy %d\n", i);
+      }
       roa_thread_destroy(kill_ctx->threads[i]);
     }
 

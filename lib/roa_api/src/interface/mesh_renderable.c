@@ -2,6 +2,7 @@
 #include <roa_lib/assert.h>
 #include <roa_graph/roa_graph.h>
 #include <roa_renderer/roa_renderer.h>
+#include <data/engine_data.h>
 #include <data/config.h>
 
 
@@ -39,6 +40,7 @@ rep_mesh_renderable_set(
       roa_mat4_export(&world_transform, renderable.world_transform);
 
       ROA_BOOL set = roa_renderer_mesh_renderable_set(renderer, &renderable, obj_id);
+      ROA_ASSERT(set);
     }
 	}
 }
@@ -56,6 +58,6 @@ rep_mesh_renderable_get(
 
 	if(object_ids && desc && count)
 	{
-
+    ROA_ASSERT(ROA_FALSE);
 	}
 }

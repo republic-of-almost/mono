@@ -6,6 +6,7 @@
 #include <roa_graph/roa_graph.h>
 #include <roa_math/math.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 void
