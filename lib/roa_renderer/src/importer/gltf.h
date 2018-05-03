@@ -79,7 +79,7 @@ struct gltf_import
 
   struct gltf_buffer *buffers;
   int buffer_count;
-  
+
   struct glft_mesh *meshes;
   int mesh_count;
 };

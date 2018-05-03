@@ -24,7 +24,8 @@
 		"STB",
 		"RepublicMath",
     "RepublicLib",
-    "Scratch"
+    "Scratch",
+    "Json"
 	],
 
 	"defines" : [

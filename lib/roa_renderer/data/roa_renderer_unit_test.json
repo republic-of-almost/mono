@@ -9,6 +9,10 @@
     "rtti": true
   },
 
+	"assets": [
+		"../test/functional/assets/"
+	],
+
 	"src_files" : [
 		"../data/roa_renderer_unit_test.json",
 		"../test/unit/**.cpp"
