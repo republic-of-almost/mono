@@ -47,7 +47,7 @@ roa_exe_dir()
   }
   return buffer_path;
   #elif defined(__linux__)
-	static char buffer_path[2048] = "/0";
+	static char buffer_path[2048] = "\0";
 
 	if(strlen(buffer_path) == 0)
 	{
