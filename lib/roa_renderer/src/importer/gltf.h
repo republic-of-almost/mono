@@ -7,7 +7,30 @@ extern "C" {
 #endif
 
 
-struct gltf_accessors
+enum gltf_component_type_e
+{
+  GLTF_COMPONENT_TYPE_BYTE = 5120,
+  GLTF_COMPONENT_TYPE_UNSIGNED_BYTE = 5121,
+  GLTF_COMPONENT_TYPE_SHORT = 5122,
+  GLTF_COMPONENT_TYPE_UNSIGNED_SHORT = 5123,
+  GLTF_COMPONENT_TYPE_UNSIGNED_INT = 5125,
+  GLTF_COMPONENT_TYPE_FLOAT = 5126,
+};
+
+
+enum gltf_type_e
+{
+  GLTF_TYPE_SCALAR,
+  GLTF_TYPE_VEC2,
+  GLTF_TYPE_VEC3,
+  GLTF_TYPE_VEC4,
+  GLTF_TYPE_MAT2,
+  GLTF_TYPE_MAT3,
+  GLTF_TYPE_MAT4,
+};
+
+
+struct gltf_accessor
 {
   int buffer_view;
   int component_type;
@@ -71,7 +94,7 @@ struct gltf_node
 
 struct gltf_import
 {
-  struct gltf_accessors *accessors;
+  struct gltf_accessor *accessors;
   int accessor_count;
 
   struct gltf_buffer_view *buffer_views;
