@@ -456,7 +456,9 @@ make.create_solution(solution_data, project_defaults, projects)
         -- Linux Copy --
         elseif os_target == "linux" then
           if proj.kind == "WindowedApp" or proj.kind == "ConsoleApp" then
-            postbuildcommands("cp -rf " .. src_dir .. "* " .. dest_dir .. config.name .. "/assets/" .. " 2>/dev/null || :");
+            local full_dest_dir = dest_dir .. config.name .. "/assets/"
+            postbuildcommands("test -d " .. full_dest_dir .. " || mkdir -p " .. full_dest_dir)
+            postbuildcommands("cp -rf " .. src_dir .. "* " .. full_dest_dir .. " 2>/dev/null || :");
           end
         -- Windows Copy --
         elseif os_target == "windows" then
@@ -482,7 +484,7 @@ make.create_solution(solution_data, project_defaults, projects)
           for k, asset_dir in ipairs(asset_proj.assets) do
             if asset_dir then
               print(asset_dir)
-              copy_files(asset_dir, make.get_proj_root() .. "../../output/")
+              copy_files(make.get_proj_root() .. asset_proj.base_location .. asset_dir, make.get_proj_root() .. "../../output/")
             end
           end
         end
