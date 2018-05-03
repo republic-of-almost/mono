@@ -25,7 +25,8 @@
 		"RepublicMath",
     "RepublicLib",
     "Scratch",
-    "OpenGL"
+    "OpenGL",
+    "Json"
 	],
 
 	"defines" : [

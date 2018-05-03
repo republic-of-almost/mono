@@ -4,6 +4,10 @@
 	"language": "C89",
 	"location": "./",
 
+	"assets": [
+    "../test/functional/assets/"
+  ],
+
 	"src_files" : [
 		"../data/roa_renderer_functional_test.json",
 		"../test/functional/**.h",
