@@ -25,6 +25,7 @@
 		"RepublicMath",
     "RepublicLib",
     "Scratch",
+    "GLTFImporter",
     "OpenGL"
 	],
 
