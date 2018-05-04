@@ -1,5 +1,5 @@
 {
-  "name" : "GLTFImpoterUnitTest",
+  "name" : "GLTFImporterUnitTest",
   "kind" : "ConsoleApp",
   "language": "C++",
   "location": "./",
