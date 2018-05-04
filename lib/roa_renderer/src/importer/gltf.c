@@ -122,6 +122,8 @@ gltf_import(const char *filename, struct gltf_import *out_import)
                   else if (strcmp(attr_name->string, "max") == 0)
                   {
                     ROA_ASSERT(attr_val->type == json_type_array);
+                    struct json_array_s *arr = (struct json_array_s*)attr_val->payload;
+                    
                   }
                   else if (strcmp(attr_name->string, "min") == 0)
                   {
@@ -131,7 +133,23 @@ gltf_import(const char *filename, struct gltf_import *out_import)
                   {
                     ROA_ASSERT(attr_val->type == json_type_string);
                     struct json_string_s *json_val = (struct json_string_s*)attr_val->payload;
-                    int i = 0;
+                    
+                    if (strcmp(json_val->string, "SCALAR") == 0)
+                    {
+                      accessor_val->type = GLTF_TYPE_SCALAR;
+                    }
+                    else if(strcmp(json_val->string, "VEC2") == 0)
+                    {
+                      accessor_val->type = GLTF_TYPE_VEC2;
+                    }
+                    else if (strcmp(json_val->string, "VEC3") == 0)
+                    {
+                      accessor_val->type = GLTF_TYPE_VEC3;
+                    }
+                    else if (strcmp(json_val->string, "VEC4") == 0)
+                    {
+                      accessor_val->type = GLTF_TYPE_VEC4;
+                    }
                   }
 
                   attr_ele = attr_ele->next;
