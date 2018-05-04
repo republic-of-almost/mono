@@ -2,7 +2,7 @@
 task :ci do |t, args|
 
   Dir.chdir("scripts/solution/")
-  sh("../../premake5 --file=solution.lua gmake")
+  sh("../../premake5 --file=roa.lua gmake")
   sh("make #{ENV['EXE']} config=release CXX=g++-5")
 
   Dir.chdir("../../output/release")
