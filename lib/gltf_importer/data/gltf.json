@@ -1,0 +1,27 @@
+{
+  "name": "GLTFImporter",
+  "kind": "StaticLib",
+  "language": "C89",
+  "location": "./",
+
+  "src_files" : [
+    "../include/**.h",
+    "../src/**.h",
+    "../src/**.c",
+    "../doc/**.md",
+    "../data/gltf.json"
+  ],
+
+  "public_inc_dirs": [
+    "../include/"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "project_dependencies" : [
+    "RepublicLib",
+    "Json"
+  ]
+}

@@ -28,6 +28,7 @@ env:
     - EXE=RepublicGraphUnitTest
     - EXE=RepublicJobUnitTest
     - EXE=RepublicRendererUnitTest
+    - EXE=GLTFImporterUnitTest
 
 addons:
     apt:

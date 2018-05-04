@@ -1,5 +1,5 @@
 #include <catch/catch.hpp>
-#include <importer/gltf.h>
+#include <gltf/gltf.h>
 #include <roa_lib/dir.h>
 #include <cstring>
 

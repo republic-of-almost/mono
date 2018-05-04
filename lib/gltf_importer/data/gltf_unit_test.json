@@ -1,0 +1,30 @@
+{
+  "name" : "GLTFImpoterUnitTest",
+  "kind" : "ConsoleApp",
+  "language": "C++",
+  "location": "./",
+
+  "lang_settings" : {
+    "exceptions": true,
+    "rtti": true
+  },
+
+  "assets": [
+    "../test/assets/"
+  ],
+
+  "src_files" : [
+    "../data/gltf_unit_test.json",
+    "../test/unit/**.cpp"
+  ],
+
+  "public_inc_dirs" : [
+    "../include/",
+    "../src/"
+  ],
+
+  "project_dependencies" : [
+    "Catch",
+    "GLTFImporter"
+  ]
+}

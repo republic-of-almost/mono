@@ -1,4 +1,4 @@
-#include "gltf.h"
+#include <gltf/gltf.h>
 #include <json/json.h>
 #include <stdlib.h>
 #include <stdio.h>
