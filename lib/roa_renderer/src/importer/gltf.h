@@ -30,24 +30,41 @@ enum gltf_type_e
 };
 
 
-struct gltf_accessor
+enum gltf_target_e
 {
-  int buffer_view;
-  int component_type;
-  int count;
-  int type;
-
-  float max[4];
-  float min[4];
+  GLTF_TARGET_NONE,
+  GLTF_TARGET_ARRAY_BUFFER = 34962,
+  GLTF_TARGET_ELEMENT_ARRAY_BUFFER = 34963,
 };
 
 
-struct glft_buffer_view
+struct gltf_accessor
+{
+  int buffer_view;              /* optional */
+  int byte_offset;              /* optional */
+  int component_type;           /* gltf_type_e */
+  int normalized;               /* 0 or 1 */
+  int count;                    /* number of attributes */
+  int type;                     /* gltf_type_e */
+  float max[16];                /* optional */
+  float min[16];                /* optional */
+  /* missing - sparse */
+  char *name;                /* optional */
+  /* missing - extensions */
+  /* missing - extras */
+};
+
+
+struct gltf_buffer_view
 {
   int buffer;
-  int byte_length;
   int byte_offset;
+  int byte_length;
+  int byte_stride;
   int target;
+  char name[64];
+  /* missing - extensions */
+  /* missing - extras */
 };
 
 

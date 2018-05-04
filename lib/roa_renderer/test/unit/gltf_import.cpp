@@ -17,7 +17,7 @@ TEST_CASE("GLTF Importer")
   SECTION("accessors")
   {
     REQUIRE(import_scene.accessor_count == 5);
-
+    
     REQUIRE(import_scene.accessors[0].buffer_view == 0);
     REQUIRE(import_scene.accessors[0].count == 36);
     REQUIRE(import_scene.accessors[0].type == GLTF_TYPE_SCALAR);
@@ -69,6 +69,36 @@ TEST_CASE("GLTF Importer")
     REQUIRE(import_scene.accessors[4].min[0] == 9.997998859034851e-05f);
     REQUIRE(import_scene.accessors[4].min[1] == 9.995698928833008e-05f);
   }
+
+  // SECTION("Buffer views")
+  // {
+  //   REQUIRE(import_scene.buffer_view_count == 5);
+  //
+  //   REQUIRE(import_scene.buffer_views[0].buffer == 0);
+  //   REQUIRE(import_scene.buffer_views[0].byte_length == 36);
+  //   REQUIRE(import_scene.buffer_views[0].byte_offset == 0);
+  //   REQUIRE(import_scene.buffer_views[0].target == GLTF_TARGET_ELEMENT_ARRAY_BUFFER);
+  //
+  //   REQUIRE(import_scene.buffer_views[1].buffer == 0);
+  //   REQUIRE(import_scene.buffer_views[1].byte_length == 288);
+  //   REQUIRE(import_scene.buffer_views[1].byte_offset == 36);
+  //   REQUIRE(import_scene.buffer_views[1].target == GLTF_TARGET_ARRAY_BUFFER);
+  //
+  //   REQUIRE(import_scene.buffer_views[2].buffer == 0);
+  //   REQUIRE(import_scene.buffer_views[2].byte_length == 288);
+  //   REQUIRE(import_scene.buffer_views[2].byte_offset == 324);
+  //   REQUIRE(import_scene.buffer_views[2].target == GLTF_TARGET_ARRAY_BUFFER);
+  //
+  //   REQUIRE(import_scene.buffer_views[3].buffer == 0);
+  //   REQUIRE(import_scene.buffer_views[3].byte_length == 384);
+  //   REQUIRE(import_scene.buffer_views[3].byte_offset == 612);
+  //   REQUIRE(import_scene.buffer_views[3].target == GLTF_TARGET_ARRAY_BUFFER);
+  //
+  //   REQUIRE(import_scene.buffer_views[4].buffer == 0);
+  //   REQUIRE(import_scene.buffer_views[4].byte_length == 192);
+  //   REQUIRE(import_scene.buffer_views[4].byte_offset == 996);
+  //   REQUIRE(import_scene.buffer_views[4].target == GLTF_TARGET_ARRAY_BUFFER);
+  // }
 
   gltf_free(&import_scene);
 }
