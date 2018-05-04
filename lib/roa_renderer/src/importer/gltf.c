@@ -122,12 +122,40 @@ gltf_import(const char *filename, struct gltf_import *out_import)
                   else if (strcmp(attr_name->string, "max") == 0)
                   {
                     ROA_ASSERT(attr_val->type == json_type_array);
-                    struct json_array_s *arr = (struct json_array_s*)attr_val->payload;
-                    
+                    struct json_array_s *json_val = (struct json_array_s*)attr_val->payload;
+                    struct json_array_element_s *ele = (struct json_array_element_s *)json_val->start;
+
+                    int i = 0;
+
+                    while (ele != ROA_NULL)
+                    {
+                      struct json_value_s *ele_val = (struct json_value_s*)ele->value;
+                      ROA_ASSERT(ele_val->type == json_type_number);
+                      struct json_number_s *json_val = (struct json_number_s*)ele_val->payload;
+
+                      accessor_val->max[i++] = atof(json_val->number);
+
+                      ele = ele->next;
+                    }
                   }
                   else if (strcmp(attr_name->string, "min") == 0)
                   {
                     ROA_ASSERT(attr_val->type == json_type_array);
+                    struct json_array_s *json_val = (struct json_array_s*)attr_val->payload;
+                    struct json_array_element_s *ele = (struct json_array_element_s *)json_val->start;
+
+                    int i = 0;
+
+                    while (ele != ROA_NULL)
+                    {
+                      struct json_value_s *ele_val = (struct json_value_s*)ele->value;
+                      ROA_ASSERT(ele_val->type == json_type_number);
+                      struct json_number_s *json_val = (struct json_number_s*)ele_val->payload;
+
+                      accessor_val->min[i++] = atof(json_val->number);
+
+                      ele = ele->next;
+                    }
                   }
                   else if (strcmp(attr_name->string, "type") == 0)
                   {
