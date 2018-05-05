@@ -27,6 +27,7 @@ env:
     - EXE=RepublicLibUnitTest
     - EXE=RepublicGraphUnitTest
     - EXE=RepublicJobUnitTest
+    - EXE=RepublicJobFuncTest
     - EXE=RepublicRendererUnitTest
     - EXE=GLTFImporterUnitTest
 
