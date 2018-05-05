@@ -84,126 +84,97 @@ gltf_import(const char *filename, struct gltf_import *out_import)
       struct json_object_s *root_obj = (struct json_object_s*)root->payload;
       struct json_object_element_s *root_obj_ele = root_obj->start;
 
-      while(root_obj_ele != ROA_NULL)
-      {
+      while(root_obj_ele != ROA_NULL) {
         struct json_string_s *root_name = root_obj_ele->name;
 
         /* ----------------------------------------------- [ accessors ] -- */
 
-        if (json_attr_is_called(root_obj_ele, "accessors"))
-        {
-          struct gltf_accessor accessor;
-          ROA_MEM_ZERO(accessor);
-
+        if (json_attr_is_called(root_obj_ele, "accessors")) {
           struct json_value_s *accessors = (struct json_object_s*)root_obj_ele->value;
           ROA_ASSERT(accessors->type == json_type_array);
 
           struct json_array_s *accessor_arr = (struct json_array_s*)accessors->payload;
           struct json_array_element_s *accessor_arr_ele = (struct json_array_element_s*)accessor_arr->start;
 
-          while (accessor_arr_ele != ROA_NULL)
-          {
-            struct gltf_accessor *accessor_val = ROA_NULL;
+          while (accessor_arr_ele != ROA_NULL) {
+            struct gltf_accessor accessor;
+            ROA_MEM_ZERO(accessor);
 
             struct json_value_s *acc_val = (struct json_value_s*)accessor_arr_ele->value;
             struct json_object_s *attr_obj = (struct json_object_s*)acc_val->payload;
             struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
 
-            while (attr_ele != ROA_NULL)
-            {
+            while (attr_ele != ROA_NULL) {
               if (json_attr_is_called(attr_ele, "name"))
               {
-                if(accessor_val)
-                {
-                  /* to string */
-                }
+
               }
-              else if (json_attr_is_called(attr_ele, "bufferView"))
-              {
+              else if (json_attr_is_called(attr_ele, "bufferView")) {
                 accessor.buffer_view = json_to_int(attr_ele->value);
               }
-              else if (json_attr_is_called(attr_ele, "componentType"))
-              {
+              else if (json_attr_is_called(attr_ele, "componentType")) {
                 accessor.component_type = json_to_int(attr_ele->value);
               }
-              else if (json_attr_is_called(attr_ele, "count"))
-              {
+              else if (json_attr_is_called(attr_ele, "count")) {
                 accessor.count = json_to_int(attr_ele->value);
               }
-              else if (json_attr_is_called(attr_ele, "max"))
-              {
+              else if (json_attr_is_called(attr_ele, "max")) {
                 ROA_ASSERT(attr_ele->value->type == json_type_array);
                 struct json_array_s *json_val = (struct json_array_s*)attr_ele->value->payload;
                 struct json_array_element_s *ele = (struct json_array_element_s *)json_val->start;
 
                 int i = 0;
 
+                roa_array_create(accessor.max);
+
                 while (ele != ROA_NULL)
                 {
-                  if(accessor_val)
-                  {
-                    accessor_val->max[i++] = json_to_float(ele->value);
-                  }
-                  else
-                  {
-                    alloc_buffer_space += sizeof(accessor_val->max[0]);
-                  }
+                  roa_array_push(accessor.max, json_to_float(ele->value));
 
                   ele = ele->next;
                 }
+
+                accessor.max_count = roa_array_size(accessor.max);
               }
-              else if (json_attr_is_called(attr_ele, "min"))
-              {
+              else if (json_attr_is_called(attr_ele, "min")) {
                 ROA_ASSERT(attr_ele->value->type == json_type_array);
                 struct json_array_s *json_val = (struct json_array_s*)attr_ele->value->payload;
                 struct json_array_element_s *ele = (struct json_array_element_s *)json_val->start;
 
                 int i = 0;
+                roa_array_create(accessor.min);
 
-                while (ele != ROA_NULL)
-                {
-                  if(accessor_val)
-                  {
-                    accessor_val->min[i++] = json_to_float(ele->value);
-                  }
-                  else
-                  {
-                    alloc_buffer_space += sizeof(accessor_val->max[0]);
-                  }
+                while (ele != ROA_NULL) {
+                  roa_array_push(accessor.min, json_to_float(ele->value));
                       
                   ele = ele->next;
                 }
+
+                accessor.min_count = roa_array_size(accessor.min);
               }
-              else if (json_attr_is_called(attr_ele, "type"))
-              {
+              else if (json_attr_is_called(attr_ele, "type")) {
                 ROA_ASSERT(attr_ele->value->type == json_type_string);
                 struct json_string_s *json_val = (struct json_string_s*)attr_ele->value->payload;
 
-                if(accessor_val)
-                {
-                  if (strcmp(json_val->string, "SCALAR") == 0)
-                  {
-                    accessor_val->type = GLTF_TYPE_SCALAR;
-                  }
-                  else if(strcmp(json_val->string, "VEC2") == 0)
-                  {
-                    accessor_val->type = GLTF_TYPE_VEC2;
-                  }
-                  else if (strcmp(json_val->string, "VEC3") == 0)
-                  {
-                    accessor_val->type = GLTF_TYPE_VEC3;
-                  }
-                  else if (strcmp(json_val->string, "VEC4") == 0)
-                  {
-                    accessor_val->type = GLTF_TYPE_VEC4;
-                  }
+                if (strcmp(json_val->string, "SCALAR") == 0) {
+                  accessor.type = GLTF_TYPE_SCALAR;
+                }
+                else if(strcmp(json_val->string, "VEC2") == 0) {
+                  accessor.type = GLTF_TYPE_VEC2;
+                }
+                else if (strcmp(json_val->string, "VEC3") == 0) {
+                  accessor.type = GLTF_TYPE_VEC3;
+                }
+                else if (strcmp(json_val->string, "VEC4") == 0) {
+                  accessor.type = GLTF_TYPE_VEC4;
                 }
               }
 
               attr_ele = attr_ele->next;
             }
 
-            
+            roa_array_push(out_import->accessors, accessor);
+            out_import->accessor_count += 1;
 
             accessor_arr_ele = accessor_arr_ele->next;
           }

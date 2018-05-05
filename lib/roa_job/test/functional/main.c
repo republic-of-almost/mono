@@ -6,6 +6,7 @@
 #include <roa_lib/time.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 
 /* -------------------------------------------------------------- [ Vars ] -- */
@@ -14,8 +15,8 @@
 #define TEST_WITH_OUTPUT 1
 
 
-#define BATCH_COUNT (1 << 7)
-#define TICK_COUNT (1 << 7)
+#define BATCH_COUNT (1 << 6)
+#define TICK_COUNT (1 << 6)
 
 
 int ticks = TICK_COUNT;
@@ -181,8 +182,13 @@ main()
     {
       int expected = TICK_COUNT;
       ROA_ASSERT(roa_atomic_int_load(&test_data[i]) == expected);
+
+      if (roa_atomic_int_load(&test_data[i]) != expected)
+      {
+        exit(EXIT_FAILURE);
+      }
     }
   }
 
-  return 2;
+  return 0;
 }

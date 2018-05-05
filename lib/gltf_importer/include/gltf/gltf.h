@@ -46,8 +46,11 @@ struct gltf_accessor
   int normalized;               /* 0 or 1 */
   int count;                    /* number of attributes */
   int type;                     /* gltf_type_e */
-  float max[16];                /* optional */
-  float min[16];                /* optional */
+  float *max;                   /* optional */
+  int max_count;
+
+  float *min;                   /* optional */
+  int min_count;
   /* missing - sparse */
   char *name;                /* optional */
   /* missing - extensions */
@@ -120,7 +123,7 @@ struct gltf_import
   struct gltf_buffer *buffers;
   int buffer_count;
 
-  struct glft_mesh *meshes;
+  struct gltf_mesh *meshes;
   int mesh_count;
 };
 
