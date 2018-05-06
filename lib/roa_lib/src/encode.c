@@ -57,7 +57,7 @@ roa_base64_encode(
       encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
     }
 
-    for (int i = 0; i < mod_table[input_length % 3]; i++)
+    for (i = 0; i < mod_table[input_length % 3]; i++)
       encoded_data[*output_length - 1 - i] = '=';
   }
 }
