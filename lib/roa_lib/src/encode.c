@@ -41,8 +41,9 @@ roa_base64_encode(
   if(output_data)
   {
     unsigned char *encoded_data = *output_data;
+    int i, j;
 
-    for (int i = 0, j = 0; i < input_length;)
+    for (i = 0, j = 0; i < input_length;)
     {
       uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
       uint32_t octet_b = i < input_length ? (unsigned char)data[i++] : 0;
@@ -83,8 +84,9 @@ roa_base64_decode(
   if(output_data)
   {
     unsigned char *decoded_data = *output_data;
+    int i,j;
 
-    for (int i = 0, j = 0; i < input_length;) {
+    for (i = 0, j = 0; i < input_length;) {
 
       uint32_t sextet_a = data[i] == '=' ? 0 & i++ : decoding_table[(int)data[i++]];
       uint32_t sextet_b = data[i] == '=' ? 0 & i++ : decoding_table[(int)data[i++]];
