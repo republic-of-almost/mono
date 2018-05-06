@@ -73,7 +73,9 @@ struct gltf_buffer_view
 
 struct gltf_buffer
 {
-  unsigned char *uri;
+  char *uri;
+  unsigned char *uri_data;
+
   int byte_length;
   char *name;
   /* missing - extensions */

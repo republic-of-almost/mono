@@ -75,6 +75,11 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
       }
       else if (json_attr_is_called(attr_ele, "uri")) {
         
+        const char *embedded[] = {
+          "data:image/png;base64,",
+        };
+
+
       }
       else if (json_attr_is_called(attr_ele, "name")) {
         const char *name = json_to_str(attr_ele->value);
