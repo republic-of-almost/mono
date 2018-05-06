@@ -52,7 +52,7 @@ struct gltf_accessor
   float *min;                   /* optional */
   int min_count;
   /* missing - sparse */
-  char *name;                /* optional */
+  char *name;                   /* optional */
   /* missing - extensions */
   /* missing - extras */
 };
@@ -65,7 +65,7 @@ struct gltf_buffer_view
   int byte_length;
   int byte_stride;
   int target;
-  char name[64];
+  char *name;
   /* missing - extensions */
   /* missing - extras */
 };
@@ -73,8 +73,11 @@ struct gltf_buffer_view
 
 struct gltf_buffer
 {
+  unsigned char *uri;
   int byte_length;
-  void *data;
+  char *name;
+  /* missing - extensions */
+  /* missing - extras */
 };
 
 

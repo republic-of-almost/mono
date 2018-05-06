@@ -4,13 +4,13 @@
 #include <cstring>
 
 
-TEST_CASE("GLTF Importer")
+TEST_CASE("Cube Import")
 {
   struct gltf_import import_scene{};
 
   char path[2048]{};
   strcat(path, roa_exe_dir());
-  strcat(path, "assets/cube.gltf");
+  strcat(path, "assets/gltf_test/cube.gltf");
 
   gltf_import(path, &import_scene);
 
@@ -18,6 +18,7 @@ TEST_CASE("GLTF Importer")
   {
     REQUIRE(import_scene.accessor_count == 5);
     
+    REQUIRE(strcmp(import_scene.accessors[0].name, "somename") == 0);
     REQUIRE(import_scene.accessors[0].buffer_view == 0);
     REQUIRE(import_scene.accessors[0].count == 36);
     REQUIRE(import_scene.accessors[0].type == GLTF_TYPE_SCALAR);
@@ -70,35 +71,43 @@ TEST_CASE("GLTF Importer")
     REQUIRE(import_scene.accessors[4].min[1] == 9.995698928833008e-05f);
   }
 
-  // SECTION("Buffer views")
-  // {
-  //   REQUIRE(import_scene.buffer_view_count == 5);
-  //
-  //   REQUIRE(import_scene.buffer_views[0].buffer == 0);
-  //   REQUIRE(import_scene.buffer_views[0].byte_length == 36);
-  //   REQUIRE(import_scene.buffer_views[0].byte_offset == 0);
-  //   REQUIRE(import_scene.buffer_views[0].target == GLTF_TARGET_ELEMENT_ARRAY_BUFFER);
-  //
-  //   REQUIRE(import_scene.buffer_views[1].buffer == 0);
-  //   REQUIRE(import_scene.buffer_views[1].byte_length == 288);
-  //   REQUIRE(import_scene.buffer_views[1].byte_offset == 36);
-  //   REQUIRE(import_scene.buffer_views[1].target == GLTF_TARGET_ARRAY_BUFFER);
-  //
-  //   REQUIRE(import_scene.buffer_views[2].buffer == 0);
-  //   REQUIRE(import_scene.buffer_views[2].byte_length == 288);
-  //   REQUIRE(import_scene.buffer_views[2].byte_offset == 324);
-  //   REQUIRE(import_scene.buffer_views[2].target == GLTF_TARGET_ARRAY_BUFFER);
-  //
-  //   REQUIRE(import_scene.buffer_views[3].buffer == 0);
-  //   REQUIRE(import_scene.buffer_views[3].byte_length == 384);
-  //   REQUIRE(import_scene.buffer_views[3].byte_offset == 612);
-  //   REQUIRE(import_scene.buffer_views[3].target == GLTF_TARGET_ARRAY_BUFFER);
-  //
-  //   REQUIRE(import_scene.buffer_views[4].buffer == 0);
-  //   REQUIRE(import_scene.buffer_views[4].byte_length == 192);
-  //   REQUIRE(import_scene.buffer_views[4].byte_offset == 996);
-  //   REQUIRE(import_scene.buffer_views[4].target == GLTF_TARGET_ARRAY_BUFFER);
-  // }
+  SECTION("Buffer views")
+  {
+    REQUIRE(import_scene.buffer_view_count == 5);
+  
+    REQUIRE(strcmp(import_scene.buffer_views[0].name, "somebufferviewname") == 0);
+    REQUIRE(import_scene.buffer_views[0].buffer == 0);
+    REQUIRE(import_scene.buffer_views[0].byte_length == 36);
+    REQUIRE(import_scene.buffer_views[0].byte_offset == 0);
+    REQUIRE(import_scene.buffer_views[0].target == GLTF_TARGET_ELEMENT_ARRAY_BUFFER);
+  
+    REQUIRE(import_scene.buffer_views[1].buffer == 0);
+    REQUIRE(import_scene.buffer_views[1].byte_length == 288);
+    REQUIRE(import_scene.buffer_views[1].byte_offset == 36);
+    REQUIRE(import_scene.buffer_views[1].target == GLTF_TARGET_ARRAY_BUFFER);
+  
+    REQUIRE(import_scene.buffer_views[2].buffer == 0);
+    REQUIRE(import_scene.buffer_views[2].byte_length == 288);
+    REQUIRE(import_scene.buffer_views[2].byte_offset == 324);
+    REQUIRE(import_scene.buffer_views[2].target == GLTF_TARGET_ARRAY_BUFFER);
+  
+    REQUIRE(import_scene.buffer_views[3].buffer == 0);
+    REQUIRE(import_scene.buffer_views[3].byte_length == 384);
+    REQUIRE(import_scene.buffer_views[3].byte_offset == 612);
+    REQUIRE(import_scene.buffer_views[3].target == GLTF_TARGET_ARRAY_BUFFER);
+  
+    REQUIRE(import_scene.buffer_views[4].buffer == 0);
+    REQUIRE(import_scene.buffer_views[4].byte_length == 192);
+    REQUIRE(import_scene.buffer_views[4].byte_offset == 996);
+    REQUIRE(import_scene.buffer_views[4].target == GLTF_TARGET_ARRAY_BUFFER);
+  }
+
+  SECTION("Buffers")
+  {
+    REQUIRE(import_scene.buffer_count == 1);
+    REQUIRE(strcmp(import_scene.buffers[0].name, "somebuffername") == 0);
+    REQUIRE(import_scene.buffers[0].byte_length == 1188);
+  }
 
   gltf_free(&import_scene);
 }
