@@ -20,8 +20,8 @@ static int mod_table[] = { 0, 2, 1 };
 void build_decoding_table() {
 
   decoding_table = (char*)malloc(256);
-
-  for (int i = 0; i < 64; i++)
+  int i;
+  for (i = 0; i < 64; i++)
     decoding_table[(unsigned char)encoding_table[i]] = i;
 }
 
@@ -41,7 +41,7 @@ roa_base64_encode(
   if(output_data)
   {
     unsigned char *encoded_data = *output_data;
-    int i, j;
+    unsigned i, j;
 
     for (i = 0, j = 0; i < input_length;)
     {
@@ -84,7 +84,7 @@ roa_base64_decode(
   if(output_data)
   {
     unsigned char *decoded_data = *output_data;
-    int i,j;
+    unsigned i,j;
 
     for (i = 0, j = 0; i < input_length;) {
 
