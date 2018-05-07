@@ -38,6 +38,18 @@ enum gltf_target_e
 };
 
 
+enum gltf_primitive_mode_e
+{
+  GLTF_PRIM_MODE_POINTS = 0,
+  GLTF_PRIM_MODE_LINES = 1,
+  GLTF_PRIM_MODE_LINE_LOOP = 2,
+  GLTF_PRIM_MODE_LINE_STRIP = 3,
+  GLTF_PRIM_MODE_TRIANGLES = 4,
+  GLTF_PRIM_MODE_TRIANGLE_STRIP = 5,
+  GLTF_PRIM_MODE_TRIANGLE_FAN = 6,
+};
+
+
 struct gltf_accessor
 {
   int buffer_view;              /* optional */
@@ -85,24 +97,38 @@ struct gltf_buffer
 
 struct gltf_attributes
 {
-  int NORMAL;
-  int POSITION;
-  int TANGENT;
-  int TEXCOORD_0;
+  int POSITION;     /* vec3 - Float */
+  int NORMAL;       /* vec3 - Float */
+  int TANGENT;      /* vec4 - Float */
+  int TEXCOORD_0;   /* vec2 - Float, UByte, UShort*/
+  int TEXCOORD_1;   /* vec2 - Float Ubyte, UShort */
+  int COLOR_0;      /* vec3/vec4 - Float, Ubyte, UShort */
+  int JOINTS_0;     /* vec4 - UByte, UShort */
+  int WEIGHTS_0;    /* vec4 - Float, UByte, UShort */
 };
 
 
-struct gltf_primitives
+struct gltf_primitive
 {
   struct gltf_attributes attributes;
   int indices;
+  int material;
+  int mode;
+
+  /* missing - targets */
+  /* missing - extensions */
+  /* missing - extras */
 };
 
 
 struct gltf_mesh
 {
-  char name[64];
-  struct gltf_primitives primitives;
+  char *name;
+  struct gltf_primitive *primitives;
+
+  /* missing - weights */
+  /* missing - extensions */
+  /* missing - extras */
 };
 
 

@@ -17,7 +17,7 @@ TEST_CASE("Cube Import")
   SECTION("accessors")
   {
     REQUIRE(import_scene.accessor_count == 5);
-    
+
     REQUIRE(strcmp(import_scene.accessors[0].name, "somename") == 0);
     REQUIRE(import_scene.accessors[0].buffer_view == 0);
     REQUIRE(import_scene.accessors[0].count == 36);
@@ -74,28 +74,28 @@ TEST_CASE("Cube Import")
   SECTION("Buffer views")
   {
     REQUIRE(import_scene.buffer_view_count == 5);
-  
+
     REQUIRE(strcmp(import_scene.buffer_views[0].name, "somebufferviewname") == 0);
     REQUIRE(import_scene.buffer_views[0].buffer == 0);
     REQUIRE(import_scene.buffer_views[0].byte_length == 36);
     REQUIRE(import_scene.buffer_views[0].byte_offset == 0);
     REQUIRE(import_scene.buffer_views[0].target == GLTF_TARGET_ELEMENT_ARRAY_BUFFER);
-  
+
     REQUIRE(import_scene.buffer_views[1].buffer == 0);
     REQUIRE(import_scene.buffer_views[1].byte_length == 288);
     REQUIRE(import_scene.buffer_views[1].byte_offset == 36);
     REQUIRE(import_scene.buffer_views[1].target == GLTF_TARGET_ARRAY_BUFFER);
-  
+
     REQUIRE(import_scene.buffer_views[2].buffer == 0);
     REQUIRE(import_scene.buffer_views[2].byte_length == 288);
     REQUIRE(import_scene.buffer_views[2].byte_offset == 324);
     REQUIRE(import_scene.buffer_views[2].target == GLTF_TARGET_ARRAY_BUFFER);
-  
+
     REQUIRE(import_scene.buffer_views[3].buffer == 0);
     REQUIRE(import_scene.buffer_views[3].byte_length == 384);
     REQUIRE(import_scene.buffer_views[3].byte_offset == 612);
     REQUIRE(import_scene.buffer_views[3].target == GLTF_TARGET_ARRAY_BUFFER);
-  
+
     REQUIRE(import_scene.buffer_views[4].buffer == 0);
     REQUIRE(import_scene.buffer_views[4].byte_length == 192);
     REQUIRE(import_scene.buffer_views[4].byte_offset == 996);
@@ -108,6 +108,15 @@ TEST_CASE("Cube Import")
     REQUIRE(strcmp(import_scene.buffers[0].name, "somebuffername") == 0);
     REQUIRE(import_scene.buffers[0].byte_length == 1188);
     REQUIRE(strcmp(import_scene.buffers[0].uri, "data:application/octet-stream;base64") == 0);
+  }
+
+  SECTION("Meshes")
+  {
+    REQUIRE(import_scene.mesh_count == 1);
+
+    REQUIRE(import_scene.meshes[0].name != nullptr);
+    REQUIRE(strcmp(import_scene.meshes[0].name, "Cube") == 0);
+
   }
 
   gltf_free(&import_scene);
