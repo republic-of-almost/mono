@@ -1,0 +1,29 @@
+{
+  "name": "GLTFImporterFuncTest",
+  "kind": "ConsoleApp",
+  "language": "C89",
+  "location": "./",
+
+  "src_files" : [
+    "../test/functional/**.c",
+    "../data/gltf_func_test.json"
+  ],
+
+  "assets": [
+    "../test/assets/"
+  ],
+
+  "public_inc_dirs": [
+    "../include/"
+  ],
+
+  "private_inc_dirs": [
+    "../src/"
+  ],
+
+  "project_dependencies" : [
+    "RepublicCtx",
+    "GLTFImporter",
+    "OpenGL"
+  ]
+}
