@@ -125,6 +125,7 @@ struct gltf_mesh
 {
   char *name;
   struct gltf_primitive *primitives;
+  int primitive_count;
 
   /* missing - weights */
   /* missing - extensions */

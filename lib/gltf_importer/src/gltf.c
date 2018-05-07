@@ -71,13 +71,14 @@ gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
 
     while(attr_ele != ROA_NULL)
     {
-
       if(json_attr_is_called(attr_ele, "primitives"))
       {
-        /*
+        struct gltf_primitive prim;
+        ROA_MEM_ZERO(prim);
+
         struct json_value_s *prim_val = (struct json_value_s*)attr_ele->value;
-        struct json_object_s *prim_attr_obj = (struct json_object_s*)prim_val->payload;
-        struct json_object_element_s *prim_ele = (struct json_object_element_s*)prim_attr_obj->start;
+        struct json_array_s *prim_attr_obj = (struct json_array_s*)prim_val->payload;
+        struct json_array_element_s *prim_ele = (struct json_array_element_s*)prim_attr_obj->start;
 
         if(prim_ele)
         {
@@ -86,28 +87,82 @@ gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
 
         while(prim_ele != ROA_NULL)
         {
+          struct json_value_s *acc_val = (struct json_value_s*)prim_ele->value;
+          struct json_object_s *attr_obj = (struct json_object_s*)acc_val->payload;
+          struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
 
-          struct gltf_primitive primitive;
-
-          if(json_attr_is_called(prim_ele, "attributes"))
+          while(attr_ele != ROA_NULL)
           {
 
-          }
-          else if(json_attr_is_called(prim_ele, "indices"))
-          {
+            if(json_attr_is_called(attr_ele, "attributes"))
+            {
+              struct gltf_attributes attrs;
+              attrs.COLOR_0     = -1;
+              attrs.JOINTS_0    = -1;
+              attrs.NORMAL      = -1;
+              attrs.POSITION    = -1;
+              attrs.TANGENT     = -1;
+              attrs.TEXCOORD_0  = -1;
+              attrs.TEXCOORD_1  = -1;
+              attrs.WEIGHTS_0   = -1;
 
-          }
-          else if(json_attr_is_called(prim_ele, "material"))
-          {
+              struct json_value_s *patt_val = (struct json_value_s*)attr_ele->value;
+              struct json_object_s *pattr_obj = (struct json_object_s*)patt_val->payload;
+              struct json_object_element_s *pattr_ele = (struct json_object_element_s*)pattr_obj->start;
 
+              while (pattr_ele != ROA_NULL)
+              {
+                if (json_attr_is_called(pattr_ele, "COLOR_0")) {
+                  attrs.COLOR_0 = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "JOINTS_0")) {
+                  attrs.JOINTS_0 = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "NORMAL")) {
+                  attrs.NORMAL = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "POSITION")) {
+                  attrs.POSITION = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "TANGENT")) {
+                  attrs.TANGENT = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "TEXCOORD_0")) {
+                  attrs.TEXCOORD_0 = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "TEXCOORD_1")) {
+                  attrs.TEXCOORD_1 = json_to_int(pattr_ele->value);
+                }
+                else if (json_attr_is_called(pattr_ele, "WEIGHTS_0")) {
+                  attrs.WEIGHTS_0 = json_to_int(pattr_ele->value);
+                }
+                
+                pattr_ele = pattr_ele->next;
+              }
+
+              prim.attributes = attrs;
+            }
+            else if (json_attr_is_called(prim_ele, "indices"))
+            {
+              prim.indices = json_to_int(prim_ele->value);
+            }
+            else if (json_attr_is_called(prim_ele, "material"))
+            {
+              prim.material = json_to_int(prim_ele->value);
+            }
+
+            attr_ele = attr_ele->next;
           }
+
+          roa_array_push(mesh.primitives, prim);
+          mesh.primitive_count += 1;
 
           prim_ele = prim_ele->next;
         }
 
-        */
+        
       } else if(json_attr_is_called(attr_ele, "weights")) {
-
+        /* not done yet */
       } else if(json_attr_is_called(attr_ele, "name")) {
         const char *name = json_to_str(attr_ele->value);
         int len = strlen(name) + 1;

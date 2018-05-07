@@ -117,6 +117,18 @@ TEST_CASE("Cube Import")
     REQUIRE(import_scene.meshes[0].name != nullptr);
     REQUIRE(strcmp(import_scene.meshes[0].name, "Cube") == 0);
 
+    REQUIRE(import_scene.meshes[0].primitive_count == 1);
+    REQUIRE(import_scene.meshes[0].primitives[0].indices == 0);
+    REQUIRE(import_scene.meshes[0].primitives[0].material == 0);
+
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.NORMAL == 2);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.POSITION == 1);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.TANGENT == 3);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.TEXCOORD_0 == 4);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.COLOR_0 == -1);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.JOINTS_0 == -1);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.WEIGHTS_0 == -1);
+    REQUIRE(import_scene.meshes[0].primitives[0].attributes.TEXCOORD_1 == -1);
   }
 
   gltf_free(&import_scene);
