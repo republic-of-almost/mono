@@ -107,6 +107,7 @@ TEST_CASE("Cube Import")
     REQUIRE(import_scene.buffer_count == 1);
     REQUIRE(strcmp(import_scene.buffers[0].name, "somebuffername") == 0);
     REQUIRE(import_scene.buffers[0].byte_length == 1188);
+    REQUIRE(strcmp(import_scene.buffers[0].uri, "data:application/octet-stream;base64") == 0);
   }
 
   gltf_free(&import_scene);

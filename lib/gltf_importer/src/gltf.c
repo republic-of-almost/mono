@@ -7,6 +7,7 @@
 #include <roa_lib/fundamental.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
+#include <roa_lib/encode.h>
 
 
 /* ---------------------------------------------------- [ json helpers ] -- */
@@ -75,11 +76,37 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
       }
       else if (json_attr_is_called(attr_ele, "uri")) {
         
+        const char *uri_value = json_to_str(attr_ele->value);
+
         const char *embedded[] = {
           "data:image/png;base64,",
+          "data:application/octet-stream;base64",
         };
 
+        int i;
+        int count = ROA_ARR_COUNT(embedded);
 
+        for (i = 0; i < count; ++i)
+        {
+          if (strncmp(uri_value, embedded[i], strlen(embedded[i])) == 0)
+          {
+            unsigned start = strlen(embedded[i]);
+            unsigned len = strlen(uri_value) - start;
+
+            unsigned decode_len = 0;
+            roa_base64_decode(&uri_value[start], len, ROA_NULL, decode_len);
+
+            unsigned char * data = malloc(decode_len);
+            roa_base64_decode(&uri_value[start], len, data, decode_len);
+
+            buffer.uri_data = data;
+            
+            len = strlen(embedded[i]) + 1;
+            roa_array_create_with_capacity(buffer.uri, len);
+            roa_array_resize(buffer.uri, len);
+            memcpy(buffer.uri, embedded[i], len);
+          }
+        }
       }
       else if (json_attr_is_called(attr_ele, "name")) {
         const char *name = json_to_str(attr_ele->value);
