@@ -216,7 +216,7 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
 
         const char *embedded[] = {
           "data:image/png;base64,",
-          "data:application/octet-stream;base64",
+          "data:application/octet-stream;base64,",
         };
 
         int i;
