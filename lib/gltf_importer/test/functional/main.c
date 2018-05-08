@@ -42,105 +42,107 @@ main()
 
   /* setup gl */
   {
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glEnable(GL_DEPTH_TEST);
-
-    int vertex_desc[3];
+    /* state */
     {
-      vertex_desc[0] = gltf.meshes[0].primitives->attributes.POSITION;
-      vertex_desc[1] = gltf.meshes[0].primitives->attributes.NORMAL;
-      vertex_desc[2] = gltf.meshes[0].primitives->attributes.TEXCOORD_0;
+      glGenVertexArrays(1, &vao);
+      glBindVertexArray(vao);
+      glEnable(GL_DEPTH_TEST);
     }
 
     /* program */
-    GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
-    const char *vs_src = glsl_fullbright_vs();
-    glShaderSource(vert_shd, 1, &vs_src, NULL);
-    glCompileShader(vert_shd);
+    {
+      GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
+      const char *vs_src = glsl_fullbright_vs();
+      glShaderSource(vert_shd, 1, &vs_src, NULL);
+      glCompileShader(vert_shd);
 
-    // Create and compile the fragment shader
-    GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
-    const char *fs_src = glsl_fullbright_fs();
-    glShaderSource(frag_shd, 1, &fs_src, NULL);
-    glCompileShader(frag_shd);
+      // Create and compile the fragment shader
+      GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
+      const char *fs_src = glsl_fullbright_fs();
+      glShaderSource(frag_shd, 1, &fs_src, NULL);
+      glCompileShader(frag_shd);
 
-    // Link the vertex and fragment shader into a shader program
-    program = glCreateProgram();
-    glAttachShader(program, vert_shd);
-    glAttachShader(program, frag_shd);
-    glBindFragDataLocation(program, 0, "fs_out_fragcolor");
-    glLinkProgram(program);
-    glUseProgram(program);
+      // Link the vertex and fragment shader into a shader program
+      program = glCreateProgram();
+      glAttachShader(program, vert_shd);
+      glAttachShader(program, frag_shd);
+      glBindFragDataLocation(program, 0, "fs_out_fragcolor");
+      glLinkProgram(program);
+      glUseProgram(program);
 
-    GLint err = glGetError();
-    ROA_ASSERT(err == 0);
+      glDeleteShader(vert_shd);
+      glDeleteShader(frag_shd);
+    }
+
+    /* check err */
+    {
+      GLuint err = glGetError();
+      if (err) { ROA_ASSERT(0); }
+    }
 
     /* vbo */
-
+    /*
+      vbo data is stored in chunks |pos|pos|pos|norm|norm|norm|tex|tex|tex|
+      this is because we can just pass the pointer to the gltf data buffer.
+      All we need is the data pointers and now big the vbo should be.
+    */
     struct gltf_buffer_view buffer_views[3];
     {
-      int i;
-      for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
+      int vertex_desc[3];
       {
-        buffer_views[i] = gltf.buffer_views[gltf.accessors[vertex_desc[i]].buffer_view];
+        vertex_desc[0] = gltf.meshes[0].primitives->attributes.POSITION;
+        vertex_desc[1] = gltf.meshes[0].primitives->attributes.NORMAL;
+        vertex_desc[2] = gltf.meshes[0].primitives->attributes.TEXCOORD_0;
+      }
+
+      int vbo_size = 0;
+      {
+        int i;
+        for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
+        {
+          buffer_views[i] = gltf.buffer_views[gltf.accessors[vertex_desc[i]].buffer_view];
+          vbo_size += buffer_views[i].byte_length;
+        }
+      }
+
+      glGenBuffers(1, &vbo);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      glBufferData(GL_ARRAY_BUFFER, vbo_size, ROA_NULL, GL_STATIC_DRAW);
+
+      {
+        int i;
+        int vbo_offset = 0;
+
+        for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
+        {
+          unsigned char *buffer = gltf.buffers[buffer_views[i].buffer].uri_data;
+          int byte_offset = vbo_offset;
+          int byte_length = buffer_views[i].byte_length;
+          void *data = &buffer[buffer_views[i].byte_offset];
+
+          vbo_offset += byte_length;
+
+          glBufferSubData(GL_ARRAY_BUFFER, byte_offset, byte_length, data);
+        }
       }
     }
 
-    float *vbo_raw_data[3];
+    /* check err */
     {
-      int i;
-      for (i = 0; i < ROA_ARR_COUNT(vbo_raw_data); ++i)
-      {
-        unsigned char *buffer = gltf.buffers[buffer_views[i].buffer].uri_data;
-        vbo_raw_data[i] = (float*)&buffer[buffer_views[i].byte_offset];
-      }
-    }
-    
-    float *vbo_data = ROA_NULL;
-    int vbo_size = 0;
-    {
-      int vertex_count = gltf.accessors[vertex_desc[0]].count;
-      roa_array_create_with_capacity(vbo_data, 1024);
-
-      int i;
-      for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
-      {
-        vbo_size += buffer_views[i].byte_length;
-      }
-
-      for (i = 0; i < vertex_count; ++i)
-      {
-        /* positions */
-        roa_array_push(vbo_data, vbo_raw_data[0][(i * 3) + 0]);
-        roa_array_push(vbo_data, vbo_raw_data[0][(i * 3) + 1]);
-        roa_array_push(vbo_data, vbo_raw_data[0][(i * 3) + 2]);
-
-        /* normal */
-        roa_array_push(vbo_data, vbo_raw_data[1][(i * 3) + 0]);
-        roa_array_push(vbo_data, vbo_raw_data[1][(i * 3) + 1]);
-        roa_array_push(vbo_data, vbo_raw_data[1][(i * 3) + 2]);
-
-        /* tex c */
-        roa_array_push(vbo_data, vbo_raw_data[2][(i * 2) + 0]);
-        roa_array_push(vbo_data, vbo_raw_data[2][(i * 2) + 1]);
-      }
+      GLuint err = glGetError();
+      if (err) { ROA_ASSERT(0); }
     }
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vbo_size, vbo_data, GL_STATIC_DRAW);
-
-    /* verts */
+    /* vert attrs */
     {
       // Specify the layout of the vertex data
       GLint pos_attr = glGetAttribLocation(program, "vs_in_position");
       glEnableVertexAttribArray(pos_attr);
-      glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+      glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 
       GLint tex_coord_attr = glGetAttribLocation(program, "vs_in_texcoord");
       glEnableVertexAttribArray(tex_coord_attr);
-      glVertexAttribPointer(tex_coord_attr, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+      glVertexAttribPointer(tex_coord_attr, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)(buffer_views[0].byte_length));
     }
 
     /* check err */
@@ -150,30 +152,15 @@ main()
     }
 
     /* ibo */
-
-    ibo_raw_data = ROA_NULL;
-    int ibo_size = 0;
-    int ibo_count = 0;
     {
       int accessor_id = gltf.meshes[0].primitives[0].indices;
       struct gltf_buffer_view buffer_view = gltf.buffer_views[gltf.accessors[accessor_id].buffer_view];
       unsigned char *buffer = gltf.buffers[buffer_view.buffer].uri_data;
-      ibo_raw_data = &buffer[buffer_view.byte_offset];
-      ibo_size = buffer_view.byte_length;
-      ibo_count = ibo_size / sizeof(unsigned char);
+    
+      glGenBuffers(1, &ibo);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_view.byte_length, &buffer[buffer_view.byte_offset], GL_STATIC_DRAW);
     }
-
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_size, ibo_raw_data, GL_STATIC_DRAW);
-
-    /* check err */
-    {
-      GLuint err = glGetError();
-      if (err) { ROA_ASSERT(0); }
-    }
-
 
     /* check err */
     {
@@ -186,7 +173,7 @@ main()
   roa_mat4_lookat(&view, roa_float3_set_with_values(1,1,1), roa_float3_zero(), roa_float3_set_with_values(0, 1, 0));
 
   roa_mat4 proj;
-  roa_mat4_projection(&proj, ROA_QUART_TAU * 0.5f, 0.1, 100.0, 800.0 / 480.0);
+  roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25f, 0.1, 100.0, 800.0 / 480.0);
 
   roa_mat4 world;
   roa_mat4_id(&world);
