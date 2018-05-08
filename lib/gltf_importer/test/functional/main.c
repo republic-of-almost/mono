@@ -2,9 +2,11 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_lib/dir.h>
 #include <roa_lib/array.h>
+#include <roa_lib/assert.h>
 #include <gltf/gltf.h>
 #include <GL/gl3w.h>
 #include <string.h>
+#include <scratch/glsl.h>
 
 
 roa_ctx_t hw_ctx;
@@ -45,6 +47,29 @@ main()
       vertex_desc[1] = gltf.meshes[0].primitives->attributes.NORMAL;
       vertex_desc[2] = gltf.meshes[0].primitives->attributes.TEXCOORD_0;
     }
+
+    /* program */
+    GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
+    const char *vs_src = glsl_fullbright_vs();
+    glShaderSource(vert_shd, 1, &vs_src, NULL);
+    glCompileShader(vert_shd);
+
+    // Create and compile the fragment shader
+    GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
+    const char *fs_src = glsl_fullbright_fs();
+    glShaderSource(frag_shd, 1, &fs_src, NULL);
+    glCompileShader(frag_shd);
+
+    // Link the vertex and fragment shader into a shader program
+    program = glCreateProgram();
+    glAttachShader(program, vert_shd);
+    glAttachShader(program, frag_shd);
+    glBindFragDataLocation(program, 0, "fs_out_fragcolor");
+    glLinkProgram(program);
+    glUseProgram(program);
+
+    GLint err = glGetError();
+    ROA_ASSERT(err == 0);
 
     /* vbo */
 
@@ -119,11 +144,27 @@ main()
     glGenBuffers(1, ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_size, ibo_raw_data, GL_STATIC_DRAW);
+
+    /* verts */
+    {
+      // Specify the layout of the vertex data
+      GLint pos_attr = glGetAttribLocation(program, "vs_in_position");
+      glEnableVertexAttribArray(pos_attr);
+      glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+
+      GLint tex_coord_attr = glGetAttribLocation(program, "vs_in_texcoord");
+      glEnableVertexAttribArray(tex_coord_attr);
+      glVertexAttribPointer(tex_coord_attr, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+    }
   }
 
   while (roa_ctx_new_frame(hw_ctx))
   {
-    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Draw a rectangle from the 2 triangles using 6 indices
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   }
 
   roa_ctx_destroy(&hw_ctx);

@@ -23,7 +23,9 @@
 
   "project_dependencies" : [
     "RepublicCtx",
+    "RepublicMath",
     "GLTFImporter",
+    "Scratch",
     "OpenGL"
   ]
 }
