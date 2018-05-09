@@ -27,7 +27,7 @@ main()
   /* setup sys/data */
   {
     roa_ctx_create(&hw_ctx);
-    int init = gl3wInit();
+    gl3wInit();
 
     char path[2048];
     ROA_MEM_ZERO(path);

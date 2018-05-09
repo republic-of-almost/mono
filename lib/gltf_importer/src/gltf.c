@@ -18,7 +18,7 @@ json_to_float(struct json_value_s *val)
 {
   ROA_ASSERT(val->type == json_type_number);
   struct json_number_s *json_val = (struct json_number_s*)val->payload;
-  return atof(json_val->number);
+  return (float)atof(json_val->number);
 }
 
 
@@ -87,14 +87,14 @@ gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
 
         while(prim_ele != ROA_NULL)
         {
-          struct json_value_s *acc_val = (struct json_value_s*)prim_ele->value;
-          struct json_object_s *attr_obj = (struct json_object_s*)acc_val->payload;
-          struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
+          struct json_value_s *ac_val = (struct json_value_s*)prim_ele->value;
+          struct json_object_s *atr_obj = (struct json_object_s*)ac_val->payload;
+          struct json_object_element_s *atr_ele = (struct json_object_element_s*)atr_obj->start;
 
-          while(attr_ele != ROA_NULL)
+          while(atr_ele != ROA_NULL)
           {
 
-            if(json_attr_is_called(attr_ele, "attributes"))
+            if(json_attr_is_called(atr_ele, "attributes"))
             {
               struct gltf_attributes attrs;
               attrs.COLOR_0     = -1;
@@ -106,7 +106,7 @@ gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
               attrs.TEXCOORD_1  = -1;
               attrs.WEIGHTS_0   = -1;
 
-              struct json_value_s *patt_val = (struct json_value_s*)attr_ele->value;
+              struct json_value_s *patt_val = (struct json_value_s*)atr_ele->value;
               struct json_object_s *pattr_obj = (struct json_object_s*)patt_val->payload;
               struct json_object_element_s *pattr_ele = (struct json_object_element_s*)pattr_obj->start;
 
@@ -142,16 +142,16 @@ gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
 
               prim.attributes = attrs;
             }
-            else if (json_attr_is_called(prim_ele, "indices"))
+            else if (json_attr_is_called(atr_ele, "indices"))
             {
-              prim.indices = json_to_int(prim_ele->value);
+              prim.indices = json_to_int(atr_ele->value);
             }
-            else if (json_attr_is_called(prim_ele, "material"))
+            else if (json_attr_is_called(atr_ele, "material"))
             {
-              prim.material = json_to_int(prim_ele->value);
+              prim.material = json_to_int(atr_ele->value);
             }
 
-            attr_ele = attr_ele->next;
+            atr_ele = atr_ele->next;
           }
 
           roa_array_push(mesh.primitives, prim);
@@ -532,5 +532,5 @@ gltf_import(const char *filename, struct gltf_import *out_import)
 void
 gltf_free(struct gltf_import *scene)
 {
-
+  ROA_UNUSED(scene);
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 
-static uint8_t encoding_table[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+static unsigned char encoding_table[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -13,16 +13,16 @@ static uint8_t encoding_table[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 'w', 'x', 'y', 'z', '0', '1', '2', '3',
 '4', '5', '6', '7', '8', '9', '+', '/' };
 
-static uint8_t *decoding_table = ROA_NULL;
+static unsigned char *decoding_table = ROA_NULL;
 static int mod_table[] = { 0, 2, 1 };
 
 
 void build_decoding_table() {
 
-  decoding_table = (char*)malloc(256);
-  int i;
+  decoding_table = (unsigned char*)malloc(256);
+  unsigned char i;
   for (i = 0; i < 64; i++)
-    decoding_table[(unsigned char)encoding_table[i]] = i;
+    decoding_table[encoding_table[i]] = i;
 }
 
 
@@ -57,7 +57,7 @@ roa_base64_encode(
       encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
     }
 
-    for (i = 0; i < mod_table[input_length % 3]; i++)
+    for (i = 0; i < (unsigned)mod_table[input_length % 3]; i++)
       encoded_data[*output_length - 1 - i] = '=';
   }
 }
@@ -75,7 +75,7 @@ roa_base64_decode(
 
   if (decoding_table == NULL) { build_decoding_table(); }
 
-  if (input_length % 4 != 0) return NULL;
+  if (input_length % 4 != 0) return;
 
   *output_length = input_length / 4 * 3;
   if (data[input_length - 1] == '=') (*output_length)--;
