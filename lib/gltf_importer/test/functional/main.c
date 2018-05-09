@@ -16,6 +16,8 @@ struct gltf_import gltf;
 
 GLuint vao;
 GLuint program;
+
+
 GLuint vbo;
 GLuint ibo;
 
@@ -163,7 +165,13 @@ main()
         GLboolean normalized = accessor.normalized ? GL_TRUE : GL_FALSE;
         
         glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, components, comp_type, normalized, stride, (void*)(buffer_offset));
+        glVertexAttribPointer(
+          i,
+          components,
+          comp_type,
+          normalized,
+          stride,
+          (void*)(buffer_offset));
 
         struct gltf_buffer_view buffer_view = gltf.buffer_views[accessor.buffer_view];
         buffer_offset = buffer_view.byte_length;
@@ -179,12 +187,18 @@ main()
     /* ibo */
     {
       int accessor_id = gltf.meshes[0].primitives[0].indices;
-      struct gltf_buffer_view buffer_view = gltf.buffer_views[gltf.accessors[accessor_id].buffer_view];
+      int bv_id = gltf.accessors[accessor_id].buffer_view;
+
+      struct gltf_buffer_view buffer_view = gltf.buffer_views[bv_id];
       unsigned char *buffer = gltf.buffers[buffer_view.buffer].uri_data;
     
       glGenBuffers(1, &ibo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_view.byte_length, &buffer[buffer_view.byte_offset], GL_STATIC_DRAW);
+      glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        buffer_view.byte_length,
+        &buffer[buffer_view.byte_offset],
+        GL_STATIC_DRAW);
     }
 
     /* check err */
@@ -228,7 +242,6 @@ main()
     GLint uni_world = glGetUniformLocation(program, "uni_world_mat");
     glUniformMatrix4fv(uni_world, 1, GL_FALSE, world.data);
 
-    // Draw a rectangle from the 2 triangles using 6 indices
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
   }
 

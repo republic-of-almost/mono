@@ -441,7 +441,7 @@ gltf_import(const char *filename, struct gltf_import *out_import)
   {
     unsigned char *src = 0;
     int src_length = 0;
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename, "rb");
 
     if (file != 0)
     {
@@ -451,14 +451,14 @@ gltf_import(const char *filename, struct gltf_import *out_import)
 
         if(src_length == -1) { /* error */ }
 
-        src = malloc(sizeof(src[0]) * (src_length));
+        src = calloc(sizeof(src[0]) * (src_length), 1);
 
         if (fseek(file, 0L, SEEK_SET) != 0)
         {
           /* error */
         }
 
-        fread(src, 1, src_length, file);
+        fread(src, src_length, 1, file);
 
         fclose(file);
       }
