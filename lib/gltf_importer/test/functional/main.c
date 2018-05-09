@@ -15,11 +15,7 @@ roa_ctx_t hw_ctx;
 struct gltf_import gltf;
 
 GLuint vao;
-
 GLuint program;
-
-unsigned char *ibo_raw_data;
-
 GLuint vbo;
 GLuint ibo;
 
@@ -86,9 +82,9 @@ main()
       this is because we can just pass the pointer to the gltf data buffer.
       All we need is the data pointers and now big the vbo should be.
     */
-    struct gltf_buffer_view buffer_views[3];
+    int vertex_desc[3];
     {
-      int vertex_desc[3];
+      /* we need to now this up front to build vbo and be able to enable attrs */
       {
         vertex_desc[0] = gltf.meshes[0].primitives->attributes.POSITION;
         vertex_desc[1] = gltf.meshes[0].primitives->attributes.NORMAL;
@@ -96,6 +92,7 @@ main()
       }
 
       int vbo_size = 0;
+      struct gltf_buffer_view buffer_views[3];
       {
         int i;
         for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
@@ -135,14 +132,42 @@ main()
 
     /* vert attrs */
     {
-      // Specify the layout of the vertex data
-      GLint pos_attr = glGetAttribLocation(program, "vs_in_position");
-      glEnableVertexAttribArray(pos_attr);
-      glVertexAttribPointer(pos_attr, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+      int i;
+      int buffer_offset = 0;
+      for (i = 0; i < ROA_ARR_COUNT(vertex_desc); ++i)
+      {
+        struct gltf_accessor accessor = gltf.accessors[vertex_desc[i]];
 
-      GLint tex_coord_attr = glGetAttribLocation(program, "vs_in_texcoord");
-      glEnableVertexAttribArray(tex_coord_attr);
-      glVertexAttribPointer(tex_coord_attr, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)(buffer_views[0].byte_length));
+        GLenum comp_type = accessor.component_type;
+        int comp_size = 0;
+        {
+          if (accessor.component_type == GLTF_COMPONENT_TYPE_FLOAT) {
+            comp_size = sizeof(GLfloat);
+          } else if (accessor.component_type == GLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+            comp_size = sizeof(GLenum);
+          } else {
+            ROA_ASSERT(0)
+          }
+        }
+
+        int components = 0;
+        {
+          if (accessor.type == GLTF_TYPE_SCALAR)    { components = 1; }
+          else if (accessor.type == GLTF_TYPE_VEC2) { components = 2; }
+          else if (accessor.type == GLTF_TYPE_VEC3) { components = 3; }
+          else if (accessor.type == GLTF_TYPE_VEC4) { components = 4; }
+          else { ROA_ASSERT(0); }
+        }
+
+        GLsizei stride = components * comp_size;
+        GLboolean normalized = accessor.normalized ? GL_TRUE : GL_FALSE;
+        
+        glEnableVertexAttribArray(i);
+        glVertexAttribPointer(i, components, comp_type, normalized, stride, (void*)(buffer_offset));
+
+        struct gltf_buffer_view buffer_view = gltf.buffer_views[accessor.buffer_view];
+        buffer_offset = buffer_view.byte_length;
+      }
     }
 
     /* check err */
@@ -169,21 +194,32 @@ main()
     }
   }
 
-  roa_mat4 view;
-  roa_mat4_lookat(&view, roa_float3_set_with_values(1,1,1), roa_float3_zero(), roa_float3_set_with_values(0, 1, 0));
+  roa_mat4 world, view, proj, wvp;
+  {
+    /* view */
+    roa_mat4_lookat(
+      &view,
+      roa_float3_set_with_values(1,1,1),
+      roa_float3_zero(),
+      roa_float3_set_with_values(0, 1, 0));
 
-  roa_mat4 proj;
-  roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25f, 0.1, 100.0, 800.0 / 480.0);
+    /* proj */
+    struct roa_ctx_window_desc win_desc;
+    roa_ctx_get_window_desc(hw_ctx, &win_desc);
 
-  roa_mat4 world;
-  roa_mat4_id(&world);
+    float aspect = (float)win_desc.width / (float)win_desc.height;
+    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25f, 0.1, 100.0, aspect);
 
-  roa_mat4 wvp;
-  roa_mat4_multiply_three(&wvp, &world, &view, &proj);
+    /* world */
+    roa_mat4_id(&world);
+
+    /* wvp */
+    roa_mat4_multiply_three(&wvp, &world, &view, &proj);
+  }
 
   while (roa_ctx_new_frame(hw_ctx))
   {
-    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     GLint uni_wvp = glGetUniformLocation(program, "uni_wvp_mat");
