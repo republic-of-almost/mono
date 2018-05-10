@@ -232,18 +232,31 @@ struct roa_renderer_mesh_resource
 {
   const char *name;
 
-  float *vert_vec3_array;
+  float *position_vec3_array;
   float *normal_vec3_array;
   float *texture_coord_vec2_array;
+  unsigned vertex_count;
 
-  unsigned vert_count;
+  unsigned *index_array;
+  unsigned index_count;
 };
+
+
+unsigned
+roa_renderer_mesh_resource_count(
+  roa_renderer_ctx_t ctx);
 
 
 uint64_t
 roa_renderer_mesh_resource_add(
   roa_renderer_ctx_t ctx,
   const struct roa_renderer_mesh_resource *rsrc);
+
+
+int
+roa_renderer_mesh_resource_remove(
+  roa_renderer_ctx_t ctx,
+  const char *name);
 
 
 /* -------------------------------------------------------------- [ Task ] -- */
