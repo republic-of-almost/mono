@@ -18,6 +18,6 @@ roa_renderer_set_device_resolution(
   ROA_ASSERT(height);
 
   /* set */
-  ctx->settings.device_viewport[0] = width;
-  ctx->settings.device_viewport[1] = height;
+  ctx->settings.device_viewport[0] = (float)width;
+  ctx->settings.device_viewport[1] = (float)height;
 }

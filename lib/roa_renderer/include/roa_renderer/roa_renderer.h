@@ -141,10 +141,10 @@ struct roa_renderer_light
 
   float color[3];
 
-  union {
+  union roa_light_data {
     struct roa_renderer_point_light point;
     struct roa_renderer_directional_light directional;
-  };
+  } light_data;
 };
 
 

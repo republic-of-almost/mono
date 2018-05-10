@@ -14,8 +14,8 @@ platform_render(roa_renderer_ctx_t ctx)
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 
-  GLsizei vp_width  = ctx->settings.device_viewport[0];
-  GLsizei vp_height = ctx->settings.device_viewport[1];
+  GLsizei vp_width  = (GLsizei)ctx->settings.device_viewport[0];
+  GLsizei vp_height = (GLsizei)ctx->settings.device_viewport[1];
 
   glViewport(0, 0, vp_width, vp_height);
 
