@@ -4,10 +4,6 @@
   "language": "C++",
   "location": "./",
 
-  "assets": [
-    "../assets/"
-  ],
-
   "src_files": [
     "../src/**.cpp",
     "../src/**.hpp",
