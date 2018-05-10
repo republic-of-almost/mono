@@ -191,7 +191,7 @@ main()
 
       struct gltf_buffer_view buffer_view = gltf.buffer_views[bv_id];
       unsigned char *buffer = gltf.buffers[buffer_view.buffer].uri_data;
-    
+      
       glGenBuffers(1, &ibo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
       glBufferData(
