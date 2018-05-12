@@ -15,24 +15,44 @@ roa_renderer_camera_set(
   ROA_ASSERT(camera);
   ROA_ASSERT(camera_id);
 
-  /* find key */
-  unsigned cam_count = roa_array_size(ctx->camera_id);
-  unsigned i;
+  ROA_BOOL result = ROA_FALSE;
 
-  for (i = 0; i < cam_count; ++i)
+  if (!ctx || !camera || !camera_id)
   {
-    if (ctx->camera_id[i] == camera_id)
-    {
-      ctx->camera[i] = *camera;
+    result = ROA_FALSE;
+    return result;
+  }
 
-      return ROA_TRUE;
+  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+
+  /* search and replace */
+  {
+    uint32_t *ids = ctx->renderer_desc.camera_ids;
+    int count = roa_array_size(ctx->renderer_desc.camera_ids);
+    int i;
+
+    for (i = 0; i < count; ++i)
+    {
+      if (ids[i] == camera_id)
+      {
+        result = ROA_TRUE;
+
+        ctx->renderer_desc.camera_descs[i] = *camera;
+        
+        roa_spin_lock_release(&ctx->renderer_desc.lock);
+        return result;
+      }
     }
   }
 
-  roa_array_push(ctx->camera_id, camera_id);
-  roa_array_push(ctx->camera, *camera);
+  /* insert new one */
+  result = ROA_TRUE;
 
-  return ROA_TRUE;
+  roa_array_push(ctx->renderer_desc.camera_ids, camera_id);
+  roa_array_push(ctx->renderer_desc.camera_descs, *camera);
+
+  roa_spin_lock_release(&ctx->renderer_desc.lock);
+  return result;
 }
 
 
@@ -47,21 +67,36 @@ roa_renderer_camera_get(
   ROA_ASSERT(out_camera);
   ROA_ASSERT(camera_id);
 
-  /* find key */
-  unsigned cam_count = roa_array_size(ctx->camera_id);
-  unsigned i;
+  ROA_BOOL result = ROA_FALSE;
 
-  for (i = 0; i < cam_count; ++i)
+  if (!ctx || !out_camera || !camera_id)
   {
-    if (ctx->camera_id[i] == camera_id)
-    {
-      *out_camera = ctx->camera[i];
-
-      return ROA_TRUE;
-    }
+    result = ROA_FALSE;
+    return result;
   }
 
-  return ROA_FALSE;
+  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+
+  /* search */
+  {
+    uint32_t *ids = ctx->renderer_desc.camera_ids;
+    int count = roa_array_size(ctx->renderer_desc.camera_ids);
+    int i;
+
+    for (i = 0; i < count; ++i)
+    {
+      if (ids[i] == camera_id)
+      {
+        result = ROA_TRUE;
+
+        *out_camera = ctx->renderer_desc.camera_descs[i];
+        break;
+      }
+    }
+  }
+  
+  roa_spin_lock_release(&ctx->renderer_desc.lock);
+  return result;
 }
 
 
@@ -74,22 +109,39 @@ roa_renderer_camera_clear(
   ROA_ASSERT(ctx);
   ROA_ASSERT(camera_id);
 
-  /* find camera */
-  unsigned count = roa_array_size(ctx->camera_id);
-  unsigned i;
+  ROA_BOOL result = ROA_FALSE;
 
-  for (i = 0; i < count; ++i)
+  if (!ctx || !camera_id)
   {
-    if (ctx->camera_id[i] == camera_id)
-    {
-      roa_array_erase(ctx->camera_id, i);
-      roa_array_erase(ctx->camera, i);
+    result = ROA_FALSE;
+    return result;
+  }
 
-      return ROA_TRUE;
+  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+
+  /* search */
+  {
+    uint32_t *ids = ctx->renderer_desc.camera_ids;
+    int count = roa_array_size(ctx->renderer_desc.camera_ids);
+    int i;
+
+    for (i = 0; i < count; ++i)
+    {
+      if (ids[i] == camera_id)
+      {
+        result = ROA_TRUE;
+        
+        roa_array_erase(ctx->renderer_desc.camera_ids, i);
+        roa_array_erase(ctx->renderer_desc.camera_descs, i);
+        
+        break;
+      }
     }
   }
 
-	return ROA_FALSE;
+  roa_spin_lock_release(&ctx->renderer_desc.lock);
+
+  return result;
 }
 
 
@@ -97,7 +149,21 @@ unsigned
 roa_renderer_camera_count(
   const roa_renderer_ctx_t ctx)
 {
-  unsigned count = roa_array_size(ctx->camera_id);
+  /* param check */
+  ROA_ASSERT(ctx);
+
+  if (!ctx)
+  {
+    return 0;
+  }
+
+  unsigned count = 0;
+
+  {
+    roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+    count = roa_array_size(ctx->renderer_desc.camera_ids);
+    roa_spin_lock_release(&ctx->renderer_desc.lock);
+  }
 
   return count;
 }
@@ -112,17 +178,30 @@ roa_renderer_camera_exists(
   ROA_ASSERT(ctx);
   ROA_ASSERT(camera_id);
 
-  /* find key */
-  unsigned cam_count = roa_array_size(ctx->camera_id);
-  unsigned i;
-
-  for (i = 0; i < cam_count; ++i)
+  if (!ctx || !camera_id)
   {
-    if (ctx->camera_id[i] == camera_id)
+    return ROA_FALSE;
+  }
+
+  ROA_BOOL result = ROA_FALSE;
+  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+
+  /* search */
+  {
+    uint32_t *ids = ctx->renderer_desc.camera_ids;
+    int count = roa_array_size(ctx->renderer_desc.camera_ids);
+    int i;
+
+    for (i = 0; i < count; ++i)
     {
-      return ROA_TRUE;
+      if (ids[i] == camera_id)
+      {
+        result = ROA_TRUE;
+        break;
+      }
     }
   }
 
-  return ROA_FALSE;
+  roa_spin_lock_release(&ctx->renderer_desc.lock);
+  return result;
 }

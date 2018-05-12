@@ -24,11 +24,7 @@ typedef void(*roa_renderer_free)(void *addr);
 
 struct roa_renderer_ctx_desc
 {
-  roa_renderer_alloc alloc;
-  roa_renderer_free free;
-
-  roa_renderer_alloc task_alloc;
-  roa_renderer_free task_free;
+  int i; /* ignore atm */
 };
 
 
@@ -223,6 +219,20 @@ ROA_BOOL
 roa_renderer_mesh_renderable_exists(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id);
+
+/* ----------------------------------------------- [ Material Resources ] -- */
+
+
+struct roa_renderer_material_resource
+{
+  uint32_t shader;
+  uint32_t texture;
+};
+
+
+unsigned
+roa_renderer_material_resource_count(
+  roa_renderer_ctx_t ctx);
 
 
 /* ---------------------------------------------------- [ Mesh Resources ] -- */

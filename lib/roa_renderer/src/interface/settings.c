@@ -12,12 +12,5 @@ roa_renderer_set_device_resolution(
   unsigned width,
   unsigned height)
 {
-  /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(width);
-  ROA_ASSERT(height);
 
-  /* set */
-  ctx->settings.device_viewport[0] = (float)width;
-  ctx->settings.device_viewport[1] = (float)height;
 }

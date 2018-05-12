@@ -2,6 +2,7 @@
 #include <ctx/ctx.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
+#include <roa_lib/spin_lock.h>
 
 
 /* -------------------------------------------------------- [ Renderable ] -- */
@@ -13,29 +14,7 @@ roa_renderer_mesh_renderable_set(
   struct roa_renderer_mesh_renderable *renderable,
   uint32_t renderable_id)
 {
-	/* param check */
-	ROA_ASSERT(ctx);
-	ROA_ASSERT(renderable);
-	ROA_ASSERT(renderable_id);
 
-  /* find key */
-  unsigned rdr_count = roa_array_size(ctx->renderable_id);
-  unsigned i;
-
-  for (i = 0; i < rdr_count; ++i)
-  {
-    if (ctx->renderable_id[i] == renderable_id)
-    {
-      ctx->renderable[i] = *renderable;
-
-      return ROA_TRUE;
-    }
-  }
-
-  roa_array_push(ctx->renderable_id, renderable_id);
-  roa_array_push(ctx->renderable, *renderable);
-
-  return ROA_TRUE;
 }
 
 
@@ -45,26 +24,7 @@ roa_renderer_mesh_renderable_get(
   struct roa_renderer_mesh_renderable *out_renderable,
   uint32_t renderable_id)
 {
-  /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(out_renderable);
-  ROA_ASSERT(renderable_id);
-
-  /* find key */
-  unsigned rdr_count = roa_array_size(ctx->renderable_id);
-  unsigned i;
-
-  for(i = 0; i < rdr_count; ++i)
-  {
-    if (ctx->renderable_id[i] == renderable_id)
-    {
-      *out_renderable = ctx->renderable[i];
-
-      return ROA_TRUE;
-    }
-  }
-
-  return ROA_FALSE;
+ 
 }
 
 
@@ -73,11 +33,7 @@ roa_renderer_renderable_clear(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
-  /* unused */
-  ROA_UNUSED(ctx);
-  ROA_UNUSED(renderable_id);
-
-  return ROA_FALSE;
+ 
 }
 
 
@@ -87,26 +43,7 @@ roa_renderer_mesh_renderable_clear(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
-  /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(renderable_id);
-
-  /* find key */
-  unsigned rdr_count = roa_array_size(ctx->renderable_id);
-  unsigned i;
-
-  for (i = 0; i < rdr_count; ++i)
-  {
-    if (ctx->renderable_id[i] == renderable_id)
-    {
-      roa_array_erase(ctx->renderable_id, i);
-      roa_array_erase(ctx->renderable, i);
-
-      return ROA_TRUE;
-    }
-  }
-
-  return ROA_FALSE;
+ 
 }
 
 
@@ -116,8 +53,14 @@ roa_renderer_mesh_renderable_count(
 {
   /* param check */
   ROA_ASSERT(ctx);
+  
+  unsigned count = 0;
 
-  unsigned count = roa_array_size(ctx->renderable_id);
+  {
+    roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+    count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
+    roa_spin_lock_release(&ctx->renderer_desc.lock);
+  }
 
   return count;
 }
@@ -128,21 +71,5 @@ roa_renderer_mesh_renderable_exists(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
-  /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(renderable_id);
 
-  /* find key */
-  unsigned rdr_count = roa_array_size(ctx->renderable_id);
-  unsigned i;
-
-  for (i = 0; i < rdr_count; ++i)
-  {
-    if (ctx->renderable_id[i] == renderable_id)
-    {
-      return ROA_TRUE;
-    }
-  }
-
-  return ROA_FALSE;
 }

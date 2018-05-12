@@ -26,6 +26,16 @@
 #endif
 
 
+/* ----------------------------------------------- [ generic error codes ] -- */
+
+
+typedef int ROA_STATUS;
+
+#define ROA_ERROR 0
+#define ROA_SUCCESS 1
+#define ROA_INVALID_PARAMS 2
+
+
 /* ------------------------------------------------------- [ basic types ] -- */
 
 

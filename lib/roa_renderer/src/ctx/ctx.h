@@ -14,70 +14,55 @@
 #endif
 
 
-struct mesh_draw_call
+struct renderer_data_desc
 {
-  float world[16];
-  float world_view_projection[16];
+  roa_atomic_int lock;
+
+  /* array */ uint32_t *camera_ids;
+  /* array */ struct roa_renderer_camera *camera_descs;
+
+  /* array */ uint32_t *mesh_rdr_ids;
+  /* array */ struct roa_renderer_mesh_renderable *mesh_rdr_descs;
+
+  /* array */ uint32_t *light_ids;
+  /* array */ struct roa_renderer_light *light_descs;
 };
 
 
-struct mesh_renderpass
+struct renderer_resource_data_desc
 {
-  float projection[16];
-  float view[16];
-  float camera_pos[3];
+  roa_atomic_int lock;
 
-  struct mesh_draw_call *draw_calls;
+  /* array */ uint64_t *mesh_ids;
+  /* array */ struct roa_renderer_material_resource *mesh_rsrc_data;
+
+  /* array */ uint64_t *material_ids;
+  /* array */ struct roa_renderer_material_resource *mat_descs;
 };
 
 
-struct renderer_alloc
+struct renderer_renderpass_data
 {
-  roa_renderer_alloc alloc;
-  roa_renderer_free free;
+  roa_atomic_int lock;
 
-  roa_renderer_alloc frame_alloc;
-  roa_renderer_free frame_free;
 };
 
 
-struct roa_mesh_rsrc
+struct device_setting_data
 {
-	roa_atomic_int lock;
+  roa_atomic_int lock;
 
-	/* array */ uint64_t *create_ids;
-
-	/* array */ uint64_t *ids;
-	/* array */ struct roa_renderer_mesh_resource *rsrc;
-};
-
-
-struct roa_device_settings
-{
   float device_viewport[2];
 };
 
 
 struct roa_renderer_ctx
 {
-  struct renderer_alloc mem;
-
-	/* data */
-
-	/* array */ uint32_t *camera_id;
-	/* array */ struct roa_renderer_camera *camera;
-
-	/* array */ uint32_t *renderable_id;
-	/* array */ struct roa_renderer_mesh_renderable *renderable;
-
-	struct roa_mesh_rsrc mesh_rsrc;
-
-  /* array */ struct mesh_renderpass *mesh_renderpasses;
-
-  /* settings */
-  struct roa_device_settings settings;
-
-  struct graphics_api gfx_api;
+  struct device_setting_data device_settings;
+  struct renderer_data_desc renderer_desc;
+  struct renderer_resource_data_desc resource_desc;
+  struct renderer_renderpass_data renderpass;
+  struct graphics_api graphics_api;
 };
 
 
