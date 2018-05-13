@@ -269,6 +269,12 @@ roa_renderer_mesh_resource_remove(
   const char *name);
 
 
+ROA_BOOL
+roa_renderer_mesh_resource_exists(
+  roa_renderer_ctx_t ctx,
+  const char *name);
+
+
 /* -------------------------------------------------------------- [ Task ] -- */
 
 

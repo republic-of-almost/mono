@@ -105,21 +105,47 @@ roa_renderer_mesh_renderable_get(
 
 
 ROA_BOOL
-roa_renderer_renderable_clear(
-  roa_renderer_ctx_t ctx,
-  uint32_t renderable_id)
-{
- 
-}
-
-
-
-ROA_BOOL
 roa_renderer_mesh_renderable_clear(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
- 
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(renderable_id);
+
+  ROA_BOOL result = ROA_FALSE;
+
+  if (!ctx || !renderable_id)
+  {
+    result = ROA_FALSE;
+    return result;
+  }
+
+  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+
+  /* search */
+  {
+    uint32_t *ids = ctx->renderer_desc.mesh_rdr_ids;
+    int count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
+    int i;
+
+    for (i = 0; i < count; ++i)
+    {
+      if (ids[i] == renderable_id)
+      {
+        result = ROA_TRUE;
+
+        roa_array_erase(ctx->renderer_desc.mesh_rdr_ids, i);
+        roa_array_erase(ctx->renderer_desc.mesh_rdr_descs, i);
+
+        break;
+      }
+    }
+  }
+
+  roa_spin_lock_release(&ctx->renderer_desc.lock);
+
+  return result;
 }
 
 
@@ -147,5 +173,34 @@ roa_renderer_mesh_renderable_exists(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id)
 {
+  /* param check */
+  ROA_ASSERT(ctx);
+  ROA_ASSERT(renderable_id);
 
+  if (!ctx || !renderable_id)
+  {
+    return ROA_FALSE;
+  }
+
+  ROA_BOOL result = ROA_FALSE;
+  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+
+  /* search */
+  {
+    uint32_t *ids = ctx->renderer_desc.mesh_rdr_ids;
+    int count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
+    int i;
+
+    for (i = 0; i < count; ++i)
+    {
+      if (ids[i] == renderable_id)
+      {
+        result = ROA_TRUE;
+        break;
+      }
+    }
+  }
+
+  roa_spin_lock_release(&ctx->renderer_desc.lock);
+  return result;
 }

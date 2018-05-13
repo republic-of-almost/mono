@@ -7,4 +7,7 @@ void   rdr_free(void *);
 void * rdr_frame_alloc(unsigned bytes);
 
 
+void * rdr_alloc_copy(void *src, unsigned size);
+
+
 #endif /* inc guard */

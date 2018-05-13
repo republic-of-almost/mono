@@ -34,7 +34,7 @@ struct renderer_resource_data_desc
   roa_atomic_int lock;
 
   /* array */ uint64_t *mesh_ids;
-  /* array */ struct roa_renderer_material_resource *mesh_rsrc_data;
+  /* array */ struct roa_renderer_mesh_resource *mesh_rsrc_data;
 
   /* array */ uint64_t *material_ids;
   /* array */ struct roa_renderer_material_resource *mat_descs;
@@ -44,6 +44,7 @@ struct renderer_resource_data_desc
 struct renderer_renderpass_data
 {
   roa_atomic_int lock;
+
 
 };
 

@@ -88,49 +88,49 @@ TEST_CASE("Mesh Renderer")
 
   SECTION("Has Mesh Renderable")
   {
-    //uint32_t rdr_id = 1;
+    uint32_t rdr_id = 1;
 
-    //ROA_BOOL exists = roa_renderer_mesh_renderable_exists(ctx, rdr_id);
-    //REQUIRE(exists == ROA_FALSE);
+    ROA_BOOL exists = roa_renderer_mesh_renderable_exists(ctx, rdr_id);
+    REQUIRE(exists == ROA_FALSE);
 
-    //ROA_BOOL set = roa_renderer_mesh_renderable_set(ctx, &mesh_desc, rdr_id);
-    //REQUIRE(set == ROA_TRUE);
+    ROA_BOOL set = roa_renderer_mesh_renderable_set(ctx, &mesh_desc, rdr_id);
+    REQUIRE(set == ROA_TRUE);
 
-    //ROA_BOOL second_exists = roa_renderer_mesh_renderable_exists(ctx, rdr_id);
-    //REQUIRE(second_exists == ROA_TRUE);
+    ROA_BOOL second_exists = roa_renderer_mesh_renderable_exists(ctx, rdr_id);
+    REQUIRE(second_exists == ROA_TRUE);
   }
 
   SECTION("Get Unknown Mesh Renderable")
   {
-    //uint32_t rdr_id = 1;
-    //struct roa_renderer_mesh_renderable get_desc {};
-    //ROA_BOOL get_success = roa_renderer_mesh_renderable_get(ctx, &get_desc, rdr_id);
+    uint32_t rdr_id = 1;
+    struct roa_renderer_mesh_renderable get_desc {};
+    ROA_BOOL get_success = roa_renderer_mesh_renderable_get(ctx, &get_desc, rdr_id);
 
-    //REQUIRE(get_success == ROA_FALSE);
+    REQUIRE(get_success == ROA_FALSE);
   }
 
   SECTION("Set/Clear/Get Mesh Renderable")
   {
-    //uint32_t rdr_id = 1;
+    uint32_t rdr_id = 1;
 
-    //ROA_BOOL set = roa_renderer_mesh_renderable_set(ctx, &mesh_desc, rdr_id);
-    //REQUIRE(set == ROA_TRUE);
+    ROA_BOOL set = roa_renderer_mesh_renderable_set(ctx, &mesh_desc, rdr_id);
+    REQUIRE(set == ROA_TRUE);
 
-    //ROA_BOOL clear = roa_renderer_mesh_renderable_clear(ctx, rdr_id);
-    //REQUIRE(clear == ROA_TRUE);
+    ROA_BOOL clear = roa_renderer_mesh_renderable_clear(ctx, rdr_id);
+    REQUIRE(clear == ROA_TRUE);
 
-    //unsigned count = roa_renderer_mesh_renderable_count(ctx);
-    //REQUIRE(count == 0);
+    unsigned count = roa_renderer_mesh_renderable_count(ctx);
+    REQUIRE(count == 0);
 
-    //ROA_BOOL exists = roa_renderer_mesh_renderable_exists(ctx, rdr_id);
-    //REQUIRE(exists == ROA_FALSE);
+    ROA_BOOL exists = roa_renderer_mesh_renderable_exists(ctx, rdr_id);
+    REQUIRE(exists == ROA_FALSE);
   }
 
   SECTION("Clear Unknown Mesh Renderable")
   {
-    //uint32_t rdr_id = 1;
-    //ROA_BOOL get_success = roa_renderer_mesh_renderable_clear(ctx, rdr_id);
+    uint32_t rdr_id = 1;
+    ROA_BOOL get_success = roa_renderer_mesh_renderable_clear(ctx, rdr_id);
 
-    //REQUIRE(get_success == ROA_FALSE);
+    REQUIRE(get_success == ROA_FALSE);
   }
 }

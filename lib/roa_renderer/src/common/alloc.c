@@ -18,7 +18,25 @@ rdr_free(void *addr)
 }
 
 
-void * rdr_frame_alloc(unsigned bytes)
+void *
+rdr_frame_alloc(unsigned bytes)
 {
   return 0;
+}
+
+
+void *
+rdr_alloc_copy(void *src, unsigned size)
+{
+  if(src)
+  {
+    void *dst = malloc(size);
+    memcpy(dst, src, size);
+
+    return dst;
+  }
+  else
+  {
+    return 0;
+  }
 }
