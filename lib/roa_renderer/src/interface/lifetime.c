@@ -77,6 +77,11 @@ roa_renderer_ctx_create(
       roa_spin_lock_release(&new_ctx->resource_desc.lock);
     }
 
+    /* platform */
+    {
+      platform_setup(new_ctx);
+    }
+
     *ctx = new_ctx;
   }
 }

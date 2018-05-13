@@ -42,6 +42,7 @@ main()
 	/* setup resources */
 	{
 		struct roa_renderer_mesh_resource mesh_rsrc;
+    ROA_MEM_ZERO(mesh_rsrc);
 		mesh_rsrc.name = "cube_mesh";
 
 		cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
@@ -101,9 +102,17 @@ main()
     /* set resolution */
     {
       struct roa_ctx_window_desc win_desc;
+      ROA_MEM_ZERO(win_desc);
+
       roa_ctx_get_window_desc(hw_ctx, &win_desc);
 
-      roa_renderer_set_device_resolution(renderer_ctx, win_desc.width, win_desc.height);
+      struct roa_renderer_device_viewport vp;
+      ROA_MEM_ZERO(vp);
+
+      vp.width = win_desc.width;
+      vp.height = win_desc.height;
+
+      roa_renderer_set_device_viewport(renderer_ctx, &vp);
     }
 
     /* set camera */

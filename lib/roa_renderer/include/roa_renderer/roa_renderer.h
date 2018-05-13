@@ -57,11 +57,23 @@ roa_renderer_ctx_unlock(
 /* ---------------------------------------------------------- [ Settings ] -- */
 
 
+struct roa_renderer_device_viewport
+{
+  unsigned width;
+  unsigned height;
+};
+
+
 void
-roa_renderer_set_device_resolution(
+roa_renderer_set_device_viewport(
   roa_renderer_ctx_t ctx,
-  unsigned width,
-  unsigned height);
+  const struct roa_renderer_device_viewport *vp);
+
+
+void
+roa_renderer_get_device_viewport(
+  roa_renderer_ctx_t ctx,
+  struct roa_renderer_device_viewport *out_vp);
 
 
 /* ------------------------------------------------------------ [ Camera ] -- */
@@ -261,12 +273,6 @@ uint64_t
 roa_renderer_mesh_resource_add(
   roa_renderer_ctx_t ctx,
   const struct roa_renderer_mesh_resource *rsrc);
-
-
-int
-roa_renderer_mesh_resource_remove(
-  roa_renderer_ctx_t ctx,
-  const char *name);
 
 
 ROA_BOOL

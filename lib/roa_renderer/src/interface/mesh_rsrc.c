@@ -71,15 +71,6 @@ roa_renderer_mesh_resource_add(
 }
 
 
-int
-roa_renderer_mesh_resource_remove(
-  roa_renderer_ctx_t ctx,
-  const char *name)
-{
-  return 0;
-}
-
-
 ROA_BOOL
 roa_renderer_mesh_resource_exists(
   roa_renderer_ctx_t ctx,
