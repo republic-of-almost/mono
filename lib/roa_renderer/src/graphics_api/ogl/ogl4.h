@@ -19,6 +19,7 @@ struct ogl_gbuffer_fill_pass
   GLuint program;
   GLuint uni_wvp;
   GLuint uni_world;
+  GLuint uni_colormap;
 };
 
 

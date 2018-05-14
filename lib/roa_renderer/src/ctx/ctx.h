@@ -44,8 +44,6 @@ struct renderer_resource_data_desc
 struct renderer_renderpass_data
 {
   roa_atomic_int lock;
-
-
 };
 
 

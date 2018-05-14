@@ -11,7 +11,7 @@
 void
 platform_setup(roa_renderer_ctx_t ctx)
 {
-  gl3wInit();
+  //gl3wInit();
 
   /* VAO */
   {
@@ -25,6 +25,8 @@ platform_setup(roa_renderer_ctx_t ctx)
 
     ctx->graphics_api.vao = vao;
   }
+
+  glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Setup");
 
   /* GBuffer */
   {
@@ -144,7 +146,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         GLint status;
         glGetShaderiv(vert_shd, GL_COMPILE_STATUS, &status);
 
-        if(status != GL_TRUE)
+        if (status != GL_TRUE)
         {
           char buffer[512];
           glGetShaderInfoLog(vert_shd, 512, NULL, buffer);
@@ -217,7 +219,47 @@ platform_setup(roa_renderer_ctx_t ctx)
         ctx->graphics_api.gbuffer_fill.program = prog;
       }
     }
+
+    /* uniforms */
+    {
+      ctx->graphics_api.gbuffer_fill.uni_wvp = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWVP");
+      ctx->graphics_api.gbuffer_fill.uni_world = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWorld");
+    }
   }
+
+  /* temp */
+  {
+    geom_vert_desc vert_desc[] = {
+      GEOM_VERT_POSITION3,
+      GEOM_UV,
+      GEOM_NORMAL,
+    };
+
+    float geom[2048];
+    unsigned count = 0;
+
+    geometry_generate_cube(
+      ROA_ARR_DATA(vert_desc),
+      ROA_ARR_COUNT(vert_desc),
+      1,
+      1,
+      1,
+      ROA_ARR_DATA(geom),
+      &count);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * count, geom, GL_STATIC_DRAW);
+
+    if (glObjectLabel) {
+      glObjectLabel(GL_BUFFER, vbo, -1, "Temp:Cube");
+    }
+
+    ctx->graphics_api.vbo = vbo;
+  }
+
+  glPopDebugGroup();
 }
 
 
