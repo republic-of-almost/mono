@@ -25,14 +25,19 @@ platform_render(roa_renderer_ctx_t ctx)
   roa_mat4 wvp;
   roa_mat4_multiply_three(&wvp, &world, &view, &proj);
 
+  glBindVertexArray(ctx->graphics_api.vao);
+
   glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "GBuffer:Fill");
 
-  glClearColor(1,0,1,1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH);
+  glEnable(GL_CULL_FACE);
 
   glUseProgram(ctx->graphics_api.gbuffer_fill.program);
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
+
+  glClearColor(1, 0, 1, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.vbo);
 
