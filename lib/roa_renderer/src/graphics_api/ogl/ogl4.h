@@ -14,9 +14,9 @@ struct ogl_gbuffer
 };
 
 
-struct ogl_gbuffer_passes
+struct ogl_gbuffer_fill_pass
 {
-  GLuint program_fill;
+  GLuint program;
   GLuint uni_wvp;
   GLuint uni_world;
 };
@@ -29,7 +29,7 @@ struct graphics_api
 
   /* gbuffer */
   struct ogl_gbuffer gbuffer;
-  struct ogl_gbuffer_passes gbuffer_passes;
+  struct ogl_gbuffer_fill_pass gbuffer_fill;
 
   GLuint mesh_program;
   GLuint vbo;
