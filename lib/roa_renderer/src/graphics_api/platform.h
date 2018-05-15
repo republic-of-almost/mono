@@ -14,6 +14,10 @@ platform_update(roa_renderer_ctx_t ctx);
 
 
 void
+platform_resize(roa_renderer_ctx_t ctx);
+
+
+void
 platform_render(roa_renderer_ctx_t ctx);
 
 

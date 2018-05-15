@@ -2,6 +2,7 @@
 #include <ctx/ctx.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
+#include <roa_lib/spin_lock.h>
 
 
 ROA_BOOL

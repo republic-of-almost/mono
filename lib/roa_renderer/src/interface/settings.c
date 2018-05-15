@@ -2,6 +2,7 @@
 #include <ctx/ctx.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/spin_lock.h>
+#include <graphics_api/platform.h>
 
 
 /* ---------------------------------------------------------- [ Settings ] -- */
@@ -18,8 +19,14 @@ roa_renderer_set_device_viewport(
 
   roa_spin_lock_aquire(&ctx->device_settings.lock);
 
-  ctx->device_settings.device_viewport[0] = vp->width;
-  ctx->device_settings.device_viewport[1] = vp->height;
+  if (ctx->device_settings.device_viewport[0] != vp->width ||
+    ctx->device_settings.device_viewport[1] != vp->height)
+  {
+    ctx->device_settings.device_viewport[0] = vp->width;
+    ctx->device_settings.device_viewport[1] = vp->height;
+
+    platform_resize(ctx);
+  }
 
   roa_spin_lock_release(&ctx->device_settings.lock);
 }

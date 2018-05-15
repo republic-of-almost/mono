@@ -9,25 +9,8 @@
 
 
 void
-platform_setup(roa_renderer_ctx_t ctx)
+platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
 {
-  //gl3wInit();
-
-  /* VAO */
-  {
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(&vao);
-
-    if (glObjectLabel) {
-      glObjectLabel(GL_VERTEX_ARRAY, vao, -1, "ROARenderer:VAO");
-    }
-
-    ctx->graphics_api.vao = vao;
-  }
-
-  glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Setup");
-
   /* GBuffer */
   {
     GLsizei width = ctx->device_settings.device_viewport[0];
@@ -110,6 +93,37 @@ platform_setup(roa_renderer_ctx_t ctx)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
   }
+}
+
+
+void
+platform_internal_destroy_gbuffer(roa_renderer_ctx_t ctx)
+{
+  /* todo :) */
+}
+
+
+void
+platform_setup(roa_renderer_ctx_t ctx)
+{
+  //gl3wInit();
+
+  /* VAO */
+  {
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(&vao);
+
+    if (glObjectLabel) {
+      glObjectLabel(GL_VERTEX_ARRAY, vao, -1, "ROARenderer:VAO");
+    }
+
+    ctx->graphics_api.vao = vao;
+  }
+
+  glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Setup");
+
+  platform_internal_create_gbuffer(ctx);
 
   /* gbuffer fill */
   {
@@ -275,7 +289,7 @@ platform_setup(roa_renderer_ctx_t ctx)
 
           "void main()  \n"
           "{\n"
-          " final_color      = vec4(1, 0.3, 0, 1); /*texture(gColorMap, TexCoord0).xyz;*/\n"
+          " final_color      = texture(gColorMap, TexCoord0);\n"
           "}\n";
 
         const GLchar *src = fs;
@@ -379,6 +393,17 @@ platform_setup(roa_renderer_ctx_t ctx)
 
 
 void
+platform_resize(roa_renderer_ctx_t ctx)
+{
+  /* delete fbo */
+  platform_internal_destroy_gbuffer(ctx);
+
+  /* recreate fbo */
+  platform_internal_create_gbuffer(ctx);
+}
+
+
+void
 platform_destroy(roa_renderer_ctx_t ctx)
 {
   ROA_UNUSED(ctx);
@@ -386,5 +411,6 @@ platform_destroy(roa_renderer_ctx_t ctx)
   /* param check */
   ROA_ASSERT(ctx);
 }
+
 
 #endif /* ROA_RENDERER_API_GL4 */
