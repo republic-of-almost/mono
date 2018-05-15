@@ -23,6 +23,13 @@ struct ogl_gbuffer_fill_pass
 };
 
 
+struct ogl_blit_pass
+{
+  GLuint program;
+  GLuint fullscreen_triangle;
+};
+
+
 struct graphics_api
 {
   /* global VAO */
@@ -31,6 +38,7 @@ struct graphics_api
   /* gbuffer */
   struct ogl_gbuffer gbuffer;
   struct ogl_gbuffer_fill_pass gbuffer_fill;
+  struct ogl_blit_pass blit;
 
   GLuint mesh_program;
   GLuint vbo;

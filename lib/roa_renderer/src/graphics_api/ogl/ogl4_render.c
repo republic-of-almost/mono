@@ -27,38 +27,50 @@ platform_render(roa_renderer_ctx_t ctx)
 
   glBindVertexArray(ctx->graphics_api.vao);
 
-  glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "GBuffer:Fill");
+  /* fill buffer */
+  {
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "GBuffer:Fill");
 
-  glEnable(GL_DEPTH);
-  glEnable(GL_CULL_FACE);
+    glUseProgram(ctx->graphics_api.gbuffer_fill.program);
 
-  glUseProgram(ctx->graphics_api.gbuffer_fill.program);
+    glEnable(GL_DEPTH);
+    glEnable(GL_CULL_FACE);
 
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
 
-  glClearColor(1, 0, 1, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1, 0, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.vbo);
 
-  GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
-  glEnableVertexAttribArray(pos);
-  glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+    GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 
-  GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
-  glEnableVertexAttribArray(texc);
-  glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
+    glEnableVertexAttribArray(texc);
+    glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-  GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Normal");
-  glEnableVertexAttribArray(norm);
-  glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+    GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Normal");
+    glEnableVertexAttribArray(norm);
+    glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 
-  glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_wvp, 1, GL_FALSE, wvp.data);
-  glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_world, 1, GL_FALSE, world.data);
+    glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_wvp, 1, GL_FALSE, wvp.data);
+    glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_world, 1, GL_FALSE, world.data);
 
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-  glPopDebugGroup();
+    glPopDebugGroup();
+  }
+
+  /* blit to screen */
+  {
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Backbuffer:Blit");
+
+
+
+    glPopDebugGroup();
+  }
 }
 
 #endif /* ROA_RENDERER_API_GL4 */
