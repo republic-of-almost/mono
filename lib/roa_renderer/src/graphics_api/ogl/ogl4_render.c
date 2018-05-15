@@ -37,7 +37,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
     glUseProgram(ctx->graphics_api.gbuffer_fill.program);
 
-    glEnable(GL_DEPTH);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
