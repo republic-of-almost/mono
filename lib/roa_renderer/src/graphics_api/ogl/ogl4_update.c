@@ -9,7 +9,7 @@ void
 platform_update(roa_renderer_ctx_t ctx)
 {
   int pending_meshes = roa_array_size(ctx->resource_desc.mesh_pending_ids);
-
+  
   /* load meshes */
   if(pending_meshes > 0)
   {
@@ -19,14 +19,14 @@ platform_update(roa_renderer_ctx_t ctx)
     GLuint *vbos = 0;
     roa_array_create_with_capacity(vbos, count);
     roa_array_resize(vbos, count);
-
+    
     GLuint *ibos = 0;
     roa_array_create_with_capacity(ibos, count);
     roa_array_resize(ibos, count);
-
+    
     glGenBuffers(count, vbos);
     glGenBuffers(count, ibos);
-
+    
     struct roa_renderer_mesh_resource *pending = ctx->resource_desc.mesh_rsrc_pending_data;
     uint64_t *pending_ids = ctx->resource_desc.mesh_pending_ids;
 
@@ -36,7 +36,7 @@ platform_update(roa_renderer_ctx_t ctx)
       if (pending[i].vertex_count)
       {
         glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-
+        
         if (glObjectLabel) {
           const char * name = pending[i].name ? pending[i].name : "UnknownVBO";
           glObjectLabel(GL_BUFFER, vbos[i], -1, name);
@@ -48,9 +48,9 @@ platform_update(roa_renderer_ctx_t ctx)
         element_count += pending[i].texture_coord_vec2_array ? 2 : 0;
 
         float *data = 0;
-        roa_array_create_with_capacity(data, element_count);
-        roa_array_resize(data, element_count);
-
+        roa_array_create_with_capacity(data, element_count * pending[i].vertex_count);
+        roa_array_resize(data, element_count * pending[i].vertex_count);
+        
         int j;
         int offset = 0;
 
@@ -58,35 +58,35 @@ platform_update(roa_renderer_ctx_t ctx)
         {
           if (pending[i].position_vec3_array)
           {
-            int index = i * 3;
+            int index = j * 3;
             data[offset++] = pending[i].position_vec3_array[index + 0];
             data[offset++] = pending[i].position_vec3_array[index + 1];
             data[offset++] = pending[i].position_vec3_array[index + 2];
           }
 
+          if (pending[i].texture_coord_vec2_array)
+          {
+            int index = j * 2;
+            data[offset++] = pending[i].texture_coord_vec2_array[index + 0];
+            data[offset++] = pending[i].texture_coord_vec2_array[index + 1];
+          }
+
           if (pending[i].normal_vec3_array)
           {
-            int index = i * 3;
+            int index = j * 3;
             data[offset++] = pending[i].normal_vec3_array[index + 0];
             data[offset++] = pending[i].normal_vec3_array[index + 1];
             data[offset++] = pending[i].normal_vec3_array[index + 2];
           }
-
-          if (pending[i].texture_coord_vec2_array)
-          {
-            int index = i * 2;
-            data[offset++] = pending[i].texture_coord_vec2_array[index + 0];
-            data[offset++] = pending[i].texture_coord_vec2_array[index + 1];
-          }
         }
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * element_count, data, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * element_count * pending[i].vertex_count, data, GL_STATIC_DRAW);
       }
-
+      
       /* ibo */
       if(pending[i].index_count)
       {
-        glBindBuffer(GL_ARRAY_BUFFER, ibos[i]);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[i]);
 
         if (glObjectLabel) {
           const char * name = pending[i].name ? pending[i].name : "UnknownIBO";
