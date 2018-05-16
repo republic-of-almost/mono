@@ -65,6 +65,9 @@ roa_renderer_mesh_resource_add(
 
     roa_array_push(ctx->resource_desc.mesh_rsrc_data, copy);
     roa_array_push(ctx->resource_desc.mesh_ids, hash_name);
+
+    roa_array_push(ctx->resource_desc.mesh_rsrc_pending_data, copy);
+    roa_array_push(ctx->resource_desc.mesh_pending_ids, hash_name);
   }
 
   return ROA_FALSE;

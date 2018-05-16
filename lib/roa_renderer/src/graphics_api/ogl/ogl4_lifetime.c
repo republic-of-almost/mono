@@ -3,6 +3,7 @@
 #include <graphics_api/platform.h>
 #include <GL/gl3w.h>
 #include <roa_lib/assert.h>
+#include <roa_lib/array.h>
 #include <scratch/glsl.h>
 #include <scratch/geometry.h>
 #include <stdlib.h>
@@ -124,6 +125,12 @@ platform_setup(roa_renderer_ctx_t ctx)
   glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Setup");
 
   platform_internal_create_gbuffer(ctx);
+
+  /* general init */
+  {
+    roa_array_create_with_capacity(ctx->graphics_api.mesh_ids, 32);
+    roa_array_create_with_capacity(ctx->graphics_api.meshes, 32);
+  }
 
   /* gbuffer fill */
   {
