@@ -42,26 +42,45 @@ platform_update(roa_renderer_ctx_t ctx)
           glObjectLabel(GL_BUFFER, vbos[i], -1, name);
         }
 
-        unsigned v_size = sizeof(pending[i].position_vec3_array[0]) * (pending[i].vertex_count * (pending[i].position_vec3_array ? 3 : 0));
-        unsigned n_size = sizeof(pending[i].normal_vec3_array[0]) * (pending[i].vertex_count * (pending[i].normal_vec3_array ? 3 : 0));
-        unsigned t_size = sizeof(pending[i].texture_coord_vec2_array[0]) * (pending[i].vertex_count * (pending[i].texture_coord_vec2_array ? 2 : 0));
+        unsigned element_count = 0;
+        element_count += pending[i].position_vec3_array ? 3 : 0;
+        element_count += pending[i].normal_vec3_array ? 3 : 0;
+        element_count += pending[i].texture_coord_vec2_array ? 2 : 0;
 
-        unsigned buffer_size = v_size + n_size + t_size;
+        float *data = 0;
+        roa_array_create_with_capacity(data, element_count);
+        roa_array_resize(data, element_count);
 
-        glBufferData(GL_ARRAY_BUFFER, buffer_size, ROA_NULL, GL_STATIC_DRAW);
+        int j;
+        int offset = 0;
 
-        if (v_size)
+        for (j = 0; j < pending[i].vertex_count; ++j)
         {
-          glBufferSubData(GL_ARRAY_BUFFER, 0, v_size, pending[i].position_vec3_array);
+          if (pending[i].position_vec3_array)
+          {
+            int index = i * 3;
+            data[offset++] = pending[i].position_vec3_array[index + 0];
+            data[offset++] = pending[i].position_vec3_array[index + 1];
+            data[offset++] = pending[i].position_vec3_array[index + 2];
+          }
+
+          if (pending[i].normal_vec3_array)
+          {
+            int index = i * 3;
+            data[offset++] = pending[i].normal_vec3_array[index + 0];
+            data[offset++] = pending[i].normal_vec3_array[index + 1];
+            data[offset++] = pending[i].normal_vec3_array[index + 2];
+          }
+
+          if (pending[i].texture_coord_vec2_array)
+          {
+            int index = i * 2;
+            data[offset++] = pending[i].texture_coord_vec2_array[index + 0];
+            data[offset++] = pending[i].texture_coord_vec2_array[index + 1];
+          }
         }
-        if (n_size)
-        {
-          glBufferSubData(GL_ARRAY_BUFFER, v_size, n_size, pending[i].normal_vec3_array);
-        }
-        if (v_size)
-        {
-          glBufferSubData(GL_ARRAY_BUFFER, v_size + n_size, t_size, pending[i].texture_coord_vec2_array);
-        }
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * element_count, data, GL_STATIC_DRAW);
       }
 
       /* ibo */

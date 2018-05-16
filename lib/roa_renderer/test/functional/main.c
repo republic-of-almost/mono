@@ -1,6 +1,7 @@
 #include <roa_renderer/roa_renderer.h>
 #include <roa_ctx/roa_ctx.h>
 #include <roa_math/math.h>
+#include <scratch/geometry.h>
 #include <stdio.h>
 
 
@@ -41,9 +42,65 @@ main()
 
 	/* setup resources */
 	{
+    float pos[1024];
+    float uv[1024];
+    float norm[1024];
+    int vert_count = 0;
+
+    {
+      geom_vert_desc vert_desc[] = {
+        GEOM_VERT_POSITION3,
+      };
+
+      geometry_generate_cube(
+        ROA_ARR_DATA(vert_desc),
+        ROA_ARR_COUNT(vert_desc),
+        1,
+        1,
+        1,
+        ROA_ARR_DATA(pos),
+        &vert_count);
+    }
+
+    {
+      geom_vert_desc vert_desc[] = {
+        GEOM_NORMAL,
+      };
+
+      geometry_generate_cube(
+        ROA_ARR_DATA(vert_desc),
+        ROA_ARR_COUNT(vert_desc),
+        1,
+        1,
+        1,
+        ROA_ARR_DATA(norm),
+        &vert_count);
+    }
+
+    {
+      geom_vert_desc vert_desc[] = {
+        GEOM_UV,
+      };
+
+      geometry_generate_cube(
+        ROA_ARR_DATA(vert_desc),
+        ROA_ARR_COUNT(vert_desc),
+        1,
+        1,
+        1,
+        ROA_ARR_DATA(uv),
+        &vert_count);
+    }
+
+    
+
 		struct roa_renderer_mesh_resource mesh_rsrc;
     ROA_MEM_ZERO(mesh_rsrc);
-		mesh_rsrc.name = "cube_mesh";
+		mesh_rsrc.name = "CubeMesh";
+    mesh_rsrc.position_vec3_array = ROA_ARR_DATA(pos);
+    mesh_rsrc.normal_vec3_array = ROA_ARR_DATA(norm);
+    mesh_rsrc.texture_coord_vec2_array = ROA_ARR_DATA(uv);
+    mesh_rsrc.vertex_count = vert_count;
 
 		cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
 	}

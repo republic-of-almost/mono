@@ -45,7 +45,7 @@ platform_render(roa_renderer_ctx_t ctx)
     glClearColor(1, 0, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
 
     GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
     glEnableVertexAttribArray(pos);
