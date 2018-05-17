@@ -14,6 +14,9 @@
 #endif
 
 
+/* -- [ Raw Data ] -- */
+
+
 struct renderer_data_desc
 {
   roa_atomic_int lock;
@@ -44,9 +47,29 @@ struct renderer_resource_data_desc
 };
 
 
+/* -- [ Renderpasses ] -- */
+
+
+struct renderpass_camera
+{
+  float projection[16];
+  float view[16];
+  float view_projection[16];
+  float position[3];
+};
+
+
+struct renderpass
+{
+  struct renderpass_camera camera;;
+};
+
+
 struct renderer_renderpass_data
 {
   roa_atomic_int lock;
+
+  struct renderpass *rps;
 };
 
 

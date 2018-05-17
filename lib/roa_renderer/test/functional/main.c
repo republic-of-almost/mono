@@ -183,7 +183,7 @@ main()
 
       float x = roa_float_sin(spin_time) * radius;
       float y = radius - (radius / ROA_G_RATIO);
-      float z = roa_float_cos(spin_time) * radius;
+      float z = roa_float_cos(spin_time) * radius; 
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at   = roa_float3_fill_with_value(0.f);

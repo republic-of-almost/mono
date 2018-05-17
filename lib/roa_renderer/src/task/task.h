@@ -15,7 +15,7 @@ struct task_render_arg
 
 
 void
-task_render(void *arg);
+task_renderpass(void *arg);
 
 
 #endif /* inc guard */

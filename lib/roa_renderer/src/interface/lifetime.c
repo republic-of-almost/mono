@@ -80,6 +80,13 @@ roa_renderer_ctx_create(
       roa_spin_lock_release(&new_ctx->resource_desc.lock);
     }
 
+    /* rps */
+    {
+      roa_array_create_with_capacity(new_ctx->renderpass.rps, 4);
+
+      roa_spin_lock_release(&new_ctx->renderpass.lock);
+    }
+
     /* platform */
     {
       platform_setup(new_ctx);
@@ -94,6 +101,8 @@ void
 roa_renderer_ctx_execute(
 	roa_renderer_ctx_t ctx)
 {
+  
+
   platform_update(ctx);
   platform_render(ctx);
 }

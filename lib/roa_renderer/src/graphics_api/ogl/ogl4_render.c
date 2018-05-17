@@ -13,6 +13,9 @@ platform_render(roa_renderer_ctx_t ctx)
   /* param check */
   ROA_ASSERT(ctx);
 
+  /* renderpasses */
+  
+
   float aspect = (float)ctx->device_settings.device_viewport[0] / (float)ctx->device_settings.device_viewport[1];
 
   roa_mat4 world;

@@ -6,7 +6,7 @@
 
 
 void
-task_render(void *arg)
+task_renderpass(void *arg)
 {
 
 }
