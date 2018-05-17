@@ -59,7 +59,7 @@ struct renderpass_camera
 };
 
 
-struct draw_call
+struct renderpass_draw_call
 {
   float world[16];
   float wvp[16];
@@ -69,7 +69,7 @@ struct draw_call
 struct renderpass
 {
   struct renderpass_camera camera;
-  struct draw_call *draw_calls;
+  struct renderpass_draw_call *draw_calls;
 };
 
 
@@ -81,12 +81,18 @@ struct renderer_renderpass_data
 };
 
 
+/* -- [ Device ] -- */
+
+
 struct device_setting_data
 {
   roa_atomic_int lock;
 
   float device_viewport[2];
 };
+
+
+/* -- [ Context ] -- */
 
 
 struct roa_renderer_ctx

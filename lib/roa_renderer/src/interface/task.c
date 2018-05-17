@@ -60,7 +60,7 @@ roa_renderer_task_pump(
     {
       struct roa_renderer_mesh_renderable rdr = ctx->renderer_desc.mesh_rdr_descs[j];
 
-      struct draw_call dc;
+      struct renderpass_draw_call dc;
       memcpy(dc.world, rdr.world_transform, sizeof(dc.world));
 
       roa_mat4 world;

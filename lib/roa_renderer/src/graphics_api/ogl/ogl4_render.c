@@ -23,10 +23,15 @@ platform_render(roa_renderer_ctx_t ctx)
   for (i = 0; i < rp_count; ++i)
   {
     struct renderpass *rp = &ctx->renderpass.rps[i];
-    
+    unsigned dc_count = roa_array_size(rp->draw_calls);
+
     /* fill buffer */
     {
-      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "GBuffer:Fill");
+      char buffer[128];
+      memset(buffer, 0, sizeof(buffer));
+      sprintf(buffer, "GBuffer:Fill - Cam %d - DCs %d", i, dc_count);
+
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, buffer);
 
       glUseProgram(ctx->graphics_api.gbuffer_fill.program);
 
@@ -39,12 +44,11 @@ platform_render(roa_renderer_ctx_t ctx)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       /* draw calls */
-      unsigned dc_count = roa_array_size(rp->draw_calls);
       int j;
 
       for (j = 0; j < dc_count; ++j)
       {
-        struct draw_call dc = rp->draw_calls[j];
+        struct renderpass_draw_call dc = rp->draw_calls[j];
 
         glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
 
