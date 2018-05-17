@@ -14,61 +14,63 @@ platform_render(roa_renderer_ctx_t ctx)
   ROA_ASSERT(ctx);
 
   /* renderpasses */
-  
-
-  float aspect = (float)ctx->device_settings.device_viewport[0] / (float)ctx->device_settings.device_viewport[1];
-
-  roa_mat4 world;
-  roa_mat4_id(&world);
-
-  roa_mat4 proj;
-  roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25f, 0.1, 100.f, aspect);
-
-  roa_mat4 view;
-  roa_mat4_lookat(&view, roa_float3_set_with_values(4, 4, 4), roa_float3_zero(), roa_float3_set_with_values(0, 1, 0));
-
-  roa_mat4 wvp;
-  roa_mat4_multiply_three(&wvp, &world, &view, &proj);
+  int rp_count = roa_array_size(ctx->renderpass.rps);
+  int i;
 
   glBindVertexArray(ctx->graphics_api.vao);
-
   glViewport(0, 0, ctx->device_settings.device_viewport[0], ctx->device_settings.device_viewport[1]);
 
-  /* fill buffer */
+  for (i = 0; i < rp_count; ++i)
   {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "GBuffer:Fill");
+    struct renderpass *rp = &ctx->renderpass.rps[i];
+    
+    /* fill buffer */
+    {
+      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "GBuffer:Fill");
 
-    glUseProgram(ctx->graphics_api.gbuffer_fill.program);
+      glUseProgram(ctx->graphics_api.gbuffer_fill.program);
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_CULL_FACE);
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
 
-    glClearColor(1, 0, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClearColor(1, 0, 1, 1);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
+      /* draw calls */
+      unsigned dc_count = roa_array_size(rp->draw_calls);
+      int j;
 
-    GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
-    glEnableVertexAttribArray(pos);
-    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+      for (j = 0; j < dc_count; ++j)
+      {
+        struct draw_call dc = rp->draw_calls[j];
 
-    GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
-    glEnableVertexAttribArray(texc);
-    glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+        glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
 
-    GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Normal");
-    glEnableVertexAttribArray(norm);
-    glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+        GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
+        glEnableVertexAttribArray(pos);
+        glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 
-    glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_wvp, 1, GL_FALSE, wvp.data);
-    glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_world, 1, GL_FALSE, world.data);
+        GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
+        glEnableVertexAttribArray(texc);
+        glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+        GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Normal");
+        glEnableVertexAttribArray(norm);
+        glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 
-    glPopDebugGroup();
-  }
+        glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_wvp, 1, GL_FALSE, dc.wvp);
+        glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_world, 1, GL_FALSE, dc.world);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+      }
+
+      roa_array_destroy(rp->draw_calls);
+
+      glPopDebugGroup();
+    }
+  } /* rps */
 
   /* blit to screen */
   {

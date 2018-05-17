@@ -59,9 +59,17 @@ struct renderpass_camera
 };
 
 
+struct draw_call
+{
+  float world[16];
+  float wvp[16];
+};
+
+
 struct renderpass
 {
-  struct renderpass_camera camera;;
+  struct renderpass_camera camera;
+  struct draw_call *draw_calls;
 };
 
 

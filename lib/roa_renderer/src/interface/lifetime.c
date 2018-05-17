@@ -101,8 +101,6 @@ void
 roa_renderer_ctx_execute(
 	roa_renderer_ctx_t ctx)
 {
-  
-
   platform_update(ctx);
   platform_render(ctx);
 }
