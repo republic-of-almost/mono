@@ -34,11 +34,9 @@ if project_files then
     if err then
       print("Failed to load json" .. err)
     else
-      proj_table["base_location"] = path.getdirectory(proj) .. "/";
+      proj_table["base_location"] = path.getdirectory(proj)
 
       table.insert(projects, proj_table)
-
-      --print(proj_table["name"] .. " loaded");
     end
   end
 

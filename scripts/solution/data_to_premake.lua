@@ -359,15 +359,15 @@ make.create_solution(solution_data, project_defaults, projects)
               if _dep_inc_dirs then
                 for i,v in ipairs(_dep_inc_dirs) do
                   _dep_inc_dirs[i] = other_proj.base_location .. "/" .. v
+                  _dep_inc_dirs[i] = path.getabsolute(_dep_inc_dirs[i])
                 end
 
                 includedirs(_dep_inc_dirs)
               end
 
-
-              if other_proj.public_inc_dirs then includedirs(other_proj.public_inc_dirs) end
+              if other_proj.public_inc_dirs then includedirs(path.getabsolute(other_proj.public_inc_dirs)) end
               local platform_inc_dirs = find_table_with_platform(other_proj, "public_inc_dirs")
-              if platform_inc_dirs then includedirs(platform_inc_dirs) end
+              if platform_inc_dirs then includedirs(path.getabsolute(platform_inc_dirs)) end
 
               -- We also need link dirs
               if proj.kind ~= "StaticLib" then
@@ -390,6 +390,10 @@ make.create_solution(solution_data, project_defaults, projects)
     get_dependencies(proj, proj, "  ")
 
     buildoptions(proj.buildoptions)
+
+    xcodebuildsettings {
+      ['ALWAYS_SEARCH_USER_PATHS'] = 'YES'
+    }
 
     -- Global build options --
     if proj.ignore_defaults ~= true then
