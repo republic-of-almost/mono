@@ -191,12 +191,13 @@ roa_ctx_create(roa_ctx_t *ctx)
   if (glfwInit())
   {
     glfwSetErrorCallback(roa_ctx_err_callback);
-
+    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     #ifdef __APPLE__
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
