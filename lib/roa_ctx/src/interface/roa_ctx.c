@@ -229,8 +229,6 @@ roa_ctx_create(roa_ctx_t *ctx)
       glfwSetScrollCallback(win, roa_ctx_cursor_scroll_callback);
       glfwSetKeyCallback(win, roa_ctx_key_callback);
 
-      glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
       gl3wInit();
 
 			new_ctx->width = width;
@@ -310,6 +308,7 @@ roa_ctx_get_window_desc(
 	out_desc->height = ctx->height;
   out_desc->width = ctx->width;
 	out_desc->title = ctx->title;
+  out_desc->capture_mouse = ctx->mouse_locked;
 }
 
 
@@ -328,12 +327,17 @@ roa_ctx_set_window_desc(
 
 	ctx->width = desc->width;
 	ctx->height = desc->height;
+  ctx->mouse_locked = desc->capture_mouse;
 
 	unsigned bytes = strlen(desc->title) + 1 > sizeof(ctx->title) - 1 ? sizeof(ctx->title) - 1 : strlen(desc->title) + 1;
 	memcpy(ctx->title, desc->title, bytes);
 
   glfwSetWindowSize(ctx->window, desc->width, desc->height);
   glfwSetWindowTitle(ctx->window, desc->title);
+  
+  int cursor = ctx->mouse_locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
+  
+  glfwSetInputMode(ctx->window, GLFW_CURSOR, cursor);
 }
 
 

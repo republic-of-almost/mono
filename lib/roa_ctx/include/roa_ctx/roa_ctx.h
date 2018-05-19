@@ -36,6 +36,7 @@ struct roa_ctx_window_desc
   int width;
   int height;
   const char *title;
+  int capture_mouse;
 };
 
 void
@@ -55,7 +56,8 @@ roa_ctx_set_window_desc(
 
 typedef enum ms_button_id {
   ROA_MS_BUTTON_LEFT, ROA_MS_BUTTON_MIDDLE, ROA_MS_BUTTON_RIGHT,
-  ROA_MS_BUTTON_0, ROA_MS_BUTTON_1, ROA_MS_BUTTON_2, ROA_MS_BUTTON_3, ROA_MS_BUTTON_4,
+  ROA_MS_BUTTON_0, ROA_MS_BUTTON_1, ROA_MS_BUTTON_2, ROA_MS_BUTTON_3,
+  ROA_MS_BUTTON_4,
 
   ROA_MS_BUTTON_COUNT
 } ms_button_id;
