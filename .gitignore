@@ -2,6 +2,9 @@ output/
 media_masters/
 app/roa_apps/
 
+scripts/solution/premake5
+scripts/solution/premake.exe
+
 tags
 imgui.ini
 
