@@ -195,6 +195,10 @@ roa_ctx_create(roa_ctx_t *ctx)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    
+    #ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
 
 		/* some defaults */
 		int width = 800;
@@ -237,6 +241,10 @@ roa_ctx_create(roa_ctx_t *ctx)
       *ctx = new_ctx;
 
 			ROA_LOG_INFO("Created Context");
+    }
+    else
+    {
+      ROA_ASSERT(0);
     }
   }
 }
