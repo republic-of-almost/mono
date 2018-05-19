@@ -466,6 +466,12 @@ gltf_import(const char *filename, struct gltf_import *out_import)
 
     root = json_parse((void*)src, src_length);
   }
+  
+  /* early bail */
+  if(!root)
+  {
+    return;
+  }
 
   /* setup import */
   {

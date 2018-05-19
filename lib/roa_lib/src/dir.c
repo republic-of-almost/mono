@@ -8,6 +8,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
+#elsif defined(__APPLE__)
+#include <unistd.h>
+#include <string.h>
+#include <libproc.h>
 #endif
 
 const char*
@@ -69,5 +73,28 @@ roa_exe_dir()
 	}
 
 	return ROA_ARR_DATA(buffer_path);
-	#endif
+	#elif defined(__APPLE__)
+  static char buffer_exe_path[2048] = "\0";
+
+  if(strlen(buffer_exe_path) == 0)
+  {
+    proc_pidpath(getpid(), buffer_exe_path, sizeof(buffer_exe_path));
+
+    size_t i;
+    int buffer_length = strlen(buffer_exe_path);
+
+    size_t last_slash_index = 0;
+    for(i = 0; i < buffer_length; i++) {
+      size_t r_i = (buffer_length - 1) - i;
+      if(buffer_exe_path[r_i] == '/' || buffer_exe_path[r_i] == '\\') {
+        last_slash_index = r_i;
+        break;
+      }
+    }
+
+    buffer_exe_path[last_slash_index + 1] = '\0';
+  }
+
+  return buffer_exe_path;
+  #endif
 }
