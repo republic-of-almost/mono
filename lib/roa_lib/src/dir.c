@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
-##elif defined(__APPLE__)
+#elif defined(__APPLE__)
 #include <unistd.h>
 #include <string.h>
 #include <libproc.h>
