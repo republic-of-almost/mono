@@ -1,3 +1,6 @@
+#ifdef ROA_RENDERER_API_GL4
+
+
 #include <graphics_api/ogl/ogl4_helpers.h>
 #include <GL/gl3w.h>
 
@@ -18,3 +21,6 @@ glrPopMarkerGroup()
     glPopDebugGroup();
   }
 }
+
+
+#endif /* api guard */
