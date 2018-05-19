@@ -1,6 +1,7 @@
 #ifdef ROA_RENDERER_API_GL4
 
 #include <graphics_api/platform.h>
+#include <graphics_api/ogl/ogl4_helpers.h>
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
 #include <GL/gl3w.h>
@@ -30,8 +31,8 @@ platform_render(roa_renderer_ctx_t ctx)
       char buffer[128];
       memset(buffer, 0, sizeof(buffer));
       sprintf(buffer, "GBuffer:Fill - Cam %d - DCs %d", i, dc_count);
-
-      glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, buffer);
+      
+      glrPushMarkerGroup(buffer);
 
       glUseProgram(ctx->graphics_api.gbuffer_fill.program);
 
@@ -72,13 +73,13 @@ platform_render(roa_renderer_ctx_t ctx)
 
       roa_array_destroy(rp->draw_calls);
 
-      glPopDebugGroup();
+      glrPopMarkerGroup();
     }
   } /* rps */
 
   /* blit to screen */
   {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Backbuffer:Blit");
+    glrPushMarkerGroup("Backbuffer:Blit");
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -108,7 +109,7 @@ platform_render(roa_renderer_ctx_t ctx)
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    glPopDebugGroup();
+    glrPopMarkerGroup();
   }
 }
 

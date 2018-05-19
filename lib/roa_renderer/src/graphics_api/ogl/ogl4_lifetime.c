@@ -1,6 +1,7 @@
 #ifdef ROA_RENDERER_API_GL4
 
 #include <graphics_api/platform.h>
+#include <graphics_api/ogl/ogl4_helpers.h>
 #include <GL/gl3w.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
@@ -122,7 +123,7 @@ platform_setup(roa_renderer_ctx_t ctx)
     ctx->graphics_api.vao = vao;
   }
 
-  glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, "Setup");
+  glrPushMarkerGroup("Setup");
 
   platform_internal_create_gbuffer(ctx);
 
@@ -395,7 +396,7 @@ platform_setup(roa_renderer_ctx_t ctx)
     ctx->graphics_api.vbo = vbo;
   }
 
-  glPopDebugGroup();
+  glrPopMarkerGroup();
 }
 
 
