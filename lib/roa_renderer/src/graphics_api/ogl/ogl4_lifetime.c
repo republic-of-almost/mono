@@ -249,6 +249,11 @@ platform_setup(roa_renderer_ctx_t ctx)
     }
   }
 
+  /* dir light */
+  {
+    
+  }
+
   /* fullscreen */
   {
   /* program */
