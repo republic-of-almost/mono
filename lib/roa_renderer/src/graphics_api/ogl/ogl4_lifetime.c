@@ -209,7 +209,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           "void main()  \n"
           "{\n"
           " WorldPosOut     = WorldPos0;\n"
-          " DiffuseOut      = vec3(1, 0.3, 0); /*texture(gColorMap, TexCoord0).xyz;*/\n"
+          " DiffuseOut      = texture(gColorMap, TexCoord0).xyz;\n"
           " NormalOut       = normalize(Normal0);\n"
           " TexCoordOut     = vec3(TexCoord0, 0.0);\n"
           "}\n";
