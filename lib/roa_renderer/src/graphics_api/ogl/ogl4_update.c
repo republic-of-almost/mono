@@ -9,6 +9,7 @@ void
 platform_update(roa_renderer_ctx_t ctx)
 {
   int pending_meshes = roa_array_size(ctx->resource_desc.mesh_pending_ids);
+  int pending_textures = roa_array_size(ctx->resource_desc.texture_pending_ids);
   
   /* load meshes */
   if(pending_meshes > 0)
@@ -115,6 +116,44 @@ platform_update(roa_renderer_ctx_t ctx)
 
     roa_array_clear(ctx->resource_desc.mesh_pending_ids);
     roa_array_clear(ctx->resource_desc.mesh_rsrc_pending_data);
+  }
+
+  if (pending_textures)
+  {
+    int count = pending_textures;
+    int i;
+
+    GLuint *textures = 0;
+    roa_array_create_with_capacity(textures, count);
+    roa_array_resize(textures, count);
+
+    glGenTextures(count, textures);
+
+    struct roa_renderer_texture_resource *pending = ctx->resource_desc.texture_rsrc_pending_data;
+    uint64_t *pending_ids = ctx->resource_desc.texture_pending_ids;
+
+    for (i = 0; i < count; ++i)
+    {
+      glBindTexture(GL_TEXTURE_2D, textures[i]);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      glGenerateMipmap(GL_TEXTURE_2D);
+
+      if (glObjectLabel) {
+        const char * name = pending[i].name ? pending[i].name : "UnknownTexture";
+        glObjectLabel(GL_BUFFER, textures[i], -1, name);
+      }
+
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pending[i].width, pending[i].height, 0, GL_RGB,
+        GL_UNSIGNED_BYTE, pending[i].data);
+
+      ctx->graphics_api.tex = textures[i];
+    }
+
+    roa_array_clear(ctx->resource_desc.texture_pending_ids);
+    roa_array_clear(ctx->resource_desc.texture_rsrc_pending_data);
   }
 }
 

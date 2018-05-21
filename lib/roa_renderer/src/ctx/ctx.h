@@ -42,6 +42,12 @@ struct renderer_resource_data_desc
   /* array */ uint64_t *mesh_pending_ids;
   /* array */ struct roa_renderer_mesh_resource *mesh_rsrc_pending_data;
 
+  /* array */ uint64_t *texture_ids;
+  /* array */ struct roa_renderer_texture_resource *texture_rsrc_data;
+
+  /* array */ uint64_t *texture_pending_ids;
+  /* array */ struct roa_renderer_texture_resource *texture_rsrc_pending_data;
+
   /* array */ uint64_t *material_ids;
   /* array */ struct roa_renderer_material_resource *mat_descs;
 };

@@ -196,7 +196,6 @@ struct roa_renderer_mesh_renderable
   float world_transform[16];
 
   uint32_t color;
-
   uint64_t mesh_id;
   uint64_t material_id;
 };
@@ -277,6 +276,36 @@ roa_renderer_mesh_resource_add(
 
 ROA_BOOL
 roa_renderer_mesh_resource_exists(
+  roa_renderer_ctx_t ctx,
+  const char *name);
+
+
+/* ------------------------------------------------- [ Texture Resources ] -- */
+
+
+struct roa_renderer_texture_resource
+{
+  const char *name;
+  unsigned width;
+  unsigned height;
+  int components;
+  void *data;
+};
+
+
+unsigned
+roa_renderer_texture_resource_count(
+  roa_renderer_ctx_t ctx);
+
+
+uint64_t
+roa_renderer_texture_resource_add(
+  roa_renderer_ctx_t ctx,
+  const struct roa_renderer_texture_resource *rsrc);
+
+
+ROA_BOOL
+roa_renderer_texture_resource_exists(
   roa_renderer_ctx_t ctx,
   const char *name);
 

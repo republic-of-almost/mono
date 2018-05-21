@@ -77,6 +77,12 @@ roa_renderer_ctx_create(
       roa_array_create_with_capacity(new_ctx->resource_desc.mesh_pending_ids, 32);
       roa_array_create_with_capacity(new_ctx->resource_desc.mesh_rsrc_pending_data, 32);
 
+      roa_array_create_with_capacity(new_ctx->resource_desc.texture_ids, 32);
+      roa_array_create_with_capacity(new_ctx->resource_desc.texture_rsrc_data, 32);
+
+      roa_array_create_with_capacity(new_ctx->resource_desc.texture_pending_ids, 32);
+      roa_array_create_with_capacity(new_ctx->resource_desc.texture_rsrc_pending_data, 32);
+
       roa_spin_lock_release(&new_ctx->resource_desc.lock);
     }
 
@@ -139,6 +145,12 @@ roa_renderer_ctx_destroy(
 
       roa_array_destroy(kill_ctx->resource_desc.mesh_pending_ids);
       roa_array_destroy(kill_ctx->resource_desc.mesh_rsrc_pending_data);
+
+      roa_array_destroy(kill_ctx->resource_desc.texture_ids);
+      roa_array_destroy(kill_ctx->resource_desc.texture_rsrc_data);
+
+      roa_array_destroy(kill_ctx->resource_desc.texture_pending_ids);
+      roa_array_destroy(kill_ctx->resource_desc.texture_rsrc_pending_data);
     }
 
     rdr_free(kill_ctx);

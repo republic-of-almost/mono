@@ -70,6 +70,7 @@ struct graphics_api
 
   GLuint mesh_program;
   GLuint vbo;
+  GLuint tex;
 };
 
 

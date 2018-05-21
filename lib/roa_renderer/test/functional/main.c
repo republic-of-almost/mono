@@ -2,6 +2,8 @@
 #include <roa_ctx/roa_ctx.h>
 #include <roa_math/math.h>
 #include <scratch/geometry.h>
+#include <scratch/textures.h>
+#include <stb/stb_image.h>
 #include <stdio.h>
 
 
@@ -40,7 +42,7 @@ main()
     roa_ctx_set_window_desc(hw_ctx, &win_desc);
   }
 
-	/* setup resources */
+	/* setup mesh resources */
 	{
     float pos[1024];
     float uv[1024];
@@ -92,8 +94,6 @@ main()
         &vert_count);
     }
 
-    
-
 		struct roa_renderer_mesh_resource mesh_rsrc;
     ROA_MEM_ZERO(mesh_rsrc);
 		mesh_rsrc.name = "CubeMesh";
@@ -104,6 +104,22 @@ main()
 
 		cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
 	}
+
+  /* setup texture */
+  {
+    struct roa_renderer_texture_resource texture_rsrc;
+    ROA_MEM_ZERO(texture_rsrc);
+    texture_rsrc.name = "TestTexture";
+   
+    unsigned bytes = 0;
+    unsigned *raw_png = texture_png_data_blender_1(&bytes);
+
+    stbi_set_flip_vertically_on_load(1);
+    texture_rsrc.data = stbi_load_from_memory(
+      raw_png, bytes, &texture_rsrc.width, &texture_rsrc.height, &texture_rsrc.components, 3);
+
+    roa_renderer_texture_resource_add(renderer_ctx, &texture_rsrc);
+  }
 
   /* setup objects */
   {

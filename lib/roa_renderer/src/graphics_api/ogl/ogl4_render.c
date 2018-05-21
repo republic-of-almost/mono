@@ -75,6 +75,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glrPopMarkerGroup();
     }
+
   } /* rps */
 
   /* blit to screen */
@@ -98,7 +99,7 @@ platform_render(roa_renderer_ctx_t ctx)
     glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[3]);
+    glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[2]);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
