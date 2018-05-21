@@ -110,11 +110,16 @@ platform_setup(roa_renderer_ctx_t ctx)
 {
   //gl3wInit();
 
+  /* clear arr */
+  {
+    while(glGetError());
+  }
+
   /* VAO */
   {
     GLuint vao = 0;
     glGenVertexArrays(1, &vao);
-    glBindVertexArray(&vao);
+    glBindVertexArray(vao);
 
     if (glObjectLabel) {
       glObjectLabel(GL_VERTEX_ARRAY, vao, -1, "ROARenderer:VAO");
@@ -131,6 +136,15 @@ platform_setup(roa_renderer_ctx_t ctx)
   {
     roa_array_create_with_capacity(ctx->graphics_api.mesh_ids, 32);
     roa_array_create_with_capacity(ctx->graphics_api.meshes, 32);
+  }
+
+  /* err */
+  {
+    GLuint err = glGetError();
+    if (err)
+    {
+      ROA_ASSERT(0);
+    }
   }
 
   /* gbuffer fill */
@@ -249,14 +263,61 @@ platform_setup(roa_renderer_ctx_t ctx)
     }
   }
 
-  /* dir light */
+  /* err */
   {
+    GLuint err = glGetError();
+    if (err)
+    {
+      ROA_ASSERT(0);
+    }
+  }
+
+  /* decal */
+  {
+    float data[1024];
+
+    geom_vert_desc vert_desc[] = {
+      GEOM_VERT_POSITION3,
+      GEOM_NORMAL,
+      GEOM_UV,
+    };
+
+    unsigned vert_count = 0;
+
+    geometry_generate_cube(
+      ROA_ARR_DATA(vert_desc),
+      ROA_ARR_COUNT(vert_desc),
+      1,
+      1,
+      1,
+      ROA_ARR_DATA(data),
+      &vert_count);
     
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    if (glObjectLabel) {
+      glObjectLabel(GL_BUFFER, vbo, -1, "Decal:Volume(P3N3T2)");
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vert_count, data, GL_STATIC_DRAW);
+
+    ctx->graphics_api.decal.vbo = vbo;
+  }
+
+  /* err */
+  {
+    GLuint err = glGetError();
+    if (err)
+    {
+      ROA_ASSERT(0);
+    }
   }
 
   /* fullscreen */
   {
-  /* program */
+    /* program */
     {
       GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
       {
@@ -366,6 +427,15 @@ platform_setup(roa_renderer_ctx_t ctx)
       }
 
       ctx->graphics_api.blit.fullscreen_triangle = vbo;
+    }
+  }
+
+  /* err */
+  {
+    GLuint err = glGetError();
+    if (err)
+    {
+      ROA_ASSERT(0);
     }
   }
 
