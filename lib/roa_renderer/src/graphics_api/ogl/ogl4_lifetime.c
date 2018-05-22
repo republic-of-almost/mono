@@ -64,8 +64,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
 
     /* output textures */
     {
-      GLuint *tex_arr = ctx->graphics_api.gbuffer.texture_output;
-      GLuint output_textures[ROA_ARR_COUNT(tex_arr)];
+      GLuint output_textures[ROA_ARR_COUNT(ctx->graphics_api.gbuffer.texture_output)];
       ROA_MEM_ZERO(output_textures);
 
       const char *debug_texture_names[] = {
@@ -86,11 +85,11 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         glTexImage2D(
           GL_TEXTURE_2D,
           0,
-          GL_RGBA32F,
+          GL_RGB32F,
           width,
           height,
           0,
-          GL_RGBA,
+          GL_RGB,
           GL_FLOAT,
           NULL);
 
@@ -295,8 +294,8 @@ platform_setup(roa_renderer_ctx_t ctx)
 
     /* uniforms */
     {
-      ctx->graphics_api.gbuffer_fill.uni_wvp = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWVP");
-      ctx->graphics_api.gbuffer_fill.uni_world = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWorld");
+      ctx->graphics_api.gbuffer_fill.uni_wvp    = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWVP");
+      ctx->graphics_api.gbuffer_fill.uni_world  = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWorld");
     }
   }
 
@@ -460,7 +459,7 @@ platform_setup(roa_renderer_ctx_t ctx)
     }
 
     /* volume */
-    {
+    if(0){
       float data[1024];
 
       geom_vert_desc vert_desc[] = {
