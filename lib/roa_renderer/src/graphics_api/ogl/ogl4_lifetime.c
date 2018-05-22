@@ -8,6 +8,7 @@
 #include <scratch/glsl.h>
 #include <scratch/geometry.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 void
@@ -36,20 +37,35 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
       GLuint depth_texture = 0;
       glGenTextures(1, &depth_texture);
       glBindTexture(GL_TEXTURE_2D, depth_texture);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, ROA_NULL);
+      glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        width,
+        height,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        ROA_NULL);
 
       if (glObjectLabel) {
         glObjectLabel(GL_TEXTURE, depth_texture, -1, "GBuffer:Depth");
       }
 
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
+      glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        depth_texture,
+        0);
 
       ctx->graphics_api.gbuffer.texture_depth = depth_texture;
     }
 
     /* output textures */
     {
-      GLuint output_textures[ROA_ARR_COUNT(ctx->graphics_api.gbuffer.texture_output)];
+      GLuint *tex_arr = ctx->graphics_api.gbuffer.texture_output;
+      GLuint output_textures[ROA_ARR_COUNT(tex_arr)];
       ROA_MEM_ZERO(output_textures);
 
       const char *debug_texture_names[] = {
@@ -67,13 +83,31 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
       for (i = 0; i < count; ++i)
       {
         glBindTexture(GL_TEXTURE_2D, output_textures[i]);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexImage2D(
+          GL_TEXTURE_2D,
+          0,
+          GL_RGBA32F,
+          width,
+          height,
+          0,
+          GL_RGBA,
+          GL_FLOAT,
+          NULL);
 
         if (glObjectLabel) {
-          glObjectLabel(GL_TEXTURE, output_textures[i], -1, debug_texture_names[i]);
+          glObjectLabel(
+            GL_TEXTURE,
+            output_textures[i],
+            -1,
+            debug_texture_names[i]);
         }
 
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, output_textures[i], 0);
+        glFramebufferTexture2D(
+          GL_FRAMEBUFFER,
+          GL_COLOR_ATTACHMENT0 + i,
+          GL_TEXTURE_2D,
+          output_textures[i],
+          0);
       }
 
       GLenum draw_buffers[] = {
@@ -86,9 +120,13 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
 
       GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-      ROA_ASSERT(fbo_status == GL_FRAMEBUFFER_COMPLETE);
+      GLenum complete = GL_FRAMEBUFFER_COMPLETE;
 
-      memcpy(ctx->graphics_api.gbuffer.texture_output, output_textures, sizeof(output_textures));
+      ROA_ASSERT(fbo_status == complete);
+
+      void *dst = (void*)ctx->graphics_api.gbuffer.texture_output;
+
+      memcpy(dst, output_textures, sizeof(output_textures));
     }
 
     /* unbind state */
@@ -101,6 +139,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
 void
 platform_internal_destroy_gbuffer(roa_renderer_ctx_t ctx)
 {
+  (void)ctx;
   /* todo :) */
 }
 
@@ -108,8 +147,6 @@ platform_internal_destroy_gbuffer(roa_renderer_ctx_t ctx)
 void
 platform_setup(roa_renderer_ctx_t ctx)
 {
-  //gl3wInit();
-
   /* clear arr */
   {
     while(glGetError());
@@ -274,14 +311,160 @@ platform_setup(roa_renderer_ctx_t ctx)
 
   /* decal */
   {
+    /* program */
+    {
+      GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
+      {
+        const char *vs = ""
+          "#version 430\n"
+          "\n"
+          "uniform mat4 gView;\n"
+          "uniform mat4 gProjection;\n"
+          "\n"
+          "uniform mat4 modelMatrix;\n"
+          "uniform vec3 decalSize;\n"
+          "\n"
+          "layout ( location = 0 ) in vec4 positionIN;\n"
+          "layout ( location = 1 ) in vec4 normalIN;\n"
+          "layout ( location = 2 ) in vec4 tangentIN;\n"
+          "layout ( location = 3 ) in ivec4 boneIndices;\n"
+          "layout ( location = 4 ) in vec4 boneWeights;\n"
+          "layout ( location = 5 ) in vec2 uvIN;\n"
+          "\n"
+          "out vec4 posFS;\n"
+          "out vec4 posW;\n"
+          "out vec2 uvFS;\n"
+          "\n"
+          "void main()\n"
+          "{\n"
+            "posW = modelMatrix * vec4(positionIN.xyz * 1, positionIN.w);\n"
+            "//Move position to clip space\n"
+            "posFS = gProjection * gView * posW;\n"
+            "uvFS = uvIN;\n"
+            "gl_Position = posFS;\n"
+          "}\n";
 
+        const GLchar *src = vs;
+        glShaderSource(vert_shd, 1, &src, ROA_NULL);
+        glCompileShader(vert_shd);
+
+        GLint status;
+        glGetShaderiv(vert_shd, GL_COMPILE_STATUS, &status);
+
+        if (status != GL_TRUE)
+        {
+          char buffer[512];
+          glGetShaderInfoLog(vert_shd, 512, NULL, buffer);
+          ROA_ASSERT(ROA_FALSE);
+        }
+
+      }
+
+      GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
+      {
+
+        const char *fs = ""
+          "#version 430\n"
+          "#extension GL_ARB_texture_rectangle : enable\n"
+          "\n"
+          "in vec4 posFS;\n"
+          "in vec4 posW;\n"
+          "in vec2 uvFS;\n"
+          "\n"
+          "uniform sampler2D gNormalDepth;\n"
+          "uniform sampler2D gDiffuse;\n"
+          "\n"
+          "uniform float gGamma;\n"
+          "\n"
+          "uniform mat4 invProjView;\n"
+          "uniform mat4 invModelMatrix;\n"
+          "\n"
+          "vec4 reconstruct_pos(float z, vec2 uv_f)\n"
+          "{\n"
+            "vec4 sPos = vec4(uv_f * 2.0 - 1.0, z, 1.0);\n"
+            "sPos = invProjView * sPos;\n"
+            "return vec4((sPos.xyz / sPos.w ), sPos.w);\n"
+          "}\n"
+          "\n"
+          "\n"
+          "layout ( location = 1 ) out vec4 diffuseRT;\n"
+          "layout ( location = 2 ) out vec4 specularRT;\n"
+          "layout ( location = 3 ) out vec4 glowMatIDRT;\n"
+          "\n"
+          "void main()\n"
+          "{\n"
+            "vec2 screenPosition = posFS.xy / posFS.w;\n"
+            "\n"
+            "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
+            "depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
+            "float depth = texture2D(gNormalDepth, depthUV).w;\n"
+            "\n"
+            "vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
+            "vec4 localPos = invModelMatrix * worldPos;\n"
+            "\n"
+            "float dist = 0.5f - abs(localPos.y);\n"
+            "float dist2 = 0.5f - abs(localPos.x);\n"
+            "\n"
+            "if (dist > 0.0f && dist2 > 0)\n"
+            "{\n"
+              "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
+              "vec4 diffuseColor = texture2D(gDiffuse, uv);\n"
+              "diffuseRT = diffuseColor;\n"
+              "diffuseRT = vec4(0.0, 1.0, 0.0, 1);\n"
+            "}\n"
+            "else\n"
+              "diffuseRT = vec4(1.0, 0, 0, 1);\n"
+            "}\n";
+      
+        const GLchar *src = fs;
+        glShaderSource(frag_shd, 1, &src, ROA_NULL);
+        glCompileShader(frag_shd);
+
+        GLint status;
+        glGetShaderiv(frag_shd, GL_COMPILE_STATUS, &status);
+
+        if (status != GL_TRUE)
+        {
+          char buffer[512];
+          glGetShaderInfoLog(frag_shd, 512, NULL, buffer);
+          ROA_ASSERT(ROA_FALSE);
+        }
+      }
+
+      {
+        GLuint prog = glCreateProgram();
+        glAttachShader(prog, vert_shd);
+        glAttachShader(prog, frag_shd);
+        glLinkProgram(prog);
+
+        GLint status;
+        glGetProgramiv(prog, GL_LINK_STATUS, &status);
+
+        if (status != GL_TRUE)
+        {
+          char buffer[512];
+          glGetProgramInfoLog(prog, 512, NULL, buffer);
+          ROA_ASSERT(ROA_FALSE);
+        }
+
+        if (glObjectLabel) {
+          glObjectLabel(GL_PROGRAM, prog, -1, "Decal");
+        }
+
+        glDeleteShader(vert_shd);
+        glDeleteShader(frag_shd);
+
+        ctx->graphics_api.decal.program = prog; 
+      }
+
+    }
 
     /* volume */
     {
       float data[1024];
 
       geom_vert_desc vert_desc[] = {
-        GEOM_VERT_POSITION3,
+        GEOM_VERT_POSITION4,
         GEOM_NORMAL,
         GEOM_UV,
       };
