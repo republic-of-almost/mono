@@ -210,7 +210,7 @@ make.create_solution(solution_data, project_defaults, projects)
     elseif(proj.language == "C89") then
       language("C")
       if os_target == "macosx" or os_target == "linux" then
-        buildoptions("-std=c89");
+        buildoptions("-std=gnu89");
       end
     elseif(proj.language == "C99") then
       language("C")
