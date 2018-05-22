@@ -274,36 +274,41 @@ platform_setup(roa_renderer_ctx_t ctx)
 
   /* decal */
   {
-    float data[1024];
 
-    geom_vert_desc vert_desc[] = {
-      GEOM_VERT_POSITION3,
-      GEOM_NORMAL,
-      GEOM_UV,
-    };
 
-    unsigned vert_count = 0;
+    /* volume */
+    {
+      float data[1024];
 
-    geometry_generate_cube(
-      ROA_ARR_DATA(vert_desc),
-      ROA_ARR_COUNT(vert_desc),
-      1,
-      1,
-      1,
-      ROA_ARR_DATA(data),
-      &vert_count);
+      geom_vert_desc vert_desc[] = {
+        GEOM_VERT_POSITION3,
+        GEOM_NORMAL,
+        GEOM_UV,
+      };
+
+      unsigned vert_count = 0;
+
+      geometry_generate_cube(
+        ROA_ARR_DATA(vert_desc),
+        ROA_ARR_COUNT(vert_desc),
+        1,
+        1,
+        1,
+        ROA_ARR_DATA(data),
+        &vert_count);
     
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      GLuint vbo;
+      glGenBuffers(1, &vbo);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    if (glObjectLabel) {
-      glObjectLabel(GL_BUFFER, vbo, -1, "Decal:Volume(P3N3T2)");
+      if (glObjectLabel) {
+        glObjectLabel(GL_BUFFER, vbo, -1, "Decal:Volume(P3N3T2)");
+      }
+
+      glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vert_count, data, GL_STATIC_DRAW);
+
+      ctx->graphics_api.decal.vbo = vbo;
     }
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vert_count, data, GL_STATIC_DRAW);
-
-    ctx->graphics_api.decal.vbo = vbo;
   }
 
   /* err */

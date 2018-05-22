@@ -86,6 +86,50 @@ platform_render(roa_renderer_ctx_t ctx)
       glrPopMarkerGroup();
     }
 
+    
+    /* decals */
+    {
+      glrPushMarkerGroup("Decals");
+
+      glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
+
+      GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
+      glEnableVertexAttribArray(pos);
+      glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+
+      GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
+      glEnableVertexAttribArray(texc);
+      glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+      GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Normal");
+      glEnableVertexAttribArray(norm);
+      glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+
+      GLint texAttrib = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "gColorMap");
+      glEnableVertexAttribArray(texAttrib);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.tex);
+
+      roa_mat4 id, world, scale, position;
+
+      roa_mat4_id(&id);
+      roa_mat4_translate(&position, roa_float3_set_with_values(10, 4, 0));
+      roa_mat4_scale(&scale, roa_float3_set_with_values(1, 1, 3));
+      roa_mat4_multiply_three(&world, &id, &scale, &position);
+
+      roa_mat4 view_proj;
+      roa_mat4_import(&view_proj, rp->camera.view_projection);
+
+      roa_mat4 wvp;
+      roa_mat4_multiply(&wvp, &world, &view_proj);
+
+      glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_wvp, 1, GL_FALSE, wvp.data);
+      glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_world, 1, GL_FALSE, world.data);
+
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+
+      glrPopMarkerGroup();
+    }
   } /* rps */
 
   /* blit to screen */
