@@ -38,7 +38,7 @@ main()
 
     struct roa_ctx_window_desc win_desc;
     ROA_MEM_ZERO(win_desc);
-    win_desc.width = 1200;
+    win_desc.width = 1280;
     win_desc.height = 720;
     win_desc.title = "ROA Renderer Func Test";
     win_desc.capture_mouse = ROA_TRUE;

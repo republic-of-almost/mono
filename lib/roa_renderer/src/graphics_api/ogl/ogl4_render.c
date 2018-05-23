@@ -77,7 +77,7 @@ platform_render(roa_renderer_ctx_t ctx)
         glEnableVertexAttribArray(norm);
         glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 
-        GLint texAttrib = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "gColorMap");
+        GLint texAttrib = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gColorMap");
         glEnableVertexAttribArray(texAttrib);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.tex);
@@ -98,6 +98,7 @@ platform_render(roa_renderer_ctx_t ctx)
       glrPopMarkerGroup();
     }
 
+    glFinish();
     
     /* decals */
     {
@@ -110,28 +111,45 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
 
+      //glDisable(GL_DEPTH_TEST);
+
       glrPushMarkerGroup("Decals");
 
       glUseProgram(ctx->graphics_api.decal.program);
 
       glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.decal.vbo);
 
-      GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "positionIN");
+      GLint pos = glGetAttribLocation(ctx->graphics_api.decal.program, "positionIN");
       glEnableVertexAttribArray(pos);
       glVertexAttribPointer(pos, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), 0);
 
-      GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "uvIN");
+      GLint texc = glGetAttribLocation(ctx->graphics_api.decal.program, "uvIN");
       glEnableVertexAttribArray(texc);
       glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
 
-      GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "normalIN");
+      GLint norm = glGetAttribLocation(ctx->graphics_api.decal.program, "normalIN");
       glEnableVertexAttribArray(norm);
       glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
 
-      GLint texAttrib = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "gColorMap");
-      glEnableVertexAttribArray(texAttrib);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.tex);
+      glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[0]);
+      GLint texAttrib1 = glGetUniformLocation(ctx->graphics_api.decal.program, "gWorldPos");
+      glUniform1i(texAttrib1, 0);
+      
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_depth);
+      GLint texAttrib2 = glGetUniformLocation(ctx->graphics_api.decal.program, "gNormalDepth");
+      glUniform1i(texAttrib2, 1);
+      
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
       roa_mat4 id, world, scale, position, inv_world;
 
@@ -144,11 +162,19 @@ platform_render(roa_renderer_ctx_t ctx)
       roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;
       roa_mat4_import(&view_proj, rp->camera.view_projection);
       
+
       roa_mat4_import(&proj, rp->camera.projection);
       roa_mat4_import(&view, rp->camera.view);
-      roa_mat4_multiply(&proj_view, &proj, &view);
+      
+      roa_mat4 inv_view, inv_proj;
+      roa_mat4_inverse(&inv_view, &view);
+      roa_mat4_inverse(&inv_proj, &proj);
+            
+      roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
+      //roa_mat4_multiply(&proj_view, &proj, &view);
+      //roa_mat4_multiply(&proj_view, &view, &proj);
 
-      roa_mat4_inverse(&inv_view_proj, &proj_view);
+      //roa_mat4_inverse(&inv_view_proj, &proj_view);
 
       roa_mat4 wvp;
       roa_mat4_multiply(&wvp, &world, &view_proj);
@@ -173,6 +199,8 @@ platform_render(roa_renderer_ctx_t ctx)
       glrPopMarkerGroup();
     }
   } /* rps */
+
+  glFinish();
 
   /* blit to screen */
   {

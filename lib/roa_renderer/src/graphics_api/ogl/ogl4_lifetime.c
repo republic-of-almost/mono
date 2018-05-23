@@ -324,11 +324,8 @@ platform_setup(roa_renderer_ctx_t ctx)
           "uniform vec3 decalSize;\n"
           "\n"
           "layout ( location = 0 ) in vec4 positionIN;\n"
-          "layout ( location = 1 ) in vec4 normalIN;\n"
-          "layout ( location = 2 ) in vec4 tangentIN;\n"
-          "layout ( location = 3 ) in ivec4 boneIndices;\n"
-          "layout ( location = 4 ) in vec4 boneWeights;\n"
-          "layout ( location = 5 ) in vec2 uvIN;\n"
+          "layout ( location = 1 ) in vec2 uvIN;\n"
+          "layout ( location = 2 ) in vec3 normalIN;\n"
           "\n"
           "out vec4 posFS;\n"
           "out vec4 posW;\n"
@@ -370,8 +367,9 @@ platform_setup(roa_renderer_ctx_t ctx)
           "in vec4 posW;\n"
           "in vec2 uvFS;\n"
           "\n"
-          "uniform sampler2D gNormalDepth;\n"
           "uniform sampler2D gDiffuse;\n"
+          "uniform sampler2D gNormalDepth;\n"
+          "uniform sampler2D gWorldPos;\n"
           "\n"
           "uniform float gGamma;\n"
           "\n"
@@ -380,9 +378,9 @@ platform_setup(roa_renderer_ctx_t ctx)
           "\n"
           "vec4 reconstruct_pos(float z, vec2 uv_f)\n"
           "{\n"
-            "vec4 sPos = vec4(uv_f * 2.0 - 1.0, z, 1.0);\n"
-            "sPos = invProjView * sPos;\n"
-            "return vec4((sPos.xyz / sPos.w ), sPos.w);\n"
+          "vec4 sPos = vec4(uv_f * 2.0 - 1.0, z, 1.0);\n"
+          "sPos = invProjView * sPos;\n"
+          "return vec4((sPos.xyz / sPos.w ), sPos.w);\n"
           "}\n"
           "\n"
           "\n"
@@ -392,28 +390,31 @@ platform_setup(roa_renderer_ctx_t ctx)
           "\n"
           "void main()\n"
           "{\n"
-            "vec2 screenPosition = posFS.xy / posFS.w;\n"
-            "\n"
-            "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
-            "depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
-            "float depth = texture2D(gNormalDepth, depthUV).w;\n"
-            "\n"
-            "vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
-            "vec4 localPos = invModelMatrix * worldPos;\n"
-            "\n"
-            "float dist = 0.5f - abs(localPos.y);\n"
-            "float dist2 = 0.5f - abs(localPos.x);\n"
-            "\n"
-            "if (dist > 0.0f && dist2 > 0)\n"
-            "{\n"
-              "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
-              "vec4 diffuseColor = texture2D(gDiffuse, uv);\n"
-              "diffuseRT = diffuseColor;\n"
-              "diffuseRT = vec4(0.0, 1.0, 0.0, 1);\n"
-            "}\n"
-            "else\n"
-              "diffuseRT = vec4(1.0, 0, 0, 1);\n"
-            "}\n";
+          "vec2 screenPosition = posFS.xy / posFS.w;\n"
+          "\n"
+          "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
+          "depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
+          "float depth = texture2D(gNormalDepth, depthUV).w;\n"
+          "\n"
+          "vec4 worldPos = texture2D(gWorldPos, depthUV); //reconstruct_pos(depth, depthUV);\n"
+          "vec4 localPos = invModelMatrix * worldPos;\n"
+          "\n"
+          "float dist = 0.5f - abs(localPos.y);\n"
+          "float dist2 = 0.5f - abs(localPos.x);\n"
+          "float dist3 = 0.5f - abs(localPos.z);\n"
+          "\n"
+          "if ((dist > 0 && dist2 > 0 && dist3 > 0))\n"
+          "{\n"
+          "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
+          "vec4 diffuseColor = texture2D(gDiffuse, uv);\n"
+          "diffuseRT = diffuseColor;\n"
+          "diffuseRT = vec4(0.0, 1.0, 0.0, 1);\n"
+          "}\n"
+          "else\n"
+          "diffuseRT = vec4(1.0, 0, 0, 1);\n"
+          //"diffuseRT = vec4(dist, dist2, dist3, 1);"
+          "}\n";
+          
       
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
@@ -459,13 +460,13 @@ platform_setup(roa_renderer_ctx_t ctx)
     }
 
     /* volume */
-    if(0){
+    {
       float data[1024];
 
       geom_vert_desc vert_desc[] = {
         GEOM_VERT_POSITION4,
-        GEOM_NORMAL,
         GEOM_UV,
+        GEOM_NORMAL,
       };
 
       unsigned vert_count = 0;
