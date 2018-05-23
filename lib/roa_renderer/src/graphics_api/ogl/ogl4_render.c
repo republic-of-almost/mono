@@ -146,7 +146,7 @@ platform_render(roa_renderer_ctx_t ctx)
       
       roa_mat4_import(&proj, rp->camera.projection);
       roa_mat4_import(&view, rp->camera.view);
-      roa_mat4_multiply(&proj_view, &view, &proj);
+      roa_mat4_multiply(&proj_view, &proj, &view);
 
       roa_mat4_inverse(&inv_view_proj, &proj_view);
 

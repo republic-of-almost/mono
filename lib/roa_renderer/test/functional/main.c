@@ -18,8 +18,11 @@ roa_renderer_ctx_t renderer_ctx = ROA_NULL;
 
 
 uint32_t object_id_counter = 0;
-unsigned renderable_count = 24;
+unsigned renderable_count = 1;
 uint64_t cube_mesh = 0;
+
+float spin = 0.f;
+float pitch = 0.f;
 
 
 /* -------------------------------------------------------- [ Func Test ] -- */
@@ -38,6 +41,7 @@ main()
     win_desc.width = 1200;
     win_desc.height = 720;
     win_desc.title = "ROA Renderer Func Test";
+    win_desc.capture_mouse = ROA_TRUE;
 
     roa_ctx_set_window_desc(hw_ctx, &win_desc);
   }
@@ -190,6 +194,27 @@ main()
 
     /* set camera */
     {
+      struct roa_ctx_mouse_desc ms_desc;
+      ROA_MEM_ZERO(ms_desc);
+      roa_ctx_mouse_get_desc(hw_ctx, &ms_desc);
+
+      spin += (ms_desc.x_delta * 0.001f);
+      pitch += (ms_desc.y_delta * 0.001f);
+
+      pitch = roa_float_clamp(pitch, -ROA_QUART_TAU, +ROA_QUART_TAU);
+
+      roa_quaternion yaw_rot = roa_quaternion_from_axis_angle(
+        roa_transform_world_up(),
+        spin);
+
+      roa_quaternion pitch_rot = roa_quaternion_from_axis_angle(
+        roa_transform_world_fwd(),
+        pitch);
+
+      roa_quaternion final_rot = roa_quaternion_multiply(yaw_rot, pitch_rot);
+      roa_float3 rot_pos = roa_quaternion_rotate_vector(final_rot, roa_transform_world_left());
+      rot_pos = roa_float3_scale(rot_pos, 30.f);
+      
       struct roa_renderer_camera camera;
       ROA_MEM_ZERO(camera);
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
@@ -197,15 +222,15 @@ main()
 			float radius = 20.f;
 			float spin_time = time * 0.025f;
 
-      float x = roa_float_sin(spin_time) * radius;
+      float x = roa_float_sin(spin) * radius;
       float y = radius - (radius / ROA_G_RATIO);
-      float z = roa_float_cos(spin_time) * radius; 
+      float z = roa_float_cos(spin) * radius; 
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at   = roa_float3_fill_with_value(0.f);
-      roa_float3 up   = roa_float3_set_with_values(0.f, 1.f, 0.f);
+      roa_float3 up   = roa_quaternion_rotate_vector(final_rot, roa_transform_world_up());
 
-			roa_float3_export(from, camera.position);
+			roa_float3_export(rot_pos, camera.position);
 			roa_float3_export(at, camera.lookat);
 			roa_float3_export(up, camera.up);
 
@@ -227,18 +252,32 @@ main()
         ROA_MEM_ZERO(renderable);
         roa_renderer_mesh_renderable_get(renderer_ctx, &renderable, obj_id);
 
-        float x = roa_float_sin(((float)i * increment)) * radius;
-        float y = 1.8f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
-        float z = roa_float_cos(((float)i * increment)) * radius;
+        if(renderable_count > 1)
+        {
+          float x = roa_float_sin(((float)i * increment)) * radius;
+          float y = 1.8f + roa_float_sin((i + increment + time) * 0.25f) * 1.7f;
+          float z = roa_float_cos(((float)i * increment)) * radius;
 
-        roa_transform transform;
-        transform.position = roa_float3_set_with_values(x, y, z);
-        transform.rotation = roa_quaternion_default();
-        transform.scale    = roa_float3_set_with_values(1, y, 1);
+          roa_transform transform;
+          transform.position = roa_float3_set_with_values(x, y, z);
+          transform.rotation = roa_quaternion_default();
+          transform.scale    = roa_float3_set_with_values(1, y, 1);
 
-        roa_transform_export_mat4(&transform, renderable.world_transform);
+          roa_transform_export_mat4(&transform, renderable.world_transform);
 
-        roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
+          roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
+        }
+        else
+        {
+          roa_transform transform;
+          transform.position = roa_float3_set_with_values(0, 0, 0);
+          transform.rotation = roa_quaternion_default();
+          transform.scale    = roa_float3_set_with_values(15, 1, 15);
+
+          roa_transform_export_mat4(&transform, renderable.world_transform);
+
+          roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
+        }
       }
     }
 
