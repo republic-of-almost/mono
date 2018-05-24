@@ -17,9 +17,11 @@ platform_render(roa_renderer_ctx_t ctx)
   /* param check */
   ROA_ASSERT(ctx);
   
+  struct graphics_api *gfx_api = &ctx->graphics_api;
+  
   /* setup */
   {
-    glBindVertexArray(ctx->graphics_api.vao);
+    glBindVertexArray(gfx_api->vao);
     
     GLsizei vp_width = ctx->device_settings.device_viewport[0];
     GLsizei vp_height = ctx->device_settings.device_viewport[1];
@@ -51,8 +53,8 @@ platform_render(roa_renderer_ctx_t ctx)
       
       glrPushMarkerGroup(buffer);
       
-      struct ogl_gbuffer gbuffer = ctx->graphics_api.gbuffer;
-      struct ogl_gbuffer_fill_pass fill = ctx->graphics_api.gbuffer_fill;
+      struct ogl_gbuffer gbuffer = gfx_api->gbuffer;
+      struct ogl_gbuffer_fill_pass fill = gfx_api->gbuffer_fill;
 
       glUseProgram(fill.program);
 
@@ -82,10 +84,10 @@ platform_render(roa_renderer_ctx_t ctx)
 
         /* input format */
         int k;
-        int input_count = ROA_ARR_COUNT(ctx->graphics_api.gbuffer_fill.input);
+        int input_count = ROA_ARR_COUNT(gfx_api->gbuffer_fill.input);
         for(k = 0; k < input_count; ++k)
         {
-          struct ogl_vertex_input input = ctx->graphics_api.gbuffer_fill.input[k];
+          struct ogl_vertex_input input = gfx_api->gbuffer_fill.input[k];
           
           if(input.loc < 0)
           {
@@ -103,7 +105,7 @@ platform_render(roa_renderer_ctx_t ctx)
         }
         
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.tex);
+        glBindTexture(GL_TEXTURE_2D, gfx_api->tex);
         glUniform1i(fill.uni_diffuse, 0);
 
         glUniformMatrix4fv(fill.uni_wvp, 1, GL_FALSE, dc.wvp);
@@ -131,12 +133,12 @@ platform_render(roa_renderer_ctx_t ctx)
     {
       glrPushMarkerGroup("Decals");
       
-      glUseProgram(ctx->graphics_api.decal.program);
+      glUseProgram(gfx_api->decal.program);
     
       glDisable(GL_DEPTH_TEST);
       glDisable(GL_STENCIL_TEST);
 
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gfx_api->gbuffer.fbo);
 
       GLenum draw_buffers[] = {
         GL_COLOR_ATTACHMENT0,
@@ -147,14 +149,14 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
       
-      glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.decal.vbo);
+      glBindBuffer(GL_ARRAY_BUFFER, gfx_api->decal.vbo);
 
       /* input format */
       int k;
-      int input_count = ROA_ARR_COUNT(ctx->graphics_api.decal.input);
+      int input_count = ROA_ARR_COUNT(gfx_api->decal.input);
       for(k = 0; k < input_count; ++k)
       {
-        struct ogl_vertex_input input = ctx->graphics_api.decal.input[k];
+        struct ogl_vertex_input input = gfx_api->decal.input[k];
         
         if(input.loc < 0)
         {
@@ -172,15 +174,16 @@ platform_render(roa_renderer_ctx_t ctx)
       }
 
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[0]);
-      GLint texAttrib1 = glGetUniformLocation(ctx->graphics_api.decal.program, "gWorldPos");
+      glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[0]);
+      GLint texAttrib1 = glGetUniformLocation(gfx_api->decal.program, "gWorldPos");
       glUniform1i(texAttrib1, 0);
       
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_depth);
-      GLint texAttrib2 = glGetUniformLocation(ctx->graphics_api.decal.program, "gNormalDepth");
+      glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
+      GLint texAttrib2 = glGetUniformLocation(gfx_api->decal.program, "gNormalDepth");
       glUniform1i(texAttrib2, 1);
       
+      /* sort */
       roa_mat4 id, world, scale, position, inv_world;
 
       roa_mat4_id(&id);
@@ -209,19 +212,19 @@ platform_render(roa_renderer_ctx_t ctx)
       roa_mat4 wvp;
       roa_mat4_multiply(&wvp, &world, &view_proj);
       
-      GLint view_uni = glGetUniformLocation(ctx->graphics_api.decal.program, "gView");
+      GLint view_uni = glGetUniformLocation(gfx_api->decal.program, "gView");
       glUniformMatrix4fv(view_uni, 1, GL_FALSE, rp->camera.view);
 
-      GLint proj_uni = glGetUniformLocation(ctx->graphics_api.decal.program, "gProjection");
+      GLint proj_uni = glGetUniformLocation(gfx_api->decal.program, "gProjection");
       glUniformMatrix4fv(proj_uni, 1, GL_FALSE, rp->camera.projection);
 
-      GLint world_uni = glGetUniformLocation(ctx->graphics_api.decal.program, "modelMatrix");
+      GLint world_uni = glGetUniformLocation(gfx_api->decal.program, "modelMatrix");
       glUniformMatrix4fv(world_uni, 1, GL_FALSE, world.data);
 
-      GLint inv_view_proj_uni = glGetUniformLocation(ctx->graphics_api.decal.program, "invProjView");
+      GLint inv_view_proj_uni = glGetUniformLocation(gfx_api->decal.program, "invProjView");
       glUniformMatrix4fv(inv_view_proj_uni, 1, GL_FALSE, inv_view_proj.data);
 
-      GLint inv_world_uni = glGetUniformLocation(ctx->graphics_api.decal.program, "invModelMatrix");
+      GLint inv_world_uni = glGetUniformLocation(gfx_api->decal.program, "invModelMatrix");
       glUniformMatrix4fv(inv_world_uni, 1, GL_FALSE, inv_world.data);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -250,20 +253,20 @@ platform_render(roa_renderer_ctx_t ctx)
     glClearColor(1, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.blit.fullscreen_triangle);
+    glBindBuffer(GL_ARRAY_BUFFER, gfx_api->blit.fullscreen_triangle);
 
-    GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
+    GLint pos = glGetAttribLocation(gfx_api->gbuffer_fill.program, "Position");
     glEnableVertexAttribArray(pos);
     glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 
-    GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
+    GLint texc = glGetAttribLocation(gfx_api->gbuffer_fill.program, "TexCoord");
     glEnableVertexAttribArray(texc);
     glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[1]);
+    glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[1]);
 
-    glUniform1i(glGetUniformLocation(ctx->graphics_api.blit.program, "gColorMap"), 0);
+    glUniform1i(glGetUniformLocation(gfx_api->blit.program, "gColorMap"), 0);
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
