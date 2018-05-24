@@ -2,13 +2,15 @@
 
 
 #include <graphics_api/ogl/ogl4_helpers.h>
-#include <GL/gl3w.h>
+
+
+/* ------------------------------------------------------- [ OGL Helpers ] -- */
 
 
 void
 glrPushMarkerGroup(const char *marker)
 {
-  if(glPushDebugGroup) {
+  if(OGL4_DEBUG_LABLES && glPushDebugGroup) {
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PUSH_GROUP, -1, marker);
   }
 }
@@ -17,8 +19,17 @@ glrPushMarkerGroup(const char *marker)
 void
 glrPopMarkerGroup()
 {
-  if(glPopDebugGroup) {
+  if(OGL4_DEBUG_LABLES && glPopDebugGroup) {
     glPopDebugGroup();
+  }
+}
+
+
+void
+glrObjectLabel(GLenum type, GLuint item, const char *name)
+{
+  if (OGL4_DEBUG_LABLES && glObjectLabel) {
+    glObjectLabel(type, item, -1, name);
   }
 }
 

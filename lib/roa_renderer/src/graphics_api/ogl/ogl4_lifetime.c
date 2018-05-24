@@ -26,9 +26,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
       glGenFramebuffers(1, &fbo);
       glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-      if (OGL4_DEBUG_LABLES && glObjectLabel) {
-        glObjectLabel(GL_FRAMEBUFFER, fbo, -1, "GBuffer:FBO");
-      }
+      glrObjectLabel(GL_FRAMEBUFFER, fbo, "GBuffer:FBO");
 
       ctx->graphics_api.gbuffer.fbo = fbo;
     }
@@ -49,9 +47,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         GL_FLOAT,
         ROA_NULL);
 
-      if (OGL4_DEBUG_LABLES && glObjectLabel) {
-        glObjectLabel(GL_TEXTURE, depth_texture, -1, "GBuffer:Depth");
-      }
+      glrObjectLabel(GL_TEXTURE, depth_texture, "GBuffer:Depth");
 
       glFramebufferTexture2D(
         GL_FRAMEBUFFER,
@@ -108,13 +104,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        if (OGL4_DEBUG_LABLES && glObjectLabel) {
-          glObjectLabel(
-            GL_TEXTURE,
-            output_textures[i],
-            -1,
-            debug_texture_names[i]);
-        }
+        glrObjectLabel(GL_TEXTURE, output_textures[i], debug_texture_names[i]);
 
         glFramebufferTexture2D(
           GL_FRAMEBUFFER,
@@ -171,9 +161,8 @@ platform_setup(roa_renderer_ctx_t ctx)
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    if (OGL4_DEBUG_LABLES && glObjectLabel) {
-      glObjectLabel(GL_VERTEX_ARRAY, vao, -1, "ROARenderer:VAO");
-    }
+    glrObjectLabel(GL_VERTEX_ARRAY, vao, "ROARenderer:VAO");
+    
 
     ctx->graphics_api.vao = vao;
   }
@@ -295,9 +284,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           ROA_ASSERT(ROA_FALSE);
         }
 
-        if (OGL4_DEBUG_LABLES && glObjectLabel) {
-          glObjectLabel(GL_PROGRAM, prog, -1, "GBuffer:Fill");
-        }
+        glrObjectLabel(GL_PROGRAM, prog, "GBuffer:Fill");
 
         glDeleteShader(vert_shd);
         glDeleteShader(frag_shd);
@@ -495,9 +482,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           ROA_ASSERT(ROA_FALSE);
         }
         
-        if (OGL4_DEBUG_LABLES && glObjectLabel) {
-          glObjectLabel(GL_PROGRAM, prog, -1, "Decal");
-        }
+        glrObjectLabel(GL_PROGRAM, prog, "Decal");
 
         glDeleteShader(vert_shd);
         glDeleteShader(frag_shd);
@@ -561,9 +546,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       glGenBuffers(1, &vbo);
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-      if (OGL4_DEBUG_LABLES && glObjectLabel) {
-        glObjectLabel(GL_BUFFER, vbo, -1, "Decal:Volume(P3N3T2)");
-      }
+      glrObjectLabel(GL_BUFFER, vbo, "Decal:Volume(P3N3T2)");
 
       glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vert_count, data, GL_STATIC_DRAW);
 
@@ -662,9 +645,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           ROA_ASSERT(ROA_FALSE);
         }
 
-        if (OGL4_DEBUG_LABLES && glObjectLabel) {
-          glObjectLabel(GL_PROGRAM, prog, -1, "FullscreenBlit");
-        }
+        glrObjectLabel(GL_PROGRAM, prog, "FullscreenBlit");
 
         glDeleteShader(vert_shd);
         glDeleteShader(frag_shd);
@@ -687,10 +668,8 @@ platform_setup(roa_renderer_ctx_t ctx)
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
       glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
     
-      if (OGL4_DEBUG_LABLES && glObjectLabel) {
-        glObjectLabel(GL_BUFFER, vbo, -1, "FullscreenTriangle(f2:f2)");
-      }
-
+      glrObjectLabel(GL_BUFFER, vbo, "FullscreenTriangle(f2:f2)");
+    
       ctx->graphics_api.blit.fullscreen_triangle = vbo;
     }
   }
@@ -729,9 +708,7 @@ platform_setup(roa_renderer_ctx_t ctx)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * count, geom, GL_STATIC_DRAW);
 
-    if (OGL4_DEBUG_LABLES && glObjectLabel) {
-      glObjectLabel(GL_BUFFER, vbo, -1, "Temp:Cube");
-    }
+    glrObjectLabel(GL_BUFFER, vbo, "Temp:Cube");
 
     ctx->graphics_api.vbo = vbo;
   }

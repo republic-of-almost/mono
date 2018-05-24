@@ -4,6 +4,9 @@
 #define OGL4_HELPERS_INCLUDED_B8EE5741_7AE4_46F6_A63C_19D1E6684020
 
 
+#include <GL/gl3w.h>
+
+
 /* -------------------------------------------------------- [ OGL Config ] -- */
 
 
@@ -25,9 +28,13 @@
 #endif
 
 
+/* ------------------------------------------------------- [ OGL Helpers ] -- */
+
+
 void glrPushMarkerGroup(const char *marker);
 void glrPopMarkerGroup();
 
+void glrObjectLabel(GLenum type, GLuint item, const char *name);
 
 
 #endif /* inc guard */
