@@ -315,7 +315,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
       {
         const char *vs = ""
-          "#version 430\n"
+          "#version 410\n"
           "\n"
           "uniform mat4 gView;\n"
           "uniform mat4 gProjection;\n"
@@ -359,8 +359,8 @@ platform_setup(roa_renderer_ctx_t ctx)
       GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
       {
         const char *fs = ""
-          "#version 430\n"
-          "#extension GL_ARB_texture_rectangle : enable\n"
+          "#version 410\n"
+          //"#extension GL_ARB_texture_rectangle : enable\n"
           "\n"
           "in vec4 posFS;\n"
           "in vec4 posW;\n"
@@ -394,9 +394,9 @@ platform_setup(roa_renderer_ctx_t ctx)
           "\n"
           "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
           //"depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
-          "float depth = texture2D(gNormalDepth, depthUV).r;\n"
+          "float depth = texture(gNormalDepth, depthUV).r;\n"
           "\n"
-          "vec4 worldPos = texture2D(gWorldPos, depthUV);\n"
+          "vec4 worldPos = texture(gWorldPos, depthUV);\n"
           //"vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
           "worldPos.w = 1;"
           "vec4 localPos = worldPos * invModelMatrix;\n"
@@ -408,7 +408,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           "if ((depth < 1.0 && dist > 0 && dist2 > 0 && dist3 > 0))\n"
           "{\n"
           "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
-          "vec4 diffuseColor = texture2D(gDiffuse, uv);\n"
+          "vec4 diffuseColor = texture(gDiffuse, uv);\n"
           "diffuseRT = diffuseColor;\n"
           "diffuseRT = vec4(0.0, 1.0, 0.0, 1);\n"
           "}\n"
