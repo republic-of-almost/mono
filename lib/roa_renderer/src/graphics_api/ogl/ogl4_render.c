@@ -1,11 +1,14 @@
 #ifdef ROA_RENDERER_API_GL4
 
+
 #include <graphics_api/platform.h>
 #include <graphics_api/ogl/ogl4_helpers.h>
 #include <roa_lib/array.h>
 #include <roa_lib/assert.h>
-#include <GL/gl3w.h>
 #include <roa_math/math.h>
+#include <GL/gl3w.h>
+#include <string.h>
+#include <stdio.h>
 
 
 void
@@ -13,22 +16,33 @@ platform_render(roa_renderer_ctx_t ctx)
 {
   /* param check */
   ROA_ASSERT(ctx);
-
+  
+  /* setup */
+  {
+    glBindVertexArray(ctx->graphics_api.vao);
+    
+    GLsizei vp_width = ctx->device_settings.device_viewport[0];
+    GLsizei vp_height = ctx->device_settings.device_viewport[1];
+    glViewport(0, 0, vp_width, vp_height);
+  }
+  
+  if(OGL4_ERROR_CHECKS)
+  {
+    GLuint err = glGetError();
+    if(err) {
+      ROA_ASSERT(0);
+    }
+  }
+  
   /* renderpasses */
   int rp_count = roa_array_size(ctx->renderpass.rps);
   int i;
 
-  glBindVertexArray(ctx->graphics_api.vao);
-
-  GLsizei vp_width = ctx->device_settings.device_viewport[0];
-  GLsizei vp_height = ctx->device_settings.device_viewport[1];
-  glViewport(0, 0, vp_width, vp_height);
-
   for (i = 0; i < rp_count; ++i)
   {
     struct renderpass *rp = &ctx->renderpass.rps[i];
-    unsigned dc_count = roa_array_size(rp->draw_calls);
-
+    int dc_count = roa_array_size(rp->draw_calls);
+    
     /* fill buffer */
     {
       char buffer[128];
@@ -36,13 +50,16 @@ platform_render(roa_renderer_ctx_t ctx)
       sprintf(buffer, "GBuffer:Fill - Cam %d - DCs %d", i, dc_count);
       
       glrPushMarkerGroup(buffer);
+      
+      struct ogl_gbuffer gbuffer = ctx->graphics_api.gbuffer;
+      struct ogl_gbuffer_fill_pass fill = ctx->graphics_api.gbuffer_fill;
 
-      glUseProgram(ctx->graphics_api.gbuffer_fill.program);
+      glUseProgram(fill.program);
 
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);
 
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fbo);
 
       glClearColor(1, 0, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -58,38 +75,40 @@ platform_render(roa_renderer_ctx_t ctx)
 
       /* draw calls */
       int j;
-
       for (j = 0; j < dc_count; ++j)
       {
         struct renderpass_draw_call dc = rp->draw_calls[j];
-
         glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
 
-        GLint pos = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Position");
-        glEnableVertexAttribArray(pos);
-        glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-
-        GLint texc = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "TexCoord");
-        glEnableVertexAttribArray(texc);
-        glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-
-        GLint norm = glGetAttribLocation(ctx->graphics_api.gbuffer_fill.program, "Normal");
-        glEnableVertexAttribArray(norm);
-        glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
-
-        GLint texAttrib = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gColorMap");
-        glEnableVertexAttribArray(texAttrib);
+        /* input format */
+        int k;
+        int input_count = ROA_ARR_COUNT(ctx->graphics_api.gbuffer_fill.input);
+        for(k = 0; k < input_count; ++k)
+        {
+          struct ogl_vertex_input input = ctx->graphics_api.gbuffer_fill.input[k];
+          
+          if(input.loc < 0)
+          {
+            continue;
+          }
+        
+          glEnableVertexAttribArray(input.loc);
+          glVertexAttribPointer(
+            input.loc,
+            input.component_count,
+            GL_FLOAT,
+            input.normalize,
+            input.size,
+            input.ptr);
+        }
+        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.tex);
+        glUniform1i(fill.uni_diffuse, 0);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_wvp, 1, GL_FALSE, dc.wvp);
-        glUniformMatrix4fv(ctx->graphics_api.gbuffer_fill.uni_world, 1, GL_FALSE, dc.world);
-
+        glUniformMatrix4fv(fill.uni_wvp, 1, GL_FALSE, dc.wvp);
+        glUniformMatrix4fv(fill.uni_world, 1, GL_FALSE, dc.world);
+        
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }
 
@@ -97,11 +116,23 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glrPopMarkerGroup();
     }
-
+    
+    if(OGL4_ERROR_CHECKS)
+    {
+      GLuint err = glGetError();
+      if(err) {
+        ROA_ASSERT(0);
+      }
+    }
+    
     glFinish();
     
     /* decals */
     {
+      glrPushMarkerGroup("Decals");
+      
+      glUseProgram(ctx->graphics_api.decal.program);
+    
       glDisable(GL_DEPTH_TEST);
       glDisable(GL_STENCIL_TEST);
 
@@ -115,48 +146,41 @@ platform_render(roa_renderer_ctx_t ctx)
       };
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
-
-
-
-
-      glrPushMarkerGroup("Decals");
-
-      glUseProgram(ctx->graphics_api.decal.program);
-
+      
       glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.decal.vbo);
 
-      GLint pos = glGetAttribLocation(ctx->graphics_api.decal.program, "positionIN");
-      glEnableVertexAttribArray(pos);
-      glVertexAttribPointer(pos, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), 0);
-
-      GLint texc = glGetAttribLocation(ctx->graphics_api.decal.program, "uvIN");
-      glEnableVertexAttribArray(texc);
-      glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
-
-      GLint norm = glGetAttribLocation(ctx->graphics_api.decal.program, "normalIN");
-      glEnableVertexAttribArray(norm);
-      glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+      /* input format */
+      int k;
+      int input_count = ROA_ARR_COUNT(ctx->graphics_api.decal.input);
+      for(k = 0; k < input_count; ++k)
+      {
+        struct ogl_vertex_input input = ctx->graphics_api.decal.input[k];
+        
+        if(input.loc < 0)
+        {
+          continue;
+        }
+      
+        glEnableVertexAttribArray(input.loc);
+        glVertexAttribPointer(
+          input.loc,
+          input.component_count,
+          GL_FLOAT,
+          input.normalize,
+          input.size,
+          input.ptr);
+      }
 
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[0]);
       GLint texAttrib1 = glGetUniformLocation(ctx->graphics_api.decal.program, "gWorldPos");
       glUniform1i(texAttrib1, 0);
       
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_depth);
       GLint texAttrib2 = glGetUniformLocation(ctx->graphics_api.decal.program, "gNormalDepth");
       glUniform1i(texAttrib2, 1);
       
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
       roa_mat4 id, world, scale, position, inv_world;
 
       roa_mat4_id(&id);
@@ -205,7 +229,15 @@ platform_render(roa_renderer_ctx_t ctx)
       glrPopMarkerGroup();
     }
   } /* rps */
-
+  
+  if(OGL4_ERROR_CHECKS)
+  {
+    GLuint err = glGetError();
+    if(err) {
+      ROA_ASSERT(0);
+    }
+  }
+  
   glFinish();
 
   /* blit to screen */
@@ -213,8 +245,8 @@ platform_render(roa_renderer_ctx_t ctx)
     glrPushMarkerGroup("Backbuffer:Blit");
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
     glUseProgram(ctx->graphics_api.blit.program);
+    
     glClearColor(1, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -231,16 +263,19 @@ platform_render(roa_renderer_ctx_t ctx)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, ctx->graphics_api.gbuffer.texture_output[1]);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     glUniform1i(glGetUniformLocation(ctx->graphics_api.blit.program, "gColorMap"), 0);
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glrPopMarkerGroup();
+  }
+  
+  if(OGL4_ERROR_CHECKS)
+  {
+    GLuint err = glGetError();
+    if(err) {
+      ROA_ASSERT(0);
+    }
   }
 }
 

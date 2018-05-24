@@ -6,6 +6,16 @@
 #include <GL/gl3w.h>
 
 
+struct ogl_vertex_input
+{
+  GLint loc;
+  GLboolean normalize;
+  GLsizei component_count;
+  GLsizei size;
+  GLvoid *ptr;
+};
+
+
 struct ogl_gbuffer
 {
   GLuint fbo;
@@ -23,9 +33,12 @@ struct ogl_gbuffer_dir_light
 struct ogl_gbuffer_fill_pass
 {
   GLuint program;
+  
   GLuint uni_wvp;
   GLuint uni_world;
-  GLuint uni_colormap;
+  GLuint uni_diffuse;
+  
+  struct ogl_vertex_input input[3];
 };
 
 
@@ -40,6 +53,8 @@ struct ogl_decal
 {
   GLuint program;
   GLuint vbo;
+  
+  struct ogl_vertex_input input[3];
 };
 
 

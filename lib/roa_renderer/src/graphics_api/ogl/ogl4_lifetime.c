@@ -1,5 +1,6 @@
 #ifdef ROA_RENDERER_API_GL4
 
+
 #include <graphics_api/platform.h>
 #include <graphics_api/ogl/ogl4_helpers.h>
 #include <GL/gl3w.h>
@@ -16,7 +17,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
 {
   /* GBuffer */
   {
-    GLsizei width = ctx->device_settings.device_viewport[0];
+    GLsizei width  = ctx->device_settings.device_viewport[0];
     GLsizei height = ctx->device_settings.device_viewport[1];
 
     /* FBO */
@@ -58,13 +59,20 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         GL_TEXTURE_2D,
         depth_texture,
         0);
+      
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
       ctx->graphics_api.gbuffer.texture_depth = depth_texture;
     }
 
     /* output textures */
     {
-      GLuint output_textures[ROA_ARR_COUNT(ctx->graphics_api.gbuffer.texture_output)];
+      struct ogl_gbuffer *buffer = &ctx->graphics_api.gbuffer;
+    
+      GLuint output_textures[ROA_ARR_COUNT(buffer->texture_output)];
       ROA_MEM_ZERO(output_textures);
 
       const char *debug_texture_names[] = {
@@ -74,7 +82,9 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         "GBuffer:TexCoords",
       };
 
-      glGenTextures(ROA_ARR_COUNT(output_textures), ROA_ARR_DATA(output_textures));
+      glGenTextures(
+        ROA_ARR_COUNT(output_textures),
+        ROA_ARR_DATA(output_textures));
 
       int count = ROA_ARR_COUNT(output_textures);
       int i;
@@ -92,6 +102,11 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
           GL_RGBA,
           GL_FLOAT,
           NULL);
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         if (glObjectLabel) {
           glObjectLabel(
@@ -119,12 +134,11 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
 
       GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-      GLenum complete = GL_FRAMEBUFFER_COMPLETE;
+      GLenum complete   = GL_FRAMEBUFFER_COMPLETE;
 
       ROA_ASSERT(fbo_status == complete);
 
       void *dst = (void*)ctx->graphics_api.gbuffer.texture_output;
-
       memcpy(dst, output_textures, sizeof(output_textures));
     }
 
@@ -294,8 +308,41 @@ platform_setup(roa_renderer_ctx_t ctx)
 
     /* uniforms */
     {
-      ctx->graphics_api.gbuffer_fill.uni_wvp    = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWVP");
-      ctx->graphics_api.gbuffer_fill.uni_world  = glGetUniformLocation(ctx->graphics_api.gbuffer_fill.program, "gWorld");
+      struct ogl_gbuffer_fill_pass *fill = &ctx->graphics_api.gbuffer_fill;
+      GLuint program = fill->program;
+    
+      fill->uni_wvp     = glGetUniformLocation(program, "gWVP");
+      fill->uni_world   = glGetUniformLocation(program, "gWorld");
+      fill->uni_diffuse = glGetUniformLocation(program, "gColorMap");
+    }
+    
+    /* input */
+    {
+      GLuint program = ctx->graphics_api.gbuffer_fill.program;
+      
+      GLint pos = glGetAttribLocation(program, "Position");
+      
+      ctx->graphics_api.gbuffer_fill.input[0].loc = pos;
+      ctx->graphics_api.gbuffer_fill.input[0].normalize = GL_FALSE;
+      ctx->graphics_api.gbuffer_fill.input[0].size = 8 * sizeof(GLfloat);
+      ctx->graphics_api.gbuffer_fill.input[0].component_count = 3;
+      ctx->graphics_api.gbuffer_fill.input[0].ptr = 0;
+      
+      GLint texc = glGetAttribLocation(program, "TexCoord");
+      
+      ctx->graphics_api.gbuffer_fill.input[1].loc = texc;
+      ctx->graphics_api.gbuffer_fill.input[1].normalize = GL_FALSE;
+      ctx->graphics_api.gbuffer_fill.input[1].size = 8 * sizeof(GLfloat);
+      ctx->graphics_api.gbuffer_fill.input[1].component_count = 2;
+      ctx->graphics_api.gbuffer_fill.input[1].ptr = (void*)(3 * sizeof(GLfloat));
+
+      GLint norm = glGetAttribLocation(program, "Normal");
+
+      ctx->graphics_api.gbuffer_fill.input[2].loc = norm;
+      ctx->graphics_api.gbuffer_fill.input[2].normalize = GL_TRUE;
+      ctx->graphics_api.gbuffer_fill.input[2].size = 8 * sizeof(GLfloat);
+      ctx->graphics_api.gbuffer_fill.input[2].component_count = 3;
+      ctx->graphics_api.gbuffer_fill.input[2].ptr = (void*)(5 * sizeof(GLfloat));
     }
   }
 
@@ -457,7 +504,36 @@ platform_setup(roa_renderer_ctx_t ctx)
 
         ctx->graphics_api.decal.program = prog; 
       }
+    }
+    
+    /* input */
+    {
+      struct ogl_decal *decal = &ctx->graphics_api.decal;
+      GLuint program = decal->program;
+      
+      GLint pos = glGetAttribLocation(program, "positionIN");
+      
+      decal->input[0].loc             = pos;
+      decal->input[0].normalize       = GL_FALSE;
+      decal->input[0].size            = 9 * sizeof(GLfloat);
+      decal->input[0].component_count = 4;
+      decal->input[0].ptr             = 0;
+      
+      GLint texc = glGetAttribLocation(program, "uvIN");
+      
+      decal->input[1].loc             = texc;
+      decal->input[1].normalize       = GL_FALSE;
+      decal->input[1].size            = 9 * sizeof(GLfloat);
+      decal->input[1].component_count = 2;
+      decal->input[1].ptr             = (void*)(4 * sizeof(GLfloat));
 
+      GLint norm = glGetAttribLocation(program, "normalIN");
+
+      decal->input[2].loc             = norm;
+      decal->input[2].normalize       = GL_TRUE;
+      decal->input[2].size            = 9 * sizeof(GLfloat);
+      decal->input[2].component_count = 3;
+      decal->input[2].ptr             = (void*)(6 * sizeof(GLfloat));
     }
 
     /* volume */
