@@ -102,6 +102,11 @@ platform_render(roa_renderer_ctx_t ctx)
     
     /* decals */
     {
+      glDisable(GL_DEPTH_TEST);
+      glDisable(GL_STENCIL_TEST);
+
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->graphics_api.gbuffer.fbo);
+
       GLenum draw_buffers[] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
@@ -111,8 +116,8 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
 
-      glDisable(GL_DEPTH_TEST);
-      glDisable(GL_STENCIL_TEST);
+
+
 
       glrPushMarkerGroup("Decals");
 
@@ -156,7 +161,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
       roa_mat4_id(&id);
       roa_mat4_translate(&position, roa_float3_set_with_values(0, 0, 0));
-      roa_mat4_scale(&scale, roa_float3_set_with_values(2, 2, 2));
+      roa_mat4_scale(&scale, roa_float3_set_with_values(3, 3, 3));
       roa_mat4_multiply_three(&world, &id, &scale, &position);
       roa_mat4_inverse(&inv_world, &world);
 
@@ -171,11 +176,11 @@ platform_render(roa_renderer_ctx_t ctx)
       roa_mat4_inverse(&inv_view, &view);
       roa_mat4_inverse(&inv_proj, &proj);
             
-      roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
-      //roa_mat4_multiply(&proj_view, &proj, &view);
+      //roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
+      roa_mat4_multiply(&proj_view, &proj, &view);
       //roa_mat4_multiply(&proj_view, &view, &proj);
 
-      //roa_mat4_inverse(&inv_view_proj, &proj_view);
+      roa_mat4_inverse(&inv_view_proj, &proj_view);
 
       roa_mat4 wvp;
       roa_mat4_multiply(&wvp, &world, &view_proj);

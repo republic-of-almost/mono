@@ -85,11 +85,11 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         glTexImage2D(
           GL_TEXTURE_2D,
           0,
-          GL_RGB32F,
+          GL_RGBA32F,
           width,
           height,
           0,
-          GL_RGB,
+          GL_RGBA,
           GL_FLOAT,
           NULL);
 
@@ -393,18 +393,19 @@ platform_setup(roa_renderer_ctx_t ctx)
           "vec2 screenPosition = posFS.xy / posFS.w;\n"
           "\n"
           "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
-          "depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
+          //"depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
           "float depth = texture2D(gNormalDepth, depthUV).r;\n"
           "\n"
           "vec4 worldPos = texture2D(gWorldPos, depthUV);\n"
           //"vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
+          "worldPos.w = 1;"
           "vec4 localPos = worldPos * invModelMatrix;\n"
           "\n"
           "float dist = 0.5f - abs(localPos.y);\n"
           "float dist2 = 0.5f - abs(localPos.x);\n"
           "float dist3 = 0.5f - abs(localPos.z);\n"
           "\n"
-          "if ((depth < 1 && dist > 0 && dist2 > 0 && dist3 > 0))\n"
+          "if ((depth < 1.0 && dist > 0 && dist2 > 0 && dist3 > 0))\n"
           "{\n"
           "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
           "vec4 diffuseColor = texture2D(gDiffuse, uv);\n"
@@ -413,6 +414,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           "}\n"
           "else {\n"
           "discard; }\n"
+          //"diffuseRT = worldPos;\n"
           "}\n";
           
         const GLchar *src = fs;

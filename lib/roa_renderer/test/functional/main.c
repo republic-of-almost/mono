@@ -212,7 +212,9 @@ main()
         pitch);
 
       roa_quaternion final_rot = roa_quaternion_multiply(yaw_rot, pitch_rot);
-      roa_float3 rot_pos = roa_quaternion_rotate_vector(final_rot, roa_transform_world_left());
+      roa_float3 rot_pos = roa_quaternion_rotate_vector(
+        final_rot,
+        roa_transform_world_left());
       rot_pos = roa_float3_scale(rot_pos, 30.f);
       
       struct roa_renderer_camera camera;
@@ -228,7 +230,8 @@ main()
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at   = roa_float3_fill_with_value(0.f);
-      roa_float3 up   = roa_quaternion_rotate_vector(final_rot, roa_transform_world_up());
+      roa_float3 up   = roa_quaternion_rotate_vector(
+        final_rot, roa_transform_world_up());
 
 			roa_float3_export(rot_pos, camera.position);
 			roa_float3_export(at, camera.lookat);
