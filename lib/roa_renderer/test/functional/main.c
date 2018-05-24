@@ -272,7 +272,7 @@ main()
           roa_transform transform;
           transform.position = roa_float3_set_with_values(0, 0, 0);
           transform.rotation = roa_quaternion_default();
-          transform.scale    = roa_float3_set_with_values(15, 1, 15);
+          transform.scale    = roa_float3_set_with_values(8.f, 0.1f, 8.f);
 
           roa_transform_export_mat4(&transform, renderable.world_transform);
 

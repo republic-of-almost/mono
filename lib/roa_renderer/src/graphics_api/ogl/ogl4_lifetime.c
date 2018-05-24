@@ -358,7 +358,6 @@ platform_setup(roa_renderer_ctx_t ctx)
 
       GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
       {
-
         const char *fs = ""
           "#version 430\n"
           "#extension GL_ARB_texture_rectangle : enable\n"
@@ -367,6 +366,7 @@ platform_setup(roa_renderer_ctx_t ctx)
           "in vec4 posW;\n"
           "in vec2 uvFS;\n"
           "\n"
+          "uniform mat4 modelMatrix;\n"
           "uniform sampler2D gDiffuse;\n"
           "uniform sampler2D gNormalDepth;\n"
           "uniform sampler2D gWorldPos;\n"
@@ -394,28 +394,27 @@ platform_setup(roa_renderer_ctx_t ctx)
           "\n"
           "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
           "depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
-          "float depth = texture2D(gNormalDepth, depthUV).w;\n"
+          "float depth = texture2D(gNormalDepth, depthUV).r;\n"
           "\n"
-          "vec4 worldPos = texture2D(gWorldPos, depthUV); //reconstruct_pos(depth, depthUV);\n"
-          "vec4 localPos = invModelMatrix * worldPos;\n"
+          "vec4 worldPos = texture2D(gWorldPos, depthUV);\n"
+          //"vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
+          "vec4 localPos = worldPos * invModelMatrix;\n"
           "\n"
           "float dist = 0.5f - abs(localPos.y);\n"
           "float dist2 = 0.5f - abs(localPos.x);\n"
           "float dist3 = 0.5f - abs(localPos.z);\n"
           "\n"
-          "if ((dist > 0 && dist2 > 0 && dist3 > 0))\n"
+          "if ((depth < 1 && dist > 0 && dist2 > 0 && dist3 > 0))\n"
           "{\n"
           "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
           "vec4 diffuseColor = texture2D(gDiffuse, uv);\n"
           "diffuseRT = diffuseColor;\n"
           "diffuseRT = vec4(0.0, 1.0, 0.0, 1);\n"
           "}\n"
-          "else\n"
-          "diffuseRT = vec4(1.0, 0, 0, 1);\n"
-          //"diffuseRT = vec4(dist, dist2, dist3, 1);"
+          "else {\n"
+          "discard; }\n"
           "}\n";
           
-      
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
         glCompileShader(frag_shd);
@@ -474,9 +473,9 @@ platform_setup(roa_renderer_ctx_t ctx)
       geometry_generate_cube(
         ROA_ARR_DATA(vert_desc),
         ROA_ARR_COUNT(vert_desc),
-        1,
-        1,
-        1,
+        0.5f,
+        0.5f,
+        0.5f,
         ROA_ARR_DATA(data),
         &vert_count);
     
