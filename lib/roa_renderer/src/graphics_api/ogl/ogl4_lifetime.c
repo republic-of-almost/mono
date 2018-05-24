@@ -136,6 +136,14 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
   }
+
+  if (OGL4_ERROR_CHECKS)
+  {
+    GLuint err = glGetError();
+    if (err) {
+      ROA_ASSERT(0);
+    }
+  }
 }
 
 
@@ -165,6 +173,14 @@ platform_setup(roa_renderer_ctx_t ctx)
     
 
     ctx->graphics_api.vao = vao;
+  }
+
+  if (OGL4_ERROR_CHECKS)
+  {
+    GLuint err = glGetError();
+    if (err) {
+      ROA_ASSERT(0);
+    }
   }
 
   glrPushMarkerGroup("Setup");

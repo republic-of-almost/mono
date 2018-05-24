@@ -1,6 +1,8 @@
 #ifdef ROA_RENDERER_API_GL4
 
 #include <graphics_api/platform.h>
+#include <graphics_api/ogl/ogl4_helpers.h>
+#include <roa_lib/assert.h>
 #include <roa_lib/array.h>
 #include <GL/gl3w.h>
 
@@ -37,10 +39,11 @@ platform_update(roa_renderer_ctx_t ctx)
       if (pending[i].vertex_count)
       {
         glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-        
-        if (glObjectLabel) {
+
+        if (OGL4_DEBUG_LABLES)
+        {
           const char * name = pending[i].name ? pending[i].name : "UnknownVBO";
-          glObjectLabel(GL_BUFFER, vbos[i], -1, name);
+          glrObjectLabel(GL_BUFFER, vbos[i], name);
         }
 
         unsigned element_count = 0;
@@ -82,6 +85,14 @@ platform_update(roa_renderer_ctx_t ctx)
         }
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * element_count * pending[i].vertex_count, data, GL_STATIC_DRAW);
+
+        if (OGL4_ERROR_CHECKS)
+        {
+          GLuint err = glGetError();
+          if (err) {
+            ROA_ASSERT(0);
+          }
+        }
       }
       
       /* ibo */
@@ -89,14 +100,23 @@ platform_update(roa_renderer_ctx_t ctx)
       {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibos[i]);
 
-        if (glObjectLabel) {
+        if (OGL4_DEBUG_LABLES)
+        {
           const char * name = pending[i].name ? pending[i].name : "UnknownIBO";
-          glObjectLabel(GL_BUFFER, ibos[i], -1, name);
+          glrObjectLabel(GL_BUFFER, ibos[i], name);
         }
 
         unsigned buffer_size = sizeof(pending[i].index_array[0]) * pending[i].index_count;
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_size, pending[i].index_array, GL_STATIC_DRAW);
+
+        if (OGL4_ERROR_CHECKS)
+        {
+          GLuint err = glGetError();
+          if (err) {
+            ROA_ASSERT(0);
+          }
+        }
       }
     }
 
@@ -143,15 +163,32 @@ platform_update(roa_renderer_ctx_t ctx)
 
       glGenerateMipmap(GL_TEXTURE_2D);
 
-      if (glObjectLabel) {
+      if (OGL4_ERROR_CHECKS)
+      {
+        GLuint err = glGetError();
+        if (err) {
+          ROA_ASSERT(0);
+        }
+      }
+
+      if(OGL4_DEBUG_LABLES)
+      {
         const char * name = pending[i].name ? pending[i].name : "UnknownTexture";
-        glObjectLabel(GL_BUFFER, textures[i], -1, name);
+        glrObjectLabel(GL_TEXTURE, textures[i], name);
       }
 
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pending[i].width, pending[i].height, 0, GL_RGB,
         GL_UNSIGNED_BYTE, pending[i].data);
 
       ctx->graphics_api.tex = textures[i];
+
+      if (OGL4_ERROR_CHECKS)
+      {
+        GLuint err = glGetError();
+        if (err) {
+          ROA_ASSERT(0);
+        }
+      }
     }
 
     roa_array_clear(ctx->resource_desc.texture_pending_ids);
