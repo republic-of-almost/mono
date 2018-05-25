@@ -537,6 +537,21 @@ platform_setup(roa_renderer_ctx_t ctx)
       decal->input[2].ptr             = (void*)(6 * sizeof(GLfloat));
     }
 
+    /* uniforms */
+    {
+      struct ogl_decal *decal = &ctx->graphics_api.decal;
+      GLuint program = decal->program;
+
+      decal->uni_world_pos    = glGetUniformLocation(program, "gWorldPos");
+      decal->uni_depth        = glGetUniformLocation(program, "gNormalDepth");
+      decal->uni_diffuse      = glGetUniformLocation(program, "gColorMap");
+      decal->uni_view         = glGetUniformLocation(program, "gView");
+      decal->uni_proj         = glGetUniformLocation(program, "gProjection");
+      decal->uni_world        = glGetUniformLocation(program, "modelMatrix");
+      decal->uni_inv_projview = glGetUniformLocation(program, "invProjView");
+      decal->uni_inv_world    = glGetUniformLocation(program, "invModelMatrix");
+    }
+
     /* volume */
     {
       float data[1024];
@@ -668,6 +683,36 @@ platform_setup(roa_renderer_ctx_t ctx)
 
         ctx->graphics_api.blit.program = prog;
       }
+    }
+
+    /* input */
+    {
+      struct ogl_blit_pass *blit = &ctx->graphics_api.blit;
+      GLuint program = blit->program;
+
+      GLint pos = glGetAttribLocation(program, "Position");
+
+      blit->input[0].loc              = pos;
+      blit->input[0].normalize        = GL_FALSE;
+      blit->input[0].size             = 4 * sizeof(GLfloat);
+      blit->input[0].component_count  = 2;
+      blit->input[0].ptr              = 0;
+
+      GLint texc = glGetAttribLocation(program, "TexCoord");
+
+      blit->input[1].loc             = texc;
+      blit->input[1].normalize       = GL_FALSE;
+      blit->input[1].size            = 4 * sizeof(GLfloat);
+      blit->input[1].component_count = 2;
+      blit->input[1].ptr             = (void*)(2 * sizeof(GLfloat));
+    }
+
+    /* uniforms */
+    {
+      struct ogl_blit_pass *blit = &ctx->graphics_api.blit;
+      GLuint program = blit->program;
+
+      blit->uni_blit_src = glGetUniformLocation(program, "gColorMap");
     }
 
     /* triangle */

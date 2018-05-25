@@ -46,6 +46,10 @@ struct ogl_blit_pass
 {
   GLuint program;
   GLuint fullscreen_triangle;
+
+  GLuint uni_blit_src;
+
+  struct ogl_vertex_input input[2];
 };
 
 
@@ -53,6 +57,15 @@ struct ogl_decal
 {
   GLuint program;
   GLuint vbo;
+
+  GLuint uni_world_pos;
+  GLuint uni_depth;
+  GLuint uni_diffuse;
+  GLuint uni_view;
+  GLuint uni_proj;
+  GLuint uni_world;
+  GLuint uni_inv_projview;
+  GLuint uni_inv_world;
   
   struct ogl_vertex_input input[3];
 };

@@ -158,8 +158,7 @@ platform_render(roa_renderer_ctx_t ctx)
       {
         struct ogl_vertex_input input = gfx_api->decal.input[k];
         
-        if(input.loc < 0)
-        {
+        if(input.loc < 0) {
           continue;
         }
       
@@ -175,13 +174,11 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[0]);
-      GLint texAttrib1 = glGetUniformLocation(gfx_api->decal.program, "gWorldPos");
-      glUniform1i(texAttrib1, 0);
+      glUniform1i(gfx_api->decal.uni_world_pos, 0);
       
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
-      GLint texAttrib2 = glGetUniformLocation(gfx_api->decal.program, "gNormalDepth");
-      glUniform1i(texAttrib2, 1);
+      glUniform1i(gfx_api->decal.uni_depth, 1);
       
       /* sort */
       roa_mat4 id, world, scale, position, inv_world;
@@ -212,20 +209,11 @@ platform_render(roa_renderer_ctx_t ctx)
       roa_mat4 wvp;
       roa_mat4_multiply(&wvp, &world, &view_proj);
       
-      GLint view_uni = glGetUniformLocation(gfx_api->decal.program, "gView");
-      glUniformMatrix4fv(view_uni, 1, GL_FALSE, rp->camera.view);
-
-      GLint proj_uni = glGetUniformLocation(gfx_api->decal.program, "gProjection");
-      glUniformMatrix4fv(proj_uni, 1, GL_FALSE, rp->camera.projection);
-
-      GLint world_uni = glGetUniformLocation(gfx_api->decal.program, "modelMatrix");
-      glUniformMatrix4fv(world_uni, 1, GL_FALSE, world.data);
-
-      GLint inv_view_proj_uni = glGetUniformLocation(gfx_api->decal.program, "invProjView");
-      glUniformMatrix4fv(inv_view_proj_uni, 1, GL_FALSE, inv_view_proj.data);
-
-      GLint inv_world_uni = glGetUniformLocation(gfx_api->decal.program, "invModelMatrix");
-      glUniformMatrix4fv(inv_world_uni, 1, GL_FALSE, inv_world.data);
+      glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera.view);
+      glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
+      glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
+      glUniformMatrix4fv(gfx_api->decal.uni_inv_projview, 1, GL_FALSE, inv_view_proj.data);
+      glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_FALSE, inv_world.data);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -255,18 +243,30 @@ platform_render(roa_renderer_ctx_t ctx)
 
     glBindBuffer(GL_ARRAY_BUFFER, gfx_api->blit.fullscreen_triangle);
 
-    GLint pos = glGetAttribLocation(gfx_api->gbuffer_fill.program, "Position");
-    glEnableVertexAttribArray(pos);
-    glVertexAttribPointer(pos, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+    /* input format */
+    int k;
+    int input_count = ROA_ARR_COUNT(gfx_api->blit.input);
+    for (k = 0; k < input_count; ++k)
+    {
+      struct ogl_vertex_input input = gfx_api->blit.input[k];
 
-    GLint texc = glGetAttribLocation(gfx_api->gbuffer_fill.program, "TexCoord");
-    glEnableVertexAttribArray(texc);
-    glVertexAttribPointer(texc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+      if (input.loc < 0) {
+        continue;
+      }
+
+      glEnableVertexAttribArray(input.loc);
+      glVertexAttribPointer(
+        input.loc,
+        input.component_count,
+        GL_FLOAT,
+        input.normalize,
+        input.size,
+        input.ptr);
+    }
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[1]);
-
-    glUniform1i(glGetUniformLocation(gfx_api->blit.program, "gColorMap"), 0);
+    glUniform1i(gfx_api->blit.uni_blit_src, 0);
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
