@@ -334,7 +334,7 @@ make.create_solution(solution_data, project_defaults, projects)
               -- Projects can be marked no link
               -- But still want to bring in header files etc.
 
-              table.insert(asset_dependencies, dep);
+              table.insert(asset_dependencies, other_proj);
 
               link = true;
               if other_proj.no_link == true then link = false end -- deprecated
@@ -487,7 +487,6 @@ make.create_solution(solution_data, project_defaults, projects)
         if(asset_proj.assets) then
           for k, asset_dir in ipairs(asset_proj.assets) do
             if asset_dir then
-              print(asset_dir)
               copy_files(make.get_proj_root() .. asset_proj.base_location .. "/" .. asset_dir, make.get_proj_root() .. "../../output/")
             end
           end
