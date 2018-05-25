@@ -4,6 +4,10 @@
 	"language": "C89",
 	"location": "./",
 
+    "assets" : [
+        "../assets/" 
+    ],
+
 	"src_files" : [
 		"../data/roa_renderer.json",
 		"../include/**.h",
@@ -23,10 +27,10 @@
 	"project_dependencies" : [
 		"STB",
 		"RepublicMath",
-    "RepublicLib",
-    "Scratch",
-    "GLTFImporter",
-    "OpenGL"
+        "RepublicLib",
+        "Scratch",
+        "GLTFImporter",
+        "OpenGL"
 	],
 
 	"defines" : [

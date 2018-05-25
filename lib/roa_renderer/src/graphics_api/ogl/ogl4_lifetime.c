@@ -6,10 +6,13 @@
 #include <GL/gl3w.h>
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
+#include <roa_lib/dir.h>
+#include <roa_lib/file.h>
 #include <scratch/glsl.h>
 #include <scratch/geometry.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 
 void
@@ -33,6 +36,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
 
     /* depth texture */
     {
+
       GLuint depth_texture = 0;
       glGenTextures(1, &depth_texture);
       glBindTexture(GL_TEXTURE_2D, depth_texture);
@@ -208,28 +212,16 @@ platform_setup(roa_renderer_ctx_t ctx)
     {
       GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
       {
-        const char vs[] = ""
-          "#version 330\n"
+        char file[1024];
+        memset(file, 0, sizeof(file));
 
-          "layout(location = 0) in vec3 Position;\n"
-          "layout(location = 1) in vec2 TexCoord; \n"
-          "layout(location = 2) in vec3 Normal;\n"
+        strcat(file, roa_exe_dir());
+        strcat(file, "assets/shaders/");
+        strcat(file, "gbuffer_fill.vert");
 
-          "uniform mat4 gWVP;\n"
-          "uniform mat4 gWorld;\n"
-
-          "out vec2 TexCoord0;\n"
-          "out vec3 Normal0;\n"
-          "out vec3 WorldPos0;\n"
-
-          "void main()\n"
-          "{\n"
-          " gl_Position = gWVP * vec4(Position, 1.0);\n"
-          " TexCoord0 = TexCoord;\n"
-          " Normal0 = (gWorld * vec4(Normal, 0.0)).xyz;\n"
-          " WorldPos0 = (gWorld * vec4(Position, 1.0)).xyz;\n"
-          "}\n";
-
+        const char *vs = 0;
+        roa_copy_file(file, &vs, ROA_NULL);
+   
         const GLchar *src = vs;
         glShaderSource(vert_shd, 1, &src, ROA_NULL);
         glCompileShader(vert_shd);
@@ -247,27 +239,15 @@ platform_setup(roa_renderer_ctx_t ctx)
 
       GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
       {
-        const char fs[] = ""
-          "#version 330\n"
+        char file[1024];
+        memset(file, 0, sizeof(file));
 
-          "in vec2 TexCoord0;   \n"
-          "in vec3 Normal0;   \n"
-          "in vec3 WorldPos0;  \n"
+        strcat(file, roa_exe_dir());
+        strcat(file, "assets/shaders/");
+        strcat(file, "gbuffer_fill.frag");
 
-          "uniform sampler2D gColorMap;\n"
-
-          "layout (location = 0) out vec3 WorldPosOut;\n"
-          "layout (location = 1) out vec3 DiffuseOut;\n"
-          "layout (location = 2) out vec3 NormalOut;\n"
-          "layout (location = 3) out vec3 TexCoordOut;\n"
-
-          "void main()  \n"
-          "{\n"
-          " WorldPosOut     = WorldPos0;\n"
-          " DiffuseOut      = texture(gColorMap, TexCoord0).xyz;\n"
-          " NormalOut       = normalize(Normal0);\n"
-          " TexCoordOut     = vec3(TexCoord0, 0.0);\n"
-          "}\n";
+        const char *fs = 0;
+        roa_copy_file(file, &fs, ROA_NULL);
 
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
@@ -314,16 +294,16 @@ platform_setup(roa_renderer_ctx_t ctx)
       struct ogl_gbuffer_fill_pass *fill = &ctx->graphics_api.gbuffer_fill;
       GLuint program = fill->program;
     
-      fill->uni_wvp     = glGetUniformLocation(program, "gWVP");
-      fill->uni_world   = glGetUniformLocation(program, "gWorld");
-      fill->uni_diffuse = glGetUniformLocation(program, "gColorMap");
+      fill->uni_wvp     = glGetUniformLocation(program, "uni_wvp");
+      fill->uni_world   = glGetUniformLocation(program, "uni_world");
+      fill->uni_diffuse = glGetUniformLocation(program, "uni_map_diffuse");
     }
     
     /* input */
     {
       GLuint program = ctx->graphics_api.gbuffer_fill.program;
       
-      GLint pos = glGetAttribLocation(program, "Position");
+      GLint pos = glGetAttribLocation(program, "vs_position0");
       
       ctx->graphics_api.gbuffer_fill.input[0].loc = pos;
       ctx->graphics_api.gbuffer_fill.input[0].normalize = GL_FALSE;
@@ -331,7 +311,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       ctx->graphics_api.gbuffer_fill.input[0].component_count = 3;
       ctx->graphics_api.gbuffer_fill.input[0].ptr = 0;
       
-      GLint texc = glGetAttribLocation(program, "TexCoord");
+      GLint texc = glGetAttribLocation(program, "vs_texcoord0");
       
       ctx->graphics_api.gbuffer_fill.input[1].loc = texc;
       ctx->graphics_api.gbuffer_fill.input[1].normalize = GL_FALSE;
@@ -339,7 +319,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       ctx->graphics_api.gbuffer_fill.input[1].component_count = 2;
       ctx->graphics_api.gbuffer_fill.input[1].ptr = (void*)(3 * sizeof(GLfloat));
 
-      GLint norm = glGetAttribLocation(program, "Normal");
+      GLint norm = glGetAttribLocation(program, "vs_normal0");
 
       ctx->graphics_api.gbuffer_fill.input[2].loc = norm;
       ctx->graphics_api.gbuffer_fill.input[2].normalize = GL_TRUE;
@@ -364,39 +344,23 @@ platform_setup(roa_renderer_ctx_t ctx)
     {
       GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
       {
-        const char *vs = ""
-          "#version 410\n"
-          "\n"
-          "uniform mat4 gView;\n"
-          "uniform mat4 gProjection;\n"
-          "\n"
-          "uniform mat4 modelMatrix;\n"
-          "uniform vec3 decalSize;\n"
-          "\n"
-          "layout ( location = 0 ) in vec4 positionIN;\n"
-          "layout ( location = 1 ) in vec2 uvIN;\n"
-          "layout ( location = 2 ) in vec3 normalIN;\n"
-          "\n"
-          "out vec4 posFS;\n"
-          "out vec4 posW;\n"
-          "out vec2 uvFS;\n"
-          "\n"
-          "void main()\n"
-          "{\n"
-            "posW = modelMatrix * vec4(positionIN.xyz * 1, positionIN.w);\n"
-            "//Move position to clip space\n"
-            "posFS = gProjection * gView * posW;\n"
-            "uvFS = uvIN;\n"
-            "gl_Position = posFS;\n"
-          "}\n";
+        char file[1024];
+        memset(file, 0, sizeof(file));
 
+        strcat(file, roa_exe_dir());
+        strcat(file, "assets/shaders/");
+        strcat(file, "decal.vert");
+
+        const char *vs = 0;
+        roa_copy_file(file, &vs, ROA_NULL);
+         
         const GLchar *src = vs;
         glShaderSource(vert_shd, 1, &src, ROA_NULL);
         glCompileShader(vert_shd);
 
         GLint status;
         glGetShaderiv(vert_shd, GL_COMPILE_STATUS, &status);
-
+         
         if (status != GL_TRUE)
         {
           char buffer[512];
@@ -408,64 +372,15 @@ platform_setup(roa_renderer_ctx_t ctx)
 
       GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
       {
-        const char *fs = ""
-          "#version 410\n"
-          //"#extension GL_ARB_texture_rectangle : enable\n"
-          "\n"
-          "in vec4 posFS;\n"
-          "in vec4 posW;\n"
-          "in vec2 uvFS;\n"
-          "\n"
-          "uniform mat4 modelMatrix;\n"
-          "uniform sampler2D gDiffuse;\n"
-          "uniform sampler2D gNormalDepth;\n"
-          "uniform sampler2D gWorldPos;\n"
-          "\n"
-          "uniform float gGamma;\n"
-          "\n"
-          "uniform mat4 invProjView;\n"
-          "uniform mat4 invModelMatrix;\n"
-          "\n"
-          "vec4 reconstruct_pos(float z, vec2 uv_f)\n"
-          "{\n"
-          "vec4 sPos = vec4(uv_f * 2.0 - 1.0, z, 1.0);\n"
-          "sPos = invProjView * sPos;\n"
-          "return vec4((sPos.xyz / sPos.w ), sPos.w);\n"
-          "}\n"
-          "\n"
-          "\n"
-          "layout ( location = 1 ) out vec4 diffuseRT;\n"
-          "layout ( location = 2 ) out vec4 specularRT;\n"
-          "layout ( location = 3 ) out vec4 glowMatIDRT;\n"
-          "\n"
-          "void main()\n"
-          "{\n"
-          "vec2 screenPosition = posFS.xy / posFS.w;\n"
-          "\n"
-          "vec2 depthUV = screenPosition * 0.5f + 0.5f;\n"
-          //"depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset\n"
-          "float depth = texture(gNormalDepth, depthUV).r;\n"
-          "\n"
-          "vec4 worldPos = texture(gWorldPos, depthUV);\n"
-          //"vec4 worldPos = reconstruct_pos(depth, depthUV);\n"
-          "worldPos.w = 1;"
-          "vec4 localPos = worldPos * invModelMatrix;\n"
-          "\n"
-          "float dist = 0.5f - abs(localPos.y);\n"
-          "float dist2 = 0.5f - abs(localPos.x);\n"
-          "float dist3 = 0.5f - abs(localPos.z);\n"
-          "\n"
-          "if ((depth < 1.0 && dist > 0 && dist2 > 0 && dist3 > 0))\n"
-          "{\n"
-          "vec2 uv = vec2(localPos.x, localPos.y) + 0.5f;\n"
-          "vec4 diffuseColor = texture(gDiffuse, uv);\n"
-          "diffuseRT = diffuseColor;\n"
-          "diffuseRT = vec4(0.0, 1.0, 0.0, 1);\n"
-          "}\n"
-          "else {\n"
-          "discard; }\n"
-          //"diffuseRT = worldPos;\n"
-          "}\n";
+        char file[1024];
+        memset(file, 0, sizeof(file));
+
+        strcat(file, roa_exe_dir());
+        strcat(file, "assets/shaders/");
+        strcat(file, "decal.frag");
+
+        const char *fs = 0;
+        roa_copy_file(file, &fs, ROA_NULL);
           
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
@@ -473,14 +388,14 @@ platform_setup(roa_renderer_ctx_t ctx)
 
         GLint status;
         glGetShaderiv(frag_shd, GL_COMPILE_STATUS, &status);
-
+         
         if (status != GL_TRUE)
         {
           char buffer[512];
           glGetShaderInfoLog(frag_shd, 512, NULL, buffer);
           ROA_ASSERT(ROA_FALSE);
-        }
-      }
+        } 
+      } 
 
       {
         GLuint prog = glCreateProgram();
@@ -512,7 +427,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       struct ogl_decal *decal = &ctx->graphics_api.decal;
       GLuint program = decal->program;
       
-      GLint pos = glGetAttribLocation(program, "positionIN");
+      GLint pos = glGetAttribLocation(program, "vs_position0");
       
       decal->input[0].loc             = pos;
       decal->input[0].normalize       = GL_FALSE;
@@ -520,7 +435,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       decal->input[0].component_count = 4;
       decal->input[0].ptr             = 0;
       
-      GLint texc = glGetAttribLocation(program, "uvIN");
+      GLint texc = glGetAttribLocation(program, "vs_texcoord0");
       
       decal->input[1].loc             = texc;
       decal->input[1].normalize       = GL_FALSE;
@@ -528,7 +443,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       decal->input[1].component_count = 2;
       decal->input[1].ptr             = (void*)(4 * sizeof(GLfloat));
 
-      GLint norm = glGetAttribLocation(program, "normalIN");
+      GLint norm = glGetAttribLocation(program, "vs_normal0");
 
       decal->input[2].loc             = norm;
       decal->input[2].normalize       = GL_TRUE;
@@ -542,14 +457,14 @@ platform_setup(roa_renderer_ctx_t ctx)
       struct ogl_decal *decal = &ctx->graphics_api.decal;
       GLuint program = decal->program;
 
-      decal->uni_world_pos    = glGetUniformLocation(program, "gWorldPos");
-      decal->uni_depth        = glGetUniformLocation(program, "gNormalDepth");
-      decal->uni_diffuse      = glGetUniformLocation(program, "gColorMap");
-      decal->uni_view         = glGetUniformLocation(program, "gView");
-      decal->uni_proj         = glGetUniformLocation(program, "gProjection");
-      decal->uni_world        = glGetUniformLocation(program, "modelMatrix");
-      decal->uni_inv_projview = glGetUniformLocation(program, "invProjView");
-      decal->uni_inv_world    = glGetUniformLocation(program, "invModelMatrix");
+      decal->uni_world_pos    = glGetUniformLocation(program, "uni_map_worldpos");
+      decal->uni_depth        = glGetUniformLocation(program, "uni_map_depth");
+      decal->uni_diffuse      = glGetUniformLocation(program, "uni_map_diffuse");
+      decal->uni_view         = glGetUniformLocation(program, "uni_view");
+      decal->uni_proj         = glGetUniformLocation(program, "uni_proj");
+      decal->uni_world        = glGetUniformLocation(program, "uni_world");
+      decal->uni_inv_projview = glGetUniformLocation(program, "uni_inv_proj_view");
+      decal->uni_inv_world    = glGetUniformLocation(program, "uni_inv_world");
     }
 
     /* volume */
@@ -593,26 +508,22 @@ platform_setup(roa_renderer_ctx_t ctx)
       ROA_ASSERT(0);
     }
   }
-
+  
   /* fullscreen */
   {
     /* program */
     {
       GLuint vert_shd = glCreateShader(GL_VERTEX_SHADER);
       {
-        const char vs[] = ""
-          "#version 330\n"
+        char file[1024];
+        memset(file, 0, sizeof(file));
 
-          "layout(location = 0) in vec2 Position;\n"
-          "layout(location = 1) in vec2 TexCoord; \n"
+        strcat(file, roa_exe_dir());
+        strcat(file, "assets/shaders/");
+        strcat(file, "blit.vert");
 
-          "out vec2 TexCoord0;\n"
-
-          "void main()\n"
-          "{\n"
-          " gl_Position = vec4(Position, 0.0, 1.0);\n"
-          " TexCoord0 = TexCoord;\n"
-          "}\n";
+        const char *vs = 0;
+        roa_copy_file(file, &vs, ROA_NULL);
 
         const GLchar *src = vs;
         glShaderSource(vert_shd, 1, &src, ROA_NULL);
@@ -631,19 +542,15 @@ platform_setup(roa_renderer_ctx_t ctx)
 
       GLuint frag_shd = glCreateShader(GL_FRAGMENT_SHADER);
       {
-        const char fs[] = ""
-          "#version 330\n"
+        char file[1024];
+        memset(file, 0, sizeof(file));
 
-          "in vec2 TexCoord0;   \n"
+        strcat(file, roa_exe_dir());
+        strcat(file, "assets/shaders/");
+        strcat(file, "blit.frag");
 
-          "uniform sampler2D gColorMap;\n"
-
-          "layout (location = 0) out vec4 final_color;\n"
-
-          "void main()  \n"
-          "{\n"
-          " final_color      = texture(gColorMap, TexCoord0);\n"
-          "}\n";
+        const char *fs = 0;
+        roa_copy_file(file, &fs, ROA_NULL);
 
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
@@ -690,7 +597,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       struct ogl_blit_pass *blit = &ctx->graphics_api.blit;
       GLuint program = blit->program;
 
-      GLint pos = glGetAttribLocation(program, "Position");
+      GLint pos = glGetAttribLocation(program, "vs_position0");
 
       blit->input[0].loc              = pos;
       blit->input[0].normalize        = GL_FALSE;
@@ -698,7 +605,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       blit->input[0].component_count  = 2;
       blit->input[0].ptr              = 0;
 
-      GLint texc = glGetAttribLocation(program, "TexCoord");
+      GLint texc = glGetAttribLocation(program, "vs_texcoord0");
 
       blit->input[1].loc             = texc;
       blit->input[1].normalize       = GL_FALSE;
@@ -706,13 +613,13 @@ platform_setup(roa_renderer_ctx_t ctx)
       blit->input[1].component_count = 2;
       blit->input[1].ptr             = (void*)(2 * sizeof(GLfloat));
     }
-
+    
     /* uniforms */
     {
       struct ogl_blit_pass *blit = &ctx->graphics_api.blit;
       GLuint program = blit->program;
 
-      blit->uni_blit_src = glGetUniformLocation(program, "gColorMap");
+      blit->uni_blit_src = glGetUniformLocation(program, "uni_map_color");
     }
 
     /* triangle */
