@@ -184,8 +184,9 @@ platform_render(roa_renderer_ctx_t ctx)
       
 
       roa_transform decal_transforms[1];
-      decal_transforms[0].position = roa_float3_set_with_values(-1,0,-1);
-      decal_transforms[0].scale = roa_float3_set_with_values(4, 4, 4);
+      decal_transforms[0].position = roa_float3_set_with_values(3,0,3);
+      decal_transforms[0].scale = roa_float3_set_with_values(8, 2, 4);
+      decal_transforms[0].rotation = roa_quaternion_from_axis_angle(roa_transform_world_left(), 0.123f);
       
       int decal_count = ROA_ARR_COUNT(decal_transforms);
       for(k = 0; k < decal_count; ++k)
@@ -198,7 +199,7 @@ platform_render(roa_renderer_ctx_t ctx)
         roa_mat4_id(&id);
         roa_mat4_translate(&position, tra->position);
         roa_mat4_scale(&scale, tra->scale);
-        roa_mat4_multiply(&world, &scale, &position);
+        roa_transform_to_mat4(&decal_transforms[0], &world);
         roa_mat4_inverse(&inv_world, &world);
 
         roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;
@@ -211,11 +212,11 @@ platform_render(roa_renderer_ctx_t ctx)
         roa_mat4_inverse(&inv_view, &view);
         roa_mat4_inverse(&inv_proj, &proj);
             
-        //roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
-        //roa_mat4_multiply(&proj_view, &proj, &view);
-        roa_mat4_multiply(&proj_view, &view, &proj);
+        roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
+//        roa_mat4_multiply(&proj_view, &proj, &view);
+//        roa_mat4_multiply(&proj_view, &view, &proj);
 
-        roa_mat4_inverse(&inv_view_proj, &proj_view);
+//        roa_mat4_inverse(&inv_view_proj, &proj_view);
 
         roa_mat4 wvp;
         roa_mat4_multiply(&wvp, &world, &view_proj);
@@ -224,7 +225,7 @@ platform_render(roa_renderer_ctx_t ctx)
         glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
         glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
         glUniformMatrix4fv(gfx_api->decal.uni_inv_projview, 1, GL_FALSE, inv_view_proj.data);
-        glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_FALSE, inv_world.data);
+        glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_TRUE, inv_world.data);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }

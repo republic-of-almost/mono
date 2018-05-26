@@ -272,11 +272,11 @@ main()
         }
         else
         {
-          //float width = 4.f;
-          //float height = width * ROA_G_RATIO;
+          float width = 4.f;
+          float height = width * ROA_G_RATIO;
 
-          float width = 10.f;
-          float height = 0.1f;
+//          float width = 10.f;
+//          float height = 0.1f;
 
           roa_transform transform;
           transform.position = roa_float3_set_with_values(0, 0, 0);
