@@ -63,8 +63,6 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fbo);
 
-      glClearColor(1, 0, 1, 1);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       GLenum draw_buffers[] = {
         GL_COLOR_ATTACHMENT0,
@@ -74,6 +72,10 @@ platform_render(roa_renderer_ctx_t ctx)
       };
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
+
+
+      glClearColor(1, 0, 1, 1);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       /* draw calls */
       int j;
@@ -132,7 +134,7 @@ platform_render(roa_renderer_ctx_t ctx)
     /* decals */
     {
       glrPushMarkerGroup("Decals");
-      
+
       glUseProgram(gfx_api->decal.program);
     
       glDisable(GL_DEPTH_TEST);
@@ -141,10 +143,10 @@ platform_render(roa_renderer_ctx_t ctx)
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gfx_api->gbuffer.fbo);
 
       GLenum draw_buffers[] = {
-        GL_COLOR_ATTACHMENT0,
+        //GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3,
+        //GL_COLOR_ATTACHMENT2,
+        //GL_COLOR_ATTACHMENT3,
       };
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
@@ -161,7 +163,7 @@ platform_render(roa_renderer_ctx_t ctx)
         if(input.loc < 0) {
           continue;
         }
-      
+
         glEnableVertexAttribArray(input.loc);
         glVertexAttribPointer(
           input.loc,
@@ -180,42 +182,52 @@ platform_render(roa_renderer_ctx_t ctx)
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
       
-      /* sort */
-      roa_mat4 id, world, scale, position, inv_world;
 
-      roa_mat4_id(&id);
-      roa_mat4_translate(&position, roa_float3_set_with_values(0, 0, 0));
-      roa_mat4_scale(&scale, roa_float3_set_with_values(3, 3, 3));
-      roa_mat4_multiply_three(&world, &id, &scale, &position);
-      roa_mat4_inverse(&inv_world, &world);
-
-      roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;
-      roa_mat4_import(&view_proj, rp->camera.view_projection);
+      roa_transform decal_transforms[1];
+      decal_transforms[0].position = roa_float3_set_with_values(-1,0,-1);
+      decal_transforms[0].scale = roa_float3_set_with_values(4, 4, 4);
       
+      int decal_count = ROA_ARR_COUNT(decal_transforms);
+      for(k = 0; k < decal_count; ++k)
+      {
+        roa_transform *tra = &decal_transforms[k];
 
-      roa_mat4_import(&proj, rp->camera.projection);
-      roa_mat4_import(&view, rp->camera.view);
+        /* sort */
+        roa_mat4 id, world, scale, position, inv_world;
+
+        roa_mat4_id(&id);
+        roa_mat4_translate(&position, tra->position);
+        roa_mat4_scale(&scale, tra->scale);
+        roa_mat4_multiply(&world, &scale, &position);
+        roa_mat4_inverse(&inv_world, &world);
+
+        roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;
+        roa_mat4_import(&view_proj, rp->camera.view_projection);
       
-      roa_mat4 inv_view, inv_proj;
-      roa_mat4_inverse(&inv_view, &view);
-      roa_mat4_inverse(&inv_proj, &proj);
+        roa_mat4_import(&proj, rp->camera.projection);
+        roa_mat4_import(&view, rp->camera.view);
+      
+        roa_mat4 inv_view, inv_proj;
+        roa_mat4_inverse(&inv_view, &view);
+        roa_mat4_inverse(&inv_proj, &proj);
             
-      //roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
-      roa_mat4_multiply(&proj_view, &proj, &view);
-      //roa_mat4_multiply(&proj_view, &view, &proj);
+        //roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
+        //roa_mat4_multiply(&proj_view, &proj, &view);
+        roa_mat4_multiply(&proj_view, &view, &proj);
 
-      roa_mat4_inverse(&inv_view_proj, &proj_view);
+        roa_mat4_inverse(&inv_view_proj, &proj_view);
 
-      roa_mat4 wvp;
-      roa_mat4_multiply(&wvp, &world, &view_proj);
+        roa_mat4 wvp;
+        roa_mat4_multiply(&wvp, &world, &view_proj);
       
-      glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera.view);
-      glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
-      glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
-      glUniformMatrix4fv(gfx_api->decal.uni_inv_projview, 1, GL_FALSE, inv_view_proj.data);
-      glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_FALSE, inv_world.data);
+        glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera.view);
+        glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
+        glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
+        glUniformMatrix4fv(gfx_api->decal.uni_inv_projview, 1, GL_FALSE, inv_view_proj.data);
+        glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_FALSE, inv_world.data);
 
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+      }
 
       glrPopMarkerGroup();
     }

@@ -5,8 +5,12 @@
     geometry.
 */
 
+/* ----------------------------------------------------------- [ config ] -- */
+
 #version 410
 //"#extension GL_ARB_texture_rectangle : enable
+
+#define DEBUG_NO_DISCARD 1
 
 /* ----------------------------------------------------------- [ inputs ] -- */
 
@@ -25,9 +29,9 @@ uniform mat4 uni_inv_world;
 
 /* ---------------------------------------------------------- [ outputs ] -- */
 
-layout ( location = 1 ) out vec4 fs_out_diffuse;
-layout ( location = 2 ) out vec4 fs_out_specular;
-layout ( location = 3 ) out vec4 fs_out_glow;
+layout ( location = 0 ) out vec4 fs_out_diffuse;
+//layout ( location = 2 ) out vec4 fs_out_specular;
+//layout ( location = 3 ) out vec4 fs_out_glow;
 
 /* ---------------------------------------------------------- [ helpers ] -- */
 
@@ -47,12 +51,12 @@ main()
     vec2 screenPosition = fs_position0.xy / fs_position0.w;
  
     vec2 depthUV = screenPosition * 0.5f + 0.5f;
-    //"depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset
+    //depthUV += vec2(0.5f / 1280.0f, 0.5f / 720.0f); //half pixel offset
     float depth = texture(uni_map_depth, depthUV).r;
           
     vec4 worldPos = texture(uni_map_worldpos, depthUV);
-    //"vec4 worldPos = reconstruct_pos(depth, depthUV);
-    worldPos.w = 1;
+    //vec4 worldPos = reconstruct_pos(depth, depthUV);
+    //worldPos.w = 1;
     vec4 localPos = worldPos * uni_inv_world;
      
     float dist = 0.5f - abs(localPos.y);
@@ -69,6 +73,13 @@ main()
     }
     else
     {
-        discard;
+        if(DEBUG_NO_DISCARD == 1)
+        {
+            fs_out_diffuse = vec4(1.0, 1.0, 0.0, 1);
+        }
+        else
+        {
+            discard;
+        }
     }
 }
