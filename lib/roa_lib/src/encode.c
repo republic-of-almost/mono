@@ -75,7 +75,11 @@ roa_base64_decode(
 
   if (decoding_table == NULL) { build_decoding_table(); }
 
-  if (input_length % 4 != 0) return;
+  if (input_length % 4 != 0)
+  {
+    ROA_ASSERT(0);
+    return;
+  }
 
   *output_length = input_length / 4 * 3;
   if (data[input_length - 1] == '=') (*output_length)--;
