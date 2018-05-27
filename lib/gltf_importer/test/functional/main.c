@@ -17,9 +17,12 @@ struct gltf_import gltf;
 GLuint vao;
 GLuint program;
 
-
 GLuint vbo;
 GLuint ibo;
+GLsizei ibo_count;
+GLenum ibo_index_type;
+
+float distance[3];
 
 int
 main()
@@ -33,7 +36,8 @@ main()
     ROA_MEM_ZERO(path);
 
     strcat(path, roa_exe_dir());
-    strcat(path, "assets/gltf_test/cube.gltf");
+    //strcat(path, "assets/gltf_test/cube.gltf");
+    strcat(path, "assets/plane_trainer.gltf");
 
     gltf_import(path, &gltf);
   }
@@ -91,6 +95,14 @@ main()
         vertex_desc[0] = gltf.meshes[0].primitives->attributes.POSITION;
         vertex_desc[1] = gltf.meshes[0].primitives->attributes.NORMAL;
         vertex_desc[2] = gltf.meshes[0].primitives->attributes.TEXCOORD_0;
+      }
+
+      /* where to place camera */
+      {
+        int pos = gltf.meshes[0].primitives->attributes.POSITION;
+        distance[0] = gltf.accessors[pos].max[0] * 4;
+        distance[1] = gltf.accessors[pos].max[1] * 4;
+        distance[2] = gltf.accessors[pos].max[2] * 4;
       }
 
       int vbo_size = 0;
@@ -199,6 +211,9 @@ main()
         buffer_view.byte_length,
         &buffer[buffer_view.byte_offset],
         GL_STATIC_DRAW);
+
+      ibo_count = gltf.accessors[accessor_id].count;
+      ibo_index_type = gltf.accessors[accessor_id].component_type;
     }
 
     /* check err */
@@ -213,7 +228,7 @@ main()
     /* view */
     roa_mat4_lookat(
       &view,
-      roa_float3_set_with_values(1,1,1),
+      roa_float3_set_with_values(distance[0],distance[1],distance[2]),
       roa_float3_zero(),
       roa_float3_set_with_values(0, 1, 0));
 
@@ -222,7 +237,7 @@ main()
     roa_ctx_get_window_desc(hw_ctx, &win_desc);
 
     float aspect = (float)win_desc.width / (float)win_desc.height;
-    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.25f, 0.1, 100.0, aspect);
+    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.125f, 0.1, 100.0, aspect);
 
     /* world */
     roa_mat4_id(&world);
@@ -242,7 +257,7 @@ main()
     GLint uni_world = glGetUniformLocation(program, "uni_world_mat");
     glUniformMatrix4fv(uni_world, 1, GL_FALSE, world.data);
 
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+    glDrawElements(GL_TRIANGLES, ibo_count, ibo_index_type, 0);
   }
 
   roa_ctx_destroy(&hw_ctx);

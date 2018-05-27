@@ -54,7 +54,7 @@ struct gltf_accessor
 {
   int buffer_view;              /* optional */
   int byte_offset;              /* optional */
-  int component_type;           /* gltf_type_e */
+  int component_type;           /* gltf_component_type_e */
   int normalized;               /* 0 or 1 */
   int count;                    /* number of attributes */
   int type;                     /* gltf_type_e */

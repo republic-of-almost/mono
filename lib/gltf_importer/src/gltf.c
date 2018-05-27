@@ -215,8 +215,8 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
         const char *uri_value = json_to_str(attr_ele->value);
 
         const char *embedded[] = {
-          "data:image/png;base64",
-          "data:application/octet-stream;base64",
+          "data:image/png;base64,",
+          "data:application/octet-stream;base64,",
         };
 
         int i;
@@ -227,7 +227,8 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
           if (strncmp(uri_value, embedded[i], strlen(embedded[i])) == 0)
           {
             unsigned start = strlen(embedded[i]);
-            unsigned len = strlen(uri_value) - start;
+            unsigned full_len = strlen(uri_value);
+            unsigned len = full_len - start;
 
             unsigned decode_len = 0;
             roa_base64_decode((const unsigned char *)&uri_value[start], len, ROA_NULL, &decode_len);
@@ -235,7 +236,7 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
             unsigned char * data = malloc(decode_len);
             roa_base64_decode((const unsigned char *)&uri_value[start], len, &data, &decode_len);
 
-            buffer.uri_data = data[1]; /* skip trailing comma */
+            buffer.uri_data = data;
 
             len = strlen(embedded[i]) + 1;
             roa_array_create_with_capacity(buffer.uri, len);
