@@ -25,11 +25,12 @@ roa_renderer_task_pump(
     struct roa_renderer_camera cam = ctx->renderer_desc.camera_descs[i];
     struct renderpass *rp = &ctx->renderpass.rps[i];
 
+
     /* calculate camera mats */
     roa_mat4 view;
     roa_float3 pos = roa_float3_import(cam.position);
-    roa_float3 up = roa_float3_import(cam.up);
-    roa_float3 at = roa_float3_import(cam.lookat);
+    roa_float3 up  = roa_float3_import(cam.up);
+    roa_float3 at  = roa_float3_import(cam.lookat);
 
     roa_mat4_lookat(&view, pos, at, up);
     unsigned view_size = sizeof(rp->camera.view);

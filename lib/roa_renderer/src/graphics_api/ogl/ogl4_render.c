@@ -124,13 +124,13 @@ platform_render(roa_renderer_ctx_t ctx)
         if(ctx->graphics_api.meshes[0].ibo)
         {
           GLsizei count = ctx->graphics_api.meshes[0].index_count;
-          unsigned int *data = ctx->resource_desc.mesh_rsrc_data[0].index_array;
 
           glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
         }
         else
         {
-          glDrawArrays(GL_TRIANGLES, 0, ctx->resource_desc.mesh_rsrc_data[0].vertex_count);
+          GLsizei count = ctx->resource_desc.mesh_rsrc_data[0].vertex_count;
+          glDrawArrays(GL_TRIANGLES, 0, count);
         }
       }
 
