@@ -63,7 +63,6 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fbo);
 
-
       GLenum draw_buffers[] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
@@ -73,7 +72,6 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
 
-
       glClearColor(1, 0, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -82,7 +80,17 @@ platform_render(roa_renderer_ctx_t ctx)
       for (j = 0; j < dc_count; ++j)
       {
         struct renderpass_draw_call dc = rp->draw_calls[j];
-        glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
+        
+        if (ctx->graphics_api.meshes[0].ibo)
+        {
+          glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctx->graphics_api.meshes[0].ibo);
+        }
+        else
+        {
+          glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
 
         /* input format */
         int k;
@@ -95,7 +103,7 @@ platform_render(roa_renderer_ctx_t ctx)
           {
             continue;
           }
-        
+          
           glEnableVertexAttribArray(input.loc);
           glVertexAttribPointer(
             input.loc,
@@ -113,7 +121,17 @@ platform_render(roa_renderer_ctx_t ctx)
         glUniformMatrix4fv(fill.uni_wvp, 1, GL_FALSE, dc.wvp);
         glUniformMatrix4fv(fill.uni_world, 1, GL_FALSE, dc.world);
         
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        if(ctx->graphics_api.meshes[0].ibo)
+        {
+          GLsizei count = ctx->graphics_api.meshes[0].index_count;
+          unsigned int *data = ctx->resource_desc.mesh_rsrc_data[0].index_array;
+
+          glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+        }
+        else
+        {
+          glDrawArrays(GL_TRIANGLES, 0, ctx->resource_desc.mesh_rsrc_data[0].vertex_count);
+        }
       }
 
       roa_array_destroy(rp->draw_calls);
@@ -182,12 +200,27 @@ platform_render(roa_renderer_ctx_t ctx)
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
       
-
-      roa_transform decal_transforms[1];
+      roa_transform decal_transforms[5];
       decal_transforms[0].position = roa_float3_set_with_values(3,0,3);
       decal_transforms[0].scale = roa_float3_set_with_values(8, 2, 4);
-      decal_transforms[0].rotation = roa_quaternion_from_axis_angle(roa_transform_world_left(), 0.123f);
+      decal_transforms[0].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(1,2,3,4));
       
+      decal_transforms[1].position = roa_float3_set_with_values(-3, 0, 3);
+      decal_transforms[1].scale = roa_float3_set_with_values(2, 2, 4);
+      decal_transforms[1].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(1, 9, 3, 4));
+
+      decal_transforms[2].position = roa_float3_set_with_values(-3, 0, -3);
+      decal_transforms[2].scale = roa_float3_set_with_values(2, 2, 4);
+      decal_transforms[2].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(7, 7, 3, 4));
+
+      decal_transforms[3].position = roa_float3_set_with_values(-2, 0, 3);
+      decal_transforms[3].scale = roa_float3_set_with_values(2, 2, 4);
+      decal_transforms[3].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(5, 2, 3, 4));
+
+      decal_transforms[4].position = roa_float3_set_with_values(-1, 0, -3);
+      decal_transforms[4].scale = roa_float3_set_with_values(2, 2, 4);
+      decal_transforms[4].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(1, 6, 3, 4));
+
       int decal_count = ROA_ARR_COUNT(decal_transforms);
       for(k = 0; k < decal_count; ++k)
       {
@@ -199,7 +232,7 @@ platform_render(roa_renderer_ctx_t ctx)
         roa_mat4_id(&id);
         roa_mat4_translate(&position, tra->position);
         roa_mat4_scale(&scale, tra->scale);
-        roa_transform_to_mat4(&decal_transforms[0], &world);
+        roa_transform_to_mat4(&decal_transforms[k], &world);
         roa_mat4_inverse(&inv_world, &world);
 
         roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;

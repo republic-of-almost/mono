@@ -38,14 +38,6 @@ platform_update(roa_renderer_ctx_t ctx)
       /* vbo */
       if (pending[i].vertex_count)
       {
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-
-        if (OGL4_DEBUG_LABLES)
-        {
-          const char * name = pending[i].name ? pending[i].name : "UnknownVBO";
-          glrObjectLabel(GL_BUFFER, vbos[i], name);
-        }
-
         unsigned element_count = 0;
         element_count += pending[i].position_vec3_array ? 3 : 0;
         element_count += pending[i].normal_vec3_array ? 3 : 0;
@@ -84,10 +76,28 @@ platform_update(roa_renderer_ctx_t ctx)
           }
         }
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * element_count * pending[i].vertex_count, data, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
 
-        if (OGL4_ERROR_CHECKS)
+        if (OGL4_DEBUG_LABLES)
         {
+          if (pending[i].name)
+          {
+            char name[2048];
+            memset(name, 0, sizeof(name));
+            strcat(name, pending[i].name);
+            strcat(name, ":VBO");
+            glrObjectLabel(GL_BUFFER, vbos[i], name);
+          }
+          else
+          {
+            glrObjectLabel(GL_BUFFER, vbos[i], "Unknown:VBO");
+          }
+        }
+
+        unsigned buffer_size = sizeof(pending[i].position_vec3_array[0]) * element_count * pending[i].vertex_count;
+        glBufferData(GL_ARRAY_BUFFER, buffer_size, data, GL_STATIC_DRAW);
+
+        if (OGL4_ERROR_CHECKS) {
           GLuint err = glGetError();
           if (err) {
             ROA_ASSERT(0);
@@ -102,16 +112,24 @@ platform_update(roa_renderer_ctx_t ctx)
 
         if (OGL4_DEBUG_LABLES)
         {
-          const char * name = pending[i].name ? pending[i].name : "UnknownIBO";
-          glrObjectLabel(GL_BUFFER, ibos[i], name);
+          if (pending[i].name)
+          {
+            char name[2048];
+            memset(name, 0, sizeof(name));
+            strcat(name, pending[i].name);
+            strcat(name, ":IBO");
+            glrObjectLabel(GL_BUFFER, ibos[i], name);
+          }
+          else
+          {
+            glrObjectLabel(GL_BUFFER, ibos[i], "Unknown:IBO");
+          }
         }
 
         unsigned buffer_size = sizeof(pending[i].index_array[0]) * pending[i].index_count;
-
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_size, pending[i].index_array, GL_STATIC_DRAW);
 
-        if (OGL4_ERROR_CHECKS)
-        {
+        if (OGL4_ERROR_CHECKS) {
           GLuint err = glGetError();
           if (err) {
             ROA_ASSERT(0);
