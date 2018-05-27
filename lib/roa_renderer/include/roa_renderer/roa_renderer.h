@@ -190,6 +190,15 @@ roa_renderer_light_exists(
 /* --------------------------------------------------- [ Mesh Renderable ] -- */
 
 
+struct roa_renderer_decal
+{
+  float color[3];
+  float scale[3];
+  float position[3];
+  float rotation[4];
+};
+
+
 
 struct roa_renderer_mesh_renderable
 {
@@ -198,6 +207,9 @@ struct roa_renderer_mesh_renderable
   uint32_t color;
   uint64_t mesh_id;
   uint64_t material_id;
+
+  struct roa_renderer_decal *decals;
+  unsigned decal_count;
 };
 
 
