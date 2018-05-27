@@ -6,24 +6,24 @@
 
 #version 330
 
-/* ----------------------------------------------------------- [ inputs ] -- */
+/* ------------------------------------------------------------ [ inputs ] -- */
 
 in vec2 fs_texcoord0;
 in vec3 fs_normal0;
 in vec3 fs_worldpos0;
 
-/* --------------------------------------------------------- [ uniforms ] -- */
+/* ---------------------------------------------------------- [ uniforms ] -- */
 
 uniform sampler2D uni_map_diffuse;
 
-/* ---------------------------------------------------------- [ outputs ] -- */
+/* ----------------------------------------------------------- [ outputs ] -- */
 
 layout (location = 0) out vec3 fs_out_worldpos;
 layout (location = 1) out vec3 fs_out_diffuse;
 layout (location = 2) out vec3 fs_out_normal;
 layout (location = 3) out vec3 fs_out_texcoord;
 
-/* ---------------------------------------------------------- [ program ] -- */
+/* ----------------------------------------------------------- [ program ] -- */
 
 void
 main()
