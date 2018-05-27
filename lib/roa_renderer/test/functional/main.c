@@ -133,7 +133,7 @@ main()
       ROA_MEM_ZERO(camera);
       camera.near_plane     = 0.1f;
       camera.far_plane      = 100.f;
-      camera.field_of_view  = ROA_QUART_TAU * 0.25f;
+      camera.field_of_view  = ROA_QUART_TAU * 0.125f;
       camera.position[2]    = +3.f;
 
       uint32_t camera_id = ++object_id_counter;
@@ -247,7 +247,7 @@ main()
 
       for (i = 0; i < renderable_count; ++i)
       {
-        uint32_t obj_id = i + 1;
+        uint32_t obj_id = i + 2;
 
         struct roa_renderer_mesh_renderable renderable;
         ROA_MEM_ZERO(renderable);
@@ -279,7 +279,7 @@ main()
           roa_transform transform;
           transform.position = roa_float3_set_with_values(0, 0, 0);
           transform.rotation = roa_quaternion_default();
-          transform.scale    = roa_float3_set_with_values(width, height, width);
+          transform.scale    = roa_float3_set_with_values(width, width, width);
 
           roa_transform_export_mat4(&transform, renderable.world_transform);
 
