@@ -37,7 +37,7 @@ main()
 
     strcat(path, roa_exe_dir());
     //strcat(path, "assets/gltf_test/cube.gltf");
-    strcat(path, "assets/plane_trainer.gltf");
+    strcat(path, "assets/gltf_test/plane_trainer.gltf");
 
     gltf_import(path, &gltf);
   }
