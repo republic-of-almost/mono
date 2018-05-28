@@ -17,6 +17,7 @@ struct gltf_import gltf;
 GLuint vao;
 GLuint program;
 
+
 GLuint vbo;
 GLuint ibo;
 GLsizei ibo_count;
@@ -111,8 +112,13 @@ main()
         int i;
         for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
         {
-          buffer_views[i] = gltf.buffer_views[gltf.accessors[vertex_desc[i]].buffer_view];
-          vbo_size += buffer_views[i].byte_length;
+          if(vertex_desc[i] >= 0)
+          {
+            int attr = vertex_desc[i];
+            int buffer_view = gltf.accessors[attr].buffer_view;
+            buffer_views[i] = gltf.buffer_views[buffer_view];
+            vbo_size += buffer_views[i].byte_length;
+          }
         }
       }
 
@@ -126,14 +132,17 @@ main()
 
         for (i = 0; i < ROA_ARR_COUNT(buffer_views); ++i)
         {
-          unsigned char *buffer = gltf.buffers[buffer_views[i].buffer].uri_data;
-          int byte_offset = vbo_offset;
-          int byte_length = buffer_views[i].byte_length;
-          void *data = &buffer[buffer_views[i].byte_offset];
+          if(vertex_desc[i] >= 0)
+          {
+            unsigned char *buffer = gltf.buffers[buffer_views[i].buffer].uri_data;
+            int byte_offset = vbo_offset;
+            int byte_length = buffer_views[i].byte_length;
+            void *data = &buffer[buffer_views[i].byte_offset];
 
-          vbo_offset += byte_length;
-
-          glBufferSubData(GL_ARRAY_BUFFER, byte_offset, byte_length, data);
+            vbo_offset += byte_length;
+          
+            glBufferSubData(GL_ARRAY_BUFFER, byte_offset, byte_length, data);
+          }
         }
       }
     }
@@ -150,6 +159,11 @@ main()
       int buffer_offset = 0;
       for (i = 0; i < ROA_ARR_COUNT(vertex_desc); ++i)
       {
+        if(vertex_desc[i] < 0)
+        {
+          continue;
+        }
+
         struct gltf_accessor accessor = gltf.accessors[vertex_desc[i]];
 
         GLenum comp_type = accessor.component_type;
