@@ -51,6 +51,55 @@ json_to_str(struct json_value_s *val)
 
 
 void
+gltf_nodes(struct json_value_s *nodes, struct gltf_import *out_import)
+{
+  /* param check */
+  ROA_ASSERT(nodes);
+  ROA_ASSERT(out_import);
+  ROA_ASSERT(nodes->type == json_type_array);
+
+  struct json_array_s *node_arr = (struct json_array_s*)nodes->payload;
+  struct json_array_element_s *node_arr_ele = (struct json_array_element_s*)node_arr->start;
+
+  while (node_arr_ele != ROA_NULL)
+  {
+    struct gltf_node node;
+    ROA_MEM_ZERO(node);
+    node.mesh = -1;
+
+    struct json_value_s *acc_val = (struct json_value_s*)node_arr_ele->value;
+    struct json_object_s *attr_obj = (struct json_object_s*)acc_val->payload;
+    struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
+
+    while (attr_ele != ROA_NULL)
+    {
+      if (json_attr_is_called(attr_ele, "mesh")) {
+        node.mesh = json_to_int(attr_ele->value);
+      }
+      else if (json_attr_is_called(attr_ele, "name")) {
+        const char *name = json_to_str(attr_ele->value);
+        int len = strlen(name) + 1;
+        roa_array_create_with_capacity(node.name, len);
+        roa_array_resize(node.name, len);
+        memcpy(node.name, name, len);
+      }
+      else if (json_attr_is_called(attr_ele, "children")) {
+      }
+      else if (json_attr_is_called(attr_ele, "translation")) {
+      }
+      else if (json_attr_is_called(attr_ele, "rotation")) {
+      }
+
+
+      attr_ele = attr_ele->next;
+    }
+
+    node_arr_ele = node_arr_ele->next;
+  }
+}
+
+
+void
 gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
 {
   /* param check */
@@ -238,10 +287,11 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
 
             buffer.uri_data = data;
 
-            len = strlen(embedded[i]) + 1;
+            len = strlen(embedded[i]);
             roa_array_create_with_capacity(buffer.uri, len);
             roa_array_resize(buffer.uri, len);
             memcpy(buffer.uri, embedded[i], len);
+            buffer.uri[len - 1] = '\0';
           }
         }
       }
@@ -525,7 +575,7 @@ gltf_import(const char *filename, struct gltf_import *out_import)
         /* ----------------------------------------------------- [ nodes ] -- */
 
         else if (strcmp(root_name->string, "nodes") == 0) {
-          printf("nodes\n");
+          gltf_nodes(root_obj_ele->value, out_import);
         }
 
         /* next item */

@@ -135,10 +135,19 @@ struct gltf_mesh
 
 struct gltf_node
 {
-  char name[64];
-  float rotation[4];
-  float translation[3];
-  float scale[3];
+  char *name;
+
+  float *rotation;
+  int rotation_count;
+
+  float *translation;
+  int transloation_count;
+
+  float *scale;
+  int scale_count;
+
+  int *children;
+  int child_count;
 
   int mesh;
 };
@@ -157,6 +166,9 @@ struct gltf_import
 
   struct gltf_mesh *meshes;
   int mesh_count;
+
+  struct gltf_nodes *nodes;
+  int node_count;
 };
 
 

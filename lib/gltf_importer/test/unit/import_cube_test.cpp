@@ -110,6 +110,11 @@ TEST_CASE("Cube Import")
     REQUIRE(strcmp(import_scene.buffers[0].uri, "data:application/octet-stream;base64") == 0);
   }
 
+  SECTION("Nodes")
+  {
+    
+  }
+
   SECTION("Meshes")
   {
     REQUIRE(import_scene.mesh_count == 1);
