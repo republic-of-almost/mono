@@ -152,7 +152,7 @@ platform_render(roa_renderer_ctx_t ctx)
     /* decals */
     {
       glrPushMarkerGroup("Decals");
-
+      
       glUseProgram(gfx_api->decal.program);
     
       glDisable(GL_DEPTH_TEST);
@@ -200,39 +200,26 @@ platform_render(roa_renderer_ctx_t ctx)
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
       
-      roa_transform decal_transforms[5];
-      decal_transforms[0].position = roa_float3_set_with_values(3,0,3);
-      decal_transforms[0].scale = roa_float3_set_with_values(8, 2, 4);
-      decal_transforms[0].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(1,2,3,4));
+
+      int decal_count = ctx->renderer_desc.mesh_rdr_descs[0].decals_lod0_count;
+      struct roa_renderer_decal *decals = ctx->renderer_desc.mesh_rdr_descs[0].decals_lod0;
       
-      decal_transforms[1].position = roa_float3_set_with_values(-3, 0, 3);
-      decal_transforms[1].scale = roa_float3_set_with_values(2, 2, 4);
-      decal_transforms[1].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(1, 9, 3, 4));
-
-      decal_transforms[2].position = roa_float3_set_with_values(-3, 0, -3);
-      decal_transforms[2].scale = roa_float3_set_with_values(2, 2, 4);
-      decal_transforms[2].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(7, 7, 3, 4));
-
-      decal_transforms[3].position = roa_float3_set_with_values(-2, 0, 3);
-      decal_transforms[3].scale = roa_float3_set_with_values(2, 2, 4);
-      decal_transforms[3].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(5, 2, 3, 4));
-
-      decal_transforms[4].position = roa_float3_set_with_values(-1, 0, -3);
-      decal_transforms[4].scale = roa_float3_set_with_values(2, 2, 4);
-      decal_transforms[4].rotation = roa_quaternion_normalize(roa_quaternion_set_with_values(1, 6, 3, 4));
-
-      int decal_count = ROA_ARR_COUNT(decal_transforms);
       for(k = 0; k < decal_count; ++k)
       {
-        roa_transform *tra = &decal_transforms[k];
+        struct roa_renderer_decal *decal = &decals[k];
 
         /* sort */
         roa_mat4 id, world, scale, position, inv_world;
 
+        roa_transform decal_transform;
+        decal_transform.position  = roa_float3_import(decal->position);
+        decal_transform.scale     = roa_float3_import(decal->scale);
+        decal_transform.rotation  = roa_quaternion_import(decal->rotation);
+
         roa_mat4_id(&id);
-        roa_mat4_translate(&position, tra->position);
-        roa_mat4_scale(&scale, tra->scale);
-        roa_transform_to_mat4(&decal_transforms[k], &world);
+        roa_mat4_translate(&position, decal_transform.position);
+        roa_mat4_scale(&scale, decal_transform.scale);
+        roa_transform_to_mat4(&decal_transform, &world);
         roa_mat4_inverse(&inv_world, &world);
 
         roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;

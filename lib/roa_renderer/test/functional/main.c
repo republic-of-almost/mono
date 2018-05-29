@@ -150,6 +150,22 @@ main()
         struct roa_renderer_mesh_renderable renderable;
         ROA_MEM_ZERO(renderable);
 
+        struct roa_renderer_decal decal;
+        decal.position[0] = 0;
+        decal.position[1] = 0;
+        decal.position[2] = 0;
+        decal.scale[1] = 1;
+        decal.scale[1] = 1;
+        decal.scale[1] = 1;
+        decal.rotation[0] = 0;
+        decal.rotation[0] = 0;
+        decal.rotation[0] = 0;
+        decal.rotation[1] = 1;
+
+        renderable.decals_lod0 = &decal;
+        renderable.decals_lod0_count = 1;
+
+
         uint32_t obj_id = ++object_id_counter;
 
         roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);

@@ -41,6 +41,16 @@ roa_renderer_mesh_renderable_set(
       {
         result = ROA_TRUE;
 
+        struct roa_renderer_mesh_renderable copy;
+        ROA_MEM_ZERO(copy);
+
+        /* need free / malloc array data - this sucks */
+
+        copy.mesh_id = renderable->mesh_id;
+        copy.decals_lod0_count = renderable->decals_lod0_count;
+        memcpy(copy.world_transform, renderable->world_transform, sizeof(copy.world_transform));
+        memcpy(copy.decals_lod0, renderable->decals_lod0, sizeof(copy.decals_lod0[0]) * copy.decals_lod0_count);
+
         ctx->renderer_desc.mesh_rdr_descs[i] = *renderable;
 
         roa_spin_lock_release(&ctx->renderer_desc.lock);
@@ -51,6 +61,8 @@ roa_renderer_mesh_renderable_set(
 
   /* insert new one */
   result = ROA_TRUE;
+
+  /* need to copy array data */
 
   roa_array_push(ctx->renderer_desc.mesh_rdr_ids, renderable_id);
   roa_array_push(ctx->renderer_desc.mesh_rdr_descs, *renderable);
