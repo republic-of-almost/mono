@@ -12,7 +12,6 @@ TEST_CASE("Mesh Renderer")
   struct roa_renderer_mesh_renderable mesh_desc;
   ROA_MEM_ZERO(mesh_desc);
 
-  mesh_desc.material_id = 1;
   mesh_desc.mesh_id = 2;
   mesh_desc.world_transform[0] = 3;
   mesh_desc.world_transform[1] = 4;
@@ -45,7 +44,6 @@ TEST_CASE("Mesh Renderer")
     struct roa_renderer_mesh_renderable get_desc {};
     ROA_BOOL get_success = roa_renderer_mesh_renderable_get(ctx, &get_desc, rdr_id);
     REQUIRE(get_success == ROA_TRUE);
-    REQUIRE(get_desc.material_id == get_desc.material_id);
     REQUIRE(get_desc.mesh_id == get_desc.mesh_id);
     REQUIRE(get_desc.world_transform[0] == mesh_desc.world_transform[0]);
     REQUIRE(get_desc.world_transform[1] == mesh_desc.world_transform[1]);

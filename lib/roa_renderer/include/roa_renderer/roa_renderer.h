@@ -211,6 +211,18 @@ struct roa_renderer_mesh_renderable
 
 
 ROA_BOOL
+roa_renderer_mesh_renderable_create(
+  roa_renderer_ctx_t ctx,
+  uint32_t renderable_id);
+
+
+ROA_BOOL
+roa_renderer_mesh_renderable_destroy(
+  roa_renderer_ctx_t ctx,
+  uint32_t renderable_id);
+
+
+ROA_BOOL
 roa_renderer_mesh_renderable_set(
   roa_renderer_ctx_t ctx,
   struct roa_renderer_mesh_renderable *renderable,
@@ -239,6 +251,7 @@ ROA_BOOL
 roa_renderer_mesh_renderable_exists(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id);
+
 
 /* ----------------------------------------------- [ Material Resources ] -- */
 

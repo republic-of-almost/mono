@@ -14,7 +14,23 @@
 #endif
 
 
-/* -- [ Raw Data ] -- */
+/* --------------------------------------------- [ Internal Structures ] -- */
+
+
+struct renderer_mesh_renderable
+{
+  float world_transform[16];
+};
+
+
+struct renderer_camera
+{
+  int i;
+};
+
+
+
+/* --------------------------------------------- [ Raw Data ] -- */
 
 
 struct renderer_data_desc
