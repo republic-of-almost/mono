@@ -16,18 +16,18 @@ platform_render(roa_renderer_ctx_t ctx)
 {
   /* param check */
   ROA_ASSERT(ctx);
-  
+
   struct graphics_api *gfx_api = &ctx->graphics_api;
-  
+
   /* setup */
   {
     glBindVertexArray(gfx_api->vao);
-    
+
     GLsizei vp_width = ctx->device_settings.device_viewport[0];
     GLsizei vp_height = ctx->device_settings.device_viewport[1];
     glViewport(0, 0, vp_width, vp_height);
   }
-  
+
   if(OGL4_ERROR_CHECKS)
   {
     GLuint err = glGetError();
@@ -35,7 +35,7 @@ platform_render(roa_renderer_ctx_t ctx)
       ROA_ASSERT(0);
     }
   }
-  
+
   /* renderpasses */
   int rp_count = roa_array_size(ctx->renderpass.rps);
   int i;
@@ -44,15 +44,15 @@ platform_render(roa_renderer_ctx_t ctx)
   {
     struct renderpass *rp = &ctx->renderpass.rps[i];
     int dc_count = roa_array_size(rp->draw_calls);
-    
+
     /* fill buffer */
     {
       char buffer[128];
       memset(buffer, 0, sizeof(buffer));
       sprintf(buffer, "GBuffer:Fill - Cam %d - DCs %d", i, dc_count);
-      
+
       glrPushMarkerGroup(buffer);
-      
+
       struct ogl_gbuffer gbuffer = gfx_api->gbuffer;
       struct ogl_gbuffer_fill_pass fill = gfx_api->gbuffer_fill;
 
@@ -80,7 +80,7 @@ platform_render(roa_renderer_ctx_t ctx)
       for (j = 0; j < dc_count; ++j)
       {
         struct renderpass_draw_call dc = rp->draw_calls[j];
-        
+
         if (ctx->graphics_api.meshes[0].ibo)
         {
           glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
@@ -98,12 +98,12 @@ platform_render(roa_renderer_ctx_t ctx)
         for(k = 0; k < input_count; ++k)
         {
           struct ogl_vertex_input input = gfx_api->gbuffer_fill.input[k];
-          
+
           if(input.loc < 0)
           {
             continue;
           }
-          
+
           glEnableVertexAttribArray(input.loc);
           glVertexAttribPointer(
             input.loc,
@@ -113,14 +113,14 @@ platform_render(roa_renderer_ctx_t ctx)
             input.size,
             input.ptr);
         }
-        
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gfx_api->tex);
         glUniform1i(fill.uni_diffuse, 0);
 
         glUniformMatrix4fv(fill.uni_wvp, 1, GL_FALSE, dc.wvp);
         glUniformMatrix4fv(fill.uni_world, 1, GL_FALSE, dc.world);
-        
+
         if(ctx->graphics_api.meshes[0].ibo)
         {
           GLsizei count = ctx->graphics_api.meshes[0].index_count;
@@ -138,7 +138,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glrPopMarkerGroup();
     }
-    
+
     if(OGL4_ERROR_CHECKS)
     {
       GLuint err = glGetError();
@@ -146,15 +146,15 @@ platform_render(roa_renderer_ctx_t ctx)
         ROA_ASSERT(0);
       }
     }
-    
+
     glFinish();
-    
+
     /* decals */
     {
       glrPushMarkerGroup("Decals");
-      
+
       glUseProgram(gfx_api->decal.program);
-    
+
       glDisable(GL_DEPTH_TEST);
       glDisable(GL_STENCIL_TEST);
 
@@ -168,7 +168,7 @@ platform_render(roa_renderer_ctx_t ctx)
       };
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
-      
+
       glBindBuffer(GL_ARRAY_BUFFER, gfx_api->decal.vbo);
 
       /* input format */
@@ -177,7 +177,7 @@ platform_render(roa_renderer_ctx_t ctx)
       for(k = 0; k < input_count; ++k)
       {
         struct ogl_vertex_input input = gfx_api->decal.input[k];
-        
+
         if(input.loc < 0) {
           continue;
         }
@@ -195,15 +195,14 @@ platform_render(roa_renderer_ctx_t ctx)
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[0]);
       glUniform1i(gfx_api->decal.uni_world_pos, 0);
-      
+
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
-      
 
       int decal_count = ctx->renderer_desc.mesh_rdr_descs[0].decals_lod0_count;
       struct roa_renderer_decal *decals = ctx->renderer_desc.mesh_rdr_descs[0].decals_lod0;
-      
+
       for(k = 0; k < decal_count; ++k)
       {
         struct roa_renderer_decal *decal = &decals[k];
@@ -224,14 +223,14 @@ platform_render(roa_renderer_ctx_t ctx)
 
         roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;
         roa_mat4_import(&view_proj, rp->camera.view_projection);
-      
+
         roa_mat4_import(&proj, rp->camera.projection);
         roa_mat4_import(&view, rp->camera.view);
-      
+
         roa_mat4 inv_view, inv_proj;
         roa_mat4_inverse(&inv_view, &view);
         roa_mat4_inverse(&inv_proj, &proj);
-            
+
         roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
 //        roa_mat4_multiply(&proj_view, &proj, &view);
 //        roa_mat4_multiply(&proj_view, &view, &proj);
@@ -240,7 +239,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
         roa_mat4 wvp;
         roa_mat4_multiply(&wvp, &world, &view_proj);
-      
+
         glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera.view);
         glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
         glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
@@ -253,7 +252,7 @@ platform_render(roa_renderer_ctx_t ctx)
       glrPopMarkerGroup();
     }
   } /* rps */
-  
+
   if(OGL4_ERROR_CHECKS)
   {
     GLuint err = glGetError();
@@ -261,7 +260,7 @@ platform_render(roa_renderer_ctx_t ctx)
       ROA_ASSERT(0);
     }
   }
-  
+
   glFinish();
 
   /* blit to screen */
@@ -270,7 +269,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glUseProgram(ctx->graphics_api.blit.program);
-    
+
     glClearColor(1, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -300,12 +299,12 @@ platform_render(roa_renderer_ctx_t ctx)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[1]);
     glUniform1i(gfx_api->blit.uni_blit_src, 0);
-    
+
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glrPopMarkerGroup();
   }
-  
+
   if(OGL4_ERROR_CHECKS)
   {
     GLuint err = glGetError();

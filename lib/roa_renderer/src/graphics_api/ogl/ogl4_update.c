@@ -12,7 +12,7 @@ platform_update(roa_renderer_ctx_t ctx)
 {
   int pending_meshes = roa_array_size(ctx->resource_desc.mesh_pending_ids);
   int pending_textures = roa_array_size(ctx->resource_desc.texture_pending_ids);
-  
+
   /* load meshes */
   if(pending_meshes > 0)
   {
@@ -22,14 +22,14 @@ platform_update(roa_renderer_ctx_t ctx)
     GLuint *vbos = 0;
     roa_array_create_with_capacity(vbos, count);
     roa_array_resize(vbos, count);
-    
+
     GLuint *ibos = 0;
     roa_array_create_with_capacity(ibos, count);
     roa_array_resize(ibos, count);
-    
+
     glGenBuffers(count, vbos);
     glGenBuffers(count, ibos);
-    
+
     struct roa_renderer_mesh_resource *pending = ctx->resource_desc.mesh_rsrc_pending_data;
     uint64_t *pending_ids = ctx->resource_desc.mesh_pending_ids;
 
@@ -46,7 +46,7 @@ platform_update(roa_renderer_ctx_t ctx)
         float *data = 0;
         roa_array_create_with_capacity(data, element_count * pending[i].vertex_count);
         roa_array_resize(data, element_count * pending[i].vertex_count);
-        
+
         int j;
         int offset = 0;
 
@@ -104,7 +104,7 @@ platform_update(roa_renderer_ctx_t ctx)
           }
         }
       }
-      
+
       /* ibo */
       if(pending[i].index_count)
       {
@@ -179,8 +179,6 @@ platform_update(roa_renderer_ctx_t ctx)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-      glGenerateMipmap(GL_TEXTURE_2D);
-
       if (OGL4_ERROR_CHECKS)
       {
         GLuint err = glGetError();
@@ -197,6 +195,8 @@ platform_update(roa_renderer_ctx_t ctx)
 
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pending[i].width, pending[i].height, 0, GL_RGB,
         GL_UNSIGNED_BYTE, pending[i].data);
+
+      glGenerateMipmap(GL_TEXTURE_2D);
 
       ctx->graphics_api.tex = textures[i];
 

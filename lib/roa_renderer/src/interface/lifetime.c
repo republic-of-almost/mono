@@ -41,7 +41,6 @@ roa_renderer_ctx_create(
 
     roa_spin_lock_init(&new_ctx->resource_desc.lock);
     roa_spin_lock_aquire(&new_ctx->resource_desc.lock);
-    
 
     /* device settings */
     {
@@ -50,7 +49,6 @@ roa_renderer_ctx_create(
 
       roa_spin_lock_release(&new_ctx->device_settings.lock);
     }
-
 
     /* renderer_desc */
     {
@@ -130,7 +128,7 @@ roa_renderer_ctx_destroy(
 
       roa_array_destroy(kill_ctx->renderer_desc.mesh_rdr_ids);
       roa_array_destroy(kill_ctx->renderer_desc.mesh_rdr_descs);
-      
+
       roa_array_destroy(kill_ctx->renderer_desc.light_ids);
       roa_array_destroy(kill_ctx->renderer_desc.light_descs);
     }

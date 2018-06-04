@@ -61,11 +61,11 @@ main()
     ROA_MEM_ZERO(gltf);
 
     gltf_import(import_file, &gltf);
-    
+
 		struct roa_renderer_mesh_resource mesh_rsrc;
     ROA_MEM_ZERO(mesh_rsrc);
 		mesh_rsrc.name = gltf.meshes[0].name;
-    
+
     int pos = gltf.meshes[0].primitives[0].attributes.POSITION;
     int pos_view = gltf.accessors[pos].buffer_view;
     int pos_buffer = gltf.buffer_views[pos_view].buffer;
@@ -112,7 +112,7 @@ main()
     struct roa_renderer_texture_resource texture_rsrc;
     ROA_MEM_ZERO(texture_rsrc);
     texture_rsrc.name = "TestTexture";
-   
+
     unsigned bytes = 0;
     unsigned *raw_png = texture_png_data_blender_1(&bytes);
 
@@ -211,7 +211,7 @@ main()
         final_rot,
         roa_transform_world_left());
       rot_pos = roa_float3_scale(rot_pos, 60.f);
-      
+
       struct roa_renderer_camera camera;
       ROA_MEM_ZERO(camera);
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
@@ -221,7 +221,7 @@ main()
 
       float x = roa_float_sin(spin) * radius;
       float y = radius - (radius / ROA_G_RATIO);
-      float z = roa_float_cos(spin) * radius; 
+      float z = roa_float_cos(spin) * radius;
 
       roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at   = roa_float3_fill_with_value(0.f);

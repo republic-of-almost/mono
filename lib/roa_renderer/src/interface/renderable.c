@@ -41,7 +41,7 @@ roa_renderer_mesh_renderable_create(
   }
 
   /* need to copy array data */
-  
+
   struct renderer_mesh_renderable renderable;
   ROA_MEM_ZERO(renderable);
 
@@ -49,7 +49,7 @@ roa_renderer_mesh_renderable_create(
   roa_array_push(ctx->renderer_desc.mesh_rdr_descs, renderable);
 
   roa_spin_lock_release(&ctx->renderer_desc.lock);
-  
+
   return ROA_TRUE;
 }
 
@@ -82,13 +82,13 @@ roa_renderer_mesh_renderable_destroy(
       {
         roa_array_erase(ctx->renderer_desc.mesh_rdr_descs, i);
         roa_array_erase(ctx->renderer_desc.mesh_rdr_ids, i);
-        
+
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return ROA_TRUE;
       }
     }
   }
-  
+
   roa_spin_lock_release(&ctx->renderer_desc.lock);
   return ROA_FALSE;
 }
@@ -104,7 +104,7 @@ roa_renderer_mesh_renderable_transform_set(
   ROA_ASSERT(ctx);
   ROA_ASSERT(renderable_id);
   ROA_ASSERT(transform);
- 
+
   if (!ctx || !renderable_id || !transform)
   {
     return ROA_FALSE;
@@ -122,17 +122,17 @@ roa_renderer_mesh_renderable_transform_set(
     {
       if (ids[i] == renderable_id)
       {
-        int size = sizeof(ctx->renderer_desc.mesh_rdr_descs[i]);
-        void *dst = &ctx->renderer_desc.mesh_rdr_descs[i];
-        
+        int size = sizeof(ctx->renderer_desc.mesh_rdr_descs[i].world_transform);
+        void *dst = &ctx->renderer_desc.mesh_rdr_descs[i].world_transform;
+
         memset(dst, transform, size);
-        
+
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return ROA_TRUE;
       }
     }
   }
-  
+
   roa_spin_lock_release(&ctx->renderer_desc.lock);
   return ROA_FALSE;
 }
@@ -148,7 +148,7 @@ roa_renderer_mesh_renderable_transform_get(
   ROA_ASSERT(ctx);
   ROA_ASSERT(renderable_id);
   ROA_ASSERT(out_transform);
- 
+
   if (!ctx || !renderable_id || !out_transform)
   {
     return ROA_FALSE;
@@ -166,16 +166,16 @@ roa_renderer_mesh_renderable_transform_get(
     {
       if (ids[i] == renderable_id)
       {
-        int size = sizeof(ctx->renderer_desc.mesh_rdr_descs[i]);
-        void *src = &ctx->renderer_desc.mesh_rdr_descs[i];
-        
+        int size = sizeof(ctx->renderer_desc.mesh_rdr_descs[i].world_transform);
+        void *src = &ctx->renderer_desc.mesh_rdr_descs[i].world_transform;
+
         memset(out_transform, src, size);
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return ROA_TRUE;
       }
     }
   }
-  
+
   roa_spin_lock_release(&ctx->renderer_desc.lock);
   return ROA_FALSE;
 }
@@ -187,7 +187,7 @@ roa_renderer_mesh_renderable_count(
 {
   /* param check */
   ROA_ASSERT(ctx);
-  
+
   unsigned count = 0;
 
   {
