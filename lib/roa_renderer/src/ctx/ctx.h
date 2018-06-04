@@ -14,12 +14,17 @@
 #endif
 
 
-/* --------------------------------------------- [ Internal Structures ] -- */
+/* ----------------------------------------------- [ Internal Structures ] -- */
 
 
 struct renderer_mesh_renderable
 {
   float world_transform[16];
+  
+  uint64_t mesh_id;
+  
+  struct roa_renderer_decal *decals_lod0;
+  unsigned decals_lod0_count;
 };
 
 
@@ -30,7 +35,7 @@ struct renderer_camera
 
 
 
-/* --------------------------------------------- [ Raw Data ] -- */
+/* ---------------------------------------------------------- [ Raw Data ] -- */
 
 
 struct renderer_data_desc
@@ -41,7 +46,7 @@ struct renderer_data_desc
   /* array */ struct roa_renderer_camera *camera_descs;
 
   /* array */ uint32_t *mesh_rdr_ids;
-  /* array */ struct roa_renderer_mesh_renderable *mesh_rdr_descs;
+  /* array */ struct renderer_mesh_renderable *mesh_rdr_descs;
 
   /* array */ uint32_t *light_ids;
   /* array */ struct roa_renderer_light *light_descs;

@@ -55,7 +55,7 @@ main()
     ROA_MEM_ZERO(import_file);
 
     strcat(import_file, roa_exe_dir());
-    strcat(import_file, "assets/plane_trainer.gltf");
+    strcat(import_file, "assets/cube.gltf");
 
     struct gltf_import gltf;
     ROA_MEM_ZERO(gltf);
@@ -147,28 +147,9 @@ main()
 
       for(i = 0; i < renderable_count; ++i)
       {
-        struct roa_renderer_mesh_renderable renderable;
-        ROA_MEM_ZERO(renderable);
-
-        struct roa_renderer_decal decal;
-        decal.position[0] = 0;
-        decal.position[1] = 0;
-        decal.position[2] = 0;
-        decal.scale[1] = 1;
-        decal.scale[1] = 1;
-        decal.scale[1] = 1;
-        decal.rotation[0] = 0;
-        decal.rotation[0] = 0;
-        decal.rotation[0] = 0;
-        decal.rotation[1] = 1;
-
-        renderable.decals_lod0 = &decal;
-        renderable.decals_lod0_count = 1;
-
-
         uint32_t obj_id = ++object_id_counter;
 
-        roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
+        roa_renderer_mesh_renderable_create(renderer_ctx, obj_id);
       }
     }
   }
@@ -265,10 +246,6 @@ main()
       {
         uint32_t obj_id = i + 2;
 
-        struct roa_renderer_mesh_renderable renderable;
-        ROA_MEM_ZERO(renderable);
-        roa_renderer_mesh_renderable_get(renderer_ctx, &renderable, obj_id);
-
         if(renderable_count > 1)
         {
           float x = roa_float_sin(((float)i * increment)) * radius;
@@ -280,9 +257,10 @@ main()
           transform.rotation = roa_quaternion_default();
           transform.scale    = roa_float3_set_with_values(1, y, 1);
 
-          roa_transform_export_mat4(&transform, renderable.world_transform);
+          float export[16];
+          roa_transform_export_mat4(&transform, export);
 
-          roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
+          roa_renderer_mesh_renderable_transform_set(renderer_ctx, obj_id, export);
         }
         else
         {
@@ -297,9 +275,10 @@ main()
           transform.rotation = roa_quaternion_default();
           transform.scale    = roa_float3_set_with_values(width, width, width);
 
-          roa_transform_export_mat4(&transform, renderable.world_transform);
+          float export[16];
+          roa_transform_export_mat4(&transform, export);
 
-          roa_renderer_mesh_renderable_set(renderer_ctx, &renderable, obj_id);
+          roa_renderer_mesh_renderable_transform_set(renderer_ctx, obj_id, export);
         }
       }
     }

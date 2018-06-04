@@ -199,15 +199,15 @@ struct roa_renderer_decal
 };
 
 
-struct roa_renderer_mesh_renderable
-{
-  float world_transform[16];
-
-  uint64_t mesh_id;
-
-  struct roa_renderer_decal *decals_lod0;
-  unsigned decals_lod0_count;
-};
+//struct roa_renderer_mesh_renderable
+//{
+//  float world_transform[16];
+//
+//  uint64_t mesh_id;
+//
+//  struct roa_renderer_decal *decals_lod0;
+//  unsigned decals_lod0_count;
+//};
 
 
 ROA_BOOL
@@ -223,24 +223,18 @@ roa_renderer_mesh_renderable_destroy(
 
 
 ROA_BOOL
-roa_renderer_mesh_renderable_set(
+roa_renderer_mesh_renderable_transform_set(
   roa_renderer_ctx_t ctx,
-  struct roa_renderer_mesh_renderable *renderable,
-  uint32_t renderable_id);
+  uint32_t renderable_id,
+  float *transform);
 
 
 ROA_BOOL
-roa_renderer_mesh_renderable_get(
+roa_renderer_mesh_renderable_transform_get(
   roa_renderer_ctx_t ctx,
-  struct roa_renderer_mesh_renderable *out_renderable,
-  uint32_t renderable_id);
-
-
-ROA_BOOL
-roa_renderer_mesh_renderable_clear(
-  roa_renderer_ctx_t ctx,
-  uint32_t renderable_id);
-
+  uint32_t renderable_id,
+  float *out_transform);
+  
 
 unsigned
 roa_renderer_mesh_renderable_count(
