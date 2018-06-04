@@ -123,9 +123,9 @@ roa_renderer_mesh_renderable_transform_set(
       if (ids[i] == renderable_id)
       {
         int size = sizeof(ctx->renderer_desc.mesh_rdr_descs[i].world_transform);
-        void *dst = &ctx->renderer_desc.mesh_rdr_descs[i].world_transform;
+        void *dst = ctx->renderer_desc.mesh_rdr_descs[i].world_transform;
 
-        memset(dst, transform, size);
+        memcpy(dst, transform, size);
 
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return ROA_TRUE;
@@ -167,9 +167,9 @@ roa_renderer_mesh_renderable_transform_get(
       if (ids[i] == renderable_id)
       {
         int size = sizeof(ctx->renderer_desc.mesh_rdr_descs[i].world_transform);
-        void *src = &ctx->renderer_desc.mesh_rdr_descs[i].world_transform;
+        void *src = ctx->renderer_desc.mesh_rdr_descs[i].world_transform;
 
-        memset(out_transform, src, size);
+        memcpy(out_transform, src, size);
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return ROA_TRUE;
       }

@@ -55,7 +55,8 @@ main()
     ROA_MEM_ZERO(import_file);
 
     strcat(import_file, roa_exe_dir());
-    strcat(import_file, "assets/cube.gltf");
+    //strcat(import_file, "assets/gltf_test/cube.gltf");
+    strcat(import_file, "assets/plane_trainer.gltf");
 
     struct gltf_import gltf;
     ROA_MEM_ZERO(gltf);
@@ -92,7 +93,6 @@ main()
     float a = texc_fdata[0];
 
     mesh_rsrc.texture_coord_vec2_array = texc_fdata;
-;
 
     mesh_rsrc.vertex_count = gltf.accessors[pos].count;
 
@@ -104,8 +104,8 @@ main()
     mesh_rsrc.index_array = (unsigned int*)&gltf.buffers[index_buffer].uri_data[index_offset];
     mesh_rsrc.index_count = gltf.accessors[index_view].count;
 
-		cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
-	}
+    cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
+  }
 
   /* setup texture */
   {
