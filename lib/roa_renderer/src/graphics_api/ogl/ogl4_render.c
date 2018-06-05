@@ -121,11 +121,13 @@ platform_render(roa_renderer_ctx_t ctx)
         glUniformMatrix4fv(fill.uni_wvp, 1, GL_FALSE, dc.wvp);
         glUniformMatrix4fv(fill.uni_world, 1, GL_FALSE, dc.world);
 
+
         if(ctx->graphics_api.meshes[0].ibo)
         {
           GLsizei count = ctx->graphics_api.meshes[0].index_count;
+          GLenum type = ctx->graphics_api.meshes[0].index_type;
 
-          glDrawElements(GL_TRIANGLES, count, ctx->graphics_api.meshes[0].index_type, 0);
+          glDrawElements(GL_TRIANGLES, count, type, 0);
         }
         else
         {
@@ -138,7 +140,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
       glrPopMarkerGroup();
     }
-
+    
     if(OGL4_ERROR_CHECKS)
     {
       GLuint err = glGetError();

@@ -126,7 +126,7 @@ platform_update(roa_renderer_ctx_t ctx)
           }
         }
 
-        unsigned buffer_size = sizeof(pending[i].index_array[0]) * pending[i].index_count;
+        unsigned buffer_size = gl_type_size(roa_to_gl(pending[i].index_type)) * pending[i].index_count;
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_size, pending[i].index_array, GL_STATIC_DRAW);
 
         if (OGL4_ERROR_CHECKS) {

@@ -51,4 +51,19 @@ GLenum roa_to_gl(int i)
 }
 
 
+GLsizei
+gl_type_size(GLenum i)
+{
+  switch (i)
+  {
+    case(GL_UNSIGNED_BYTE): return sizeof(GLubyte);
+    case(GL_UNSIGNED_INT): return sizeof(GLuint);
+    case(GL_UNSIGNED_SHORT): return sizeof(GLushort);
+  }
+
+  ROA_ASSERT(0);
+  return 0;
+}
+
+
 #endif /* api guard */

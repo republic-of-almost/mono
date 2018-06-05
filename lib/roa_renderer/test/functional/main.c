@@ -72,8 +72,8 @@ main()
     ROA_MEM_ZERO(import_file);
 
     strcat(import_file, roa_exe_dir());
-    strcat(import_file, "assets/cube.gltf");
-    //strcat(import_file, "assets/plane_trainer.gltf");
+    //strcat(import_file, "assets/cube.gltf");
+    strcat(import_file, "assets/plane_trainer.gltf");
 
     struct gltf_import gltf;
     ROA_MEM_ZERO(gltf);

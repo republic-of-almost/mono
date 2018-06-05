@@ -60,6 +60,7 @@ roa_renderer_mesh_resource_add(
     copy.texture_coord_vec2_array = rdr_alloc_copy((void*)rsrc->texture_coord_vec2_array, sizeof(float) * (rsrc->vertex_count * 2));
     copy.vertex_count             = rsrc->vertex_count;
 
+    copy.index_type = rsrc->index_type;
     copy.index_array = rdr_alloc_copy((void*)rsrc->index_array, sizeof(unsigned) * (rsrc->index_count));
     copy.index_count = rsrc->index_count;
 
