@@ -18,6 +18,13 @@ typedef struct roa_renderer_ctx * roa_renderer_ctx_t;
 typedef void*(*roa_renderer_alloc)(unsigned bytes);
 typedef void(*roa_renderer_free)(void *addr);
 
+#define ROA_RENDERER_TYPE_BYTE 1
+#define ROA_RENDERER_TYPE_UBYTE 2
+#define ROA_RENDERER_TYPE_SHORT 3
+#define ROA_RENDERER_TYPE_USHORT 4
+#define ROA_RENDERER_TYPE_UINT 5
+#define ROA_RENDERER_TYPE_FLOAT 7
+
 
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
@@ -234,7 +241,7 @@ roa_renderer_mesh_renderable_transform_get(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id,
   float *out_transform);
-  
+
 
 unsigned
 roa_renderer_mesh_renderable_count(
@@ -274,7 +281,8 @@ struct roa_renderer_mesh_resource
   float *texture_coord_vec2_array;
   unsigned vertex_count;
 
-  unsigned *index_array;
+  void *index_type;
+  void *index_array;
   unsigned index_count;
 };
 

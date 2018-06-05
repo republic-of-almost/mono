@@ -144,6 +144,7 @@ platform_update(roa_renderer_ctx_t ctx)
 
       mesh.ibo = ibos[i];
       mesh.index_count = pending[i].index_count;
+      mesh.index_type = roa_to_gl(pending[i].index_type);
 
       mesh.vbo = vbos[i];
       mesh.vertex_count = pending[i].vertex_count;

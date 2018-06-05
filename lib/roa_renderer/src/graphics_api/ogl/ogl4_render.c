@@ -125,7 +125,7 @@ platform_render(roa_renderer_ctx_t ctx)
         {
           GLsizei count = ctx->graphics_api.meshes[0].index_count;
 
-          glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+          glDrawElements(GL_TRIANGLES, count, ctx->graphics_api.meshes[0].index_type, 0);
         }
         else
         {

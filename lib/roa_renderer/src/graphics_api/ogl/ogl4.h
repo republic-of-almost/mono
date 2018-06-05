@@ -33,11 +33,11 @@ struct ogl_gbuffer_dir_light
 struct ogl_gbuffer_fill_pass
 {
   GLuint program;
-  
+
   GLuint uni_wvp;
   GLuint uni_world;
   GLuint uni_diffuse;
-  
+
   struct ogl_vertex_input input[3];
 };
 
@@ -66,7 +66,7 @@ struct ogl_decal
   GLuint uni_world;
   GLuint uni_inv_projview;
   GLuint uni_inv_world;
-  
+
   struct ogl_vertex_input input[3];
 };
 
@@ -78,6 +78,7 @@ struct ogl_mesh
 
   GLuint ibo;
   int index_count;
+  GLenum index_type;
 };
 
 

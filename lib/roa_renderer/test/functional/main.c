@@ -28,6 +28,23 @@ float spin = 0.f;
 float pitch = 0.f;
 
 
+int
+gl_type_to_roa_renderer(int i)
+{
+  switch(i)
+  {
+    case(GLTF_COMPONENT_TYPE_BYTE):           return ROA_RENDERER_TYPE_BYTE;
+    case(GLTF_COMPONENT_TYPE_UNSIGNED_BYTE):  return ROA_RENDERER_TYPE_UBYTE;
+    case(GLTF_COMPONENT_TYPE_SHORT):          return ROA_RENDERER_TYPE_SHORT;
+    case(GLTF_COMPONENT_TYPE_UNSIGNED_SHORT): return ROA_RENDERER_TYPE_USHORT;
+    case(GLTF_COMPONENT_TYPE_UNSIGNED_INT):   return ROA_RENDERER_TYPE_UINT;
+    case(GLTF_COMPONENT_TYPE_FLOAT):          return ROA_RENDERER_TYPE_FLOAT;
+  }
+
+  return ROA_RENDERER_TYPE_UINT;
+}
+
+
 /* -------------------------------------------------------- [ Func Test ] -- */
 
 
@@ -55,8 +72,8 @@ main()
     ROA_MEM_ZERO(import_file);
 
     strcat(import_file, roa_exe_dir());
-    //strcat(import_file, "assets/gltf_test/cube.gltf");
-    strcat(import_file, "assets/plane_trainer.gltf");
+    strcat(import_file, "assets/cube.gltf");
+    //strcat(import_file, "assets/plane_trainer.gltf");
 
     struct gltf_import gltf;
     ROA_MEM_ZERO(gltf);
@@ -101,7 +118,8 @@ main()
     int index_buffer = gltf.buffer_views[index_view].buffer;
     int index_offset = gltf.buffer_views[index_view].byte_offset;
 
-    mesh_rsrc.index_array = (unsigned int*)&gltf.buffers[index_buffer].uri_data[index_offset];
+    mesh_rsrc.index_type = gl_type_to_roa_renderer(gltf.accessors[index_view].component_type);
+    mesh_rsrc.index_array = (void*)&gltf.buffers[index_buffer].uri_data[index_offset];
     mesh_rsrc.index_count = gltf.accessors[index_view].count;
 
     cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);

@@ -36,6 +36,8 @@ void glrPopMarkerGroup();
 
 void glrObjectLabel(GLenum type, GLuint item, const char *name);
 
+GLenum roa_to_gl(int i);
+
 
 #endif /* inc guard */
 
