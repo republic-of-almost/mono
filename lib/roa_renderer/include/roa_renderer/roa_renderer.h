@@ -75,6 +75,7 @@ roa_renderer_get_device_viewport(
 
 /* ------------------------------------------------------------ [ Camera ] -- */
 
+
 struct roa_renderer_camera
 {
   float near_plane;
@@ -117,71 +118,6 @@ ROA_BOOL
 roa_renderer_camera_exists(
   const roa_renderer_ctx_t ctx,
   uint32_t camera_id);
-
-
-/* ------------------------------------------------------------- [ Light ] -- */
-
-
-struct roa_renderer_point_light
-{
-  float position[3];
-};
-
-
-struct roa_renderer_directional_light
-{
-  float direction[3];
-};
-
-
-typedef enum _roa_renderer_light_type {
-  ROA_LIGHT_TYPE_POINT,
-  ROA_LIGHT_TYPE_DIR,
-} roa_renderer_light_type;
-
-
-struct roa_renderer_light
-{
-  roa_renderer_light_type light_type;
-
-  float color[3];
-
-  union roa_light_data {
-    struct roa_renderer_point_light point;
-    struct roa_renderer_directional_light directional;
-  } light_data;
-};
-
-
-ROA_BOOL
-roa_renderer_light_set(
-	roa_renderer_ctx_t ctx,
-	struct roa_renderer_light *light,
-	uint32_t light_id);
-
-
-ROA_BOOL
-roa_renderer_light_get(
-  roa_renderer_ctx_t ctx,
-  struct roa_renderer_light *out_light,
-  uint32_t light_id);
-
-
-ROA_BOOL
-roa_renderer_light_clear(
-  roa_renderer_ctx_t ctx,
-  uint32_t light_id);
-
-
-unsigned
-roa_renderer_light_count(
-  const roa_renderer_ctx_t ctx);
-
-
-ROA_BOOL
-roa_renderer_light_exists(
-  const roa_renderer_ctx_t ctx,
-  uint32_t light_id);
 
 
 /* --------------------------------------------------- [ Mesh Renderable ] -- */

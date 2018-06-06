@@ -77,9 +77,6 @@ setup_and_release_renderer_desc(
 				roa_array_create_with_capacity(rdr_data->mesh_rdr_ids, 256);
 				roa_array_create_with_capacity(rdr_data->mesh_rdr_descs, 256);
 
-				roa_array_create_with_capacity(rdr_data->light_ids, 64);
-				roa_array_create_with_capacity(rdr_data->light_descs, 64);
-
 				roa_spin_lock_release(&rdr_data->lock);
 }
 
@@ -99,9 +96,6 @@ lock_and_destroy_renderer_desc(
 
 				roa_array_destroy(rdr_data->mesh_rdr_ids);
 				roa_array_destroy(rdr_data->mesh_rdr_descs);
-
-				roa_array_destroy(rdr_data->light_ids);
-				roa_array_destroy(rdr_data->light_descs);
 }
 
 
