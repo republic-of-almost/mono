@@ -51,16 +51,6 @@ roa_renderer_ctx_destroy(
   roa_renderer_ctx_t *ctx);
 
 
-void
-roa_renderer_ctx_lock(
-  roa_renderer_ctx_t ctx);
-
-
-void
-roa_renderer_ctx_unlock(
-  roa_renderer_ctx_t ctx);
-
-
 /* ---------------------------------------------------------- [ Settings ] -- */
 
 

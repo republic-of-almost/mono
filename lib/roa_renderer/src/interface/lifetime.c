@@ -10,7 +10,7 @@
 #include <common/alloc.h>
 
 
-/* ----------------------------------------------------------- [ Helpers ] -- */
+/* -------------------------------------------- [ Create/Destroy Helpers ] -- */
 
 
 void
@@ -38,28 +38,28 @@ setup_and_lock(
 
 void
 setup_and_release_device_settings(
-				struct device_setting_data *dev_set)
+        struct device_setting_data *dev_set)
 {
-				/* param check */
-				ROA_ASSERT(dev_set);
+        /* param check */
+        ROA_ASSERT(dev_set);
 
-				roa_spin_lock_init(&dev_set->lock);
+        roa_spin_lock_init(&dev_set->lock);
 
-				dev_set->device_viewport[0] = 800;
-				dev_set->device_viewport[1] = 480;
+        dev_set->device_viewport[0] = 800;
+        dev_set->device_viewport[1] = 480;
 
-				roa_spin_lock_release(&dev_set->lock);
+        roa_spin_lock_release(&dev_set->lock);
 }
 
 
 void
 lock_and_destroy_device_settings(
-				struct device_setting_data *dev_set)
+        struct device_setting_data *dev_set)
 {
-				/* param check */
-				ROA_ASSERT(dev_set);
+        /* param check */
+        ROA_ASSERT(dev_set);
 
-
+        roa_spin_lock_aquire(&dev_set->lock);
 }
 
 
@@ -70,6 +70,7 @@ setup_and_release_renderer_desc(
 				/* param check */
 				ROA_ASSERT(rdr_data);
 
+        /* create */
 				roa_array_create_with_capacity(rdr_data->camera_ids, 5);
 				roa_array_create_with_capacity(rdr_data->camera_descs, 5);
 
@@ -90,6 +91,9 @@ lock_and_destroy_renderer_desc(
 				/* param check */
 				ROA_ASSERT(rdr_data);
 
+        roa_spin_lock_aquire(&rdr_data->lock);
+
+        /* destroy */
 				roa_array_destroy(rdr_data->camera_ids);
 				roa_array_destroy(rdr_data->camera_descs);
 
@@ -108,6 +112,7 @@ setup_and_release_resource_desc(
 				/* param check */
 				ROA_ASSERT(rsrc_data);
 
+        /* create */
 				roa_array_create_with_capacity(rsrc_data->material_ids, 32);
 				roa_array_create_with_capacity(rsrc_data->mat_descs, 32);
 
@@ -128,15 +133,57 @@ setup_and_release_resource_desc(
 
 
 void
+lock_and_destroy_resource_desc(
+        struct renderer_resource_data_desc *rsrc_data)
+{
+        /* param check */
+        ROA_ASSERT(rsrc_data);
+
+        roa_spin_lock_aquire(&rsrc_data->lock);
+
+        /* destroy */
+        roa_array_destroy(rsrc_data->material_ids);
+        roa_array_destroy(rsrc_data->mat_descs);
+
+        roa_array_destroy(rsrc_data->mesh_ids);
+        roa_array_destroy(rsrc_data->mesh_rsrc_data);
+
+        roa_array_destroy(rsrc_data->mesh_pending_ids);
+        roa_array_destroy(rsrc_data->mesh_rsrc_pending_data);
+
+        roa_array_destroy(rsrc_data->texture_ids);
+        roa_array_destroy(rsrc_data->texture_rsrc_data);
+
+        roa_array_destroy(rsrc_data->texture_pending_ids);
+        roa_array_destroy(rsrc_data->texture_rsrc_pending_data);
+}
+
+
+void
 setup_and_release_renderpass(
 				struct renderer_renderpass_data *rps)
 {
 				/* param check */
 				ROA_ASSERT(rps);
 
+        /* create */
 				roa_array_create_with_capacity(rps->rps, 4);
 
 				roa_spin_lock_release(&rps->lock);
+}
+
+
+void
+lock_and_destroy_renderpass(
+  struct renderer_renderpass_data *rps)
+{
+      /* param check */
+      ROA_ASSERT(rps);
+
+      roa_spin_lock_aquire(&rps->lock);
+
+      /* destroy */
+      roa_array_destroy(rps->rps);
 }
 
 
@@ -206,18 +253,3 @@ roa_renderer_ctx_destroy(
     		*ctx = ROA_NULL;
 }
 
-
-void
-roa_renderer_ctx_lock(
-  roa_renderer_ctx_t ctx)
-{
-  ROA_UNUSED(ctx);
-}
-
-
-void
-roa_renderer_ctx_unlock(
-  roa_renderer_ctx_t ctx)
-{
-  ROA_UNUSED(ctx);
-}
