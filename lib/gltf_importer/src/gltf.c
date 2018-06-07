@@ -366,89 +366,113 @@ gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
 
 
 void
-gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
+gltf_buffer_get_uri(
+        struct json_value_s *val,
+        unsigned char **uri_data,
+        char **uri)
 {
-  /* param check */
-  ROA_ASSERT(buffers);
-  ROA_ASSERT(out_import);
-  ROA_ASSERT(buffers->type == json_type_array);
-
-  struct json_array_s *buffer_arr = (struct json_array_s*)buffers->payload;
-  struct json_array_element_s *buffer_arr_ele = (struct json_array_element_s*)buffer_arr->start;
-
-  while (buffer_arr_ele != ROA_NULL) {
-    struct gltf_buffer buffer;
-    ROA_MEM_ZERO(buffer);
-
-    struct json_value_s *acc_val = (struct json_value_s*)buffer_arr_ele->value;
-    struct json_object_s *attr_obj = (struct json_object_s*)acc_val->payload;
-    struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
-
-    while (attr_ele != ROA_NULL) {
-
-      if (json_attr_is_called(attr_ele, "byteLength")) {
-        buffer.byte_length = json_to_int(attr_ele->value);
-      }
-      else if (json_attr_is_called(attr_ele, "uri")) {
-
-        const char *uri_value = json_to_str(attr_ele->value);
+        const char *uri_value = json_to_str(val);
 
         const char *embedded[] = {
-          "data:image/png;base64,",
-          "data:application/octet-stream;base64,",
+                "data:image/png;base64,",
+                "data:application/octet-stream;base64,",
         };
 
         int i;
         int count = ROA_ARR_COUNT(embedded);
 
-        for (i = 0; i < count; ++i)
-        {
-          if (strncmp(uri_value, embedded[i], strlen(embedded[i])) == 0)
-          {
-            unsigned start = strlen(embedded[i]);
-            unsigned full_len = strlen(uri_value);
-            unsigned len = full_len - start;
+        for (i = 0; i < count; ++i) {
+                int str_len = strlen(embedded[i]);
 
-            unsigned decode_len = 0;
-            roa_base64_decode((const unsigned char *)&uri_value[start], len, ROA_NULL, &decode_len);
+                if (strncmp(uri_value, embedded[i], str_len) == 0) {
+                        unsigned start = strlen(embedded[i]);
+                        unsigned full_len = strlen(uri_value);
+                        unsigned len = full_len - start;
 
-            unsigned char * data = malloc(decode_len);
-            roa_base64_decode((const unsigned char *)&uri_value[start], len, &data, &decode_len);
+                        unsigned decode_len = 0;
+                        roa_base64_decode(
+                                (const unsigned char *)&uri_value[start],
+                                len,
+                                ROA_NULL,
+                                &decode_len);
 
-            buffer.uri_data = data;
+                        unsigned char * data = malloc(decode_len);
+                        roa_base64_decode(
+                                (const unsigned char *)&uri_value[start],
+                                len,
+                                &data,
+                                &decode_len);
 
-            len = strlen(embedded[i]);
-            roa_array_create_with_capacity(buffer.uri, len);
-            roa_array_resize(buffer.uri, len);
-            memcpy(buffer.uri, embedded[i], len);
-            buffer.uri[len - 1] = '\0';
-          }
+                        *uri_data = data;
+
+                        len = strlen(embedded[i]);
+                        roa_array_create_with_capacity(*uri, len);
+                        roa_array_resize(*uri, len);
+                        memcpy(*uri, embedded[i], len);
+                        (*uri)[len - 1] = '\0';
+                }
         }
-      }
-      else if (json_attr_is_called(attr_ele, "name")) {
-        const char *name = json_to_str(attr_ele->value);
-        int len = strlen(name) + 1;
-        roa_array_create_with_capacity(buffer.name, len);
-        roa_array_resize(buffer.name, len);
-        memcpy(buffer.name, name, len);
-      }
-      else if (json_attr_is_called(attr_ele, "extensions"))
-      {
-        /* not handled */
-      }
-      else if (json_attr_is_called(attr_ele, "extras"))
-      {
-        /* not handled */
-      }
+}
 
-      attr_ele = attr_ele->next;
-    }
 
-    roa_array_push(out_import->buffers, buffer);
-    out_import->buffer_count += 1;
+void
+gltf_buffer(
+        struct json_value_s *buf_val,
+        struct gltf_buffer *buffer)
+{
+        /* param check */
+        ROA_ASSERT(buf_val);
+        ROA_ASSERT(buffer);
+        ROA_ASSERT(buf_val->type == json_type_object);
 
-    buffer_arr_ele = buffer_arr_ele->next;
-  }
+        struct json_object_s *attr_obj = (struct json_object_s*)buf_val->payload;
+        struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
+
+        while (attr_ele != ROA_NULL) {
+                if (json_attr_is_called(attr_ele, "byteLength")) {
+                        buffer->byte_length = json_to_int(attr_ele->value);
+                }
+                else if (json_attr_is_called(attr_ele, "uri")) {
+                        gltf_buffer_get_uri(attr_ele->value, &buffer->uri_data, &buffer->uri);
+                }
+                else if (json_attr_is_called(attr_ele, "name")) {
+                        gltf_get_string(attr_ele->value, &buffer->name);
+                }
+                else if (json_attr_is_called(attr_ele, "extensions")) {
+                        /* not handled */
+                }
+                else if (json_attr_is_called(attr_ele, "extras")) {
+                        /* not handled */
+                }
+
+                attr_ele = attr_ele->next;
+        }
+}
+
+
+void
+gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
+{
+        /* param check */
+        ROA_ASSERT(buffers);
+        ROA_ASSERT(out_import);
+        ROA_ASSERT(buffers->type == json_type_array);
+
+        struct json_array_s *buffer_arr = (struct json_array_s*)buffers->payload;
+        struct json_array_element_s *buffer_arr_ele = (struct json_array_element_s*)buffer_arr->start;
+
+        while (buffer_arr_ele != ROA_NULL) {
+                struct gltf_buffer buffer;
+                ROA_MEM_ZERO(buffer);
+
+                struct json_value_s *acc_val = (struct json_value_s*)buffer_arr_ele->value;
+                gltf_buffer(acc_val, &buffer);
+
+                roa_array_push(out_import->buffers, buffer);
+                out_import->buffer_count += 1;
+
+                buffer_arr_ele = buffer_arr_ele->next;
+        }
 }
 
 
@@ -485,11 +509,7 @@ gltf_buffer_view(
                         buffer_view->target = json_to_int(attr_ele->value);
                 }
                 else if (json_attr_is_called(attr_ele, "name")) {
-                        const char *name = json_to_str(attr_ele->value);
-                        int len = strlen(name) + 1;
-                        roa_array_create_with_capacity(buffer_view->name, len);
-                        roa_array_resize(buffer_view->name, len);
-                        memcpy(buffer_view->name, name, len);
+                        gltf_get_string(attr_ele->value, &buffer_view->name);
                 }
                 else if (json_attr_is_called(attr_ele, "extensions")) {
                         /* not handled */
