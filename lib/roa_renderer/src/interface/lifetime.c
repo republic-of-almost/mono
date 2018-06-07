@@ -65,19 +65,19 @@ lock_and_destroy_device_settings(
 
 void
 setup_and_release_renderer_desc(
-				struct renderer_data_desc *rdr_data)
+        struct renderer_data_desc *rdr_data)
 {
-				/* param check */
-				ROA_ASSERT(rdr_data);
+        /* param check */
+        ROA_ASSERT(rdr_data);
 
         /* create */
-				roa_array_create_with_capacity(rdr_data->camera_ids, 5);
-				roa_array_create_with_capacity(rdr_data->camera_descs, 5);
+        roa_array_create_with_capacity(rdr_data->camera_ids, 5);
+        roa_array_create_with_capacity(rdr_data->camera_descs, 5);
 
-				roa_array_create_with_capacity(rdr_data->mesh_rdr_ids, 256);
-				roa_array_create_with_capacity(rdr_data->mesh_rdr_descs, 256);
+        roa_array_create_with_capacity(rdr_data->mesh_rdr_ids, 256);
+        roa_array_create_with_capacity(rdr_data->mesh_rdr_descs, 256);
 
-				roa_spin_lock_release(&rdr_data->lock);
+        roa_spin_lock_release(&rdr_data->lock);
 }
 
 

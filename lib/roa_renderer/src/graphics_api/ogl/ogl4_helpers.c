@@ -35,19 +35,16 @@ glrObjectLabel(GLenum type, GLuint item, const char *name)
 }
 
 
-GLenum roa_to_gl(int i)
+GLenum stride_to_gl_index_type(int i)
 {
   switch(i)
   {
-    case(ROA_RENDERER_TYPE_BYTE): return GL_BYTE;
-    case(ROA_RENDERER_TYPE_UBYTE): return GL_UNSIGNED_BYTE;
-    case(ROA_RENDERER_TYPE_SHORT): return GL_SHORT;
-    case(ROA_RENDERER_TYPE_USHORT): return GL_UNSIGNED_SHORT;
-    case(ROA_RENDERER_TYPE_UINT): return GL_UNSIGNED_INT;
-    case(ROA_RENDERER_TYPE_FLOAT): return GL_FLOAT;
+    case(sizeof(unsigned char)): return GL_UNSIGNED_BYTE;
+    case(sizeof(unsigned short)): return GL_UNSIGNED_SHORT;
+    case(sizeof(unsigned int)): return GL_UNSIGNED_INT;
   }
   ROA_ASSERT(0);
-  return GL_UNSIGNED_INT;
+  return sizeof(unsigned int);
 }
 
 

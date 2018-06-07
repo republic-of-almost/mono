@@ -207,7 +207,7 @@ struct roa_renderer_mesh_resource
   float *texture_coord_vec2_array;
   unsigned vertex_count;
 
-  void *index_type;
+  int index_stride;
   void *index_array;
   unsigned index_count;
 };

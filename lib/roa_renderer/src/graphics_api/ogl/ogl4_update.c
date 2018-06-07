@@ -126,7 +126,7 @@ platform_update(roa_renderer_ctx_t ctx)
           }
         }
 
-        unsigned buffer_size = gl_type_size(roa_to_gl(pending[i].index_type)) * pending[i].index_count;
+        unsigned buffer_size = pending[i].index_stride * pending[i].index_count;
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer_size, pending[i].index_array, GL_STATIC_DRAW);
 
         if (OGL4_ERROR_CHECKS) {
@@ -144,7 +144,7 @@ platform_update(roa_renderer_ctx_t ctx)
 
       mesh.ibo = ibos[i];
       mesh.index_count = pending[i].index_count;
-      mesh.index_type = roa_to_gl(pending[i].index_type);
+      mesh.index_type = stride_to_gl_index_type(pending[i].index_stride);
 
       mesh.vbo = vbos[i];
       mesh.vertex_count = pending[i].vertex_count;

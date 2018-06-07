@@ -17,11 +17,18 @@ struct gltf_import gltf;
 GLuint vao;
 GLuint program;
 
+//struct mesh_data
+//{
+  GLuint vbo;
+  GLuint ibo;
+  GLsizei ibo_count;
+  GLenum ibo_index_type;
+//};
+ 
 
-GLuint vbo;
-GLuint ibo;
-GLsizei ibo_count;
-GLenum ibo_index_type;
+//#define MESH_MAX 10
+//struct mesh_data mesh[MESH_MAX];
+
 
 float distance[3];
 
@@ -37,8 +44,8 @@ main()
     ROA_MEM_ZERO(path);
 
     strcat(path, roa_exe_dir());
-    strcat(path, "assets/gltf_test/cube.gltf");
-    //strcat(path, "assets/gltf_test/plane_trainer.gltf");
+    //strcat(path, "assets/gltf_test/cube.gltf");
+    strcat(path, "assets/gltf_test/plane_trainer.gltf");
 
     gltf_import(path, &gltf);
   }

@@ -22,7 +22,6 @@ roa_renderer_ctx_t renderer_ctx = ROA_NULL;
 
 uint32_t object_id_counter = 0;
 unsigned renderable_count = 1;
-uint64_t cube_mesh = 0;
 
 float spin = 0.f;
 float pitch = 0.f;
@@ -54,7 +53,7 @@ main()
   /* setup systems */
   {
     roa_ctx_create(&hw_ctx);
-	  roa_renderer_ctx_create(&renderer_ctx, ROA_NULL);
+    roa_renderer_ctx_create(&renderer_ctx, ROA_NULL);
 
     struct roa_ctx_window_desc win_desc;
     ROA_MEM_ZERO(win_desc);
@@ -75,54 +74,7 @@ main()
     //strcat(import_file, "assets/cube.gltf");
     strcat(import_file, "assets/plane_trainer.gltf");
 
-    struct gltf_import gltf;
-    ROA_MEM_ZERO(gltf);
-
-    gltf_import(import_file, &gltf);
-
-		struct roa_renderer_mesh_resource mesh_rsrc;
-    ROA_MEM_ZERO(mesh_rsrc);
-		mesh_rsrc.name = gltf.meshes[0].name;
-
-    int pos = gltf.meshes[0].primitives[0].attributes.POSITION;
-    int pos_view = gltf.accessors[pos].buffer_view;
-    int pos_buffer = gltf.buffer_views[pos_view].buffer;
-    int pos_offset = gltf.buffer_views[pos_view].byte_offset;
-
-    mesh_rsrc.position_vec3_array = (float*)&gltf.buffers[pos_buffer].uri_data[pos_offset];
-
-    int nor = gltf.meshes[0].primitives[0].attributes.NORMAL;
-    int nor_view = gltf.accessors[nor].buffer_view;
-    int nor_buffer = gltf.buffer_views[nor_view].buffer;
-    int nor_offset = gltf.buffer_views[nor_view].byte_offset;
-
-    mesh_rsrc.normal_vec3_array = (float*)&gltf.buffers[nor_buffer].uri_data[nor_offset];
-
-    int texc = gltf.meshes[0].primitives[0].attributes.TEXCOORD_0;
-    int texc_view = gltf.accessors[texc].buffer_view;
-    int texc_buffer = gltf.buffer_views[texc_view].buffer;
-    int texc_offset = gltf.buffer_views[texc_view].byte_offset;
-
-    const unsigned char *buffer = gltf.buffers[texc_buffer].uri_data;
-    const unsigned char *texc_rdata = &buffer[texc_offset];
-    const float *texc_fdata = (float*)texc_rdata;
-
-    float a = texc_fdata[0];
-
-    mesh_rsrc.texture_coord_vec2_array = texc_fdata;
-
-    mesh_rsrc.vertex_count = gltf.accessors[pos].count;
-
-    int index = gltf.meshes[0].primitives[0].indices;
-    int index_view = gltf.accessors[index].buffer_view;
-    int index_buffer = gltf.buffer_views[index_view].buffer;
-    int index_offset = gltf.buffer_views[index_view].byte_offset;
-
-    mesh_rsrc.index_type = gl_type_to_roa_renderer(gltf.accessors[index_view].component_type);
-    mesh_rsrc.index_array = (void*)&gltf.buffers[index_buffer].uri_data[index_offset];
-    mesh_rsrc.index_count = gltf.accessors[index_view].count;
-
-    cube_mesh = roa_renderer_mesh_resource_add(renderer_ctx, &mesh_rsrc);
+    roa_renderer_load(renderer_ctx, import_file);
   }
 
   /* setup texture */

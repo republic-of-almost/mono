@@ -1,40 +1,40 @@
 {
-	"name": "RepublicRenderer",
-	"kind": "StaticLib",
-	"language": "C89",
-	"location": "./",
+  "name": "RepublicRenderer",
+  "kind": "StaticLib",
+  "language": "C89",
+  "location": "./",
 
     "assets" : [
         "../assets/" 
     ],
 
-	"src_files" : [
-		"../data/roa_renderer.json",
-		"../include/**.h",
-		"../src/**.h",
-		"../src/**.c",
-		"../doc/**.md"
-	],
+  "src_files" : [
+    "../data/roa_renderer.json",
+    "../include/**.h",
+    "../src/**.h",
+    "../src/**.c",
+    "../doc/**.md"
+  ],
 
-	"public_inc_dirs" : [
-		"../include/"
-	],
+  "public_inc_dirs" : [
+    "../include/"
+  ],
 
-	"private_inc_dirs" : [
-		"../src/"
-	],
+  "private_inc_dirs" : [
+    "../src/"
+  ],
 
-	"project_dependencies" : [
-		"STB",
-		"RepublicMath",
-        "RepublicLib",
-        "Scratch",
-        "GLTFImporter",
-        "OpenGL"
-	],
+  "project_dependencies" : [
+    "STB",
+    "RepublicMath",
+    "RepublicLib",
+    "Scratch",
+    "GLTFImporter",
+    "OpenGL"
+  ],
 
-	"defines" : [
-		"ROA_RENDERER_API_GL4"
-	]
+  "defines" : [
+    "ROA_RENDERER_API_GL4"
+  ]
 
 }
