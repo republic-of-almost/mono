@@ -137,14 +137,9 @@ struct gltf_node
 {
   char *name;
 
-  float *rotation;
-  int rotation_count;
-
-  float *translation;
-  int transloation_count;
-
-  float *scale;
-  int scale_count;
+  float rotation[4];
+  float translation[3];
+  float scale[3];
 
   int *children;
   int child_count;
