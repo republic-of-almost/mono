@@ -162,7 +162,7 @@ struct gltf_import
   struct gltf_mesh *meshes;
   int mesh_count;
 
-  struct gltf_nodes *nodes;
+  struct gltf_node *nodes;
   int node_count;
 };
 

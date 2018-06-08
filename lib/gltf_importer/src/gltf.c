@@ -281,11 +281,18 @@ gltf_nodes(
                 struct gltf_node node;
                 ROA_MEM_ZERO(node);
                 node.mesh = -1;
+                node.scale[0] = 1.f;
+                node.scale[1] = 1.f;
+                node.scale[2] = 1.f;
+                node.rotation[3] = 1.f;
 
                 struct json_value_s *acc_val =
                         (struct json_value_s*)node_arr_ele->value;
 
                 gltf_node(acc_val, &node);
+
+                roa_array_push(out_import->nodes, node);
+                out_import->node_count += 1;
 
                 node_arr_ele = node_arr_ele->next;
         }
@@ -837,6 +844,7 @@ gltf_import_setup(
         roa_array_create_with_capacity(import->buffers, 32);
         roa_array_create_with_capacity(import->buffer_views, 32);
         roa_array_create_with_capacity(import->meshes, 32);
+        roa_array_create_with_capacity(import->nodes, 32);
 }
 
 

@@ -19,14 +19,20 @@ GLuint vao;
 GLuint program;
 
 
-struct node
+struct node_data
 {
   float scale[3];
   float rot[4];
   float pos[3];
 
+  int parent_id;
   int mesh_id;
 };
+
+
+#define NODE_MAX 10
+struct node_data node_data[NODE_MAX];
+int node_data_count = 0;
 
 
 struct mesh_data
@@ -186,8 +192,8 @@ main()
 
       /* check err */
       {
-        GLuint err = glGetError();
-        if (err) { ROA_ASSERT(0); }
+      GLuint err = glGetError();
+      if (err) { ROA_ASSERT(0); }
       }
 
       /* vert attrs */
@@ -196,7 +202,7 @@ main()
         int buffer_offset = 0;
         for (i = 0; i < ROA_ARR_COUNT(vertex_desc); ++i)
         {
-          if(vertex_desc[i] < 0)
+          if (vertex_desc[i] < 0)
           {
             continue;
           }
@@ -208,16 +214,18 @@ main()
           {
             if (accessor.component_type == GLTF_COMPONENT_TYPE_FLOAT) {
               comp_size = sizeof(GLfloat);
-            } else if (accessor.component_type == GLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+            }
+            else if (accessor.component_type == GLTF_COMPONENT_TYPE_UNSIGNED_INT) {
               comp_size = sizeof(GLenum);
-            } else {
+            }
+            else {
               ROA_ASSERT(0)
             }
           }
 
           int components = 0;
           {
-            if (accessor.type == GLTF_TYPE_SCALAR)    { components = 1; }
+            if (accessor.type == GLTF_TYPE_SCALAR) { components = 1; }
             else if (accessor.type == GLTF_TYPE_VEC2) { components = 2; }
             else if (accessor.type == GLTF_TYPE_VEC3) { components = 3; }
             else if (accessor.type == GLTF_TYPE_VEC4) { components = 4; }
@@ -226,7 +234,7 @@ main()
 
           GLsizei stride = components * comp_size;
           GLboolean normalized = accessor.normalized ? GL_TRUE : GL_FALSE;
-        
+
           glEnableVertexAttribArray(i);
           glVertexAttribPointer(
             i,
@@ -254,7 +262,7 @@ main()
 
         struct gltf_buffer_view buffer_view = gltf.buffer_views[bv_id];
         unsigned char *buffer = gltf.buffers[buffer_view.buffer].uri_data;
-     
+
         GLuint ibo = 0;
         glGenBuffers(1, &ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -277,37 +285,81 @@ main()
     }
   }
 
-  roa_mat4 world, view, proj, wvp;
+  /* nodes */
   {
-    /* view */
-    roa_mat4_lookat(
-      &view,
-      roa_float3_set_with_values(distance[0],distance[1],distance[2]),
-      roa_float3_zero(),
-      roa_float3_set_with_values(0, 1, 0));
+    int node_data_cap = ROA_ARR_COUNT(node_data);
+    node_data_count = gltf.node_count > node_data_cap ? node_data_cap : gltf.node_count;
+    int n;
 
-    /* proj */
-    struct roa_ctx_window_desc win_desc;
-    roa_ctx_get_window_desc(hw_ctx, &win_desc);
+    for (n = 0; n < node_data_count; ++n)
+    {
+       struct gltf_node *node = &gltf.nodes[n];
+       struct node_data *curr_node = &node_data[n];
 
-    float aspect = (float)win_desc.width / (float)win_desc.height;
-    roa_mat4_projection(&proj, ROA_QUART_TAU * 0.125f, 0.1, 100.0, aspect);
+       curr_node->mesh_id = node->mesh;
+       
+       memcpy(curr_node->pos, node->translation, sizeof(curr_node->pos));
+       memcpy(curr_node->rot, node->rotation, sizeof(curr_node->rot));
+       memcpy(curr_node->scale, node->scale, sizeof(curr_node->scale));
 
-    /* world */
-    roa_mat4_id(&world);
+       int c;
+       int child_count = node->child_count;
 
-    /* wvp */
-    roa_mat4_multiply_three(&wvp, &world, &view, &proj);
+       for (c = 0; c < child_count; ++c)
+       {
+        int c_id = node->children[c];
+
+        if (c_id < ROA_ARR_COUNT(node_data))
+        {
+          node_data[c_id].parent_id = n;
+        }
+       }
+    }
   }
 
   while (roa_ctx_new_frame(hw_ctx))
   {
+    roa_mat4 world, view, proj, wvp;
+    {
+      /* view */
+      roa_mat4_lookat(
+        &view,
+        roa_float3_set_with_values(distance[0], distance[1], distance[2]),
+        roa_float3_zero(),
+        roa_float3_set_with_values(0, 1, 0));
+
+      /* proj */
+      struct roa_ctx_window_desc win_desc;
+      roa_ctx_get_window_desc(hw_ctx, &win_desc);
+
+      float aspect = (float)win_desc.width / (float)win_desc.height;
+      roa_mat4_projection(&proj, ROA_QUART_TAU * 0.125f, 0.1, 100.0, aspect);
+    }
+
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    int m;
-    for(m = 0; m < mesh_data_count; ++m)
+    int n;
+    for (n = 0; n < node_data_count; ++n)
     {
+      int m = node_data[n].mesh_id;
+
+      if (m == -1)
+      {
+        continue;
+      }
+
+      /* world */
+      roa_transform trans;
+      trans.position = roa_float3_import(node_data[n].pos);
+      trans.scale = roa_float3_import(node_data[n].scale);
+      trans.rotation = roa_quaternion_import(node_data[n].rot);
+
+      roa_transform_to_mat4(&trans, &world);
+
+      /* wvp */
+      roa_mat4_multiply_three(&wvp, &world, &view, &proj);
+
       glBindVertexArray(mesh_data[m].vao);
 
       GLint uni_wvp = glGetUniformLocation(program, "uni_wvp_mat");
