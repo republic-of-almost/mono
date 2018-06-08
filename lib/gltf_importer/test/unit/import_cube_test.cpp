@@ -2,7 +2,7 @@
 #include <gltf/gltf.h>
 #include <roa_lib/dir.h>
 #include <cstring>
-
+#include <cstdio>
 
 TEST_CASE("Cube Import")
 {
@@ -17,8 +17,9 @@ TEST_CASE("Cube Import")
   SECTION("accessors")
   {
     REQUIRE(import_scene.accessor_count == 5);
-
+    
     REQUIRE(strcmp(import_scene.accessors[0].name, "somename") == 0);
+
     REQUIRE(import_scene.accessors[0].buffer_view == 0);
     REQUIRE(import_scene.accessors[0].count == 36);
     REQUIRE(import_scene.accessors[0].type == GLTF_TYPE_SCALAR);

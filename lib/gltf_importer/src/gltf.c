@@ -70,7 +70,6 @@ create_file_copy(
 }
 
 
-
 /* ------------------------------------------------------ [ json helpers ] -- */
 
 
@@ -126,7 +125,7 @@ gltf_get_string(
         /* process */
         if(name && out_name) {
                 memcpy(out_name, name, len);
-                //out_name[len - 1] = '\0';
+                out_name[len] = '\0';
         }
 
         return len + 1;
@@ -369,7 +368,7 @@ gltf_mesh_prim(struct json_value_s *val, struct gltf_primitive *prim)
 
                         struct json_value_s *patt_val =
                                   (struct json_value_s*)atr_ele->value;
-                        
+
                         gltf_mesh_attrs(patt_val, &attrs);
 
                         prim->attributes = attrs;
