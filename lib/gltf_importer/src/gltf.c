@@ -169,8 +169,8 @@ gltf_get_float_array(
 
 int
 gltf_get_int_array(
-  struct json_value_s *val,
-  int *out_arr)
+        struct json_value_s *val,
+        int *out_arr)
 {
         /* prepare */
         ROA_ASSERT(val->type == json_type_array);
@@ -207,8 +207,8 @@ gltf_get_int_array(
 
 void
 gltf_node(
-  struct json_value_s *node_val,
-  struct gltf_node *node)
+        struct json_value_s *node_val,
+        struct gltf_node *node)
 {
         /* param check */
         ROA_ASSERT(node_val);
@@ -261,7 +261,9 @@ gltf_node(
 
 
 void
-gltf_nodes(struct json_value_s *nodes, struct gltf_import *out_import)
+gltf_nodes(
+        struct json_value_s *nodes,
+        struct gltf_import *out_import)
 {
         /* param check */
         ROA_ASSERT(nodes);
@@ -294,7 +296,9 @@ gltf_nodes(struct json_value_s *nodes, struct gltf_import *out_import)
 
 
 void
-gltf_mesh_attrs(struct json_value_s *val, struct gltf_attributes *attrs)
+gltf_mesh_attrs(
+        struct json_value_s *val,
+        struct gltf_attributes *attrs)
 {
         /* param check */
         ROA_ASSERT(val);
@@ -340,7 +344,9 @@ gltf_mesh_attrs(struct json_value_s *val, struct gltf_attributes *attrs)
 
 
 void
-gltf_mesh_prim(struct json_value_s *val, struct gltf_primitive *prim)
+gltf_mesh_prim(
+        struct json_value_s *val,
+        struct gltf_primitive *prim)
 {
         /* param check */
         ROA_ASSERT(val);
@@ -386,7 +392,9 @@ gltf_mesh_prim(struct json_value_s *val, struct gltf_primitive *prim)
 
 
 void
-gltf_mesh(struct json_value_s *val, struct gltf_mesh *mesh)
+gltf_mesh(
+        struct json_value_s *val,
+        struct gltf_mesh *mesh)
 {
         /* param check */
         ROA_ASSERT(mesh);
@@ -454,7 +462,9 @@ gltf_mesh(struct json_value_s *val, struct gltf_mesh *mesh)
 
 
 void
-gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
+gltf_meshes(
+        struct json_value_s *meshes,
+        struct gltf_import *out_import)
 {
         /* param check */
         ROA_ASSERT(meshes);

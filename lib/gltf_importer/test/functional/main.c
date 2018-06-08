@@ -14,8 +14,20 @@
 roa_ctx_t hw_ctx;
 struct gltf_import gltf;
 
+
 GLuint vao;
 GLuint program;
+
+
+struct node
+{
+  float scale[3];
+  float rot[4];
+  float pos[3];
+
+  int mesh_id;
+};
+
 
 struct mesh_data
 {
@@ -33,6 +45,7 @@ int mesh_data_count = 0;
 
 
 float distance[3];
+
 
 int
 main()
@@ -98,7 +111,6 @@ main()
       this is because we can just pass the pointer to the gltf data buffer.
       All we need is the data pointers and now big the vbo should be.
     */
-
     int mesh_data_cap = ROA_ARR_COUNT(mesh_data);
     mesh_data_count = gltf.mesh_count > mesh_data_cap ? mesh_data_cap : gltf.mesh_count;
     int m;
