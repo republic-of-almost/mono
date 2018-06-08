@@ -590,7 +590,9 @@ gltf_buffer(
 
 
 void
-gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
+gltf_buffers(
+        struct json_value_s *buffers,
+        struct gltf_import *out_import)
 {
         /* param check */
         ROA_ASSERT(buffers);
@@ -674,7 +676,9 @@ gltf_buffer_view(
 
 
 void
-gltf_buffer_views(struct json_value_s *buffer_views, struct gltf_import *out_import)
+gltf_buffer_views(
+        struct json_value_s *buffer_views,
+        struct gltf_import *out_import)
 {
         /* param check */
         ROA_ASSERT(buffer_views);
@@ -822,7 +826,8 @@ gltf_accessors(
 
 
 void
-gltf_import_setup(struct gltf_import *import)
+gltf_import_setup(
+        struct gltf_import *import)
 {
         /* param check */
         ROA_ASSERT(import);
@@ -840,7 +845,9 @@ gltf_import_setup(struct gltf_import *import)
 
 
 void
-gltf_import(const char *filename, struct gltf_import *out_import)
+gltf_import(
+        const char *filename,
+        struct gltf_import *out_import)
 {
         /* param check */  
         ROA_ASSERT(filename);
