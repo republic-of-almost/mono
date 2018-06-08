@@ -120,15 +120,15 @@ gltf_get_string(
 
         /* prepare */
         const char *name = json_to_str(val);
-        int len = strlen(name) + 1;
+        int len = strlen(name);
 
         /* process */
         if(name && out_name) {
                 memcpy(out_name, name, len);
-                out_name[len] = '\0';
+                //out_name[len - 1] = '\0';
         }
 
-        return len;
+        return len + 1;
 }
 
 
@@ -167,6 +167,41 @@ gltf_get_float_array(
 }
 
 
+int
+gltf_get_int_array(
+  struct json_value_s *val,
+  int *out_arr)
+{
+        /* prepare */
+        ROA_ASSERT(val->type == json_type_array);
+
+        /* prepare */
+        struct json_array_s *arr = (struct json_array_s*)val->payload;
+        struct json_array_element_s *ele =
+          (struct json_array_element_s *)arr->start;
+
+        int count = 0;
+
+        while (ele != ROA_NULL) {
+                count += 1;
+                ele = ele->next;
+        }
+
+        /* process */
+        int i = 0;
+        ele = (struct json_array_element_s *)arr->start;
+
+        while (ele != ROA_NULL) {
+                if (out_arr) {
+                  out_arr[i++] = json_to_int(ele->value);
+                }
+                ele = ele->next;
+        }
+
+        return count;
+}
+
+
 /* ------------------------------------------------------------- [ Nodes ] -- */
 
 
@@ -180,11 +215,13 @@ gltf_node(
         ROA_ASSERT(node);
         ROA_ASSERT(node_val->type == json_type_object);
 
-        /* prepare */
-        struct json_object_s *attr_obj = (struct json_object_s*)node_val->payload;
-        struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
-
         /* process */
+        struct json_object_s *attr_obj =
+                (struct json_object_s*)node_val->payload;
+
+        struct json_object_element_s *attr_ele =
+                (struct json_object_element_s*)attr_obj->start;
+
         while (attr_ele != ROA_NULL) {
                 if (json_attr_is_called(attr_ele, "mesh")) {
                         node->mesh = json_to_int(attr_ele->value);
@@ -193,10 +230,14 @@ gltf_node(
                         int len = gltf_get_string(attr_ele->value, ROA_NULL);
                         roa_array_create_with_capacity(node->name, len);
                         roa_array_resize(node->name, len);
-                        gltf_get_string(attr_ele->value, &node->name);
+                        gltf_get_string(attr_ele->value, node->name);
                 }
                 else if (json_attr_is_called(attr_ele, "children")) {
-                  
+                        int len = gltf_get_int_array(attr_ele->value, ROA_NULL);
+                        roa_array_create_with_capacity(node->children, len);
+                        roa_array_resize(node->children, len);
+                        gltf_get_int_array(attr_ele->value, node->children);
+                        node->child_count = len;
                 }
                 else if (json_attr_is_called(attr_ele, "translation")) {
                         int count = gltf_get_float_array(attr_ele->value, ROA_NULL);
@@ -227,12 +268,11 @@ gltf_nodes(struct json_value_s *nodes, struct gltf_import *out_import)
         ROA_ASSERT(out_import);
         ROA_ASSERT(nodes->type == json_type_array);
 
-        /* prepare */
+        /* process */
         struct json_array_s *node_arr = (struct json_array_s*)nodes->payload;
         struct json_array_element_s *node_arr_ele =
                 (struct json_array_element_s*)node_arr->start;
 
-        /* process */
         while (node_arr_ele != ROA_NULL) {
                 struct gltf_node node;
                 ROA_MEM_ZERO(node);
@@ -252,138 +292,194 @@ gltf_nodes(struct json_value_s *nodes, struct gltf_import *out_import)
 
 
 void
-gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
+gltf_mesh_attrs(struct json_value_s *val, struct gltf_attributes *attrs)
 {
-  /* param check */
-  ROA_ASSERT(meshes);
-  ROA_ASSERT(out_import);
-  ROA_ASSERT(meshes->type == json_type_array);
+        /* param check */
+        ROA_ASSERT(val);
+        ROA_ASSERT(attrs);
+        ROA_ASSERT(val->type == json_type_object);
 
-  struct json_array_s *mesh_arr = (struct json_array_s*)meshes->payload;
-  struct json_array_element_s *mesh_arr_ele = (struct json_array_element_s*)mesh_arr->start;
+        /* process */
+        struct json_object_s *pattr_obj =
+                (struct json_object_s*)val->payload;
 
-  while(mesh_arr_ele != ROA_NULL) {
-    struct gltf_mesh mesh;
-    ROA_MEM_ZERO(mesh);
+        struct json_object_element_s *pattr_ele =
+                (struct json_object_element_s*)pattr_obj->start;
 
-    struct json_value_s *acc_val = (struct json_value_s*)mesh_arr_ele->value;
-    struct json_object_s *attr_obj = (struct json_object_s*)acc_val->payload;
-    struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
-
-    while(attr_ele != ROA_NULL)
-    {
-      if(json_attr_is_called(attr_ele, "primitives"))
-      {
-        struct gltf_primitive prim;
-        ROA_MEM_ZERO(prim);
-
-        struct json_value_s *prim_val = (struct json_value_s*)attr_ele->value;
-        struct json_array_s *prim_attr_obj = (struct json_array_s*)prim_val->payload;
-        struct json_array_element_s *prim_ele = (struct json_array_element_s*)prim_attr_obj->start;
-
-        if(prim_ele)
-        {
-          roa_array_create(mesh.primitives);
-        }
-
-        while(prim_ele != ROA_NULL)
-        {
-          struct json_value_s *ac_val = (struct json_value_s*)prim_ele->value;
-          struct json_object_s *atr_obj = (struct json_object_s*)ac_val->payload;
-          struct json_object_element_s *atr_ele = (struct json_object_element_s*)atr_obj->start;
-
-          while(atr_ele != ROA_NULL)
-          {
-
-            if(json_attr_is_called(atr_ele, "attributes"))
-            {
-              struct gltf_attributes attrs;
-              attrs.COLOR_0     = -1;
-              attrs.JOINTS_0    = -1;
-              attrs.NORMAL      = -1;
-              attrs.POSITION    = -1;
-              attrs.TANGENT     = -1;
-              attrs.TEXCOORD_0  = -1;
-              attrs.TEXCOORD_1  = -1;
-              attrs.WEIGHTS_0   = -1;
-
-              struct json_value_s *patt_val = (struct json_value_s*)atr_ele->value;
-              struct json_object_s *pattr_obj = (struct json_object_s*)patt_val->payload;
-              struct json_object_element_s *pattr_ele = (struct json_object_element_s*)pattr_obj->start;
-
-              while (pattr_ele != ROA_NULL)
-              {
+        while (pattr_ele != ROA_NULL) {
                 if (json_attr_is_called(pattr_ele, "COLOR_0")) {
-                  attrs.COLOR_0 = json_to_int(pattr_ele->value);
+                        attrs->COLOR_0 = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "JOINTS_0")) {
-                  attrs.JOINTS_0 = json_to_int(pattr_ele->value);
+                        attrs->JOINTS_0 = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "NORMAL")) {
-                  attrs.NORMAL = json_to_int(pattr_ele->value);
+                        attrs->NORMAL = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "POSITION")) {
-                  attrs.POSITION = json_to_int(pattr_ele->value);
+                        attrs->POSITION = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "TANGENT")) {
-                  attrs.TANGENT = json_to_int(pattr_ele->value);
+                        attrs->TANGENT = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "TEXCOORD_0")) {
-                  attrs.TEXCOORD_0 = json_to_int(pattr_ele->value);
+                        attrs->TEXCOORD_0 = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "TEXCOORD_1")) {
-                  attrs.TEXCOORD_1 = json_to_int(pattr_ele->value);
+                        attrs->TEXCOORD_1 = json_to_int(pattr_ele->value);
                 }
                 else if (json_attr_is_called(pattr_ele, "WEIGHTS_0")) {
-                  attrs.WEIGHTS_0 = json_to_int(pattr_ele->value);
+                        attrs->WEIGHTS_0 = json_to_int(pattr_ele->value);
                 }
-                
+
                 pattr_ele = pattr_ele->next;
-              }
-
-              prim.attributes = attrs;
-            }
-            else if (json_attr_is_called(atr_ele, "indices"))
-            {
-              prim.indices = json_to_int(atr_ele->value);
-            }
-            else if (json_attr_is_called(atr_ele, "material"))
-            {
-              prim.material = json_to_int(atr_ele->value);
-            }
-
-            atr_ele = atr_ele->next;
-          }
-
-          roa_array_push(mesh.primitives, prim);
-          mesh.primitive_count += 1;
-
-          prim_ele = prim_ele->next;
         }
+}
 
-        
-      } else if(json_attr_is_called(attr_ele, "weights")) {
-        /* not done yet */
-      } else if(json_attr_is_called(attr_ele, "name")) {
-        const char *name = json_to_str(attr_ele->value);
-        int len = strlen(name) + 1;
-        roa_array_create_with_capacity(mesh.name, len);
-        roa_array_resize(mesh.name, len);
-        memcpy(mesh.name, name, len);
-      } else if(json_attr_is_called(attr_ele, "extensions")) {
-        /* missing */
-      } else if(json_attr_is_called(attr_ele, "extras")) {
-        /* missing */
-      }
 
-      attr_ele = attr_ele->next;
-    }
+void
+gltf_mesh_prim(struct json_value_s *val, struct gltf_primitive *prim)
+{
+        /* param check */
+        ROA_ASSERT(val);
+        ROA_ASSERT(prim);
+        ROA_ASSERT(val->type == json_type_object);
 
-    roa_array_push(out_import->meshes, mesh);
-    out_import->mesh_count += 1;
+        /* process */
+        struct json_object_s *atr_obj =
+                (struct json_object_s*)val->payload;
 
-    mesh_arr_ele = mesh_arr_ele->next;
-  }
+        struct json_object_element_s *atr_ele =
+                (struct json_object_element_s*)atr_obj->start;
+
+        while (atr_ele != ROA_NULL) {
+                if (json_attr_is_called(atr_ele, "attributes")) {
+                        struct gltf_attributes attrs;
+                        attrs.COLOR_0 = -1;
+                        attrs.JOINTS_0 = -1;
+                        attrs.NORMAL = -1;
+                        attrs.POSITION = -1;
+                        attrs.TANGENT = -1;
+                        attrs.TEXCOORD_0 = -1;
+                        attrs.TEXCOORD_1 = -1;
+                        attrs.WEIGHTS_0 = -1;
+
+                        struct json_value_s *patt_val =
+                                  (struct json_value_s*)atr_ele->value;
+                        
+                        gltf_mesh_attrs(patt_val, &attrs);
+
+                        prim->attributes = attrs;
+                      }
+                else if (json_attr_is_called(atr_ele, "indices")) {
+                        prim->indices = json_to_int(atr_ele->value);
+                }
+                else if (json_attr_is_called(atr_ele, "material")) {
+                        prim->material = json_to_int(atr_ele->value);
+                }
+
+                atr_ele = atr_ele->next;
+        }
+}
+
+
+void
+gltf_mesh(struct json_value_s *val, struct gltf_mesh *mesh)
+{
+        /* param check */
+        ROA_ASSERT(mesh);
+        ROA_ASSERT(val);
+        ROA_ASSERT(val->type == json_type_object);
+
+        /* process */
+        struct json_object_s *attr_obj =
+                (struct json_object_s*)val->payload;
+
+        struct json_object_element_s *attr_ele =
+                (struct json_object_element_s*)attr_obj->start;
+
+        while (attr_ele != ROA_NULL) {
+                if (json_attr_is_called(attr_ele, "primitives")) {
+
+                        struct gltf_primitive prim;
+                        ROA_MEM_ZERO(prim);
+
+                        struct json_value_s *prim_val =
+                                (struct json_value_s*)attr_ele->value;
+
+                        struct json_array_s *prim_attr_obj =
+                                (struct json_array_s*)prim_val->payload;
+
+                        struct json_array_element_s *prim_ele =
+                                (struct json_array_element_s*)prim_attr_obj->start;
+
+                        if (prim_ele) {
+                                roa_array_create(mesh->primitives);
+                        }
+
+                        while (prim_ele != ROA_NULL) {
+                                struct json_value_s *ac_val =
+                                        (struct json_value_s*)prim_ele->value;
+      
+                                gltf_mesh_prim(ac_val, &prim);
+
+                                roa_array_push(mesh->primitives, prim);
+                                mesh->primitive_count += 1;
+
+                                prim_ele = prim_ele->next;
+                        }
+                }
+                else if (json_attr_is_called(attr_ele, "weights")) {
+                        /* not done yet */
+                }
+                else if (json_attr_is_called(attr_ele, "name")) {
+                        const char *name = json_to_str(attr_ele->value);
+                        int len = strlen(name) + 1;
+                        roa_array_create_with_capacity(mesh->name, len);
+                        roa_array_resize(mesh->name, len);
+                        memcpy(mesh->name, name, len);
+                }
+                else if (json_attr_is_called(attr_ele, "extensions")) {
+                        /* missing */
+                }
+                else if (json_attr_is_called(attr_ele, "extras")) {
+                        /* missing */
+                }
+
+                attr_ele = attr_ele->next;
+        }
+}
+
+
+void
+gltf_meshes(struct json_value_s *meshes, struct gltf_import *out_import)
+{
+        /* param check */
+        ROA_ASSERT(meshes);
+        ROA_ASSERT(out_import);
+        ROA_ASSERT(meshes->type == json_type_array);
+
+        /* process */
+        struct json_array_s *mesh_arr =
+                (struct json_array_s*)meshes->payload;
+
+        struct json_array_element_s *mesh_arr_ele =
+                (struct json_array_element_s*)mesh_arr->start;
+
+        while(mesh_arr_ele != ROA_NULL) {
+                struct gltf_mesh mesh;
+                ROA_MEM_ZERO(mesh);
+
+                struct json_value_s *val =
+                        (struct json_value_s*)mesh_arr_ele->value;
+  
+                gltf_mesh(val, &mesh);
+
+                roa_array_push(out_import->meshes, mesh);
+                out_import->mesh_count += 1;
+
+                mesh_arr_ele = mesh_arr_ele->next;
+        }
 }
 
 
@@ -461,7 +557,10 @@ gltf_buffer(
                         gltf_buffer_get_uri(attr_ele->value, &buffer->uri_data, &buffer->uri);
                 }
                 else if (json_attr_is_called(attr_ele, "name")) {
-                        gltf_get_string(attr_ele->value, &buffer->name);
+                        int len = gltf_get_string(attr_ele->value, ROA_NULL);
+                        roa_array_create_with_capacity(buffer->name, len);
+                        roa_array_resize(buffer->name, len);
+                        gltf_get_string(attr_ele->value, buffer->name);
                 }
                 else if (json_attr_is_called(attr_ele, "extensions")) {
                         /* not handled */
@@ -537,7 +636,7 @@ gltf_buffer_view(
                         int len = gltf_get_string(attr_ele->value, ROA_NULL);
                         roa_array_create_with_capacity(buffer_view->name, len);
                         roa_array_resize(buffer_view->name, len);
-                        gltf_get_string(attr_ele->value, &buffer_view->name);
+                        gltf_get_string(attr_ele->value, buffer_view->name);
                 }
                 else if (json_attr_is_called(attr_ele, "extensions")) {
                         /* not handled */
@@ -602,7 +701,7 @@ gltf_accessor(
                         int len = gltf_get_string(attr_ele->value, ROA_NULL);
                         roa_array_create_with_capacity(accessor->name, len);
                         roa_array_resize(accessor->name, len);
-                        gltf_get_string(attr_ele->value, &accessor->name);
+                        gltf_get_string(attr_ele->value, accessor->name);
                 }
                 else if (json_attr_is_called(attr_ele, "bufferView")) {
                         accessor->buffer_view = json_to_int(attr_ele->value);
