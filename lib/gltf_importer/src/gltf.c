@@ -15,6 +15,7 @@
 
 /*
  *  Copys the contents of a file out. You need to be sure to free the copy.
+ *  feel like this already exists in lib.
  */
 int
 create_file_copy(
@@ -269,7 +270,9 @@ gltf_nodes(struct json_value_s *nodes, struct gltf_import *out_import)
         ROA_ASSERT(nodes->type == json_type_array);
 
         /* process */
-        struct json_array_s *node_arr = (struct json_array_s*)nodes->payload;
+        struct json_array_s *node_arr =
+                (struct json_array_s*)nodes->payload;
+
         struct json_array_element_s *node_arr_ele =
                 (struct json_array_element_s*)node_arr->start;
 
@@ -370,7 +373,7 @@ gltf_mesh_prim(struct json_value_s *val, struct gltf_primitive *prim)
                         gltf_mesh_attrs(patt_val, &attrs);
 
                         prim->attributes = attrs;
-                      }
+                }
                 else if (json_attr_is_called(atr_ele, "indices")) {
                         prim->indices = json_to_int(atr_ele->value);
                 }
@@ -546,8 +549,11 @@ gltf_buffer(
         ROA_ASSERT(buffer);
         ROA_ASSERT(buf_val->type == json_type_object);
 
-        struct json_object_s *attr_obj = (struct json_object_s*)buf_val->payload;
-        struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
+        struct json_object_s *attr_obj =
+                (struct json_object_s*)buf_val->payload;
+
+        struct json_object_element_s *attr_ele =
+                (struct json_object_element_s*)attr_obj->start;
 
         while (attr_ele != ROA_NULL) {
                 if (json_attr_is_called(attr_ele, "byteLength")) {
@@ -582,14 +588,19 @@ gltf_buffers(struct json_value_s *buffers, struct gltf_import *out_import)
         ROA_ASSERT(out_import);
         ROA_ASSERT(buffers->type == json_type_array);
 
-        struct json_array_s *buffer_arr = (struct json_array_s*)buffers->payload;
-        struct json_array_element_s *buffer_arr_ele = (struct json_array_element_s*)buffer_arr->start;
+        struct json_array_s *buffer_arr =
+                (struct json_array_s*)buffers->payload;
+
+        struct json_array_element_s *buffer_arr_ele =
+                (struct json_array_element_s*)buffer_arr->start;
 
         while (buffer_arr_ele != ROA_NULL) {
                 struct gltf_buffer buffer;
                 ROA_MEM_ZERO(buffer);
 
-                struct json_value_s *acc_val = (struct json_value_s*)buffer_arr_ele->value;
+                struct json_value_s *acc_val =
+                        (struct json_value_s*)buffer_arr_ele->value;
+
                 gltf_buffer(acc_val, &buffer);
 
                 roa_array_push(out_import->buffers, buffer);
@@ -612,8 +623,11 @@ gltf_buffer_view(
         ROA_ASSERT(buf_val);
         ROA_ASSERT(buffer_view);
 
-        struct json_object_s *attr_obj = (struct json_object_s*)buf_val->payload;
-        struct json_object_element_s *attr_ele = (struct json_object_element_s*)attr_obj->start;
+        struct json_object_s *attr_obj =
+                (struct json_object_s*)buf_val->payload;
+
+        struct json_object_element_s *attr_ele =
+                (struct json_object_element_s*)attr_obj->start;
 
         while (attr_ele != ROA_NULL) {
 
@@ -658,14 +672,19 @@ gltf_buffer_views(struct json_value_s *buffer_views, struct gltf_import *out_imp
         ROA_ASSERT(out_import);
         ROA_ASSERT(buffer_views->type == json_type_array);
 
-        struct json_array_s *buffer_view_arr = (struct json_array_s*)buffer_views->payload;
-        struct json_array_element_s *buffer_arr_ele = (struct json_array_element_s*)buffer_view_arr->start;
+        struct json_array_s *buffer_view_arr =
+                (struct json_array_s*)buffer_views->payload;
+
+        struct json_array_element_s *buffer_arr_ele =
+                (struct json_array_element_s*)buffer_view_arr->start;
 
         while (buffer_arr_ele != ROA_NULL) {
                 struct gltf_buffer_view buffer_view;
                 ROA_MEM_ZERO(buffer_view);
 
-                struct json_value_s *val = (struct json_value_s*)buffer_arr_ele->value;
+                struct json_value_s *val =
+                        (struct json_value_s*)buffer_arr_ele->value;
+
                 gltf_buffer_view(val, &buffer_view);
 
                 roa_array_push(out_import->buffer_views, buffer_view);
