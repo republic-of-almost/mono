@@ -88,7 +88,6 @@ load_mesh(
         roa_renderer_mesh_resource_add(ctx, &mesh_rsrc);
 }
 
-
 void
 load(
         struct roa_renderer_ctx *ctx,
@@ -97,7 +96,7 @@ load(
         struct roa_renderer_mesh_resource mesh_rsrc;
         ROA_MEM_ZERO(mesh_rsrc);
 
-        int mesh_index = 1;
+        int mesh_index = 0;
 
         mesh_rsrc.name = gltf->meshes[mesh_index].name;
 
@@ -148,13 +147,19 @@ load(
 
         struct roa_renderer_decal decals[2];
 
-        memcpy(decals->position, gltf->nodes[1].translation, sizeof(decals->position));
-        memcpy(decals->rotation, gltf->nodes[1].rotation, sizeof(decals->rotation));
-        memcpy(decals->scale, gltf->nodes[1].scale, sizeof(decals->scale));
+        memcpy(decals[0].position, gltf->nodes[0].translation, sizeof(decals->position));
+        memcpy(decals[0].rotation, gltf->nodes[0].rotation, sizeof(decals->rotation));
+        memcpy(decals[0].scale, gltf->nodes[0].scale, sizeof(decals->scale));
+        decals[0].scale[0] *= 2.f;
+        decals[0].scale[1] *= 2.f;
+        decals[0].scale[2] *= 2.f;
 
-        memcpy(decals->position, gltf->nodes[2].translation, sizeof(decals->position));
-        memcpy(decals->rotation, gltf->nodes[2].rotation, sizeof(decals->rotation));
-        memcpy(decals->scale, gltf->nodes[2].scale, sizeof(decals->scale));
+        memcpy(decals[1].position, gltf->nodes[1].translation, sizeof(decals->position));
+        memcpy(decals[1].rotation, gltf->nodes[1].rotation, sizeof(decals->rotation));
+        memcpy(decals[1].scale, gltf->nodes[1].scale, sizeof(decals->scale));
+        decals[1].scale[0] *= 2.f;
+        decals[1].scale[1] *= 2.f;
+        decals[1].scale[2] *= 2.f;
 
         mesh_rsrc.decals_lod0 = decals;
         mesh_rsrc.decals_lod0_count = 2;

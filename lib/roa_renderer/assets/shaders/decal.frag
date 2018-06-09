@@ -10,7 +10,9 @@
 #version 410
 //"#extension GL_ARB_texture_rectangle : enable
 
-#define DEBUG_NO_DISCARD 1 
+/* 1 will not cull any fragments, helps with debuging if you suspect the
+    projector is indside geometry */
+#define DEBUG_NO_DISCARD 0 
 
 /* ------------------------------------------------------------ [ inputs ] -- */
 

@@ -202,25 +202,28 @@ platform_render(roa_renderer_ctx_t ctx)
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
 
-      int decal_count = ctx->resource_desc.mesh_rsrc_data[0].decals_lod0_count;
-      struct roa_renderer_decal *decals = ctx->resource_desc.mesh_rsrc_data[0].decals_lod0;
+      int decal_count = roa_array_size(rp->decals);
+      struct decal_transform *decals = rp->decals;
 
       for(k = 0; k < decal_count; ++k)
       {
-        struct roa_renderer_decal *decal = &decals[k];
+        struct decal_transform *decal = &decals[k];
 
         /* sort */
         roa_mat4 id, world, scale, position, inv_world;
 
-        roa_transform decal_transform;
-        decal_transform.position  = roa_float3_import(decal->position);
-        decal_transform.scale     = roa_float3_import(decal->scale);
-        decal_transform.rotation  = roa_quaternion_import(decal->rotation);
+        //roa_transform decal_transform;
+        //decal_transform.position  = roa_float3_import(decal->position);
+        //decal_transform.scale     = roa_float3_import(decal->scale);
+        //decal_transform.rotation  = roa_quaternion_import(decal->rotation);
 
-        roa_mat4_id(&id);
-        roa_mat4_translate(&position, decal_transform.position);
-        roa_mat4_scale(&scale, decal_transform.scale);
-        roa_transform_to_mat4(&decal_transform, &world);
+        //roa_mat4_id(&id);
+        //roa_mat4_translate(&position, decal_transform.position);
+        //roa_mat4_scale(&scale, decal_transform.scale);
+        //roa_transform_to_mat4(&decal_transform, &world);
+
+        roa_mat4_import(&world, decal->world_mat);
+
         roa_mat4_inverse(&inv_world, &world);
 
         roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;

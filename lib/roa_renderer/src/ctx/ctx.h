@@ -101,7 +101,7 @@ struct renderpass
 {
   struct renderpass_camera camera;
   struct renderpass_draw_call *draw_calls;
-
+   
   struct decal_transform *decals;
 };
 

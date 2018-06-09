@@ -129,7 +129,7 @@ roa_renderer_mesh_renderable_transform_set(
         /* set data */
         if (rdr_index > -1) {
                 struct renderer_mesh_renderable *descs =
-                  &ctx->renderer_desc.mesh_rdr_descs;
+                  ctx->renderer_desc.mesh_rdr_descs;
 
                 if (position) {
                         memcpy(descs[rdr_index].position,
@@ -194,7 +194,7 @@ roa_renderer_mesh_renderable_transform_get(
         /* get data */
         if (rdr_index > -1) {
                 struct renderer_mesh_renderable *descs =
-                        &ctx->renderer_desc.mesh_rdr_descs;
+                        ctx->renderer_desc.mesh_rdr_descs;
 
                 if (out_pos) {
                         memcpy(out_pos,

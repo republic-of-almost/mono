@@ -159,14 +159,18 @@ ROA_BOOL
 roa_renderer_mesh_renderable_transform_set(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id,
-  float *transform);
+  float *pos,
+  float *scale,
+  float *rotation);
 
 
 ROA_BOOL
 roa_renderer_mesh_renderable_transform_get(
   roa_renderer_ctx_t ctx,
   uint32_t renderable_id,
-  float *out_transform);
+  float *out_pos,
+  float *out_scale,
+  float *out_rotation);
 
 
 unsigned

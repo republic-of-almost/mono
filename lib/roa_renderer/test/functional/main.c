@@ -227,10 +227,12 @@ main()
           transform.rotation = roa_quaternion_default();
           transform.scale    = roa_float3_set_with_values(1, y, 1);
 
-          float export[16];
-          roa_transform_export_mat4(&transform, export);
-
-          roa_renderer_mesh_renderable_transform_set(renderer_ctx, obj_id, export);
+          roa_renderer_mesh_renderable_transform_set(
+            renderer_ctx,
+            obj_id,
+            &transform.position,
+            &transform.scale,
+            &transform.rotation);
         }
         else
         {
@@ -245,10 +247,13 @@ main()
           transform.rotation = roa_quaternion_default();
           transform.scale    = roa_float3_set_with_values(width, width, width);
 
-          float export[16];
-          roa_transform_export_mat4(&transform, export);
+          roa_renderer_mesh_renderable_transform_set(
+            renderer_ctx,
+            obj_id,
+            &transform.position,
+            &transform.scale,
+            &transform.rotation);
 
-          roa_renderer_mesh_renderable_transform_set(renderer_ctx, obj_id, export);
         }
       }
     }
