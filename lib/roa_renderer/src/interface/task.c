@@ -55,23 +55,85 @@ roa_renderer_task_pump(
     rp->draw_calls = 0;
     unsigned dc_count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
     roa_array_create_with_capacity(rp->draw_calls, dc_count);
+    roa_array_create_with_capacity(rp->decals, dc_count * 4);
+
     unsigned j;
 
+    /* draw calls */
     for (j = 0; j < dc_count; ++j)
     {
-      struct renderer_mesh_renderable rdr = ctx->renderer_desc.mesh_rdr_descs[j];
+            struct renderer_mesh_renderable rdr = ctx->renderer_desc.mesh_rdr_descs[j];
 
-      struct renderpass_draw_call dc;
-      memcpy(dc.world, rdr.world_transform, sizeof(dc.world));
+            struct renderpass_draw_call dc;
+            roa_transform trans;
+            trans.position = roa_float3_import(rdr.position);
+            trans.rotation = roa_quaternion_import(rdr.rotation);
+            trans.scale = roa_float3_import(rdr.scale);
 
-      roa_mat4 world;
-      roa_mat4_import(&world, rdr.world_transform);
+            roa_mat4 world;
+            roa_transform_to_mat4(&trans, &world);
 
-      roa_mat4 wvp;
-      roa_mat4_multiply(&wvp, &world, &view_proj);
-      memcpy(dc.wvp, wvp.data, sizeof(dc.wvp));
+            memcpy(dc.world, ROA_ARRAY_DATA(world.data), sizeof(dc.world));
 
-      roa_array_push(rp->draw_calls, dc);
+            roa_mat4 wvp;
+            roa_mat4_multiply(&wvp, &world, &view_proj);
+            memcpy(dc.wvp, wvp.data, sizeof(dc.wvp));
+
+            roa_array_push(rp->draw_calls, dc);
+    }
+
+    /* decals */
+    for (j = 0; j < dc_count; ++j)
+    {
+            struct renderer_mesh_renderable rdr = ctx->renderer_desc.mesh_rdr_descs[j];
+
+            roa_transform parent_trans;
+            parent_trans.position = roa_float3_import(rdr.position);
+            parent_trans.rotation = roa_quaternion_import(rdr.rotation);
+            parent_trans.scale = roa_float3_import(rdr.scale);
+
+            int mesh_id = rdr.mesh_id;
+
+            unsigned mesh_count = roa_array_size(ctx->resource_desc.mesh_ids);
+            uint64_t *mesh_ids = ctx->resource_desc.mesh_ids;
+
+            int k;
+            for (k = 0; k < mesh_count; ++k)
+            {
+                    if (mesh_ids[k] == mesh_id)
+                    {
+                            struct roa_renderer_mesh_resource *rsrc = &ctx->resource_desc.mesh_rsrc_data[k];
+
+                            int l;
+                            int decal_count = rsrc->decals_lod0_count;
+
+                            for(l = 0; l < decal_count; ++l) {
+                              struct roa_renderer_decal *decal = &rsrc->decals_lod0[l];
+
+                              roa_transform decal_trans;
+                              decal_trans.position  = roa_float3_import(decal->position);
+                              decal_trans.rotation  = roa_quaternion_import(decal->rotation);
+                              decal_trans.scale     = roa_float3_import(decal->scale);
+
+
+                            }
+          
+
+                            break;
+                    }
+            }
+
+            struct renderpass_draw_call dc;
+            memcpy(dc.world, rdr.world_transform, sizeof(dc.world));
+
+            roa_mat4 world;
+            roa_mat4_import(&world, rdr.world_transform);
+
+            roa_mat4 wvp;
+            roa_mat4_multiply(&wvp, &world, &view_proj);
+            memcpy(dc.wvp, wvp.data, sizeof(dc.wvp));
+
+            roa_array_push(rp->draw_calls, dc);
     }
   }
 

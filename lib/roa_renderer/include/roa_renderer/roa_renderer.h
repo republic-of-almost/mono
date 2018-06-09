@@ -210,6 +210,9 @@ struct roa_renderer_mesh_resource
   int index_stride;
   void *index_array;
   unsigned index_count;
+
+  struct roa_renderer_decal *decals_lod0;
+  int decals_lod0_count;
 };
 
 

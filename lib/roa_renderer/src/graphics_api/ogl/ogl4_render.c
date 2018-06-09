@@ -202,8 +202,8 @@ platform_render(roa_renderer_ctx_t ctx)
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
 
-      int decal_count = ctx->renderer_desc.mesh_rdr_descs[0].decals_lod0_count;
-      struct roa_renderer_decal *decals = ctx->renderer_desc.mesh_rdr_descs[0].decals_lod0;
+      int decal_count = ctx->resource_desc.mesh_rsrc_data[0].decals_lod0_count;
+      struct roa_renderer_decal *decals = ctx->resource_desc.mesh_rsrc_data[0].decals_lod0;
 
       for(k = 0; k < decal_count; ++k)
       {

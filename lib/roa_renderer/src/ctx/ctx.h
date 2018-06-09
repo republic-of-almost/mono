@@ -19,12 +19,11 @@
 
 struct renderer_mesh_renderable
 {
-  float world_transform[16];
+  float position[3];
+  float scale[3];
+  float rotation[4];
   
   uint64_t mesh_id;
-  
-  struct roa_renderer_decal *decals_lod0;
-  unsigned decals_lod0_count;
 };
 
 
@@ -93,10 +92,17 @@ struct renderpass_draw_call
 };
 
 
+struct decal_transform {
+      float world_mat[16];
+};
+
+
 struct renderpass
 {
   struct renderpass_camera camera;
   struct renderpass_draw_call *draw_calls;
+
+  struct decal_transform *decals;
 };
 
 
