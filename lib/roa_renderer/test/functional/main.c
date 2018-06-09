@@ -72,7 +72,7 @@ main()
 
     strcat(import_file, roa_exe_dir());
     //strcat(import_file, "assets/cube.gltf");
-    strcat(import_file, "assets/gltf_test/plane_trainer.gltf");
+    strcat(import_file, "assets/plane_trainer.gltf");
 
     roa_renderer_load(renderer_ctx, import_file);
   }
