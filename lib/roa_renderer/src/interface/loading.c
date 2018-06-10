@@ -27,23 +27,20 @@ gltf_to_stride(int component_type)
 /* ----------------------------------------------------------- [ Helpers ] -- */
 
 
-struct node_scan {
-        int is_decal;
-};
-
-
 /*
         Scans the gltf nodes and returns how many aren't decals.
-        Nodes must be the correct size.
+        is_node_a_decal size must be equal to node_count.
 */
 int
 scan_nodes(
         const struct gltf_import *gltf,
-        struct node_scan *nodes)
+        int *is_node_a_decal)
 {
+        /* param check */
         ROA_ASSERT(gltf);
-        ROA_ASSERT(nodes);
+        ROA_ASSERT(is_node_a_decal);
 
+        /* process */
         int i;
         int node_count = gltf->node_count;
         int nodes_to_create = 0;
@@ -52,26 +49,107 @@ scan_nodes(
         for (i = 0; i < node_count; ++i)
         {
           if (strcmp(gltf->nodes[i].name, "Decals") == 0) {
-            nodes[i].is_decal = 1;
+            is_node_a_decal[i] = 1;
 
             int j;
             int child_count = gltf->nodes[i].child_count;
 
             for (j = 0; j < child_count; ++j) {
               int node_id = gltf->nodes[i].children[j];
-              nodes[node_id].is_decal = 1;
+              is_node_a_decal[node_id] = 1;
             }
           }
         }
 
         /* count */
         for (i = 0; i < node_count; ++i) {
-                if (!nodes[i].is_decal) {
+                if (!is_node_a_decal[i]) {
                         nodes_to_create += 1;
                 }
         }
 
         return nodes_to_create;
+}
+
+
+/* 
+        Gets the vertex data, all types in the format must be found.
+        Returns the vertex count.
+*/
+int
+get_vertex_data(
+        const struct gltf_import *gltf,
+        int *vertex_desc,
+        float **vertex_data,
+        int vertex_count)
+{
+        /* param check */
+        ROA_ASSERT(gltf);
+        ROA_ASSERT(vertex_desc);
+        ROA_ASSERT(vertex_data);
+        ROA_ASSERT(vertex_count);
+
+        /* process */
+        int i;
+
+        for (i = 0; i < vertex_count; ++i) {
+                /* missing attribute - is this a decal */
+                ROA_ASSERT(vertex_desc[i] >= 0);
+
+                int item = vertex_desc[i];
+                int view = gltf->accessors[item].buffer_view;
+                ROA_ASSERT(view < gltf->buffer_view_count);
+
+                int buf = gltf->buffer_views[view].buffer;
+                ROA_ASSERT(buf < gltf->buffer_count);
+
+                int off = gltf->buffer_views[view].byte_offset;
+                float *data = (float*)&gltf->buffers[buf].uri_data[off];
+                ROA_ASSERT(data);
+
+                vertex_data[i] = data;
+        }
+
+        return gltf->accessors[vertex_desc[0]].count;
+}
+
+
+/* 
+        Gets the index data, returns the number of indices.
+*/
+int
+get_index_data(
+        const struct gltf_import *gltf,
+        int index,
+        void **index_data,
+        int *index_stride)
+{
+        /* param check */
+        ROA_ASSERT(gltf);
+        ROA_ASSERT(index);
+        ROA_ASSERT(index_data);
+        ROA_ASSERT(index_stride);
+
+        /* process */
+        int view = gltf->accessors[index].buffer_view;
+        ROA_ASSERT(view < gltf->buffer_view_count);
+
+        int buf = gltf->buffer_views[view].buffer;
+        ROA_ASSERT(buf < gltf->buffer_view_count);
+
+        int off = gltf->buffer_views[view].byte_offset;
+        ROA_ASSERT(off >= 0);
+
+        int type = gltf->accessors[view].component_type;
+        *index_stride = gltf_to_stride(type);
+        ROA_ASSERT(*index_stride > 0);
+
+        *index_data = (void*)&gltf->buffers[buf].uri_data[off];
+
+        int count = gltf->accessors[view].count;
+        ROA_ASSERT(count > 0);
+
+        return count;
 }
 
 
@@ -83,9 +161,9 @@ scan_nodes(
 */
 int
 generate_meshes(
-        struct gltf_import *gltf,
+        const struct gltf_import *gltf,
         struct roa_renderer_mesh_resource *meshes,
-        struct node_scan *nodes)
+        int *is_node_a_decal)
 {
         int i;
         int node_count = gltf->node_count;
@@ -94,111 +172,89 @@ generate_meshes(
         for (i = 0; i < node_count; ++i) {
 
                 /* skip decals*/
-                if (nodes[i].is_decal) {
+                if (is_node_a_decal[i]) {
                         continue;
                 }
 
                 int mesh_index = gltf->nodes[i].mesh;
 
+                const struct gltf_mesh *curr_mesh = &gltf->meshes[mesh_index];
+                struct roa_renderer_mesh_resource *out_mesh = &meshes[meshes_to_generate];
+
+                /* name */
                 const char *name = gltf->meshes[mesh_index].name;
-                meshes[meshes_to_generate].name = name;
+                out_mesh->name = name;
 
                 /* vertex data */
-                int pos = gltf->meshes[mesh_index].primitives[0].attributes.POSITION;
+                int vertex_desc[3];
+                ROA_MEM_ZERO(vertex_desc);
+                vertex_desc[0] = curr_mesh->primitives[0].attributes.POSITION;
+                vertex_desc[1] = curr_mesh->primitives[0].attributes.NORMAL;
+                vertex_desc[2] = curr_mesh->primitives[0].attributes.TEXCOORD_0;
 
-                if (pos < 0) {  
-                        /* a mesh without positional data? */
-                        ROA_ASSERT(0);
-                        continue;
-                }
+                float **vertex_data[ROA_ARR_COUNT(vertex_desc)];
+                ROA_MEM_ZERO(vertex_data);
 
-                int pos_view = gltf->accessors[pos].buffer_view;
-                int pos_buffer = gltf->buffer_views[pos_view].buffer;
-                int pos_offset = gltf->buffer_views[pos_view].byte_offset;
+                out_mesh->vertex_count = get_vertex_data(
+                        gltf,
+                        ROA_ARR_DATA(vertex_desc),
+                        ROA_ARR_DATA(vertex_data),
+                        ROA_ARR_COUNT(vertex_desc));
 
-                meshes[meshes_to_generate].position_vec3_array = (float*)&gltf->buffers[pos_buffer].uri_data[pos_offset];
-
-                int nor = gltf->meshes[mesh_index].primitives[0].attributes.NORMAL;
-
-                if (nor < 0) {
-                        /* is this a decal not in the correct place? */
-                        ROA_ASSERT(0);
-                        continue;
-                }
-
-                int nor_view = gltf->accessors[nor].buffer_view;
-                int nor_buffer = gltf->buffer_views[nor_view].buffer;
-                int nor_offset = gltf->buffer_views[nor_view].byte_offset;
-
-                meshes[meshes_to_generate].normal_vec3_array = (float*)&gltf->buffers[nor_buffer].uri_data[nor_offset];
-
-                int texc = gltf->meshes[mesh_index].primitives[0].attributes.TEXCOORD_0;
-
-                if (texc < 0) {
-                        /* is this a decal not in the correct place? */
-                        ROA_ASSERT(0);
-                        continue;
-                }
-
-                int texc_view = gltf->accessors[texc].buffer_view;
-                int texc_buffer = gltf->buffer_views[texc_view].buffer;
-                int texc_offset = gltf->buffer_views[texc_view].byte_offset;
-
-                const unsigned char *buffer = gltf->buffers[texc_buffer].uri_data;
-                const unsigned char *texc_rdata = &buffer[texc_offset];
-                const float *texc_fdata = (float*)texc_rdata;
+                /* be sure order matches desc */
+                out_mesh->position_vec3_array = vertex_data[0];
+                out_mesh->normal_vec3_array = vertex_data[1];
+                out_mesh->texture_coord_vec2_array = vertex_data[2];
                 
-                meshes[meshes_to_generate].texture_coord_vec2_array = texc_fdata;
-                meshes[meshes_to_generate].vertex_count = gltf->accessors[pos].count;
-
                 /* index data */
-                int index = gltf->meshes[mesh_index].primitives[0].indices;
-                int index_view = gltf->accessors[index].buffer_view;
-                int index_buffer = gltf->buffer_views[index_view].buffer;
-                int index_offset = gltf->buffer_views[index_view].byte_offset;
-
-                meshes[meshes_to_generate].index_stride = gltf_to_stride(gltf->accessors[index_view].component_type);
-                meshes[meshes_to_generate].index_array = (void*)&gltf->buffers[index_buffer].uri_data[index_offset];
-                meshes[meshes_to_generate].index_count = gltf->accessors[index_view].count;
+                out_mesh->index_count = get_index_data(
+                          gltf,
+                          gltf->meshes[mesh_index].primitives[0].indices,
+                          &out_mesh->index_array,
+                          &out_mesh->index_stride);
 
                 struct roa_renderer_decal *decals = 0;
                 roa_array_create_with_capacity(decals, 32);
 
                 int decal_count = 0;
-
-
+                
                 int j = 0;
-                for (j = 0; j < gltf->nodes[i].child_count; ++j)
+                int child_count = gltf->nodes[i].child_count;
+
+                for (j = 0; j < child_count; ++j)
                 {
-                  if (strcmp(gltf->nodes[gltf->nodes[i].children[j]].name, "Decals") == 0) {
+                        int child_id = gltf->nodes[i].children[j];
+                        const char *child_name = gltf->nodes[child_id].name;
 
-                    int m = 0;
-                    int decal_count = gltf->nodes[gltf->nodes[i].children[j]].child_count;
+                        if (strcmp(child_name, "Decals") == 0) {
 
-                    for (m = 0; m < decal_count; ++m)
-                    {
-                      int n = gltf->nodes[gltf->nodes[i].children[j]].children[m];
+                                int m = 0;
+                                int decal_count = gltf->nodes[child_id].child_count;
 
-                      struct roa_renderer_decal decal;
+                                for (m = 0; m < decal_count; ++m)
+                                {
+                                        int n = gltf->nodes[child_id].children[m];
 
-                      memcpy(decal.position, gltf->nodes[n].translation, sizeof(decals->position));
-                      memcpy(decal.rotation, gltf->nodes[n].rotation, sizeof(decals->rotation));
-                      memcpy(decal.scale, gltf->nodes[n].scale, sizeof(decals->scale));
+                                        struct roa_renderer_decal decal;
 
-                      /* projector is unit cube, but blenders default a 2x2x2 cube */
-                      decal.scale[0] *= 2.f;
-                      decal.scale[1] *= 2.f;
-                      decal.scale[2] *= 2.f;
+                                        memcpy(decal.position, gltf->nodes[n].translation, sizeof(decals->position));
+                                        memcpy(decal.rotation, gltf->nodes[n].rotation, sizeof(decals->rotation));
+                                        memcpy(decal.scale, gltf->nodes[n].scale, sizeof(decals->scale));
 
-                      roa_array_push(decals, decal);
-                    }
+                                        /* projector is a unit cube, but blenders default a 2x2x2 cube */
+                                        decal.scale[0] *= 2.f;
+                                        decal.scale[1] *= 2.f;
+                                        decal.scale[2] *= 2.f;
 
-                    break;
-                  }
+                                        roa_array_push(decals, decal);
+                                }
+
+                                break;
+                        }
                 }
 
-                meshes[meshes_to_generate].decals_lod0 = decals;
-                meshes[].decals_lod0_count = roa_array_size(decals);
+                out_mesh->decals_lod0 = decals;
+                out_mesh->decals_lod0_count = roa_array_size(decals);
 
                 meshes_to_generate += 1;
         }
@@ -217,17 +273,17 @@ load(
         ROA_ASSERT(gltf);
 
         int node_count = gltf->node_count;
-        struct node_scan *nodes = ROA_NULL;
+        int *is_node_a_decal = ROA_NULL;
 
         /* process the nodes first */
         int nodes_to_create_count = 0;
         {
-                roa_array_create_with_capacity(nodes, node_count);
-                roa_array_resize(nodes, node_count);
+                roa_array_create_with_capacity(is_node_a_decal, node_count);
+                roa_array_resize(is_node_a_decal, node_count);
 
-                memset(nodes, 0, sizeof(nodes[0]) * node_count);
+                memset(is_node_a_decal, 0, sizeof(is_node_a_decal[0]) * node_count);
 
-                nodes_to_create_count = scan_nodes(gltf, nodes);
+                nodes_to_create_count = scan_nodes(gltf, is_node_a_decal);
         }
 
         /* create meshes */
@@ -239,7 +295,7 @@ load(
 
                 memset(meshes, 0, sizeof(meshes[0]) * nodes_to_create_count);
 
-                mesh_count = generate_meshes(gltf, meshes, nodes);
+                mesh_count = generate_meshes(gltf, meshes, is_node_a_decal);
 
                 ROA_ASSERT(mesh_count == nodes_to_create_count);
         }
