@@ -303,9 +303,8 @@ load(
         /* add meshes */
         int m;
 
-        for(m = 0; m < mesh_count; ++m)
-        {
-          roa_renderer_mesh_resource_add(ctx, &meshes[m]);
+        for(m = 0; m < mesh_count; ++m) {
+                roa_renderer_mesh_resource_add(ctx, &meshes[m]);
         }
 }
 

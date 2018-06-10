@@ -25,6 +25,7 @@ unsigned renderable_count = 1;
 
 float spin = 0.f;
 float pitch = 0.f;
+float cam_radius = 50.f;
 
 
 int
@@ -102,7 +103,7 @@ main()
       struct roa_renderer_camera camera;
       ROA_MEM_ZERO(camera);
       camera.near_plane     = 0.1f;
-      camera.far_plane      = 100.f;
+      camera.far_plane      = 400.f;
       camera.field_of_view  = ROA_QUART_TAU * 0.125f;
       camera.position[2]    = +3.f;
 
@@ -165,6 +166,7 @@ main()
 
       spin += (ms_desc.x_delta * 0.001f);
       pitch += (ms_desc.y_delta * 0.001f);
+      cam_radius += (ms_desc.y_scroll * 2.2f);
 
       pitch = roa_float_clamp(pitch, -ROA_QUART_TAU, +ROA_QUART_TAU);
 
@@ -180,20 +182,14 @@ main()
       roa_float3 rot_pos = roa_quaternion_rotate_vector(
         final_rot,
         roa_transform_world_left());
-      rot_pos = roa_float3_scale(rot_pos, 60.f);
+      rot_pos = roa_float3_scale(rot_pos, cam_radius);
 
       struct roa_renderer_camera camera;
       ROA_MEM_ZERO(camera);
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
 
-			float radius = 150.f;
 			float spin_time = time * 0.025f;
 
-      float x = roa_float_sin(spin) * radius;
-      float y = radius - (radius / ROA_G_RATIO);
-      float z = roa_float_cos(spin) * radius;
-
-      roa_float3 from = roa_float3_set_with_values(x, y, z);
       roa_float3 at   = roa_float3_fill_with_value(0.f);
       roa_float3 up   = roa_quaternion_rotate_vector(
         final_rot, roa_transform_world_up());
