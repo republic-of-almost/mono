@@ -232,17 +232,17 @@ parse_decals(
 
                                 memcpy(
                                     decal.position,
-                                    gltf->nodes[j].translation,
+                                    gltf->nodes[decal_id].translation,
                                     sizeof(decal.position));
 
                                 memcpy(
                                     decal.rotation,
-                                    gltf->nodes[j].rotation,
+                                    gltf->nodes[decal_id].rotation,
                                     sizeof(decal.rotation));
 
                                 memcpy(
                                     decal.scale,
-                                    gltf->nodes[j].scale,
+                                    gltf->nodes[decal_id].scale,
                                     sizeof(decal.scale));
 
                                 /* projector is a unit cube,

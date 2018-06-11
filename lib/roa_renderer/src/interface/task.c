@@ -91,6 +91,9 @@ roa_renderer_task_pump(
             parent_trans.rotation = roa_quaternion_import(rdr.rotation);
             parent_trans.scale = roa_float3_import(rdr.scale);
 
+            roa_float3 distance = roa_float3_subtract(parent_trans.position, roa_float3_import(cam.position));
+            float lod_distance = roa_float_abs(roa_float3_length(distance));
+
             int mesh_id = rdr.mesh_id;
 
             unsigned mesh_count = roa_array_size(ctx->resource_desc.mesh_ids);
@@ -99,28 +102,64 @@ roa_renderer_task_pump(
             int k;
             for (k = 0; k < mesh_count; ++k)
             {
-                    //if (mesh_ids[k] == mesh_id) {
                     if(k == 0) {
                             struct roa_renderer_mesh_resource *rsrc = &ctx->resource_desc.mesh_rsrc_data[k];
 
+                            struct roa_renderer_decal *lods[10] = {
+                                    rsrc->decals_lod0,
+                                    rsrc->decals_lod1,
+                                    rsrc->decals_lod2,
+                                    rsrc->decals_lod3,
+                                    rsrc->decals_lod4,
+                                    rsrc->decals_lod5,
+                                    rsrc->decals_lod6,
+                                    rsrc->decals_lod7,
+                                    rsrc->decals_lod8,
+                                    rsrc->decals_lod9,
+                            };
+
+                            int *lod_count[10] = {
+                                    rsrc->decals_lod0_count,
+                                    rsrc->decals_lod1_count,
+                                    rsrc->decals_lod2_count,
+                                    rsrc->decals_lod3_count,
+                                    rsrc->decals_lod4_count,
+                                    rsrc->decals_lod5_count,
+                                    rsrc->decals_lod6_count,
+                                    rsrc->decals_lod7_count,
+                                    rsrc->decals_lod8_count,
+                                    rsrc->decals_lod9_count,
+                            };
+
+                            
+                            float dist = lod_distance > 0.f ? (lod_distance + 0.5f) : (lod_distance - 0.5f);
+                            int lod_max = 10 - (int)dist / 10;
+                            lod_max = lod_max > 10 ? 10 : lod_max < 0 ? 0 : lod_max;
+
                             int l;
-                            int decal_count = rsrc->decals_lod0_count;
+                            int m;
 
-                            for(l = 0; l < decal_count; ++l) {
-                                    struct roa_renderer_decal *decal = &rsrc->decals_lod0[l];
+                            for(m = 0; m < lod_max; ++m)
+                            {
 
-                                    roa_transform decal_trans;
-                                    decal_trans.position  = roa_float3_import(decal->position);
-                                    decal_trans.rotation  = roa_quaternion_import(decal->rotation);
-                                    decal_trans.scale     = roa_float3_import(decal->scale);
+                                    int decal_count = lod_count[m];
 
-                                    roa_transform inherited;
-                                    roa_transform_inherited(&inherited, &parent_trans, &decal_trans);
+                                    for(l = 0; l < decal_count; ++l) {
+                                            struct roa_renderer_decal *decal = &lods[m][l];
 
-                                    struct decal_transform decal_t;
-                                    roa_transform_to_mat4(&inherited, decal_t.world_mat);
+                                            roa_transform decal_trans;
+                                            decal_trans.position  = roa_float3_import(decal->position);
+                                            decal_trans.rotation  = roa_quaternion_import(decal->rotation);
+                                            decal_trans.scale     = roa_float3_import(decal->scale);
 
-                                    roa_array_push(rp->decals, decal_t);
+                                            roa_transform inherited;
+                                            roa_transform_inherited(&inherited, &parent_trans, &decal_trans);
+
+                                            struct decal_transform decal_t;
+                                            roa_transform_to_mat4(&inherited, decal_t.world_mat);
+
+                                            roa_array_push(rp->decals, decal_t);
+                                    }
                             }
           
                             break;

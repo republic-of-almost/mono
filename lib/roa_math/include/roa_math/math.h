@@ -46,6 +46,7 @@ float           roa_float_sin(float a);
 float           roa_float_cos(float a);
 float           roa_float_acos(float a);
 
+float           roa_float_exp(float a);
 float           roa_float_sqrt(float a);
 
 float           roa_float_sign(float a);

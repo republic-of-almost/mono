@@ -43,6 +43,13 @@ roa_float_acos(float a)
 
 
 float
+roa_float_exp(float a)
+{
+        return expf(a);
+}
+
+
+float
 roa_float_sqrt(float a)
 {
   return sqrtf(a);

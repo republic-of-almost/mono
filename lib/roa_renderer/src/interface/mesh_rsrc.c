@@ -63,6 +63,33 @@ roa_renderer_mesh_resource_add(
     copy.decals_lod0 = rdr_alloc_copy((void*)rsrc->decals_lod0, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod0_count);
     copy.decals_lod0_count = rsrc->decals_lod0_count;
 
+    copy.decals_lod1 = rdr_alloc_copy((void*)rsrc->decals_lod1, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod1_count);
+    copy.decals_lod1_count = rsrc->decals_lod1_count;
+
+    copy.decals_lod2 = rdr_alloc_copy((void*)rsrc->decals_lod2, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod2_count);
+    copy.decals_lod2_count = rsrc->decals_lod2_count;
+
+    copy.decals_lod3 = rdr_alloc_copy((void*)rsrc->decals_lod3, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod3_count);
+    copy.decals_lod3_count = rsrc->decals_lod3_count;
+
+    copy.decals_lod4 = rdr_alloc_copy((void*)rsrc->decals_lod4, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod4_count);
+    copy.decals_lod4_count = rsrc->decals_lod4_count;
+
+    copy.decals_lod5 = rdr_alloc_copy((void*)rsrc->decals_lod5, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod5_count);
+    copy.decals_lod5_count = rsrc->decals_lod5_count;
+
+    copy.decals_lod6 = rdr_alloc_copy((void*)rsrc->decals_lod6, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod6_count);
+    copy.decals_lod6_count = rsrc->decals_lod6_count;
+
+    copy.decals_lod7 = rdr_alloc_copy((void*)rsrc->decals_lod7, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod7_count);
+    copy.decals_lod7_count = rsrc->decals_lod7_count;
+
+    copy.decals_lod8 = rdr_alloc_copy((void*)rsrc->decals_lod8, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod8_count);
+    copy.decals_lod8_count = rsrc->decals_lod8_count;
+
+    copy.decals_lod9 = rdr_alloc_copy((void*)rsrc->decals_lod9, sizeof(rsrc->decals_lod0[0]) * rsrc->decals_lod9_count);
+    copy.decals_lod9_count = rsrc->decals_lod9_count;
+
     copy.index_stride = rsrc->index_stride;
     copy.index_array = rdr_alloc_copy((void*)rsrc->index_array, sizeof(unsigned) * (rsrc->index_count));
     copy.index_count = rsrc->index_count;
