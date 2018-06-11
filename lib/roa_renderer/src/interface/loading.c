@@ -230,11 +230,23 @@ parse_decals(
                         if(strncmp(lod_name, decal_name, len) == 0) {
                                 struct roa_renderer_decal decal;
 
-                                memcpy(decal.position, gltf->nodes[j].translation, sizeof(decal.position));
-                                memcpy(decal.rotation, gltf->nodes[j].rotation, sizeof(decal.rotation));
-                                memcpy(decal.scale, gltf->nodes[j].scale, sizeof(decal.scale));
+                                memcpy(
+                                    decal.position,
+                                    gltf->nodes[j].translation,
+                                    sizeof(decal.position));
 
-                                /* projector is a unit cube, but blenders default a 2x2x2 cube */
+                                memcpy(
+                                    decal.rotation,
+                                    gltf->nodes[j].rotation,
+                                    sizeof(decal.rotation));
+
+                                memcpy(
+                                    decal.scale,
+                                    gltf->nodes[j].scale,
+                                    sizeof(decal.scale));
+
+                                /* projector is a unit cube,
+                                   but blenders default a 2x2x2 cube */
                                 decal.scale[0] *= 2.f;
                                 decal.scale[1] *= 2.f;
                                 decal.scale[2] *= 2.f;
@@ -245,6 +257,7 @@ parse_decals(
 
         }
 
+        /* output lod levels */
         out_mesh->decals_lod0 = decals[0];
         out_mesh->decals_lod0_count = roa_array_size(decals[0]);
 
@@ -274,7 +287,6 @@ parse_decals(
 
         out_mesh->decals_lod9 = decals[9];
         out_mesh->decals_lod9_count = roa_array_size(decals[9]);
-
 }
 
 
