@@ -217,6 +217,33 @@ struct roa_renderer_mesh_resource
 
   struct roa_renderer_decal *decals_lod0;
   int decals_lod0_count;
+
+  struct roa_renderer_decal *decals_lod1;
+  int decals_lod1_count;
+
+  struct roa_renderer_decal *decals_lod2;
+  int decals_lod2_count;
+
+  struct roa_renderer_decal *decals_lod3;
+  int decals_lod3_count;
+
+  struct roa_renderer_decal *decals_lod4;
+  int decals_lod4_count;
+
+  struct roa_renderer_decal *decals_lod5;
+  int decals_lod5_count;
+
+  struct roa_renderer_decal *decals_lod6;
+  int decals_lod6_count;
+
+  struct roa_renderer_decal *decals_lod7;
+  int decals_lod7_count;
+
+  struct roa_renderer_decal *decals_lod8;
+  int decals_lod8_count;
+
+  struct roa_renderer_decal *decals_lod9;
+  int decals_lod9_count;
 };
 
 
