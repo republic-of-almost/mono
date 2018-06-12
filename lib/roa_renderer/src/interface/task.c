@@ -5,6 +5,7 @@
 #include <roa_math/math.h>
 #include <stdio.h>
 #include <roa_lib/spin_lock.h>
+#include <string.h>
 
 
 unsigned
@@ -12,11 +13,13 @@ roa_renderer_task_pump(
   roa_renderer_ctx_t ctx,
   struct roa_renderer_task **tasks)
 {
+  (void)tasks;
+
   roa_spin_lock_aquire(&ctx->renderer_desc.lock);
   roa_spin_lock_aquire(&ctx->renderpass.lock);
   roa_spin_lock_aquire(&ctx->device_settings.lock);
   
-  unsigned cam_count = roa_array_size(ctx->renderer_desc.camera_ids);
+  int cam_count = (int)roa_array_size(ctx->renderer_desc.camera_ids);
   roa_array_resize(ctx->renderpass.rps, cam_count);
 
   int i = 0;
@@ -94,10 +97,7 @@ roa_renderer_task_pump(
             roa_float3 distance = roa_float3_subtract(parent_trans.position, roa_float3_import(cam.position));
             float lod_distance = roa_float_abs(roa_float3_length(distance));
 
-            int mesh_id = rdr.mesh_id;
-
-            unsigned mesh_count = roa_array_size(ctx->resource_desc.mesh_ids);
-            uint64_t *mesh_ids = ctx->resource_desc.mesh_ids;
+            int mesh_count = (int)roa_array_size(ctx->resource_desc.mesh_ids);
 
             int k;
             for (k = 0; k < mesh_count; ++k)
@@ -118,7 +118,7 @@ roa_renderer_task_pump(
                                     rsrc->decals_lod9,
                             };
 
-                            int *lod_count[10] = {
+                            int lod_count[10] = {
                                     rsrc->decals_lod0_count,
                                     rsrc->decals_lod1_count,
                                     rsrc->decals_lod2_count,
@@ -155,7 +155,9 @@ roa_renderer_task_pump(
                                             roa_transform_inherited(&inherited, &parent_trans, &decal_trans);
 
                                             struct decal_transform decal_t;
-                                            roa_transform_to_mat4(&inherited, decal_t.world_mat);
+                                            roa_mat4 out_mat;
+                                            roa_transform_to_mat4(&inherited, &out_mat);
+                                            roa_mat4_export(&out_mat, &decal_t.world_mat[0]);
 
                                             memcpy(decal_t.color, decal->color, sizeof(decal_t.color));
 
@@ -181,5 +183,5 @@ void
 roa_renderer_task_run(
 	struct roa_renderer_task *task)
 {
-
+        (void)task;
 }

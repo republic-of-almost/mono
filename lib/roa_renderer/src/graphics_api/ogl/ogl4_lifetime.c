@@ -220,7 +220,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         strcat(file, "gbuffer_fill.vert");
 
         const char *vs = 0;
-        roa_copy_file(file, &vs, ROA_NULL);
+        roa_copy_file(file, (char**)&vs, ROA_NULL);
    
         const GLchar *src = vs;
         glShaderSource(vert_shd, 1, &src, ROA_NULL);
@@ -247,7 +247,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         strcat(file, "gbuffer_fill.frag");
 
         const char *fs = 0;
-        roa_copy_file(file, &fs, ROA_NULL);
+        roa_copy_file(file, (char**)&fs, ROA_NULL);
 
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
@@ -352,7 +352,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         strcat(file, "decal.vert");
 
         const char *vs = 0;
-        roa_copy_file(file, &vs, ROA_NULL);
+        roa_copy_file(file, (char **)&vs, ROA_NULL);
          
         const GLchar *src = vs;
         glShaderSource(vert_shd, 1, &src, ROA_NULL);
@@ -380,7 +380,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         strcat(file, "decal.frag");
 
         const char *fs = 0;
-        roa_copy_file(file, &fs, ROA_NULL);
+        roa_copy_file(file, (char**)&fs, ROA_NULL);
           
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);
@@ -524,7 +524,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         strcat(file, "blit.vert");
 
         const char *vs = 0;
-        roa_copy_file(file, &vs, ROA_NULL);
+        roa_copy_file(file, (char**)&vs, ROA_NULL);
 
         const GLchar *src = vs;
         glShaderSource(vert_shd, 1, &src, ROA_NULL);
@@ -551,7 +551,7 @@ platform_setup(roa_renderer_ctx_t ctx)
         strcat(file, "blit.frag");
 
         const char *fs = 0;
-        roa_copy_file(file, &fs, ROA_NULL);
+        roa_copy_file(file, (char**)&fs, ROA_NULL);
 
         const GLchar *src = fs;
         glShaderSource(frag_shd, 1, &src, ROA_NULL);

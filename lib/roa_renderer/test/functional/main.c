@@ -85,7 +85,7 @@ main()
     texture_rsrc.name = "TestTexture";
 
     unsigned bytes = 0;
-    unsigned *raw_png = texture_png_data_blender_1(&bytes);
+    unsigned char *raw_png = texture_png_data_blender_1(&bytes);
 
     stbi_set_flip_vertically_on_load(1);
     texture_rsrc.data = stbi_load_from_memory(
@@ -188,8 +188,6 @@ main()
       ROA_MEM_ZERO(camera);
       roa_renderer_camera_get(renderer_ctx, &camera, 1);
 
-			float spin_time = time * 0.025f;
-
       roa_float3 at   = roa_float3_fill_with_value(0.f);
       roa_float3 up   = roa_quaternion_rotate_vector(
         final_rot, roa_transform_world_up());
@@ -226,17 +224,13 @@ main()
           roa_renderer_mesh_renderable_transform_set(
             renderer_ctx,
             obj_id,
-            &transform.position,
-            &transform.scale,
-            &transform.rotation);
+            (float*)&transform.position,
+            (float*)&transform.scale,
+            (float*)&transform.rotation);
         }
         else
         {
           float width = 4.f;
-          float height = width * ROA_G_RATIO;
-
-//          float width = 10.f;
-//          float height = 0.1f;
 
           roa_transform transform;
           transform.position = roa_float3_set_with_values(0, 0, 0);
@@ -246,9 +240,9 @@ main()
           roa_renderer_mesh_renderable_transform_set(
             renderer_ctx,
             obj_id,
-            &transform.position,
-            &transform.scale,
-            &transform.rotation);
+            (float*)&transform.position,
+            (float*)&transform.scale,
+            (float*)&transform.rotation);
 
         }
       }

@@ -8,5 +8,5 @@
 void
 task_renderpass(void *arg)
 {
-
+        (void)arg;
 }

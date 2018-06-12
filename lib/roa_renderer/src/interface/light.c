@@ -11,7 +11,11 @@ roa_renderer_light_set(
   struct roa_renderer_light *light,
   uint32_t light_id)
 {
-  
+        (void)ctx;
+        (void)light;
+        (void)light_id;
+
+        return ROA_FALSE;
 }
 
 
@@ -21,7 +25,11 @@ roa_renderer_light_get(
   struct roa_renderer_light *out_light,
   uint32_t light_id)
 {
+        (void)ctx;
+        (void)out_light;
+        (void)light_id;
 
+        return ROA_FALSE;
 }
 
 
@@ -30,7 +38,10 @@ roa_renderer_light_clear(
   roa_renderer_ctx_t ctx,
   uint32_t light_id)
 {
+        (void)ctx;
+        (void)light_id;
 
+        return ROA_FALSE;
 }
 
 
@@ -58,5 +69,8 @@ roa_renderer_light_exists(
   const roa_renderer_ctx_t ctx,
   uint32_t light_id)
 {
+        (void)ctx;
+        (void)light_id;
 
+        return ROA_FALSE;
 }

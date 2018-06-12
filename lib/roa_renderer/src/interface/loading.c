@@ -2,6 +2,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
 #include <gltf/gltf.h>
+#include <string.h>
 
 
 /* ---------------------------------------------------------- [ GLTF Ext ] -- */
@@ -190,6 +191,8 @@ parse_decals(
                 "lod5", "lod6", "lod7", "lod8", "lod9",
         };
 
+        int lod_count = ROA_ARR_COUNT(lod_names);
+
         int lod_counts[ROA_ARR_COUNT(lod_names)];
         memset(lod_counts, 0, sizeof(lod_counts));
         
@@ -197,7 +200,7 @@ parse_decals(
                 int decal_id = gltf->nodes[decal_child].children[i];
                 const char *decal_name = gltf->nodes[decal_id].name;
 
-                for(j = 0; j < ROA_ARR_COUNT(lod_counts); ++j) {
+                for(j = 0; j < lod_count; ++j) {
                 
                         const char *lod_name = lod_names[j];
                         int len = strlen(lod_name);
@@ -213,7 +216,7 @@ parse_decals(
         struct roa_renderer_decal *decals[ROA_ARR_COUNT(lod_counts)];
         memset(decals, 0, sizeof(decals[0]) * ROA_ARR_COUNT(lod_counts));
 
-        for(i = 0; i < ROA_ARR_COUNT(lod_counts); ++i) {
+        for(i = 0; i < lod_count; ++i) {
                 roa_array_create_with_capacity(decals[i], lod_counts[i]);
         }
 
@@ -223,7 +226,7 @@ parse_decals(
                 int decal_id = gltf->nodes[decal_child].children[i];
                 const char *decal_name = gltf->nodes[decal_id].name;
 
-                for(j = 0; j < ROA_ARR_COUNT(lod_counts); ++j) {
+                for(j = 0; j < lod_count; ++j) {
                         const char *lod_name = lod_names[j];
                         int len = strlen(lod_name);
 
@@ -249,7 +252,8 @@ parse_decals(
                                 if (mesh_id >= 0) {
                                         int mat_id = gltf->meshes[mesh_id].primitives[0].material;
 
-
+                                        /* need to get material color */
+                                        (void)mat_id;
                                 }
 
                                 /* projector is a unit cube,
@@ -296,6 +300,8 @@ parse_decals(
 
         out_mesh->decals_lod9 = decals[9];
         out_mesh->decals_lod9_count = roa_array_size(decals[9]);
+
+        return 1;
 }
 
 
@@ -341,7 +347,7 @@ generate_meshes(
                 vertex_desc[1] = curr_mesh->primitives[0].attributes.NORMAL;
                 vertex_desc[2] = curr_mesh->primitives[0].attributes.TEXCOORD_0;
 
-                float **vertex_data[ROA_ARR_COUNT(vertex_desc)];
+                float *vertex_data[ROA_ARR_COUNT(vertex_desc)];
                 ROA_MEM_ZERO(vertex_data);
 
                 out_mesh->vertex_count = get_vertex_data(
@@ -440,4 +446,6 @@ roa_renderer_load(
         ROA_ASSERT(gltf.mesh_count);
        
         load(ctx, &gltf);
+
+        return ROA_TRUE;
 }

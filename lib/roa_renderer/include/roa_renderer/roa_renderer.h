@@ -73,6 +73,15 @@ roa_renderer_get_device_viewport(
   struct roa_renderer_device_viewport *out_vp);
 
 
+/* -------------------------------------------------------------- [ Load ] -- */
+
+
+ROA_BOOL
+roa_renderer_load(
+  roa_renderer_ctx_t ctx,
+  const char *file);
+
+
 /* ------------------------------------------------------------ [ Camera ] -- */
 
 
@@ -270,8 +279,8 @@ roa_renderer_mesh_resource_exists(
 struct roa_renderer_texture_resource
 {
   const char *name;
-  unsigned width;
-  unsigned height;
+  int width;
+  int height;
   int components;
   void *data;
 };

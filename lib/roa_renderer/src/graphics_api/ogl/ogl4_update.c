@@ -5,6 +5,8 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
 #include <GL/gl3w.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 void
@@ -49,8 +51,9 @@ platform_update(roa_renderer_ctx_t ctx)
 
         int j;
         int offset = 0;
+        int vertex_count = (int)pending[i].vertex_count;
 
-        for (j = 0; j < pending[i].vertex_count; ++j)
+        for (j = 0; j < vertex_count; ++j)
         {
           if (pending[i].position_vec3_array)
           {
@@ -169,7 +172,6 @@ platform_update(roa_renderer_ctx_t ctx)
     glGenTextures(count, textures);
 
     struct roa_renderer_texture_resource *pending = ctx->resource_desc.texture_rsrc_pending_data;
-    uint64_t *pending_ids = ctx->resource_desc.texture_pending_ids;
 
     for (i = 0; i < count; ++i)
     {

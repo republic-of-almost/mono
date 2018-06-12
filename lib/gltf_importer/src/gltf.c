@@ -242,17 +242,17 @@ gltf_node(
                 else if (json_attr_is_called(attr_ele, "translation")) {
                         int count = gltf_get_float_array(attr_ele->value, ROA_NULL);
                         ROA_ASSERT(count == 3);
-                        gltf_get_float_array(attr_ele->value, &node->translation);
+                        gltf_get_float_array(attr_ele->value, &node->translation[0]);
                 }
                 else if (json_attr_is_called(attr_ele, "rotation")) {
                         int count = gltf_get_float_array(attr_ele->value, ROA_NULL);
                         ROA_ASSERT(count == 4);
-                        gltf_get_float_array(attr_ele->value, &node->rotation);
+                        gltf_get_float_array(attr_ele->value, &node->rotation[0]);
                 }
                 else if (json_attr_is_called(attr_ele, "scale")) {
                         int count = gltf_get_float_array(attr_ele->value, ROA_NULL);
                         ROA_ASSERT(count == 3);
-                        gltf_get_float_array(attr_ele->value, &node->scale);
+                        gltf_get_float_array(attr_ele->value, &node->scale[0]);
                 }
 
                 attr_ele = attr_ele->next;

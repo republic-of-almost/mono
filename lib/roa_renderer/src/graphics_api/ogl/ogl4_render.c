@@ -210,23 +210,13 @@ platform_render(roa_renderer_ctx_t ctx)
         struct decal_transform *decal = &decals[k];
 
         /* sort */
-        roa_mat4 id, world, scale, position, inv_world;
-
-        //roa_transform decal_transform;
-        //decal_transform.position  = roa_float3_import(decal->position);
-        //decal_transform.scale     = roa_float3_import(decal->scale);
-        //decal_transform.rotation  = roa_quaternion_import(decal->rotation);
-
-        //roa_mat4_id(&id);
-        //roa_mat4_translate(&position, decal_transform.position);
-        //roa_mat4_scale(&scale, decal_transform.scale);
-        //roa_transform_to_mat4(&decal_transform, &world);
+        roa_mat4 world, inv_world;
 
         roa_mat4_import(&world, decal->world_mat);
 
         roa_mat4_inverse(&inv_world, &world);
 
-        roa_mat4 view_proj, inv_view_proj, view, proj_view, proj;
+        roa_mat4 view_proj, inv_view_proj, view, proj;
         roa_mat4_import(&view_proj, rp->camera.view_projection);
 
         roa_mat4_import(&proj, rp->camera.projection);
@@ -237,10 +227,6 @@ platform_render(roa_renderer_ctx_t ctx)
         roa_mat4_inverse(&inv_proj, &proj);
 
         roa_mat4_multiply(&inv_view_proj, &inv_proj, &inv_view);
-//        roa_mat4_multiply(&proj_view, &proj, &view);
-//        roa_mat4_multiply(&proj_view, &view, &proj);
-
-//        roa_mat4_inverse(&inv_view_proj, &proj_view);
 
         roa_mat4 wvp;
         roa_mat4_multiply(&wvp, &world, &view_proj);

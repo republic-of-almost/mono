@@ -21,6 +21,7 @@ rdr_free(void *addr)
 void *
 rdr_frame_alloc(unsigned bytes)
 {
+  (void)bytes;
   return 0;
 }
 
