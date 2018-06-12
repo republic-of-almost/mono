@@ -25,6 +25,7 @@ in vec2 fs_texcoord0;
 uniform sampler2D uni_map_diffuse;
 uniform sampler2D uni_map_depth;
 uniform sampler2D uni_map_worldpos;
+uniform vec3 uni_color;
 uniform mat4 uni_inv_world;
 
 /* ----------------------------------------------------------- [ outputs ] -- */
@@ -50,13 +51,13 @@ main()
 
     if ((depth < 1.0 && dist.x > 0 && dist.y > 0 && dist.z > 0))
     {
-        fs_out_diffuse = vec4(0.0, 1.0, 1.0, 1);
+        fs_out_diffuse = vec4(uni_color, 1);
     }
     else
     {
         if(DEBUG_NO_DISCARD == 1)
         {
-            fs_out_diffuse = vec4(1.0, 1.0, 0.0, 1);
+            fs_out_diffuse = vec4(1.0, 1.0, 0, 1);
         }
         else
         {

@@ -245,6 +245,8 @@ platform_render(roa_renderer_ctx_t ctx)
         roa_mat4 wvp;
         roa_mat4_multiply(&wvp, &world, &view_proj);
 
+        glUniform3fv(gfx_api->decal.uni_color, 1, decal->color);
+
         glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera.view);
         glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
         glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);

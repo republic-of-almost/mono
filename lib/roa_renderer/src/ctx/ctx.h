@@ -94,6 +94,7 @@ struct renderpass_draw_call
 
 struct decal_transform {
       float world_mat[16];
+      float color[3];
 };
 
 

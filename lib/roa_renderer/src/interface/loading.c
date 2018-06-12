@@ -231,25 +231,34 @@ parse_decals(
                                 struct roa_renderer_decal decal;
 
                                 memcpy(
-                                    decal.position,
-                                    gltf->nodes[decal_id].translation,
-                                    sizeof(decal.position));
+                                        decal.position,
+                                        gltf->nodes[decal_id].translation,
+                                        sizeof(decal.position));
 
                                 memcpy(
-                                    decal.rotation,
-                                    gltf->nodes[decal_id].rotation,
-                                    sizeof(decal.rotation));
+                                        decal.rotation,
+                                        gltf->nodes[decal_id].rotation,
+                                        sizeof(decal.rotation));
 
                                 memcpy(
-                                    decal.scale,
-                                    gltf->nodes[decal_id].scale,
-                                    sizeof(decal.scale));
+                                        decal.scale,
+                                        gltf->nodes[decal_id].scale,
+                                        sizeof(decal.scale));
+
+                                int mesh_id = gltf->nodes[decal_id].mesh;
+                                if (mesh_id >= 0) {
+                                        int mat_id = gltf->meshes[mesh_id].primitives[0].material;
+
+
+                                }
 
                                 /* projector is a unit cube,
                                    but blenders default a 2x2x2 cube */
                                 decal.scale[0] *= 2.f;
                                 decal.scale[1] *= 2.f;
                                 decal.scale[2] *= 2.f;
+
+                                decal.color[0] = 1.f;
 
                                 roa_array_push(decals[j], decal);
                         }

@@ -465,6 +465,7 @@ platform_setup(roa_renderer_ctx_t ctx)
       decal->uni_world        = glGetUniformLocation(program, "uni_world");
       decal->uni_inv_projview = glGetUniformLocation(program, "uni_inv_proj_view");
       decal->uni_inv_world    = glGetUniformLocation(program, "uni_inv_world");
+      decal->uni_color        = glGetUniformLocation(program, "uni_color");
     }
 
     /* volume */

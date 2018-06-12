@@ -58,14 +58,15 @@ struct ogl_decal
   GLuint program;
   GLuint vbo;
 
-  GLuint uni_world_pos;
-  GLuint uni_depth;
-  GLuint uni_diffuse;
-  GLuint uni_view;
-  GLuint uni_proj;
-  GLuint uni_world;
-  GLuint uni_inv_projview;
-  GLuint uni_inv_world;
+  GLint uni_world_pos;
+  GLint uni_depth;
+  GLint uni_diffuse;
+  GLint uni_view;
+  GLint uni_proj;
+  GLint uni_world;
+  GLint uni_inv_projview;
+  GLint uni_inv_world;
+  GLint uni_color;
 
   struct ogl_vertex_input input[3];
 };

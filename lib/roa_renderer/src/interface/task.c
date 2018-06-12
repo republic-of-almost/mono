@@ -131,10 +131,9 @@ roa_renderer_task_pump(
                                     rsrc->decals_lod9_count,
                             };
 
-                            
                             float dist = lod_distance > 0.f ? (lod_distance + 0.5f) : (lod_distance - 0.5f);
                             int lod_max = 10 - (int)dist / 10;
-                            lod_max = lod_max > 10 ? 10 : lod_max < 0 ? 0 : lod_max;
+                            lod_max = lod_max > 10 ? 10 : lod_max < 1 ? 1 : lod_max;
 
                             int l;
                             int m;
@@ -157,6 +156,8 @@ roa_renderer_task_pump(
 
                                             struct decal_transform decal_t;
                                             roa_transform_to_mat4(&inherited, decal_t.world_mat);
+
+                                            memcpy(decal_t.color, decal->color, sizeof(decal_t.color));
 
                                             roa_array_push(rp->decals, decal_t);
                                     }
