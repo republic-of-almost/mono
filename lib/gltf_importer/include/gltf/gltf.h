@@ -144,6 +144,7 @@ struct gltf_texture_map {
         int tex_coord;
 };
 
+
 struct gltf_pbr_metallic_roughness {
         float base_color_factor[4];
         struct gltf_texture_map base_color_texture;
@@ -164,7 +165,6 @@ struct gltf_material {
 
         float emissive_factor[3];
 };
-
 
 
 struct gltf_import {
