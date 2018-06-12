@@ -202,6 +202,57 @@ gltf_get_int_array(
 }
 
 
+/* ---------------------------------------------------------- [ Material ] -- */
+
+
+void
+gltf_material(
+        struct json_value_s *mat_value,
+        struct gltf_material *mat)
+{
+        /* param check */
+        ROA_ASSERT(mat_value);
+        ROA_ASSERT(mat);
+        ROA_ASSERT(mat_value->type == json_type_object);
+
+        /* process */
+}
+
+
+void
+gltf_materials(
+        struct json_value_s *mats,
+        struct gltf_import *out_import)
+{
+        /* param check */
+        ROA_ASSERT(mats);
+        ROA_ASSERT(out_import);
+        ROA_ASSERT(mats->type == json_type_array);
+
+        /* process */
+        struct json_array_s *arr =
+                (struct json_array_s*)mats->payload;
+
+        struct json_array_element_s *arr_ele =
+                (struct json_array_element_s*)arr->start;
+
+        while (arr_ele != ROA_NULL) {
+                struct gltf_material material;
+                ROA_MEM_ZERO(material);
+
+                struct json_value_s *acc_val =
+                        (struct json_value_s*)arr_ele->value;
+
+                gltf_material(acc_val, &material);
+
+                roa_array_push(out_import->materials, material);
+                out_import->material_count += 1;
+
+                arr_ele = arr_ele->next;
+        }
+}
+
+
 /* ------------------------------------------------------------- [ Nodes ] -- */
 
 
@@ -576,7 +627,10 @@ gltf_buffer(
                         buffer->byte_length = json_to_int(attr_ele->value);
                 }
                 else if (json_attr_is_called(attr_ele, "uri")) {
-                        gltf_buffer_get_uri(attr_ele->value, &buffer->uri_data, &buffer->uri);
+                        gltf_buffer_get_uri(
+                                attr_ele->value,
+                                &buffer->uri_data,
+                                &buffer->uri);
                 }
                 else if (json_attr_is_called(attr_ele, "name")) {
                         int len = gltf_get_string(attr_ele->value, ROA_NULL);
@@ -845,6 +899,7 @@ gltf_import_setup(
         roa_array_create_with_capacity(import->buffer_views, 32);
         roa_array_create_with_capacity(import->meshes, 32);
         roa_array_create_with_capacity(import->nodes, 32);
+        roa_array_create_with_capacity(import->materials, 32);
 }
 
 
@@ -900,6 +955,9 @@ gltf_import(
                 }
                 else if (strcmp(root_name->string, "nodes") == 0) {
                         gltf_nodes(root_obj_ele->value, out_import);
+                }
+                else if(strcmp(root_name->string, "materials") == 0) {
+                        gltf_materials(root_obj_ele->value, out_import);
                 }
 
                 /* next item */
