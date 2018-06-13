@@ -206,16 +206,66 @@ gltf_get_int_array(
 
 
 void
+gltf_material_pbr(
+        struct json_value_s *val,
+        struct gltf_pbr_metallic_roughness *pbr)
+{
+        /* param check */
+        ROA_ASSERT(val);
+        ROA_ASSERT(val->type == json_type_object);
+        ROA_ASSERT(pbr);
+
+        /* process */
+        struct json_object_s *obj = 
+                (struct json_object_s*)val->payload;
+
+        struct json_object_element_s *obj_ele =
+                (struct json_object_element_s *)obj->start;
+
+        while(obj_ele != ROA_NULL) {
+                if(json_attr_is_called(obj_ele, "baseColorFactor")) {
+                        int count = gltf_get_float_array(obj_ele->value, ROA_NULL);
+                        ROA_ASSERT(count == 4);
+                        gltf_get_float_array(
+                                obj_ele->value,
+                                &pbr->base_color_factor[0]);
+                }
+
+                obj_ele = obj_ele->next;
+        }
+}
+
+
+void
 gltf_material(
-        struct json_value_s *mat_value,
+        struct json_value_s *val,
         struct gltf_material *mat)
 {
         /* param check */
-        ROA_ASSERT(mat_value);
+        ROA_ASSERT(val);
         ROA_ASSERT(mat);
-        ROA_ASSERT(mat_value->type == json_type_object);
+        ROA_ASSERT(val->type == json_type_object);
 
         /* process */
+        struct json_object_s *attr_obj =
+                (struct json_object_s*)val->payload;
+
+        struct json_object_element_s *attr_ele =
+                (struct json_object_element_s*)attr_obj->start;
+
+        while (attr_ele != ROA_NULL) {
+                if (json_attr_is_called(attr_ele, "name")) {
+                        int len = gltf_get_string(attr_ele->value, ROA_NULL);
+                        roa_array_create_with_capacity(mat->name, len);
+                        roa_array_resize(mat->name, len);
+                        gltf_get_string(attr_ele->value, mat->name);
+                }
+                else if (json_attr_is_called(attr_ele, "pbrMetallicRoughness")) {
+                        gltf_material_pbr(attr_ele->value, &mat->pbr_metallic_roughness);
+                }
+
+                attr_ele = attr_ele->next;
+        }
 }
 
 

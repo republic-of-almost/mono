@@ -37,8 +37,7 @@ struct renderer_camera
 /* ---------------------------------------------------------- [ Raw Data ] -- */
 
 
-struct renderer_data_desc
-{
+struct renderer_data_desc {
   roa_atomic_int lock;
 
   /* array */ uint32_t *camera_ids;
@@ -52,8 +51,7 @@ struct renderer_data_desc
 };
 
 
-struct renderer_resource_data_desc
-{
+struct renderer_resource_data_desc {
   roa_atomic_int lock;
 
   /* array */ uint64_t *mesh_ids;
@@ -76,8 +74,7 @@ struct renderer_resource_data_desc
 /* -- [ Renderpasses ] -- */
 
 
-struct renderpass_camera
-{
+struct renderpass_camera {
   float projection[16];
   float view[16];
   float view_projection[16];
@@ -85,30 +82,28 @@ struct renderpass_camera
 };
 
 
-struct renderpass_draw_call
-{
+struct renderpass_draw_call {
+  uint32_t object_id;
   float world[16];
   float wvp[16];
 };
 
 
 struct decal_transform {
+      uint32_t object_id;
       float world_mat[16];
       float color[3];
 };
 
 
-struct renderpass
-{
+struct renderpass {
   struct renderpass_camera camera;
   struct renderpass_draw_call *draw_calls;
-   
   struct decal_transform *decals;
 };
 
 
-struct renderer_renderpass_data
-{
+struct renderer_renderpass_data {
   roa_atomic_int lock;
 
   struct renderpass *rps;
@@ -118,8 +113,7 @@ struct renderer_renderpass_data
 /* -- [ Device ] -- */
 
 
-struct device_setting_data
-{
+struct device_setting_data {
   roa_atomic_int lock;
 
   float device_viewport[2];

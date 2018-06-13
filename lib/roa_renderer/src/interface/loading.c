@@ -211,7 +211,6 @@ parse_decals(
                 }
         }
 
-
         /* allocate */
         struct roa_renderer_decal *decals[ROA_ARR_COUNT(lod_counts)];
         memset(decals, 0, sizeof(decals[0]) * ROA_ARR_COUNT(lod_counts));
@@ -251,10 +250,11 @@ parse_decals(
                                 int mesh_id = gltf->nodes[decal_id].mesh;
                                 if (mesh_id >= 0) {
                                         int mat_id = gltf->meshes[mesh_id].primitives[0].material;
-
-                                        /* need to get material color */
-                                        (void)mat_id;
-                                }
+                                        
+                                        decal.color[0] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[0];
+                                        decal.color[1] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[1];
+                                        decal.color[2] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[2];
+                                } 
 
                                 /* projector is a unit cube,
                                    but blenders default a 2x2x2 cube */
@@ -262,7 +262,7 @@ parse_decals(
                                 decal.scale[1] *= 2.f;
                                 decal.scale[2] *= 2.f;
 
-                                decal.color[0] = 1.f;
+                               /* decal.color[0] = 1.f; */
 
                                 roa_array_push(decals[j], decal);
                         }

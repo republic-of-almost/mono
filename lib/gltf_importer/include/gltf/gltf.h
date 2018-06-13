@@ -160,8 +160,8 @@ struct gltf_material {
 
         struct gltf_pbr_metallic_roughness pbr_metallic_roughness;
 
-        struct gltf_texture_map normal_texture_info;
-        struct gltf_texture_map occlusion_texture_info;
+        /*struct gltf_texture_map normal_texture_info;*/
+        /*struct gltf_texture_map occlusion_texture_info;*/
 
         float emissive_factor[3];
 };
