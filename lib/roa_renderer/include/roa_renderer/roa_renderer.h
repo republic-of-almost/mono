@@ -193,7 +193,7 @@ roa_renderer_mesh_renderable_exists(
   uint32_t renderable_id);
 
 
-/* ----------------------------------------------- [ Material Resources ] -- */
+/* ------------------------------------------------ [ Material Resources ] -- */
 
 
 struct roa_renderer_material_resource

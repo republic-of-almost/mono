@@ -10,14 +10,14 @@
 #include <string.h>
 
 
-/* -------------------------------------------------- [ Func Test Ctx's ] -- */
+/* --------------------------------------------------- [ Func Test Ctx's ] -- */
 
 
 roa_ctx_t hw_ctx = ROA_NULL;
 roa_renderer_ctx_t renderer_ctx = ROA_NULL;
 
 
-/* ------------------------------------------ [ Func Test Renderer Data ] -- */
+/* ------------------------------------------- [ Func Test Renderer Data ] -- */
 
 
 uint32_t object_id_counter = 0;
@@ -45,7 +45,7 @@ gl_type_to_roa_renderer(int i)
 }
 
 
-/* -------------------------------------------------------- [ Func Test ] -- */
+/* --------------------------------------------------------- [ Func Test ] -- */
 
 
 int
