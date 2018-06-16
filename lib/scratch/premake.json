@@ -7,14 +7,14 @@
     	"location": "./",
 
     	"src_files": [
-    		"../src/**.c",
-    		"../src/**.h",
-    		"../doc/**.md",
-    		"../include/**.h"
+    		"src/**.c",
+    		"src/**.h",
+    		"doc/**.md",
+    		"include/**.h"
     	],
 
     	"public_inc_dirs": [
-    		"../include/"
+    		"include/"
     	],
 
     	"project_dependencies": [

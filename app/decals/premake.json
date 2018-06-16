@@ -1,5 +1,33 @@
 {
   "projects" : [
+    {
+      "name": "AppDecals",
+      "kind": "ConsoleApp",
+      "language": "C89",
+      "location": "./",
 
+      "src_files": [
+        "../src/**.c",
+        "../src/**.h",
+        "../docs/**.md"
+      ],
+
+      "private_inc_dirs": [
+        "../src/"
+      ],
+
+      "project_dependencies": [
+        "RepublicMath",
+        "RepublicCtx",
+        "RepublicLib",
+        "Scratch",
+        "Volt",
+        "STB"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    }
   ]
 }

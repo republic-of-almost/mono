@@ -8,17 +8,17 @@
       "location": "./",
 
       "src_files" : [
-        "../include/**.h",
-        "../src/**.c",
-        "../docs/**.md"
+        "include/**.h",
+        "src/**.c",
+        "docs/**.md"
       ],
 
       "public_inc_dirs" : [
-        "../include/"
+        "include/"
       ],
 
       "private_inc_dirs" : [
-        "../include/json"
+        "include/json"
       ]
     }
 

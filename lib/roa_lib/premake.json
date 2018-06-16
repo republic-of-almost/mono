@@ -7,12 +7,12 @@
       "location": "./",
 
       "src_files" : [
-        "../include/**.h",
-        "../src/**.c"
+        "include/**.h",
+        "src/**.c"
       ],
 
       "public_inc_dirs" : [
-        "../include/"
+        "include/"
       ],
 
       "link_dependencies_linux": [
@@ -53,8 +53,8 @@
       },
 
       "src_files" : [
-        "../test/unit/**.cpp",
-        "../test/unit/**.hpp"
+        "test/unit/**.cpp",
+        "test/unit/**.hpp"
       ],
 
       "project_dependencies" : [

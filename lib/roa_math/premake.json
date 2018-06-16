@@ -7,13 +7,13 @@
       "location": "./",
 
       "src_files" : [
-        "../include/**.h",
-        "../src/**.c",
-        "../docs/**.md"
+        "include/**.h",
+        "src/**.c",
+        "docs/**.md"
       ],
 
       "public_inc_dirs": [
-        "../include"
+        "include"
       ]
     },
     {
@@ -28,7 +28,7 @@
       },
 
       "src_files" : [
-        "../test/unit/*.cpp"
+        "test/unit/*.cpp"
       ],
 
       "project_dependencies" : [

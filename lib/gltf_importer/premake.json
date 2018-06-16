@@ -7,19 +7,19 @@
       "location": "./",
 
       "src_files" : [
-        "../include/**.h",
-        "../src/**.h",
-        "../src/**.c",
-        "../doc/**.md",
-        "../data/gltf.json"
+        "include/**.h",
+        "src/**.h",
+        "src/**.c",
+        "doc/**.md",
+        "premake.json"
       ],
 
       "public_inc_dirs": [
-        "../include/"
+        "include/"
       ],
 
       "private_inc_dirs": [
-        "../src/"
+        "src/"
       ],
 
       "project_dependencies" : [
@@ -39,17 +39,17 @@
       },
 
       "assets": [
-        "../test/assets/"
+        "test/assets/"
       ],
 
       "src_files" : [
-        "../data/gltf_unit_test.json",
-        "../test/unit/**.cpp"
+        "data/gltf_unit_test.json",
+        "test/unit/**.cpp"
       ],
 
       "public_inc_dirs" : [
-        "../include/",
-        "../src/"
+        "include/",
+        "src/"
       ],
 
       "project_dependencies" : [
@@ -64,20 +64,20 @@
       "location": "./",
 
       "src_files" : [
-        "../test/functional/**.c",
-        "../data/gltf_func_test.json"
+        "test/functional/**.c",
+        "data/gltf_func_test.json"
       ],
 
       "assets": [
-        "../test/assets/"
+        "test/assets/"
       ],
 
       "public_inc_dirs": [
-        "../include/"
+        "include/"
       ],
 
       "private_inc_dirs": [
-        "../src/"
+        "src/"
       ],
 
       "project_dependencies" : [

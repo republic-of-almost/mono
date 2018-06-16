@@ -7,23 +7,23 @@
       "location": "./",
 
         "assets" : [
-            "../assets/"
+            "assets/"
         ],
 
       "src_files" : [
-        "../data/roa_renderer.json",
-        "../include/**.h",
-        "../src/**.h",
-        "../src/**.c",
-        "../doc/**.md"
+        "data/roa_renderer.json",
+        "include/**.h",
+        "src/**.h",
+        "src/**.c",
+        "doc/**.md"
       ],
 
       "public_inc_dirs" : [
-        "../include/"
+        "include/"
       ],
 
       "private_inc_dirs" : [
-        "../src/"
+        "src/"
       ],
 
       "project_dependencies" : [
@@ -52,17 +52,17 @@
       },
 
     	"assets": [
-    		"../test/functional/assets/"
+    		"test/functional/assets/"
     	],
 
     	"src_files" : [
-    		"../data/roa_renderer_unit_test.json",
-    		"../test/unit/**.cpp"
+    		"data/roa_renderer_unit_test.json",
+    		"test/unit/**.cpp"
     	],
 
     	"public_inc_dirs" : [
-        "../include/",
-        "../src/"
+        "include/",
+        "src/"
       ],
 
     	"project_dependencies" : [
@@ -77,27 +77,27 @@
     	"location": "./",
 
     	"src_files" : [
-    		"../data/roa_renderer.json",
-    		"../include/**.h",
-    		"../src/**.h",
-    		"../src/**.c",
-    		"../doc/**.md"
+    		"data/roa_renderer.json",
+    		"include/**.h",
+    		"src/**.h",
+    		"src/**.c",
+    		"doc/**.md"
     	],
 
     	"public_inc_dirs" : [
-    		"../include/"
+    		"include/"
     	],
 
     	"private_inc_dirs" : [
-    		"../src/"
+    		"src/"
     	],
 
     	"project_dependencies" : [
     		"STB",
     		"RepublicMath",
-        "RepublicLib",
-        "Scratch",
-        "Json"
+            "RepublicLib",
+            "Scratch",
+            "Json"
     	],
 
     	"defines" : [
@@ -111,13 +111,13 @@
     	"location": "./",
 
     	"assets": [
-        "../test/functional/assets/"
-      ],
+            "test/functional/assets/"
+          ],
 
     	"src_files" : [
-    		"../data/roa_renderer_functional_test.json",
-    		"../test/functional/**.h",
-    		"../test/functional/**.c"
+    		"data/roa_renderer_functional_test.json",
+    		"test/functional/**.h",
+    		"test/functional/**.c"
     	],
 
     	"project_dependencies" : [

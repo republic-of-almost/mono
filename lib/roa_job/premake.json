@@ -7,36 +7,36 @@
       "location": "./",
 
       "src_files": [
-        "../data/**.json",
-        "../src/**.c",
-        "../src/**.h",
-        "../docs/**.md",
-        "../include/**.h"
+        "data/**.json",
+        "src/**.c",
+        "src/**.h",
+        "docs/**.md",
+        "include/**.h"
       ],
 
       "src_files_windows" : [
-        "../thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
-        "../thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm"
+        "thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
+        "thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm"
       ],
 
       "src_files_macos" : [
-        "../thirdparty/boost_context/asm/jump_x86_64_sysv_macho_gas.S",
-        "../thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S"
+        "thirdparty/boost_context/asm/jump_x86_64_sysv_macho_gas.S",
+        "thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S"
       ],
 
       "src_files_linux" : [
-        "../thirdparty/boost_context/asm/jump_x86_64_sysv_elf_gas.S",
-        "../thirdparty/boost_context/asm/make_x86_64_sysv_elf_gas.S"
+        "thirdparty/boost_context/asm/jump_x86_64_sysv_elf_gas.S",
+        "thirdparty/boost_context/asm/make_x86_64_sysv_elf_gas.S"
       ],
 
       "private_inc_dirs" : [
-        "../src/",
-        "../include/",
-        "../thirdparty/boost_context/include/"
+        "src/",
+        "include/",
+        "thirdparty/boost_context/include/"
       ],
 
       "public_inc_dirs" : [
-        "../include/"
+        "include/"
       ],
 
       "defines": [
@@ -72,13 +72,13 @@
       },
 
       "src_files" : [
-        "../data/roa_job_unit_test.json",
-        "../test/unit/**.cpp"
+        "data/roa_job_unit_test.json",
+        "test/unit/**.cpp"
       ],
 
       "public_inc_dirs" : [
-        "../include/",
-        "../src/"
+        "include/",
+        "src/"
       ],
 
       "project_dependencies" : [
@@ -93,8 +93,8 @@
       "location" : "./",
 
       "src_files" : [
-        "../test/functional/**.c",
-        "../test/functional/**.h"
+        "test/functional/**.c",
+        "test/functional/**.h"
       ],
 
       "project_dependencies": [

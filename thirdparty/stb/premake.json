@@ -7,13 +7,13 @@
       "location": "./",
 
       "src_files": [
-        "../include/**.h",
-        "../src/**.c",
-        "../docs/**.md"
+        "include/**.h",
+        "src/**.c",
+        "docs/**.md"
       ],
 
       "public_inc_dirs": [
-        "../include/"
+        "include/"
       ],
 
       "defines_windows": [

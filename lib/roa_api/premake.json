@@ -7,18 +7,18 @@
       "location": "./",
 
       "src_files" : [
-        "../src/**.c",
-        "../src/**.h",
-        "../include/**.h",
-        "../doc/**.md"
+        "src/**.c",
+        "src/**.h",
+        "include/**.h",
+        "doc/**.md"
       ],
 
       "public_inc_dirs" : [
-        "../include/"
+        "include/"
       ],
 
       "private_inc_dirs" : [
-        "../src/"
+        "src/"
       ],
 
       "project_dependencies" : [
@@ -51,8 +51,8 @@
       "location" : "./",
 
       "src_files" : [
-        "../test/functional/**.c",
-        "../test/functional/**.h"
+        "test/functional/**.c",
+        "test/functional/**.h"
       ],
 
       "project_dependencies": [
