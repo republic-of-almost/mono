@@ -13,29 +13,15 @@ typedef int CODEX_DATA_TYPE;
 
 
 typedef enum codex_data_type {
+        CODEX_DATA_BYTE,
+        CODEX_DATA_SHORT,
+        CODEX_DATA_USHORT,
         CODEX_DATA_UINT,
-        CODEX_DATA_UINT2,
-        CODEX_DATA_UINT3,
-        CODEX_DATA_UINT4,
-
         CODEX_DATA_INT,
-        CODEX_DATA_INT2,
-        CODEX_DATA_INT3,
-        CODEX_DATA_INT4,
-
         CODEX_DATA_FLOAT,
-        CODEX_DATA_FLOAT2,
-        CODEX_DATA_FLOAT3,
-        CODEX_DATA_FLOAT4,
-
         CODEX_DATA_DOUBLE,
-        CODEX_DATA_DOUBLE2,
-        CODEX_DATA_DOUBLE3,
-        CODEX_DATA_DOUBLE4,
-
         CODEX_DATA_BOOL,
         CODEX_DATA_STRING,
-
         CODEX_DATA_PTR,
 
 } CODEX_DATA_TYPE;

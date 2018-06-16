@@ -14,6 +14,9 @@ struct data_type {
 
 struct object_data {
         union data {
+                unsigned char byte;
+                short short_int;
+                unsigned short short_uint;
                 int integer;
                 unsigned uinteger;
                 float floating;
