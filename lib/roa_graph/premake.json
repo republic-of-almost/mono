@@ -1,0 +1,58 @@
+{
+  "projects" : [
+    {
+      "name": "RepublicGraph",
+      "kind": "StaticLib",
+      "language": "C89",
+      "location": "./",
+
+      "src_files" : [
+        "../include/**.h",
+        "../src/**.c",
+        "../src/**.h"
+      ],
+
+      "public_inc_dirs" : [
+        "../include/"
+      ],
+
+      "private_inc_dirs" : [
+        "../src/"
+      ],
+
+      "project_dependencies" : [
+        "RepublicMath",
+        "RepublicLib"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    },
+    {
+      "name": "RepublicGraphUnitTest",
+      "kind": "ConsoleApp",
+      "language": "C++",
+      "location": "./",
+
+      "lang_settings" : {
+        "exceptions": true,
+        "rtti": true
+      },
+
+      "src_files" : [
+        "../test/unit/**.cpp",
+        "../test/unit/**.hpp"
+      ],
+
+      "project_dependencies" : [
+        "RepublicGraph",
+        "Catch"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    }
+  ]
+}

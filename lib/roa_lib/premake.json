@@ -1,0 +1,70 @@
+{
+  "projects" : [
+    {
+      "name": "RepublicLib",
+      "kind": "StaticLib",
+      "language": "C89",
+      "location": "./",
+
+      "src_files" : [
+        "../include/**.h",
+        "../src/**.c"
+      ],
+
+      "public_inc_dirs" : [
+        "../include/"
+      ],
+
+      "link_dependencies_linux": [
+        "pthread"
+      ],
+
+      "defines_linux" : [
+        "_GNU_SOURCE"
+      ],
+
+      "link_dependencies_windows" : [
+        "Kernel32.lib"
+      ],
+
+      "defines_windows" : [
+        "WIN32_LEAN_AND_MEAN",
+        "NOMINMAX",
+        "_CRT_SECURE_NO_WARNINGS"
+      ],
+
+      "defines" : [
+        "ROA_JOB_DEBUG_NAME_THREADS=1"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    },
+    {
+      "name": "RepublicLibUnitTest",
+      "kind": "ConsoleApp",
+      "language": "C++",
+      "location": "./",
+
+      "lang_settings" : {
+        "exceptions": true,
+        "rtti": true
+      },
+
+      "src_files" : [
+        "../test/unit/**.cpp",
+        "../test/unit/**.hpp"
+      ],
+
+      "project_dependencies" : [
+        "RepublicLib",
+        "Catch"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    }
+  ]
+}

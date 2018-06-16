@@ -1,0 +1,26 @@
+{
+  "projects" : [
+    {
+    	"name": "Scratch",
+    	"kind": "StaticLib",
+    	"language": "C89",
+    	"location": "./",
+
+    	"src_files": [
+    		"../src/**.c",
+    		"../src/**.h",
+    		"../doc/**.md",
+    		"../include/**.h"
+    	],
+
+    	"public_inc_dirs": [
+    		"../include/"
+    	],
+
+    	"project_dependencies": [
+    		"RepublicLib"
+    	]
+    }
+
+  ]
+}

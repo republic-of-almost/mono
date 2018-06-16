@@ -1,0 +1,109 @@
+{
+  "projects" : [
+    {
+      "name": "RepublicJob",
+      "kind": "StaticLib",
+      "language": "C89",
+      "location": "./",
+
+      "src_files": [
+        "../data/**.json",
+        "../src/**.c",
+        "../src/**.h",
+        "../docs/**.md",
+        "../include/**.h"
+      ],
+
+      "src_files_windows" : [
+        "../thirdparty/boost_context/asm/jump_i386_ms_pe_masm.asm",
+        "../thirdparty/boost_context/asm/make_i386_ms_pe_masm.asm"
+      ],
+
+      "src_files_macos" : [
+        "../thirdparty/boost_context/asm/jump_x86_64_sysv_macho_gas.S",
+        "../thirdparty/boost_context/asm/make_x86_64_sysv_macho_gas.S"
+      ],
+
+      "src_files_linux" : [
+        "../thirdparty/boost_context/asm/jump_x86_64_sysv_elf_gas.S",
+        "../thirdparty/boost_context/asm/make_x86_64_sysv_elf_gas.S"
+      ],
+
+      "private_inc_dirs" : [
+        "../src/",
+        "../include/",
+        "../thirdparty/boost_context/include/"
+      ],
+
+      "public_inc_dirs" : [
+        "../include/"
+      ],
+
+      "defines": [
+        "ROA_JOB_DEBUG_NAME_THREADS=1",
+        "ROA_JOB_CACHELINE_PADDING=0",
+        "ROA_JOB_CPU_AFFINITY=1",
+        "ROA_JOB_DEBUG_TH_PROCESS_OUTPUT=0",
+        "ROA_JOB_STEAL_SIZE=1",
+        "ROA_JOB_DEBUG_OUTPUT=0"
+      ],
+
+      "defines_windows": [
+        "_CRT_SECURE_NO_WARNINGS"
+      ],
+
+      "project_dependencies" : [
+        "RepublicLib"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    },
+    {
+      "name": "RepublicJobUnitTest",
+      "kind": "ConsoleApp",
+      "language": "C++11",
+      "location": "./",
+
+      "lang_settings" : {
+        "exceptions": true,
+        "rtti": true
+      },
+
+      "src_files" : [
+        "../data/roa_job_unit_test.json",
+        "../test/unit/**.cpp"
+      ],
+
+      "public_inc_dirs" : [
+        "../include/",
+        "../src/"
+      ],
+
+      "project_dependencies" : [
+        "RepublicJob",
+        "Catch"
+      ]
+    },
+    {
+      "name"     : "RepublicJobFuncTest",
+      "kind"     : "ConsoleApp",
+      "language" : "C89",
+      "location" : "./",
+
+      "src_files" : [
+        "../test/functional/**.c",
+        "../test/functional/**.h"
+      ],
+
+      "project_dependencies": [
+        "RepublicJob"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "projects" : [
+    {
+      "name": "RepublicMath",
+      "kind": "StaticLib",
+      "language": "C99",
+      "location": "./",
+
+      "src_files" : [
+        "../include/**.h",
+        "../src/**.c",
+        "../docs/**.md"
+      ],
+
+      "public_inc_dirs": [
+        "../include"
+      ]
+    },
+    {
+      "name": "RepublicMathUnitTest",
+      "kind": "ConsoleApp",
+      "language": "C++",
+      "location": "./",
+
+      "lang_settings": {
+        "exceptions": true,
+        "rtti": true
+      },
+
+      "src_files" : [
+        "../test/unit/*.cpp"
+      ],
+
+      "project_dependencies" : [
+        "RepublicMath",
+        "Catch"
+      ]
+    }
+  ]
+}

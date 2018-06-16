@@ -21,7 +21,8 @@ solution_data = {
 }
 
 -- Find the projects for the solution and add them --
-project_files = os.matchfiles("../../**.json")
+-- project_files = os.matchfiles("../../**.json")
+project_files = os.matchfiles("../../**premake.json")
 
 if project_files then
 
@@ -34,9 +35,13 @@ if project_files then
     if err then
       print("Failed to load json" .. err)
     else
-      proj_table["base_location"] = path.getdirectory(proj)
+      for j, p in ipairs(proj_table["projects"]) do
+        if p then
+          p["base_location"] = path.getdirectory(proj)
 
-      table.insert(projects, proj_table)
+          table.insert(projects, p)
+        end
+      end
     end
   end
 

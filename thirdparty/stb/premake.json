@@ -1,0 +1,40 @@
+{
+  "projects" : [
+    {
+      "name": "STB",
+      "kind": "StaticLib",
+      "language": "C",
+      "location": "./",
+
+      "src_files": [
+        "../include/**.h",
+        "../src/**.c",
+        "../docs/**.md"
+      ],
+
+      "public_inc_dirs": [
+        "../include/"
+      ],
+
+      "defines_windows": [
+        "_CRT_SECURE_NO_WARNINGS"
+      ],
+
+      "disable_warning_windows" : [
+        "4100",
+        "4204"
+      ],
+
+      "disable_warning_linux" : [
+        "unused-variable",
+        "unused-parameter"
+      ],
+
+      "disable_warning_osx" : [
+        "unused-variable",
+        "unused-parameter"
+      ]
+    }
+
+  ]
+}

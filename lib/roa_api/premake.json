@@ -1,0 +1,63 @@
+{
+  "projects" : [
+    {
+      "name": "RepublicAPI",
+      "kind": "StaticLib",
+      "language": "C89",
+      "location": "./",
+
+      "src_files" : [
+        "../src/**.c",
+        "../src/**.h",
+        "../include/**.h",
+        "../doc/**.md"
+      ],
+
+      "public_inc_dirs" : [
+        "../include/"
+      ],
+
+      "private_inc_dirs" : [
+        "../src/"
+      ],
+
+      "project_dependencies" : [
+        "RepublicLib",
+        "RepublicJob",
+        "RepublicCtx",
+    		"RepublicGraph",
+        "RepublicRenderer",
+        "RepublicMath"
+      ]
+    },
+    {
+      "name": "RepublicAPIUnitTest",
+      "kind": "ConsoleApp",
+      "language": "C89",
+      "location": "./",
+
+      "src_files" : [
+        "../test/unit/*.c"
+      ],
+
+      "project_dependencies" : [
+        "RepublicAPI"
+      ]
+    },
+    {
+      "name"     : "RepublicAPIFuncTest",
+      "kind"     : "ConsoleApp",
+      "language" : "C89",
+      "location" : "./",
+
+      "src_files" : [
+        "../test/functional/**.c",
+        "../test/functional/**.h"
+      ],
+
+      "project_dependencies": [
+        "RepublicAPI"
+      ]
+    }
+  ]
+}

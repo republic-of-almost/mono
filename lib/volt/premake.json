@@ -1,0 +1,76 @@
+{
+  "projects" : [
+    {
+      "name": "Volt",
+      "kind": "StaticLib",
+      "language": "C++14",
+      "location": "./",
+
+      "src_files" : [
+        "../include/**.h",
+        "../src/**.hpp",
+        "../src/**.h",
+        "../src/**.cpp",
+        "../doc/**.md"
+      ],
+
+      "public_inc_dirs": [
+        "../include/",
+        "C:/VulkanSDK/1.0.65.1/Include"
+      ],
+
+      "private_inc_dirs": [
+        "../src/"
+      ],
+
+      "lib_dirs": [
+        "C:/VulkanSDK/1.0.65.1/Lib32"
+      ],
+
+      "defines": [
+        "VOLT_OGL4=1"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ],
+
+      "project_dependencies" : [
+        "RepublicLib",
+        "OpenGL"
+      ]
+    },
+    {
+      "name": "VoltFunctionalTest",
+      "kind": "ConsoleApp",
+      "language": "C",
+      "location": "./",
+
+      "assets": [
+        "../assets/"
+        ],
+
+      "src_files": [
+        "../test/functional/**.c",
+        "../test/functional/**.h"
+      ],
+
+      "public_inc_dirs" : [
+        "../"
+      ],
+
+      "project_dependencies" : [
+        "Volt",
+        "RepublicMath",
+        "RepublicCtx",
+        "Scratch",
+        "STB",
+        "MMX"
+      ],
+
+      "disable_warning_windows" : [
+        "4127"
+      ]
+    }
+  ]
+}
