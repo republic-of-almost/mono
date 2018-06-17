@@ -15,24 +15,24 @@
 
 void
 setup_and_lock(
-				struct roa_renderer_ctx *new_ctx)
+        struct roa_renderer_ctx *new_ctx)
 {
-				ROA_ASSERT(new_ctx);
+        ROA_ASSERT(new_ctx);
 
-				roa_spin_lock_init(&new_ctx->device_settings.lock);
-				roa_spin_lock_aquire(&new_ctx->device_settings.lock);
+        roa_spin_lock_init(&new_ctx->device_settings.lock);
+        roa_spin_lock_aquire(&new_ctx->device_settings.lock);
 
-				roa_spin_lock_init(&new_ctx->renderer_desc.lock);
-				roa_spin_lock_aquire(&new_ctx->renderer_desc.lock);
+        roa_spin_lock_init(&new_ctx->renderer_desc.lock);
+        roa_spin_lock_aquire(&new_ctx->renderer_desc.lock);
 
-				roa_spin_lock_init(&new_ctx->device_settings.lock);
-				roa_spin_lock_aquire(&new_ctx->device_settings.lock);
+        roa_spin_lock_init(&new_ctx->device_settings.lock);
+        roa_spin_lock_aquire(&new_ctx->device_settings.lock);
 
-				roa_spin_lock_init(&new_ctx->renderpass.lock);
-				roa_spin_lock_aquire(&new_ctx->renderpass.lock);
+        roa_spin_lock_init(&new_ctx->renderpass.lock);
+        roa_spin_lock_aquire(&new_ctx->renderpass.lock);
 
-				roa_spin_lock_init(&new_ctx->resource_desc.lock);
-				roa_spin_lock_aquire(&new_ctx->resource_desc.lock);
+        roa_spin_lock_init(&new_ctx->resource_desc.lock);
+        roa_spin_lock_aquire(&new_ctx->resource_desc.lock);
 }
 
 
@@ -83,46 +83,46 @@ setup_and_release_renderer_desc(
 
 void
 lock_and_destroy_renderer_desc(
-				struct renderer_data_desc *rdr_data)
+        struct renderer_data_desc *rdr_data)
 {
-				/* param check */
-				ROA_ASSERT(rdr_data);
+        /* param check */
+        ROA_ASSERT(rdr_data);
 
         roa_spin_lock_aquire(&rdr_data->lock);
 
         /* destroy */
-				roa_array_destroy(rdr_data->camera_ids);
-				roa_array_destroy(rdr_data->camera_descs);
+        roa_array_destroy(rdr_data->camera_ids);
+        roa_array_destroy(rdr_data->camera_descs);
 
-				roa_array_destroy(rdr_data->mesh_rdr_ids);
-				roa_array_destroy(rdr_data->mesh_rdr_descs);
+        roa_array_destroy(rdr_data->mesh_rdr_ids);
+        roa_array_destroy(rdr_data->mesh_rdr_descs);
 }
 
 
 void
 setup_and_release_resource_desc(
-				struct renderer_resource_data_desc *rsrc_data)
+        struct renderer_resource_data_desc *rsrc_data)
 {
-				/* param check */
-				ROA_ASSERT(rsrc_data);
+        /* param check */
+        ROA_ASSERT(rsrc_data);
 
         /* create */
-				roa_array_create_with_capacity(rsrc_data->material_ids, 32);
-				roa_array_create_with_capacity(rsrc_data->mat_descs, 32);
+        roa_array_create_with_capacity(rsrc_data->material_ids, 32);
+        roa_array_create_with_capacity(rsrc_data->mat_descs, 32);
 
-				roa_array_create_with_capacity(rsrc_data->mesh_ids, 32);
-				roa_array_create_with_capacity(rsrc_data->mesh_rsrc_data, 32);
+        roa_array_create_with_capacity(rsrc_data->mesh_ids, 32);
+        roa_array_create_with_capacity(rsrc_data->mesh_rsrc_data, 32);
 
-				roa_array_create_with_capacity(rsrc_data->mesh_pending_ids, 32);
-				roa_array_create_with_capacity(rsrc_data->mesh_rsrc_pending_data, 32);
+        roa_array_create_with_capacity(rsrc_data->mesh_pending_ids, 32);
+        roa_array_create_with_capacity(rsrc_data->mesh_rsrc_pending_data, 32);
 
-				roa_array_create_with_capacity(rsrc_data->texture_ids, 32);
-				roa_array_create_with_capacity(rsrc_data->texture_rsrc_data, 32);
+        roa_array_create_with_capacity(rsrc_data->texture_ids, 32);
+        roa_array_create_with_capacity(rsrc_data->texture_rsrc_data, 32);
 
-				roa_array_create_with_capacity(rsrc_data->texture_pending_ids, 32);
-				roa_array_create_with_capacity(rsrc_data->texture_rsrc_pending_data, 32);
+        roa_array_create_with_capacity(rsrc_data->texture_pending_ids, 32);
+        roa_array_create_with_capacity(rsrc_data->texture_rsrc_pending_data, 32);
 
-				roa_spin_lock_release(&rsrc_data->lock);
+        roa_spin_lock_release(&rsrc_data->lock);
 }
 
 
@@ -155,15 +155,15 @@ lock_and_destroy_resource_desc(
 
 void
 setup_and_release_renderpass(
-				struct renderer_renderpass_data *rps)
+        struct renderer_renderpass_data *rps)
 {
-				/* param check */
-				ROA_ASSERT(rps);
+        /* param check */
+        ROA_ASSERT(rps);
 
         /* create */
-				roa_array_create_with_capacity(rps->rps, 4);
+        roa_array_create_with_capacity(rps->rps, 4);
 
-				roa_spin_lock_release(&rps->lock);
+roa_spin_lock_release(&rps->lock);
 }
 
 
@@ -186,41 +186,41 @@ lock_and_destroy_renderpass(
 
 ROA_BOOL
 roa_renderer_ctx_create(
-	roa_renderer_ctx_t *ctx,
-  struct roa_renderer_ctx_desc *desc)
+        roa_renderer_ctx_t *ctx,
+        struct roa_renderer_ctx_desc *desc)
 {
-				(void)desc;
+        (void)desc;
 
-  			/* param check */
-  			ROA_ASSERT(ctx);
+        /* param check */
+        ROA_ASSERT(ctx);
 
-				/* new ctx */
-				struct roa_renderer_ctx *new_ctx = rdr_alloc(sizeof(*new_ctx));
-				ROA_ASSERT(new_ctx);
+        /* new ctx */
+        struct roa_renderer_ctx *new_ctx = rdr_alloc(sizeof(*new_ctx));
+        ROA_ASSERT(new_ctx);
 
-				if(!new_ctx) {
-								return ROA_FALSE;
-				}
+        if(!new_ctx) {
+                return ROA_FALSE;
+        }
 
-				/* create internal data */
-				setup_and_lock(new_ctx);
-				setup_and_release_device_settings(&new_ctx->device_settings);
-				setup_and_release_renderer_desc(&new_ctx->renderer_desc);
-				setup_and_release_resource_desc(&new_ctx->resource_desc);
-				setup_and_release_renderpass(&new_ctx->renderpass);
+        /* create internal data */
+        setup_and_lock(new_ctx);
+        setup_and_release_device_settings(&new_ctx->device_settings);
+        setup_and_release_renderer_desc(&new_ctx->renderer_desc);
+        setup_and_release_resource_desc(&new_ctx->resource_desc);
+        setup_and_release_renderpass(&new_ctx->renderpass);
 
-    		/* platform */
-      	platform_setup(new_ctx);
+        /* platform */
+        platform_setup(new_ctx);
 
-    		*ctx = new_ctx;
+        *ctx = new_ctx;
 
-				return ROA_TRUE;
+        return ROA_TRUE;
 }
 
 
 void
 roa_renderer_ctx_execute(
-	roa_renderer_ctx_t ctx)
+        roa_renderer_ctx_t ctx)
 {
   platform_update(ctx);
   platform_render(ctx);
@@ -229,21 +229,21 @@ roa_renderer_ctx_execute(
 
 void
 roa_renderer_ctx_destroy(
-	roa_renderer_ctx_t *ctx)
+        roa_renderer_ctx_t *ctx)
 {
-  			/* param check */
-  			ROA_ASSERT(ctx);
-				ROA_ASSERT(*ctx);
+        /* param check */
+        ROA_ASSERT(ctx);
+        ROA_ASSERT(*ctx);
 
-				/* ctx to kill */
-				struct roa_renderer_ctx *kill_ctx = *ctx;
+        /* ctx to kill */
+        struct roa_renderer_ctx *kill_ctx = *ctx;
 
-				/* destroy internal data */
-				lock_and_destroy_resource_desc(&kill_ctx->resource_desc);
-				lock_and_destroy_renderer_desc(&kill_ctx->renderer_desc);
-				lock_and_destroy_device_settings(&kill_ctx->device_settings);
+        /* destroy internal data */
+        lock_and_destroy_resource_desc(&kill_ctx->resource_desc);
+        lock_and_destroy_renderer_desc(&kill_ctx->renderer_desc);
+        lock_and_destroy_device_settings(&kill_ctx->device_settings);
 
-    		rdr_free(kill_ctx);
-    		*ctx = ROA_NULL;
+        rdr_free(kill_ctx);
+        *ctx = ROA_NULL;
 }
 

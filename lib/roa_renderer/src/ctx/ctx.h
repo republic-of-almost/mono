@@ -19,17 +19,17 @@
 
 struct renderer_mesh_renderable
 {
-  float position[3];
-  float scale[3];
-  float rotation[4];
+        float position[3];
+        float scale[3];
+        float rotation[4];
   
-  uint64_t mesh_id;
+        uint64_t mesh_id;
 };
 
 
 struct renderer_camera
 {
-  int i;
+        int i;
 };
 
 
@@ -38,36 +38,36 @@ struct renderer_camera
 
 
 struct renderer_data_desc {
-  roa_atomic_int lock;
+        roa_atomic_int lock;
 
-  /* array */ uint32_t *camera_ids;
-  /* array */ struct roa_renderer_camera *camera_descs;
+        /* array */ uint32_t *camera_ids;
+        /* array */ struct roa_renderer_camera *camera_descs;
 
-  /* array */ uint32_t *mesh_rdr_ids;
-  /* array */ struct renderer_mesh_renderable *mesh_rdr_descs;
+        /* array */ uint32_t *mesh_rdr_ids;
+        /* array */ struct renderer_mesh_renderable *mesh_rdr_descs;
 
-  /* array */ uint32_t *light_ids;
-  /* array */ struct roa_renderer_light *light_descs;
+        /* array */ uint32_t *light_ids;
+        /* array */ struct roa_renderer_light *light_descs;
 };
 
 
 struct renderer_resource_data_desc {
-  roa_atomic_int lock;
+        roa_atomic_int lock;
 
-  /* array */ uint64_t *mesh_ids;
-  /* array */ struct roa_renderer_mesh_resource *mesh_rsrc_data;
+        /* array */ uint64_t *mesh_ids;
+        /* array */ struct roa_renderer_mesh_resource *mesh_rsrc_data;
 
-  /* array */ uint64_t *mesh_pending_ids;
-  /* array */ struct roa_renderer_mesh_resource *mesh_rsrc_pending_data;
+        /* array */ uint64_t *mesh_pending_ids;
+        /* array */ struct roa_renderer_mesh_resource *mesh_rsrc_pending_data;
 
-  /* array */ uint64_t *texture_ids;
-  /* array */ struct roa_renderer_texture_resource *texture_rsrc_data;
+        /* array */ uint64_t *texture_ids;
+        /* array */ struct roa_renderer_texture_resource *texture_rsrc_data;
 
-  /* array */ uint64_t *texture_pending_ids;
-  /* array */ struct roa_renderer_texture_resource *texture_rsrc_pending_data;
+        /* array */ uint64_t *texture_pending_ids;
+        /* array */ struct roa_renderer_texture_resource *texture_rsrc_pending_data;
 
-  /* array */ uint64_t *material_ids;
-  /* array */ struct roa_renderer_material_resource *mat_descs;
+        /* array */ uint64_t *material_ids;
+        /* array */ struct roa_renderer_material_resource *mat_descs;
 };
 
 
@@ -75,38 +75,38 @@ struct renderer_resource_data_desc {
 
 
 struct renderpass_camera {
-  float projection[16];
-  float view[16];
-  float view_projection[16];
-  float position[3];
+        float projection[16];
+        float view[16];
+        float view_projection[16];
+        float position[3];
 };
 
 
 struct renderpass_draw_call {
-  uint32_t object_id;
-  float world[16];
-  float wvp[16];
+        uint32_t object_id;
+        float world[16];
+        float wvp[16];
 };
 
 
 struct decal_transform {
-      uint32_t object_id;
-      float world_mat[16];
-      float color[3];
+        uint32_t object_id;
+        float world_mat[16];
+        float color[3];
 };
 
 
 struct renderpass {
-  struct renderpass_camera camera;
-  struct renderpass_draw_call *draw_calls;
-  struct decal_transform *decals;
+        struct renderpass_camera camera;
+        struct renderpass_draw_call *draw_calls;
+        struct decal_transform *decals;
 };
 
 
 struct renderer_renderpass_data {
-  roa_atomic_int lock;
+        roa_atomic_int lock;
 
-  struct renderpass *rps;
+        struct renderpass *rps;
 };
 
 
@@ -114,22 +114,21 @@ struct renderer_renderpass_data {
 
 
 struct device_setting_data {
-  roa_atomic_int lock;
+        roa_atomic_int lock;
 
-  float device_viewport[2];
+        float device_viewport[2];
 };
 
 
 /* -- [ Context ] -- */
 
 
-struct roa_renderer_ctx
-{
-  struct device_setting_data device_settings;
-  struct renderer_data_desc renderer_desc;
-  struct renderer_resource_data_desc resource_desc;
-  struct renderer_renderpass_data renderpass;
-  struct graphics_api graphics_api;
+struct roa_renderer_ctx {
+        struct device_setting_data device_settings;
+        struct renderer_data_desc renderer_desc;
+        struct renderer_resource_data_desc resource_desc;
+        struct renderer_renderpass_data renderpass;
+        struct graphics_api graphics_api;
 };
 
 

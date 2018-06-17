@@ -5,55 +5,72 @@
 #include <roa_lib/spin_lock.h>
 
 
+/* ------------------------------------------------------------ [ Helper ] -- */
+
+
+int
+find_index(uint32_t *ids, int id_count, uint32_t id)
+{
+        int i;
+
+        for (i = 0; i < id_count; ++i)
+        {
+                if (ids[i] == id)
+                {
+                        return i;
+                }
+        }
+
+        return -1;
+}
+
+
+
+/* ------------------------------------------------------------ [ Camera ] -- */
+
+
 ROA_BOOL
 roa_renderer_camera_set(
   roa_renderer_ctx_t ctx,
   struct roa_renderer_camera *camera,
   uint32_t camera_id)
 {
-  /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(camera);
-  ROA_ASSERT(camera_id);
+        /* param check */
+        ROA_ASSERT(ctx);
+        ROA_ASSERT(camera);
+        ROA_ASSERT(camera_id);
 
-  ROA_BOOL result = ROA_FALSE;
+        ROA_BOOL result = ROA_FALSE;
 
-  if (!ctx || !camera || !camera_id)
-  {
-    result = ROA_FALSE;
-    return result;
-  }
+        if (!ctx || !camera || !camera_id) {
+                result = ROA_FALSE;
+                return result;
+        }
 
-  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+        roa_spin_lock_aquire(&ctx->renderer_desc.lock);
 
-  /* search and replace */
-  {
-    uint32_t *ids = ctx->renderer_desc.camera_ids;
-    int count = roa_array_size(ctx->renderer_desc.camera_ids);
-    int i;
+        /* search and replace or insert */
+        uint32_t *ids = ctx->renderer_desc.camera_ids;
+        int count = roa_array_size(ctx->renderer_desc.camera_ids);
+        int index = find_index(ids, count, camera_id);
 
-    for (i = 0; i < count; ++i)
-    {
-      if (ids[i] == camera_id)
-      {
-        result = ROA_TRUE;
+        if(index >= 0) {
+                result = ROA_TRUE;
 
-        ctx->renderer_desc.camera_descs[i] = *camera;
+                ctx->renderer_desc.camera_descs[index] = *camera;
         
+                roa_spin_lock_release(&ctx->renderer_desc.lock);
+        }
+        else {
+                result = ROA_TRUE;
+
+                roa_array_push(ctx->renderer_desc.camera_ids, camera_id);
+                roa_array_push(ctx->renderer_desc.camera_descs, *camera);
+
+        }
+          
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return result;
-      }
-    }
-  }
-
-  /* insert new one */
-  result = ROA_TRUE;
-
-  roa_array_push(ctx->renderer_desc.camera_ids, camera_id);
-  roa_array_push(ctx->renderer_desc.camera_descs, *camera);
-
-  roa_spin_lock_release(&ctx->renderer_desc.lock);
-  return result;
 }
 
 
@@ -63,41 +80,33 @@ roa_renderer_camera_get(
   struct roa_renderer_camera *out_camera,
   uint32_t camera_id)
 {
-  /* param check */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(out_camera);
-  ROA_ASSERT(camera_id);
+        /* param check */
+        ROA_ASSERT(ctx);
+        ROA_ASSERT(out_camera);
+        ROA_ASSERT(camera_id);
 
-  ROA_BOOL result = ROA_FALSE;
+        ROA_BOOL result = ROA_FALSE;
 
-  if (!ctx || !out_camera || !camera_id)
-  {
-    result = ROA_FALSE;
-    return result;
-  }
+        if (!ctx || !out_camera || !camera_id) {
+                result = ROA_FALSE;
+                return result;
+        }
 
-  roa_spin_lock_aquire(&ctx->renderer_desc.lock);
+        roa_spin_lock_aquire(&ctx->renderer_desc.lock);
 
-  /* search */
-  {
-    uint32_t *ids = ctx->renderer_desc.camera_ids;
-    int count = roa_array_size(ctx->renderer_desc.camera_ids);
-    int i;
+        /* search */
+        uint32_t *ids = ctx->renderer_desc.camera_ids;
+        int count = roa_array_size(ctx->renderer_desc.camera_ids);
+        int index = find_index(ids, count, camera_id);
 
-    for (i = 0; i < count; ++i)
-    {
-      if (ids[i] == camera_id)
-      {
-        result = ROA_TRUE;
+        if (index >= 0) {
+                result = ROA_TRUE;
 
-        *out_camera = ctx->renderer_desc.camera_descs[i];
-        break;
-      }
-    }
-  }
+                *out_camera = ctx->renderer_desc.camera_descs[index];
+        }
   
-  roa_spin_lock_release(&ctx->renderer_desc.lock);
-  return result;
+        roa_spin_lock_release(&ctx->renderer_desc.lock);
+        return result;
 }
 
 
