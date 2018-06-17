@@ -171,13 +171,13 @@ void
 lock_and_destroy_renderpass(
   struct renderer_renderpass_data *rps)
 {
-      /* param check */
-      ROA_ASSERT(rps);
+        /* param check */
+        ROA_ASSERT(rps);
 
-      roa_spin_lock_aquire(&rps->lock);
+        roa_spin_lock_aquire(&rps->lock);
 
-      /* destroy */
-      roa_array_destroy(rps->rps);
+        /* destroy */
+        roa_array_destroy(rps->rps);
 }
 
 
@@ -222,8 +222,8 @@ void
 roa_renderer_ctx_execute(
         roa_renderer_ctx_t ctx)
 {
-  platform_update(ctx);
-  platform_render(ctx);
+        platform_update(ctx);
+        platform_render(ctx);
 }
 
 
