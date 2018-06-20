@@ -69,6 +69,22 @@ roa_renderer_camera_set(
                 ROA_MEM_ZERO(rp);
                 rp.camera = *camera;
 
+                int max_decal_count = 256;
+
+                roa_array_create_with_capacity(rp.decals, max_decal_count);
+                roa_array_resize(rp.decals, max_decal_count);
+                memset(rp.decals, 0, sizeof(rp.decals[0]) * max_decal_count);
+
+                roa_array_create_with_capacity(rp.decal_ids, max_decal_count);
+                roa_array_resize(rp.decal_ids, max_decal_count);
+                memset(rp.decal_ids, 0, sizeof(rp.decal_ids[0]) * max_decal_count);
+
+                roa_array_create_with_capacity(rp.decal_lru, max_decal_count);
+                roa_array_resize(rp.decal_lru, max_decal_count);
+                memset(rp.decal_lru, 0, sizeof(rp.decal_lru[0]) * max_decal_count);
+                
+                rp.decal_count = max_decal_count;
+
                 roa_array_push(ctx->renderer_desc.camera_passes, rp);
         }
           

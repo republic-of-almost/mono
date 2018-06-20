@@ -207,6 +207,10 @@ platform_render(roa_renderer_ctx_t ctx)
 
       for(k = 0; k < decal_count; ++k)
       {
+              if (rp->decal_ids[k] <= 0) {
+                      continue;
+              }
+
         struct decal_transform *decal = &decals[k];
 
         /* sort */

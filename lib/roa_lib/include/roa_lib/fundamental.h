@@ -85,7 +85,8 @@ typedef int ROA_BOOL;
 #define ROA_FORTH8_BITS(ui32) (ui32 >> & 0xFFFFFF)
 #define ROA_UPPER_24_BITS(ui32) (ui32 & 0xFFFFFF)
 
-#define ROA_PACK3232(ui32a, ui32b) ((uint64_t)ui32a) << 32 | ui32b
+#define ROA_PACK1616(ui16a, ui16b) (((uint32_t)ui16a) << 16 | ui16b)
+#define ROA_PACK3232(ui32a, ui32b) (((uint64_t)ui32a) << 32 | ui32b)
 #define ROA_PACK8888(ui8a, ui8b, ui8c, ui8d) (uint32_t)((uint32_t)ui8a << 24) | ((uint32_t)ui8b << 16) | ((uint32_t)ui8c << 8) | ((uint32_t)ui8d << 0))
 #define ROA_PACK824(ui8a, ui32b) (uint32_t)(ui8a << 24) | ui32b
 

@@ -58,6 +58,12 @@ struct renderpass {
         float camera_view_projection[16];
 
         struct renderpass_draw_call *draw_calls;
+
+        uint64_t *decal_ids;
+        int32_t *decal_lru;
+
+        unsigned decal_count;
+
         struct decal_transform *decals;
 };
 

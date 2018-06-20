@@ -3,6 +3,7 @@
 #include <roa_lib/array.h>
 #include <task/task.h>
 #include <roa_math/math.h>
+#include <roa_lib/fundamental.h>
 #include <stdio.h>
 #include <roa_lib/spin_lock.h>
 #include <string.h>
@@ -56,8 +57,8 @@ roa_renderer_task_pump(
                 unsigned dc_count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
                 roa_array_create_with_capacity(rp->draw_calls, dc_count);
 
-                rp->decals = 0;
-                roa_array_create_with_capacity(rp->decals, dc_count * 4);
+                //rp->decals = 0;
+                //roa_array_create_with_capacity(rp->decals, dc_count * 4);
 
                 unsigned j;
 
@@ -136,12 +137,30 @@ roa_renderer_task_pump(
                                         int l;
                                         int m;
 
-                                        for(m = 0; m < lod_max; ++m)
-                                        {
-
+                                        for(m = 0; m < lod_max; ++m) {
                                                 int decal_count = lod_count[m];
 
                                                 for(l = 0; l < decal_count; ++l) {
+                                                        
+                                                        /* check if decal exists */
+                                                        uint32_t lod_id = ROA_PACK1616((uint16_t)m + 1, (uint16_t)l + 1);
+                                                        uint64_t decal_id = ROA_PACK3232(k + 1, lod_id);
+
+                                                        int found = 0;
+
+                                                        unsigned decal_count = rp->decal_count;
+                                                        int z;
+                                                        for(z = 0; z < decal_count; ++z) {
+                                                                if (rp->decal_ids[z] == decal_id) {
+                                                                        found = 1;
+                                                                        break;
+                                                                }
+                                                        }
+
+                                                        if (found > 0) {
+                                                                continue;
+                                                        }
+
                                                         struct roa_renderer_decal *decal = &lods[m][l];
 
                                                         roa_transform decal_trans;
@@ -159,7 +178,15 @@ roa_renderer_task_pump(
 
                                                         memcpy(decal_t.color, decal->color, sizeof(decal_t.color));
 
-                                                        roa_array_push(rp->decals, decal_t);
+                                                        for (z = 0; z < decal_count; ++z) {
+                                                                if (rp->decal_ids[z] == 0) {
+                                                                        rp->decal_ids[z] = decal_id;
+                                                                        rp->decals[z] = decal_t;
+                                                                        break;
+                                                                }
+                                                        }
+
+                                                        //roa_array_push(rp->decals, decal_t);
                                                 }
                                         }
                       
