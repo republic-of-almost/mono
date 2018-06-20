@@ -37,12 +37,12 @@ platform_render(roa_renderer_ctx_t ctx)
   }
 
   /* renderpasses */
-  int rp_count = roa_array_size(ctx->renderpass.rps);
+  int rp_count = roa_array_size(ctx->renderer_desc.camera_ids);
   int i;
 
   for (i = 0; i < rp_count; ++i)
   {
-    struct renderpass *rp = &ctx->renderpass.rps[i];
+    struct renderpass *rp = &ctx->renderer_desc.camera_passes[i];
     int dc_count = roa_array_size(rp->draw_calls);
 
     /* fill buffer */
@@ -217,10 +217,10 @@ platform_render(roa_renderer_ctx_t ctx)
         roa_mat4_inverse(&inv_world, &world);
 
         roa_mat4 view_proj, inv_view_proj, view, proj;
-        roa_mat4_import(&view_proj, rp->camera.view_projection);
+        roa_mat4_import(&view_proj, rp->camera_view_projection);
 
-        roa_mat4_import(&proj, rp->camera.projection);
-        roa_mat4_import(&view, rp->camera.view);
+        roa_mat4_import(&proj, rp->camera_projection);
+        roa_mat4_import(&view, rp->camera_view);
 
         roa_mat4 inv_view, inv_proj;
         roa_mat4_inverse(&inv_view, &view);
@@ -233,8 +233,8 @@ platform_render(roa_renderer_ctx_t ctx)
 
         glUniform3fv(gfx_api->decal.uni_color, 1, decal->color);
 
-        glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera.view);
-        glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera.projection);
+        glUniformMatrix4fv(gfx_api->decal.uni_view, 1, GL_FALSE, rp->camera_view);
+        glUniformMatrix4fv(gfx_api->decal.uni_proj, 1, GL_FALSE, rp->camera_projection);
         glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
         glUniformMatrix4fv(gfx_api->decal.uni_inv_projview, 1, GL_FALSE, inv_view_proj.data);
         glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_TRUE, inv_world.data);

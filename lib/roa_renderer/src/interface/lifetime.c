@@ -27,10 +27,7 @@ setup_and_lock(
 
         roa_spin_lock_init(&new_ctx->device_settings.lock);
         roa_spin_lock_aquire(&new_ctx->device_settings.lock);
-
-        roa_spin_lock_init(&new_ctx->renderpass.lock);
-        roa_spin_lock_aquire(&new_ctx->renderpass.lock);
-
+        
         roa_spin_lock_init(&new_ctx->resource_desc.lock);
         roa_spin_lock_aquire(&new_ctx->resource_desc.lock);
 }
@@ -72,7 +69,7 @@ setup_and_release_renderer_desc(
 
         /* create */
         roa_array_create_with_capacity(rdr_data->camera_ids, 5);
-        roa_array_create_with_capacity(rdr_data->camera_descs, 5);
+        roa_array_create_with_capacity(rdr_data->camera_passes, 5);
 
         roa_array_create_with_capacity(rdr_data->mesh_rdr_ids, 256);
         roa_array_create_with_capacity(rdr_data->mesh_rdr_descs, 256);
@@ -92,7 +89,7 @@ lock_and_destroy_renderer_desc(
 
         /* destroy */
         roa_array_destroy(rdr_data->camera_ids);
-        roa_array_destroy(rdr_data->camera_descs);
+        roa_array_destroy(rdr_data->camera_passes);
 
         roa_array_destroy(rdr_data->mesh_rdr_ids);
         roa_array_destroy(rdr_data->mesh_rdr_descs);
@@ -153,34 +150,6 @@ lock_and_destroy_resource_desc(
 }
 
 
-void
-setup_and_release_renderpass(
-        struct renderer_renderpass_data *rps)
-{
-        /* param check */
-        ROA_ASSERT(rps);
-
-        /* create */
-        roa_array_create_with_capacity(rps->rps, 4);
-
-roa_spin_lock_release(&rps->lock);
-}
-
-
-void
-lock_and_destroy_renderpass(
-  struct renderer_renderpass_data *rps)
-{
-        /* param check */
-        ROA_ASSERT(rps);
-
-        roa_spin_lock_aquire(&rps->lock);
-
-        /* destroy */
-        roa_array_destroy(rps->rps);
-}
-
-
 /* ---------------------------------------------------------- [ Lifetime ] -- */
 
 
@@ -207,7 +176,6 @@ roa_renderer_ctx_create(
         setup_and_release_device_settings(&new_ctx->device_settings);
         setup_and_release_renderer_desc(&new_ctx->renderer_desc);
         setup_and_release_resource_desc(&new_ctx->resource_desc);
-        setup_and_release_renderpass(&new_ctx->renderpass);
 
         /* platform */
         platform_setup(new_ctx);

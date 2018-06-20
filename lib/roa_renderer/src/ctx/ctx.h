@@ -33,6 +33,35 @@ struct renderer_camera
 };
 
 
+/* -- [ Renderpasses ] -- */
+
+
+struct renderpass_draw_call {
+        uint32_t object_id;
+        float world[16];
+        float wvp[16];
+};
+
+
+struct decal_transform {
+        uint32_t object_id;
+        float world_mat[16];
+        float color[3];
+};
+
+
+struct renderpass {
+        struct roa_renderer_camera camera;
+
+        float camera_view[16];
+        float camera_projection[16];
+        float camera_view_projection[16];
+
+        struct renderpass_draw_call *draw_calls;
+        struct decal_transform *decals;
+};
+
+
 
 /* ---------------------------------------------------------- [ Raw Data ] -- */
 
@@ -41,7 +70,7 @@ struct renderer_data_desc {
         roa_atomic_int lock;
 
         /* array */ uint32_t *camera_ids;
-        /* array */ struct roa_renderer_camera *camera_descs;
+        /* array */ struct renderpass *camera_passes;
 
         /* array */ uint32_t *mesh_rdr_ids;
         /* array */ struct renderer_mesh_renderable *mesh_rdr_descs;
@@ -71,45 +100,6 @@ struct renderer_resource_data_desc {
 };
 
 
-/* -- [ Renderpasses ] -- */
-
-
-struct renderpass_camera {
-        float projection[16];
-        float view[16];
-        float view_projection[16];
-        float position[3];
-};
-
-
-struct renderpass_draw_call {
-        uint32_t object_id;
-        float world[16];
-        float wvp[16];
-};
-
-
-struct decal_transform {
-        uint32_t object_id;
-        float world_mat[16];
-        float color[3];
-};
-
-
-struct renderpass {
-        struct renderpass_camera camera;
-        struct renderpass_draw_call *draw_calls;
-        struct decal_transform *decals;
-};
-
-
-struct renderer_renderpass_data {
-        roa_atomic_int lock;
-
-        struct renderpass *rps;
-};
-
-
 /* -- [ Device ] -- */
 
 
@@ -127,7 +117,6 @@ struct roa_renderer_ctx {
         struct device_setting_data device_settings;
         struct renderer_data_desc renderer_desc;
         struct renderer_resource_data_desc resource_desc;
-        struct renderer_renderpass_data renderpass;
         struct graphics_api graphics_api;
 };
 
