@@ -6,7 +6,7 @@
 
 
 void
-task_renderpass(void *arg)
-{
-        (void)arg;
+task_camera_mats(void *arg) {
+
+
 }

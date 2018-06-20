@@ -16,6 +16,18 @@ roa_renderer_task_pump(
 {
         (void)tasks;
 
+        /* after draw submit task should be ready */
+
+        /* generate matrix tasks */
+        
+        /* generate draw call tasks */
+
+        /* generate decal decay tasks */
+
+        /* generate update decals tasks */
+
+        /* submit for drawing */
+
         roa_spin_lock_aquire(&ctx->renderer_desc.lock);
         roa_spin_lock_aquire(&ctx->device_settings.lock);
         

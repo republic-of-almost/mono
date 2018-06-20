@@ -3,7 +3,7 @@
 
 
 void
-task_sphere_culling(void *arg)
+task_submit(void *arg)
 {
-  ROA_UNUSED(arg);
+        
 }

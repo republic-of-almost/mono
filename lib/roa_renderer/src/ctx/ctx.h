@@ -72,6 +72,13 @@ struct renderpass {
 /* ---------------------------------------------------------- [ Raw Data ] -- */
 
 
+struct renderer_tasks {
+        roa_atomic_int lock;
+
+        /* array */ struct roa_renderer_task *tasks;
+};
+
+
 struct renderer_data_desc {
         roa_atomic_int lock;
 
