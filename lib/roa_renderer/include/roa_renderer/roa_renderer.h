@@ -324,6 +324,7 @@ roa_renderer_task_pump(
 
 void
 roa_renderer_task_run(
+  roa_renderer_ctx_t ctx,
   struct roa_renderer_task *task);
 
 

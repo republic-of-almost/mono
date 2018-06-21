@@ -1,5 +1,5 @@
-#ifndef REPUBLIC_API
-#define REPUBLIC_API
+#ifndef REPUBLIC_API_INCLUDED
+#define REPUBLIC_API_INCLUDED
 
 
 #include <republic/republic.h>

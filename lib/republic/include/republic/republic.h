@@ -1,5 +1,5 @@
-#ifndef REPUBLIC_ENGINE
-#define REPUBLIC_ENGINE
+#ifndef REPUBLIC_ENGINE_INCLUDED
+#define REPUBLIC_ENGINE_INCLUDED
 
 
 /* ----------------------------------------------------------- [ General ] -- */
@@ -63,7 +63,6 @@ struct rep_task_desc {
 
         void * ext;
 };
-
 
 
 REP_TASK_MARKER

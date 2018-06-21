@@ -3,6 +3,7 @@
 #include <ctx/ctx.h>
 #include <roa_math/math.h>
 #include <roa_lib/array.h>
+#include <stdio.h>
 
 
 void
@@ -10,6 +11,30 @@ task_submit(void *arg1, void *arg2, void *arg3)
 {
         /* create task for each camera */
         struct roa_renderer_ctx *ctx = (struct roa_renderer_ctx*)arg1;
+        
+        printf("TASK : sumbit\n");
+
+
+        int cams = (int)roa_array_size(ctx->renderer_desc.camera_passes);
+
+        int z;
+        for(z = 0; z < cams; ++z) {
+                
+                struct roa_renderer_task task;
+                task.func = task_camera_mats;
+                task.arg1 = arg1;
+                task.arg2 = &ctx->renderer_desc.camera_passes[z];
+                task.arg3 = 0;
+
+                roa_array_push(ctx->tasks.back_tasks, task);
+        }
+
+
+        return;
+
+
+        /* old stuff */
+
 
         roa_spin_lock_aquire(&ctx->renderer_desc.lock);
         roa_spin_lock_aquire(&ctx->device_settings.lock);
@@ -17,8 +42,7 @@ task_submit(void *arg1, void *arg2, void *arg3)
         int cam_count = (int)roa_array_size(ctx->renderer_desc.camera_ids);
 
         int i = 0;
-        for (i = 0; i < cam_count; ++i)
-        {
+        for (i = 0; i < cam_count; ++i) {
                 struct roa_renderer_camera cam = ctx->renderer_desc.camera_passes[i].camera;
                 struct renderpass *rp = &ctx->renderer_desc.camera_passes[i];
 
@@ -194,5 +218,4 @@ task_submit(void *arg1, void *arg2, void *arg3)
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         roa_spin_lock_release(&ctx->device_settings.lock);
 
-        roa_atomic_int_dec(&ctx->tasks.curr_task_count);
 }

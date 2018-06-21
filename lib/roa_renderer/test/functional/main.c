@@ -265,10 +265,10 @@ main()
       unsigned i;
       for(i = 0; i < task_count; ++i)
       {
-        roa_renderer_task_run(&tasks[i]);
+        roa_renderer_task_run(renderer_ctx, &tasks[i]);
       }
     }
-
+    
     roa_renderer_ctx_execute(renderer_ctx);
   }
 
