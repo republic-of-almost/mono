@@ -6,7 +6,7 @@
 
 
 void
-task_camera_mats(void *arg) {
+task_camera_mats(void *arg1, void *arg2, void *arg3) {
 
-
+        /* create draw calls tasks */
 }

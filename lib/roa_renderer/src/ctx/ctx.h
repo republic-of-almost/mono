@@ -75,7 +75,12 @@ struct renderpass {
 struct renderer_tasks {
         roa_atomic_int lock;
 
-        /* array */ struct roa_renderer_task *tasks;
+        roa_atomic_int curr_task_count;
+        struct roa_renderer_task *curr_tasks;
+        struct roa_renderer_task *back_tasks;
+
+        /* array */ struct roa_renderer_task *task_buffer_a;
+        /* array */ struct roa_renderer_task *task_buffer_b;
 };
 
 
@@ -131,6 +136,7 @@ struct roa_renderer_ctx {
         struct renderer_data_desc renderer_desc;
         struct renderer_resource_data_desc resource_desc;
         struct graphics_api graphics_api;
+        struct renderer_tasks tasks;
 };
 
 

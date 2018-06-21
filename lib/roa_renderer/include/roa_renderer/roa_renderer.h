@@ -309,7 +309,10 @@ roa_renderer_texture_resource_exists(
 struct roa_renderer_task
 {
   void *func;
-  void *arg;
+
+  void *arg1;
+  void *arg2;
+  void *arg3;
 };
 
 

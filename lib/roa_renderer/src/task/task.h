@@ -2,38 +2,31 @@
 #define ROA_TASK_INCLUDED_56435A9E_2011_4D0D_B76D_854777D6DDDB
 
 
-typedef void(*roa_renderer_task_func)(void*);
+typedef void(*roa_renderer_task_func)(void*, void*, void*);
 
 
 /* ------------------------------------------------------ [ render task ] -- */
 
 
-struct task_arg
-{
-        struct roa_renderer_ctx *ctx;
-        struct renderpass *rp;
-};
+void
+task_camera_mats(void *arg1, void *arg2, void *arg3);
 
 
 void
-task_camera_mats(void *arg);
+task_draw_calls(void *arg1, void *arg2, void *arg3);
 
 
 void
-task_draw_calls(void *arg);
+task_decal_decay(void *arg1, void *arg2, void *arg3);
 
 
 void
-task_decal_decay(void *arg);
-
-
-void
-task_decal_update(void *arg);
+task_decal_update(void *arg1, void *arg2, void *arg3);
 
 
 /* dummy task that is created after a draw call, to generate the first renderpasses */
 void
-task_submit(void *arg);
+task_submit(void *arg1, void *arg2, void *arg3);
 
 
 #endif /* inc guard */

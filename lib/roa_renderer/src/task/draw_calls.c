@@ -3,6 +3,6 @@
 
 
 void
-task_draw_calls(void *arg) {
+task_draw_calls(void *arg1, void *arg2, void *arg3) {
         
 }
