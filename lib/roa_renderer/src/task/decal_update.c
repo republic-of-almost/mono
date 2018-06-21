@@ -8,8 +8,12 @@
 
 
 void
-task_decal_update(void *arg1, void *arg2, void *arg3) {
-
+task_decal_update(
+        void *arg1,
+        void *arg2,
+        void *arg3)
+{
+        /* param check */
         ROA_ASSERT(arg1);
         ROA_ASSERT(arg2);
         ROA_UNUSED(arg3);
@@ -32,14 +36,16 @@ task_decal_update(void *arg1, void *arg2, void *arg3) {
                 parent_trans.rotation = roa_quaternion_import(rdr.rotation);
                 parent_trans.scale = roa_float3_import(rdr.scale);
 
-                roa_float3 distance = roa_float3_subtract(parent_trans.position, roa_float3_import(cam.position));
+                roa_float3 distance = roa_float3_subtract(
+                        parent_trans.position,
+                        roa_float3_import(cam.position));
+
                 float lod_distance = roa_float_abs(roa_float3_length(distance));
 
                 int mesh_count = (int)roa_array_size(ctx->resource_desc.mesh_ids);
 
                 int k;
-                for (k = 0; k < mesh_count; ++k)
-                {
+                for (k = 0; k < mesh_count; ++k) {
                         if (k == 0) {
                                 struct roa_renderer_mesh_resource *rsrc = &ctx->resource_desc.mesh_rsrc_data[k];
 
