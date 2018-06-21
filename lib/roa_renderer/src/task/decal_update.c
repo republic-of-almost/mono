@@ -18,9 +18,7 @@ task_decal_update(void *arg1, void *arg2, void *arg3) {
         struct roa_renderer_ctx *ctx = (struct roa_renderer_ctx*)arg1;
         struct renderpass *rp = (struct renderpass*)arg2;
 
-        rp->draw_calls = 0;
-        unsigned dc_count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
-        roa_array_create_with_capacity(rp->draw_calls, dc_count);
+        unsigned dc_count = roa_array_size(rp->draw_calls);
 
         struct roa_renderer_camera cam = rp->camera;
 

@@ -5,6 +5,7 @@
 #include <ctx/ctx.h>
 #include <roa_math/math.h>
 #include <string.h>
+#include <stdio.h>
 
 
 void
