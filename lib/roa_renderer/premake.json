@@ -93,11 +93,11 @@
     	],
 
     	"project_dependencies" : [
-    		"STB",
-    		"RepublicMath",
-            "RepublicLib",
-            "Scratch",
-            "Json"
+        "STB",
+        "RepublicMath",
+        "RepublicLib",
+        "Scratch",
+        "Json"
     	],
 
     	"defines" : [

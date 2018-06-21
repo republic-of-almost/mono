@@ -20,7 +20,7 @@ roa_renderer_task_pump(
                 roa_spin_lock_aquire(&ctx->tasks.lock);
 
                 /* flip task buffer */
-                struct roa_renderer_tasks *old_curr = ctx->tasks.curr_tasks;
+                struct roa_renderer_task *old_curr = ctx->tasks.curr_tasks;
 
                 ctx->tasks.curr_tasks = ctx->tasks.back_tasks;
                 ctx->tasks.back_tasks = old_curr;

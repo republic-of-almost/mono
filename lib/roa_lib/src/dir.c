@@ -81,7 +81,7 @@ roa_exe_dir()
     proc_pidpath(getpid(), buffer_exe_path, sizeof(buffer_exe_path));
 
     size_t i;
-    int buffer_length = strlen(buffer_exe_path);
+    size_t buffer_length = (size_t)strlen(buffer_exe_path);
 
     size_t last_slash_index = 0;
     for(i = 0; i < buffer_length; i++) {

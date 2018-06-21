@@ -4,6 +4,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/fundamental.h>
 #include <roa_lib/array.h>
+#include <string.h>
 
 
 void
@@ -13,12 +14,10 @@ task_decal_update(void *arg1, void *arg2, void *arg3) {
         ROA_ASSERT(arg2);
         ROA_UNUSED(arg3);
 
-        printf("TASK : Decals\n");
-
         struct roa_renderer_ctx *ctx = (struct roa_renderer_ctx*)arg1;
         struct renderpass *rp = (struct renderpass*)arg2;
 
-        unsigned dc_count = roa_array_size(rp->draw_calls);
+        int dc_count = (int)roa_array_size(rp->draw_calls);
 
         struct roa_renderer_camera cam = rp->camera;
 
@@ -88,7 +87,7 @@ task_decal_update(void *arg1, void *arg2, void *arg3) {
 
                                                 int found = 0;
 
-                                                unsigned decal_count = rp->decal_count;
+                                                int decal_count = (int)rp->decal_count;
                                                 int z;
                                                 for (z = 0; z < decal_count; ++z) {
                                                         if (rp->decal_ids[z] == decal_id) {
