@@ -51,7 +51,7 @@ task_decal_update(
                 int k;
                 for (k = 0; k < mesh_count; ++k) {
                         if (k == dc->rdr_id) {
-                                struct roa_renderer_mesh_resource *rsrc = &ctx->resource_desc.mesh_rsrc_data[k];
+                                rsrc = &ctx->resource_desc.mesh_rsrc_data[k];
                                 break;
                         }
                 }
