@@ -37,16 +37,30 @@ struct renderer_camera
 
 
 struct renderpass_draw_call {
-        uint32_t object_id;
-        /* mesh needed */
-        /* transform needed for decals? */
+        uint32_t rdr_id;
+
+        float position[3];
+        float scale[3];
+        float rotation[4];
+        
         float world[16];
         float wvp[16];
 };
 
 
 struct decal_transform {
+        
         uint32_t object_id;
+
+        float final_pos[3];
+        float final_scale[3];
+        
+        float curr_pos[3];
+        float curr_scale[3];
+
+        float rotation[4];
+        float speed;
+
         float world_mat[16];
         float color[3];
 };
