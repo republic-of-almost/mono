@@ -139,8 +139,6 @@ task_decal_update(
                                                         break;
                                                 }
                                         }
-
-                                        //roa_array_push(rp->decals, decal_t);
                                 }
                         }
 

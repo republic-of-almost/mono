@@ -521,6 +521,9 @@ gltf_mesh(
 
                         struct gltf_primitive prim;
                         ROA_MEM_ZERO(prim);
+                        prim.indices = -1;
+                        prim.material = -1;
+                        prim.mode = -1;
 
                         struct json_value_s *prim_val =
                                 (struct json_value_s*)attr_ele->value;

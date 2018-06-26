@@ -3,6 +3,7 @@
 #include <roa_lib/array.h>
 #include <gltf/gltf.h>
 #include <string.h>
+#include <ctx/ctx.h>
 
 
 /* ---------------------------------------------------------- [ GLTF Ext ] -- */
@@ -129,7 +130,7 @@ get_index_data(
 {
         /* param check */
         ROA_ASSERT(gltf);
-        ROA_ASSERT(index);
+        ROA_ASSERT(index > -1);
         ROA_ASSERT(index_data);
         ROA_ASSERT(index_stride);
 
@@ -181,7 +182,7 @@ parse_decals(
                 }
         }
 
-        if(decal_child < 0) {
+        if(decal_child < 0 || !gltf->nodes[decal_child].children) {
                 return 0;
         }
 
@@ -197,6 +198,7 @@ parse_decals(
         memset(lod_counts, 0, sizeof(lod_counts));
         
         for(i = 0; i < decal_count; ++i) {
+
                 int decal_id = gltf->nodes[decal_child].children[i];
                 const char *decal_name = gltf->nodes[decal_id].name;
 
@@ -311,6 +313,7 @@ parse_decals(
 
         returns number of meshes to generate.
 */
+
 int
 generate_meshes(
         const struct gltf_import *gltf,
@@ -426,6 +429,28 @@ load(
 }
 
 
+void
+load_renderables(
+        struct roa_renderer_ctx *ctx,
+        struct gltf_import *gltf)
+{
+        /* param check */
+        ROA_ASSERT(ctx);
+        ROA_ASSERT(gltf);
+
+        int node_count = gltf->node_count;
+
+        int i;
+        for (i = 0; i < node_count; ++i) {
+                struct renderer_mesh_renderable rdr;
+                memset(&rdr, 0, sizeof(rdr));
+
+                rdr.scale[0] = 1.f; rdr.scale[1] = 1.f; rdr.scale[2] = 1.f;
+                rdr.rotation[3] = 1.f;
+        }
+}
+
+
 /* ----------------------------------------------------------- [ Loading ] -- */
 
 
@@ -446,6 +471,8 @@ roa_renderer_load(
         ROA_ASSERT(gltf.mesh_count);
        
         load(ctx, &gltf);
+
+        load_renderables(ctx, &gltf);
 
         return ROA_TRUE;
 }
