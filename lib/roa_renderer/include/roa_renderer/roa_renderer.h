@@ -141,6 +141,7 @@ struct roa_renderer_decal
 };
 
 
+
 //struct roa_renderer_mesh_renderable
 //{
 //  float world_transform[16];
@@ -271,6 +272,13 @@ ROA_BOOL
 roa_renderer_mesh_resource_exists(
   roa_renderer_ctx_t ctx,
   const char *name);
+
+
+void
+roa_renderer_mesh_list(
+        roa_renderer_ctx_t ctx,
+        const char **names,
+        int *count);
 
 
 /* ------------------------------------------------- [ Texture Resources ] -- */

@@ -21,7 +21,7 @@ roa_renderer_ctx_t renderer_ctx = ROA_NULL;
 
 
 uint32_t object_id_counter = 0;
-unsigned renderable_count = 1;
+unsigned renderable_count = 0;
 
 float spin = 0.f;
 float pitch = 0.f;
@@ -115,14 +115,15 @@ main()
 
     /* renderable */
     {
-      unsigned i;
+        int i;
+        renderable_count = 0;
+        roa_renderer_mesh_list(renderer_ctx, ROA_NULL, &renderable_count);
 
-      for(i = 0; i < renderable_count; ++i)
-      {
-        uint32_t obj_id = ++object_id_counter;
+        for(i = 0; i < renderable_count; ++i) {
+                uint32_t obj_id = ++object_id_counter;
 
-        roa_renderer_mesh_renderable_create(renderer_ctx, obj_id);
-      }
+                roa_renderer_mesh_renderable_create(renderer_ctx, obj_id);
+        }
     }
   }
 

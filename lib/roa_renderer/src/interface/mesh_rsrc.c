@@ -110,28 +110,56 @@ roa_renderer_mesh_resource_exists(
   roa_renderer_ctx_t ctx,
   const char *name)
 {
-  /* param */
-  ROA_ASSERT(ctx);
-  ROA_ASSERT(name);
+        ROA_ASSERT(ctx);
+        ROA_ASSERT(name);
 
-  if (!ctx || !name)
-  {
-    return ROA_FALSE;
-  }
+        if (!ctx || !name) {
+                return ROA_FALSE;
+        }
 
-  uint64_t hash_name = roa_hash(name);
+        roa_spin_lock_aquire(&ctx->resource_desc.lock);
 
-  int count = roa_array_size(ctx->resource_desc.mesh_ids);
-  int i;
-  uint64_t *mesh_ids = ctx->resource_desc.mesh_ids;
+        uint64_t hash_name = roa_hash(name);
+        ROA_BOOL result = ROA_FALSE;
 
-  for (i = 0; i < count; ++i)
-  {
-    if (mesh_ids[i] == hash_name)
-    {
-      return ROA_TRUE;
-    }
-  }
+        int count = roa_array_size(ctx->resource_desc.mesh_ids);
+        int i;
+        uint64_t *mesh_ids = ctx->resource_desc.mesh_ids;
 
-  return ROA_FALSE;
+        for (i = 0; i < count; ++i) {
+                if (mesh_ids[i] == hash_name) {
+                        result = ROA_TRUE;
+                }
+        }
+
+        roa_spin_lock_release(&ctx->resource_desc.lock);
+
+        return result;
+}
+
+
+void
+roa_renderer_mesh_list(
+        roa_renderer_ctx_t ctx,
+        const char **names,
+        int *count)
+{
+        ROA_ASSERT(ctx);
+
+        roa_spin_lock_aquire(&ctx->resource_desc.lock);
+
+        int mesh_count = roa_array_size(ctx->resource_desc.mesh_ids);
+        int i;
+
+        if (count) {
+                *count = mesh_count;
+        }
+
+        if (names) {
+                for (i = 0; i < mesh_count; ++i) {
+                        names[i] = ctx->resource_desc.mesh_rsrc_data->name;
+                }
+        }
+
+        roa_spin_lock_release(&ctx->resource_desc.lock);
 }

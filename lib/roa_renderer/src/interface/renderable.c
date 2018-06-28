@@ -18,28 +18,26 @@ roa_renderer_mesh_renderable_create(
         ROA_ASSERT(ctx);
         ROA_ASSERT(renderable_id);
 
-        if (!ctx || !renderable_id)
-        {
+        if (!ctx || !renderable_id) {
                 return ROA_FALSE;
         }
 
         roa_spin_lock_aquire(&ctx->renderer_desc.lock);
 
-        /* check to see if exists */
-        {
-                uint32_t *ids = ctx->renderer_desc.mesh_rdr_ids;
-                int count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
-                int i;
+        /* check to see if exists */        
+        uint32_t *ids = ctx->renderer_desc.mesh_rdr_ids;
+        int count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
+        int i;
 
-                for (i = 0; i < count; ++i)
+        for (i = 0; i < count; ++i)
+        {
+                if (ids[i] == renderable_id)
                 {
-                        if (ids[i] == renderable_id)
-                        {
-                                roa_spin_lock_release(&ctx->renderer_desc.lock);
-                                return ROA_FALSE;
-                        }
+                        roa_spin_lock_release(&ctx->renderer_desc.lock);
+                        return ROA_FALSE;
                 }
         }
+        
 
         /* need to copy array data */
 
@@ -227,7 +225,6 @@ unsigned
 roa_renderer_mesh_renderable_count(
         roa_renderer_ctx_t ctx)
 {
-        /* param check */
         ROA_ASSERT(ctx);
 
         unsigned count = 0;
@@ -245,33 +242,29 @@ roa_renderer_mesh_renderable_exists(
         roa_renderer_ctx_t ctx,
         uint32_t renderable_id)
 {
-        /* param check */
         ROA_ASSERT(ctx);
         ROA_ASSERT(renderable_id);
 
-        if (!ctx || !renderable_id)
-        {
+        if (!ctx || !renderable_id) {
                 return ROA_FALSE;
         }
 
         ROA_BOOL result = ROA_FALSE;
         roa_spin_lock_aquire(&ctx->renderer_desc.lock);
 
-        /* search */
-        {
-                uint32_t *ids = ctx->renderer_desc.mesh_rdr_ids;
-                int count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
-                int i;
+        uint32_t *ids = ctx->renderer_desc.mesh_rdr_ids;
+        int count = roa_array_size(ctx->renderer_desc.mesh_rdr_ids);
+        int i;
 
-                for (i = 0; i < count; ++i)
+        for (i = 0; i < count; ++i)
+        {
+                if (ids[i] == renderable_id)
                 {
-                        if (ids[i] == renderable_id)
-                        {
-                                result = ROA_TRUE;
-                                break;
-                        }
+                        result = ROA_TRUE;
+                        break;
                 }
         }
+        
 
         roa_spin_lock_release(&ctx->renderer_desc.lock);
         return result;
