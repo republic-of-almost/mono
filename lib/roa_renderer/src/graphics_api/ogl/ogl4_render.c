@@ -80,15 +80,15 @@ platform_render(roa_renderer_ctx_t ctx)
       for (j = 0; j < dc_count; ++j)
       {
         struct renderpass_draw_call dc = rp->draw_calls[j];
-
-        if (ctx->graphics_api.meshes[0].ibo)
-        {
-          glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctx->graphics_api.meshes[0].ibo);
+        
+        struct ogl_mesh *mesh = &ctx->graphics_api.meshes[dc.mesh_index];
+        
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+        
+        if (mesh->ibo) {
+          glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
         }
-        else
-        {
-          glBindBuffer(GL_ARRAY_BUFFER, ctx->graphics_api.meshes[0].vbo);
+        else {
           glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 

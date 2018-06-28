@@ -42,6 +42,20 @@ task_draw_calls(
                 struct renderpass_draw_call dc;
                 dc.rdr_id = ctx->renderer_desc.mesh_rdr_ids[j];
           
+                uint64_t mesh_id = ctx->renderer_desc.mesh_rdr_descs[0].mesh_id;
+          
+                /* all this is broken */
+          
+                unsigned k;
+                unsigned mesh_count = roa_array_size(ctx->resource_desc.mesh_ids);
+          
+                for(k = 0; k < mesh_count; ++k) {
+                        uint64_t this_id = ctx->resource_desc.mesh_ids[k];
+                        if(this_id == mesh_id) {
+                                dc.mesh_index = k;
+                        }
+                }
+          
                 roa_transform trans;
                 trans.position = roa_float3_import(rdr.position);
                 trans.rotation = roa_quaternion_import(rdr.rotation);

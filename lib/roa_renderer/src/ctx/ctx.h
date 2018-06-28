@@ -38,6 +38,8 @@ struct renderer_camera
 
 struct renderpass_draw_call {
         uint32_t rdr_id;
+  
+        uint64_t mesh_index;
 
         float position[3];
         float scale[3];
