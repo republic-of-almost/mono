@@ -30,12 +30,12 @@ task_decal_update(
 
         for (j = 0; j < dc_count; ++j) {
                 struct renderpass_draw_call *dc = &rp->draw_calls[j];
-                struct renderer_mesh_renderable rdr = ctx->renderer_desc.mesh_rdr_descs[dc->rdr_id];
+//                struct renderer_mesh_renderable rdr = ctx->renderer_desc.mesh_rdr_descs[dc->rdr_id];
 
                 roa_transform parent_trans;
-                parent_trans.position = roa_float3_import(rdr.position);
-                parent_trans.rotation = roa_quaternion_import(rdr.rotation);
-                parent_trans.scale = roa_float3_import(rdr.scale);
+                parent_trans.position = roa_float3_import(dc->position);
+                parent_trans.rotation = roa_quaternion_import(dc->rotation);
+                parent_trans.scale = roa_float3_import(dc->scale);
 
                 roa_float3 distance = roa_float3_subtract(
                         parent_trans.position,

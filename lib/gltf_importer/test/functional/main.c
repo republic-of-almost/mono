@@ -21,12 +21,12 @@ GLuint program;
 
 struct node_data
 {
-  float scale[3];
-  float rot[4];
-  float pos[3];
+        float scale[3];
+        float rot[4];
+        float pos[3];
 
-  int parent_id;
-  int mesh_id;
+        int parent_id;
+        int mesh_id;
 };
 
 
@@ -37,11 +37,11 @@ int node_data_count = 0;
 
 struct mesh_data
 {
-  GLuint vao;
-  GLuint vbo;
-  GLuint ibo;
-  GLsizei ibo_count;
-  GLenum ibo_index_type;
+        GLuint vao;
+        GLuint vbo;
+        GLuint ibo;
+        GLsizei ibo_count;
+        GLenum ibo_index_type;
 };
  
 
@@ -64,9 +64,12 @@ main()
     char path[2048];
     ROA_MEM_ZERO(path);
 
+    //const char *asset = "assets/gltf_test/cube.gltf";
+    //const char *asset = "assets/gltf_test/plane_trainer.gltf";
+    const char *asset = "assets/renderer_test/column_room.gltf";
+
     strcat(path, roa_exe_dir());
-    //strcat(path, "assets/gltf_test/cube.gltf");
-    strcat(path, "assets/gltf_test/plane_trainer.gltf");
+    strcat(path, asset);
 
     gltf_import(path, &gltf);
   }

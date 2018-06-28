@@ -40,7 +40,7 @@ task_draw_calls(
                         ctx->renderer_desc.mesh_rdr_descs[j];
 
                 struct renderpass_draw_call dc;
-                dc.rdr_id = j;
+                dc.rdr_id = ctx->renderer_desc.mesh_rdr_ids[j];
           
                 roa_transform trans;
                 trans.position = roa_float3_import(rdr.position);

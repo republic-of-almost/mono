@@ -79,7 +79,8 @@ roa_renderer_get_device_viewport(
 ROA_BOOL
 roa_renderer_load(
   roa_renderer_ctx_t ctx,
-  const char *file);
+  const char *file,
+  ROA_BOOL load_nodes);
 
 
 /* ------------------------------------------------------------ [ Camera ] -- */

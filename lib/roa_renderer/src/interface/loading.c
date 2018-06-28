@@ -444,9 +444,15 @@ load_renderables(
         for (i = 0; i < node_count; ++i) {
                 struct renderer_mesh_renderable rdr;
                 memset(&rdr, 0, sizeof(rdr));
-
-                rdr.scale[0] = 1.f; rdr.scale[1] = 1.f; rdr.scale[2] = 1.f;
-                rdr.rotation[3] = 1.f;
+          
+                rdr.mesh_id = i;
+          
+                memcpy(rdr.scale, gltf->nodes[i].scale, sizeof(rdr.scale));
+                memcpy(rdr.position, gltf->nodes[i].translation, sizeof(rdr.position));
+                memcpy(rdr.rotation, gltf->nodes[i].rotation, sizeof(rdr.rotation));
+          
+                roa_array_push(ctx->renderer_desc.mesh_rdr_descs, rdr);
+                roa_array_push(ctx->renderer_desc.mesh_rdr_ids, 0);
         }
 }
 
@@ -457,7 +463,8 @@ load_renderables(
 ROA_BOOL
 roa_renderer_load(
         roa_renderer_ctx_t ctx,
-        const char *file)
+        const char *file,
+        ROA_BOOL load_objects)
 {
         /* param check */
         ROA_ASSERT(ctx);
@@ -471,8 +478,10 @@ roa_renderer_load(
         ROA_ASSERT(gltf.mesh_count);
        
         load(ctx, &gltf);
-
-        load_renderables(ctx, &gltf);
+  
+        if(load_objects == ROA_TRUE) {
+                load_renderables(ctx, &gltf);
+        }
 
         return ROA_TRUE;
 }
