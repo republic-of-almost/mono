@@ -84,13 +84,7 @@ platform_render(roa_renderer_ctx_t ctx)
         struct ogl_mesh *mesh = &ctx->graphics_api.meshes[dc.mesh_index];
         
         glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-        
-        if (mesh->ibo) {
-          glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-        }
-        else {
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        }
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
 
         /* input format */
         int k;
@@ -145,7 +139,7 @@ platform_render(roa_renderer_ctx_t ctx)
     {
       GLuint err = glGetError();
       if(err) {
-        ROA_ASSERT(0);
+        //ROA_ASSERT(0);
       }
     }
 
