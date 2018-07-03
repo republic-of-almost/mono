@@ -40,9 +40,8 @@ task_draw_calls(
                         ctx->renderer_desc.mesh_rdr_descs[j];
 
                 struct renderpass_draw_call dc;
-                dc.rdr_id = ctx->renderer_desc.mesh_rdr_ids[j];
           
-                uint64_t mesh_id = ctx->renderer_desc.mesh_rdr_descs[0].mesh_id;
+                uint64_t mesh_id = rdr.mesh_id;
           
                 /* all this is broken */
           
@@ -53,6 +52,7 @@ task_draw_calls(
                         uint64_t this_id = ctx->resource_desc.mesh_ids[k];
                         if(this_id == mesh_id) {
                                 dc.mesh_index = k;
+                                break;
                         }
                 }
           
@@ -68,6 +68,10 @@ task_draw_calls(
                 roa_mat4 wvp;
                 roa_mat4_multiply(&wvp, &world, &view_proj);
                 roa_mat4_export(&wvp, dc.wvp);
+
+                memcpy(dc.position, &trans.position, sizeof(dc.position));
+                memcpy(dc.rotation, &trans.rotation, sizeof(dc.rotation));
+                memcpy(dc.scale, &trans.scale, sizeof(dc.scale));
 
                 roa_array_push(rp->draw_calls, dc);
         }

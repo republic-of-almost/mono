@@ -44,17 +44,7 @@ task_decal_update(
                 float lod_distance = roa_float_abs(roa_float3_length(distance));
 
                 /* find mesh */
-                int mesh_count = (int)roa_array_size(ctx->resource_desc.mesh_ids);
-
-                struct roa_renderer_mesh_resource *rsrc = ROA_NULL;
-
-                int k;
-                for (k = 0; k < mesh_count; ++k) {
-                        if (k == dc->rdr_id) {
-                                rsrc = &ctx->resource_desc.mesh_rsrc_data[k];
-                                break;
-                        }
-                }
+                struct roa_renderer_mesh_resource *rsrc = &ctx->resource_desc.mesh_rsrc_data[dc->mesh_index];
 
                 /* process decals */
                 if (rsrc != ROA_NULL) {
@@ -98,7 +88,7 @@ task_decal_update(
 
                                         /* check if decal exists */
                                         uint32_t lod_id = ROA_PACK1616((uint16_t)m + 1, (uint16_t)l + 1);
-                                        uint64_t decal_id = ROA_PACK3232(k + 1, lod_id);
+                                        uint64_t decal_id = ROA_PACK3232(dc->mesh_index + 1, lod_id);
 
                                         int found = 0;
 
@@ -123,7 +113,7 @@ task_decal_update(
                                         decal_trans.scale = roa_float3_import(decal->scale);
 
                                         roa_transform inherited;
-                                        roa_transform_inherited(&inherited, &parent_trans, &decal_trans);
+                                        roa_transform_inherited(&inherited, &decal_trans, &parent_trans);
 
                                         struct decal_transform decal_t;
                                         roa_mat4 out_mat;
@@ -131,6 +121,8 @@ task_decal_update(
                                         roa_mat4_export(&out_mat, &decal_t.world_mat[0]);
 
                                         memcpy(decal_t.color, decal->color, sizeof(decal_t.color));
+                                        decal_t.color[0] = 1.f;
+                                        decal_t.color[1] = 1.f;
 
                                         for (z = 0; z < decal_count; ++z) {
                                                 if (rp->decal_ids[z] == 0) {
@@ -141,8 +133,6 @@ task_decal_update(
                                         }
                                 }
                         }
-
-                        break;
                 }
         }
 
