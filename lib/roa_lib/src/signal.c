@@ -6,7 +6,13 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <errno.h>
-#elif defined(_WIN32)
+#endif
+
+#if defined(__APPLE__)
+#include <time.h>
+#endif
+
+#if defined(_WIN32)
 #include <windows.h>
 #endif
 

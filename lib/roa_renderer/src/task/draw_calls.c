@@ -4,6 +4,7 @@
 #include <roa_lib/assert.h>
 #include <roa_lib/array.h>
 #include <roa_math/math.h>
+#include <string.h>
 
 
 void

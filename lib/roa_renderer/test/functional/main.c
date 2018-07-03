@@ -79,10 +79,6 @@ app_tick(struct app *app)
 
         roa_renderer_camera_set(app->renderer_ctx, &camera, 1);
 
-        /* set renderables */
-        float increment = ROA_TAU / (float)app->renderable_count;
-        float radius = 9.f;
-
         /* pump renderer events */
         while(1) {
               struct roa_renderer_task *tasks = ROA_NULL;

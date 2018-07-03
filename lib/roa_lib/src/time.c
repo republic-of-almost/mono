@@ -5,7 +5,9 @@
 #include <sys/time.h>
 #include <time.h>
 #include <math.h>
-#elif defined(_WIN32)
+#endif
+
+#if defined(_WIN32)
 #include <windows.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
