@@ -23,12 +23,20 @@ task_submit(
 
         int i;
         for(i = 0; i < cam_count; ++i) {
-                struct roa_renderer_task task;
-                task.func = task_camera_mats;
-                task.arg1 = arg1;
-                task.arg2 = &ctx->renderer_desc.camera_passes[i];
-                task.arg3 = 0;
-
-                roa_array_push(ctx->tasks.back_tasks, task);
+                struct roa_renderer_task cam_task;
+                ROA_MEM_ZERO(cam_task);
+                cam_task.func = task_camera_mats;
+                cam_task.arg1 = arg1;
+                cam_task.arg2 = &ctx->renderer_desc.camera_passes[i];
+          
+                roa_array_push(ctx->tasks.back_tasks, cam_task);
+          
+                struct roa_renderer_task decal_dec_task;
+                ROA_MEM_ZERO(decal_dec_task);
+                decal_dec_task.func = task_decal_decay;
+                decal_dec_task.arg1 = arg1;
+                decal_dec_task.arg2 = &ctx->renderer_desc.camera_passes[i];
+          
+                roa_array_push(ctx->tasks.back_tasks, decal_dec_task);
         }
 }

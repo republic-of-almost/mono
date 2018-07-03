@@ -82,9 +82,9 @@ task_decal_update(
                         int m;
 
                         for (m = 0; m < lod_max; ++m) {
-                                int decal_count = lod_count[m];
+                                int m_decal_count = lod_count[m];
 
-                                for (l = 0; l < decal_count; ++l) {
+                                for (l = 0; l < m_decal_count; ++l) {
 
                                         /* check if decal exists */
                                         uint32_t lod_id = ROA_PACK1616((uint16_t)m + 1, (uint16_t)l + 1);

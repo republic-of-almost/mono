@@ -49,10 +49,10 @@ scan_nodes(
 
         /* Find decals and mark */
         for (i = 0; i < node_count; ++i) {
-                int len = strlen("Decals");
+                const char *decals = "Decals";
                 const char *name = gltf->nodes[i].name;
 
-                if (strncmp(name, "Decals", len) == 0) {
+                if (strncmp(name, decals, strlen(decals)) == 0) {
                         is_node_a_decal[i] = 1;
 
                         int j;
@@ -177,9 +177,11 @@ parse_decals(
 
         for(i = 0; i < child_count; ++i) {
                 int child_id = gltf->nodes[node_id].children[i];
+          
+                const char *decals = "Decals";
                 const char *child_name = gltf->nodes[child_id].name;
 
-                if(strcmp(child_name, "Decals") == 0) {
+                if(strncmp(child_name, decals, strlen(decals)) == 0) {
                       decal_child = child_id;
                       decal_count = gltf->nodes[child_id].child_count;
                       break;
