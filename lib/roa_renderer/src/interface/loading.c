@@ -10,7 +10,7 @@
 /* ---------------------------------------------------------- [ GLTF Ext ] -- */
 
 
-int
+static int
 gltf_to_stride(int component_type)
 {
         switch (component_type) {
@@ -28,6 +28,14 @@ gltf_to_stride(int component_type)
 
 
 /* ----------------------------------------------------------- [ Helpers ] -- */
+
+
+static int
+is_decal(const char *name)
+{
+  static const char *decals = "Decals";
+  return (strncmp(name, decals, strlen(decals)) == 0) ? 1 : 0;
+}
 
 
 /*
@@ -49,10 +57,9 @@ scan_nodes(
 
         /* Find decals and mark */
         for (i = 0; i < node_count; ++i) {
-                const char *decals = "Decals";
                 const char *name = gltf->nodes[i].name;
 
-                if (strncmp(name, decals, strlen(decals)) == 0) {
+                if (is_decal(name)) {
                         is_node_a_decal[i] = 1;
 
                         int j;
@@ -178,10 +185,9 @@ parse_decals(
         for(i = 0; i < child_count; ++i) {
                 int child_id = gltf->nodes[node_id].children[i];
           
-                const char *decals = "Decals";
                 const char *child_name = gltf->nodes[child_id].name;
 
-                if(strncmp(child_name, decals, strlen(decals)) == 0) {
+                if(is_decal(child_name)) {
                       decal_child = child_id;
                       decal_count = gltf->nodes[child_id].child_count;
                       break;
