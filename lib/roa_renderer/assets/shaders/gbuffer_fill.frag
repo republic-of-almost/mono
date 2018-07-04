@@ -15,6 +15,7 @@ in vec3 fs_worldpos0;
 /* ---------------------------------------------------------- [ uniforms ] -- */
 
 uniform sampler2D uni_map_diffuse;
+uniform float uni_object_id;
 
 /* ----------------------------------------------------------- [ outputs ] -- */
 
@@ -22,6 +23,7 @@ layout (location = 0) out vec3 fs_out_worldpos;
 layout (location = 1) out vec3 fs_out_diffuse;
 layout (location = 2) out vec3 fs_out_normal;
 layout (location = 3) out vec3 fs_out_texcoord;
+layout (location = 4) out vec3 fs_out_object_id;
 
 /* ----------------------------------------------------------- [ program ] -- */
 
@@ -33,4 +35,5 @@ main()
     fs_out_diffuse  = texture(uni_map_diffuse, fs_texcoord0).xyz;
     fs_out_normal   = normalize(fs_normal0);
     fs_out_texcoord = vec3(fs_texcoord0, 0.0);
+    fs_out_object_id = vec3(uni_object_id);
 }

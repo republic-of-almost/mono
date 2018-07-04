@@ -19,7 +19,7 @@ struct ogl_vertex_input
 struct ogl_gbuffer
 {
   GLuint fbo;
-  GLuint texture_output[4];
+  GLuint texture_output[5];
   GLuint texture_depth;
 };
 
@@ -37,6 +37,7 @@ struct ogl_gbuffer_fill_pass
   GLuint uni_wvp;
   GLuint uni_world;
   GLuint uni_diffuse;
+  GLuint uni_object_id;
 
   struct ogl_vertex_input input[3];
 };
@@ -61,12 +62,14 @@ struct ogl_decal
   GLint uni_world_pos;
   GLint uni_depth;
   GLint uni_diffuse;
+  GLint uni_map_object_ids;
   GLint uni_view;
   GLint uni_proj;
   GLint uni_world;
   GLint uni_inv_projview;
   GLint uni_inv_world;
   GLint uni_color;
+  GLint uni_object_id;
 
   struct ogl_vertex_input input[3];
 };

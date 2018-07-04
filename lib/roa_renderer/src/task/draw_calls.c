@@ -41,6 +41,8 @@ task_draw_calls(
                         ctx->renderer_desc.mesh_rdr_descs[j];
 
                 struct renderpass_draw_call dc;
+
+                dc.object_id = (float)j; /*ctx->renderer_desc.mesh_rdr_ids[j];*/
           
                 uint64_t mesh_id = rdr.mesh_id;
           

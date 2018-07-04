@@ -120,10 +120,10 @@ task_decal_update(
                                         roa_transform_to_mat4(&inherited, &out_mat);
                                         roa_mat4_export(&out_mat, &decal_t.world_mat[0]);
 
+                                        decal_t.object_id = j;
+                                        
                                         memcpy(decal_t.color, decal->color, sizeof(decal_t.color));
-                                        decal_t.color[0] = 1.f;
-                                        decal_t.color[1] = 1.f;
-
+                                        
                                         for (z = 0; z < decal_count; ++z) {
                                                 if (rp->decal_ids[z] == 0) {
                                                         rp->decal_ids[z] = decal_id;

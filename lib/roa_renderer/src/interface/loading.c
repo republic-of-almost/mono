@@ -265,9 +265,16 @@ parse_decals(
                                 if (mesh_id >= 0) {
                                         int mat_id = gltf->meshes[mesh_id].primitives[0].material;
                                         
-                                        decal.color[0] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[0];
-                                        decal.color[1] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[1];
-                                        decal.color[2] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[2];
+                                        if(mat_id >= 0) {
+                                                decal.color[0] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[0];
+                                                decal.color[1] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[1];
+                                                decal.color[2] = gltf->materials[mat_id].pbr_metallic_roughness.base_color_factor[2];
+                                        }
+                                        else {
+                                                decal.color[0] = 0.5f;
+                                                decal.color[1] = 0.5f;
+                                                decal.color[2] = 1.f;
+                                        }
                                 } 
 
                                 /* projector is a unit cube,
@@ -407,7 +414,6 @@ load(
         ROA_ASSERT(ctx);
         ROA_ASSERT(gltf);
 
-
         int node_count = gltf->node_count;
         int *is_node_a_decal = ROA_NULL;
 
@@ -445,37 +451,38 @@ load(
                 roa_renderer_mesh_resource_add(ctx, &meshes[m]);
         }
 
-        /* create renderables */
-        if (load_objects == ROA_TRUE) {
-
-                int node_count = gltf->node_count;
-
-                int i;
-                for (i = 0; i < node_count; ++i) {
-
-                        if (is_node_a_decal[i]) {
-                                continue;
-                        }
-
-                        int mesh_id = gltf->nodes[i].mesh;
-
-                        if (mesh_id < 0) {
-                                continue;
-                        }
-
-                        struct renderer_mesh_renderable rdr;
-                        memset(&rdr, 0, sizeof(rdr));
-
-                        rdr.mesh_id = roa_hash(gltf->meshes[mesh_id].name);
-
-                        memcpy(rdr.scale, gltf->nodes[i].scale, sizeof(rdr.scale));
-                        memcpy(rdr.position, gltf->nodes[i].translation, sizeof(rdr.position));
-                        memcpy(rdr.rotation, gltf->nodes[i].rotation, sizeof(rdr.rotation));
-
-                        roa_array_push(ctx->renderer_desc.mesh_rdr_descs, rdr);
-                        roa_array_push(ctx->renderer_desc.mesh_rdr_ids, 0);
-                }
+        /* bail if not loading nodes */
+        if (load_objects != ROA_TRUE) {
+                return;
         }
+
+        /* create renderables */
+        int i;
+        for (i = 0; i < node_count; ++i) {
+
+                if (is_node_a_decal[i]) {
+                        continue;
+                }
+
+                int mesh_id = gltf->nodes[i].mesh;
+
+                if (mesh_id < 0) {
+                        continue;
+                }
+
+                struct renderer_mesh_renderable rdr;
+                memset(&rdr, 0, sizeof(rdr));
+
+                rdr.mesh_id = roa_hash(gltf->meshes[mesh_id].name);
+
+                memcpy(rdr.scale, gltf->nodes[i].scale, sizeof(rdr.scale));
+                memcpy(rdr.position, gltf->nodes[i].translation, sizeof(rdr.position));
+                memcpy(rdr.rotation, gltf->nodes[i].rotation, sizeof(rdr.rotation));
+
+                roa_array_push(ctx->renderer_desc.mesh_rdr_descs, rdr);
+                roa_array_push(ctx->renderer_desc.mesh_rdr_ids, 0);
+        }
+        
 
 }
 

@@ -68,9 +68,12 @@ platform_render(roa_renderer_ctx_t ctx)
         GL_COLOR_ATTACHMENT1,
         GL_COLOR_ATTACHMENT2,
         GL_COLOR_ATTACHMENT3,
+        GL_COLOR_ATTACHMENT4,
       };
 
-      glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
+      glDrawBuffers(
+        ROA_ARR_COUNT(draw_buffers),
+        ROA_ARR_DATA(draw_buffers));
 
       glClearColor(1, 0, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -114,7 +117,7 @@ platform_render(roa_renderer_ctx_t ctx)
 
         glUniformMatrix4fv(fill.uni_wvp, 1, GL_FALSE, dc.wvp);
         glUniformMatrix4fv(fill.uni_world, 1, GL_FALSE, dc.world);
-
+        glUniform1f(fill.uni_object_id, (float)dc.object_id);
 
         if(ctx->graphics_api.meshes[0].ibo)
         {
@@ -161,6 +164,7 @@ platform_render(roa_renderer_ctx_t ctx)
         GL_COLOR_ATTACHMENT1,
         //GL_COLOR_ATTACHMENT2,
         //GL_COLOR_ATTACHMENT3,
+        //GL_COLOR_ATTACHMENT4,
       };
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
@@ -195,6 +199,10 @@ platform_render(roa_renderer_ctx_t ctx)
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_depth);
       glUniform1i(gfx_api->decal.uni_depth, 1);
+
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, gfx_api->gbuffer.texture_output[4]);
+      glUniform1i(gfx_api->decal.uni_map_object_ids, 2);
 
       int decal_count = roa_array_size(rp->decals);
       struct decal_transform *decals = rp->decals;
@@ -236,6 +244,7 @@ platform_render(roa_renderer_ctx_t ctx)
         glUniformMatrix4fv(gfx_api->decal.uni_world, 1, GL_FALSE, world.data);
         glUniformMatrix4fv(gfx_api->decal.uni_inv_projview, 1, GL_FALSE, inv_view_proj.data);
         glUniformMatrix4fv(gfx_api->decal.uni_inv_world, 1, GL_TRUE, inv_world.data);
+        glUniform1f(gfx_api->decal.uni_object_id, (float)decal->object_id);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }

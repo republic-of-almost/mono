@@ -25,8 +25,10 @@ in vec2 fs_texcoord0;
 uniform sampler2D uni_map_diffuse;
 uniform sampler2D uni_map_depth;
 uniform sampler2D uni_map_worldpos;
+uniform sampler2D uni_map_object_ids;
 uniform vec3 uni_color;
 uniform mat4 uni_inv_world;
+uniform float uni_object_id;
 
 /* ----------------------------------------------------------- [ outputs ] -- */
 
@@ -38,11 +40,18 @@ void
 main()
 {
     vec2 screen_pos = fs_position0.xy / fs_position0.w;
-
     vec2 texcoord = screen_pos * 0.5f + 0.5f;
+
+    float object_id = texture(uni_map_object_ids, texcoord).r;
+
+    /* ensure we don't render decal on another object */
+    if(abs(object_id - uni_object_id) > 0.001) {
+        discard;
+    }
 
     float depth = texture(uni_map_depth, texcoord).r;
     vec4 worldpos = texture(uni_map_worldpos, texcoord);
+
     worldpos.w = 1;
 
     vec4 localpos = worldpos * uni_inv_world;

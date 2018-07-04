@@ -80,6 +80,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         "GBuffer:Diffuse",
         "GBuffer:Normal",
         "GBuffer:TexCoords",
+        "GBuffer:ObjectID",
       };
 
       glGenTextures(
@@ -123,6 +124,7 @@ platform_internal_create_gbuffer(roa_renderer_ctx_t ctx)
         GL_COLOR_ATTACHMENT1,
         GL_COLOR_ATTACHMENT2,
         GL_COLOR_ATTACHMENT3,
+        GL_COLOR_ATTACHMENT4,
       };
 
       glDrawBuffers(ROA_ARR_COUNT(draw_buffers), draw_buffers);
@@ -294,9 +296,10 @@ platform_setup(roa_renderer_ctx_t ctx)
       struct ogl_gbuffer_fill_pass *fill = &ctx->graphics_api.gbuffer_fill;
       GLuint program = fill->program;
     
-      fill->uni_wvp     = glGetUniformLocation(program, "uni_wvp");
-      fill->uni_world   = glGetUniformLocation(program, "uni_world");
-      fill->uni_diffuse = glGetUniformLocation(program, "uni_map_diffuse");
+      fill->uni_wvp       = glGetUniformLocation(program, "uni_wvp");
+      fill->uni_world     = glGetUniformLocation(program, "uni_world");
+      fill->uni_diffuse   = glGetUniformLocation(program, "uni_map_diffuse");
+      fill->uni_object_id = glGetUniformLocation(program, "uni_object_id");
     }
     
     /* input */
@@ -457,15 +460,17 @@ platform_setup(roa_renderer_ctx_t ctx)
       struct ogl_decal *decal = &ctx->graphics_api.decal;
       GLuint program = decal->program;
 
-      decal->uni_world_pos    = glGetUniformLocation(program, "uni_map_worldpos");
-      decal->uni_depth        = glGetUniformLocation(program, "uni_map_depth");
-      decal->uni_diffuse      = glGetUniformLocation(program, "uni_map_diffuse");
-      decal->uni_view         = glGetUniformLocation(program, "uni_view");
-      decal->uni_proj         = glGetUniformLocation(program, "uni_proj");
-      decal->uni_world        = glGetUniformLocation(program, "uni_world");
-      decal->uni_inv_projview = glGetUniformLocation(program, "uni_inv_proj_view");
-      decal->uni_inv_world    = glGetUniformLocation(program, "uni_inv_world");
-      decal->uni_color        = glGetUniformLocation(program, "uni_color");
+      decal->uni_world_pos      = glGetUniformLocation(program, "uni_map_worldpos");
+      decal->uni_depth          = glGetUniformLocation(program, "uni_map_depth");
+      decal->uni_diffuse        = glGetUniformLocation(program, "uni_map_diffuse");
+      decal->uni_map_object_ids = glGetUniformLocation(program, "uni_map_object_ids");
+      decal->uni_view           = glGetUniformLocation(program, "uni_view");
+      decal->uni_proj           = glGetUniformLocation(program, "uni_proj");
+      decal->uni_world          = glGetUniformLocation(program, "uni_world");
+      decal->uni_inv_projview   = glGetUniformLocation(program, "uni_inv_proj_view");
+      decal->uni_inv_world      = glGetUniformLocation(program, "uni_inv_world");
+      decal->uni_color          = glGetUniformLocation(program, "uni_color");
+      decal->uni_object_id      = glGetUniformLocation(program, "uni_object_id");
     }
 
     /* volume */
