@@ -31,7 +31,7 @@ task_decal_decay(
                 struct decal_transform *decal = &rp->decals[i];
 
                 decal->time += 0.002f;
-                decal->time = roa_float_clamp(decal->time, 0.f, 1.f);
+                decal->time = roa_float_clamp(decal->time, 0.01f, 1.f);
 
                 roa_float3 scale_mask = roa_float3_import(decal->scale);
                 roa_float3 scale = roa_float3_scale(scale_mask, decal->time);
