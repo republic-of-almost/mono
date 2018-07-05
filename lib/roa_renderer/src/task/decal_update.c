@@ -108,6 +108,7 @@ task_decal_update(
                                         struct roa_renderer_decal *decal = &lods[m][l];
 
                                         roa_transform decal_trans;
+
                                         decal_trans.position = roa_float3_import(decal->position);
                                         decal_trans.rotation = roa_quaternion_import(decal->rotation);
                                         decal_trans.scale = roa_float3_import(decal->scale);
@@ -120,8 +121,24 @@ task_decal_update(
                                         roa_transform_to_mat4(&inherited, &out_mat);
                                         roa_mat4_export(&out_mat, &decal_t.world_mat[0]);
 
-                                        decal_t.object_id = j;
+                                        roa_float3_export(inherited.position, decal_t.final_pos);
+                                        roa_float3_export(inherited.scale, decal_t.final_scale);
+                                        roa_quaternion_export(inherited.rotation, decal_t.rotation);
+
+                                        /* largest scale */
+                                        decal_t.scale[0] = inherited.scale.x >= roa_float_max(inherited.scale.y, inherited.scale.z) ? -1 : 0;
+                                        decal_t.scale[1] = inherited.scale.y > roa_float_max(inherited.scale.x, inherited.scale.z) ? -1 : 0;
+                                        decal_t.scale[2] = inherited.scale.z > roa_float_max(inherited.scale.x, inherited.scale.y) ? -1 : 0;
                                         
+                                        /* set current positions to 0 */
+                                        roa_float3 scale = roa_float3_import(decal_t.scale);
+                                        scale = roa_float3_normalize(scale);
+
+                                        roa_float3 rot = roa_quaternion_rotate_vector(inherited.rotation, scale);
+                                        roa_float3_export(rot, decal_t.brush);
+
+                                        decal_t.object_id = j;
+
                                         memcpy(decal_t.color, decal->color, sizeof(decal_t.color));
                                         
                                         for (z = 0; z < decal_count; ++z) {

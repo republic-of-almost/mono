@@ -56,6 +56,7 @@ float           roa_float_floor(float a);
 float           roa_float_ceil(float a);
 float           roa_float_lerp(float a, float b, float mix);
 float           roa_float_max(float a, float b);
+float           roa_float_max_arr(float *vals, int count);
 float           roa_float_min(float a, float b);
 float           roa_float_clamp(float val, float a, float b);
 

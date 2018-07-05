@@ -61,8 +61,12 @@ struct decal_transform {
         float curr_pos[3];
         float curr_scale[3];
 
+        float scale[3];
+        float brush[3];
+
         float rotation[4];
         float speed;
+        float time;
 
         float world_mat[16];
         float color[3];

@@ -112,6 +112,22 @@ roa_float_max(float a, float b)
 
 
 float
+roa_float_max_arr(float *vals, int count)
+{
+        float curr = vals[0];
+
+        int i;
+        for (i = 1; i < count; ++i) {
+                if (curr < vals[i]) {
+                        curr = vals[i];
+                }
+        }
+
+        return curr;
+}
+
+
+float
 roa_float_min(float a, float b)
 {
   return a < b ? a : b;
