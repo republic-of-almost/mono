@@ -126,9 +126,21 @@ task_decal_update(
                                         roa_quaternion_export(inherited.rotation, decal_t.rotation);
 
                                         /* largest scale */
-                                        decal_t.scale[0] = inherited.scale.x >= roa_float_max(inherited.scale.y, inherited.scale.z) ? -1 : 0;
-                                        decal_t.scale[1] = inherited.scale.y > roa_float_max(inherited.scale.x, inherited.scale.z) ? -1 : 0;
-                                        decal_t.scale[2] = inherited.scale.z > roa_float_max(inherited.scale.x, inherited.scale.y) ? -1 : 0;
+                                        if(inherited.scale.x >= roa_float_max(inherited.scale.y, inherited.scale.z)) {
+                                                decal_t.scale[0] = 1;
+                                                decal_t.scale[1] = 0;
+                                                decal_t.scale[2] = 0;
+                                        }
+                                        else if(inherited.scale.y >= roa_float_max(inherited.scale.x, inherited.scale.z)) {
+                                                decal_t.scale[0] = 0;
+                                                decal_t.scale[1] = 1;
+                                                decal_t.scale[2] = 0;
+                                        }
+                                        else if(inherited.scale.z >= roa_float_max(inherited.scale.x, inherited.scale.y)) {
+                                                decal_t.scale[0] = 0;
+                                                decal_t.scale[1] = 0;
+                                                decal_t.scale[2] = 1;
+                                        }
                                         
                                         /* set current positions to 0 */
                                         roa_float3 scale = roa_float3_import(decal_t.scale);
